@@ -1,0 +1,114 @@
+package com.lanterna.command;
+
+import com.lanterna.capability.ModCapabilities;
+import com.lanterna.capability.RingData;
+import com.lanterna.corps.CorpsDefinition;
+import com.lanterna.corps.CorpsManager;
+import com.lanterna.power.RingPowers;
+import com.lanterna.selection.SelectionManager;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+
+/**
+ * Comandos de teste (precisa de permissão de operador / cheats ligados):
+ *
+ *   /lanterna escolher <tropa> [jogador]   roda a cerimônia de entrega
+ *   /lanterna carga <valor>                define a carga do anel
+ *   /lanterna remover                      tira o anel e devolve o item
+ *   /lanterna resetar                      zera tudo para testar a seleção de novo
+ */
+public final class LanternaCommand {
+
+    private static final SuggestionProvider<CommandSourceStack> CORPS =
+            (ctx, builder) -> SharedSuggestionProvider.suggestResource(CorpsManager.ids(), builder);
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("lanterna")
+                .requires(source -> source.hasPermission(2))
+
+                .then(Commands.literal("escolher")
+                        .then(Commands.argument("tropa", ResourceLocationArgument.id())
+                                .suggests(CORPS)
+                                .executes(ctx -> choose(ctx, ctx.getSource().getPlayerOrException()))
+                                .then(Commands.argument("jogador", EntityArgument.player())
+                                        .executes(ctx -> choose(ctx, EntityArgument.getPlayer(ctx, "jogador"))))))
+
+                .then(Commands.literal("carga")
+                        .then(Commands.argument("valor", IntegerArgumentType.integer(0))
+                                .executes(LanternaCommand::setCharge)))
+
+                .then(Commands.literal("remover")
+                        .executes(LanternaCommand::remove))
+
+                .then(Commands.literal("resetar")
+                        .executes(LanternaCommand::reset)));
+    }
+
+    private static int choose(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
+        ResourceLocation corpsId = ResourceLocationArgument.getId(ctx, "tropa");
+        if (!CorpsManager.exists(corpsId)) {
+            ctx.getSource().sendFailure(Component.translatable("command.lanterna.unknown_corps", corpsId.toString()));
+            return 0;
+        }
+        if (!SelectionManager.startSelection(target, corpsId)) {
+            ctx.getSource().sendFailure(Component.translatable("command.lanterna.cannot_choose"));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.chosen",
+                target.getDisplayName(), Component.translatable(CorpsDefinition.nameKey(corpsId))), true);
+        return 1;
+    }
+
+    private static int setCharge(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        RingData data = ModCapabilities.get(player).orElse(null);
+        if (data == null || !data.hasRing()) {
+            ctx.getSource().sendFailure(Component.translatable("message.lanterna.battery_no_ring"));
+            return 0;
+        }
+        data.setCharge(IntegerArgumentType.getInteger(ctx, "valor"));
+        RingPowers.sync(player, data);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.charge_set", data.charge(), data.maxCharge()), false);
+        return 1;
+    }
+
+    private static int remove(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ItemStack ring = RingPowers.removeRing(player);
+        if (ring.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable("message.lanterna.battery_no_ring"));
+            return 0;
+        }
+        if (!player.getInventory().add(ring)) player.drop(ring, false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.removed"), false);
+        return 1;
+    }
+
+    private static int reset(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        RingData data = ModCapabilities.get(player).orElse(null);
+        if (data == null) return 0;
+        data.unequip();
+        data.clearPending();
+        data.resetRage();
+        data.setEverChosen(false);
+        RingPowers.applyFlightAbility(player, data);
+        RingPowers.sync(player, data);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.reset"), false);
+        return 1;
+    }
+
+    private LanternaCommand() {}
+}

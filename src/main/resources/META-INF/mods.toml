@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="lanterna"
+version="0.1.0"
+displayName="Lanterna"
+authors="Johann"
+description='''
+Anéis de poder, baterias e o espectro emocional. Fase 1: anel, bateria e entrega do anel.
+'''
+
+[[dependencies.lanterna]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.lanterna]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
