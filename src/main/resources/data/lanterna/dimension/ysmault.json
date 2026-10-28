@@ -1,0 +1,11 @@
+{
+  "type": "lanterna:planet",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "lanterna:ysmault",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "lanterna:ysmault"
+    }
+  }
+}

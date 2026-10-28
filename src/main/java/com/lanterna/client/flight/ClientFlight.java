@@ -40,6 +40,8 @@ public final class ClientFlight {
     /** Velocidade que o anel está dando (guardada aqui para a gravidade não interferir). */
     private static Vec3 velocity = Vec3.ZERO;
     private static boolean wasFlying;
+    private static int landTicks;
+    private static final Map<Integer, Double> LAST_SPEED = new HashMap<>();
     private static FlightWindSound wind;
 
     private static final Map<Integer, Float> TILT = new HashMap<>();
@@ -78,6 +80,15 @@ public final class ClientFlight {
         float strafe = player.input.leftImpulse;
         boolean up = player.input.jumping;
         boolean down = player.input.shiftKeyDown;
+
+        // Pousar: segurando Shift encostado no chão por meio segundo, o voo desliga sozinho
+        if (down && player.onGround()) {
+            if (++landTicks == 10) {
+                com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.ToggleFlightPacket());
+            }
+        } else {
+            landTicks = 0;
+        }
         boolean boost = Minecraft.getInstance().options.keySprint.isDown() && forward > 0;
 
         Vec3 look = player.getLookAngle();
@@ -91,13 +102,15 @@ public final class ClientFlight {
             v = new Vec3(v.x, 0, v.z);
         }
 
+        // No espaço não há ar: o anel voa 4x mais rápido
+        double spaceBoost = player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE) ? 4.0 : 1.0;
         double speed = v.length();
-        double maxSpeed = boost ? MAX_BOOST : MAX_CRUISE;
+        double maxSpeed = (boost ? MAX_BOOST : MAX_CRUISE) * spaceBoost;
         boolean anyInput = forward != 0 || strafe != 0 || up || down;
 
         if (forward > 0) {
             // Empurra para onde está olhando
-            double thrust = boost ? THRUST_BOOST : THRUST;
+            double thrust = (boost ? THRUST_BOOST : THRUST) * (spaceBoost > 1 ? 3.0 : 1.0);
             // Mergulho dá velocidade; subir custa um pouco
             thrust += -look.y * 0.02;
             v = v.add(look.scale(thrust * forward));
@@ -105,7 +118,7 @@ public final class ClientFlight {
             // Curva: parte do embalo lateral é "puxada" para a nova direção, o resto escorrega
             Vec3 along = look.scale(v.dot(look));
             Vec3 lateral = v.subtract(along);
-            double fast = Mth.clamp(speed / MAX_BOOST, 0, 1);
+            double fast = Mth.clamp(speed / (MAX_BOOST * spaceBoost), 0, 1);
             double grip = Mth.lerp(fast, 0.16, 0.06);          // devagar: vira fácil; rápido: curva larga
             Vec3 carried = look.scale(lateral.length() * grip * 0.75); // parte vira embalo para frente
             v = along.add(lateral.scale(1 - grip)).add(carried);
@@ -193,11 +206,20 @@ public final class ClientFlight {
             Vec3 look = player.getLookAngle();
             // Só deita quando está indo PARA FRENTE (subindo reto com Espaço fica em pé)
             double forwardSpeed = Math.max(0, move.dot(look));
-            target = (float) Mth.clamp((forwardSpeed - 0.1) / 0.3, 0, 1);
+            // Inclina aos poucos com a velocidade (devagar: só um leve inclinar para frente)
+            target = (float) Mth.clamp((forwardSpeed - 0.03) / 0.4, 0, 1);
 
             // Inclina de lado nas curvas, mais forte em alta velocidade
             float fast = (float) Mth.clamp(move.length() / 1.0, 0.2, 1.3);
             targetBank = Mth.clamp(-yawRate * 2.6f * fast, -60f, 60f) * target;
+
+            // Deslizar de lado (A/D) também inclina o corpo, como quem corta o vento
+            Vec3 side = move.subtract(look.scale(move.dot(look)));
+            Vec3 right = look.cross(new Vec3(0, 1, 0));
+            double lateral = right.lengthSqr() > 1.0E-4 ? side.dot(right.normalize()) : 0;
+            targetBank += (float) Mth.clamp(lateral * 70.0, -30, 30);
+
+            effects(player, move, look);
 
             // O corpo acompanha para onde a cabeça olha
             player.yBodyRot = player.getYHeadRot();
@@ -229,6 +251,78 @@ public final class ClientFlight {
         Float now = BANK.get(player.getId());
         if (now == null) return 0f;
         return Mth.lerp(partialTick, BANK_OLD.getOrDefault(player.getId(), now), now);
+    }
+
+    // ===================== Efeitos do voo (todos os jogadores) =====================
+
+    private static final double SONIC_SPEED = 1.45;
+
+    private static void effects(Player player, Vec3 move, Vec3 look) {
+        double speed = move.length();
+        double last = LAST_SPEED.getOrDefault(player.getId(), 0.0);
+        LAST_SPEED.put(player.getId(), speed);
+        Minecraft mc = Minecraft.getInstance();
+        int color = player == mc.player ? ClientRingData.color : ClientVisibleRings.of(player.getId()).color();
+        var rnd = player.getRandom();
+
+        // Estrondo sônico: ao passar da velocidade do som, um anel de energia e um "BUM"
+        if (speed >= SONIC_SPEED && last < SONIC_SPEED) {
+            Vec3 center = player.position().add(0, 0.9, 0);
+            Vec3 a = look.cross(new Vec3(0, 1, 0));
+            if (a.lengthSqr() < 1.0E-4) a = new Vec3(1, 0, 0);
+            a = a.normalize();
+            Vec3 b = a.cross(look).normalize();
+            for (int i = 0; i < 40; i++) {
+                double ang = i * (Math.PI * 2 / 40);
+                Vec3 dir = a.scale(Math.cos(ang)).add(b.scale(Math.sin(ang)));
+                Vec3 p = center.add(dir.scale(0.6));
+                player.level().addParticle(GlowOrbOptions.of(lighten(color, 0.3f), 0.3f),
+                        p.x, p.y, p.z, dir.x * 0.35, dir.y * 0.35, dir.z * 0.35);
+            }
+            player.level().playLocalSound(center.x, center.y, center.z,
+                    net.minecraft.sounds.SoundEvents.FIREWORK_ROCKET_LARGE_BLAST, net.minecraft.sounds.SoundSource.PLAYERS,
+                    2.0f, 0.55f, false);
+            if (player == mc.player) shake = 8;
+        }
+
+        // Rasante: perto do chão em alta velocidade, levanta poeira (ou espirra água)
+        if (speed > 0.55 && player.tickCount % 2 == 0) {
+            net.minecraft.core.BlockPos.MutableBlockPos pos = player.blockPosition().mutable();
+            for (int dy = 0; dy < 5; dy++) {
+                pos.setY(player.blockPosition().getY() - dy - 1);
+                var state = player.level().getBlockState(pos);
+                var fluid = player.level().getFluidState(pos);
+                if (!fluid.isEmpty()) {
+                    for (int i = 0; i < 6; i++) {
+                        player.level().addParticle(net.minecraft.core.particles.ParticleTypes.SPLASH,
+                                player.getX() + (rnd.nextDouble() - 0.5) * 2, pos.getY() + 1.05, player.getZ() + (rnd.nextDouble() - 0.5) * 2,
+                                -move.x * 0.3, 0.25, -move.z * 0.3);
+                    }
+                    break;
+                }
+                if (!state.isAir()) {
+                    var particle = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, state);
+                    for (int i = 0; i < 5; i++) {
+                        player.level().addParticle(particle,
+                                player.getX() + (rnd.nextDouble() - 0.5) * 2.5, pos.getY() + 1.1, player.getZ() + (rnd.nextDouble() - 0.5) * 2.5,
+                                (rnd.nextDouble() - 0.5) * 0.4 - move.x * 0.2, 0.15 + rnd.nextDouble() * 0.2, (rnd.nextDouble() - 0.5) * 0.4 - move.z * 0.2);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    /** Tremor da câmera (estrondo e altíssima velocidade). */
+    private static int shake;
+
+    public static float shakeAmount() {
+        float base = (float) Mth.clamp((localSpeed() - 1.2) * 0.6, 0, 0.35);
+        return base + (shake > 0 ? shake * 0.12f : 0);
+    }
+
+    public static void tickShake() {
+        if (shake > 0) shake--;
     }
 
     // ===================== Rastro =====================
@@ -273,6 +367,7 @@ public final class ClientFlight {
         BANK.clear();
         BANK_OLD.clear();
         LAST_YAW.clear();
+        LAST_SPEED.clear();
         velocity = Vec3.ZERO;
         wasFlying = false;
         if (wind != null) wind.finish();

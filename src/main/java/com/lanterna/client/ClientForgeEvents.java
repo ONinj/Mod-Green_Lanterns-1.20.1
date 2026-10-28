@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import com.lanterna.client.flight.ClientFlight;
+import com.lanterna.client.uniform.UniformTransition;
 import com.lanterna.network.TogglePowerPacket;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -57,7 +58,9 @@ public final class ClientForgeEvents {
         if (mc.level != null && !mc.isPaused()) {
             for (Player player : mc.level.players()) {
                 ClientFlight.tickPose(player);
+                UniformTransition.tick(player);
             }
+            ClientFlight.tickShake();
         }
     }
 
@@ -128,6 +131,14 @@ public final class ClientForgeEvents {
         float bank = ClientFlight.bank(mc.player, (float) event.getPartialTick());
         float amount = mc.options.getCameraType().isFirstPerson() ? 0.3f : 0.15f;
         event.setRoll(event.getRoll() - bank * amount);
+
+        // Tremor leve em altíssima velocidade e no estrondo sônico
+        float shake = ClientFlight.shakeAmount();
+        if (shake > 0) {
+            var rnd = mc.player.getRandom();
+            event.setYaw(event.getYaw() + (rnd.nextFloat() - 0.5f) * shake);
+            event.setPitch(event.getPitch() + (rnd.nextFloat() - 0.5f) * shake);
+        }
     }
 
     /** O campo de visão abre com a velocidade (sensação de velocidade). */
@@ -145,6 +156,7 @@ public final class ClientForgeEvents {
         ClientCutscene.reset();
         ClientVisibleRings.clear();
         ClientFlight.clear();
+        UniformTransition.clear();
     }
 
     private ClientForgeEvents() {}

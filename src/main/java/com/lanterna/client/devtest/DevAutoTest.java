@@ -99,61 +99,19 @@ public final class DevAutoTest {
             at(60, () -> {
                 mc.options.hideGui = false;
                 mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-                cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear");
-                cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s saturation 99999 1 true");
-                cmd("gamerule doMobSpawning false"); cmd("kill @e[type=!player]");
-                cmd("lanterna resetar"); cmd("clear @s");
-                cmd("tp @s 0 -60 0");
-                look(0, 10);
+                cmd("gamemode creative"); cmd("time set 6000");
+                cmd("effect give @s resistance 99999 4 true");
             });
-            at(30, () -> cmd("lanterna escolher lanterna:green"));
-            at(200, () -> { look(0, 0); sideCamera(true, 25, 1.6, -0.2); });
-            at(20, () -> shot("a1_ring_low_front"));
-            at(3, () -> sideCamera(true, 100, 1.6, -0.3));
-            at(10, () -> shot("a2_ring_low_side"));
-            at(3, () -> sideCamera(false, 0, 0, 0));
-            // Tela Lanterna com botões
-            at(5, () -> ModNetwork.sendToServer(new OpenLanternMenuPacket()));
-            at(20, () -> shot("a3_lantern_screen"));
-            at(3, () -> mc.setScreen(new InventoryScreen(mc.player)));
-            at(15, () -> shot("a3b_survival_tabs"));
-            at(3, () -> mc.setScreen(null));
-            // Criativo: aba lateral
-            at(5, () -> cmd("gamemode creative"));
-            at(10, () -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(
-                    mc.player, mc.player.connection.enabledFeatures(), false)));
-            at(15, () -> shot("a4_creative_tab"));
-            at(3, () -> { mc.setScreen(null); cmd("gamemode survival"); });
-            // Voo: arrancada, reta, curva e frenagem
-            at(20, () -> { look(0, -10); ModNetwork.sendToServer(new ToggleFlightPacket()); });
-            at(8, () -> { LanternaMod.LOGGER.info("AUTOTEST takeoff y = {}", mc.player.getY()); });
-            at(15, () -> { hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); sideCamera(true, 150, 6.0, 1.6); });
-            at(40, () -> { shot("b1_boost_straight"); LanternaMod.LOGGER.info("AUTOTEST speed straight = {}", mc.player.getDeltaMovement().length()); });
-            for (int t = 0; t < 20; t++) {
-                final int tt = t;
-                at(1, () -> {
-                    look(4f * (tt + 1), -5);
-                    if (tt == 10) {
-                        shot("b2_banking");
-                        net.minecraft.world.phys.Vec3 v = mc.player.getDeltaMovement();
-                        double velYaw = Math.toDegrees(Math.atan2(-v.x, v.z));
-                        LanternaMod.LOGGER.info("AUTOTEST turning: look yaw = {} velocity yaw = {} (drift = {})",
-                                mc.player.getYRot(), velYaw, mc.player.getYRot() - velYaw);
-                    }
-                });
+            String[][] tours = {{"oa", "0"}, {"korugar", "0"}, {"odym", "0"}, {"zamaron", "0"}, {"okaara", "0"}, {"nok", "0"}};
+            int n = 1;
+            for (String[] t : tours) {
+                final int idx = n++;
+                at(10, () -> cmd("execute in lanterna:" + t[0] + " run tp @s 0 200 0"));
+                at(400, () -> cmd("spreadplayers 0 0 0 1 false @s"));
+                at(120, () -> { cmd("tp @s ~ ~12 ~"); look(30, 35); });
+                at(60, () -> shot("q" + idx + "_" + t[0]));
             }
-            at(3, () -> shot("b3_after_turn"));
-            at(20, () -> {
-                net.minecraft.world.phys.Vec3 v = mc.player.getDeltaMovement();
-                LanternaMod.LOGGER.info("AUTOTEST after turn: look yaw = {} velocity yaw = {}", mc.player.getYRot(), Math.toDegrees(Math.atan2(-v.x, v.z)));
-            });
-            at(3, () -> { look(80, 40); });
-            at(20, () -> { shot("b4_dive"); LanternaMod.LOGGER.info("AUTOTEST dive speed = {}", mc.player.getDeltaMovement().length()); });
-            at(3, () -> { look(80, -5); hold(mc.options.keySprint, false); hold(mc.options.keyUp, false); });
-            at(10, () -> LanternaMod.LOGGER.info("AUTOTEST braking speed after 10 ticks = {}", mc.player.getDeltaMovement().length()));
-            at(30, () -> { shot("b5_hover"); LanternaMod.LOGGER.info("AUTOTEST hover speed = {}", mc.player.getDeltaMovement().length()); });
-            at(3, () -> { sideCamera(false, 0, 0, 0); ModNetwork.sendToServer(new ToggleFlightPacket()); });
-            at(40, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+            at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }
 
@@ -161,6 +119,16 @@ public final class DevAutoTest {
     public static void onTick(TickEvent.ClientTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
+        // Mundo superplano de teste: aceita o aviso de "configurações experimentais" sozinho
+        if (mc.screen instanceof net.minecraft.client.gui.screens.ConfirmScreen confirm) {
+            for (var child : confirm.children()) {
+                if (child instanceof net.minecraft.client.gui.components.Button button
+                        && button.getMessage().getString().equals("Proceed")) {
+                    button.onPress();
+                    return;
+                }
+            }
+        }
         if (mc.player == null || mc.level == null) return;
         tick++;
         updateSideCam();

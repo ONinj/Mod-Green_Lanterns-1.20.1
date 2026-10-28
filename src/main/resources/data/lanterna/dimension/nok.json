@@ -1,0 +1,11 @@
+{
+  "type": "lanterna:planet",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "lanterna:nok",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "lanterna:nok"
+    }
+  }
+}

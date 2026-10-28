@@ -1,0 +1,18 @@
+{
+  "type": "lanterna:space",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "lanterna:space",
+      "layers": [
+        {
+          "block": "minecraft:air",
+          "height": 1
+        }
+      ],
+      "lakes": false,
+      "features": false,
+      "structure_overrides": []
+    }
+  }
+}
