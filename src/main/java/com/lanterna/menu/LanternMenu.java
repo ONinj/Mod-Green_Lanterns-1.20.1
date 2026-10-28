@@ -22,13 +22,13 @@ import org.jetbrains.annotations.Nullable;
  * A aba "Lanterna": slot do anel, slot da bateria e o inventário do jogador.
  *
  * Posições (dentro da tela de 176x166):
- *   anel    -> (104, 22)
- *   bateria -> (104, 52)
+ *   anel    -> (104, 18)
+ *   bateria -> (104, 41)
  *   inventário e barra rápida no lugar de sempre
  */
 public class LanternMenu extends AbstractContainerMenu {
-    public static final int RING_X = 104, RING_Y = 22;
-    public static final int BATTERY_X = 104, BATTERY_Y = 52;
+    public static final int RING_X = 104, RING_Y = 18;
+    public static final int BATTERY_X = 104, BATTERY_Y = 41;
 
     private static final int EQUIP_SLOTS = 2;
     private static final int INV_START = EQUIP_SLOTS;          // 2

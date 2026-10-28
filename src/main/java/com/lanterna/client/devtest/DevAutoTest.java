@@ -107,44 +107,53 @@ public final class DevAutoTest {
                 look(0, 10);
             });
             at(30, () -> cmd("lanterna escolher lanterna:green"));
-            at(200, () -> { camera(CameraType.THIRD_PERSON_FRONT); look(0, 15); });
-            at(40, () -> shot("a1_ring_hand_front"));
-            at(5, () -> { look(-60, 15); });
-            at(10, () -> shot("a2_ring_hand_angle"));
-            at(5, () -> { camera(CameraType.THIRD_PERSON_BACK); look(0, 10); });
-            at(10, () -> shot("a3_back_aura"));
-            // Desligar e ligar o anel (G)
-            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
-            at(20, () -> { camera(CameraType.THIRD_PERSON_FRONT); shot("a4_ring_off"); });
-            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
-            // Voo
-            at(20, () -> { camera(CameraType.FIRST_PERSON); ModNetwork.sendToServer(new ToggleFlightPacket()); });
-            at(10, () -> hold(mc.options.keyJump, true));
-            at(30, () -> hold(mc.options.keyJump, false));
-            at(10, () -> { look(0, 0); sideCamera(true, 90, 4.0, 0.3); });
-            at(15, () -> shot("b1_hover_side"));
-            at(3, () -> hold(mc.options.keyUp, true));
-            at(30, () -> shot("b2_flying_side"));
-            at(3, () -> look(0, 30));
-            at(15, () -> shot("b3_diving_side"));
-            at(3, () -> look(0, -35));
-            at(15, () -> shot("b4_climbing_side"));
-            at(3, () -> { look(0, 0); hold(mc.options.keySprint, true); });
-            at(20, () -> shot("b5_boost_side"));
-            at(3, () -> sideCamera(true, 35, 4.0, 0.8));
-            at(10, () -> shot("b6_boost_front_angle"));
-            at(3, () -> sideCamera(true, 150, 4.0, 1.2));
-            at(10, () -> shot("b7_boost_back_angle"));
-            at(3, () -> { hold(mc.options.keySprint, false); hold(mc.options.keyUp, false); sideCamera(true, 60, 3.5, 0.3); });
-            at(35, () -> shot("b8_stopped_hover"));
+            at(200, () -> { look(0, 0); sideCamera(true, 25, 1.6, -0.2); });
+            at(20, () -> shot("a1_ring_low_front"));
+            at(3, () -> sideCamera(true, 100, 1.6, -0.3));
+            at(10, () -> shot("a2_ring_low_side"));
+            at(3, () -> sideCamera(false, 0, 0, 0));
+            // Tela Lanterna com botões
+            at(5, () -> ModNetwork.sendToServer(new OpenLanternMenuPacket()));
+            at(20, () -> shot("a3_lantern_screen"));
+            at(3, () -> mc.setScreen(new InventoryScreen(mc.player)));
+            at(15, () -> shot("a3b_survival_tabs"));
+            at(3, () -> mc.setScreen(null));
+            // Criativo: aba lateral
+            at(5, () -> cmd("gamemode creative"));
+            at(10, () -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen(
+                    mc.player, mc.player.connection.enabledFeatures(), false)));
+            at(15, () -> shot("a4_creative_tab"));
+            at(3, () -> { mc.setScreen(null); cmd("gamemode survival"); });
+            // Voo: arrancada, reta, curva e frenagem
+            at(20, () -> { look(0, -10); ModNetwork.sendToServer(new ToggleFlightPacket()); });
+            at(8, () -> { LanternaMod.LOGGER.info("AUTOTEST takeoff y = {}", mc.player.getY()); });
+            at(15, () -> { hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); sideCamera(true, 150, 6.0, 1.6); });
+            at(40, () -> { shot("b1_boost_straight"); LanternaMod.LOGGER.info("AUTOTEST speed straight = {}", mc.player.getDeltaMovement().length()); });
+            for (int t = 0; t < 20; t++) {
+                final int tt = t;
+                at(1, () -> {
+                    look(4f * (tt + 1), -5);
+                    if (tt == 10) {
+                        shot("b2_banking");
+                        net.minecraft.world.phys.Vec3 v = mc.player.getDeltaMovement();
+                        double velYaw = Math.toDegrees(Math.atan2(-v.x, v.z));
+                        LanternaMod.LOGGER.info("AUTOTEST turning: look yaw = {} velocity yaw = {} (drift = {})",
+                                mc.player.getYRot(), velYaw, mc.player.getYRot() - velYaw);
+                    }
+                });
+            }
+            at(3, () -> shot("b3_after_turn"));
+            at(20, () -> {
+                net.minecraft.world.phys.Vec3 v = mc.player.getDeltaMovement();
+                LanternaMod.LOGGER.info("AUTOTEST after turn: look yaw = {} velocity yaw = {}", mc.player.getYRot(), Math.toDegrees(Math.atan2(-v.x, v.z)));
+            });
+            at(3, () -> { look(80, 40); });
+            at(20, () -> { shot("b4_dive"); LanternaMod.LOGGER.info("AUTOTEST dive speed = {}", mc.player.getDeltaMovement().length()); });
+            at(3, () -> { look(80, -5); hold(mc.options.keySprint, false); hold(mc.options.keyUp, false); });
+            at(10, () -> LanternaMod.LOGGER.info("AUTOTEST braking speed after 10 ticks = {}", mc.player.getDeltaMovement().length()));
+            at(30, () -> { shot("b5_hover"); LanternaMod.LOGGER.info("AUTOTEST hover speed = {}", mc.player.getDeltaMovement().length()); });
             at(3, () -> { sideCamera(false, 0, 0, 0); ModNetwork.sendToServer(new ToggleFlightPacket()); });
-            at(40, () -> {});
-            // Amarelo (escuridão)
-            at(10, () -> { cmd("lanterna resetar"); cmd("tp @s 0 -60 0"); look(0, 20); camera(CameraType.THIRD_PERSON_BACK); });
-            at(20, () -> cmd("lanterna escolher lanterna:yellow"));
-            at(60, () -> shot("c1_yellow"));
-            at(80, () -> {});
-            at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+            at(40, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }
 

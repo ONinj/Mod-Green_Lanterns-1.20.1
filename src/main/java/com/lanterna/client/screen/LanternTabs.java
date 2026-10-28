@@ -74,6 +74,22 @@ public final class LanternTabs {
         return null;
     }
 
+    // ===================== Aba lateral (inventário do criativo) =====================
+
+    /** No criativo as abas de cima já são do jogo, então a "Lanterna" fica de lado, à esquerda. */
+    public static void renderSide(GuiGraphics g, int left, int top, int width) {
+        int x = left - TAB_W + 3;
+        int y = top + 6;
+        g.blit(TEXTURE, x, y, 0, 166, TAB_W, TAB_H);
+        g.renderItem(icon(Tab.LANTERN), x + 6, y + 6);
+    }
+
+    public static boolean hoveredSide(int left, int top, int width, double mouseX, double mouseY) {
+        int x = left - TAB_W + 3;
+        int y = top + 6;
+        return mouseX >= x && mouseX < x + TAB_W && mouseY >= y && mouseY < y + TAB_H;
+    }
+
     public static void renderTooltip(GuiGraphics g, Font font, int left, int top, int mouseX, int mouseY) {
         Tab tab = hovered(left, top, mouseX, mouseY);
         if (tab != null) {

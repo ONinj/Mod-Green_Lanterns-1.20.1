@@ -9,7 +9,8 @@
     "HumanoidModelMixin",
     "LivingEntityRendererMixin",
     "MinecraftMixin",
-    "EntityMixin"
+    "EntityMixin",
+    "CapeLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

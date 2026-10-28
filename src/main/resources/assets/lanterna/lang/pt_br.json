@@ -117,5 +117,11 @@
   "ritual.lanterna.violet.progress": "O amor cresce... (%s/%s)",
   "ritual.lanterna.indigo.hint": "Algo índigo observa a sua compaixão...",
   "ritual.lanterna.orange.hint": "O ouro chama... mas ainda não é o bastante.",
-  "ritual.lanterna.orange.taken": "A avareza já tem um dono neste mundo."
+  "ritual.lanterna.orange.taken": "A avareza já tem um dono neste mundo.",
+  "gui.lanterna.button.ring_on": "Anel: ON",
+  "gui.lanterna.button.ring_off": "Anel: OFF",
+  "gui.lanterna.button.flight_on": "Voo: ON",
+  "gui.lanterna.button.flight_off": "Voo: OFF",
+  "gui.lanterna.button.ring_tip": "Liga/desliga os poderes do anel (tecla G)",
+  "gui.lanterna.button.flight_tip": "Liga/desliga o voo (tecla V)"
 }

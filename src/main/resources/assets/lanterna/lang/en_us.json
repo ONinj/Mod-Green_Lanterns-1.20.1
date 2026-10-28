@@ -117,5 +117,11 @@
   "ritual.lanterna.violet.progress": "Love grows... (%s/%s)",
   "ritual.lanterna.indigo.hint": "Something indigo watches your compassion...",
   "ritual.lanterna.orange.hint": "The gold calls... but it is not enough yet.",
-  "ritual.lanterna.orange.taken": "Avarice already has an owner in this world."
+  "ritual.lanterna.orange.taken": "Avarice already has an owner in this world.",
+  "gui.lanterna.button.ring_on": "Ring: ON",
+  "gui.lanterna.button.ring_off": "Ring: OFF",
+  "gui.lanterna.button.flight_on": "Fly: ON",
+  "gui.lanterna.button.flight_off": "Fly: OFF",
+  "gui.lanterna.button.ring_tip": "Turn ring powers on/off (G)",
+  "gui.lanterna.button.flight_tip": "Turn flight on/off (V)"
 }

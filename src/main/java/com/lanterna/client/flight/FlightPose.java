@@ -29,8 +29,11 @@ public final class FlightPose {
         float pitch = player.getViewXRot(partialTick);
         float angle = k * (-90f - pitch);
 
+        // Deita o corpo e, nas curvas, gira em volta do próprio eixo (como a asa de um avião)
+        float bank = ClientFlight.bank(player, partialTick);
         poseStack.translate(0, 0.9, 0);
         poseStack.mulPose(Axis.XP.rotationDegrees(angle));
+        poseStack.mulPose(Axis.YP.rotationDegrees(bank));
         poseStack.translate(0, -0.9, 0);
     }
 

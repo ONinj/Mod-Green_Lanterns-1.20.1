@@ -6,6 +6,12 @@ import com.lanterna.menu.LanternMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import com.lanterna.network.ModNetwork;
+import com.lanterna.network.TogglePowerPacket;
+import com.lanterna.network.ToggleFlightPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -29,6 +35,37 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
         super(menu, inventory, title);
         this.imageWidth = 176;
         this.imageHeight = 166;
+    }
+
+    private Button powerButton;
+    private Button flightButton;
+
+    @Override
+    protected void init() {
+        super.init();
+        // Botões: ligar/desligar o anel e o voo, sem precisar lembrar das teclas
+        powerButton = addRenderableWidget(Button.builder(Component.empty(),
+                b -> ModNetwork.sendToServer(new TogglePowerPacket())).bounds(leftPos + 80, topPos + 62, 45, 14).build());
+        flightButton = addRenderableWidget(Button.builder(Component.empty(),
+                b -> ModNetwork.sendToServer(new ToggleFlightPacket())).bounds(leftPos + 126, topPos + 62, 45, 14).build());
+        updateButtons();
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        updateButtons();
+    }
+
+    private void updateButtons() {
+        if (powerButton == null) return;
+        boolean ring = ClientRingData.hasRing;
+        powerButton.active = ring;
+        flightButton.active = ring && ClientRingData.active;
+        powerButton.setMessage(Component.translatable(ring && ClientRingData.active ? "gui.lanterna.button.ring_on" : "gui.lanterna.button.ring_off"));
+        flightButton.setMessage(Component.translatable(ring && ClientRingData.flight ? "gui.lanterna.button.flight_on" : "gui.lanterna.button.flight_off"));
+        powerButton.setTooltip(Tooltip.create(Component.translatable("gui.lanterna.button.ring_tip")));
+        flightButton.setTooltip(Tooltip.create(Component.translatable("gui.lanterna.button.flight_tip")));
     }
 
     @Override
@@ -76,12 +113,6 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
         };
         g.drawString(font, batteryInfo, textX, LanternMenu.BATTERY_Y + 10, 0x808080, false);
 
-        if (ClientRingData.hasRing) {
-            Component corps = Component.translatable(CorpsDefinition.fullNameKey(ClientRingData.corps));
-            int w = font.width(corps);
-            int x = Math.max(80, 170 - w);
-            g.drawString(font, corps, x, 73, 0xFF000000 | darken(ClientRingData.color), false);
-        }
     }
 
     /** Escurece a cor da Tropa para dar leitura no fundo cinza. */
@@ -98,7 +129,10 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
                 && minecraft != null && minecraft.player != null) {
             // Volta para o inventário normal
             minecraft.player.closeContainer();
-            minecraft.setScreen(new InventoryScreen(minecraft.player));
+            minecraft.setScreen(minecraft.player.isCreative()
+                    ? new CreativeModeInventoryScreen(minecraft.player, minecraft.player.connection.enabledFeatures(),
+                        minecraft.options.operatorItemsTab().get())
+                    : new InventoryScreen(minecraft.player));
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);

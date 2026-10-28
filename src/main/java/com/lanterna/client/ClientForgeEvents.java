@@ -7,7 +7,11 @@ import com.lanterna.network.OpenLanternMenuPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import com.lanterna.client.flight.ClientFlight;
 import com.lanterna.network.TogglePowerPacket;
 import net.minecraft.client.player.LocalPlayer;
@@ -57,6 +61,54 @@ public final class ClientForgeEvents {
         }
     }
 
+    // ===================== Abas no inventário (sobrevivência e criativo) =====================
+
+    /** Desenha as abas "Inventário" e "Lanterna" no inventário, e a aba lateral no criativo. */
+    @SubscribeEvent
+    public static void onInventoryRender(ScreenEvent.Render.Post event) {
+        GuiGraphics g = event.getGuiGraphics();
+        if (event.getScreen() instanceof CreativeModeInventoryScreen creative) {
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 300);
+            LanternTabs.renderSide(g, creative.getGuiLeft(), creative.getGuiTop(), creative.getXSize());
+            g.pose().popPose();
+            if (LanternTabs.hoveredSide(creative.getGuiLeft(), creative.getGuiTop(), creative.getXSize(),
+                    event.getMouseX(), event.getMouseY())) {
+                g.renderTooltip(Minecraft.getInstance().font, Component.translatable("gui.lanterna.tab.lantern"),
+                        event.getMouseX(), event.getMouseY());
+            }
+            return;
+        }
+        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
+        int left = screen.getGuiLeft();
+        int top = screen.getGuiTop();
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 300); // por cima dos itens
+        LanternTabs.renderBack(g, left, top, LanternTabs.Tab.INVENTORY);
+        LanternTabs.renderFront(g, left, top, LanternTabs.Tab.INVENTORY);
+        g.pose().popPose();
+        LanternTabs.renderTooltip(g, Minecraft.getInstance().font, left, top, event.getMouseX(), event.getMouseY());
+    }
+
+    /** Clique na aba "Lanterna" abre a tela do anel. */
+    @SubscribeEvent
+    public static void onInventoryClick(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (event.getButton() != 0) return;
+        if (event.getScreen() instanceof CreativeModeInventoryScreen creative) {
+            if (LanternTabs.hoveredSide(creative.getGuiLeft(), creative.getGuiTop(), creative.getXSize(),
+                    event.getMouseX(), event.getMouseY())) {
+                ModNetwork.sendToServer(new OpenLanternMenuPacket());
+                event.setCanceled(true);
+            }
+            return;
+        }
+        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
+        LanternTabs.Tab tab = LanternTabs.hovered(screen.getGuiLeft(), screen.getGuiTop(), event.getMouseX(), event.getMouseY());
+        if (tab == null) return;
+        if (tab == LanternTabs.Tab.LANTERN) ModNetwork.sendToServer(new OpenLanternMenuPacket());
+        event.setCanceled(true); // não deixa o clique na aba jogar o item da mão no chão
+    }
+
     // ===================== Voo do anel =====================
 
     /** Física do voo do jogador local (antes do Minecraft mover o jogador). */
@@ -66,6 +118,25 @@ public final class ClientForgeEvents {
                 && event.player == Minecraft.getInstance().player) {
             ClientFlight.tickLocalPlayer((LocalPlayer) event.player);
         }
+    }
+
+    /** A câmera inclina um pouco nas curvas do voo. */
+    @SubscribeEvent
+    public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || !ClientFlight.isFlying(mc.player)) return;
+        float bank = ClientFlight.bank(mc.player, (float) event.getPartialTick());
+        float amount = mc.options.getCameraType().isFirstPerson() ? 0.3f : 0.15f;
+        event.setRoll(event.getRoll() - bank * amount);
+    }
+
+    /** O campo de visão abre com a velocidade (sensação de velocidade). */
+    @SubscribeEvent
+    public static void onFov(ComputeFovModifierEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (event.getPlayer() != mc.player || !ClientFlight.isFlying(mc.player)) return;
+        float extra = (float) Math.min(0.3, ClientFlight.localSpeed() * 0.2);
+        event.setNewFovModifier(1.0f + extra);
     }
 
     @SubscribeEvent
