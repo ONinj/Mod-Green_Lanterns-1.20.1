@@ -8,21 +8,30 @@ import net.minecraft.world.item.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
-/** No cliente: o anel que cada jogador visível está usando, para desenhar na mão. */
+/** No cliente: o anel de cada jogador visível (para desenhar na mão, a aura e a pose de voo). */
 public final class ClientVisibleRings {
-    private static final Map<Integer, ItemStack> RINGS = new HashMap<>();
+
+    public record Visible(ItemStack ring, int color, boolean active, boolean flying) {}
+
+    private static final Visible NONE = new Visible(ItemStack.EMPTY, 0, false, false);
+    private static final Map<Integer, Visible> RINGS = new HashMap<>();
 
     public static void update(SyncVisibleRingPacket msg) {
         ResourceLocation corps = ResourceLocation.tryParse(msg.corps());
         if (!msg.hasRing() || corps == null) {
             RINGS.remove(msg.entityId());
         } else {
-            RINGS.put(msg.entityId(), PowerRingItem.create(corps, msg.color(), -1));
+            RINGS.put(msg.entityId(), new Visible(PowerRingItem.create(corps, msg.color(), -1),
+                    msg.color(), msg.active(), msg.flying()));
         }
     }
 
+    public static Visible of(int entityId) {
+        return RINGS.getOrDefault(entityId, NONE);
+    }
+
     public static ItemStack get(int entityId) {
-        return RINGS.getOrDefault(entityId, ItemStack.EMPTY);
+        return of(entityId).ring();
     }
 
     public static void clear() {

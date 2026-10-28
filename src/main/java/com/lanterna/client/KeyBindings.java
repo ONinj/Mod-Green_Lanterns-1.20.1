@@ -29,5 +29,12 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_K,
             CATEGORY);
 
+    public static final KeyMapping TOGGLE_POWER = new KeyMapping(
+            "key.lanterna.toggle_power",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_G,
+            CATEGORY);
+
     private KeyBindings() {}
 }

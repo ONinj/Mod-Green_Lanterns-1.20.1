@@ -7,6 +7,7 @@ import com.lanterna.registry.ModBlocks;
 import com.lanterna.registry.ModCreativeTabs;
 import com.lanterna.registry.ModItems;
 import com.lanterna.registry.ModMenus;
+import com.lanterna.registry.ModParticles;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -30,6 +31,7 @@ public class LanternaMod {
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
         ModMenus.MENUS.register(modBus);
+        ModParticles.PARTICLES.register(modBus);
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModCapabilities::register);

@@ -73,7 +73,8 @@ public final class RingPowers {
 
     /** Avisa quem está vendo este jogador (e ele mesmo) qual anel desenhar na mão. */
     public static void syncVisibleRing(ServerPlayer player, RingData data, boolean force) {
-        String key = data.hasRing() ? data.corps() + "|" + data.color() : "";
+        String key = data.hasRing()
+                ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled() : "";
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
                 SyncVisibleRingPacket.of(player.getId(), data));
@@ -159,11 +160,44 @@ public final class RingPowers {
         return ring;
     }
 
+    // ===================== Ligar / desligar o anel =====================
+
+    /** Tecla G: liga ou desliga os poderes (a aura acende e apaga). */
+    public static void togglePower(ServerPlayer player) {
+        RingData data = ModCapabilities.get(player).orElse(null);
+        if (data == null || !data.hasRing()) return;
+
+        boolean enable = !data.powerActive();
+        if (enable && data.charge() <= 0) {
+            player.displayClientMessage(Component.translatable("message.lanterna.no_charge"), true);
+            return;
+        }
+        data.setPowerActive(enable);
+        applyFlightAbility(player, data);
+
+        CorpsDefinition def = CorpsManager.get(data.corps());
+        player.displayClientMessage(Component.translatable(enable ? "message.lanterna.power_on" : "message.lanterna.power_off")
+                .withStyle(s -> s.withColor(def.color())), true);
+        player.level().playSound(null, player.blockPosition(),
+                enable ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8f, 1.4f);
+        if (enable) {
+            player.serverLevel().sendParticles(new DustParticleOptions(PowerBatteryBlock.rgb(def.color()), 1.2f),
+                    player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.9, 0.4, 0.02);
+        }
+        sync(player, data);
+        syncVisibleRing(player, data, false);
+    }
+
     // ===================== Voo =====================
 
     public static void toggleFlight(ServerPlayer player) {
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !data.hasRing()) return;
+
+        if (!data.powerActive()) {
+            player.displayClientMessage(Component.translatable("message.lanterna.power_needed"), true);
+            return;
+        }
 
         if (!data.flightEnabled() && data.charge() <= 0) {
             player.displayClientMessage(Component.translatable("message.lanterna.no_charge"), true);
@@ -173,11 +207,6 @@ public final class RingPowers {
         boolean enable = !data.flightEnabled();
         data.setFlightEnabled(enable);
         applyFlightAbility(player, data);
-
-        if (enable) {
-            player.getAbilities().flying = true;
-            player.onUpdateAbilities();
-        }
 
         player.displayClientMessage(Component.translatable(
                 enable ? "message.lanterna.flight_on" : "message.lanterna.flight_off"), true);
@@ -191,11 +220,11 @@ public final class RingPowers {
     public static void applyFlightAbility(ServerPlayer player, RingData data) {
         Abilities abilities = player.getAbilities();
         boolean canFlyNaturally = player.isCreative() || player.isSpectator();
-        boolean shouldFly = canFlyNaturally || (data.hasRing() && data.flightEnabled());
+        boolean shouldFly = canFlyNaturally || (data.hasRing() && data.powerActive() && data.flightEnabled());
 
         if (abilities.mayfly != shouldFly) {
             abilities.mayfly = shouldFly;
-            if (!shouldFly) abilities.flying = false;
+            if (!shouldFly || !canFlyNaturally) abilities.flying = false;
             player.onUpdateAbilities();
         }
     }
@@ -203,10 +232,12 @@ public final class RingPowers {
     private static void tickFlight(ServerPlayer player, RingData data) {
         if (!data.flightEnabled()) return;
 
-        // Outro mod ou troca de modo de jogo pode ter tirado o voo
+        // Outro mod ou troca de modo de jogo pode ter tirado a permissão de voo
         if (!player.getAbilities().mayfly) applyFlightAbility(player, data);
 
-        if (player.getAbilities().flying && !player.isCreative() && !player.isSpectator()
+        // O voo é controlado pelo anel (cliente); aqui só zera a queda e cobra a carga
+        player.fallDistance = 0;
+        if (!player.onGround() && !player.isCreative() && !player.isSpectator()
                 && data.nextFlightTick() % 20 == 0) {
             CorpsDefinition def = CorpsManager.get(data.corps());
             setCharge(player, data, data.charge() - def.flightDrain());

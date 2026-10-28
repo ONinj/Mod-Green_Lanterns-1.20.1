@@ -29,8 +29,8 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 ## Roteiro
 1. ✅ Anel + bateria + entrega (verde e vermelho)
 1.5 ✅ Aba "Lanterna" própria no inventário (slots de anel e bateria, tecla K), modelos 3D, anel visível na mão, recarga pela bateria do slot (tecla R)
+1.6 ✅ Rituais para as 9 Tropas (`/lanterna rituais`), anel liga/desliga (G) com contorno na cor da Tropa, voo deitado com braço à frente e rastro de energia
 2. Poderes: rajada, escudo, constructos (entidades), menu radial de constructos
-3. Entregas das outras Tropas (amarelo, azul, violeta, índigo, laranja, negro, branco)
 4. Uniformes que aparecem ao ativar o anel
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 6. Espaço: acima de certa altura, teleporte para a dimensão espacial
@@ -38,3 +38,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 
 ## Arte
 As texturas atuais são provisórias e genéricas. Substitua os PNGs em `assets/lanterna/textures/` mantendo os mesmos nomes. A pedra do anel e o núcleo da bateria devem ficar em tons de cinza/branco, porque o jogo pinta na cor da Tropa.
+
+## Teste visual automático (desenvolvimento)
+`gradle runTestClient` abre o jogo com um roteiro que roda cerimônias, liga o anel, voa e tira prints em `run/screenshots`.
+Precisa de um mundo chamado `test` em `run/saves`. O código de teste (`client/devtest`) não vai para o .jar.

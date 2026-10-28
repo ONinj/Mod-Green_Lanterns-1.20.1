@@ -26,8 +26,31 @@ public final class CutsceneOverlay {
                 ? (float) Math.pow(Math.max(0, Math.sin(time * 0.35)), 6)
                 : 0.5f + 0.5f * Mth.sin(time * 0.15f);
 
-        // Vinheta nas bordas
-        int edgeAlpha = (int) Mth.clamp((40 + 120 * p) + pulse * 50, 0, 220);
+        String style = ClientCutscene.style();
+        boolean dark = style.equals("yellow") || style.equals("black");
+
+        // Medo e morte: o mundo escurece por inteiro, e a cor só aparece em lampejos
+        if (dark) {
+            int black = (int) Mth.clamp(60 + 150 * p, 0, 215);
+            g.fill(0, 0, width, height, black << 24);
+            float flicker = style.equals("yellow")
+                    ? (Mth.sin(time * 1.7f) > 0.75f ? 1f : 0f)
+                    : 0.4f + 0.3f * Mth.sin(time * 0.08f);
+            int edgeA = (int) (flicker * 150 * p);
+            int band = Math.max(16, (int) (height * 0.12f));
+            g.fillGradient(0, 0, width, band, (edgeA << 24) | rgb, rgb);
+            g.fillGradient(0, height - band, width, height, rgb, (edgeA << 24) | rgb);
+        }
+
+        // Vida: tudo vai clareando até ficar branco
+        if (style.equals("white")) {
+            int glow = (int) Mth.clamp(p * p * 170, 0, 170);
+            g.fill(0, 0, width, height, (glow << 24) | 0xFFFFFF);
+        }
+
+        // Vinheta nas bordas (no medo e na morte ela é bem fraca, para o escuro dominar)
+        float edgeScale = dark ? 0.35f : 1f;
+        int edgeAlpha = (int) (Mth.clamp((40 + 120 * p) + pulse * 50, 0, 220) * edgeScale);
         int edge = (edgeAlpha << 24) | rgb;
         int clear = rgb; // alpha 0
         int band = Math.max(20, (int) (height * (0.18f + 0.22f * p)));
@@ -39,7 +62,7 @@ public final class CutsceneOverlay {
         fillHorizontalGradient(g, width - side, 0, width, height, clear, edge); // direita
 
         // Tinta suave na tela inteira, cresce com o progresso
-        int washAlpha = (int) Mth.clamp(p * 50 + pulse * 15, 0, 90);
+        int washAlpha = (int) (Mth.clamp(p * 50 + pulse * 15, 0, 90) * edgeScale);
         g.fill(0, 0, width, height, (washAlpha << 24) | rgb);
 
         // Clarão final (últimos 8 ticks)

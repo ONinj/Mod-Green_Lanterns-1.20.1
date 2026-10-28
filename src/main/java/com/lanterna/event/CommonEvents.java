@@ -11,6 +11,7 @@ import com.lanterna.corps.CorpsManager;
 import com.lanterna.network.ModNetwork;
 import com.lanterna.network.SyncVisibleRingPacket;
 import com.lanterna.power.RingPowers;
+import com.lanterna.selection.RitualEvents;
 import com.lanterna.selection.SelectionManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -105,7 +106,7 @@ public final class CommonEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         RingData data = ModCapabilities.get(player).orElse(null);
-        if (data == null || data.hasRing() || data.isSelectionPending() || data.everChosen()) return;
+        if (data == null || !RitualEvents.canBeChosen(player, data) || data.everChosen()) return;
 
         if (player.getRandom().nextDouble() < LanternaConfig.GREEN_SLEEP_CHANCE.get()) {
             SelectionManager.startSelection(player, BuiltinCorps.GREEN.id());
@@ -120,7 +121,7 @@ public final class CommonEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
 
         RingData data = ModCapabilities.get(player).orElse(null);
-        if (data == null || data.hasRing() || data.isSelectionPending() || data.everChosen()) return;
+        if (data == null || !RitualEvents.canBeChosen(player, data)) return;
 
         int required = LanternaConfig.RED_KILLS_REQUIRED.get();
         int window = LanternaConfig.RED_WINDOW_SECONDS.get() * 20;

@@ -44,6 +44,12 @@ public final class ModNetwork {
                 .consumerMainThread(PocketRechargePacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(TogglePowerPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(TogglePowerPacket::encode)
+                .decoder(TogglePowerPacket::decode)
+                .consumerMainThread(TogglePowerPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(OpenLanternMenuPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(OpenLanternMenuPacket::encode)
                 .decoder(OpenLanternMenuPacket::decode)

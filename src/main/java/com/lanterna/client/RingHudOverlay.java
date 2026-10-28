@@ -58,7 +58,10 @@ public final class RingHudOverlay {
             y += 10;
         }
 
-        if (ClientRingData.flight) {
+        if (!ClientRingData.active) {
+            g.drawString(font, Component.translatable("hud.lanterna.power_off"), x, y, 0xFF888888, true);
+            y += 10;
+        } else if (ClientRingData.flight) {
             g.drawString(font, Component.translatable("hud.lanterna.flight_on"), x, y, color, true);
             y += 10;
         }

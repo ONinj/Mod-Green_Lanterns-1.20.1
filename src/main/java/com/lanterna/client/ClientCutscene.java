@@ -31,6 +31,12 @@ public final class ClientCutscene {
     public static int color() { return color; }
     public static boolean isRed() { return corps.endsWith(":red"); }
 
+    /** Nome curto da Tropa: "green", "yellow"... */
+    public static String style() {
+        int i = corps.indexOf(':');
+        return i >= 0 ? corps.substring(i + 1) : corps;
+    }
+
     public static void reset() {
         ticksLeft = 0;
     }

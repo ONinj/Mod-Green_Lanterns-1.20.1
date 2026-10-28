@@ -10,10 +10,11 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 /** Servidor -> clientes: qual anel desenhar na mão de um jogador (ou nenhum). */
-public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps, int color) {
+public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps, int color, boolean active, boolean flying) {
 
     public static SyncVisibleRingPacket of(int entityId, RingData data) {
-        return new SyncVisibleRingPacket(entityId, data.hasRing(), data.corps().toString(), data.color());
+        return new SyncVisibleRingPacket(entityId, data.hasRing(), data.corps().toString(), data.color(),
+                data.hasRing() && data.powerActive(), data.hasRing() && data.flightEnabled());
     }
 
     public static void encode(SyncVisibleRingPacket msg, FriendlyByteBuf buf) {
@@ -21,10 +22,13 @@ public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps,
         buf.writeBoolean(msg.hasRing);
         buf.writeUtf(msg.corps);
         buf.writeInt(msg.color);
+        buf.writeBoolean(msg.active);
+        buf.writeBoolean(msg.flying);
     }
 
     public static SyncVisibleRingPacket decode(FriendlyByteBuf buf) {
-        return new SyncVisibleRingPacket(buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readInt());
+        return new SyncVisibleRingPacket(buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readInt(),
+                buf.readBoolean(), buf.readBoolean());
     }
 
     public static void handle(SyncVisibleRingPacket msg, Supplier<NetworkEvent.Context> ctx) {

@@ -8,6 +8,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraftforge.client.event.ScreenEvent;
+import com.lanterna.client.flight.ClientFlight;
+import com.lanterna.network.TogglePowerPacket;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
 import com.lanterna.network.PocketRechargePacket;
 import com.lanterna.network.ToggleFlightPacket;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,34 +41,31 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.TOGGLE_POWER.consumeClick()) {
+            if (ClientRingData.hasRing) {
+                ModNetwork.sendToServer(new TogglePowerPacket());
+            }
+        }
         ClientCutscene.tick();
+
+        // Pose de voo e partículas de todos os jogadores visíveis
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && !mc.isPaused()) {
+            for (Player player : mc.level.players()) {
+                ClientFlight.tickPose(player);
+            }
+        }
     }
 
-    // ===================== Abas no inventário normal =====================
+    // ===================== Voo do anel =====================
 
-    /** Desenha as abas "Inventário" e "Lanterna" em cima do inventário de sobrevivência. */
+    /** Física do voo do jogador local (antes do Minecraft mover o jogador). */
     @SubscribeEvent
-    public static void onInventoryRender(ScreenEvent.Render.Post event) {
-        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        GuiGraphics g = event.getGuiGraphics();
-        int left = screen.getGuiLeft();
-        int top = screen.getGuiTop();
-        g.pose().pushPose();
-        g.pose().translate(0, 0, 300); // por cima dos itens
-        LanternTabs.renderBack(g, left, top, LanternTabs.Tab.INVENTORY);
-        LanternTabs.renderFront(g, left, top, LanternTabs.Tab.INVENTORY);
-        g.pose().popPose();
-        LanternTabs.renderTooltip(g, Minecraft.getInstance().font, left, top, event.getMouseX(), event.getMouseY());
-    }
-
-    /** Clique na aba "Lanterna" abre a tela do anel. */
-    @SubscribeEvent
-    public static void onInventoryClick(ScreenEvent.MouseButtonPressed.Pre event) {
-        if (!(event.getScreen() instanceof InventoryScreen screen) || event.getButton() != 0) return;
-        LanternTabs.Tab tab = LanternTabs.hovered(screen.getGuiLeft(), screen.getGuiTop(), event.getMouseX(), event.getMouseY());
-        if (tab == null) return;
-        if (tab == LanternTabs.Tab.LANTERN) ModNetwork.sendToServer(new OpenLanternMenuPacket());
-        event.setCanceled(true); // não deixa o clique na aba jogar o item da mão no chão
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && event.side.isClient()
+                && event.player == Minecraft.getInstance().player) {
+            ClientFlight.tickLocalPlayer((LocalPlayer) event.player);
+        }
     }
 
     @SubscribeEvent
@@ -72,6 +73,7 @@ public final class ClientForgeEvents {
         ClientRingData.reset();
         ClientCutscene.reset();
         ClientVisibleRings.clear();
+        ClientFlight.clear();
     }
 
     private ClientForgeEvents() {}

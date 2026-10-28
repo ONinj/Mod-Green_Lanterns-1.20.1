@@ -16,18 +16,20 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Desenha o anel no punho da mão principal de qualquer jogador que esteja usando um,
- * com a pedra virada para fora e sempre brilhando (luz máxima).
+ * Desenha um anel pequeno na frente do punho da mão principal de qualquer jogador
+ * que esteja usando um, com a pedra para fora e sempre brilhando (luz máxima).
  *
  * Ajuste fino: mude POSITION / SCALE se quiser o anel mais para cima, mais para baixo,
  * maior ou menor.
  */
 public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    /** Altura no braço (em pixels do modelo, 0 = ombro, 10 = ponta da mão). */
-    private static final float POSITION = 9.0f;
-    /** Tamanho do anel em relação ao modelo do item. */
-    private static final float SCALE = 0.62f;
+    /** Altura no braço (pixels do modelo: -2 = ombro, 10 = ponta da mão). */
+    private static final float POSITION = 8.6f;
+    /** Tamanho do anel (0.25 = um quarto do tamanho do item). */
+    private static final float SCALE = 0.24f;
+    /** Quanto o anel fica para fora da frente do punho (pixels). */
+    private static final float OUTSET = 0.15f;
 
     public RingHandLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -49,13 +51,12 @@ public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         // Segue o movimento do braço
         arm.translateAndRotate(poseStack);
 
-        // Centro do braço: braço direito vai de x=-3 a x=1, o esquerdo de -1 a 3
+        // Centro do braço (o direito vai de x=-3 a 1, o esquerdo de -1 a 3), na frente do punho (z=-2)
         float centerX = right ? -1f / 16f : 1f / 16f;
-        poseStack.translate(centerX, POSITION / 16f, 0);
+        poseStack.translate(centerX, POSITION / 16f, -(2f + OUTSET) / 16f);
 
-        // Anel deitado em volta do braço, com a pedra virada para fora
-        poseStack.mulPose(Axis.XP.rotationDegrees(90));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(right ? 90 : -90));
+        // Pedra virada para a frente do punho, aro em volta do "dedo"
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.scale(SCALE, SCALE, SCALE);
 
         Minecraft.getInstance().getItemRenderer().renderStatic(ring, ItemDisplayContext.FIXED,

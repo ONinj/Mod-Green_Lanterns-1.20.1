@@ -13,6 +13,9 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.IntValue RED_WINDOW_SECONDS;
     public static final ForgeConfigSpec.IntValue SELECTION_ANIMATION_TICKS;
     public static final ForgeConfigSpec.IntValue POCKET_RECHARGE_COOLDOWN_SECONDS;
+    public static final ForgeConfigSpec.IntValue YELLOW_FEAR_SECONDS;
+    public static final ForgeConfigSpec.IntValue VIOLET_BREEDS;
+    public static final ForgeConfigSpec.IntValue ORANGE_TREASURE_VALUE;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -30,6 +33,18 @@ public final class LanternaConfig {
         RED_WINDOW_SECONDS = b
                 .comment("Vermelho: janela de tempo em segundos para contar os abates")
                 .defineInRange("janela_vermelho_segundos", 300, 10, 36000);
+
+        YELLOW_FEAR_SECONDS = b
+                .comment("Amarelo: segundos na Escuridão do Warden, com ele por perto, para ser escolhido")
+                .defineInRange("segundos_medo_amarelo", 30, 5, 3600);
+
+        VIOLET_BREEDS = b
+                .comment("Violeta: filhotes que é preciso criar com seu bicho domado por perto")
+                .defineInRange("filhotes_violeta", 5, 1, 1000);
+
+        ORANGE_TREASURE_VALUE = b
+                .comment("Laranja: valor do tesouro no inventário (ouro=1, esmeralda=3, diamante=5, netherite=40; blocos x9)")
+                .defineInRange("tesouro_laranja", 1000, 10, 100000);
 
         SELECTION_ANIMATION_TICKS = b
                 .comment("Duração da animação de entrega do anel, em ticks (20 ticks = 1 segundo)")

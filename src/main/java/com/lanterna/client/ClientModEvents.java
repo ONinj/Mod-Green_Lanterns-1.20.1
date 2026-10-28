@@ -18,6 +18,9 @@ import com.lanterna.registry.ModMenus;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import com.lanterna.client.flight.GlowOrbParticle;
+import com.lanterna.registry.ModParticles;
 
 /** Eventos de cliente no barramento do mod (registro). */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -28,6 +31,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.TOGGLE_FLIGHT);
         event.register(KeyBindings.POCKET_RECHARGE);
         event.register(KeyBindings.OPEN_LANTERN);
+        event.register(KeyBindings.TOGGLE_POWER);
     }
 
     /** Liga a tela da aba "Lanterna". */
@@ -41,8 +45,15 @@ public final class ClientModEvents {
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         for (String skin : event.getSkins()) {
             PlayerRenderer renderer = event.getSkin(skin);
-            if (renderer != null) renderer.addLayer(new RingHandLayer(renderer));
+            if (renderer != null) {
+                renderer.addLayer(new RingHandLayer(renderer));
+            }
         }
+    }
+
+    @SubscribeEvent
+    public static void registerParticles(RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(ModParticles.GLOW_ORB.get(), GlowOrbParticle.Provider::new);
     }
 
     @SubscribeEvent

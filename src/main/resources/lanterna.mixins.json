@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.lanterna.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "lanterna.refmap.json",
+  "mixins": [],
+  "client": [
+    "HumanoidModelMixin",
+    "LivingEntityRendererMixin",
+    "MinecraftMixin",
+    "EntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

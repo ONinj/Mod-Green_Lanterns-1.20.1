@@ -41,6 +41,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
     private int charge;
     private int maxCharge = 1000;
     private boolean flightEnabled;
+    private boolean powerActive = true;
 
     // --- Seleção (entrega do anel) ---
     private boolean everChosen;
@@ -69,6 +70,17 @@ public class RingData implements INBTSerializable<CompoundTag> {
     public int charge() { return charge; }
     public int maxCharge() { return maxCharge; }
     public boolean flightEnabled() { return flightEnabled; }
+
+    /** Poderes do anel ligados (aura acesa) ou desligados (anel só no dedo). */
+    public boolean powerActive() { return powerActive; }
+
+    public void setPowerActive(boolean value) {
+        if (powerActive != value) {
+            powerActive = value;
+            if (!value) flightEnabled = false;
+            markDirty();
+        }
+    }
 
     /**
      * Atualiza a "foto" do anel que está no slot de anel.
@@ -179,6 +191,26 @@ public class RingData implements INBTSerializable<CompoundTag> {
         rageWindowStart = 0;
     }
 
+    // ===== Rituais das outras Tropas =====
+    private int fearTicks;        // amarelo: tempo encarando o Warden na escuridão
+    private int loveBreeds;       // violeta: filhotes criados com o companheiro por perto
+    private boolean diedWithering; // negro: morreu sob o efeito Wither
+
+    public int addFearTick() { return ++fearTicks; }
+    public void decayFear() { if (fearTicks > 0) fearTicks--; }
+    public int fearTicks() { return fearTicks; }
+
+    public int addLoveBreed() { return ++loveBreeds; }
+
+    public boolean diedWithering() { return diedWithering; }
+    public void setDiedWithering(boolean v) { diedWithering = v; }
+
+    public void resetRituals() {
+        fearTicks = 0;
+        loveBreeds = 0;
+        diedWithering = false;
+    }
+
     // ===== Sincronização =====
 
     public boolean isDirty() { return dirty; }
@@ -196,6 +228,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
         tag.putInt("Charge", charge);
         tag.putInt("MaxCharge", maxCharge);
         tag.putBoolean("Flight", flightEnabled);
+        tag.putBoolean("PowerActive", powerActive);
         tag.putBoolean("EverChosen", everChosen);
         tag.putString("PendingCorps", pendingCorps);
         tag.putInt("PendingTicks", pendingTicks);
@@ -203,6 +236,9 @@ public class RingData implements INBTSerializable<CompoundTag> {
         tag.putInt("RageKills", rageKills);
         tag.putLong("RageStart", rageWindowStart);
         tag.put("Equipment", equipment.serializeNBT());
+        tag.putInt("FearTicks", fearTicks);
+        tag.putInt("LoveBreeds", loveBreeds);
+        tag.putBoolean("DiedWithering", diedWithering);
         return tag;
     }
 
@@ -214,12 +250,16 @@ public class RingData implements INBTSerializable<CompoundTag> {
         charge = tag.getInt("Charge");
         maxCharge = tag.contains("MaxCharge") ? Math.max(1, tag.getInt("MaxCharge")) : 1000;
         flightEnabled = tag.getBoolean("Flight");
+        powerActive = !tag.contains("PowerActive") || tag.getBoolean("PowerActive");
         everChosen = tag.getBoolean("EverChosen");
         pendingCorps = tag.getString("PendingCorps");
         pendingTicks = tag.getInt("PendingTicks");
         pendingTotal = tag.getInt("PendingTotal");
         rageKills = tag.getInt("RageKills");
         rageWindowStart = tag.getLong("RageStart");
+        fearTicks = tag.getInt("FearTicks");
+        loveBreeds = tag.getInt("LoveBreeds");
+        diedWithering = tag.getBoolean("DiedWithering");
         if (tag.contains("Equipment")) {
             equipment.deserializeNBT(tag.getCompound("Equipment"));
         }

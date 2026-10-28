@@ -5,6 +5,7 @@ import com.lanterna.capability.RingData;
 import com.lanterna.corps.CorpsDefinition;
 import com.lanterna.corps.CorpsManager;
 import com.lanterna.power.RingPowers;
+import com.lanterna.selection.OrangeClaim;
 import com.lanterna.selection.SelectionManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -36,9 +37,14 @@ public final class LanternaCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("lanterna")
-                .requires(source -> source.hasPermission(2))
 
+                // Qualquer jogador: lista dos rituais
+                .then(Commands.literal("rituais")
+                        .executes(LanternaCommand::rituals))
+
+                // Daqui para baixo: só operador (cheats)
                 .then(Commands.literal("escolher")
+                        .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("tropa", ResourceLocationArgument.id())
                                 .suggests(CORPS)
                                 .executes(ctx -> choose(ctx, ctx.getSource().getPlayerOrException()))
@@ -46,13 +52,16 @@ public final class LanternaCommand {
                                         .executes(ctx -> choose(ctx, EntityArgument.getPlayer(ctx, "jogador"))))))
 
                 .then(Commands.literal("carga")
+                        .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("valor", IntegerArgumentType.integer(0))
                                 .executes(LanternaCommand::setCharge)))
 
                 .then(Commands.literal("remover")
+                        .requires(source -> source.hasPermission(2))
                         .executes(LanternaCommand::remove))
 
                 .then(Commands.literal("resetar")
+                        .requires(source -> source.hasPermission(2))
                         .executes(LanternaCommand::reset)));
     }
 
@@ -100,14 +109,34 @@ public final class LanternaCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null) return 0;
-        RingPowers.removeRing(player); // o anel some (é só para testes)
+        RingPowers.removeRing(player); // o anel e a bateria somem (é só para testes)
+        com.lanterna.power.EquipmentHelper.take(player, RingData.BATTERY_SLOT);
         data.unequip();
         data.clearPending();
         data.resetRage();
         data.setEverChosen(false);
+        data.resetRituals();
+        OrangeClaim claim = OrangeClaim.get(player.server);
+        if (player.getUUID().equals(claim.owner())) claim.release();
         RingPowers.applyFlightAbility(player, data);
         RingPowers.sync(player, data);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.reset"), false);
+        return 1;
+    }
+
+    private static final String[] RITUAL_ORDER = {"green", "red", "yellow", "blue", "violet", "indigo", "orange", "black", "white"};
+
+    private static int rituals(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        source.sendSuccess(() -> Component.translatable("ritual.lanterna.header").withStyle(s -> s.withBold(true)), false);
+        for (String corps : RITUAL_ORDER) {
+            ResourceLocation id = new ResourceLocation("lanterna", corps);
+            int color = com.lanterna.corps.BuiltinCorps.colorOf(id);
+            source.sendSuccess(() -> Component.literal("\u25C6 ").withStyle(s -> s.withColor(color))
+                    .append(Component.translatable(CorpsDefinition.fullNameKey(id)).withStyle(s -> s.withColor(color).withBold(true)))
+                    .append(Component.literal(": "))
+                    .append(Component.translatable("ritual.lanterna." + corps + ".how")), false);
+        }
         return 1;
     }
 

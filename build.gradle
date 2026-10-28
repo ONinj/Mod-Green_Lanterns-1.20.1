@@ -2,6 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.38'
 }
 
 version = mod_version
@@ -21,15 +22,25 @@ minecraft {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 "${mod_id}" {
                     source sourceSets.main
                 }
             }
         }
+        testClient {
+            parent runs.client
+            workingDirectory project.file('run')
+            property 'lanterna.autotest', 'true'
+            args '--quickPlaySingleplayer', 'test', '--width', '960', '--height', '540'
+        }
         server {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             args '--nogui'
             mods {
                 "${mod_id}" {
@@ -40,11 +51,17 @@ minecraft {
     }
 }
 
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
+
 repositories {
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 tasks.named('jar', Jar).configure {
@@ -55,9 +72,11 @@ tasks.named('jar', Jar).configure {
                 'Specification-Version'   : '1',
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors
+                'Implementation-Vendor'   : mod_authors,
+                'MixinConfigs'            : "${mod_id}.mixins.json"
         ])
     }
+    exclude 'com/lanterna/client/devtest/**'
     finalizedBy 'reobfJar'
 }
 
