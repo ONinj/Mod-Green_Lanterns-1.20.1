@@ -1,6 +1,0 @@
-{
-  "order": 165,
-  "size": 1,
-  "icon": "lanterna:slot/lantern_battery_slot",
-  "validators": ["curios:tag"]
-}

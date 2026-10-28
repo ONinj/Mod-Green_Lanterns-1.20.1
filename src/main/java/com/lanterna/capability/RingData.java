@@ -3,12 +3,36 @@ package com.lanterna.capability;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.items.ItemStackHandler;
 
 /**
  * Tudo que o mod sabe sobre o jogador como portador de anel.
  * Fica salvo no próprio jogador e sobrevive à morte.
  */
 public class RingData implements INBTSerializable<CompoundTag> {
+
+    // --- Slots próprios do mod: 0 = anel, 1 = bateria ---
+    public static final int RING_SLOT = 0;
+    public static final int BATTERY_SLOT = 1;
+
+    private final ItemStackHandler equipment = new ItemStackHandler(2) {
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
+    };
+
+    public ItemStackHandler equipment() { return equipment; }
+
+    // --- O que os outros jogadores veem (anel na mão) ---
+    private transient String lastVisibleRing = "";
+
+    /** Devolve true se o anel visível mudou desde a última vez (e guarda o novo). */
+    public boolean visibleRingChanged(String key) {
+        if (key.equals(lastVisibleRing)) return false;
+        lastVisibleRing = key;
+        return true;
+    }
 
     // --- Anel em uso ---
     private boolean hasRing;
@@ -47,7 +71,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
     public boolean flightEnabled() { return flightEnabled; }
 
     /**
-     * Atualiza a "foto" do anel que está no slot do Curios.
+     * Atualiza a "foto" do anel que está no slot de anel.
      * O anel (item) é a fonte da verdade; isto aqui é só para HUD e lógica rápida.
      */
     public void refresh(ResourceLocation corpsId, int color, int charge, int maxCharge) {
@@ -72,7 +96,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
         }
     }
 
-    // --- Bateria de bolso (slot do Curios) ---
+    // --- Bateria de bolso (slot de bateria) ---
     private long lastPocketRecharge = -100000L;
     private int pocketStatus = -1; // -1 = sem bateria compatível, 0 = pronta, >0 = segundos de espera
 
@@ -178,6 +202,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
         tag.putInt("PendingTotal", pendingTotal);
         tag.putInt("RageKills", rageKills);
         tag.putLong("RageStart", rageWindowStart);
+        tag.put("Equipment", equipment.serializeNBT());
         return tag;
     }
 
@@ -195,6 +220,10 @@ public class RingData implements INBTSerializable<CompoundTag> {
         pendingTotal = tag.getInt("PendingTotal");
         rageKills = tag.getInt("RageKills");
         rageWindowStart = tag.getLong("RageStart");
+        if (tag.contains("Equipment")) {
+            equipment.deserializeNBT(tag.getCompound("Equipment"));
+        }
+        lastVisibleRing = "";
         dirty = true;
     }
 

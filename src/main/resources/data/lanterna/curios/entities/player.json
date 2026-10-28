@@ -1,4 +1,0 @@
-{
-  "entities": ["minecraft:player"],
-  "slots": ["ring", "lantern_battery"]
-}

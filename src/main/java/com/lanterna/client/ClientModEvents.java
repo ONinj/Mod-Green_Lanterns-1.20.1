@@ -13,7 +13,11 @@ import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
+import com.lanterna.client.screen.LanternScreen;
+import com.lanterna.registry.ModMenus;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 
 /** Eventos de cliente no barramento do mod (registro). */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -23,12 +27,22 @@ public final class ClientModEvents {
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(KeyBindings.TOGGLE_FLIGHT);
         event.register(KeyBindings.POCKET_RECHARGE);
+        event.register(KeyBindings.OPEN_LANTERN);
     }
 
-    /** Liga o desenho do anel no braço do personagem. */
+    /** Liga a tela da aba "Lanterna". */
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> CuriosRendererRegistry.register(ModItems.POWER_RING.get(), RingCurioRenderer::new));
+        event.enqueueWork(() -> MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new));
+    }
+
+    /** Adiciona o anel na mão em todos os modelos de jogador (Steve e Alex). */
+    @SubscribeEvent
+    public static void addLayers(EntityRenderersEvent.AddLayers event) {
+        for (String skin : event.getSkins()) {
+            PlayerRenderer renderer = event.getSkin(skin);
+            if (renderer != null) renderer.addLayer(new RingHandLayer(renderer));
+        }
     }
 
     @SubscribeEvent

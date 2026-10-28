@@ -43,6 +43,18 @@ public final class ModNetwork {
                 .decoder(PocketRechargePacket::decode)
                 .consumerMainThread(PocketRechargePacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(OpenLanternMenuPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(OpenLanternMenuPacket::encode)
+                .decoder(OpenLanternMenuPacket::decode)
+                .consumerMainThread(OpenLanternMenuPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(SyncVisibleRingPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SyncVisibleRingPacket::encode)
+                .decoder(SyncVisibleRingPacket::decode)
+                .consumerMainThread(SyncVisibleRingPacket::handle)
+                .add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

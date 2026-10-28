@@ -12,12 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import top.theillusivec4.curios.api.SlotContext;
-import top.theillusivec4.curios.api.type.capability.ICurio;
-import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.List;
 
@@ -25,7 +20,7 @@ import java.util.List;
  * Item da bateria. A Tropa vai em BlockEntityTag, então ao colocar o bloco
  * o Minecraft já passa a Tropa para a bateria sozinho.
  */
-public class PowerBatteryItem extends BlockItem implements ICurioItem {
+public class PowerBatteryItem extends BlockItem {
 
     public PowerBatteryItem(Block block, Properties properties) {
         super(block, properties);
@@ -53,25 +48,6 @@ public class PowerBatteryItem extends BlockItem implements ICurioItem {
         CompoundTag be = stack.getTagElement("BlockEntityTag");
         if (be != null && be.contains("Color")) return be.getInt("Color");
         return BuiltinCorps.colorOf(getCorps(stack));
-    }
-
-    // ===================== Curios =====================
-
-    @Override
-    public boolean canEquip(SlotContext slotContext, ItemStack stack) {
-        return slotContext.entity() instanceof Player;
-    }
-
-    /** Clique direito continua colocando o bloco no chão; no slot se coloca pelo inventário. */
-    @Override
-    public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
-        return false;
-    }
-
-    @Override
-    public ICurio.DropRule getDropRule(SlotContext slotContext, DamageSource source, int lootingLevel,
-                                       boolean recentlyHit, ItemStack stack) {
-        return ICurio.DropRule.ALWAYS_KEEP;
     }
 
     @Override

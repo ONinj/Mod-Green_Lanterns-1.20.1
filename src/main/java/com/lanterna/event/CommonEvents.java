@@ -8,6 +8,8 @@ import com.lanterna.capability.RingDataProvider;
 import com.lanterna.command.LanternaCommand;
 import com.lanterna.corps.BuiltinCorps;
 import com.lanterna.corps.CorpsManager;
+import com.lanterna.network.ModNetwork;
+import com.lanterna.network.SyncVisibleRingPacket;
 import com.lanterna.power.RingPowers;
 import com.lanterna.selection.SelectionManager;
 import net.minecraft.network.chat.Component;
@@ -67,7 +69,17 @@ public final class CommonEvents {
             ModCapabilities.get(sp).ifPresent(data -> {
                 RingPowers.applyFlightAbility(sp, data);
                 RingPowers.sync(sp, data);
+                RingPowers.syncVisibleRing(sp, data, true);
             });
+        }
+    }
+
+    /** Quando alguém passa a enxergar um jogador, conta qual anel ele está usando. */
+    @SubscribeEvent
+    public static void onStartTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
+            ModCapabilities.get(target).ifPresent(data ->
+                    ModNetwork.sendTo(viewer, SyncVisibleRingPacket.of(target.getId(), data)));
         }
     }
 

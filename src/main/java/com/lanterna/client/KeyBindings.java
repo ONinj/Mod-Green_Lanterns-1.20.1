@@ -22,5 +22,12 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_R,
             CATEGORY);
 
+    public static final KeyMapping OPEN_LANTERN = new KeyMapping(
+            "key.lanterna.open_lantern",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_K,
+            CATEGORY);
+
     private KeyBindings() {}
 }

@@ -7,10 +7,10 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 
 ## Requisitos
 - Minecraft 1.20.1 + Forge 47.3+
-- **Curios API 5.14+** (slots de anel e bateria)
+- Nenhum outro mod é necessário
 
 ## Fase 1: anel + bateria + entrega
-- **Anel de Poder**: um item só para todas as Tropas; cor, carga e dono ficam no NBT. Clique direito para colocar no dedo.
+- **Anel de Poder**: um item só para todas as Tropas; cor, carga e dono ficam no NBT. Clique direito ou coloque na aba Lanterna (tecla K).
 - **Bateria de Poder**: recarrega só anéis da mesma Tropa. Texto do juramento em `lang/*.json` (`oath.lanterna.<tropa>`).
 - **Voo**: tecla **V**, gasta carga por segundo (`flight_drain` no JSON da Tropa).
 - **HUD**: barra de carga na cor da Tropa, aviso de carga baixa, indicador de voo.
@@ -28,7 +28,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 
 ## Roteiro
 1. ✅ Anel + bateria + entrega (verde e vermelho)
-1.5 ✅ Slots do Curios, modelos 3D, anel visível na mão, recarga pela bateria do slot (tecla R)
+1.5 ✅ Aba "Lanterna" própria no inventário (slots de anel e bateria, tecla K), modelos 3D, anel visível na mão, recarga pela bateria do slot (tecla R)
 2. Poderes: rajada, escudo, constructos (entidades), menu radial de constructos
 3. Entregas das outras Tropas (amarelo, azul, violeta, índigo, laranja, negro, branco)
 4. Uniformes que aparecem ao ativar o anel

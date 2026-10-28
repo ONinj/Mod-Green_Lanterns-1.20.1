@@ -1,7 +1,9 @@
 package com.lanterna.item;
 
+import com.lanterna.capability.RingData;
 import com.lanterna.corps.BuiltinCorps;
 import com.lanterna.corps.CorpsDefinition;
+import com.lanterna.power.EquipmentHelper;
 import com.lanterna.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -9,29 +11,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import top.theillusivec4.curios.api.SlotContext;
-import top.theillusivec4.curios.api.type.capability.ICurio;
-import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Um único item para todos os anéis. Vai no slot "ring" do Curios.
+ * Um único item para todos os anéis. Fica no slot de anel da aba "Lanterna".
  * Dados no NBT:
  *   Corps  = "lanterna:green"
  *   Color  = 0x2BFF4A  (pinta a pedra do anel)
  *   Charge = carga atual (-1 = cheia, anel novo)
  *   Owner  = UUID do portador (o anel só aceita quem escolheu)
  */
-public class PowerRingItem extends Item implements ICurioItem {
+public class PowerRingItem extends Item {
 
     public PowerRingItem(Properties properties) {
         super(properties);
@@ -84,38 +84,38 @@ public class PowerRingItem extends Item implements ICurioItem {
         return tag != null && tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
     }
 
-    // ===================== Curios =====================
-
-    /** Só entra no slot de quem o anel escolheu (ou de quem está no criativo). */
-    @Override
-    public boolean canEquip(SlotContext slotContext, ItemStack stack) {
-        if (!(slotContext.entity() instanceof Player player)) return false;
+    /** O anel só aceita quem ele escolheu (ou alguém no criativo). Anel sem dono aceita qualquer um. */
+    public static boolean canBeWornBy(ItemStack stack, Player player) {
         UUID owner = getOwner(stack);
         return owner == null || owner.equals(player.getUUID()) || player.isCreative();
     }
 
-    /** Clique direito com o anel na mão coloca direto no slot. */
-    @Override
-    public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
-        return true;
-    }
+    // ===================== Uso =====================
 
+    /** Clique direito com o anel na mão: vai direto para o slot de anel. */
     @Override
-    public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {
-        if (slotContext.entity() instanceof Player player && !player.level().isClientSide) {
-            if (getOwner(stack) == null) setOwner(stack, player);
-            if (!ItemStack.isSameItemSameTags(prevStack, stack)) {
-                player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
-                        SoundSource.PLAYERS, 0.8f, 1.3f);
-            }
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (level.isClientSide) return InteractionResultHolder.sidedSuccess(stack, true);
+
+        if (!canBeWornBy(stack, player)) {
+            player.displayClientMessage(Component.translatable("message.lanterna.not_owner"), true);
+            return InteractionResultHolder.fail(stack);
         }
-    }
+        if (!EquipmentHelper.ring(player).isEmpty()) {
+            player.displayClientMessage(Component.translatable("message.lanterna.already_wearing"), true);
+            return InteractionResultHolder.fail(stack);
+        }
 
-    /** O anel nunca cai quando o portador morre. */
-    @Override
-    public ICurio.DropRule getDropRule(SlotContext slotContext, DamageSource source, int lootingLevel,
-                                       boolean recentlyHit, ItemStack stack) {
-        return ICurio.DropRule.ALWAYS_KEEP;
+        ItemStack ring = stack.split(1);
+        if (getOwner(ring) == null) setOwner(ring, player);
+        EquipmentHelper.equip(player, RingData.RING_SLOT, ring);
+
+        level.playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8f, 1.3f);
+        int color = getColor(ring);
+        player.displayClientMessage(Component.translatable("message.lanterna.equipped",
+                Component.translatable(CorpsDefinition.nameKey(getCorps(ring)))).withStyle(s -> s.withColor(color)), true);
+        return InteractionResultHolder.consume(stack);
     }
 
     // ===================== Aparência =====================

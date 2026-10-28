@@ -17,14 +17,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.ItemStack;
-import top.theillusivec4.curios.api.SlotResult;
+import com.lanterna.network.SyncVisibleRingPacket;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Optional;
 
 /**
  * Lógica de servidor do anel.
  *
- * O anel vive no slot "ring" do Curios, e a carga fica gravada no próprio item.
+ * O anel vive no slot de anel da aba "Lanterna", e a carga fica gravada no próprio item.
  * A cada tick o RingData do jogador é atualizado a partir do slot, então o
  * resto do mod (HUD, voo, bateria, seleção) só olha o RingData.
  */
@@ -33,7 +34,8 @@ public final class RingPowers {
     // ===================== Leitura do slot =====================
 
     public static Optional<ItemStack> wornRing(ServerPlayer player) {
-        return CuriosHelper.findRing(player).map(SlotResult::stack);
+        ItemStack ring = EquipmentHelper.ring(player);
+        return ring.isEmpty() ? Optional.empty() : Optional.of(ring);
     }
 
     /** Roda a cada tick no servidor. */
@@ -64,6 +66,17 @@ public final class RingPowers {
         }
 
         if (data.isDirty()) sync(player, data);
+        syncVisibleRing(player, data, false);
+    }
+
+    // ===================== Anel visível para os outros =====================
+
+    /** Avisa quem está vendo este jogador (e ele mesmo) qual anel desenhar na mão. */
+    public static void syncVisibleRing(ServerPlayer player, RingData data, boolean force) {
+        String key = data.hasRing() ? data.corps() + "|" + data.color() : "";
+        if (!data.visibleRingChanged(key) && !force) return;
+        ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+                SyncVisibleRingPacket.of(player.getId(), data));
     }
 
     // ===================== Carga =====================
@@ -93,8 +106,8 @@ public final class RingPowers {
 
     /** -1 sem bateria compatível no slot, 0 pronta, >0 segundos de espera. */
     private static int pocketStatus(ServerPlayer player, RingData data) {
-        Optional<SlotResult> battery = CuriosHelper.findBattery(player);
-        if (battery.isEmpty() || !PowerBatteryItem.getCorps(battery.get().stack()).equals(data.corps())) return -1;
+        ItemStack battery = EquipmentHelper.battery(player);
+        if (battery.isEmpty() || !PowerBatteryItem.getCorps(battery).equals(data.corps())) return -1;
         long elapsed = player.level().getGameTime() - data.lastPocketRecharge();
         long remaining = cooldownTicks() - elapsed;
         return remaining <= 0 ? 0 : (int) ((remaining + 19) / 20);
@@ -137,10 +150,9 @@ public final class RingPowers {
 
     public static ItemStack removeRing(ServerPlayer player) {
         RingData data = ModCapabilities.get(player).orElse(null);
-        Optional<SlotResult> slot = CuriosHelper.findRing(player);
-        if (data == null || slot.isEmpty()) return ItemStack.EMPTY;
+        if (data == null || EquipmentHelper.ring(player).isEmpty()) return ItemStack.EMPTY;
 
-        ItemStack ring = CuriosHelper.take(player, slot.get());
+        ItemStack ring = EquipmentHelper.take(player, RingData.RING_SLOT);
         data.unequip();
         applyFlightAbility(player, data);
         sync(player, data);
