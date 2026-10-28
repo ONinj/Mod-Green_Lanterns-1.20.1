@@ -2,6 +2,7 @@ package com.lanterna.client;
 
 import com.lanterna.LanternaMod;
 import com.lanterna.network.ModNetwork;
+import com.lanterna.network.PocketRechargePacket;
 import com.lanterna.network.ToggleFlightPacket;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -20,6 +21,11 @@ public final class ClientForgeEvents {
         while (KeyBindings.TOGGLE_FLIGHT.consumeClick()) {
             if (ClientRingData.hasRing) {
                 ModNetwork.sendToServer(new ToggleFlightPacket());
+            }
+        }
+        while (KeyBindings.POCKET_RECHARGE.consumeClick()) {
+            if (ClientRingData.hasRing) {
+                ModNetwork.sendToServer(new PocketRechargePacket());
             }
         }
         ClientCutscene.tick();

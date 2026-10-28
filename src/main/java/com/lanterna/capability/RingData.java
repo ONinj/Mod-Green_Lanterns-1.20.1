@@ -46,21 +46,45 @@ public class RingData implements INBTSerializable<CompoundTag> {
     public int maxCharge() { return maxCharge; }
     public boolean flightEnabled() { return flightEnabled; }
 
-    public void equip(ResourceLocation corpsId, int color, int charge, int maxCharge) {
-        this.hasRing = true;
-        this.corps = corpsId.toString();
-        this.color = color;
-        this.maxCharge = Math.max(1, maxCharge);
-        this.charge = Math.max(0, Math.min(charge, this.maxCharge));
-        this.flightEnabled = false;
-        markDirty();
+    /**
+     * Atualiza a "foto" do anel que está no slot do Curios.
+     * O anel (item) é a fonte da verdade; isto aqui é só para HUD e lógica rápida.
+     */
+    public void refresh(ResourceLocation corpsId, int color, int charge, int maxCharge) {
+        String id = corpsId.toString();
+        if (!hasRing || !id.equals(this.corps) || color != this.color
+                || charge != this.charge || maxCharge != this.maxCharge) {
+            this.hasRing = true;
+            this.corps = id;
+            this.color = color;
+            this.maxCharge = Math.max(1, maxCharge);
+            this.charge = Math.max(0, Math.min(charge, this.maxCharge));
+            markDirty();
+        }
     }
 
     public void unequip() {
-        this.hasRing = false;
-        this.flightEnabled = false;
-        this.charge = 0;
-        markDirty();
+        if (hasRing || flightEnabled) {
+            this.hasRing = false;
+            this.flightEnabled = false;
+            this.charge = 0;
+            markDirty();
+        }
+    }
+
+    // --- Bateria de bolso (slot do Curios) ---
+    private long lastPocketRecharge = -100000L;
+    private int pocketStatus = -1; // -1 = sem bateria compatível, 0 = pronta, >0 = segundos de espera
+
+    public long lastPocketRecharge() { return lastPocketRecharge; }
+    public void setLastPocketRecharge(long time) { lastPocketRecharge = time; }
+    public int pocketStatus() { return pocketStatus; }
+
+    public void setPocketStatus(int status) {
+        if (status != pocketStatus) {
+            pocketStatus = status;
+            markDirty();
+        }
     }
 
     public void setCharge(int value) {

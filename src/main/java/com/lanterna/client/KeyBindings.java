@@ -15,5 +15,12 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_V,
             CATEGORY);
 
+    public static final KeyMapping POCKET_RECHARGE = new KeyMapping(
+            "key.lanterna.pocket_recharge",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
+            CATEGORY);
+
     private KeyBindings() {}
 }

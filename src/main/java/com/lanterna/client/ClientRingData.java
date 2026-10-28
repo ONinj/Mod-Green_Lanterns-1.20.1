@@ -11,6 +11,8 @@ public final class ClientRingData {
     public static int charge;
     public static int maxCharge = 1000;
     public static boolean flight;
+    /** -1 sem bateria no slot, 0 pronta, >0 segundos de espera */
+    public static int pocketStatus = -1;
 
     public static void update(SyncRingDataPacket msg) {
         hasRing = msg.hasRing();
@@ -20,12 +22,14 @@ public final class ClientRingData {
         charge = msg.charge();
         maxCharge = Math.max(1, msg.maxCharge());
         flight = msg.flight();
+        pocketStatus = msg.pocketStatus();
     }
 
     public static void reset() {
         hasRing = false;
         charge = 0;
         flight = false;
+        pocketStatus = -1;
     }
 
     private ClientRingData() {}

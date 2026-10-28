@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 public class PowerBatteryBlock extends BaseEntityBlock {
-    private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 15, 13);
+    private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 16, 14);
 
     public PowerBatteryBlock(Properties properties) {
         super(properties);
@@ -75,21 +75,11 @@ public class PowerBatteryBlock extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
 
-        // Juramento: o texto fica no arquivo de idioma (oath.lanterna.<tropa>), escreva como quiser
-        player.sendSystemMessage(Component.translatable("oath." + def.id().getNamespace() + "." + def.id().getPath())
-                .withStyle(s -> s.withColor(def.color()).withItalic(true)));
-        player.displayClientMessage(Component.translatable("message.lanterna.recharged")
-                .withStyle(s -> s.withColor(def.color())), true);
-
-        level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 1.0f, 1.0f);
-        level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.0f, 1.4f);
+        RingPowers.playRechargeEffects(serverPlayer, def);
 
         if (level instanceof ServerLevel server) {
-            Vector3f rgb = rgb(def.color());
-            server.sendParticles(new DustParticleOptions(rgb, 1.5f),
+            server.sendParticles(new DustParticleOptions(rgb(def.color()), 1.5f),
                     pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 40, 0.4, 0.5, 0.4, 0.02);
-            server.sendParticles(new DustParticleOptions(rgb, 1.2f),
-                    player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.02);
         }
         return InteractionResult.CONSUME;
     }

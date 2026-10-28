@@ -12,6 +12,7 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.IntValue RED_KILLS_REQUIRED;
     public static final ForgeConfigSpec.IntValue RED_WINDOW_SECONDS;
     public static final ForgeConfigSpec.IntValue SELECTION_ANIMATION_TICKS;
+    public static final ForgeConfigSpec.IntValue POCKET_RECHARGE_COOLDOWN_SECONDS;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -35,6 +36,13 @@ public final class LanternaConfig {
                 .defineInRange("duracao_animacao_ticks", 120, 20, 600);
 
         b.pop();
+
+        b.comment("Anel e bateria").push("anel");
+        POCKET_RECHARGE_COOLDOWN_SECONDS = b
+                .comment("Tempo de espera em segundos entre recargas usando a bateria do slot (tecla R)")
+                .defineInRange("espera_recarga_bolso_segundos", 60, 0, 3600);
+        b.pop();
+
         SPEC = b.build();
     }
 

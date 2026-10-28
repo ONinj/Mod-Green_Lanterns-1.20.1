@@ -78,7 +78,7 @@ public final class LanternaCommand {
             ctx.getSource().sendFailure(Component.translatable("message.lanterna.battery_no_ring"));
             return 0;
         }
-        data.setCharge(IntegerArgumentType.getInteger(ctx, "valor"));
+        RingPowers.setCharge(player, data, IntegerArgumentType.getInteger(ctx, "valor"));
         RingPowers.sync(player, data);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.charge_set", data.charge(), data.maxCharge()), false);
         return 1;
@@ -100,6 +100,7 @@ public final class LanternaCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null) return 0;
+        RingPowers.removeRing(player); // o anel some (é só para testes)
         data.unequip();
         data.clearPending();
         data.resetRage();

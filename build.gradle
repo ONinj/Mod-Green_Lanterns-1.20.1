@@ -21,6 +21,8 @@ minecraft {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -30,6 +32,8 @@ minecraft {
         server {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             args '--nogui'
             mods {
                 "${mod_id}" {
@@ -41,10 +45,18 @@ minecraft {
 }
 
 repositories {
+    maven {
+        name = 'Curios'
+        url = 'https://maven.theillusivec4.top/'
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Curios: slots extras no inventário (anel e bateria)
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
 }
 
 tasks.named('jar', Jar).configure {

@@ -10,7 +10,8 @@ import com.lanterna.corps.CorpsManager;
 import com.lanterna.item.PowerBatteryItem;
 import com.lanterna.network.ModNetwork;
 import com.lanterna.network.SelectionCutscenePacket;
-import com.lanterna.power.RingPowers;
+import com.lanterna.item.PowerRingItem;
+import com.lanterna.power.CuriosHelper;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -195,13 +196,15 @@ public final class SelectionManager {
         data.clearPending();
         data.resetRage();
 
-        RingPowers.equip(player, def, def.maxCharge());
+        data.setEverChosen(true);
 
-        // A bateria da Tropa vem junto
-        ItemStack battery = PowerBatteryItem.create(def.id(), def.color());
-        if (!player.getInventory().add(battery)) {
-            player.drop(battery, false);
-        }
+        // O anel vai direto para o slot de anel, já ligado ao portador
+        ItemStack ring = PowerRingItem.create(def.id(), def.color(), def.maxCharge());
+        PowerRingItem.setOwner(ring, player);
+        giveOrEquip(player, CuriosHelper.RING_SLOT, ring);
+
+        // A bateria da Tropa vem junto, no slot de bateria
+        giveOrEquip(player, CuriosHelper.BATTERY_SLOT, PowerBatteryItem.create(def.id(), def.color()));
 
         ServerLevel level = player.serverLevel();
         Vector3f rgb = PowerBatteryBlock.rgb(def.color());
@@ -219,6 +222,11 @@ public final class SelectionManager {
         String base = "selection." + def.id().getNamespace() + "." + def.id().getPath();
         player.sendSystemMessage(Component.translatable(base + ".message").withStyle(s -> s.withColor(def.color())));
         player.sendSystemMessage(Component.translatable("message.lanterna.tutorial"));
+    }
+
+    private static void giveOrEquip(ServerPlayer player, String slot, ItemStack stack) {
+        if (CuriosHelper.equip(player, slot, stack)) return;
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
     }
 
     private static boolean isCorps(CorpsDefinition def, BuiltinCorps corps) {

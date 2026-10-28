@@ -12,6 +12,8 @@ import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 
 /** Eventos de cliente no barramento do mod (registro). */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -20,6 +22,13 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(KeyBindings.TOGGLE_FLIGHT);
+        event.register(KeyBindings.POCKET_RECHARGE);
+    }
+
+    /** Liga o desenho do anel no braço do personagem. */
+    @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(() -> CuriosRendererRegistry.register(ModItems.POWER_RING.get(), RingCurioRenderer::new));
     }
 
     @SubscribeEvent

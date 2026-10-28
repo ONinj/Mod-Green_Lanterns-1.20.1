@@ -1,39 +1,37 @@
 package com.lanterna.item;
 
-import com.lanterna.capability.ModCapabilities;
-import com.lanterna.capability.RingData;
 import com.lanterna.corps.BuiltinCorps;
 import com.lanterna.corps.CorpsDefinition;
-import com.lanterna.corps.CorpsManager;
-import com.lanterna.power.RingPowers;
 import com.lanterna.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.type.capability.ICurio;
+import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Um único item para todos os anéis. A Tropa e a cor ficam no NBT:
+ * Um único item para todos os anéis. Vai no slot "ring" do Curios.
+ * Dados no NBT:
  *   Corps  = "lanterna:green"
  *   Color  = 0x2BFF4A  (pinta a pedra do anel)
- *   Charge = carga guardada (-1 = cheia)
+ *   Charge = carga atual (-1 = cheia, anel novo)
  *   Owner  = UUID do portador (o anel só aceita quem escolheu)
  */
-public class PowerRingItem extends Item {
+public class PowerRingItem extends Item implements ICurioItem {
 
     public PowerRingItem(Properties properties) {
         super(properties);
@@ -70,6 +68,10 @@ public class PowerRingItem extends Item {
         return tag != null && tag.contains("Charge") ? tag.getInt("Charge") : -1;
     }
 
+    public static void setStoredCharge(ItemStack stack, int charge) {
+        stack.getOrCreateTag().putInt("Charge", charge);
+    }
+
     public static void setOwner(ItemStack stack, Player player) {
         CompoundTag tag = stack.getOrCreateTag();
         tag.putUUID("Owner", player.getUUID());
@@ -82,38 +84,38 @@ public class PowerRingItem extends Item {
         return tag != null && tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
     }
 
-    // ===================== Uso =====================
+    // ===================== Curios =====================
+
+    /** Só entra no slot de quem o anel escolheu (ou de quem está no criativo). */
+    @Override
+    public boolean canEquip(SlotContext slotContext, ItemStack stack) {
+        if (!(slotContext.entity() instanceof Player player)) return false;
+        UUID owner = getOwner(stack);
+        return owner == null || owner.equals(player.getUUID()) || player.isCreative();
+    }
+
+    /** Clique direito com o anel na mão coloca direto no slot. */
+    @Override
+    public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+        return true;
+    }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        ItemStack stack = player.getItemInHand(hand);
-        if (level.isClientSide || !(player instanceof ServerPlayer serverPlayer)) {
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    public void onEquip(SlotContext slotContext, ItemStack prevStack, ItemStack stack) {
+        if (slotContext.entity() instanceof Player player && !player.level().isClientSide) {
+            if (getOwner(stack) == null) setOwner(stack, player);
+            if (!ItemStack.isSameItemSameTags(prevStack, stack)) {
+                player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT,
+                        SoundSource.PLAYERS, 0.8f, 1.3f);
+            }
         }
+    }
 
-        RingData data = ModCapabilities.get(player).orElse(null);
-        if (data == null) return InteractionResultHolder.fail(stack);
-
-        if (data.hasRing()) {
-            player.displayClientMessage(Component.translatable("message.lanterna.already_wearing"), true);
-            return InteractionResultHolder.fail(stack);
-        }
-
-        UUID owner = getOwner(stack);
-        if (owner != null && !owner.equals(player.getUUID()) && !player.isCreative()) {
-            player.displayClientMessage(Component.translatable("message.lanterna.not_owner"), true);
-            return InteractionResultHolder.fail(stack);
-        }
-
-        CorpsDefinition def = CorpsManager.get(getCorps(stack));
-        RingPowers.equip(serverPlayer, def, getStoredCharge(stack));
-
-        level.playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0f, 1.2f);
-        player.displayClientMessage(Component.translatable("message.lanterna.equipped",
-                Component.translatable(CorpsDefinition.nameKey(def.id()))).withStyle(s -> s.withColor(def.color())), true);
-
-        stack.shrink(1);
-        return InteractionResultHolder.consume(stack);
+    /** O anel nunca cai quando o portador morre. */
+    @Override
+    public ICurio.DropRule getDropRule(SlotContext slotContext, DamageSource source, int lootingLevel,
+                                       boolean recentlyHit, ItemStack stack) {
+        return ICurio.DropRule.ALWAYS_KEEP;
     }
 
     // ===================== Aparência =====================
@@ -122,11 +124,6 @@ public class PowerRingItem extends Item {
     public Component getName(ItemStack stack) {
         return Component.translatable(getDescriptionId(stack),
                 Component.translatable(CorpsDefinition.nameKey(getCorps(stack))));
-    }
-
-    @Override
-    public boolean isFoil(ItemStack stack) {
-        return true;
     }
 
     @Override

@@ -37,6 +37,12 @@ public final class ModNetwork {
                 .decoder(ToggleFlightPacket::decode)
                 .consumerMainThread(ToggleFlightPacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(PocketRechargePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PocketRechargePacket::encode)
+                .decoder(PocketRechargePacket::decode)
+                .consumerMainThread(PocketRechargePacket::handle)
+                .add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

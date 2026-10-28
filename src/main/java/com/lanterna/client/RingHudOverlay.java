@@ -60,6 +60,15 @@ public final class RingHudOverlay {
 
         if (ClientRingData.flight) {
             g.drawString(font, Component.translatable("hud.lanterna.flight_on"), x, y, color, true);
+            y += 10;
+        }
+
+        // Bateria no slot: pronta ou contando o tempo de espera
+        if (ClientRingData.pocketStatus == 0) {
+            g.drawString(font, Component.translatable("hud.lanterna.pocket_ready"), x, y, 0xFFCCCCCC, true);
+        } else if (ClientRingData.pocketStatus > 0) {
+            g.drawString(font, Component.translatable("hud.lanterna.pocket_cooldown", ClientRingData.pocketStatus),
+                    x, y, 0xFF888888, true);
         }
     };
 
