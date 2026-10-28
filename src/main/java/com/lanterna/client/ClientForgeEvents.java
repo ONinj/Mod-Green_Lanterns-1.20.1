@@ -14,6 +14,9 @@ import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.client.event.ComputeFovModifierEvent;
 import com.lanterna.client.flight.ClientFlight;
 import com.lanterna.client.uniform.UniformTransition;
+import com.lanterna.client.recharge.ClientRecharge;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import com.lanterna.network.TogglePowerPacket;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -61,6 +64,7 @@ public final class ClientForgeEvents {
                 UniformTransition.tick(player);
             }
             ClientFlight.tickShake();
+            ClientRecharge.tick();
         }
     }
 
@@ -150,6 +154,29 @@ public final class ClientForgeEvents {
         event.setNewFovModifier(1.0f + extra);
     }
 
+    /** Em primeira pessoa, a mão do anel desce e avança até a bateria durante a recarga. */
+    @SubscribeEvent
+    public static void onRenderHand(RenderHandEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        boolean ringHand = (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND);
+        if (!ringHand) return;
+        float k = ClientRecharge.reach(ClientRecharge.time(mc.player, event.getPartialTick()));
+        if (k <= 0f) return;
+        var pose = event.getPoseStack();
+        pose.translate(0, -0.35f * k, -0.25f * k);
+        pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-35f * k));
+    }
+
+    /** Desenha o portal e a bateria da recarga no mundo. */
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+        var buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        ClientRecharge.render(event.getPoseStack(), buffer, event.getCamera().getPosition(), event.getPartialTick());
+        buffer.endBatch();
+    }
+
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientRingData.reset();
@@ -157,6 +184,7 @@ public final class ClientForgeEvents {
         ClientVisibleRings.clear();
         ClientFlight.clear();
         UniformTransition.clear();
+        ClientRecharge.clear();
     }
 
     private ClientForgeEvents() {}

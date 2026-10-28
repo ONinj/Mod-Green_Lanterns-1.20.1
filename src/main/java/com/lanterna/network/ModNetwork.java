@@ -56,6 +56,12 @@ public final class ModNetwork {
                 .consumerMainThread(OpenLanternMenuPacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(RechargeAnimPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RechargeAnimPacket::encode)
+                .decoder(RechargeAnimPacket::decode)
+                .consumerMainThread(RechargeAnimPacket::handle)
+                .add();
+
         CHANNEL.messageBuilder(SyncVisibleRingPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncVisibleRingPacket::encode)
                 .decoder(SyncVisibleRingPacket::decode)

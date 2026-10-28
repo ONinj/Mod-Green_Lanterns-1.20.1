@@ -74,6 +74,12 @@ public final class ClientModEvents {
         event.register(LanternaMod.id("space"), new SpaceSkyEffects());
     }
 
+    /** Peças 3D do uniforme feitas no Blockbench (assets/lanterna/models/uniform/...). */
+    @SubscribeEvent
+    public static void registerModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+        com.lanterna.client.uniform.UniformPieces.register(event);
+    }
+
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.GLOW_ORB.get(), GlowOrbParticle.Provider::new);
@@ -89,16 +95,16 @@ public final class ClientModEvents {
     /** Pinta a pedra do anel (camada 1) e o núcleo da bateria (tint 0) na cor da Tropa. */
     @SubscribeEvent
     public static void itemColors(RegisterColorHandlersEvent.Item event) {
-        event.register((stack, tintIndex) -> tintIndex == 1 ? PowerRingItem.getColor(stack) : -1,
+        event.register((stack, tintIndex) -> tintIndex >= 0 ? PowerRingItem.getColor(stack) : -1,
                 ModItems.POWER_RING.get());
-        event.register((stack, tintIndex) -> tintIndex == 0 ? PowerBatteryItem.getColor(stack) : -1,
+        event.register((stack, tintIndex) -> tintIndex >= 0 ? PowerBatteryItem.getColor(stack) : -1,
                 ModItems.POWER_BATTERY.get());
     }
 
     @SubscribeEvent
     public static void blockColors(RegisterColorHandlersEvent.Block event) {
         event.register((state, level, pos, tintIndex) -> {
-            if (tintIndex != 0 || level == null || pos == null) return -1;
+            if (tintIndex < 0 || level == null || pos == null) return -1;
             if (level.getBlockEntity(pos) instanceof PowerBatteryBlockEntity battery) {
                 return battery.getColor();
             }

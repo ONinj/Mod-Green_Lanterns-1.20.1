@@ -96,22 +96,45 @@ public final class DevAutoTest {
     static {
         if (ENABLED) {
             Minecraft mc = Minecraft.getInstance();
+            at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
             at(60, () -> {
                 mc.options.hideGui = false;
                 mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-                cmd("gamemode creative"); cmd("time set 6000");
-                cmd("effect give @s resistance 99999 4 true");
+                cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear");
+                cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s saturation 99999 1 true");
+                cmd("gamerule doMobSpawning false"); cmd("kill @e[type=!player]");
+                cmd("lanterna resetar"); cmd("clear @s");
+                cmd("tp @s 0.5 150 0.5"); cmd("effect give @s slow_falling 30 0 true");
+                look(0, 0);
             });
-            String[][] tours = {{"oa", "0"}, {"korugar", "0"}, {"odym", "0"}, {"zamaron", "0"}, {"okaara", "0"}, {"nok", "0"}};
-            int n = 1;
-            for (String[] t : tours) {
-                final int idx = n++;
-                at(10, () -> cmd("execute in lanterna:" + t[0] + " run tp @s 0 200 0"));
-                at(400, () -> cmd("spreadplayers 0 0 0 1 false @s"));
-                at(120, () -> { cmd("tp @s ~ ~12 ~"); look(30, 35); });
-                at(60, () -> shot("q" + idx + "_" + t[0]));
-            }
-            at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+            at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
+            at(20, () -> cmd("lanterna escolher lanterna:green"));
+            at(200, () -> { look(0, 0); sideCamera(true, 0, 2.6, 0.4); });
+            at(15, () -> shot("m1_pieces_front"));
+            at(3, () -> sideCamera(true, 90, 2.6, 0.4));
+            at(10, () -> shot("m2_pieces_side_left"));
+            at(3, () -> sideCamera(true, -90, 2.6, 0.4));
+            at(10, () -> shot("m3_pieces_side_right"));
+            at(3, () -> sideCamera(true, 180, 2.6, 0.4));
+            at(10, () -> shot("m4_pieces_back"));
+            // Recarga: câmera de lado-frente
+            at(3, () -> { cmd("lanterna carga 150"); sideCamera(true, -50, 2.6, 0.2); });
+            at(10, () -> ModNetwork.sendToServer(new com.lanterna.network.PocketRechargePacket()));
+            at(6, () -> shot("r1_portal_opening"));
+            at(10, () -> shot("r2_battery_rising"));
+            at(12, () -> shot("r3_hand_reaching"));
+            at(8, () -> shot("r4_energy_flow"));
+            at(5, () -> shot("r5_charge_flash"));
+            at(12, () -> shot("r6_still_flowing"));
+            at(12, () -> shot("r7_retracting"));
+            at(10, () -> shot("r8_closing"));
+            // Primeira pessoa
+            at(80, () -> { sideCamera(false, 0, 0, 0); camera(CameraType.FIRST_PERSON); look(0, 40); cmd("lanterna carga 100"); });
+            at(5, () -> cmd("effect clear @s"));
+            at(1300, () -> {});
+            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.PocketRechargePacket()));
+            at(34, () -> shot("r9_first_person"));
+            at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }
 

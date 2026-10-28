@@ -1,0 +1,78 @@
+{
+  "credit": "Lanterna - molde de peca de uniforme. APAGUE o cubo REFERENCIA antes de exportar.",
+  "textures": {
+    "ref": "minecraft:block/glass",
+    "particle": "minecraft:block/glass"
+  },
+  "elements": [
+    {
+      "name": "REFERENCIA_RIGHT_ARM_apague_antes_de_exportar",
+      "from": [
+        7,
+        2,
+        6
+      ],
+      "to": [
+        11,
+        14,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#ref"
+        }
+      }
+    }
+  ]
+}

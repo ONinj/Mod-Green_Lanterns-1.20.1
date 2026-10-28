@@ -112,6 +112,11 @@ public class RingData implements INBTSerializable<CompoundTag> {
     private long lastPocketRecharge = -100000L;
     private int pocketStatus = -1; // -1 = sem bateria compatível, 0 = pronta, >0 = segundos de espera
 
+    /** Animação de recarga pela bateria do slot: ticks desde o início (-1 = parada). Só em memória. */
+    private transient int rechargeAnim = -1;
+    public int rechargeAnim() { return rechargeAnim; }
+    public void setRechargeAnim(int ticks) { rechargeAnim = ticks; }
+
     public long lastPocketRecharge() { return lastPocketRecharge; }
     public void setLastPocketRecharge(long time) { lastPocketRecharge = time; }
     public int pocketStatus() { return pocketStatus; }

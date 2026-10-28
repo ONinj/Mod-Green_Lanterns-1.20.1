@@ -80,6 +80,10 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         VertexConsumer vc = buffer.getBuffer(RenderType.entityTranslucent(texture));
         model.renderToBuffer(poseStack, vc, light, LivingEntityRenderer.getOverlayCoords(player, 0f), 1f, 1f, 1f, 1f);
 
+        // Peças 3D do uniforme (capacete, ombreiras, botas...), se existirem
+        UniformPieces.render(model, UniformTransition.corpsOf(player), ClientVisibleRings.of(player.getId()).color(),
+                poseStack, buffer, light);
+
         // Brilho da nanotecnologia nas partes que estão se formando
         if (p < 1f) {
             int color = ClientVisibleRings.of(player.getId()).color();

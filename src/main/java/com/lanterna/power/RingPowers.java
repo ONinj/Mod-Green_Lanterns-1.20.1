@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.item.ItemStack;
 import com.lanterna.network.SyncVisibleRingPacket;
+import com.lanterna.network.RechargeAnimPacket;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Optional;
@@ -65,6 +66,7 @@ public final class RingPowers {
             data.setPocketStatus(-1);
         }
 
+        tickRecharge(player, data);
         if (data.isDirty()) sync(player, data);
         syncVisibleRing(player, data, false);
     }
@@ -129,11 +131,31 @@ public final class RingPowers {
             return;
         }
 
-        CorpsDefinition def = CorpsManager.get(data.corps());
-        if (!recharge(player, data, def)) return;
-        data.setLastPocketRecharge(player.level().getGameTime());
+        if (data.rechargeAnim() >= 0) return; // já está recarregando
 
-        playRechargeEffects(player, def);
+        // Começa a animação: o portal abre na cintura e a bateria sobe dele.
+        // A carga entra quando a mão encosta na bateria (RechargeTimeline.CHARGE_AT).
+        data.setRechargeAnim(0);
+        data.setLastPocketRecharge(player.level().getGameTime());
+        ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+                new RechargeAnimPacket(player.getId(), data.corps().toString(), data.color()));
+    }
+
+    /** Avança a animação de recarga (chamado todo tick). */
+    private static void tickRecharge(ServerPlayer player, RingData data) {
+        int t = data.rechargeAnim();
+        if (t < 0) return;
+        if (!data.hasRing()) {
+            data.setRechargeAnim(-1);
+            return;
+        }
+        t++;
+        data.setRechargeAnim(t);
+        if (t == RechargeTimeline.CHARGE_AT) {
+            CorpsDefinition def = CorpsManager.get(data.corps());
+            if (recharge(player, data, def)) playRechargeEffects(player, def);
+        }
+        if (t >= RechargeTimeline.TOTAL) data.setRechargeAnim(-1);
     }
 
     public static void playRechargeEffects(ServerPlayer player, CorpsDefinition def) {

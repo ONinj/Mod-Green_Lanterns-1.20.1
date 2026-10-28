@@ -32,6 +32,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.6 ✅ Rituais para as 9 Tropas (`/lanterna rituais`), anel liga/desliga (G) com contorno na cor da Tropa, voo deitado com braço à frente e rastro de energia
 1.7 ✅ Voo com física (embalo, derrapagem nas curvas, inclinação lateral, mergulho, arrancada, vento, FOV), capa correta no voo, anel embaixo do punho, aba Lanterna também no criativo, botões Anel/Voo na tela
 1.8 ✅ Voo mais vivo (inclinação contínua, derrapagem lateral, estrondo sônico, poeira e água no rasante, pousar com Shift, tremor), uniformes com transformação estilo nanotecnologia, ESPAÇO com Terra, Sol e 8 planetas visitáveis
+1.9 ✅ Animação de recarga (tecla R): portal na cintura, a bateria sai dele, o braço encosta e a energia flui para o anel. Sistema pronto para modelos 3D próprios (anel, bateria e peças de uniforme)
 2. Poderes: rajada, escudo, constructos (entidades), menu radial de constructos
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 6. Planetas: habitantes alienígenas, vilas e minérios próprios de cada planeta, missões
@@ -53,3 +54,4 @@ Precisa de um mundo chamado `test` em `run/saves`. O código de teste (`client/d
 ## Uniformes
 Ligar o anel (G) veste o uniforme da Tropa com uma animação que sai da mão do anel.
 Para usar suas próprias texturas: coloque skins 64x64 em `config/lanterna/uniformes/<tropa>.png` (veja o LEIA-ME que o mod cria lá).
+Peças 3D de uniforme (capacete, ombreiras...) e troca dos modelos do anel e da bateria: veja `docs/COMO_TROCAR_MODELOS.md` e os moldes em `blockbench_templates/`.
