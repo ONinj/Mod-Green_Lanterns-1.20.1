@@ -24,6 +24,13 @@ public final class ModItems {
     public static final RegistryObject<Item> COMPASSION_STAFF = ITEMS.register("compassion_staff",
             () -> new com.lanterna.item.CompassionStaffItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
+    /** Anel Apagado: achado na cratera do Anel Caído; acende com a bateria da sua Tropa. */
+    public static final RegistryObject<Item> DORMANT_RING = ITEMS.register("anel_apagado",
+            () -> new com.lanterna.item.DormantRingItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+
+    public static final RegistryObject<Item> CHISELED_BATTERY = ITEMS.register("bateria_cinzelada",
+            () -> new net.minecraft.world.item.BlockItem(ModBlocks.CHISELED_BATTERY.get(), new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
+
     // ---- Liga dos alienígenas dos planetas gerados ----
     public static final RegistryObject<Item> ALIEN_ALLOY = gem("alien_alloy", Rarity.UNCOMMON);
 

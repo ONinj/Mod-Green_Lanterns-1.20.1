@@ -22,5 +22,14 @@ public final class ModBlocks {
                     .lightLevel(state -> 12)
                     .noOcclusion()));
 
+    /** Bateria Cinzelada: acorda o Anel Apagado e se parte. */
+    public static final RegistryObject<Block> CHISELED_BATTERY = BLOCKS.register("bateria_cinzelada",
+            () -> new com.lanterna.block.ChiseledBatteryBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0f, 6.0f)
+                    .sound(SoundType.STONE)
+                    .lightLevel(state -> 3)
+                    .noOcclusion()));
+
     private ModBlocks() {}
 }

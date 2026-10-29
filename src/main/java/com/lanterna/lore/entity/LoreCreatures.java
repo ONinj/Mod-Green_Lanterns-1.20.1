@@ -147,8 +147,10 @@ public final class LoreCreatures {
 
         /** Chance de nascer: cresce com os bosses derrotados no mundo. */
         public static boolean allowSpawn(ServerLevel level, net.minecraft.util.RandomSource random) {
+            // Raros no começo e um pouco mais comuns a cada boss derrotado; nunca mais que 3 por perto
             int bosses = LoreWorldData.get(level.getServer()).bossesDefeated();
-            return random.nextFloat() < 0.25f + 0.1f * bosses;
+            if (random.nextFloat() >= Math.min(0.35f, 0.06f + 0.03f * bosses)) return false;
+            return true;
         }
     }
 

@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "anel": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "lanterna:anel_apagado"
+            ]
+          }
+        ]
+      }
+    },
+    "anel_real": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "lanterna:power_ring"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "anel",
+      "anel_real"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "lanterna:bateria_cinzelada",
+      "lanterna:bateria_green",
+      "lanterna:bateria_yellow",
+      "lanterna:bateria_red",
+      "lanterna:bateria_blue",
+      "lanterna:bateria_violet",
+      "lanterna:bateria_orange",
+      "lanterna:bateria_black",
+      "lanterna:cajado_compaixao"
+    ]
+  }
+}

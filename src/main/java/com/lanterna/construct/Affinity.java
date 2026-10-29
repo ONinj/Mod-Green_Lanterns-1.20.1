@@ -43,6 +43,23 @@ public final class Affinity {
         return 1.0f + 0.2f * level(points);
     }
 
+    // ---- Bônus passivos do anel (crescem com a afinidade; só com o anel ligado e com carga) ----
+
+    /** A cada quantos segundos o anel mata um pouco da fome (+1 de comida). */
+    public static int foodSeconds(int level) {
+        return Math.max(5, 20 - 3 * level);
+    }
+
+    /** A cada quantos segundos o anel cura meio coração. */
+    public static int regenSeconds(int level) {
+        return Math.max(2, 12 - 2 * level);
+    }
+
+    /** Dano extra do soco de mão vazia (antes do multiplicador da Tropa). */
+    public static float punchBonus(int level) {
+        return 1.5f + 1.0f * level;
+    }
+
     public static Component levelName(int level) {
         return Component.translatable("affinity.lanterna." + level);
     }

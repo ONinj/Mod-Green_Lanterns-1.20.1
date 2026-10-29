@@ -32,8 +32,9 @@ public final class AlienEvents {
         @SubscribeEvent
         public static void spawnRules(SpawnPlacementRegisterEvent event) {
             event.register(ModEntities.ALIEN.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                    (type, level, reason, pos, random) -> level.getBlockState(pos.below()).isValidSpawn(level, pos.below(), type)
-                            && level.getRawBrightness(pos, 0) > 0,
+                    (type, level, reason, pos, random) -> reason != net.minecraft.world.entity.MobSpawnType.NATURAL
+                            && reason != net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION
+                            && level.getBlockState(pos.below()).isValidSpawn(level, pos.below(), type),
                     SpawnPlacementRegisterEvent.Operation.REPLACE);
         }
     }

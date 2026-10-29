@@ -95,8 +95,8 @@ public final class SpaceTravel {
         if (player.tickCount % 20 == 0 && !player.isCreative()) {
             RingData data = ModCapabilities.get(player).orElse(null);
             boolean protectedByRing = data != null && data.hasRing() && data.powerActive();
-            if (protectedByRing) {
-                // Manter o escudo de vida gasta um pouco de carga
+            if (protectedByRing && !RingPowers.homing(player)) {
+                // Manter o escudo de vida gasta um pouco de carga (a primeira viagem para casa é por conta do anel)
                 RingPowers.setCharge(player, data, data.charge() - 1);
                 if (data.charge() <= 0) {
                     data.setPowerActive(false);

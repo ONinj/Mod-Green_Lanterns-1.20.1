@@ -1,4 +1,4 @@
-# Lore, missões, construtos e afinidade (0.11.0)
+# Lore, missões, construtos e afinidade (0.12.0)
 
 ## Planetas (nomes do mod, características da lore)
 | Planeta | Tropa | Na lore | Raça | Boss | Minério | Drop do boss |
@@ -18,6 +18,37 @@ Cada planeta tem:
 - uma **arena** em X 120, Z 0, com o Altar do Desafio.
 
 Em Oa, a base é a cidadela: Bateria Central gigante, Instrutor Veltari (Mestre Toran) e os três Guardiões do Universo. Em Gênese ficam o Altar da Vida (0, 0) e a rachadura do Nulo (0, −24).
+
+## Como ser escolhido na Terra
+Além dos rituais de cada Tropa (`/lanterna rituais`), há dois caminhos novos:
+
+| Caminho | Como funciona |
+|---|---|
+| O Chamado | Conquistas de peso chamam a atenção dos anéis: diamante, Nether, encantar, curar aldeão zumbi, fortaleza, vara de blaze, Olho do Fim, herói da vila, caçador de monstros, Wither e Dragão. A cada 3 conquistas da lista, um anel aleatório escolhe você. A lista e o número ficam no config. |
+| O Anel Caído | Uma cratera de meteoro na Terra, com uma coluna de fumaça para achar de longe. No meio, dentro da casca do meteoro, um baú guarda o Anel Apagado. Fabrique uma Bateria Cinzelada, coloque no chão e clique nela com o anel: a bateria se parte e o anel escolhe uma Tropa ao acaso. Ele chega com só 10% de carga. |
+
+- A cratera aparece em `/locate structure lanterna:anel_caido`, e o cartógrafo (nível Aprendiz) vende o Mapa do Anel Caído.
+- Receita da Bateria Cinzelada: tijolos de pedra cinzelados, fragmento de ametista, lingotes de ferro e uma lanterna no meio.
+- As baterias de cada Tropa também têm receita (aparecem no livro de receitas quando você pega um anel).
+
+## Depois de escolhido
+- Todo anel novo leva o portador no piloto automático até o planeta da sua Tropa (o Preto vai para Ryut). Essa primeira viagem não gasta carga.
+- Em cada planeta das Tropas mora um **Guardião Emissário**: ninguém precisa ir a Oa para começar a lore.
+- A linha principal começa no planeta da sua Tropa e dá a volta pelos outros. No seu próprio planeta você não junta minério nem forja: o anel já é seu. Só ganha o respeito do povo e vence o boss (o drop entra na fusão).
+
+## Tropas inimigas
+Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são atacados e ninguém faz trocas com eles até conquistarem o respeito daquele povo. Os líderes e os Guardiões conversam com todos.
+
+| Tropa | Inimigos |
+|---|---|
+| Verde | Amarelo, Vermelho, Laranja, Preto |
+| Amarelo | Verde, Azul, Vermelho, Laranja, Preto |
+| Vermelho | Verde, Amarelo, Azul, Laranja, Preto |
+| Azul | Amarelo, Vermelho, Laranja, Preto |
+| Violeta | Laranja, Preto |
+| Índigo | Laranja, Preto |
+| Laranja | todos menos o Branco |
+| Preto | todos |
 
 ## Linha de missões
 1. **Início** (cada Tropa tem a sua):
@@ -70,6 +101,19 @@ Em Oa, a base é a cidadela: Bateria Central gigante, Instrutor Veltari (Mestre 
 
 - Alguns construtos só liberam com o nível de afinidade (o diário mostra quais).
 - **Força** = afinidade × Tropa. A afinidade vai de 1,0 a 2,0. A Tropa multiplica por 1,5 no Branco, 1,35 no Preto e 1,0 nas outras.
+
+## Bônus do anel (com o anel ligado e com carga)
+| Nível de afinidade | Fome | Cura | Soco (mão vazia) | Construtos |
+|---|---|---|---|---|
+| Desconfiado | +1 comida a cada 20 s | ½ coração a cada 12 s | +1,5 | ×1,0 |
+| Tolerante | a cada 17 s | a cada 10 s | +2,5 | ×1,2 |
+| Aceito | a cada 14 s | a cada 8 s | +3,5 | ×1,4 |
+| Confiável | a cada 11 s | a cada 6 s | +4,5 | ×1,6 |
+| Vinculado | a cada 8 s | a cada 4 s | +5,5 | ×1,8 |
+| Uno com o anel | a cada 5 s | a cada 2 s | +6,5 | ×2,0 |
+
+- Cada cura gasta 1 de carga. O soco e os construtos ainda multiplicam por 1,35 no Preto e 1,5 no Branco.
+- O multiplicador dos construtos vale para o dano e para a força (empurrão, duração).
 
 ## Afinidade (aceitação do anel)
 - Fica gravada no próprio anel e cresce com o tempo de anel ligado, os construtos e as missões.

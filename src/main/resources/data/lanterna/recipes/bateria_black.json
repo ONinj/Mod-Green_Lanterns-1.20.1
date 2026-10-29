@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BWB",
+    "KLK",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:polished_blackstone"
+    },
+    "W": {
+      "item": "minecraft:wither_skeleton_skull"
+    },
+    "K": {
+      "item": "minecraft:bone_block"
+    },
+    "L": {
+      "item": "minecraft:soul_lantern"
+    }
+  },
+  "result": {
+    "item": "lanterna:power_battery",
+    "count": 1,
+    "nbt": "{BlockEntityTag:{Corps:\"lanterna:black\",Color:3816004}}"
+  }
+}

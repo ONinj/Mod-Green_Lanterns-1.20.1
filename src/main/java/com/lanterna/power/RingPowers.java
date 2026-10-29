@@ -39,6 +39,26 @@ public final class RingPowers {
         return ring.isEmpty() ? Optional.empty() : Optional.of(ring);
     }
 
+    // ---- Primeira viagem: o anel novo leva o portador ao planeta da Tropa sem gastar carga ----
+    private static final String HOMING = "lanterna_homing";
+
+    public static void setHoming(ServerPlayer player, boolean value) {
+        if (value) player.getPersistentData().putBoolean(HOMING, true);
+        else player.getPersistentData().remove(HOMING);
+    }
+
+    public static boolean homing(ServerPlayer player) {
+        if (!player.getPersistentData().getBoolean(HOMING)) return false;
+        // Chegou em casa (ou o anel não é mais o mesmo): a viagem grátis acabou
+        RingData data = com.lanterna.capability.ModCapabilities.get(player).orElse(null);
+        com.lanterna.lore.PlanetLore home = data != null && data.hasRing() ? com.lanterna.lore.PlanetLore.byCorps(data.corps()) : null;
+        if (home == null || com.lanterna.lore.PlanetLore.byDimension(player.level().dimension()) == home) {
+            setHoming(player, false);
+            return false;
+        }
+        return true;
+    }
+
     /** Roda a cada tick no servidor. */
     public static void tick(ServerPlayer player, RingData data) {
         Optional<ItemStack> ringOpt = wornRing(player);
@@ -295,7 +315,7 @@ public final class RingPowers {
         // O voo é controlado pelo anel (cliente); aqui só zera a queda e cobra a carga
         player.fallDistance = 0;
         if (!player.onGround() && !player.isCreative() && !player.isSpectator()
-                && data.nextFlightTick() % 20 == 0) {
+                && data.nextFlightTick() % 20 == 0 && !homing(player)) {
             CorpsDefinition def = CorpsManager.get(data.corps());
             // Hiperpropulsão gasta o triplo
             setCharge(player, data, data.charge() - def.flightDrain() * (data.hyper() ? 3 : 1));

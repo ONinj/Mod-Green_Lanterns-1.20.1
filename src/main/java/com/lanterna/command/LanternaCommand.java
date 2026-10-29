@@ -159,6 +159,7 @@ public final class LanternaCommand {
         data.resetRituals();
         OrangeClaim claim = OrangeClaim.get(player.server);
         if (player.getUUID().equals(claim.owner())) claim.release();
+        com.lanterna.selection.CallingEvents.reset(player);
         RingPowers.applyFlightAbility(player, data);
         RingPowers.sync(player, data);
         // Lore também volta ao começo (missões, respeito, presets)
@@ -183,6 +184,18 @@ public final class LanternaCommand {
                     .append(Component.literal(": "))
                     .append(Component.translatable("ritual.lanterna." + corps + ".how")), false);
         }
+        // Outros caminhos na Terra
+        int signs = source.getEntity() instanceof net.minecraft.world.entity.player.Player p
+                ? com.lanterna.selection.CallingEvents.count(p) : 0;
+        int needed = com.lanterna.LanternaConfig.CALL_REQUIRED.get();
+        source.sendSuccess(() -> Component.literal("\u2726 ").withStyle(net.minecraft.ChatFormatting.WHITE)
+                .append(Component.translatable("ritual.lanterna.call.title").withStyle(s -> s.withBold(true)))
+                .append(Component.literal(": "))
+                .append(Component.translatable("ritual.lanterna.call.how", signs, needed)), false);
+        source.sendSuccess(() -> Component.literal("\u2726 ").withStyle(net.minecraft.ChatFormatting.DARK_GRAY)
+                .append(Component.translatable("ritual.lanterna.fallen.title").withStyle(s -> s.withBold(true)))
+                .append(Component.literal(": "))
+                .append(Component.translatable("ritual.lanterna.fallen.how")), false);
         return 1;
     }
 

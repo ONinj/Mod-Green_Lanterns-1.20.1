@@ -54,8 +54,8 @@ public final class Missions {
                     Objective.of(Type.CONSTRUCT, "laser", 1, p, PlanetLore.HUB),
                     Objective.of(Type.DUMMY, "alvo", 3, p, PlanetLore.HUB)),
                     items(() -> new ItemStack(LoreItems.MERITO.get(), 3)), 300, "inicio_" + c + "_4");
-            List<Objective> meet = green ? List.of(talk("guardiao:oa", "oa"))
-                    : List.of(goTo("oa"), talk("guardiao:oa", "oa"));
+            // Cada planeta das Tropas tem o seu Guardião: ninguém precisa ir a Oa para se apresentar
+            List<Objective> meet = List.of(talk("guardiao:" + p, p));
             add("inicio_" + c + "_4", "inicio", home.color(), meet,
                     items(() -> new ItemStack(LoreItems.MERITO.get(), 2), () -> new ItemStack(LoreItems.ANEL_VAZIO.get())),
                     200, "main_" + MAIN_ORDER[0].planet + "_1");

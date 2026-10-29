@@ -26,18 +26,12 @@
     "monster": [
       {
         "type": "lanterna:eco_cinzento",
-        "weight": 12,
+        "weight": 4,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 1
       }
     ],
     "creature": [
-      {
-        "type": "lanterna:ves_kai",
-        "weight": 12,
-        "minCount": 2,
-        "maxCount": 3
-      },
       {
         "type": "minecraft:frog",
         "weight": 4,

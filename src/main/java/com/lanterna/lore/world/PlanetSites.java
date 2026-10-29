@@ -47,8 +47,10 @@ public final class PlanetSites {
         if (planet == null) return;
         LoreWorldData data = LoreWorldData.get(level.getServer());
         // Uma construção por vez (a cada segundo), para não travar o servidor
-        if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220))
-            tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140);
+        if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220)
+                && !tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140)
+                && planet != PlanetLore.OA && planet != PlanetLore.GENESE)
+            tryBuild(level, data, planet, "guardiao", PlanetLore.HUB, player, 120);
     }
 
     private static boolean tryBuild(ServerLevel level, LoreWorldData data, PlanetLore planet, String kind, BlockPos at, ServerPlayer near, int radius) {
@@ -58,7 +60,9 @@ public final class PlanetSites {
         if (dx * dx + dz * dz > (double) radius * radius) return false;
         data.markSite(id);
         try {
-            if (planet == PlanetLore.GENESE) {
+            if (kind.equals("guardiao")) {
+                placeGuardian(level, planet);
+            } else if (planet == PlanetLore.GENESE) {
                 if (kind.equals("hub")) buildGeneseAltar(level, at);
                 else buildRift(level, at);
             } else if (kind.equals("hub")) {
@@ -184,6 +188,22 @@ public final class PlanetSites {
             d.moveTo(origin.getX() + i * 3 + 0.5, y, origin.getZ() + z + 0.5, 180, 0);
             level.addFreshEntity(d);
         }
+    }
+
+    /**
+     * Um Guardião do Universo em cada planeta das Tropas: assim nenhum Lanterna precisa ir a Oa
+     * (o Amarelo e o Vermelho não seriam bem-vindos lá). Ele fica num pequeno estrado ao lado da base.
+     */
+    private static void placeGuardian(ServerLevel level, PlanetLore planet) {
+        BlockPos c = PlanetLore.HUB;
+        if (!level.getEntitiesOfClass(RaceEntity.class, new net.minecraft.world.phys.AABB(c).inflate(40),
+                e -> e.race() == Race.GUARDIAO).isEmpty()) return;
+        BlockPos spot = new BlockPos(c.getX() + 3, 0, c.getZ() + 9);
+        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spot.getX(), spot.getZ());
+        BlockState stone = planet.stoneBlock().defaultBlockState();
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) set(level, new BlockPos(spot.getX() + dx, y, spot.getZ() + dz), stone);
+        set(level, new BlockPos(spot.getX(), y, spot.getZ()), Blocks.EMERALD_BLOCK.defaultBlockState());
+        npc(level, Race.GUARDIAO, new BlockPos(spot.getX(), y + 1, spot.getZ()), "guardiao", "npc.lanterna.name.guardiao_emissario");
     }
 
     // ===================== Base comum =====================

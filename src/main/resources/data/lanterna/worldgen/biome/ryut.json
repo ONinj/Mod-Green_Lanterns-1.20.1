@@ -20,19 +20,12 @@
     "monster": [
       {
         "type": "lanterna:eco_cinzento",
-        "weight": 12,
+        "weight": 4,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 1
       }
     ],
-    "creature": [
-      {
-        "type": "lanterna:silente",
-        "weight": 14,
-        "minCount": 2,
-        "maxCount": 4
-      }
-    ],
+    "creature": [],
     "ambient": [],
     "axolotls": [],
     "underground_water_creature": [],

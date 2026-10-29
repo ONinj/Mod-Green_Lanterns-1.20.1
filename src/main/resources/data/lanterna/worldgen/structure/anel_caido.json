@@ -1,0 +1,7 @@
+{
+  "type": "lanterna:anel_caido",
+  "biomes": "#lanterna:has_structure/anel_caido",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

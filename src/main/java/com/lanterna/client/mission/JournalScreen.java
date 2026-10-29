@@ -38,6 +38,13 @@ public class JournalScreen extends Screen {
         super(Component.translatable("journal.lanterna.title"));
     }
 
+    /** Abre direto na aba do anel. */
+    public static JournalScreen ringTab() {
+        JournalScreen s = new JournalScreen();
+        s.tab = Tab.RING;
+        return s;
+    }
+
     @Override
     protected void init() {
         list.clear();
@@ -188,7 +195,12 @@ public class JournalScreen extends Screen {
         String next = lvl >= Affinity.MAX_LEVEL ? "MAX" : pts + " / " + Affinity.THRESHOLDS[lvl + 1];
         g.drawString(font, Hud.body(Component.literal(next)), left + 216, y - 1, 0xFFB8C4CC, false);
         y += 12;
-        y += Hud.wrapped(g, Hud.body(Component.translatable("journal.lanterna.affinity_help")), left + 10, y, W - 20, 0xFF9AA8B0, 10) + 6;
+        y += Hud.wrapped(g, Hud.body(Component.translatable("journal.lanterna.affinity_help")), left + 10, y, W - 20, 0xFF9AA8B0, 10) + 4;
+        // Bônus passivos deste nível
+        g.drawString(font, Hud.body(Component.translatable("journal.lanterna.passives",
+                Affinity.foodSeconds(lvl), Affinity.regenSeconds(lvl), String.format("%.1f", Affinity.punchBonus(lvl)),
+                String.format("%.1f", Affinity.power(pts)))), left + 10, y, Hud.argb(ClientRingData.color, 255), false);
+        y += 14;
         for (ConstructType t : ConstructType.values()) {
             boolean ok = lvl >= t.unlockLevel;
             Component line = Component.literal(ok ? "◆ " : "◇ ").append(t.displayName())

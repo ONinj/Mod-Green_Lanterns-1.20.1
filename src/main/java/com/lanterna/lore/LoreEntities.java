@@ -139,12 +139,16 @@ public final class LoreEntities {
         public static void spawnRules(SpawnPlacementRegisterEvent event) {
             for (Race r : Race.values()) {
                 event.register(typeOf(r), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                        (type, level, reason, pos, random) -> level.getBlockState(pos.below()).isValidSpawn(level, pos.below(), type),
+                        // Os povos só moram nas vilas e nas bases: nada de nascer solto pelo mapa
+                        (type, level, reason, pos, random) -> reason != net.minecraft.world.entity.MobSpawnType.NATURAL
+                                && reason != net.minecraft.world.entity.MobSpawnType.CHUNK_GENERATION
+                                && level.getBlockState(pos.below()).isValidSpawn(level, pos.below(), type),
                         SpawnPlacementRegisterEvent.Operation.REPLACE);
             }
             event.register(ECO_CINZENTO.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     (type, level, reason, pos, random) -> Monster.checkAnyLightMonsterSpawnRules(type, level, reason, pos, random)
-                            && (level.getLevel() == null || LoreCreatures.Eco.allowSpawn(level.getLevel(), random)),
+                            && (level.getLevel() == null || LoreCreatures.Eco.allowSpawn(level.getLevel(), random))
+                            && level.getEntitiesOfClass(LoreCreatures.Eco.class, new net.minecraft.world.phys.AABB(pos).inflate(48)).size() < 3,
                     SpawnPlacementRegisterEvent.Operation.REPLACE);
             event.register(BROTO.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     Mob::checkMobSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);

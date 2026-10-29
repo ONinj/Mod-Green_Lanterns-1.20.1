@@ -50,6 +50,15 @@ import org.joml.Vector3f;
  */
 public final class SelectionManager {
 
+    /** Como o anel chegou, quando não foi pelo ritual da Tropa ("call" = conquistas, "dormant" = anel apagado). */
+    private static final java.util.Map<java.util.UUID, String> REASON = new java.util.HashMap<>();
+
+    public static boolean startSelection(ServerPlayer player, ResourceLocation corpsId, String reason) {
+        boolean ok = startSelection(player, corpsId);
+        if (ok) REASON.put(player.getUUID(), reason);
+        return ok;
+    }
+
     /** Começa a cerimônia. Devolve false se o jogador já tem anel ou já está sendo escolhido. */
     public static boolean startSelection(ServerPlayer player, ResourceLocation corpsId) {
         RingData data = ModCapabilities.get(player).orElse(null);
@@ -399,6 +408,7 @@ public final class SelectionManager {
     // ============================== Entrega ==============================
 
     private static void deliver(ServerPlayer player, RingData data, CorpsDefinition def) {
+        String reason = REASON.remove(player.getUUID());
         data.clearPending();
         data.resetRage();
         data.resetRituals();
@@ -406,7 +416,9 @@ public final class SelectionManager {
         data.setPowerActive(true);
 
         // O anel vai direto para o slot de anel, já ligado ao portador
-        ItemStack ring = PowerRingItem.create(def.id(), def.color(), def.maxCharge());
+        // O Anel Apagado desperta fraco: só 10% de carga
+        int startCharge = "dormant".equals(reason) ? Math.max(1, def.maxCharge() / 10) : def.maxCharge();
+        ItemStack ring = PowerRingItem.create(def.id(), def.color(), startCharge);
         PowerRingItem.setOwner(ring, player);
         EquipmentHelper.equipOrGive(player, RingData.RING_SLOT, ring);
 
@@ -445,18 +457,26 @@ public final class SelectionManager {
         }
 
         String base = "selection." + def.id().getNamespace() + "." + def.id().getPath();
-        player.sendSystemMessage(Component.translatable(base + ".message").withStyle(s -> s.withColor(def.color())));
+        if (reason != null) {
+            player.sendSystemMessage(Component.translatable("selection.lanterna.reason." + reason,
+                    Component.translatable(CorpsDefinition.nameKey(def.id()))).withStyle(s -> s.withColor(def.color())));
+        } else {
+            player.sendSystemMessage(Component.translatable(base + ".message").withStyle(s -> s.withColor(def.color())));
+        }
         player.sendSystemMessage(Component.translatable("message.lanterna.tutorial"));
         RingPowers.sync(player, data);
 
-        // A lore começa: missão inicial da Tropa. O anel verde leva o novo Lanterna direto para Oa.
+        // A lore começa: missão inicial da Tropa, e o anel leva o novo Lanterna direto para o planeta dela
         com.lanterna.mission.MissionManager.startCorpsLine(player, def.id());
-        if (def.id().equals(com.lanterna.corps.BuiltinCorps.GREEN.id())
-                && !player.level().dimension().equals(net.minecraft.resources.ResourceKey.create(
-                        net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("oa")))) {
-            player.sendSystemMessage(Component.translatable("message.lanterna.green_to_oa")
+        com.lanterna.lore.PlanetLore home = com.lanterna.lore.PlanetLore.byCorps(def.id());
+        if (home != null && home != com.lanterna.lore.PlanetLore.GENESE
+                && com.lanterna.lore.PlanetLore.byDimension(player.level().dimension()) != home) {
+            boolean green = def.id().equals(com.lanterna.corps.BuiltinCorps.GREEN.id());
+            player.sendSystemMessage((green ? Component.translatable("message.lanterna.green_to_oa")
+                    : Component.translatable("message.lanterna.ring_to_home", Component.translatable("planet.lanterna." + home.planet)))
                     .withStyle(s -> s.withColor(def.color()).withItalic(true)));
-            ModNetwork.sendTo(player, new com.lanterna.network.lore.StartAutopilotPacket("oa", 60));
+            ModNetwork.sendTo(player, new com.lanterna.network.lore.StartAutopilotPacket(home.planet, 60));
+            RingPowers.setHoming(player, true);
         }
     }
 

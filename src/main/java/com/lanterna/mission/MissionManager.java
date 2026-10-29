@@ -222,8 +222,58 @@ public final class MissionManager {
         player.level().playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.6f, 1.0f);
         player.sendSystemMessage(Component.translatable("mission.lanterna.completed_chat", m.title())
                 .withStyle(s -> s.withColor(m.color())));
-        if (m.next() != null) start(player, m.next());
+        String next = routeNext(player, data, m);
+        if (next != null) start(player, next);
         sync(player, data);
+    }
+
+    // ===================== Rota da linha principal (depende da Tropa do jogador) =====================
+
+    /**
+     * A linha principal começa pelo planeta da Tropa do jogador e segue a ordem da lore a partir dali.
+     * No planeta da própria Tropa o jogador já tem o anel: não precisa juntar minério nem forjar
+     * (só ganha o respeito do povo e vence o boss, cujo drop entra na fusão do Anel Branco).
+     */
+    private static String routeNext(ServerPlayer player, LoreData data, Mission m) {
+        String id = m.id();
+        ResourceLocation corps = ModCapabilities.get(player).map(r -> r.hasRing() ? r.corps() : null).orElse(null);
+        if (id.startsWith("inicio_") && id.endsWith("_4")) return nextPlanetLine(data, corps);
+        if (id.startsWith("main_") && !id.startsWith("main_genese")) {
+            String[] parts = id.split("_");
+            if (parts.length != 3) return m.next();
+            String planet = parts[1];
+            int step;
+            try { step = Integer.parseInt(parts[2]); } catch (NumberFormatException e) { return m.next(); }
+            boolean own = isOwnPlanet(planet, corps);
+            int n = step + 1;
+            while (own && (n == 3 || n == 5)) n++;
+            if (n <= 5) return "main_" + planet + "_" + n;
+            return nextPlanetLine(data, corps);
+        }
+        return m.next();
+    }
+
+    private static boolean isOwnPlanet(String planet, ResourceLocation corps) {
+        PlanetLore p = PlanetLore.byPlanet(planet);
+        return p != null && corps != null && p.corps.id().equals(corps);
+    }
+
+    private static boolean lineDone(LoreData data, String planet, ResourceLocation corps) {
+        return data.isDone("main_" + planet + "_5") || (isOwnPlanet(planet, corps) && data.isDone("main_" + planet + "_4"));
+    }
+
+    /** Próximo planeta da linha principal: começa no planeta da Tropa e dá a volta. */
+    public static String nextPlanetLine(LoreData data, ResourceLocation corps) {
+        PlanetLore[] order = Missions.MAIN_ORDER;
+        int start = 0;
+        for (int i = 0; i < order.length; i++) if (corps != null && order[i].corps.id().equals(corps)) start = i;
+        for (int k = 0; k < order.length; k++) {
+            PlanetLore p = order[(start + k) % order.length];
+            if (lineDone(data, p.planet, corps)) continue;
+            for (int s = 1; s <= 5; s++) if (data.isActive("main_" + p.planet + "_" + s)) return null;
+            return "main_" + p.planet + "_1";
+        }
+        return "main_genese_1";
     }
 
     public static void removeItems(ServerPlayer player, Item item, int count) {

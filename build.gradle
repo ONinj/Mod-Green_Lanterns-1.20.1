@@ -34,6 +34,7 @@ minecraft {
             parent runs.client
             workingDirectory project.file('run')
             property 'lanterna.autotest', 'true'
+            property 'lanterna.autotest.scene', project.findProperty('scene') ?: 'full'
             args '--quickPlaySingleplayer', 'test', '--width', '960', '--height', '540'
         }
         server {

@@ -34,6 +34,8 @@ public final class ModCreativeTabs {
                         for (var item : com.lanterna.lore.LoreItems.ALL) output.accept(item.get());
                         for (var block : com.lanterna.lore.LoreBlocks.ALL) output.accept(block.get());
                         for (var egg : com.lanterna.lore.LoreEntities.EGGS) output.accept(egg.get());
+                        output.accept(com.lanterna.item.DormantRingItem.create());
+                        output.accept(ModItems.CHISELED_BATTERY.get());
                         output.accept(ModItems.ALIEN_ALLOY.get());
                         output.accept(ModItems.ALIEN_SPAWN_EGG.get());
                     })

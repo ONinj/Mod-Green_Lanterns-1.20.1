@@ -16,6 +16,8 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.IntValue YELLOW_FEAR_SECONDS;
     public static final ForgeConfigSpec.IntValue VIOLET_BREEDS;
     public static final ForgeConfigSpec.IntValue ORANGE_TREASURE_VALUE;
+    public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> CALL_ADVANCEMENTS;
+    public static final ForgeConfigSpec.IntValue CALL_REQUIRED;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -45,6 +47,25 @@ public final class LanternaConfig {
         ORANGE_TREASURE_VALUE = b
                 .comment("Laranja: valor do tesouro no inventário (ouro=1, esmeralda=3, diamante=5, netherite=40; blocos x9)")
                 .defineInRange("tesouro_laranja", 1000, 10, 100000);
+
+        CALL_ADVANCEMENTS = b
+                .comment("O Chamado: conquistas que chamam a atenção dos anéis. Cada uma conta 1 sinal.")
+                .defineListAllowEmpty(java.util.List.of("conquistas_chamado"), () -> java.util.List.of(
+                        "minecraft:story/mine_diamond",
+                        "minecraft:story/enter_the_nether",
+                        "minecraft:story/enchant_item",
+                        "minecraft:story/cure_zombie_villager",
+                        "minecraft:nether/find_fortress",
+                        "minecraft:nether/obtain_blaze_rod",
+                        "minecraft:story/follow_ender_eye",
+                        "minecraft:adventure/hero_of_the_village",
+                        "minecraft:adventure/kill_all_mobs",
+                        "minecraft:nether/summon_wither",
+                        "minecraft:end/kill_dragon"), o -> o instanceof String);
+
+        CALL_REQUIRED = b
+                .comment("O Chamado: quantos sinais (conquistas da lista) até um anel aleatório escolher você. 0 desliga.")
+                .defineInRange("sinais_chamado", 3, 0, 50);
 
         SELECTION_ANIMATION_TICKS = b
                 .comment("Duração da animação de entrega do anel, em ticks (20 ticks = 1 segundo)")

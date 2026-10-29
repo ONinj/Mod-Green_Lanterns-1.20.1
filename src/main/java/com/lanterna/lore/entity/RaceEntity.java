@@ -230,6 +230,11 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
         if (!role().isEmpty() || race() == Race.GUARDIAO) return false;
         Long until = angryUntil.get(p.getUUID());
         if (until != null && until > level().getGameTime()) return true;
+        // Lanterna de uma Tropa inimiga: o povo ataca até ganhar o respeito dele.
+        // Lanterna da própria Tropa do planeta: é um dos nossos, ninguém ataca.
+        if (enemyCorps(p)) return true;
+        var mine = com.lanterna.lore.Factions.playerCorps(p);
+        if (mine != null && mine == com.lanterna.lore.Factions.raceCorps(race())) return false;
         return switch (race()) {
             case BRAKKARI -> !hasFlag(KNEEL) && rep(p, "brakkari") < 1;
             case SKRELL_VATH -> !hasFlag(FLEE) && !sparedBy.contains(p.getUUID()) && rep(p, "skrell_vath") < 3;
@@ -511,9 +516,18 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
         p.displayClientMessage(Component.translatable("message.lanterna.veskai_healed"), true);
     }
 
+    /** O jogador usa o anel de uma Tropa inimiga deste povo e ainda não tem o respeito dele? */
+    public boolean enemyCorps(Player p) {
+        Race r = race();
+        if (r == Race.GUARDIAO) return false;
+        if (!com.lanterna.lore.Factions.raceHatesPlayer(r, p)) return false;
+        return rep(p, r.repKey()) < com.lanterna.mission.Missions.repNeeded(r.repKey());
+    }
+
     public boolean canTradeWith(ServerPlayer p) {
         Race r = race();
         if (!r.trades() || !role().equals("") && r == Race.GUARDIAO) return false;
+        if (enemyCorps(p)) return false;
         return switch (r) {
             case BRAKKARI -> rep(p, "brakkari") >= 1;
             case SKRELL_VATH -> rep(p, "skrell_vath") >= 1;

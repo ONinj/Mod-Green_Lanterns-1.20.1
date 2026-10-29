@@ -1,0 +1,7 @@
+{
+  "parent": "lanterna:block/battery/bateria_vontade_verde",
+  "textures": {
+    "0": "lanterna:block/battery/bateria_cinzelada",
+    "particle": "lanterna:block/battery/bateria_cinzelada"
+  }
+}

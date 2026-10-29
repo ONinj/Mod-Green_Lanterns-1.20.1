@@ -38,7 +38,8 @@ public final class NpcDialogs {
         List<String> options = new ArrayList<>();
 
         String who = role.isEmpty() ? "morador" : role;
-        lines.add("dialog.lanterna." + race.id + "." + who);
+        if (race == Race.GUARDIAO && !planet.equals("oa")) lines.add("dialog.lanterna.guardiao.emissario");
+        else lines.add("dialog.lanterna." + race.id + "." + who);
 
         // Falas da missão (quando ela pede para falar com este NPC)
         if (data != null && !role.isEmpty()) {
@@ -79,6 +80,7 @@ public final class NpcDialogs {
             default -> {}
         }
 
+        if (npc.enemyCorps(player)) lines.add("dialog.lanterna.enemy_corps");
         if (race.trades() && npc.canTradeWith(player)) options.add(0, "trade");
 
         // Missões que este NPC oferece

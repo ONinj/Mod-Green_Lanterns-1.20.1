@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "lanterna:block/battery/bateria_cinzelada"
+    },
+    "facing=east": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 270
+    }
+  }
+}

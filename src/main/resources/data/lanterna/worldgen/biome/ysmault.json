@@ -26,18 +26,12 @@
     "monster": [
       {
         "type": "lanterna:eco_cinzento",
-        "weight": 12,
+        "weight": 4,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 1
       }
     ],
     "creature": [
-      {
-        "type": "lanterna:brakkari",
-        "weight": 12,
-        "minCount": 1,
-        "maxCount": 3
-      },
       {
         "type": "minecraft:hoglin",
         "weight": 4,

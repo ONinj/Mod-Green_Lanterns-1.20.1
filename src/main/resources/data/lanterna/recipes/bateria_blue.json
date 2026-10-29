@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PAP",
+    "ALA",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:prismarine_crystals"
+    },
+    "A": {
+      "item": "minecraft:lapis_block"
+    },
+    "L": {
+      "item": "minecraft:lantern"
+    }
+  },
+  "result": {
+    "item": "lanterna:power_battery",
+    "count": 1,
+    "nbt": "{BlockEntityTag:{Corps:\"lanterna:blue\",Color:2784255}}"
+  }
+}

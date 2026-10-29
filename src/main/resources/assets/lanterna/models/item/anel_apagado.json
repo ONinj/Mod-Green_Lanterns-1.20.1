@@ -1,0 +1,7 @@
+{
+  "parent": "lanterna:item/anel_vazio",
+  "textures": {
+    "0": "lanterna:item/apagado/espectro_vazio",
+    "particle": "lanterna:item/apagado/espectro_vazio"
+  }
+}
