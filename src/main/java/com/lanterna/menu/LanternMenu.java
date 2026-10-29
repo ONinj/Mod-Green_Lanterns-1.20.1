@@ -82,7 +82,7 @@ public class LanternMenu extends AbstractContainerMenu {
             boolean moved = false;
             if (stack.getItem() instanceof PowerRingItem && slots.get(RingData.RING_SLOT).mayPlace(stack)) {
                 moved = moveItemStackTo(stack, RingData.RING_SLOT, RingData.RING_SLOT + 1, false);
-            } else if (stack.getItem() instanceof PowerBatteryItem) {
+            } else if (com.lanterna.item.BatteryItems.isBattery(stack)) {
                 moved = moveItemStackTo(stack, RingData.BATTERY_SLOT, RingData.BATTERY_SLOT + 1, false);
             }
             if (!moved) {
@@ -116,7 +116,7 @@ public class LanternMenu extends AbstractContainerMenu {
             if (ringSlot) {
                 return stack.getItem() instanceof PowerRingItem && PowerRingItem.canBeWornBy(stack, player);
             }
-            return stack.getItem() instanceof PowerBatteryItem;
+            return com.lanterna.item.BatteryItems.isBattery(stack);
         }
 
         @Override

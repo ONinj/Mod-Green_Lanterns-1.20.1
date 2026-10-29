@@ -11,18 +11,20 @@ import java.util.Map;
 /** No cliente: o anel de cada jogador visível (para desenhar na mão, a aura e a pose de voo). */
 public final class ClientVisibleRings {
 
-    public record Visible(ItemStack ring, int color, boolean active, boolean flying, boolean hyper, boolean autopilot) {}
+    public record Visible(ItemStack ring, int color, boolean active, boolean flying, boolean hyper, boolean autopilot,
+                          boolean staff) {}
 
-    private static final Visible NONE = new Visible(ItemStack.EMPTY, 0, false, false, false, false);
+    private static final Visible NONE = new Visible(ItemStack.EMPTY, 0, false, false, false, false, false);
     private static final Map<Integer, Visible> RINGS = new HashMap<>();
 
     public static void update(SyncVisibleRingPacket msg) {
         ResourceLocation corps = ResourceLocation.tryParse(msg.corps());
-        if (!msg.hasRing() || corps == null) {
+        if ((!msg.hasRing() || corps == null) && !msg.staff()) {
             RINGS.remove(msg.entityId());
         } else {
-            RINGS.put(msg.entityId(), new Visible(PowerRingItem.create(corps, msg.color(), -1),
-                    msg.color(), msg.active(), msg.flying(), msg.hyper(), msg.autopilot()));
+            ItemStack ring = msg.hasRing() && corps != null ? PowerRingItem.create(corps, msg.color(), -1) : ItemStack.EMPTY;
+            RINGS.put(msg.entityId(), new Visible(ring, msg.color(), msg.hasRing() && msg.active(), msg.hasRing() && msg.flying(),
+                    msg.hyper(), msg.autopilot(), msg.staff()));
         }
     }
 

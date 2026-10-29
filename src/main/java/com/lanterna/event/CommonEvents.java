@@ -80,7 +80,8 @@ public final class CommonEvents {
     public static void onStartTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof ServerPlayer target && event.getEntity() instanceof ServerPlayer viewer) {
             ModCapabilities.get(target).ifPresent(data ->
-                    ModNetwork.sendTo(viewer, SyncVisibleRingPacket.of(target.getId(), data)));
+                    ModNetwork.sendTo(viewer, SyncVisibleRingPacket.of(target.getId(), data,
+                            com.lanterna.item.BatteryItems.isStaff(com.lanterna.power.EquipmentHelper.battery(target)))));
         }
     }
 

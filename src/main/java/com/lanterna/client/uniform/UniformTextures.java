@@ -41,6 +41,13 @@ public final class UniformTextures {
         return FMLPaths.CONFIGDIR.get().resolve("lanterna").resolve("uniformes");
     }
 
+    /** O jogador colocou uma skin de uniforme própria na pasta config/lanterna/uniformes. */
+    private static final Map<String, Boolean> CUSTOM = new HashMap<>();
+
+    public static boolean hasCustom(String corps) {
+        return CUSTOM.computeIfAbsent(corps, c -> Files.isRegularFile(folder().resolve(c + ".png")));
+    }
+
     public static ResourceLocation get(String corps) {
         return CACHE.computeIfAbsent(corps, UniformTextures::load);
     }

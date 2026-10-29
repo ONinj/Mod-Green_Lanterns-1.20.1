@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 
 /** Servidor -> clientes: qual anel desenhar na mão de um jogador (ou nenhum). */
 public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps, int color, boolean active, boolean flying,
-                                    boolean hyper, boolean autopilot) {
+                                    boolean hyper, boolean autopilot, boolean staff) {
 
-    public static SyncVisibleRingPacket of(int entityId, RingData data) {
+    public static SyncVisibleRingPacket of(int entityId, RingData data, boolean staff) {
         return new SyncVisibleRingPacket(entityId, data.hasRing(), data.corps().toString(), data.color(),
                 data.hasRing() && data.powerActive(), data.hasRing() && data.flightEnabled(),
-                data.hasRing() && data.hyper(), data.hasRing() && data.autopilot());
+                data.hasRing() && data.hyper(), data.hasRing() && data.autopilot(), staff);
     }
 
     public static void encode(SyncVisibleRingPacket msg, FriendlyByteBuf buf) {
@@ -28,11 +28,12 @@ public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps,
         buf.writeBoolean(msg.flying);
         buf.writeBoolean(msg.hyper);
         buf.writeBoolean(msg.autopilot);
+        buf.writeBoolean(msg.staff);
     }
 
     public static SyncVisibleRingPacket decode(FriendlyByteBuf buf) {
         return new SyncVisibleRingPacket(buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readInt(),
-                buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
+                buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
     }
 
     public static void handle(SyncVisibleRingPacket msg, Supplier<NetworkEvent.Context> ctx) {

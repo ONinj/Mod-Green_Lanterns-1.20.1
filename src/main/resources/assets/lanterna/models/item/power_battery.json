@@ -1,109 +1,47 @@
 {
-  "parent": "lanterna:block/power_battery",
-  "display": {
-    "gui": {
-      "rotation": [
-        25,
-        225,
-        0
-      ],
-      "translation": [
-        0,
-        -0.5,
-        0
-      ],
-      "scale": [
-        0.62,
-        0.62,
-        0.62
-      ]
-    },
-    "ground": {
-      "translation": [
-        0,
-        3,
-        0
-      ],
-      "scale": [
-        0.4,
-        0.4,
-        0.4
-      ]
-    },
-    "fixed": {
-      "scale": [
-        0.6,
-        0.6,
-        0.6
-      ]
-    },
-    "thirdperson_righthand": {
-      "rotation": [
-        75,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        2.5,
-        0
-      ],
-      "scale": [
-        0.4,
-        0.4,
-        0.4
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        75,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        2.5,
-        0
-      ],
-      "scale": [
-        0.4,
-        0.4,
-        0.4
-      ]
-    },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        1,
-        0
-      ],
-      "scale": [
-        0.45,
-        0.45,
-        0.45
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        225,
-        0
-      ],
-      "translation": [
-        0,
-        1,
-        0
-      ],
-      "scale": [
-        0.45,
-        0.45,
-        0.45
-      ]
-    }
+ "parent": "lanterna:block/battery/bateria_vontade_verde",
+ "overrides": [
+  {
+   "predicate": {
+    "lanterna:corps": 1
+   },
+   "model": "lanterna:block/battery/bateria_vontade_verde"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 2
+   },
+   "model": "lanterna:block/battery/bateria_medo_amarelo"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 3
+   },
+   "model": "lanterna:block/battery/bateria_raiva_vermelho"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 4
+   },
+   "model": "lanterna:block/battery/bateria_esperanca_azul"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 5
+   },
+   "model": "lanterna:block/battery/bateria_amor_violeta"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 7
+   },
+   "model": "lanterna:block/battery/bateria_avareza_laranja"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 8
+   },
+   "model": "lanterna:block/battery/caveira_morte_preto"
   }
+ ]
 }

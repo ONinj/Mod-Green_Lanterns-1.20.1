@@ -56,10 +56,31 @@ public class PowerBatteryBlockEntity extends BlockEntity {
             if (id != null) corps = id;
         }
         color = tag.contains("Color") ? tag.getInt("Color") : BuiltinCorps.colorOf(corps);
+        loadedFromTag = true;
+        syncShape(); // /setblock e itens com dados: o formato acompanha a Tropa
 
         // No cliente, força o bloco a ser redesenhado com a cor nova
         if (level != null && level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
+        }
+    }
+
+    private boolean loadedFromTag;
+
+    /** Baterias antigas (de versões anteriores) ganham o formato certo da Tropa ao carregar. */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (loadedFromTag) syncShape();
+    }
+
+    private void syncShape() {
+        if (level == null || level.isClientSide) return;
+        BlockState state = getBlockState();
+        if (!state.hasProperty(PowerBatteryBlock.CORPS)) return;
+        BatteryShape shape = BatteryShape.of(corps);
+        if (state.getValue(PowerBatteryBlock.CORPS) != shape) {
+            level.setBlock(worldPosition, state.setValue(PowerBatteryBlock.CORPS, shape), 3);
         }
     }
 

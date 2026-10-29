@@ -61,6 +61,9 @@ public final class RingPowers {
 
         if (data.hasRing()) {
             tickFlight(player, data);
+            if (data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) && data.charge() < data.maxCharge()) {
+                setCharge(player, data, data.maxCharge());
+            }
             data.setPocketStatus(pocketStatus(player, data));
         } else {
             data.setPocketStatus(-1);
@@ -75,20 +78,24 @@ public final class RingPowers {
 
     /** Avisa quem está vendo este jogador (e ele mesmo) qual anel desenhar na mão. */
     public static void syncVisibleRing(ServerPlayer player, RingData data, boolean force) {
-        String key = data.hasRing()
+        // Cajado da Compaixão no slot de bateria: aparece na mão esquerda para todos
+        boolean staff = com.lanterna.item.BatteryItems.isStaff(EquipmentHelper.battery(player));
+        String key = (data.hasRing()
                 ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled()
-                + "|" + data.hyper() + "|" + data.autopilot() : "";
+                + "|" + data.hyper() + "|" + data.autopilot() : "") + "|" + staff;
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
-                SyncVisibleRingPacket.of(player.getId(), data));
+                SyncVisibleRingPacket.of(player.getId(), data, staff));
     }
 
     // ===================== Carga =====================
 
     /** Muda a carga gravando no anel do slot. */
     public static void setCharge(ServerPlayer player, RingData data, int value) {
+        // O anel da Vida (branco) não descarrega: fica sempre cheio
+        int wanted = data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) ? data.maxCharge() : value;
         wornRing(player).ifPresent(ring -> {
-            int clamped = Math.max(0, Math.min(value, data.maxCharge()));
+            int clamped = Math.max(0, Math.min(wanted, data.maxCharge()));
             PowerRingItem.setStoredCharge(ring, clamped);
             data.setCharge(clamped);
         });
@@ -111,7 +118,7 @@ public final class RingPowers {
     /** -1 sem bateria compatível no slot, 0 pronta, >0 segundos de espera. */
     private static int pocketStatus(ServerPlayer player, RingData data) {
         ItemStack battery = EquipmentHelper.battery(player);
-        if (battery.isEmpty() || !PowerBatteryItem.getCorps(battery).equals(data.corps())) return -1;
+        if (battery.isEmpty() || !com.lanterna.item.BatteryItems.corpsOf(battery).equals(data.corps())) return -1;
         long elapsed = player.level().getGameTime() - data.lastPocketRecharge();
         long remaining = cooldownTicks() - elapsed;
         return remaining <= 0 ? 0 : (int) ((remaining + 19) / 20);
@@ -122,6 +129,10 @@ public final class RingPowers {
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !data.hasRing()) return;
 
+        if (data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id())) {
+            player.displayClientMessage(Component.translatable("message.lanterna.white_never_drains"), true);
+            return;
+        }
         int status = pocketStatus(player, data);
         if (status < 0) {
             player.displayClientMessage(Component.translatable("message.lanterna.no_pocket_battery"), true);

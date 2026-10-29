@@ -1,7 +1,25 @@
 {
-  "variants": {
-    "": {
-      "model": "lanterna:block/power_battery"
-    }
+ "variants": {
+  "corps=green": {
+   "model": "lanterna:block/battery/bateria_vontade_verde"
+  },
+  "corps=red": {
+   "model": "lanterna:block/battery/bateria_raiva_vermelho"
+  },
+  "corps=orange": {
+   "model": "lanterna:block/battery/bateria_avareza_laranja"
+  },
+  "corps=yellow": {
+   "model": "lanterna:block/battery/bateria_medo_amarelo"
+  },
+  "corps=blue": {
+   "model": "lanterna:block/battery/bateria_esperanca_azul"
+  },
+  "corps=violet": {
+   "model": "lanterna:block/battery/bateria_amor_violeta"
+  },
+  "corps=black": {
+   "model": "lanterna:block/battery/caveira_morte_preto"
   }
+ }
 }

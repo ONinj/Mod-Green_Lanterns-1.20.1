@@ -13,27 +13,42 @@ Toda face marcada com **Tint** (no Blockbench: botão direito na face → Tint, 
 Pinte essas partes da textura em **branco ou cinza** — o jogo multiplica pela cor (verde, amarelo, vermelho...).
 Faces sem Tint aparecem com a cor original da textura.
 
-## Anel
-| O quê | Onde |
-|---|---|
-| Modelo | `assets/lanterna/models/item/power_ring.json` |
-| Texturas | `assets/lanterna/textures/item/` (ex.: `ring_metal.png`, `ring_gem.png`) |
+## Anéis (um modelo por Tropa)
+| Tropa | Modelo | Textura |
+|---|---|---|
+| Verde | `models/item/ring/anel_vontade_verde.json` | `textures/item/espectro_verde.png` |
+| Amarela | `anel_medo_amarelo.json` | `espectro_amarelo.png` |
+| Vermelha | `anel_raiva_vermelho.json` | `espectro_vermelho.png` |
+| Azul | `anel_esperanca_azul.json` | `espectro_azul.png` |
+| Violeta | `anel_amor_violeta.json` | `espectro_violeta.png` |
+| Índigo | `anel_compaixao_indigo.json` | `espectro_indigo.png` |
+| Laranja | `anel_avareza_laranja.json` | `espectro_laranja.png` |
+| Negra | `anel_morte_preto.json` | `espectro_preto.png` |
+| Branca | `anel_vida_branco.json` | `espectro_branco.png` |
 
-- O modelo atual está em `blockbench_templates/anel_atual_power_ring.json` (abra no Blockbench para ver o tamanho certo).
-- A pedra fica para **cima (+Y)**: no jogo ela aparece virada para baixo, na ponta da mão.
-- O anel na mão usa a posição de exibição **"fixed"** (aba Display do Blockbench), em tamanho bem reduzido.
+- Ao exportar do Blockbench, a textura no .json deve ser `lanterna:item/espectro_<cor>` (textura e particle).
+- Peças com "Light Emission" brilham (o mod converte para o formato do Forge 1.20.1).
+- O anel no dedo usa a posição de exibição **"fixed"**; deixe-a sem rotação (o mod já ajusta).
 
-## Bateria
-| O quê | Onde |
-|---|---|
-| Modelo do bloco | `assets/lanterna/models/block/power_battery.json` |
-| Texturas | `assets/lanterna/textures/block/` (ex.: `battery_metal.png`, `battery_core.png`) |
+## Baterias (um modelo por Tropa)
+`models/block/battery/<nome>.json` + `textures/block/battery/<nome>.png`:
+`bateria_vontade_verde`, `bateria_raiva_vermelho`, `bateria_avareza_laranja`, `bateria_medo_amarelo`,
+`bateria_esperanca_azul`, `bateria_amor_violeta`, `caveira_morte_preto`.
+Cajado da Compaixão: `models/item/compassion_staff.json` + `textures/item/cajado_compaixao_indigo.png`.
+Pode me mandar os .bbmodel direto que eu converto.
 
-- O modelo atual está em `blockbench_templates/bateria_atual_power_battery.json`.
-- O núcleo usa Tint (cor da Tropa).
-- A mesma bateria aparece saindo do portal na animação de recarga (tecla R) — não precisa fazer nada a mais.
+## Uniformes 3D (GeckoLib)
+`geo/item/armor/uniforme_<cor>.geo.json`, `textures/item/armor/uniforme_<cor>.png` (+ `_glowmask.png`),
+`animations/item/armor/uniforme_<cor>.animation.json`.
 
-## Uniforme
+**Animações feitas no Blockbench:**
+- `misc.idle` toca sempre (loop). `misc.walk`, se existir, toca enquanto anda.
+- Os ossos `armorHead`, `armorBody`, `armorRightArm`... seguem o corpo do jogador — o jogo sobrescreve o movimento deles.
+  Para animar uma peça (cristal girando, capa balançando), crie um **osso filho** (ex.: `cristal` dentro de `armorBody`),
+  coloque os cubos nele e anime esse osso. Testado no jogo: funciona.
+- Ao ligar o anel, o uniforme 3D da Tropa se forma sozinho (camada de base pixel por pixel e peças cubinho por cubinho).
+
+## Uniforme (skin antiga, opcional)
 
 ### Opção 1: só textura (skin)
 Coloque uma skin 64x64 em `config/lanterna/uniformes/<tropa>.png` (ex.: `green.png`).

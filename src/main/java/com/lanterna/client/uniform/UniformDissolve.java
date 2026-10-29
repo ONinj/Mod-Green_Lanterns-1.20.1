@@ -34,6 +34,13 @@ public final class UniformDissolve {
             {32, 48, 4, 12, 4, 24},  // braço esquerdo
             {0, 16, 4, 12, 4, 12},   // perna direita
             {16, 48, 4, 12, 4, 12},  // perna esquerda
+            // segunda camada da skin
+            {32, 0, 8, 8, 8, 32},    // chapéu
+            {16, 32, 8, 12, 4, 24},  // jaqueta
+            {40, 32, 4, 12, 4, 24},  // manga direita
+            {48, 48, 4, 12, 4, 24},  // manga esquerda
+            {0, 32, 4, 12, 4, 12},   // calça direita
+            {0, 48, 4, 12, 4, 12},   // calça esquerda
     };
 
     private record Pair(ResourceLocation reveal, ResourceLocation band) {}
@@ -42,7 +49,7 @@ public final class UniformDissolve {
     private static final Map<String, float[]> THRESHOLDS = new HashMap<>();
 
     /** Altura (0..1) do pixel no corpo, ou -1 se o pixel não pertence às partes do corpo. */
-    static float heightOf(int x, int y) {
+    public static float heightOf(int x, int y) {
         for (int[] b : BOXES) {
             int u = b[0], v = b[1], w = b[2], h = b[3], d = b[4], top = b[5];
             if (x < u || x >= u + 2 * d + 2 * w || y < v || y >= v + d + h) continue;

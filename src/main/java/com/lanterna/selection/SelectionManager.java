@@ -411,7 +411,9 @@ public final class SelectionManager {
         EquipmentHelper.equipOrGive(player, RingData.RING_SLOT, ring);
 
         // A bateria da Tropa vem junto, no slot de bateria
-        EquipmentHelper.equipOrGive(player, RingData.BATTERY_SLOT, PowerBatteryItem.create(def.id(), def.color()));
+        // (a Tropa da Vida não tem bateria: o anel branco não descarrega)
+        ItemStack battery = PowerBatteryItem.create(def.id(), def.color());
+        if (!battery.isEmpty()) EquipmentHelper.equipOrGive(player, RingData.BATTERY_SLOT, battery);
 
         ServerLevel level = player.serverLevel();
         Vector3f rgb = PowerBatteryBlock.rgb(def.color());

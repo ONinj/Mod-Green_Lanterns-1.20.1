@@ -20,6 +20,10 @@ public final class ModItems {
             () -> new PowerBatteryItem(ModBlocks.POWER_BATTERY.get(),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
+    /** Cajado da Compaixão: a "bateria" da Tropa Índigo (item, não bloco). */
+    public static final RegistryObject<Item> COMPASSION_STAFF = ITEMS.register("compassion_staff",
+            () -> new com.lanterna.item.CompassionStaffItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
+
     // ---- Materiais dos planetas (moeda das trocas com os alienígenas; base de receitas futuras) ----
     public static final RegistryObject<Item> OA_CRYSTAL = gem("oa_crystal", Rarity.RARE);
     public static final RegistryObject<Item> KORUGAR_AMBER = gem("korugar_amber", Rarity.RARE);

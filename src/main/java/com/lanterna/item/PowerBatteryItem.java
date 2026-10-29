@@ -26,7 +26,13 @@ public class PowerBatteryItem extends BlockItem {
         super(block, properties);
     }
 
+    /** A bateria da Tropa (o cajado para a Índigo; vazio para a Branca). */
     public static ItemStack create(ResourceLocation corps, int color) {
+        return BatteryItems.create(corps, color);
+    }
+
+    /** O bloco-bateria com a Tropa gravada. */
+    public static ItemStack createBlock(ResourceLocation corps, int color) {
         ItemStack stack = new ItemStack(ModItems.POWER_BATTERY.get());
         CompoundTag beTag = new CompoundTag();
         beTag.putString("Corps", corps.toString());
@@ -50,10 +56,10 @@ public class PowerBatteryItem extends BlockItem {
         return BuiltinCorps.colorOf(getCorps(stack));
     }
 
+    /** Cada Tropa tem a sua bateria com nome próprio (Lanterna de Vigia, Braseiro, Relicário...). */
     @Override
     public Component getName(ItemStack stack) {
-        return Component.translatable(getDescriptionId(stack),
-                Component.translatable(CorpsDefinition.nameKey(getCorps(stack))));
+        return Component.translatable("block.lanterna.power_battery." + getCorps(stack).getPath());
     }
 
     @Override

@@ -30,7 +30,7 @@ public final class EquipmentHelper {
     /** A bateria no slot de bateria (vazio se não houver). */
     public static ItemStack battery(Player player) {
         ItemStack stack = slots(player).map(h -> h.getStackInSlot(RingData.BATTERY_SLOT)).orElse(ItemStack.EMPTY);
-        return stack.getItem() instanceof PowerBatteryItem ? stack : ItemStack.EMPTY;
+        return com.lanterna.item.BatteryItems.isBattery(stack) ? stack : ItemStack.EMPTY;
     }
 
     /** Coloca no slot se estiver vazio. Devolve false se já estiver ocupado. */

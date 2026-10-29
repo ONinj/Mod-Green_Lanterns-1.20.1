@@ -117,104 +117,89 @@ public final class DevAutoTest {
             at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
             at(20, () -> cmd("lanterna escolher lanterna:green"));
             at(200, () -> { look(0, 0); cmd("lanterna carga 1000"); cmd("time set 6000"); });
-            // ---- Aldeão num planeta vira alienígena ----
-            at(5, () -> cmd("execute in lanterna:oa run forceload add 0 0"));
-            at(10, () -> cmd("execute in lanterna:oa run summon minecraft:villager 0 120 0"));
-            at(10, () -> cmd("execute in lanterna:oa run data get entity @e[type=lanterna:alien,limit=1,x=0,y=100,z=0,distance=..60] Species"));
-            at(5, () -> cmd("execute in lanterna:oa run forceload remove 0 0"));
-            // ---- Alienígenas de cada planeta ----
+            // ---- Uniforme 3D vestido pelo anel (transformação) ----
+            at(5, () -> { look(0, 0); sideCamera(true, 0, 3.0, 0.3); });
+            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+            at(40, () -> shot("u0_off"));
+            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+            at(3, () -> shot("u1_forming"));
+            at(3, () -> shot("u2_forming"));
+            at(3, () -> shot("u3_forming"));
+            at(3, () -> shot("u4_forming"));
+            at(3, () -> shot("u5_forming"));
+            at(3, () -> shot("u6_forming"));
+            at(3, () -> shot("u7_forming"));
+            at(25, () -> shot("u8_done"));
+            at(3, () -> sideCamera(true, 180, 3.0, 0.3));
+            at(5, () -> shot("u9_back"));
+            at(3, () -> sideCamera(true, 90, 3.0, 0.3));
+            at(5, () -> shot("u10_side"));
+            at(3, () -> sideCamera(false, 0, 0, 0));
+            // ---- Uniformes das 9 Tropas em suportes de armadura ----
             at(5, () -> {
-                String[] species = {"oa", "korugar", "ysmault", "odym", "zamaron", "nok", "okaara", "ryut", "p2_1", "pm2_1"};
-                for (int i = 0; i < species.length; i++) {
-                    double x = -6.75 + i * 1.5;
-                    cmd("summon lanterna:alien " + x + " 150 5.5 {NoAI:1b,Rotation:[180f,0f],Species:\"" + species[i] + "\"}");
+                String[] t = {"verde", "vermelho", "laranja", "amarelo", "azul", "indigo", "violeta", "preto", "branco"};
+                for (int i = 0; i < t.length; i++) {
+                    int x = -8 + i * 2;
+                    String items = "[{id:\"lanterna:tropa_" + t[i] + "_boots\",Count:1b},{id:\"lanterna:tropa_" + t[i] + "_leggings\",Count:1b},"
+                            + "{id:\"lanterna:tropa_" + t[i] + "_chestplate\",Count:1b},{id:\"lanterna:tropa_" + t[i] + "_helmet\",Count:1b}]";
+                    cmd("summon armor_stand " + x + ".5 150 7.5 {ShowArms:1b,NoBasePlate:1b,Rotation:[180f,0f],ArmorItems:" + items + "}");
+                }
+                // Baterias de cada Tropa
+                String[] c = {"green", "red", "orange", "yellow", "blue", "violet", "black"};
+                for (int i = 0; i < c.length; i++) {
+                    int x = -6 + i * 2;
+                    cmd("setblock " + x + " 150 4 lanterna:power_battery[corps=" + c[i] + "]{Corps:\"lanterna:" + c[i] + "\"}");
                 }
             });
-            at(30, () -> { camera(CameraType.THIRD_PERSON_BACK); look(0, 10); });
-            at(20, () -> shot("a1_aliens"));
-            at(2, () -> { sideCamera(true, 0, 3.5, 0.2); });
-            at(1, () -> sideCamera(false, 0, 0, 0));
-            at(5, () -> { camera(CameraType.FIRST_PERSON); look(0, 15); });
-            at(10, () -> shot("a2_aliens_close"));
-            at(5, () -> cmd("tp @s -6.25 150 3 0 20"));
-            at(10, () -> {
-                var list = mc.level.getEntitiesOfClass(com.lanterna.alien.AlienEntity.class, mc.player.getBoundingBox().inflate(12));
-                for (var alien : list) if (alien.speciesId().equals("oa")) { mc.gameMode.interact(mc.player, alien, net.minecraft.world.InteractionHand.MAIN_HAND); break; }
+            at(20, () -> { camera(CameraType.FIRST_PERSON); look(0, 12); });
+            at(10, () -> shot("b1_batteries_uniforms"));
+            at(5, () -> cmd("tp @s 0.5 150 1.5 0 30"));
+            at(10, () -> shot("b2_batteries_close"));
+            at(5, () -> cmd("tp @s 0.5 150 4.5 0 10"));
+            at(10, () -> shot("b3_uniforms_close"));
+            at(5, () -> { cmd("tp @s -7.5 151 5.5 0 15"); });
+            at(10, () -> shot("b4_uniforms_left"));
+            at(5, () -> { cmd("tp @s 4.5 151 5.5 0 15"); });
+            at(10, () -> shot("b5_uniforms_right"));
+            at(5, () -> { cmd("time set 18000"); cmd("tp @s 0.5 150 4.5 0 10"); });
+            at(20, () -> shot("b6_night_glow"));
+            at(5, () -> cmd("time set 6000"));
+            // ---- Cajado da Compaixão no slot de bateria (mão esquerda) ----
+            at(5, () -> {
+                cmd("tp @s 0.5 150 0.5 0 0");
+                var server = mc.getSingleplayerServer();
+                server.execute(() -> {
+                    var sp = server.getPlayerList().getPlayers().get(0);
+                    com.lanterna.power.EquipmentHelper.take(sp, com.lanterna.capability.RingData.BATTERY_SLOT);
+                    com.lanterna.power.EquipmentHelper.equip(sp, com.lanterna.capability.RingData.BATTERY_SLOT,
+                            new net.minecraft.world.item.ItemStack(com.lanterna.registry.ModItems.COMPASSION_STAFF.get()));
+                });
             });
-            at(20, () -> shot("a3_trade_oa"));
+            at(10, () -> sideCamera(true, 0, 3.0, 0.3));
+            at(10, () -> shot("s1_staff_front"));
+            at(3, () -> sideCamera(true, -60, 3.0, 0.3));
+            at(5, () -> shot("s2_staff_side"));
+            at(3, () -> sideCamera(false, 0, 0, 0));
+            // ---- Anéis das 9 Tropas ----
+            at(5, () -> {
+                String[] c = {"green", "yellow", "red", "blue", "violet", "indigo", "orange", "black", "white"};
+                cmd("clear @s");
+                for (String k : c) cmd("give @s lanterna:power_ring{Corps:\"lanterna:" + k + "\"}");
+                cmd("give @s lanterna:compassion_staff");
+            });
+            at(10, () -> { camera(CameraType.FIRST_PERSON); look(0, 0); mc.player.getInventory().selected = 0; });
+            at(10, () -> shot("r1_rings_hotbar"));
+            at(5, () -> mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player)));
+            at(10, () -> shot("r2_inventory"));
             at(5, () -> mc.setScreen(null));
-            at(5, () -> cmd("tp @s 5.75 150 3 0 20"));
-            at(10, () -> {
-                var list = mc.level.getEntitiesOfClass(com.lanterna.alien.AlienEntity.class, mc.player.getBoundingBox().inflate(12));
-                for (var alien : list) if (alien.speciesId().equals("p2_1")) { mc.gameMode.interact(mc.player, alien, net.minecraft.world.InteractionHand.MAIN_HAND); break; }
-            });
-            at(20, () -> shot("a4_trade_generated"));
-            at(5, () -> { mc.setScreen(null); cmd("kill @e[type=lanterna:alien]"); cmd("tp @s 0.5 150 0.5 0 0"); });
-            // ---- Mapa estelar com planetas gerados ----
-            at(10, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
-            at(20, () -> shot("s1_starmap"));
-            // ---- Piloto automático até o planeta gerado mais perto ----
-            at(5, () -> {
-                mc.setScreen(null);
-                var here = com.lanterna.client.flight.Destinations.spacePosition(mc.player);
-                com.lanterna.client.flight.Destinations.Destination best = null;
-                for (var d : com.lanterna.client.flight.Destinations.all()) {
-                    if (!d.id().startsWith("p")) continue;
-                    if (best == null || d.center().distanceTo(here) < best.center().distanceTo(here)) best = d;
-                }
-                LanternaMod.LOGGER.info("AUTOTEST destino {} {} {} r={}", best == null ? null : best.id(), best == null ? null : best.name().getString(), best == null ? null : best.center(), best == null ? 0 : best.radius());
-                com.lanterna.client.flight.Autopilot.start(best);
-                camera(CameraType.THIRD_PERSON_BACK);
-            });
-            at(30, () -> shot("g1_trip"));
-            at(30, () -> shot("g2_trip"));
-            at(30, () -> shot("g3_trip"));
-            at(30, () -> shot("g4_trip"));
-            at(30, () -> shot("g5_trip"));
-            at(30, () -> shot("g6_trip"));
-            at(30, () -> shot("g7_trip"));
-            at(30, () -> shot("g8_trip"));
-            at(30, () -> shot("g9_trip"));
-            at(30, () -> shot("g10_trip"));
-            at(30, () -> shot("g11_trip"));
-            at(30, () -> shot("g12_trip"));
-            at(30, () -> shot("g13_trip"));
-            at(30, () -> shot("g14_trip"));
-            at(30, () -> shot("g15_trip"));
-            at(30, () -> shot("g16_trip"));
-            at(30, () -> shot("g17_trip"));
-            at(30, () -> shot("g18_trip"));
-            at(30, () -> shot("g19_trip"));
-            at(30, () -> shot("g20_trip"));
-            at(30, () -> shot("g21_trip"));
-            at(30, () -> shot("g22_trip"));
-            at(30, () -> shot("g23_trip"));
-            at(30, () -> shot("g24_trip"));
-            at(30, () -> shot("g25_trip"));
-            at(30, () -> shot("g26_trip"));
-            at(30, () -> shot("g27_trip"));
-            at(30, () -> shot("g28_trip"));
-            at(30, () -> shot("g29_trip"));
-            at(30, () -> shot("g30_trip"));
-            at(30, () -> shot("g31_trip"));
-            at(30, () -> shot("g32_trip"));
-            at(30, () -> shot("g33_trip"));
-            at(30, () -> shot("g34_trip"));
-            at(30, () -> shot("g35_trip"));
-            at(30, () -> shot("g36_trip"));
-            at(30, () -> shot("g37_trip"));
-            at(30, () -> shot("g38_trip"));
-            at(30, () -> shot("g39_trip"));
-            at(30, () -> shot("g40_trip"));
-            at(30, () -> shot("g41_trip"));
-            at(30, () -> shot("g42_trip"));
-            at(30, () -> shot("g43_trip"));
-            at(30, () -> shot("g44_trip"));
-            at(30, () -> shot("g45_trip"));
-            at(5, () -> { camera(CameraType.FIRST_PERSON); look(mc.player.getYRot(), 20); });
-            at(40, () -> shot("g90_planet_view"));
-            at(5, () -> look(mc.player.getYRot() + 120, 15));
-            at(20, () -> shot("g91_planet_view"));
+            at(5, () -> { camera(CameraType.THIRD_PERSON_FRONT); mc.player.getInventory().selected = 2; });
+            at(10, () -> shot("r3_ring_in_hand"));
+            at(5, () -> { camera(CameraType.FIRST_PERSON); mc.player.getInventory().selected = 0; });
+            // ---- Teste de animação do Blockbench (osso filho girando no capacete verde) ----
+            at(5, () -> { cmd("tp @s 0.5 150 0.5 0 0"); sideCamera(true, 20, 2.2, 0.8); });
+            at(20, () -> shot("t1_anim_a"));
+            at(10, () -> shot("t2_anim_b"));
+            at(10, () -> shot("t3_anim_c"));
             at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }

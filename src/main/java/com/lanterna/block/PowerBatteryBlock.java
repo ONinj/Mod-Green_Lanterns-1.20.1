@@ -30,10 +30,36 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 public class PowerBatteryBlock extends BaseEntityBlock {
-    private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 16, 14);
+    /** Caixa de 1 bloco (o modelo de algumas baterias passa um pouco da altura, é só visual). */
+    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 16, 15);
+    public static final net.minecraft.world.level.block.state.properties.EnumProperty<BatteryShape> CORPS =
+            net.minecraft.world.level.block.state.properties.EnumProperty.create("corps", BatteryShape.class);
 
     public PowerBatteryBlock(Properties properties) {
         super(properties);
+        registerDefaultState(stateDefinition.any().setValue(CORPS, BatteryShape.GREEN));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(CORPS);
+    }
+
+    /** O formato vem da Tropa gravada no item. */
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+        return defaultBlockState().setValue(CORPS,
+                BatteryShape.of(com.lanterna.item.PowerBatteryItem.getCorps(context.getItemInHand())));
+    }
+
+    /** Pegar a bateria com o botão do meio devolve a da Tropa certa. */
+    @Override
+    public net.minecraft.world.item.ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+        if (level.getBlockEntity(pos) instanceof PowerBatteryBlockEntity battery) {
+            return com.lanterna.item.PowerBatteryItem.createBlock(battery.getCorps(), battery.getColor());
+        }
+        return super.getCloneItemStack(level, pos, state);
     }
 
     @Nullable

@@ -44,8 +44,22 @@ public final class ClientModEvents {
     /** Liga a tela da aba "Lanterna". */
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new);
+            // Modelo do anel e da bateria de cada Tropa (overrides "lanterna:corps" nos modelos de item)
+            net.minecraft.client.renderer.item.ItemProperties.register(ModItems.POWER_RING.get(), com.lanterna.LanternaMod.id("corps"),
+                    (stack, level, entity, seed) -> corpsIndex(com.lanterna.item.PowerRingItem.getCorps(stack)));
+            net.minecraft.client.renderer.item.ItemProperties.register(ModItems.POWER_BATTERY.get(), com.lanterna.LanternaMod.id("corps"),
+                    (stack, level, entity, seed) -> corpsIndex(PowerBatteryItem.getCorps(stack)));
+        });
         UniformTextures.createFolder();
+    }
+
+    /** 1 = verde, 2 = amarelo ... 9 = branco (ordem de BuiltinCorps). */
+    private static float corpsIndex(net.minecraft.resources.ResourceLocation corps) {
+        var values = com.lanterna.corps.BuiltinCorps.values();
+        for (int i = 0; i < values.length; i++) if (values[i].id().equals(corps)) return i + 1;
+        return 1;
     }
 
     /** Adiciona o anel na mão em todos os modelos de jogador (Steve e Alex). */
@@ -59,6 +73,7 @@ public final class ClientModEvents {
                         new PlayerModel<>(event.getEntityModels().bakeLayer(UniformModels.WIDE), false),
                         new PlayerModel<>(event.getEntityModels().bakeLayer(UniformModels.SLIM), true)));
                 renderer.addLayer(new RingHandLayer(renderer));
+                renderer.addLayer(new StaffLayer(renderer));
             }
         }
     }

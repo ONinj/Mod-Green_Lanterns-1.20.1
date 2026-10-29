@@ -39,6 +39,14 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         float p = UniformTransition.progress(player, partialTick);
         if (p <= 0f || player.isInvisible()) return;
 
+        // Uniforme 3D da Tropa (GeckoLib). A skin da pasta config/lanterna/uniformes, se existir, tem prioridade.
+        String corpsId = UniformTransition.corpsOf(player);
+        String tropa = com.lanterna.armor.ModArmorItems.tropaOf(com.lanterna.LanternaMod.id(corpsId));
+        if (!UniformTextures.hasCustom(corpsId) && UniformDissolve3D.exists(tropa)) {
+            render3D(poseStack, light, player, tropa, p);
+            return;
+        }
+
         PlayerModel<AbstractClientPlayer> model = "slim".equals(player.getModelName()) ? slim : wide;
         getParentModel().copyPropertiesTo(model);
         model.hat.visible = false;
@@ -70,6 +78,42 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         }
 
         resetScale(model);
+    }
+
+    private static RingUniformRenderer renderer3D;
+    private static final java.util.Map<String, net.minecraft.world.item.ItemStack> PIECES = new java.util.HashMap<>();
+    private static final net.minecraft.world.entity.EquipmentSlot[] SLOTS = {
+            net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.LEGS,
+            net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.HEAD};
+
+    /** Veste o uniforme 3D: máscara, peitoral, calça e botas da Tropa (menos onde já há armadura de verdade). */
+    private void render3D(PoseStack poseStack, int light, AbstractClientPlayer player, String tropa, float p) {
+        if (renderer3D == null) renderer3D = new RingUniformRenderer();
+        int color = ClientVisibleRings.of(player.getId()).color();
+        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
+        ResourceLocation[] stage = p < 1f ? UniformDissolve3D.stage(tropa, p) : null;
+        org.joml.Matrix4f layerPose = new org.joml.Matrix4f(poseStack.last().pose());
+
+        for (var slot : SLOTS) {
+            if (!player.getItemBySlot(slot).isEmpty()) continue;
+            net.minecraft.world.item.ItemStack piece = PIECES.computeIfAbsent(tropa + "|" + slot, k -> {
+                var item = com.lanterna.armor.ModArmorItems.pieceFor(tropa, slot);
+                return item == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(item);
+            });
+            if (piece.isEmpty()) continue;
+            renderer3D.prepForRender(player, piece, slot, getParentModel());
+            if (stage == null) {
+                renderer3D.setup(RingUniformRenderer.Mode.NORMAL, 1f, color, null, layerPose);
+                renderer3D.renderToBuffer(poseStack, null, light, overlay, 1f, 1f, 1f, 1f);
+            } else {
+                for (var mode : new RingUniformRenderer.Mode[]{RingUniformRenderer.Mode.BASE,
+                        RingUniformRenderer.Mode.DETAIL, RingUniformRenderer.Mode.BAND}) {
+                    renderer3D.setup(mode, p, color, stage, layerPose);
+                    renderer3D.renderToBuffer(poseStack, null, light, overlay, 1f, 1f, 1f, 1f);
+                }
+            }
+        }
+        renderer3D.reset();
     }
 
     private static void resetScale(PlayerModel<?> model) {

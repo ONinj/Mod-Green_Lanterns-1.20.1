@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "lanterna:item/tropa_preto_helmet"
+ }
+}
