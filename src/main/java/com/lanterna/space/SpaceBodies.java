@@ -2,17 +2,20 @@ package com.lanterna.space;
 
 import com.lanterna.LanternaMod;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * O mapa do espaço. A Terra fica embaixo de onde você chega; os planetas das Tropas
- * ficam espalhados em volta, cada vez mais longe (e mais perigosos).
+ * ficam espalhados em volta. Mais longe, o espaço é cheio de planetas gerados
+ * ({@link ProceduralPlanets}) — quanto mais você voa, mais planetas encontra.
  *
  * Cada corpo tem: posição no espaço, raio, cor da atmosfera, textura e o mundo (dimensão)
  * para onde você vai ao entrar nele.
@@ -20,9 +23,19 @@ import java.util.List;
 public final class SpaceBodies {
     public static final ResourceKey<Level> SPACE = ResourceKey.create(Registries.DIMENSION, LanternaMod.id("space"));
 
+    /** Dados extras de um planeta gerado. */
+    public record Procedural(String name, Archetype type, long seed, int regionX, int regionZ) {}
+
     public record Body(String id, Vec3 center, double radius, int atmosphere, boolean landable,
-                       @Nullable ResourceKey<Level> dimension, boolean breathable) {
+                       @Nullable ResourceKey<Level> dimension, boolean breathable, @Nullable Procedural procedural) {
+
+        public Body(String id, Vec3 center, double radius, int atmosphere, boolean landable,
+                    @Nullable ResourceKey<Level> dimension, boolean breathable) {
+            this(id, center, radius, atmosphere, landable, dimension, breathable, null);
+        }
+
         public ResourceLocation texture() {
+            if (procedural != null) return LanternaMod.id("dynamic/planet/" + id);
             return LanternaMod.id("textures/space/" + id + ".png");
         }
 
@@ -30,20 +43,10 @@ public final class SpaceBodies {
             return "planet.lanterna." + id;
         }
 
-        public net.minecraft.network.chat.Component displayName() {
-            return net.minecraft.network.chat.Component.translatable(nameKey());
+        public Component displayName() {
+            if (procedural != null) return Component.literal(procedural.name());
+            return Component.translatable(nameKey());
         }
-    }
-
-    /** Todos os corpos celestes (fixos). */
-    public static List<Body> allBodies() {
-        return BODIES;
-    }
-
-    /** O corpo celeste cujo mundo é este (e, nos mundos compartilhados, a região x/z). */
-    @Nullable
-    public static Body bodyAt(ResourceKey<Level> dimension, double x, double z) {
-        return byDimension(dimension);
     }
 
     private static ResourceKey<Level> planet(String id) {
@@ -73,23 +76,48 @@ public final class SpaceBodies {
         return new Vec3(overworldX / 64.0, -300, overworldZ / 64.0);
     }
 
+    /** Corpos fixos + planetas gerados em volta da posição (raio em setores de 8.000 blocos). */
+    public static List<Body> near(Vec3 pos, int sectorRadius) {
+        List<Body> list = new ArrayList<>(BODIES);
+        list.addAll(ProceduralPlanets.near(pos, sectorRadius));
+        return list;
+    }
+
+    /** Planeta fixo cujo mundo é este. */
     @Nullable
     public static Body byDimension(ResourceKey<Level> dimension) {
         for (Body b : BODIES) if (dimension.equals(b.dimension())) return b;
         return null;
     }
 
+    /** O corpo celeste onde o jogador está (nos mundos dos planetas gerados, depende da região x/z). */
+    @Nullable
+    public static Body bodyAt(ResourceKey<Level> dimension, double x, double z) {
+        Body fixed = byDimension(dimension);
+        if (fixed != null) return fixed;
+        Archetype type = Archetype.byDimension(dimension);
+        return type != null ? ProceduralPlanets.byRegion(type, x, z) : null;
+    }
+
+    @Nullable
+    public static Body byId(String id) {
+        for (Body b : BODIES) if (b.id().equals(id)) return b;
+        return ProceduralPlanets.byId(id);
+    }
+
+    /** Em que corpo celeste a posição do espaço está (para pousar). */
     @Nullable
     public static Body inside(Vec3 pos) {
-        for (Body b : BODIES) {
+        for (Body b : near(pos, 1)) {
             if (b.landable() && pos.distanceToSqr(b.center()) < b.radius() * b.radius()) return b;
         }
         return null;
     }
 
+    /** Mundo de algum planeta (fixo ou gerado), menos a Terra. */
     public static boolean isPlanet(ResourceKey<Level> dimension) {
         Body b = byDimension(dimension);
-        return b != null && b != EARTH;
+        return (b != null && b != EARTH) || Archetype.byDimension(dimension) != null;
     }
 
     private SpaceBodies() {}

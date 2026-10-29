@@ -70,6 +70,28 @@ Posições (1 unidade = 1 pixel da skin, personagem olhando para o **NORTE**):
 Texturas das peças: coloque em `assets/lanterna/textures/block/uniform/...` e use o caminho
 `lanterna:block/uniform/<nome>` no modelo (o Blockbench faz isso se o arquivo estiver nessa pasta).
 
+## Alienígenas (GeckoLib)
+Cada planeta tem a sua espécie. O id da espécie é o id do planeta:
+`oa`, `korugar`, `ysmault`, `odym`, `zamaron`, `nok`, `okaara`, `ryut`
+(planetas gerados têm ids como `p3_m2`; o mapa estelar mostra o nome deles).
+
+Para trocar o modelo de uma espécie, use o tipo de projeto **"GeckoLib Animated Model"** (plugin GeckoLib no Blockbench)
+e exporte três arquivos com o id da espécie no nome:
+
+```
+assets/lanterna/geo/alien/<espécie>.geo.json
+assets/lanterna/textures/entity/alien/<espécie>.png
+assets/lanterna/animations/alien/<espécie>.animation.json
+```
+
+- As animações precisam se chamar **`animation.alien.idle`** (parado) e **`animation.alien.walk`** (andando).
+- O que faltar usa o provisório (`default.geo.json`, `default.png`, `default.animation.json`) — dá para trocar só a textura, por exemplo.
+- Espécie com textura própria aparece com as cores da textura; sem textura própria, o provisório é pintado na cor da espécie.
+- O modelo provisório tem ossos com nomes especiais que o mod liga/desliga por espécie: `brain`, `eye_left`, `eye_right`,
+  `eye_mid`, `antenna_left`, `antenna_right`, `arm2_left`, `arm2_right`, `tail` e `head` (que muda de tamanho).
+  No seu modelo eles são opcionais.
+- O tamanho da criatura no jogo também segue a espécie (os Oanos são baixinhos, por exemplo).
+
 ## Depois de trocar
 Me manda os arquivos que eu compilo e te entrego o `.jar` novo. Se você mesmo compilar, basta dar push no GitHub:
 o Actions gera o `.jar`.

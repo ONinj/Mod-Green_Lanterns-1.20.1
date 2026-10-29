@@ -1,0 +1,11 @@
+{
+  "type": "lanterna:planet_dark",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "lanterna:world_barren",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "lanterna:world_barren"
+    }
+  }
+}

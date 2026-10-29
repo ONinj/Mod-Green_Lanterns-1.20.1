@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "lanterna:odym"
+    "lanterna:odym",
+    "lanterna:world_ice"
   ]
 }

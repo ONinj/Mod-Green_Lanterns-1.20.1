@@ -73,6 +73,12 @@ public final class ModNetwork {
                 .decoder(FlightModePacket::decode)
                 .consumerMainThread(FlightModePacket::handle)
                 .add();
+
+        CHANNEL.messageBuilder(SpaceSeedPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SpaceSeedPacket::encode)
+                .decoder(SpaceSeedPacket::decode)
+                .consumerMainThread(SpaceSeedPacket::handle)
+                .add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

@@ -140,7 +140,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
 
     private void drawBodies(ClientLevel level, PoseStack poseStack, Camera camera, float time) {
         Vec3 cam = camera.getPosition();
-        List<SpaceBodies.Body> sorted = new ArrayList<>(SpaceBodies.BODIES);
+        List<SpaceBodies.Body> sorted = new ArrayList<>(SpaceBodies.near(cam, 3));
         sorted.sort(Comparator.comparingDouble((SpaceBodies.Body b) -> b.center().distanceToSqr(cam)).reversed());
 
         Matrix4f pose = poseStack.last().pose();
@@ -149,6 +149,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             Vec3 rel = body.center().subtract(cam);
             double dist = rel.length();
             if (dist <= body.radius()) continue;
+            if (body.radius() / dist < 0.0025 && body != SpaceBodies.SUN) continue; // pequeno demais para aparecer
 
             // Encolhe o corpo inteiro (inclusive o lado de trás) para caber no alcance da câmera,
             // mantendo o mesmo tamanho aparente
@@ -159,19 +160,24 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             Vec3 sunDir = SpaceBodies.SUN.center().subtract(body.center()).normalize();
             float spin = isSun ? 0f : time * 0.00012f * (float) (300.0 / body.radius());
 
-            // Planeta
+            // Planeta (os gerados ganham textura na hora, a partir da semente deles)
+            if (body.procedural() != null) PlanetTextures.ensure(body);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, body.texture());
             RenderSystem.defaultBlendFunc();
+            // Menos detalhe para planetas que aparecem pequenininhos (e nada para os que nem aparecem)
+            double apparent = body.radius() / dist;
+            int lat = apparent > 0.05 ? LAT : apparent > 0.012 ? 12 : 8;
+            int lon = apparent > 0.05 ? LON : apparent > 0.012 ? 24 : 16;
             BufferBuilder b = Tesselator.getInstance().getBuilder();
             b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            for (int i = 0; i < LAT; i++) {
-                for (int j = 0; j < LON; j++) {
+            for (int i = 0; i < lat; i++) {
+                for (int j = 0; j < lon; j++) {
                     // Ordem anti-horária vista de fora: desenha só o lado virado para a câmera
-                    vertex(b, pose, pos, radius, i, j, sunDir, isSun, spin);
-                    vertex(b, pose, pos, radius, i, j + 1, sunDir, isSun, spin);
-                    vertex(b, pose, pos, radius, i + 1, j + 1, sunDir, isSun, spin);
-                    vertex(b, pose, pos, radius, i + 1, j, sunDir, isSun, spin);
+                    vertex(b, pose, pos, radius, i, j, lat, lon, sunDir, isSun, spin);
+                    vertex(b, pose, pos, radius, i, j + 1, lat, lon, sunDir, isSun, spin);
+                    vertex(b, pose, pos, radius, i + 1, j + 1, lat, lon, sunDir, isSun, spin);
+                    vertex(b, pose, pos, radius, i + 1, j, lat, lon, sunDir, isSun, spin);
                 }
             }
             BufferUploader.drawWithShader(b.end());
@@ -179,14 +185,16 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             // Atmosfera: brilho na borda (mais forte onde a luz passa de raspão)
             // Bem perto da superfície a atmosfera vira só um leve brilho (senão vira névoa)
             float closeness = (float) Mth.clamp((dist - body.radius()) / (body.radius() * 0.6), 0.15, 1.0);
-            drawAtmosphere(pose, pos, radius * (isSun ? 1.25f : 1.06f), body.atmosphere(), (isSun ? 0.9f : 0.75f) * closeness);
+            if (apparent > 0.012 || isSun) {
+                drawAtmosphere(pose, pos, radius * (isSun ? 1.25f : 1.06f), body.atmosphere(), (isSun ? 0.9f : 0.75f) * closeness);
+            }
         }
     }
 
     private static void vertex(BufferBuilder b, Matrix4f pose, Vec3 center, float radius, int lat, int lon,
-                               Vec3 sunDir, boolean isSun, float spin) {
-        float theta = (float) Math.PI * lat / LAT;            // 0 = polo norte
-        float phi = (float) Math.PI * 2 * lon / LON;
+                               int latN, int lonN, Vec3 sunDir, boolean isSun, float spin) {
+        float theta = (float) Math.PI * lat / latN;           // 0 = polo norte
+        float phi = (float) Math.PI * 2 * lon / lonN;
         float nx = Mth.sin(theta) * Mth.cos(phi);
         float ny = Mth.cos(theta);
         float nz = Mth.sin(theta) * Mth.sin(phi);
@@ -199,7 +207,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             light = Mth.clamp(0.22f + Math.max(0f, d) * 0.9f, 0.22f, 1f);
         }
         b.vertex(pose, (float) (center.x + nx * radius), (float) (center.y + ny * radius), (float) (center.z + nz * radius))
-                .uv((float) lon / LON + spin, (float) lat / LAT)
+                .uv((float) lon / lonN + spin, (float) lat / latN)
                 .color(light, light, light, 1f)
                 .endVertex();
     }

@@ -30,7 +30,7 @@ public final class SpaceHud {
         Vec3 pos = mc.player.position();
 
         List<SpaceBodies.Body> list = new ArrayList<>();
-        for (SpaceBodies.Body b : SpaceBodies.BODIES) if (b.landable()) list.add(b);
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) if (b.landable()) list.add(b);
         list.sort(Comparator.comparingDouble(b -> b.center().distanceTo(pos) - b.radius()));
 
         int x = width - 8;
@@ -46,8 +46,8 @@ public final class SpaceHud {
             float targetYaw = (float) Math.toDegrees(Math.atan2(-rel.x, rel.z));
             float diff = Mth.wrapDegrees(targetYaw - mc.player.getYRot());
             String arrow = ARROWS[Math.floorMod(Math.round(diff / 45f), 8)];
-            Component line = Component.literal(arrow + " ").append(Component.translatable(b.nameKey()))
-                    .append(Component.literal(String.format(" %,d m", (int) dist)));
+            Component line = Component.literal(arrow + " ").append(b.displayName())
+                    .append(Component.literal(" " + com.lanterna.client.flight.FlightHud.formatDistance(dist)));
             int color = 0xFF000000 | b.atmosphere();
             g.drawString(font, line, x - font.width(line), y, color, true);
             y += 10;

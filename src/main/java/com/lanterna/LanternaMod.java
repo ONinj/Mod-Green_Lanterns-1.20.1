@@ -6,6 +6,7 @@ import com.lanterna.registry.ModBlockEntities;
 import com.lanterna.registry.ModBlocks;
 import com.lanterna.registry.ModCreativeTabs;
 import com.lanterna.registry.ModItems;
+import com.lanterna.registry.ModEntities;
 import com.lanterna.registry.ModMenus;
 import com.lanterna.registry.ModParticles;
 import com.mojang.logging.LogUtils;
@@ -27,6 +28,7 @@ public class LanternaMod {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModBlocks.BLOCKS.register(modBus);
+        ModEntities.ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);

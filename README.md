@@ -7,7 +7,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 
 ## Requisitos
 - Minecraft 1.20.1 + Forge 47.3+
-- Nenhum outro mod é necessário
+- **GeckoLib 4.8 ou mais nova** (modelos animados dos alienígenas)
 
 ## Fase 1: anel + bateria + entrega
 - **Anel de Poder**: um item só para todas as Tropas; cor, carga e dono ficam no NBT. Clique direito ou coloque na aba Lanterna (tecla K).
@@ -33,6 +33,9 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.7 ✅ Voo com física (embalo, derrapagem nas curvas, inclinação lateral, mergulho, arrancada, vento, FOV), capa correta no voo, anel embaixo do punho, aba Lanterna também no criativo, botões Anel/Voo na tela
 1.8 ✅ Voo mais vivo (inclinação contínua, derrapagem lateral, estrondo sônico, poeira e água no rasante, pousar com Shift, tremor), uniformes com transformação estilo nanotecnologia, ESPAÇO com Terra, Sol e 8 planetas visitáveis
 1.9 ✅ Animação de recarga (tecla R): portal na cintura, a bateria sai dele, o braço encosta e a energia flui para o anel. Sistema pronto para modelos 3D próprios (anel, bateria e peças de uniforme)
+1.10 ✅ Uniforme surgindo pixel por pixel
+1.11 ✅ Hiperpropulsão no espaço, piloto automático com mapa estelar (J), voo com mais física (parafuso, freio aerodinâmico, impacto, água, turbulência, inércia no vácuo)
+1.12 ✅ Planetas gerados sem fim pelo espaço (8 tipos), alienígenas com trocas próprias de cada planeta, materiais dos planetas
 2. Poderes: rajada, escudo, constructos (entidades), menu radial de constructos
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 6. Planetas: habitantes alienígenas, vilas e minérios próprios de cada planeta, missões
@@ -47,6 +50,10 @@ Precisa de um mundo chamado `test` em `run/saves`. O código de teste (`client/d
 
 ## Espaço
 - Voe acima de **Y 330** para sair da atmosfera. Você chega no espaço com a Terra embaixo.
+- **Hiperpropulsão**: no espaço, segure **Ctrl + W** em velocidade máxima. O anel rompe a barreira e chega a ~1.800 blocos/s; freia sozinho perto dos planetas.
+- **Mapa estelar e piloto automático (J)**: escolha um destino e clique em "Voo automático". O anel sobe, viaja (desviando de planetas no caminho) e pousa. S cancela.
+- **Planetas gerados**: além dos planetas das Tropas, o espaço tem planetas novos a cada ~8.000 blocos, sem fim (verdejantes, desérticos, gelados, vulcânicos, oceânicos, cristalinos, fúngicos e rochosos). São sempre os mesmos para a mesma semente do mundo.
+- **Alienígenas**: cada planeta tem a sua espécie, com trocas próprias (clique com o botão direito). Nas vilas dos planetas eles moram no lugar dos aldeões. Os planetas das Tropas vendem o material raro de lá (Cristal de Oa, Âmbar de Korugar...).
 - Planetas (de perto para longe): Oa, Korugar, Ysmault, Odym, Zamaron, Nok, Okaara, Ryut. O HUD mostra direção e distância.
 - Entre num planeta para pousar nele; voe acima de Y 330 no planeta para voltar ao espaço; desça até a Terra para voltar para casa.
 - No espaço só o anel ligado dá oxigênio (gasta 1 de carga por segundo). O anel voa 4x mais rápido no vácuo.

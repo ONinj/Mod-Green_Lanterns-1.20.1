@@ -39,6 +39,12 @@
     ],
     "creature": [
       {
+        "type": "lanterna:alien",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
         "type": "minecraft:allay",
         "weight": 4,
         "minCount": 1,

@@ -116,75 +116,105 @@ public final class DevAutoTest {
             });
             at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
             at(20, () -> cmd("lanterna escolher lanterna:green"));
-            at(200, () -> { look(0, 0); cmd("lanterna carga 1000"); });
-            // ---- Mapa estelar ----
-            at(5, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
-            at(20, () -> shot("p0_starmap"));
-            // ---- Manobras: parafuso e freio ----
-            at(5, () -> { mc.setScreen(null); ModNetwork.sendToServer(new ToggleFlightPacket()); });
-            at(30, () -> { hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); sideCamera(true, 120, 5, 0.8); });
-            at(30, () -> { hold(mc.options.keyLeft, true); });
-            at(1, () -> hold(mc.options.keyLeft, false));
-            at(2, () -> hold(mc.options.keyLeft, true));
-            at(1, () -> hold(mc.options.keyLeft, false));
-            at(5, () -> shot("p1_barrel_roll"));
-            at(6, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); hold(mc.options.keyDown, true); });
-            at(4, () -> shot("p2_air_brake"));
-            at(10, () -> hold(mc.options.keyDown, false));
-            // ---- Piloto automático: Terra -> Oa ----
-            at(20, () -> { look(0, 0); com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId("oa")); sideCamera(false, 0, 0, 0); camera(CameraType.THIRD_PERSON_BACK); });
-            at(25, () -> shot("p3_auto_ascend"));
-            at(25, () -> shot("p4_auto_ascend2"));
-            at(15, () -> shot("p5_auto_t"));
-            at(15, () -> shot("p6_auto_t"));
-            at(15, () -> shot("p7_auto_t"));
-            at(15, () -> shot("p8_auto_t"));
-            at(15, () -> shot("p9_auto_t"));
-            at(15, () -> shot("p10_auto_t"));
-            at(15, () -> shot("p11_auto_t"));
-            at(15, () -> shot("p12_auto_t"));
-            at(15, () -> shot("p13_auto_t"));
-            at(15, () -> shot("p14_auto_t"));
-            at(15, () -> shot("p15_auto_t"));
-            at(15, () -> shot("p16_auto_t"));
-            at(3, () -> camera(CameraType.FIRST_PERSON));
-            at(3, () -> shot("p17_auto_firstperson"));
-            at(3, () -> camera(CameraType.THIRD_PERSON_BACK));
-            at(25, () -> shot("p18_auto_late"));
-            at(25, () -> shot("p19_auto_late"));
-            at(25, () -> shot("p20_auto_late"));
-            at(25, () -> shot("p21_auto_late"));
-            at(25, () -> shot("p22_auto_late"));
-            at(25, () -> shot("p23_auto_late"));
-            at(25, () -> shot("p24_auto_late"));
-            at(25, () -> shot("p25_auto_late"));
-            at(25, () -> shot("p26_auto_late"));
-            at(25, () -> shot("p27_auto_late"));
-            at(25, () -> shot("p28_auto_late"));
-            at(25, () -> shot("p29_auto_late"));
-            at(30, () -> shot("p30_auto_late"));
-            at(30, () -> shot("p31_auto_late"));
-            at(30, () -> shot("p32_auto_late"));
-            at(30, () -> shot("p33_auto_late"));
-            at(30, () -> shot("p34_auto_late"));
-            at(30, () -> shot("p35_auto_late"));
-            at(30, () -> shot("p36_auto_late"));
-            at(30, () -> shot("p37_auto_late"));
-            at(30, () -> shot("p38_auto_late"));
-            at(30, () -> shot("p39_auto_late"));
-            // ---- Hiperpropulsão manual no espaço ----
-            at(10, () -> { com.lanterna.client.flight.Autopilot.stop(null); cmd("execute in lanterna:space run tp @s 0 0 0 90 0"); });
-            at(40, () -> { look(90, 0); hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); camera(CameraType.THIRD_PERSON_BACK); });
-            at(30, () -> shot("h1_charging"));
-            at(20, () -> shot("h2_hyper"));
-            at(20, () -> shot("h3_hyper"));
-            at(5, () -> camera(CameraType.THIRD_PERSON_FRONT));
-            at(5, () -> shot("h4_hyper_front"));
-            at(5, () -> camera(CameraType.FIRST_PERSON));
-            at(5, () -> shot("h5_firstperson"));
-            at(10, () -> shot("h6_firstperson"));
-            at(5, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); });
-            at(30, () -> shot("h7_after"));
+            at(200, () -> { look(0, 0); cmd("lanterna carga 1000"); cmd("time set 6000"); });
+            // ---- Aldeão num planeta vira alienígena ----
+            at(5, () -> cmd("execute in lanterna:oa run forceload add 0 0"));
+            at(10, () -> cmd("execute in lanterna:oa run summon minecraft:villager 0 120 0"));
+            at(10, () -> cmd("execute in lanterna:oa run data get entity @e[type=lanterna:alien,limit=1,x=0,y=100,z=0,distance=..60] Species"));
+            at(5, () -> cmd("execute in lanterna:oa run forceload remove 0 0"));
+            // ---- Alienígenas de cada planeta ----
+            at(5, () -> {
+                String[] species = {"oa", "korugar", "ysmault", "odym", "zamaron", "nok", "okaara", "ryut", "p2_1", "pm2_1"};
+                for (int i = 0; i < species.length; i++) {
+                    double x = -6.75 + i * 1.5;
+                    cmd("summon lanterna:alien " + x + " 150 5.5 {NoAI:1b,Rotation:[180f,0f],Species:\"" + species[i] + "\"}");
+                }
+            });
+            at(30, () -> { camera(CameraType.THIRD_PERSON_BACK); look(0, 10); });
+            at(20, () -> shot("a1_aliens"));
+            at(2, () -> { sideCamera(true, 0, 3.5, 0.2); });
+            at(1, () -> sideCamera(false, 0, 0, 0));
+            at(5, () -> { camera(CameraType.FIRST_PERSON); look(0, 15); });
+            at(10, () -> shot("a2_aliens_close"));
+            at(5, () -> cmd("tp @s -6.25 150 3 0 20"));
+            at(10, () -> {
+                var list = mc.level.getEntitiesOfClass(com.lanterna.alien.AlienEntity.class, mc.player.getBoundingBox().inflate(12));
+                for (var alien : list) if (alien.speciesId().equals("oa")) { mc.gameMode.interact(mc.player, alien, net.minecraft.world.InteractionHand.MAIN_HAND); break; }
+            });
+            at(20, () -> shot("a3_trade_oa"));
+            at(5, () -> mc.setScreen(null));
+            at(5, () -> cmd("tp @s 5.75 150 3 0 20"));
+            at(10, () -> {
+                var list = mc.level.getEntitiesOfClass(com.lanterna.alien.AlienEntity.class, mc.player.getBoundingBox().inflate(12));
+                for (var alien : list) if (alien.speciesId().equals("p2_1")) { mc.gameMode.interact(mc.player, alien, net.minecraft.world.InteractionHand.MAIN_HAND); break; }
+            });
+            at(20, () -> shot("a4_trade_generated"));
+            at(5, () -> { mc.setScreen(null); cmd("kill @e[type=lanterna:alien]"); cmd("tp @s 0.5 150 0.5 0 0"); });
+            // ---- Mapa estelar com planetas gerados ----
+            at(10, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
+            at(20, () -> shot("s1_starmap"));
+            // ---- Piloto automático até o planeta gerado mais perto ----
+            at(5, () -> {
+                mc.setScreen(null);
+                var here = com.lanterna.client.flight.Destinations.spacePosition(mc.player);
+                com.lanterna.client.flight.Destinations.Destination best = null;
+                for (var d : com.lanterna.client.flight.Destinations.all()) {
+                    if (!d.id().startsWith("p")) continue;
+                    if (best == null || d.center().distanceTo(here) < best.center().distanceTo(here)) best = d;
+                }
+                LanternaMod.LOGGER.info("AUTOTEST destino {} {} {} r={}", best == null ? null : best.id(), best == null ? null : best.name().getString(), best == null ? null : best.center(), best == null ? 0 : best.radius());
+                com.lanterna.client.flight.Autopilot.start(best);
+                camera(CameraType.THIRD_PERSON_BACK);
+            });
+            at(30, () -> shot("g1_trip"));
+            at(30, () -> shot("g2_trip"));
+            at(30, () -> shot("g3_trip"));
+            at(30, () -> shot("g4_trip"));
+            at(30, () -> shot("g5_trip"));
+            at(30, () -> shot("g6_trip"));
+            at(30, () -> shot("g7_trip"));
+            at(30, () -> shot("g8_trip"));
+            at(30, () -> shot("g9_trip"));
+            at(30, () -> shot("g10_trip"));
+            at(30, () -> shot("g11_trip"));
+            at(30, () -> shot("g12_trip"));
+            at(30, () -> shot("g13_trip"));
+            at(30, () -> shot("g14_trip"));
+            at(30, () -> shot("g15_trip"));
+            at(30, () -> shot("g16_trip"));
+            at(30, () -> shot("g17_trip"));
+            at(30, () -> shot("g18_trip"));
+            at(30, () -> shot("g19_trip"));
+            at(30, () -> shot("g20_trip"));
+            at(30, () -> shot("g21_trip"));
+            at(30, () -> shot("g22_trip"));
+            at(30, () -> shot("g23_trip"));
+            at(30, () -> shot("g24_trip"));
+            at(30, () -> shot("g25_trip"));
+            at(30, () -> shot("g26_trip"));
+            at(30, () -> shot("g27_trip"));
+            at(30, () -> shot("g28_trip"));
+            at(30, () -> shot("g29_trip"));
+            at(30, () -> shot("g30_trip"));
+            at(30, () -> shot("g31_trip"));
+            at(30, () -> shot("g32_trip"));
+            at(30, () -> shot("g33_trip"));
+            at(30, () -> shot("g34_trip"));
+            at(30, () -> shot("g35_trip"));
+            at(30, () -> shot("g36_trip"));
+            at(30, () -> shot("g37_trip"));
+            at(30, () -> shot("g38_trip"));
+            at(30, () -> shot("g39_trip"));
+            at(30, () -> shot("g40_trip"));
+            at(30, () -> shot("g41_trip"));
+            at(30, () -> shot("g42_trip"));
+            at(30, () -> shot("g43_trip"));
+            at(30, () -> shot("g44_trip"));
+            at(30, () -> shot("g45_trip"));
+            at(5, () -> { camera(CameraType.FIRST_PERSON); look(mc.player.getYRot(), 20); });
+            at(40, () -> shot("g90_planet_view"));
+            at(5, () -> look(mc.player.getYRot() + 120, 15));
+            at(20, () -> shot("g91_planet_view"));
             at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }

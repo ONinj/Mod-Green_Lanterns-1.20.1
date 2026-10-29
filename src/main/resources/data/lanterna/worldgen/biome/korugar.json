@@ -39,6 +39,12 @@
     ],
     "creature": [
       {
+        "type": "lanterna:alien",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
         "type": "minecraft:camel",
         "weight": 6,
         "minCount": 1,

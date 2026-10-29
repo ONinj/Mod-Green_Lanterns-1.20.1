@@ -4,6 +4,8 @@ import com.lanterna.LanternaMod;
 import com.lanterna.capability.ModCapabilities;
 import com.lanterna.capability.RingData;
 import com.lanterna.power.RingPowers;
+import com.lanterna.network.ModNetwork;
+import com.lanterna.network.SpaceSeedPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -57,15 +59,21 @@ public final class SpaceTravel {
         }
 
         // Planeta -> espaço (ao lado do planeta)
-        SpaceBodies.Body here = SpaceBodies.byDimension(player.level().dimension());
-        if (here != null && here != SpaceBodies.EARTH && player.getY() > EXIT_HEIGHT) {
+        if (SpaceBodies.isPlanet(player.level().dimension()) && player.getY() > EXIT_HEIGHT) {
+            SpaceBodies.Body here = SpaceBodies.bodyAt(player.level().dimension(), player.getX(), player.getZ());
             // Sai ao lado do planeta (olhando para fora dele), sem passar do teto do espaço
-            Vec3 out = here.center().add(here.radius() + 60, 0, 0);
+            Vec3 out = here != null ? here.center().add(here.radius() + 60, 0, 0)
+                    : ProceduralPlanets.spacePointForRegion(player.getX(), player.getZ());
             travel(player, SpaceBodies.SPACE, out, -90f, 0f, "space.lanterna.leave_planet");
             return;
         }
 
         if (!dim.is(SpaceBodies.SPACE)) return;
+
+        // Voando pelo espaço (vazio) o servidor não precisa calcular colisão com blocos. Sem isso ele
+        // pararia esperando carregar cada chunk vazio pelo caminho, travando o jogo em alta velocidade.
+        RingData flyer = ModCapabilities.get(player).orElse(null);
+        if (flyer != null && flyer.hasRing() && flyer.flightEnabled()) player.noPhysics = true;
 
         // Dentro do espaço: chegou num planeta (ou na Terra)?
         SpaceBodies.Body body = SpaceBodies.inside(player.position());
@@ -75,6 +83,7 @@ public final class SpaceTravel {
         }
 
         // Limites do espaço: não deixa cair no "fundo do mundo"
+        // (o espaço só tem blocos bem lá embaixo, de -512 a -449; acima disso é vazio e leve para o servidor)
         if (player.getY() < -500) player.teleportTo(player.getX(), -480, player.getZ());
 
         // Oxigênio: só o anel ligado protege
@@ -118,8 +127,11 @@ public final class SpaceTravel {
         Vec3 flat = new Vec3(dir.x, 0, dir.z);
         if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
         flat = flat.normalize().scale(256);
-        x = flat.x;
-        z = flat.z;
+        // Planetas gerados ficam numa região própria do mundo do tipo deles
+        double ox = body.procedural() != null ? body.procedural().regionX() : 0;
+        double oz = body.procedural() != null ? body.procedural().regionZ() : 0;
+        x = ox + flat.x;
+        z = oz + flat.z;
         // Chega no alto do céu e desce enquanto o terreno carrega (sem travar o servidor)
         travel(player, target.dimension(), new Vec3(x, 300, z), player.getYRot(), 35f, "space.lanterna.landing");
         RingData data = ModCapabilities.get(player).orElse(null);
@@ -138,8 +150,8 @@ public final class SpaceTravel {
         player.teleportTo(level, pos.x, pos.y, pos.z, yaw, pitch);
         player.fallDistance = 0;
         level.playSound(null, player.blockPosition(), SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.25f, 1.6f);
-        SpaceBodies.Body body = SpaceBodies.byDimension(dimension);
-        Component name = body != null ? Component.translatable(body.nameKey()) : Component.translatable("planet.lanterna.space");
+        SpaceBodies.Body body = SpaceBodies.bodyAt(dimension, pos.x, pos.z);
+        Component name = body != null ? body.displayName() : Component.translatable("planet.lanterna.space");
         player.displayClientMessage(Component.translatable(messageKey, name), true);
     }
 
@@ -156,7 +168,33 @@ public final class SpaceTravel {
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) updateGravity(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            updateGravity(player);
+            ModNetwork.sendTo(player, new SpaceSeedPacket(ProceduralPlanets.seed()));
+        }
+    }
+
+    /**
+     * O espaço é vazio: não precisa carregar muitos chunks em volta do jogador.
+     * Distância de visão curta lá (só para o servidor) deixa a chegada nos planetas bem mais rápida.
+     */
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.getServer().getTickCount() % 100 != 0) return;
+        ServerLevel space = event.getServer().getLevel(SpaceBodies.SPACE);
+        if (space == null) return;
+        int wanted = Math.min(SPACE_VIEW_DISTANCE, event.getServer().getPlayerList().getViewDistance());
+        space.getChunkSource().setViewDistance(wanted);
+        space.getChunkSource().setSimulationDistance(Math.min(wanted, event.getServer().getPlayerList().getSimulationDistance()));
+    }
+
+    private static final int SPACE_VIEW_DISTANCE = 4;
+
+    /** Semente dos planetas gerados (a mesma para todos no servidor). */
+    @SubscribeEvent
+    public static void onServerStarting(net.minecraftforge.event.server.ServerAboutToStartEvent event) {
+        long worldSeed = event.getServer().getWorldData().worldGenOptions().seed();
+        ProceduralPlanets.setSeed(worldSeed ^ 0x4C616E7465726E61L);
     }
 
     @SubscribeEvent

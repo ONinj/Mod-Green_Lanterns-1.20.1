@@ -96,6 +96,13 @@ public final class ClientFlight {
         boolean flying = ClientRingData.hasRing && ClientRingData.flight && ClientRingData.active
                 && !player.isSpectator() && !player.isPassenger();
 
+        // Mundo novo ainda carregando: fica parado até o chão chegar (senão a tela de carregamento não fecha)
+        if (flying && Minecraft.getInstance().screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen) {
+            velocity = Vec3.ZERO;
+            player.setDeltaMovement(Vec3.ZERO);
+            return;
+        }
+
         // O piloto pode estar esperando o voo ligar
         Autopilot.Control auto = null;
         if (Autopilot.active()) {
@@ -325,7 +332,7 @@ public final class ClientFlight {
     /** Velocidade máxima segura perto dos planetas: freia sozinho ao se aproximar. */
     private static double brakeLimit(Vec3 pos) {
         double limit = HYPER_MAX;
-        for (SpaceBodies.Body b : SpaceBodies.allBodies()) {
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
             if (!b.landable()) continue;
             double surface = pos.distanceTo(b.center()) - b.radius();
             limit = Math.min(limit, Math.max(SPACE_BOOST * 0.9, surface / 14.0));
@@ -337,7 +344,7 @@ public final class ClientFlight {
     private static Vec3 gravityWell(Vec3 pos, boolean thrusting) {
         if (thrusting) return Vec3.ZERO;
         Vec3 pull = Vec3.ZERO;
-        for (SpaceBodies.Body b : SpaceBodies.allBodies()) {
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
             if (!b.landable()) continue;
             Vec3 to = b.center().subtract(pos);
             double d = to.length();
@@ -396,6 +403,12 @@ public final class ClientFlight {
     }
 
     public static boolean hyperOn() { return hyperOn; }
+
+    /** Para quase na hora (fim do pouso do piloto automático). */
+    public static void brakeHard() {
+        velocity = velocity.scale(0.05);
+        dropHyper();
+    }
 
     /**
      * No espaço, em alta velocidade, o jogador continua se movendo mesmo onde os chunks ainda não chegaram

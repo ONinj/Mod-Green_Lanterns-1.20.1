@@ -33,6 +33,12 @@
     ],
     "creature": [
       {
+        "type": "lanterna:alien",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
         "type": "minecraft:polar_bear",
         "weight": 4,
         "minCount": 1,

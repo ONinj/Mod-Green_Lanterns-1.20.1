@@ -110,7 +110,13 @@ public final class Autopilot {
 
     private static Phase nextPhase(LocalPlayer player) {
         var dim = player.level().dimension();
-        if (dim.equals(target.dimension())) return Phase.DESCEND;
+        if (dim.equals(target.dimension())) {
+            // Mundos de planetas gerados são compartilhados: confere se é a região do destino
+            SpaceBodies.Body here = SpaceBodies.bodyAt(dim, player.getX(), player.getZ());
+            if (here != null && here.id().equals(target.id())) return Phase.DESCEND;
+            if (dim.equals(SpaceBodies.SPACE)) return Phase.CRUISE;
+            return Phase.ASCEND;
+        }
         if (dim.equals(SpaceBodies.SPACE)) return Phase.CRUISE;
         return Phase.ASCEND;
     }
@@ -136,7 +142,7 @@ public final class Autopilot {
         dir = dir.normalize();
 
         // Desvia de planetas no caminho (senão pousaria no planeta errado)
-        for (SpaceBodies.Body b : SpaceBodies.allBodies()) {
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 2)) {
             if (!b.landable() || b.id().equals(target.id())) continue;
             Vec3 to = b.center().subtract(pos);
             double along = to.dot(dir);
@@ -184,7 +190,15 @@ public final class Autopilot {
             return new Control(0, false, false, false, false);
         }
         double height = player.getY() - ground;
-        if (height < 4 || player.onGround() || phaseTicks > 20 * 60) {
+        // Chegou: algo (chão ou água) logo abaixo dos pés
+        boolean near = player.isInWater() || player.onGround();
+        var below = player.blockPosition().mutable();
+        for (int i = 1; i <= 4 && !near; i++) {
+            below.setY(player.getBlockY() - i);
+            if (!level.getBlockState(below).isAir() || !level.getFluidState(below).isEmpty()) near = true;
+        }
+        if (near || height < 4 || phaseTicks > 20 * 60) {
+            ClientFlight.brakeHard();
             stop(Component.translatable("autopilot.lanterna.arrived", target.name()));
             return null;
         }

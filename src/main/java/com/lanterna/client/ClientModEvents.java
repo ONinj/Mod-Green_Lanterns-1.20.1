@@ -64,6 +64,11 @@ public final class ClientModEvents {
     }
 
     @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(com.lanterna.registry.ModEntities.ALIEN.get(), com.lanterna.client.alien.AlienRenderer::new);
+    }
+
+    @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(UniformModels.WIDE, UniformModels::wide);
         event.registerLayerDefinition(UniformModels.SLIM, UniformModels::slim);

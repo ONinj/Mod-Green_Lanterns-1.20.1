@@ -25,6 +25,16 @@ public final class ModCreativeTabs {
                         for (BuiltinCorps corps : BuiltinCorps.values()) {
                             output.accept(PowerBatteryItem.create(corps.id(), corps.color()));
                         }
+                        output.accept(ModItems.OA_CRYSTAL.get());
+                        output.accept(ModItems.KORUGAR_AMBER.get());
+                        output.accept(ModItems.YSMAULT_BLOODSTONE.get());
+                        output.accept(ModItems.ODYM_FROST.get());
+                        output.accept(ModItems.ZAMARON_HEARTSTONE.get());
+                        output.accept(ModItems.NOK_INDIGO.get());
+                        output.accept(ModItems.OKAARA_GOLD.get());
+                        output.accept(ModItems.RYUT_OBSIDIAN.get());
+                        output.accept(ModItems.ALIEN_ALLOY.get());
+                        output.accept(ModItems.ALIEN_SPAWN_EGG.get());
                     })
                     .build());
 

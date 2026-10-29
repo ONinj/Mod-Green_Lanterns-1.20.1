@@ -1,0 +1,11 @@
+{
+  "type": "lanterna:planet",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "lanterna:world_desert",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "lanterna:world_desert"
+    }
+  }
+}

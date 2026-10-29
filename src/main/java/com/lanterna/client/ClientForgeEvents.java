@@ -195,6 +195,8 @@ public final class ClientForgeEvents {
         UniformTransition.clear();
         ClientRecharge.clear();
         com.lanterna.client.flight.HyperEffects.clear();
+        com.lanterna.client.space.PlanetTextures.clear();
+        com.lanterna.client.alien.AlienModel.clearCache();
     }
 
     private ClientForgeEvents() {}

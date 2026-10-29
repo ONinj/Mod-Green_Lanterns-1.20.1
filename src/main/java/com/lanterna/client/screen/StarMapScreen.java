@@ -56,9 +56,16 @@ public class StarMapScreen extends Screen {
         if (zoom == 0) {
             viewX = here.x;
             viewZ = here.z;
+            // Começa mostrando os planetas das Tropas e os primeiros planetas gerados (dá zoom para ver mais)
             double far = 1000;
-            for (var d : destinations) far = Math.max(far, Math.hypot(d.center().x - here.x, d.center().z - here.z));
-            zoom = Math.min(far * 1.1 / (Math.min(mapW, mapH) / 2.0), 400);
+            int generated = 0;
+            for (var d : destinations) {
+                double dd = Math.hypot(d.center().x - here.x, d.center().z - here.z);
+                boolean proc = com.lanterna.space.ProceduralPlanets.byId(d.id()) != null;
+                if (!proc) far = Math.max(far, dd);
+                else if (generated++ < 4) far = Math.max(far, dd);
+            }
+            zoom = Math.min(far * 1.15 / (Math.min(mapW, mapH) / 2.0), 400);
             if (Autopilot.active() && Autopilot.target() != null) selected = Autopilot.target().id();
         }
 
@@ -152,17 +159,40 @@ public class StarMapScreen extends Screen {
             }
         }
 
-        // Planetas
+        // Planetas (primeiro as bolinhas, depois os nomes que couberem sem encavalar)
+        java.util.List<int[]> labels = new java.util.ArrayList<>();
+        String hoverId = null;
         for (var d : destinations) {
             int x = sx(d.center().x), y = sy(d.center().z);
-            int r = Math.max(3, (int) (d.radius() / zoom));
+            if (x < mapX - 40 || x > mapX + mapW + 40 || y < mapY - 40 || y > mapY + mapH + 40) continue;
+            int r = Math.max(2, (int) (d.radius() / zoom));
             disc(g, x, y, r, 0xFF000000 | darken(d.color(), 0.55f));
             disc(g, x - r / 4, y - r / 4, Math.max(1, r * 2 / 3), 0xFF000000 | d.color());
             if (d.id().equals(selected)) ring(g, x, y, r + 3, 0xFFFFFFFF);
-            boolean hover = Math.hypot(mouseX - x, mouseY - y) <= r + 3;
-            if (hover && !d.id().equals(selected)) ring(g, x, y, r + 3, 0x88FFFFFF);
+            if (Math.hypot(mouseX - x, mouseY - y) <= r + 3) {
+                hoverId = d.id();
+                if (!d.id().equals(selected)) ring(g, x, y, r + 3, 0x88FFFFFF);
+            }
+        }
+        // Nomes: escolhido e o do mouse primeiro, depois os planetas das Tropas, depois os gerados
+        java.util.List<Destinations.Destination> order = new java.util.ArrayList<>(destinations);
+        final String hov = hoverId;
+        order.sort(Comparator.comparingInt(d -> d.id().equals(selected) || d.id().equals(hov) ? 0
+                : com.lanterna.space.ProceduralPlanets.byId(d.id()) == null ? 1 : 2));
+        for (var d : order) {
+            int x = sx(d.center().x), y = sy(d.center().z);
+            int r = Math.max(2, (int) (d.radius() / zoom));
             Component name = d.name();
-            g.drawString(font, name, x - font.width(name) / 2, y + r + 3, hover || d.id().equals(selected) ? 0xFFFFFFFF : 0xFFB8C0D0, true);
+            int w = font.width(name);
+            int[] rect = {x - w / 2 - 1, y + r + 2, x + w / 2 + 1, y + r + 12};
+            boolean important = d.id().equals(selected) || d.id().equals(hov);
+            boolean free = true;
+            for (int[] o : labels) {
+                if (rect[0] < o[2] && rect[2] > o[0] && rect[1] < o[3] && rect[3] > o[1]) { free = false; break; }
+            }
+            if (!free && !important) continue;
+            labels.add(rect);
+            g.drawString(font, name, x - w / 2, y + r + 3, important ? 0xFFFFFFFF : 0xFFB8C0D0, true);
         }
 
         // Você
