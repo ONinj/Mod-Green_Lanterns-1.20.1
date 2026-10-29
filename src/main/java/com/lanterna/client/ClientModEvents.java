@@ -39,6 +39,10 @@ public final class ClientModEvents {
         event.register(KeyBindings.OPEN_LANTERN);
         event.register(KeyBindings.TOGGLE_POWER);
         event.register(KeyBindings.STAR_MAP);
+        event.register(KeyBindings.CONSTRUCT_WHEEL);
+        event.register(KeyBindings.CONSTRUCT_USE);
+        for (var k : KeyBindings.PRESETS) event.register(k);
+        event.register(KeyBindings.JOURNAL);
     }
 
     /** Liga a tela da aba "Lanterna". */
@@ -81,6 +85,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(com.lanterna.registry.ModEntities.ALIEN.get(), com.lanterna.client.alien.AlienRenderer::new);
+        com.lanterna.client.lore.LoreRenderers.register(event);
     }
 
     @SubscribeEvent
@@ -112,6 +117,8 @@ public final class ClientModEvents {
         event.registerAboveAll("selection_cutscene", CutsceneOverlay.OVERLAY);
         event.registerAboveAll("space_nav", com.lanterna.client.space.SpaceHud.HUD);
         event.registerAboveAll("flight_hud", com.lanterna.client.flight.FlightHud.HUD);
+        event.registerAboveAll("mission_hud", com.lanterna.client.mission.MissionHud.HUD);
+        event.registerAboveAll("construct_bar", com.lanterna.client.construct.ConstructBarHud.HUD);
     }
 
     /** Pinta a pedra do anel (camada 1) e o núcleo da bateria (tint 0) na cor da Tropa. */
@@ -132,6 +139,13 @@ public final class ClientModEvents {
             }
             return -1;
         }, ModBlocks.POWER_BATTERY.get());
+        // Blocos dos construtos: cor da Tropa de quem fez
+        event.register((state, level, pos, tintIndex) -> {
+            if (level != null && pos != null && level.getBlockEntity(pos) instanceof com.lanterna.construct.ConstructBlock.Entity be) {
+                return be.color();
+            }
+            return 0x2BFF4A;
+        }, com.lanterna.construct.ConstructRegistry.CONSTRUCT_BLOCK.get());
     }
 
     private ClientModEvents() {}

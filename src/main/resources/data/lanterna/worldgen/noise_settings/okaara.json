@@ -1,7 +1,7 @@
 {
   "aquifers_enabled": true,
   "default_block": {
-    "Name": "minecraft:stone"
+    "Name": "lanterna:arenito_aurumvex"
   },
   "default_fluid": {
     "Name": "minecraft:water",
@@ -331,7 +331,7 @@
       }
     }
   },
-  "ore_veins_enabled": true,
+  "ore_veins_enabled": false,
   "sea_level": 50,
   "spawn_target": [
     {
@@ -433,7 +433,7 @@
                 "then_run": {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "minecraft:orange_terracotta"
+                    "Name": "minecraft:sand"
                   }
                 }
               }
@@ -450,7 +450,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:red_sand"
+                  "Name": "lanterna:arenito_aurumvex"
                 }
               }
             }

@@ -1,5 +1,5 @@
 {
-  "type": "lanterna:planet",
+  "type": "lanterna:planet_dusk",
   "generator": {
     "type": "minecraft:noise",
     "settings": "lanterna:korugar",

@@ -30,14 +30,10 @@ public final class ModCreativeTabs {
                         }
                         // Uniformes 3D das 9 Tropas (máscara, peitoral, calça e botas)
                         for (var piece : com.lanterna.armor.ModArmorItems.all()) output.accept(piece);
-                        output.accept(ModItems.OA_CRYSTAL.get());
-                        output.accept(ModItems.KORUGAR_AMBER.get());
-                        output.accept(ModItems.YSMAULT_BLOODSTONE.get());
-                        output.accept(ModItems.ODYM_FROST.get());
-                        output.accept(ModItems.ZAMARON_HEARTSTONE.get());
-                        output.accept(ModItems.NOK_INDIGO.get());
-                        output.accept(ModItems.OKAARA_GOLD.get());
-                        output.accept(ModItems.RYUT_OBSIDIAN.get());
+                        // Lore: minérios, drops dos bosses, moedas, presentes, blocos das bases e ovos
+                        for (var item : com.lanterna.lore.LoreItems.ALL) output.accept(item.get());
+                        for (var block : com.lanterna.lore.LoreBlocks.ALL) output.accept(block.get());
+                        for (var egg : com.lanterna.lore.LoreEntities.EGGS) output.accept(egg.get());
                         output.accept(ModItems.ALIEN_ALLOY.get());
                         output.accept(ModItems.ALIEN_SPAWN_EGG.get());
                     })

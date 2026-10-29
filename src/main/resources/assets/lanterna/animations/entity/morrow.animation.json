@@ -1,0 +1,323 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.idle": {
+   "loop": true,
+   "animation_length": 4,
+   "bones": {
+    "body": {
+     "position": [
+      0,
+      "math.sin(query.anim_time * 120) * 0.25",
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 90) * 2",
+      "math.sin(query.anim_time * 45) * 4",
+      0
+     ]
+    },
+    "mandibula": {
+     "rotation": [
+      "(math.sin(query.anim_time * 140) + 1) * 4",
+      0,
+      0
+     ]
+    },
+    "lanterna_r": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 0.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 0.0) * 4"
+     ]
+    },
+    "lanterna_l": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 90.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 90.0) * 4"
+     ]
+    },
+    "barbatana_r": {
+     "rotation": [
+      0,
+      "1 * math.sin(query.anim_time * 900) * 18",
+      0
+     ]
+    },
+    "barbatana_l": {
+     "rotation": [
+      0,
+      "-1 * math.sin(query.anim_time * 900) * 18",
+      0
+     ]
+    },
+    "cauda_1": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 0.0) * 8",
+      0
+     ]
+    },
+    "cauda_2": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 30.0) * 8",
+      0
+     ]
+    },
+    "cauda_3": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 60.0) * 8",
+      0
+     ]
+    },
+    "cauda_4": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 90.0) * 8",
+      0
+     ]
+    },
+    "cauda_5": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 120.0) * 8",
+      0
+     ]
+    },
+    "cauda_6": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 150.0) * 8",
+      0
+     ]
+    },
+    "cauda_7": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 120 + 180.0) * 8",
+      0
+     ]
+    }
+   }
+  },
+  "move.walk": {
+   "loop": true,
+   "animation_length": 1,
+   "bones": {
+    "body": {
+     "rotation": [
+      "math.sin(query.anim_time * 720) * 1.5",
+      0,
+      "math.sin(query.anim_time * 360) * 1.5"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 720) * 2",
+      0,
+      0
+     ]
+    },
+    "lanterna_r": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 0.0) * 10",
+      0,
+      0
+     ]
+    },
+    "lanterna_l": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 90.0) * 10",
+      0,
+      0
+     ]
+    },
+    "barbatana_r": {
+     "rotation": [
+      0,
+      "1 * math.sin(query.anim_time * 900) * 18",
+      0
+     ]
+    },
+    "barbatana_l": {
+     "rotation": [
+      0,
+      "-1 * math.sin(query.anim_time * 900) * 18",
+      0
+     ]
+    },
+    "cauda_1": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 0.0) * 14",
+      0
+     ]
+    },
+    "cauda_2": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 30.0) * 14",
+      0
+     ]
+    },
+    "cauda_3": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 60.0) * 14",
+      0
+     ]
+    },
+    "cauda_4": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 90.0) * 14",
+      0
+     ]
+    },
+    "cauda_5": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 120.0) * 14",
+      0
+     ]
+    },
+    "cauda_6": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 150.0) * 14",
+      0
+     ]
+    },
+    "cauda_7": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 360 + 180.0) * 14",
+      0
+     ]
+    }
+   }
+  },
+  "attack.strike": {
+   "animation_length": 0.8,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.2": [
+       -6,
+       -12,
+       0
+      ],
+      "0.45": [
+       10,
+       18,
+       0
+      ],
+      "0.8": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "mandibula": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.25": [
+       30,
+       0,
+       0
+      ],
+      "0.5": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "move.swim": {
+   "loop": true,
+   "animation_length": 2,
+   "bones": {
+    "cauda_1": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 0) * 12",
+      0
+     ]
+    },
+    "cauda_2": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 40) * 12",
+      0
+     ]
+    },
+    "cauda_3": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 80) * 12",
+      0
+     ]
+    },
+    "cauda_4": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 120) * 12",
+      0
+     ]
+    },
+    "cauda_5": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 160) * 12",
+      0
+     ]
+    },
+    "cauda_6": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 200) * 12",
+      0
+     ]
+    },
+    "cauda_7": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 180 + 240) * 12",
+      0
+     ]
+    },
+    "barbatana_r": {
+     "rotation": [
+      0,
+      0,
+      "math.sin(query.anim_time * 180) * 15"
+     ]
+    },
+    "barbatana_l": {
+     "rotation": [
+      0,
+      0,
+      "-math.sin(query.anim_time * 180) * 15"
+     ]
+    }
+   }
+  }
+ }
+}

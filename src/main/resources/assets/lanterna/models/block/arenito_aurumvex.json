@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:block/cube_all",
+ "textures": {
+  "all": "lanterna:block/arenito_aurumvex"
+ }
+}

@@ -1,8 +1,7 @@
 {
   "replace": false,
   "values": [
-    "lanterna:korugar",
-    "lanterna:okaara",
-    "lanterna:world_desert"
+    "lanterna:world_desert",
+    "lanterna:okaara"
   ]
 }

@@ -1,14 +1,14 @@
 {
   "has_precipitation": false,
-  "temperature": 0.8,
-  "downfall": 0.4,
+  "temperature": 0.7,
+  "downfall": 0.0,
   "effects": {
-    "sky_color": 16762432,
-    "fog_color": 15245360,
-    "water_color": 13664288,
-    "water_fog_color": 4202504,
-    "grass_color": 12623920,
-    "foliage_color": 10518560,
+    "sky_color": 6969872,
+    "fog_color": 13152304,
+    "water_color": 9075232,
+    "water_fog_color": 3155976,
+    "grass_color": 6971424,
+    "foliage_color": 5261336,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
@@ -19,36 +19,30 @@
       "options": {
         "type": "minecraft:white_ash"
       },
-      "probability": 0.01
+      "probability": 0.02
     }
   },
   "spawners": {
     "monster": [
       {
-        "type": "minecraft:husk",
-        "weight": 80,
-        "minCount": 2,
-        "maxCount": 4
+        "type": "lanterna:eco_cinzento",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 2
       },
       {
-        "type": "minecraft:blaze",
-        "weight": 15,
+        "type": "minecraft:spider",
+        "weight": 20,
         "minCount": 1,
-        "maxCount": 1
+        "maxCount": 2
       }
     ],
     "creature": [
       {
-        "type": "lanterna:alien",
-        "weight": 12,
-        "minCount": 2,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:camel",
-        "weight": 6,
+        "type": "lanterna:skrell_vath",
+        "weight": 10,
         "minCount": 1,
-        "maxCount": 2
+        "maxCount": 3
       }
     ],
     "ambient": [],
@@ -74,7 +68,6 @@
     [],
     [],
     [
-      "minecraft:ore_dirt",
       "minecraft:ore_gravel",
       "minecraft:ore_granite_upper",
       "minecraft:ore_granite_lower",
@@ -92,9 +85,6 @@
       "minecraft:ore_gold_lower",
       "minecraft:ore_redstone",
       "minecraft:ore_redstone_lower",
-      "minecraft:ore_diamond",
-      "minecraft:ore_diamond_large",
-      "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
@@ -102,11 +92,21 @@
       "minecraft:disk_sand",
       "minecraft:disk_clay",
       "minecraft:disk_gravel",
-      "minecraft:ore_gold_extra"
+      "lanterna:ore_fragmento_de_pavor"
     ],
     [],
     [],
-    [],
+    [
+      "minecraft:glow_lichen",
+      "minecraft:dark_forest_vegetation",
+      "minecraft:forest_flowers",
+      "minecraft:flower_default",
+      "minecraft:patch_grass_forest",
+      "minecraft:brown_mushroom_normal",
+      "minecraft:red_mushroom_normal",
+      "minecraft:patch_sugar_cane",
+      "minecraft:patch_pumpkin"
+    ],
     []
   ]
 }

@@ -1,6 +1,9 @@
 package com.lanterna.client.space;
 
 import com.lanterna.client.ClientRingData;
+import com.lanterna.client.hud.Hud;
+import com.lanterna.client.mission.ClientLoreData;
+import com.lanterna.client.mission.MissionHud;
 import com.lanterna.space.SpaceBodies;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -16,48 +19,64 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Navegação no espaço (canto superior direito): os 4 corpos mais próximos,
- * com uma seta mostrando para que lado ele está e a distância.
- * Também avisa do oxigênio.
+ * Navegação no espaço (canto superior direito): os corpos mais próximos com seta, nome e distância
+ * em colunas, e o estado do oxigênio. Fontes do HUD (Rajdhani/Orbitron).
  */
 public final class SpaceHud {
-    private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
+    private static final int W = 176;
 
     public static final IGuiOverlay HUD = (ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) -> {
         Minecraft mc = Minecraft.getInstance();
+        MissionHud.topOffset = 8;
         if (mc.player == null || mc.options.hideGui || !mc.player.level().dimension().equals(SpaceBodies.SPACE)) return;
         Font font = mc.font;
         Vec3 pos = mc.player.position();
 
         List<SpaceBodies.Body> list = new ArrayList<>();
-        for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) if (b.landable()) list.add(b);
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
+            if (!b.landable()) continue;
+            if (SpaceBodies.isHidden(b.id()) && !ClientLoreData.geneseRevealed()) continue;
+            list.add(b);
+        }
         list.sort(Comparator.comparingDouble(b -> b.center().distanceTo(pos) - b.radius()));
+        int rows = Math.min(5, list.size());
+        int x = width - W - 8, y = 8;
+        int h = 22 + rows * 12 + 16;
+        int accent = ClientRingData.hasRing ? ClientRingData.color : 0x8AB4FF;
+        Hud.panel(g, x, y, W, h, accent, 0.9f);
 
-        int x = width - 8;
-        int y = 8;
-        Component title = Component.translatable("space.lanterna.hud.title");
-        g.drawString(font, title, x - font.width(title), y, 0xFFB8C8FF, true);
-        y += 12;
+        Component title = Hud.caps(Component.translatable("space.lanterna.hud.title"));
+        g.drawString(font, title, x + 8, y + 5, Hud.argb(accent, 255), false);
+        Component speed = Hud.body(Component.literal(String.format(java.util.Locale.ROOT, "%.0f b/s",
+                com.lanterna.client.flight.ClientFlight.localSpeed() * 20)));
+        Hud.textRight(g, speed, x + W - 8, y + 5, 0xFF8A98A4);
+        g.fill(x + 8, y + 16, x + W - 8, y + 17, 0x28FFFFFF);
 
-        for (int i = 0; i < Math.min(4, list.size()); i++) {
+        int ly = y + 21;
+        for (int i = 0; i < rows; i++) {
             SpaceBodies.Body b = list.get(i);
             Vec3 rel = b.center().subtract(pos);
             double dist = Math.max(0, rel.length() - b.radius());
             float targetYaw = (float) Math.toDegrees(Math.atan2(-rel.x, rel.z));
             float diff = Mth.wrapDegrees(targetYaw - mc.player.getYRot());
-            String arrow = ARROWS[Math.floorMod(Math.round(diff / 45f), 8)];
-            Component line = Component.literal(arrow + " ").append(b.displayName())
-                    .append(Component.literal(" " + com.lanterna.client.flight.FlightHud.formatDistance(dist)));
             int color = 0xFF000000 | b.atmosphere();
-            g.drawString(font, line, x - font.width(line), y, color, true);
-            y += 10;
+            g.drawString(font, Component.literal(Hud.arrow(diff)), x + 8, ly, color, true);
+            g.fill(x + 19, ly + 3, x + 22, ly + 6, color);
+            Component name = Hud.bold(b.displayName());
+            String ns = name.getString();
+            if (font.width(name) > 88) name = Hud.bold(Component.literal(font.plainSubstrByWidth(ns, 84) + "…"));
+            g.drawString(font, name, x + 26, ly, i == 0 ? 0xFFFFFFFF : 0xFFD0D8DE, true);
+            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(dist))), x + W - 8, ly, color);
+            ly += 12;
         }
 
         // Oxigênio
         boolean safe = mc.player.isCreative() || (ClientRingData.hasRing && ClientRingData.active);
-        Component oxygen = Component.translatable(safe ? "space.lanterna.hud.oxygen_ok" : "space.lanterna.hud.oxygen_none");
         boolean blink = (mc.player.tickCount / 8) % 2 == 0;
-        g.drawString(font, oxygen, x - font.width(oxygen), y + 4, safe ? 0xFF9FE0A0 : (blink ? 0xFFFF4040 : 0xFF802020), true);
+        g.fill(x + 8, ly + 1, x + W - 8, ly + 2, 0x20FFFFFF);
+        Component oxygen = Hud.body(Component.translatable(safe ? "space.lanterna.hud.oxygen_ok" : "space.lanterna.hud.oxygen_none"));
+        g.drawString(font, oxygen, x + 8, ly + 4, safe ? 0xFF9FE0A0 : (blink ? 0xFFFF4040 : 0xFF802020), true);
+        MissionHud.topOffset = y + h + 6;
     };
 
     private SpaceHud() {}

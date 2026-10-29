@@ -11,59 +11,14 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import java.util.Random;
 
 /**
- * Trocas de cada espécie, ligadas ao planeta dela. Cada planeta das Tropas tem o seu material raro
- * (o "coração" daquele planeta); os planetas gerados trocam liga alienígena e coisas do tipo deles.
- * Base para as futuras receitas de baterias e anéis.
+ * Trocas dos alienígenas dos planetas gerados: liga alienígena e coisas do tipo do planeta.
+ * (Os planetas das Tropas têm as raças da lore, com trocas próprias em RaceTrades.)
  */
 public final class AlienTrades {
 
     public static MerchantOffers forSpecies(AlienSpecies species) {
         MerchantOffers o = new MerchantOffers();
-        switch (species.id()) {
-            case "oa" -> {
-                buy(o, Items.IRON_INGOT, 12, 1);
-                sell(o, 6, ModItems.OA_CRYSTAL.get(), 1);
-                swap(o, ModItems.OA_CRYSTAL.get(), 1, Items.EMERALD, 3);
-                trade(o, new ItemStack(ModItems.OA_CRYSTAL.get()), new ItemStack(Items.LAPIS_LAZULI, 8), new ItemStack(Items.EXPERIENCE_BOTTLE, 4));
-            }
-            case "korugar" -> {
-                buy(o, Items.GOLD_INGOT, 8, 1);
-                sell(o, 7, ModItems.KORUGAR_AMBER.get(), 1);
-                buy(o, Items.BONE, 16, 1);
-                swap(o, ModItems.KORUGAR_AMBER.get(), 1, Items.EMERALD, 3);
-            }
-            case "ysmault" -> {
-                buy(o, Items.ROTTEN_FLESH, 24, 1);
-                trade(o, new ItemStack(Items.EMERALD, 4), new ItemStack(Items.REDSTONE, 8), new ItemStack(ModItems.YSMAULT_BLOODSTONE.get()));
-                swap(o, ModItems.YSMAULT_BLOODSTONE.get(), 1, Items.BLAZE_POWDER, 4);
-            }
-            case "odym" -> {
-                buy(o, Items.SNOWBALL, 32, 1);
-                sell(o, 6, ModItems.ODYM_FROST.get(), 1);
-                swap(o, ModItems.ODYM_FROST.get(), 1, Items.BLUE_ICE, 4);
-            }
-            case "zamaron" -> {
-                buy(o, Items.POPPY, 12, 1);
-                trade(o, new ItemStack(Items.EMERALD, 5), new ItemStack(Items.PINK_PETALS, 4), new ItemStack(ModItems.ZAMARON_HEARTSTONE.get()));
-                swap(o, ModItems.ZAMARON_HEARTSTONE.get(), 1, Items.GOLDEN_APPLE, 1);
-            }
-            case "nok" -> {
-                buy(o, Items.LAPIS_LAZULI, 10, 1);
-                sell(o, 7, ModItems.NOK_INDIGO.get(), 1);
-                swap(o, ModItems.NOK_INDIGO.get(), 1, Items.AMETHYST_SHARD, 6);
-            }
-            case "okaara" -> {
-                swap(o, Items.GOLD_BLOCK, 1, Items.EMERALD, 3);
-                sell(o, 9, ModItems.OKAARA_GOLD.get(), 1);
-                swap(o, ModItems.OKAARA_GOLD.get(), 1, Items.GOLD_BLOCK, 2);
-            }
-            case "ryut" -> {
-                buy(o, Items.BONE, 20, 1);
-                trade(o, new ItemStack(Items.EMERALD, 6), new ItemStack(Items.COAL, 16), new ItemStack(ModItems.RYUT_OBSIDIAN.get()));
-                swap(o, ModItems.RYUT_OBSIDIAN.get(), 1, Items.CRYING_OBSIDIAN, 4);
-            }
-            default -> generated(o, species);
-        }
+        generated(o, species);
         return o;
     }
 

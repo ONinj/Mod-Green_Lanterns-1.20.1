@@ -448,6 +448,16 @@ public final class SelectionManager {
         player.sendSystemMessage(Component.translatable(base + ".message").withStyle(s -> s.withColor(def.color())));
         player.sendSystemMessage(Component.translatable("message.lanterna.tutorial"));
         RingPowers.sync(player, data);
+
+        // A lore começa: missão inicial da Tropa. O anel verde leva o novo Lanterna direto para Oa.
+        com.lanterna.mission.MissionManager.startCorpsLine(player, def.id());
+        if (def.id().equals(com.lanterna.corps.BuiltinCorps.GREEN.id())
+                && !player.level().dimension().equals(net.minecraft.resources.ResourceKey.create(
+                        net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("oa")))) {
+            player.sendSystemMessage(Component.translatable("message.lanterna.green_to_oa")
+                    .withStyle(s -> s.withColor(def.color()).withItalic(true)));
+            ModNetwork.sendTo(player, new com.lanterna.network.lore.StartAutopilotPacket("oa", 60));
+        }
     }
 
     private static void sound(ServerPlayer player, SoundEvent event, float volume, float pitch) {

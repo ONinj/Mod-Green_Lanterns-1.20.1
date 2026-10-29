@@ -1,10 +1,10 @@
 {
   "has_precipitation": false,
-  "temperature": 0.8,
-  "downfall": 0.4,
+  "temperature": 2.0,
+  "downfall": 0.0,
   "effects": {
-    "sky_color": 9048080,
-    "fog_color": 5900810,
+    "sky_color": 13656096,
+    "fog_color": 9056272,
     "water_color": 12582912,
     "water_fog_color": 5242880,
     "grass_color": 9445408,
@@ -17,38 +17,32 @@
     },
     "particle": {
       "options": {
-        "type": "minecraft:crimson_spore"
+        "type": "minecraft:ash"
       },
-      "probability": 0.02
+      "probability": 0.03
     }
   },
   "spawners": {
     "monster": [
       {
-        "type": "minecraft:zombified_piglin",
-        "weight": 60,
-        "minCount": 2,
-        "maxCount": 4
-      },
-      {
-        "type": "minecraft:hoglin",
-        "weight": 20,
-        "minCount": 1,
-        "maxCount": 2
-      },
-      {
-        "type": "minecraft:strider",
-        "weight": 20,
+        "type": "lanterna:eco_cinzento",
+        "weight": 12,
         "minCount": 1,
         "maxCount": 2
       }
     ],
     "creature": [
       {
-        "type": "lanterna:alien",
+        "type": "lanterna:brakkari",
         "weight": 12,
-        "minCount": 2,
-        "maxCount": 4
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "minecraft:hoglin",
+        "weight": 4,
+        "minCount": 1,
+        "maxCount": 2
       }
     ],
     "ambient": [],
@@ -74,7 +68,6 @@
     [],
     [],
     [
-      "minecraft:ore_dirt",
       "minecraft:ore_gravel",
       "minecraft:ore_granite_upper",
       "minecraft:ore_granite_lower",
@@ -92,16 +85,15 @@
       "minecraft:ore_gold_lower",
       "minecraft:ore_redstone",
       "minecraft:ore_redstone_lower",
-      "minecraft:ore_diamond",
-      "minecraft:ore_diamond_large",
-      "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
       "minecraft:underwater_magma",
       "minecraft:disk_sand",
       "minecraft:disk_clay",
-      "minecraft:disk_gravel"
+      "minecraft:disk_gravel",
+      "lanterna:ore_ira_bruta",
+      "minecraft:underwater_magma"
     ],
     [],
     [],

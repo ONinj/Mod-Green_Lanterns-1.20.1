@@ -37,10 +37,8 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.11 ✅ Hiperpropulsão no espaço, piloto automático com mapa estelar (J), voo com mais física (parafuso, freio aerodinâmico, impacto, água, turbulência, inércia no vácuo)
 1.12 ✅ Planetas gerados sem fim pelo espaço (8 tipos), alienígenas com trocas próprias de cada planeta, materiais dos planetas
 1.13 ✅ Modelos do autor: 9 anéis, baterias de cada Tropa (lanterna, braseiro, relicário, torre, farol, drusa, caveira), Cajado da Compaixão, uniformes 3D (GeckoLib) das 9 Tropas — vestidos pelo anel com transformação, ou como armadura
-2. Poderes: rajada, escudo, constructos (entidades), menu radial de constructos
+1.14 ✅ Lore completa (pacote Lore3D): 9 raças + Guardiões do Universo, 9 bosses com mecânicas, minérios e blocos de cada planeta, Gênese escondido, missões com HUD e diário (M), afinidade do anel, 12 construtos com roda (Z/X) e presets, anéis forjados com rituais, Anel Branco por fusão. Detalhes em `docs/LORE_E_MISSOES.md`
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
-6. Planetas: habitantes alienígenas, vilas e minérios próprios de cada planeta, missões
-8. Crafting: receitas para baterias e alguns anéis
 
 ## Arte
 As texturas atuais são provisórias e genéricas. Substitua os PNGs em `assets/lanterna/textures/` mantendo os mesmos nomes. A pedra do anel e o núcleo da bateria devem ficar em tons de cinza/branco, porque o jogo pinta na cor da Tropa.

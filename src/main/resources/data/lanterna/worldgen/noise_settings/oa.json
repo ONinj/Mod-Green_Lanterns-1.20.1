@@ -1,7 +1,7 @@
 {
   "aquifers_enabled": true,
   "default_block": {
-    "Name": "minecraft:stone"
+    "Name": "lanterna:rocha_polida_veridia"
   },
   "default_fluid": {
     "Name": "minecraft:water",
@@ -331,7 +331,7 @@
       }
     }
   },
-  "ore_veins_enabled": true,
+  "ore_veins_enabled": false,
   "sea_level": 48,
   "spawn_target": [
     {
@@ -450,7 +450,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:green_terracotta"
+                  "Name": "lanterna:rocha_polida_veridia"
                 }
               }
             }

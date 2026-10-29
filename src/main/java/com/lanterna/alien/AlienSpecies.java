@@ -27,19 +27,7 @@ public record AlienSpecies(String id, Component name, int skin, float height, fl
     }
 
     private static AlienSpecies create(String id) {
-        Component fixedName = Component.translatable("species.lanterna." + id);
-        return switch (id) {
-            // Planetas das Tropas: aparência pensada para cada um
-            case "oa" -> new AlienSpecies(id, fixedName, 0x5A8CFF, 0.72f, 1.35f, true, 2, false, false, false, null);
-            case "korugar" -> new AlienSpecies(id, fixedName, 0xE05AA8, 1.0f, 1.0f, false, 2, false, false, false, null);
-            case "ysmault" -> new AlienSpecies(id, fixedName, 0xC03028, 1.2f, 1.0f, false, 3, true, false, true, null);
-            case "odym" -> new AlienSpecies(id, fixedName, 0x9AD6FF, 1.05f, 1.1f, false, 1, true, false, false, null);
-            case "zamaron" -> new AlienSpecies(id, fixedName, 0xC890F0, 1.0f, 1.0f, false, 2, false, false, false, null);
-            case "nok" -> new AlienSpecies(id, fixedName, 0x6A5ACD, 1.1f, 1.05f, false, 2, true, false, false, null);
-            case "okaara" -> new AlienSpecies(id, fixedName, 0xFF9A40, 0.9f, 1.0f, false, 2, false, true, false, null);
-            case "ryut" -> new AlienSpecies(id, fixedName, 0x9A9AA6, 1.1f, 0.95f, false, 3, false, false, true, null);
-            default -> generated(id);
-        };
+        return generated(id);
     }
 
     /** Espécie de um planeta gerado: tudo sorteado a partir da semente do planeta. */

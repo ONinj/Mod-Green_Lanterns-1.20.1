@@ -65,6 +65,19 @@ public final class AlienEvents {
                 PENDING.clear();
             }
             for (Pending p : todo) {
+                // Planetas das Tropas: quem mora na vila é a raça da lore daquele planeta
+                com.lanterna.space.SpaceBodies.Body body = com.lanterna.space.SpaceBodies.bodyAt(p.level().dimension(), p.pos().x, p.pos().z);
+                com.lanterna.lore.entity.Race race = body != null ? com.lanterna.lore.entity.Race.ofPlanet(body.id()) : null;
+                if (race != null) {
+                    var folk = com.lanterna.lore.LoreEntities.typeOf(race).create(p.level());
+                    if (folk != null) {
+                        folk.moveTo(p.pos().x, p.pos().y, p.pos().z, p.yaw(), 0);
+                        folk.finalizeSpawn(p.level(), p.level().getCurrentDifficultyAt(folk.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+                        folk.setPersistenceRequired();
+                        p.level().addFreshEntity(folk);
+                    }
+                    continue;
+                }
                 AlienEntity alien = ModEntities.ALIEN.get().create(p.level());
                 if (alien == null) continue;
                 alien.moveTo(p.pos().x, p.pos().y, p.pos().z, p.yaw(), 0);

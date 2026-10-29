@@ -1,0 +1,10 @@
+{
+ "variants": {
+  "aceso=true": {
+   "model": "lanterna:block/farol_perola_aceso"
+  },
+  "aceso=false": {
+   "model": "lanterna:block/farol_perola_apagado"
+  }
+ }
+}

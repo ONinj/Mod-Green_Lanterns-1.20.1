@@ -47,12 +47,13 @@ public final class RingPowers {
             ItemStack ring = ringOpt.get();
             CorpsDefinition def = CorpsManager.get(PowerRingItem.getCorps(ring));
 
+            int max = maxCharge(player, def);
             int charge = PowerRingItem.getStoredCharge(ring);
-            if (charge < 0 || charge > def.maxCharge()) {
-                charge = def.maxCharge(); // -1 = anel novo, vem cheio
+            if (charge < 0 || charge > max) {
+                charge = charge < 0 ? max : max; // -1 = anel novo, vem cheio
                 PowerRingItem.setStoredCharge(ring, charge);
             }
-            data.refresh(def.id(), def.color(), charge, def.maxCharge());
+            data.refresh(def.id(), def.color(), charge, max);
             data.setEverChosen(true);
         } else if (data.hasRing()) {
             data.unequip();
@@ -72,6 +73,14 @@ public final class RingPowers {
         tickRecharge(player, data);
         if (data.isDirty()) sync(player, data);
         syncVisibleRing(player, data, false);
+    }
+
+    /** Carga máxima: a bateria melhorada com o drop do boss da Tropa dá 50% a mais. */
+    public static int maxCharge(ServerPlayer player, CorpsDefinition def) {
+        ItemStack battery = EquipmentHelper.battery(player);
+        boolean upgraded = !battery.isEmpty() && battery.hasTag() && battery.getTag().getBoolean("Upgraded")
+                && com.lanterna.item.BatteryItems.corpsOf(battery).equals(def.id());
+        return upgraded ? def.maxCharge() * 3 / 2 : def.maxCharge();
     }
 
     // ===================== Anel visível para os outros =====================

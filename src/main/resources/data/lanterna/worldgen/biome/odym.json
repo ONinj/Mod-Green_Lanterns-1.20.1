@@ -1,14 +1,14 @@
 {
-  "has_precipitation": false,
-  "temperature": 0.0,
-  "downfall": 0.4,
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.9,
   "effects": {
-    "sky_color": 10147583,
-    "fog_color": 13692159,
-    "water_color": 7321855,
-    "water_fog_color": 1718880,
-    "grass_color": 8440032,
-    "foliage_color": 6334672,
+    "sky_color": 7321855,
+    "fog_color": 11065599,
+    "water_color": 2784255,
+    "water_fog_color": 401482,
+    "grass_color": 5292192,
+    "foliage_color": 4235424,
     "mood_sound": {
       "sound": "minecraft:ambient.cave",
       "tick_delay": 6000,
@@ -17,44 +17,45 @@
     },
     "particle": {
       "options": {
-        "type": "minecraft:snowflake"
+        "type": "minecraft:glow"
       },
-      "probability": 0.01
+      "probability": 0.003
     }
   },
   "spawners": {
     "monster": [
       {
-        "type": "minecraft:stray",
-        "weight": 60,
+        "type": "lanterna:eco_cinzento",
+        "weight": 12,
         "minCount": 1,
-        "maxCount": 3
+        "maxCount": 2
       }
     ],
     "creature": [
       {
-        "type": "lanterna:alien",
+        "type": "lanterna:aelinos",
         "weight": 12,
         "minCount": 2,
         "maxCount": 4
       },
       {
-        "type": "minecraft:polar_bear",
+        "type": "minecraft:turtle",
         "weight": 4,
-        "minCount": 1,
-        "maxCount": 2
-      },
-      {
-        "type": "minecraft:fox",
-        "weight": 6,
-        "minCount": 1,
-        "maxCount": 2
+        "minCount": 2,
+        "maxCount": 4
       }
     ],
     "ambient": [],
     "axolotls": [],
     "underground_water_creature": [],
-    "water_creature": [],
+    "water_creature": [
+      {
+        "type": "minecraft:tropical_fish",
+        "weight": 10,
+        "minCount": 3,
+        "maxCount": 6
+      }
+    ],
     "water_ambient": [],
     "misc": []
   },
@@ -74,7 +75,6 @@
     [],
     [],
     [
-      "minecraft:ore_dirt",
       "minecraft:ore_gravel",
       "minecraft:ore_granite_upper",
       "minecraft:ore_granite_lower",
@@ -92,21 +92,32 @@
       "minecraft:ore_gold_lower",
       "minecraft:ore_redstone",
       "minecraft:ore_redstone_lower",
-      "minecraft:ore_diamond",
-      "minecraft:ore_diamond_large",
-      "minecraft:ore_diamond_buried",
       "minecraft:ore_lapis",
       "minecraft:ore_lapis_buried",
       "minecraft:ore_copper",
       "minecraft:underwater_magma",
       "minecraft:disk_sand",
       "minecraft:disk_clay",
-      "minecraft:disk_gravel"
+      "minecraft:disk_gravel",
+      "lanterna:ore_perola_do_amanha"
     ],
     [],
     [],
-    [],
+    [
+      "minecraft:glow_lichen",
+      "minecraft:trees_water",
+      "minecraft:flower_default",
+      "minecraft:patch_grass_badlands",
+      "minecraft:brown_mushroom_normal",
+      "minecraft:red_mushroom_normal",
+      "minecraft:patch_sugar_cane",
+      "minecraft:patch_pumpkin",
+      "minecraft:warm_ocean_vegetation",
+      "minecraft:seagrass_warm",
+      "minecraft:sea_pickle",
+      "minecraft:glow_lichen",
+      "lanterna:concha_perola_leito"
+    ],
     []
-  ],
-  "temperature_modifier": "none"
+  ]
 }

@@ -59,6 +59,11 @@ public final class ClientForgeEvents {
             }
         }
         ClientCutscene.tick();
+        while (KeyBindings.JOURNAL.consumeClick()) {
+            Minecraft.getInstance().setScreen(new com.lanterna.client.mission.JournalScreen());
+        }
+        com.lanterna.client.construct.ClientConstructs.tick();
+        com.lanterna.client.mission.ClientLoreData.tick();
 
         // Pose de voo e partículas de todos os jogadores visíveis
         Minecraft mc = Minecraft.getInstance();
@@ -179,6 +184,12 @@ public final class ClientForgeEvents {
     /** Desenha o portal e a bateria da recarga no mundo. */
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
+            // Matrizes da câmera: o HUD de missão projeta o objetivo na tela
+            com.lanterna.client.mission.Waypoints.capture(event.getPoseStack().last().pose(), event.getProjectionMatrix(),
+                    event.getCamera().getPosition());
+            return;
+        }
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         ClientRecharge.render(event.getPoseStack(), buffer, event.getCamera().getPosition(), event.getPartialTick());
@@ -197,6 +208,8 @@ public final class ClientForgeEvents {
         com.lanterna.client.flight.HyperEffects.clear();
         com.lanterna.client.space.PlanetTextures.clear();
         com.lanterna.client.alien.AlienModel.clearCache();
+        com.lanterna.client.mission.ClientLoreData.reset();
+        com.lanterna.client.construct.ClientConstructs.clear();
     }
 
     private ClientForgeEvents() {}

@@ -141,6 +141,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
     private void drawBodies(ClientLevel level, PoseStack poseStack, Camera camera, float time) {
         Vec3 cam = camera.getPosition();
         List<SpaceBodies.Body> sorted = new ArrayList<>(SpaceBodies.near(cam, 3));
+        if (!com.lanterna.client.mission.ClientLoreData.geneseRevealed()) sorted.removeIf(b -> SpaceBodies.isHidden(b.id()));
         sorted.sort(Comparator.comparingDouble((SpaceBodies.Body b) -> b.center().distanceToSqr(cam)).reversed());
 
         Matrix4f pose = poseStack.last().pose();

@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "size": 6,
+    "discard_chance_on_air_exposure": 0.0,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "lanterna:arenito_aurumvex"
+        },
+        "state": {
+          "Name": "lanterna:ambar_da_posse_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:stone"
+        },
+        "state": {
+          "Name": "lanterna:ambar_da_posse_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:deepslate"
+        },
+        "state": {
+          "Name": "lanterna:ambar_da_posse_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:calcite"
+        },
+        "state": {
+          "Name": "lanterna:ambar_da_posse_minerio"
+        }
+      }
+    ]
+  }
+}

@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "2";
+    private static final String VERSION = "3";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -78,6 +78,48 @@ public final class ModNetwork {
                 .encoder(SpaceSeedPacket::encode)
                 .decoder(SpaceSeedPacket::decode)
                 .consumerMainThread(SpaceSeedPacket::handle)
+                .add();
+
+        // ---- Lore: missões, conversas, construtos ----
+        CHANNEL.messageBuilder(com.lanterna.network.lore.SyncLorePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.network.lore.SyncLorePacket::encode)
+                .decoder(com.lanterna.network.lore.SyncLorePacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.SyncLorePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.MissionToastPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.network.lore.MissionToastPacket::encode)
+                .decoder(com.lanterna.network.lore.MissionToastPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.MissionToastPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.OpenDialogPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.network.lore.OpenDialogPacket::encode)
+                .decoder(com.lanterna.network.lore.OpenDialogPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.OpenDialogPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.StartAutopilotPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.network.lore.StartAutopilotPacket::encode)
+                .decoder(com.lanterna.network.lore.StartAutopilotPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.StartAutopilotPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.DialogActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.network.lore.DialogActionPacket::encode)
+                .decoder(com.lanterna.network.lore.DialogActionPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.DialogActionPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.MissionActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.network.lore.MissionActionPacket::encode)
+                .decoder(com.lanterna.network.lore.MissionActionPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.MissionActionPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.ConstructCastPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.network.lore.ConstructCastPacket::encode)
+                .decoder(com.lanterna.network.lore.ConstructCastPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.ConstructCastPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.network.lore.ConstructSelectPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.network.lore.ConstructSelectPacket::encode)
+                .decoder(com.lanterna.network.lore.ConstructSelectPacket::decode)
+                .consumerNetworkThread(com.lanterna.network.lore.ConstructSelectPacket::handle)
                 .add();
     }
 

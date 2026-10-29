@@ -1,10 +1,10 @@
 {
-  "aquifers_enabled": false,
+  "aquifers_enabled": true,
   "default_block": {
-    "Name": "minecraft:stone"
+    "Name": "lanterna:pedra_crepuscular"
   },
   "default_fluid": {
-    "Name": "minecraft:lava",
+    "Name": "minecraft:water",
     "Properties": {
       "level": "0"
     }
@@ -331,8 +331,8 @@
       }
     }
   },
-  "ore_veins_enabled": true,
-  "sea_level": 40,
+  "ore_veins_enabled": false,
+  "sea_level": 46,
   "spawn_target": [
     {
       "continentalness": [
@@ -433,7 +433,7 @@
                 "then_run": {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "minecraft:yellow_terracotta"
+                    "Name": "minecraft:coarse_dirt"
                   }
                 }
               }
@@ -450,7 +450,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:red_sand"
+                  "Name": "lanterna:pedra_crepuscular"
                 }
               }
             }

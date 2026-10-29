@@ -1,7 +1,7 @@
 {
   "aquifers_enabled": true,
   "default_block": {
-    "Name": "minecraft:blackstone"
+    "Name": "lanterna:basalto_kharuun"
   },
   "default_fluid": {
     "Name": "minecraft:water",
@@ -331,7 +331,7 @@
       }
     }
   },
-  "ore_veins_enabled": true,
+  "ore_veins_enabled": false,
   "sea_level": 58,
   "spawn_target": [
     {
@@ -433,7 +433,7 @@
                 "then_run": {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "minecraft:crimson_nylium"
+                    "Name": "lanterna:basalto_kharuun"
                   }
                 }
               }
@@ -450,7 +450,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:netherrack"
+                  "Name": "minecraft:blackstone"
                 }
               }
             }

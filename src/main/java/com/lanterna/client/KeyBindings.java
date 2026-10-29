@@ -43,5 +43,23 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_J,
             CATEGORY);
 
+    // ---- Construtos e missões ----
+    public static final KeyMapping CONSTRUCT_WHEEL = new KeyMapping(
+            "key.lanterna.construct_wheel", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY);
+
+    public static final KeyMapping CONSTRUCT_USE = new KeyMapping(
+            "key.lanterna.construct_use", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
+
+    public static final KeyMapping[] PRESETS = {
+            preset(1, GLFW.GLFW_KEY_1), preset(2, GLFW.GLFW_KEY_2), preset(3, GLFW.GLFW_KEY_3), preset(4, GLFW.GLFW_KEY_4)};
+
+    public static final KeyMapping JOURNAL = new KeyMapping(
+            "key.lanterna.journal", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
+
+    private static KeyMapping preset(int n, int key) {
+        return new KeyMapping("key.lanterna.preset_" + n, KeyConflictContext.IN_GAME,
+                net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, key, CATEGORY);
+    }
+
     private KeyBindings() {}
 }

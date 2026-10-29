@@ -1,0 +1,6 @@
+{
+ "parent": "minecraft:block/cube_all",
+ "textures": {
+  "all": "lanterna:block/obsidiana_do_fim_minerio"
+ }
+}

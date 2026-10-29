@@ -27,6 +27,12 @@ public class LanternaMod {
     public LanternaMod() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        // Lore (raças, bosses, minérios, missões) e construtos: os registros ficam nos campos estáticos
+        com.lanterna.lore.LoreBlocks.init();
+        com.lanterna.lore.LoreItems.init();
+        com.lanterna.lore.LoreEntities.init();
+        com.lanterna.construct.ConstructRegistry.init();
+
         ModBlocks.BLOCKS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
@@ -38,6 +44,7 @@ public class LanternaMod {
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModCapabilities::register);
+        modBus.addListener(com.lanterna.mission.LoreCapability::register);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LanternaConfig.SPEC);
     }

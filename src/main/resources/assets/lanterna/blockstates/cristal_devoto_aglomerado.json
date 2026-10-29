@@ -1,0 +1,10 @@
+{
+ "variants": {
+  "aceso=false": {
+   "model": "lanterna:block/cristal_devoto_apagado"
+  },
+  "aceso=true": {
+   "model": "lanterna:block/cristal_devoto_aceso"
+  }
+ }
+}

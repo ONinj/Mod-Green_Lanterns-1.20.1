@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "lanterna:ambar_da_posse_minerio",
+    "lanterna:cristal_devoto_minerio",
+    "lanterna:fragmento_de_pavor_minerio",
+    "lanterna:ira_bruta_minerio",
+    "lanterna:jade_estelar_minerio",
+    "lanterna:lagrima_indigo_minerio",
+    "lanterna:perola_do_amanha_minerio"
+  ]
+}

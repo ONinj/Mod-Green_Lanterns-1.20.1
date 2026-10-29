@@ -331,8 +331,8 @@
       }
     }
   },
-  "ore_veins_enabled": true,
-  "sea_level": 52,
+  "ore_veins_enabled": false,
+  "sea_level": 92,
   "spawn_target": [
     {
       "continentalness": [
@@ -433,7 +433,7 @@
                 "then_run": {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "minecraft:snow_block"
+                    "Name": "lanterna:areia_abissal_lumeris"
                   }
                 }
               }
@@ -450,7 +450,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:packed_ice"
+                  "Name": "lanterna:areia_abissal_lumeris"
                 }
               }
             }

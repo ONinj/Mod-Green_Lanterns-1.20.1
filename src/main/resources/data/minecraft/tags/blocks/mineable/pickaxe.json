@@ -1,0 +1,24 @@
+{
+  "replace": false,
+  "values": [
+    "lanterna:ambar_da_posse_minerio",
+    "lanterna:arenito_aurumvex",
+    "lanterna:basalto_kharuun",
+    "lanterna:bloco_obsidiana_do_fim",
+    "lanterna:concha_perola",
+    "lanterna:cristal_devoto_aglomerado",
+    "lanterna:cristal_devoto_minerio",
+    "lanterna:fragmento_de_pavor_minerio",
+    "lanterna:gelo_negro_umbrall",
+    "lanterna:ira_bruta_minerio",
+    "lanterna:jade_estelar_minerio",
+    "lanterna:lagrima_indigo_minerio",
+    "lanterna:lagrima_indigo_pendente",
+    "lanterna:obsidiana_do_fim_minerio",
+    "lanterna:pedra_crepuscular",
+    "lanterna:pedra_do_templo_taleun",
+    "lanterna:perola_do_amanha_minerio",
+    "lanterna:rocha_cristalina_selenaar",
+    "lanterna:rocha_polida_veridia"
+  ]
+}

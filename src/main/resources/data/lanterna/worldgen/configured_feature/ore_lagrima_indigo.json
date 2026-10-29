@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:ore",
+  "config": {
+    "size": 5,
+    "discard_chance_on_air_exposure": 0.0,
+    "targets": [
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "lanterna:pedra_do_templo_taleun"
+        },
+        "state": {
+          "Name": "lanterna:lagrima_indigo_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:stone"
+        },
+        "state": {
+          "Name": "lanterna:lagrima_indigo_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:deepslate"
+        },
+        "state": {
+          "Name": "lanterna:lagrima_indigo_minerio"
+        }
+      },
+      {
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "minecraft:calcite"
+        },
+        "state": {
+          "Name": "lanterna:lagrima_indigo_minerio"
+        }
+      }
+    ]
+  }
+}

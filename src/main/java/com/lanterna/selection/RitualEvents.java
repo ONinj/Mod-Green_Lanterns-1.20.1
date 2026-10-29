@@ -48,7 +48,7 @@ import java.util.UUID;
  *  ÍNDIGO   consertar um Golem de Ferro quase morto (menos de 25% de vida) até a vida cheia
  *  LARANJA  carregar um tesouro enorme em pé sobre um bloco de ouro (só 1 por mundo)
  *  NEGRO    morrer sob o efeito Wither (o anel chega quando você renasce)
- *  BRANCO   enganar a morte com um Totem da Imortalidade
+ *  BRANCO   só pela fusão dos sete anéis no Altar da Vida (Gênese)
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class RitualEvents {
@@ -226,16 +226,8 @@ public final class RitualEvents {
         }
     }
 
-    // ===================== BRANCO (vida) =====================
-
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onTotem(LivingUseTotemEvent event) {
-        if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer player)) return;
-        RingData data = dataOf(player);
-        if (data != null && canBeChosen(player, data)) {
-            SelectionManager.startSelection(player, BuiltinCorps.WHITE.id());
-        }
-    }
+    // BRANCO (vida): não é mais escolhido por ritual. Na lore, o Anel Branco só nasce da fusão
+    // dos sete anéis no Altar da Vida, em Gênese (veja lore/ritual/WhiteAltar).
 
     private static void hint(ServerPlayer player, String key, int color) {
         player.displayClientMessage(Component.translatable(key).withStyle(s -> s.withColor(color).withItalic(true)), true);

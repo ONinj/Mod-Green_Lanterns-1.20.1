@@ -1,0 +1,84 @@
+{
+ "parent": "minecraft:block/block",
+ "render_type": "minecraft:translucent",
+ "textures": {
+  "r": "lanterna:block/rachadura_nulo",
+  "particle": "lanterna:block/rachadura_nulo"
+ },
+ "elements": [
+  {
+   "from": [
+    8,
+    0,
+    0
+   ],
+   "to": [
+    8,
+    16,
+    16
+   ],
+   "shade": false,
+   "forge_data": {
+    "block_light": 6,
+    "sky_light": 6
+   },
+   "faces": {
+    "east": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#r"
+    },
+    "west": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#r"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    8
+   ],
+   "to": [
+    16,
+    16,
+    8
+   ],
+   "shade": false,
+   "forge_data": {
+    "block_light": 6,
+    "sky_light": 6
+   },
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#r"
+    },
+    "south": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#r"
+    }
+   }
+  }
+ ]
+}

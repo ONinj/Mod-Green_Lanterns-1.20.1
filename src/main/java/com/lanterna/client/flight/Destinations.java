@@ -26,6 +26,7 @@ public final class Destinations {
         List<Destination> list = new ArrayList<>();
         for (SpaceBodies.Body b : SpaceBodies.near(here, MAP_SECTORS)) {
             if (!b.landable() || b.dimension() == null) continue;
+            if (SpaceBodies.isHidden(b.id()) && !com.lanterna.client.mission.ClientLoreData.geneseRevealed()) continue;
             list.add(new Destination(b.id(), b.displayName(), b.dimension(), b.center(), b.radius(), b.atmosphere()));
         }
         return list;

@@ -65,11 +65,18 @@ public final class SpaceBodies {
             new Body("nok",      new Vec3(-5600, -100, 600),  170, 0x7B6BFF, true, planet("nok"), true),
             new Body("okaara",   new Vec3(6200, 200, -400),   240, 0xFFA040, true, planet("okaara"), true),
             new Body("ryut",     new Vec3(-1400, -200, -6400), 160, 0x8A8A9A, true, planet("ryut"), false),
+            // Gênese: onde o Coração Primordial se partiu. Escondido até o jogador juntar os sete anéis da fusão.
+            new Body("genese",   new Vec3(-300, 700, 2600),   140, 0xF4FFF4, true, planet("genese"), true),
             // O Sol: só para ver (e iluminar os planetas), longe demais para alcançar
             new Body("sun",      new Vec3(30000, 9000, 20000), 4200, 0xFFF4C0, false, null, false)
     );
 
     public static final Body SUN = BODIES.get(BODIES.size() - 1);
+
+    /** Corpo que só aparece para quem já revelou (Gênese). */
+    public static boolean isHidden(String id) {
+        return "genese".equals(id);
+    }
 
     /** Onde você aparece ao subir da Terra (o ponto bate com onde você estava no mundo normal). */
     public static Vec3 arrivalFromEarth(double overworldX, double overworldZ) {

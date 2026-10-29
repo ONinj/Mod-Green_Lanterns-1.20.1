@@ -24,15 +24,7 @@ public final class ModItems {
     public static final RegistryObject<Item> COMPASSION_STAFF = ITEMS.register("compassion_staff",
             () -> new com.lanterna.item.CompassionStaffItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
-    // ---- Materiais dos planetas (moeda das trocas com os alienígenas; base de receitas futuras) ----
-    public static final RegistryObject<Item> OA_CRYSTAL = gem("oa_crystal", Rarity.RARE);
-    public static final RegistryObject<Item> KORUGAR_AMBER = gem("korugar_amber", Rarity.RARE);
-    public static final RegistryObject<Item> YSMAULT_BLOODSTONE = gem("ysmault_bloodstone", Rarity.RARE);
-    public static final RegistryObject<Item> ODYM_FROST = gem("odym_frost", Rarity.RARE);
-    public static final RegistryObject<Item> ZAMARON_HEARTSTONE = gem("zamaron_heartstone", Rarity.RARE);
-    public static final RegistryObject<Item> NOK_INDIGO = gem("nok_indigo", Rarity.RARE);
-    public static final RegistryObject<Item> OKAARA_GOLD = gem("okaara_gold", Rarity.RARE);
-    public static final RegistryObject<Item> RYUT_OBSIDIAN = gem("ryut_obsidian", Rarity.RARE);
+    // ---- Liga dos alienígenas dos planetas gerados ----
     public static final RegistryObject<Item> ALIEN_ALLOY = gem("alien_alloy", Rarity.UNCOMMON);
 
     public static final RegistryObject<Item> ALIEN_SPAWN_EGG = ITEMS.register("alien_spawn_egg",

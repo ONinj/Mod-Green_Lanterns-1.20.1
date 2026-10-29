@@ -1,0 +1,10 @@
+{
+ "variants": {
+  "aceso=false": {
+   "model": "lanterna:block/cristal_devoto_minerio"
+  },
+  "aceso=true": {
+   "model": "lanterna:block/cristal_devoto_minerio_aceso"
+  }
+ }
+}

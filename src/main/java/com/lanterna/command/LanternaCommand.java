@@ -62,7 +62,48 @@ public final class LanternaCommand {
 
                 .then(Commands.literal("resetar")
                         .requires(source -> source.hasPermission(2))
-                        .executes(LanternaCommand::reset)));
+                        .executes(LanternaCommand::reset))
+
+                // ---- Lore (para testar) ----
+                .then(Commands.literal("missao").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        com.lanterna.mission.Missions.all().stream().map(com.lanterna.mission.Mission::id), b))
+                                .executes(c -> {
+                                    com.lanterna.mission.MissionManager.start(c.getSource().getPlayerOrException(),
+                                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
+                                    return 1;
+                                })))
+                .then(Commands.literal("afinidade").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("pontos", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .executes(c -> {
+                                    com.lanterna.construct.Affinity.add(c.getSource().getPlayerOrException(),
+                                            com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "pontos"));
+                                    return 1;
+                                })))
+                .then(Commands.literal("respeito").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("raca", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .then(Commands.argument("valor", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(c -> {
+                                            ServerPlayer p = c.getSource().getPlayerOrException();
+                                            com.lanterna.mission.LoreCapability.get(p).ifPresent(d -> d.addRep(
+                                                    com.mojang.brigadier.arguments.StringArgumentType.getString(c, "raca"),
+                                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "valor")));
+                                            return 1;
+                                        }))))
+                .then(Commands.literal("genese").requires(source -> source.hasPermission(2))
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            com.lanterna.mission.LoreCapability.get(p).ifPresent(d -> d.setGeneseRevealed(true));
+                            return 1;
+                        }))
+                .then(Commands.literal("reconstruir").requires(source -> source.hasPermission(2))
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            var planet = com.lanterna.lore.PlanetLore.byDimension(p.level().dimension());
+                            if (planet != null) com.lanterna.lore.world.PlanetSites.rebuild(p.serverLevel(), planet);
+                            return 1;
+                        })));
     }
 
     private static int choose(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
@@ -120,6 +161,11 @@ public final class LanternaCommand {
         if (player.getUUID().equals(claim.owner())) claim.release();
         RingPowers.applyFlightAbility(player, data);
         RingPowers.sync(player, data);
+        // Lore também volta ao começo (missões, respeito, presets)
+        com.lanterna.mission.LoreCapability.get(player).ifPresent(lore -> {
+            lore.deserializeNBT(new net.minecraft.nbt.CompoundTag());
+            com.lanterna.mission.MissionManager.sync(player, lore);
+        });
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.reset"), false);
         return 1;
     }

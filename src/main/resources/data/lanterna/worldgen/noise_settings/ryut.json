@@ -1,7 +1,7 @@
 {
   "aquifers_enabled": false,
   "default_block": {
-    "Name": "minecraft:deepslate"
+    "Name": "lanterna:gelo_negro_umbrall"
   },
   "default_fluid": {
     "Name": "minecraft:air"
@@ -328,7 +328,7 @@
       }
     }
   },
-  "ore_veins_enabled": true,
+  "ore_veins_enabled": false,
   "sea_level": -63,
   "spawn_target": [
     {
@@ -430,7 +430,7 @@
                 "then_run": {
                   "type": "minecraft:block",
                   "result_state": {
-                    "Name": "minecraft:soul_soil"
+                    "Name": "lanterna:gelo_negro_umbrall"
                   }
                 }
               }
@@ -447,7 +447,7 @@
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:basalt"
+                  "Name": "minecraft:deepslate"
                 }
               }
             }

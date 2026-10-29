@@ -77,6 +77,11 @@ public final class SpaceTravel {
 
         // Dentro do espaço: chegou num planeta (ou na Terra)?
         SpaceBodies.Body body = SpaceBodies.inside(player.position());
+        if (body != null && SpaceBodies.isHidden(body.id())
+                && !com.lanterna.mission.LoreCapability.get(player).map(com.lanterna.mission.LoreData::geneseRevealed).orElse(false)
+                && !player.isCreative()) {
+            body = null; // Gênese ainda escondido: não dá para pousar
+        }
         if (body != null) {
             land(player, body);
             return;
@@ -126,7 +131,7 @@ public final class SpaceTravel {
         Vec3 dir = player.position().subtract(body.center());
         Vec3 flat = new Vec3(dir.x, 0, dir.z);
         if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
-        flat = flat.normalize().scale(256);
+        flat = flat.normalize().scale(body.procedural() != null ? 256 : 40);
         // Planetas gerados ficam numa região própria do mundo do tipo deles
         double ox = body.procedural() != null ? body.procedural().regionX() : 0;
         double oz = body.procedural() != null ? body.procedural().regionZ() : 0;
