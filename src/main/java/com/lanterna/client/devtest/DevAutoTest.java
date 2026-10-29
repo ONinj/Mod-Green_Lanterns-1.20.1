@@ -302,8 +302,48 @@ public final class DevAutoTest {
         at(40, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Cena curta: o que acontece com o anel e a bateria quando o portador morre. */
+    private static void sceneMorte() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<String> report = tag -> server(sp -> {
+            var d = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            var ring = com.lanterna.power.EquipmentHelper.ring(sp);
+            var items = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(300));
+            LanternaMod.LOGGER.info("AUTOTEST morte {} ring={} charge={}/{} battery={} drops={}", tag, !ring.isEmpty(),
+                    com.lanterna.item.PowerRingItem.getStoredCharge(ring), d.maxCharge(), com.lanterna.power.EquipmentHelper.battery(sp),
+                    items.stream().map(i -> i.getItem().getItem() + "@" + i.blockPosition().toShortString()).toList());
+        });
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(60, () -> {
+            mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("gamerule keepInventory false"); cmd("gamerule doImmediateRespawn true");
+            cmd("kill @e[type=item]"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 400.5 -44 400.5");
+        });
+        at(40, () -> cmd("lanterna escolher lanterna:red"));
+        at(200, () -> report.accept("escolhido"));
+        // 80% de carga: o anel volta, a bateria fica
+        at(10, () -> server(sp -> {
+            var d = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            com.lanterna.power.RingPowers.setCharge(sp, d, d.maxCharge() * 8 / 10);
+            sp.kill();
+        }));
+        at(60, () -> { if (mc.player.isDeadOrDying()) mc.player.respawn(); mc.setScreen(null); });
+        at(40, () -> report.accept("morte80"));
+        // 30%: o anel cai junto com a bateria
+        at(10, () -> server(sp -> {
+            var d = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            com.lanterna.power.RingPowers.setCharge(sp, d, d.maxCharge() * 3 / 10);
+            sp.kill();
+        }));
+        at(60, () -> { if (mc.player.isDeadOrDying()) mc.player.respawn(); mc.setScreen(null); });
+        at(40, () -> report.accept("morte30"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("caido")) sceneCaido();
+        if (ENABLED && SCENE.equals("morte")) sceneMorte();
+        else if (ENABLED && SCENE.equals("caido")) sceneCaido();
         else if (ENABLED) {
             Minecraft mc = Minecraft.getInstance();
             at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });

@@ -813,5 +813,8 @@
   "npc.lanterna.name.guardiao_emissario": "Guardian Envoy",
   "dialog.lanterna.enemy_corps": "You carry the light of a Corps my people see as an enemy. No one here will trade with you, and the young ones will want a fight. Prove your worth first.",
   "dialog.lanterna.guardiao.emissario": "No need to travel to Oa, Lantern: we came to you. Whatever the color of your light, the Broken Heart beats weaker every day.",
-  "journal.lanterna.passives": "Ring on: +1 food every %ss · ½ heart every %ss · punch +%s · constructs x%s"
+  "journal.lanterna.passives": "Ring on: +1 food every %ss · ½ heart every %ss · punch +%s · constructs x%s",
+  "message.lanterna.death_battery": "Your battery stayed where you fell: %s, %s, %s (%s).",
+  "message.lanterna.death_ring_returns": "The ring won't abandon you: it returns to your hand, but the trip cost energy. %s%% left.",
+  "message.lanterna.death_ring_lost": "The ring was too weak to return. It stayed with the battery, where you fell."
 }

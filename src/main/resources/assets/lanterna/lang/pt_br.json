@@ -813,5 +813,8 @@
   "npc.lanterna.name.guardiao_emissario": "Guardião Emissário",
   "dialog.lanterna.enemy_corps": "Você carrega a luz de uma Tropa inimiga do meu povo. Aqui ninguém vai negociar com você, e os mais jovens vão querer briga. Mostre o seu valor antes.",
   "dialog.lanterna.guardiao.emissario": "Não precisa ir a Oa, Lanterna: nós viemos até você. Seja qual for a cor da sua luz, o Coração Partido bate mais fraco a cada dia.",
-  "journal.lanterna.passives": "Anel ligado: +1 comida a cada %ss · ½ coração a cada %ss · soco +%s · construtos x%s"
+  "journal.lanterna.passives": "Anel ligado: +1 comida a cada %ss · ½ coração a cada %ss · soco +%s · construtos x%s",
+  "message.lanterna.death_battery": "Sua bateria ficou onde você caiu: %s, %s, %s (%s).",
+  "message.lanterna.death_ring_returns": "O anel não abandona você: ele volta para a sua mão, mas a viagem gastou energia. Restam %s%%.",
+  "message.lanterna.death_ring_lost": "O anel estava fraco demais para voltar. Ele ficou junto com a bateria, onde você caiu."
 }

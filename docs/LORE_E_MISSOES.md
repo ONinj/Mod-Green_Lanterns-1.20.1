@@ -36,6 +36,13 @@ Além dos rituais de cada Tropa (`/lanterna rituais`), há dois caminhos novos:
 - Em cada planeta das Tropas mora um **Guardião Emissário**: ninguém precisa ir a Oa para começar a lore.
 - A linha principal começa no planeta da sua Tropa e dá a volta pelos outros. No seu próprio planeta você não junta minério nem forja: o anel já é seu. Só ganha o respeito do povo e vence o boss (o drop entra na fusão).
 
+## Quando o Lanterna morre
+- A bateria sempre fica onde você morreu. Ela não some com o tempo e não queima.
+- Com 50% de carga ou mais, o anel volta sozinho para a sua mão, mas gasta 25% da carga. O que sobra dá para voltar e buscar a bateria (ou recarregar na bateria da base do seu planeta).
+- Com menos de 50%, o anel não tem força para voltar e fica no chão junto com a bateria.
+- O anel Branco sempre volta. Com a regra `keepInventory` ligada, nada cai.
+- A mensagem no chat diz as coordenadas e o mundo onde a bateria ficou.
+
 ## Tropas inimigas
 Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são atacados e ninguém faz trocas com eles até conquistarem o respeito daquele povo. Os líderes e os Guardiões conversam com todos.
 
