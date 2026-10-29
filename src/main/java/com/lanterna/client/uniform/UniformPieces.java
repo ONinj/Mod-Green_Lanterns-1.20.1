@@ -25,7 +25,7 @@ import java.util.Set;
  *
  *   <parte> = head, body, right_arm, left_arm, right_leg, left_leg
  *
- * Cada peça acompanha a parte do corpo (anda, vira, voa junto) e aparece com a transformação.
+ * Cada peça acompanha a parte do corpo (anda, vira, voa junto) e aparece quando a transformação passa por ela.
  * Faces marcadas com "Tint" no Blockbench são pintadas na cor da Tropa.
  *
  * POSIÇÃO no Blockbench (1 unidade = 1 pixel do jogador, personagem olhando para o NORTE):
@@ -78,7 +78,7 @@ public final class UniformPieces {
     }
 
     /** Desenha as peças 3D presas às partes do corpo (já com a escala da transformação aplicada). */
-    public static void render(PlayerModel<?> model, String corps, int color, PoseStack poseStack,
+    public static void render(PlayerModel<?> model, String corps, int color, float progress, PoseStack poseStack,
                               MultiBufferSource buffer, int light) {
         if (AVAILABLE.isEmpty()) return;
         ModelPart[] parts = {model.head, model.body, model.rightArm, model.leftArm, model.rightLeg, model.leftLeg};
@@ -87,7 +87,7 @@ public final class UniformPieces {
 
         for (int i = 0; i < PARTS.length; i++) {
             ModelPart part = parts[i];
-            if (!part.visible) continue;
+            if (!part.visible || progress < UniformDissolve.pieceThreshold(PARTS[i])) continue;
             ResourceLocation id = find(corps, PARTS[i]);
             if (id == null) continue;
             BakedModel baked = Minecraft.getInstance().getModelManager().getModel(id);

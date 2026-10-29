@@ -14,12 +14,12 @@ import java.util.Map;
 
 /**
  * Progresso da transformação de cada jogador (0 = roupa normal, 1 = uniforme completo).
- * Ligar o anel: o uniforme se espalha a partir da mão do anel (estilo nanotecnologia).
- * Desligar: ele recolhe de volta para o anel, na ordem inversa.
+ * Ligar o anel: o uniforme se forma pixel por pixel, subindo dos pés até a cabeça.
+ * Desligar: ele se desfaz da cabeça para os pés.
  */
 public final class UniformTransition {
-    /** Velocidade da transformação por tick (1 / 0.055 ≈ 18 ticks ≈ 0,9 s). */
-    private static final float SPEED = 0.055f;
+    /** Velocidade da transformação por tick (1 / 0.045 ≈ 22 ticks ≈ 1,1 s). */
+    private static final float SPEED = 0.045f;
 
     private static final Map<Integer, Float> NOW = new HashMap<>();
     private static final Map<Integer, Float> OLD = new HashMap<>();
@@ -60,18 +60,16 @@ public final class UniformTransition {
         return now != null && now > 0f && now < 1f;
     }
 
-    /** Partículas na "frente" da onda: começa na mão, sobe pelo braço, desce pelo corpo. */
+    /** Anel de faíscas subindo junto com a frente de energia (na altura onde os pixels estão se formando). */
     private static void spawnFront(Player player, float p, int color) {
         var rnd = player.getRandom();
-        double height = p < 0.35 ? Mth.lerp(p / 0.35, 0.7, 1.4) : Mth.lerp((p - 0.35) / 0.65, 1.6, 0.0);
-        float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
-        Vec3 right = new Vec3(-Mth.cos(yaw), 0, -Mth.sin(yaw));
-        for (int i = 0; i < 5; i++) {
-            double sideways = p < 0.35 ? 0.35 : (rnd.nextDouble() - 0.5) * 0.7;
-            Vec3 pos = player.position().add(right.scale(sideways)).add(0, height + (rnd.nextDouble() - 0.5) * 0.15, 0)
-                    .add((rnd.nextDouble() - 0.5) * 0.3, 0, (rnd.nextDouble() - 0.5) * 0.3);
-            player.level().addParticle(GlowOrbOptions.of(color, 0.08f + rnd.nextFloat() * 0.08f),
-                    pos.x, pos.y, pos.z, 0, 0.01, 0);
+        double height = p * 1.95;
+        for (int i = 0; i < 6; i++) {
+            double angle = rnd.nextDouble() * Math.PI * 2;
+            double radius = 0.32 + rnd.nextDouble() * 0.08;
+            player.level().addParticle(GlowOrbOptions.of(color, 0.05f + rnd.nextFloat() * 0.06f),
+                    player.getX() + Math.cos(angle) * radius, player.getY() + height + (rnd.nextDouble() - 0.5) * 0.1,
+                    player.getZ() + Math.sin(angle) * radius, 0, 0.004, 0);
         }
     }
 
@@ -81,6 +79,7 @@ public final class UniformTransition {
     }
 
     public static void clear() {
+        UniformDissolve.clear();
         NOW.clear();
         OLD.clear();
     }

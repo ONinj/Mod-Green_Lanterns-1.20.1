@@ -109,31 +109,22 @@ public final class DevAutoTest {
             });
             at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
             at(20, () -> cmd("lanterna escolher lanterna:green"));
-            at(200, () -> { look(0, 0); sideCamera(true, 0, 2.6, 0.4); });
-            at(15, () -> shot("m1_pieces_front"));
-            at(3, () -> sideCamera(true, 90, 2.6, 0.4));
-            at(10, () -> shot("m2_pieces_side_left"));
-            at(3, () -> sideCamera(true, -90, 2.6, 0.4));
-            at(10, () -> shot("m3_pieces_side_right"));
-            at(3, () -> sideCamera(true, 180, 2.6, 0.4));
-            at(10, () -> shot("m4_pieces_back"));
-            // Recarga: câmera de lado-frente
-            at(3, () -> { cmd("lanterna carga 150"); sideCamera(true, -50, 2.6, 0.2); });
-            at(10, () -> ModNetwork.sendToServer(new com.lanterna.network.PocketRechargePacket()));
-            at(6, () -> shot("r1_portal_opening"));
-            at(10, () -> shot("r2_battery_rising"));
-            at(12, () -> shot("r3_hand_reaching"));
-            at(8, () -> shot("r4_energy_flow"));
-            at(5, () -> shot("r5_charge_flash"));
-            at(12, () -> shot("r6_still_flowing"));
-            at(12, () -> shot("r7_retracting"));
-            at(10, () -> shot("r8_closing"));
-            // Primeira pessoa
-            at(80, () -> { sideCamera(false, 0, 0, 0); camera(CameraType.FIRST_PERSON); look(0, 40); cmd("lanterna carga 100"); });
-            at(5, () -> cmd("effect clear @s"));
-            at(1300, () -> {});
-            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.PocketRechargePacket()));
-            at(34, () -> shot("r9_first_person"));
+            at(200, () -> { look(0, 0); sideCamera(true, -25, 2.7, 0.3); });
+            at(10, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+            at(50, () -> shot("t0_off"));
+            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+            at(3, () -> shot("t1_forming"));
+            at(3, () -> shot("t2_forming"));
+            at(3, () -> shot("t3_forming"));
+            at(3, () -> shot("t4_forming"));
+            at(3, () -> shot("t5_forming"));
+            at(3, () -> shot("t6_forming"));
+            at(3, () -> shot("t7_forming"));
+            at(3, () -> shot("t8_forming"));
+            at(20, () -> shot("t9_done"));
+            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+            at(8, () -> shot("u1_undoing"));
+            at(8, () -> shot("u2_undoing"));
             at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }

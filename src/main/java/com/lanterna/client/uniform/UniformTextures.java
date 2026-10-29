@@ -22,6 +22,20 @@ import java.util.Map;
  */
 public final class UniformTextures {
     private static final Map<String, ResourceLocation> CACHE = new HashMap<>();
+    private static final Map<String, NativeImage> SOURCE = new HashMap<>();
+
+    /** Cópia da imagem do uniforme (para montar a animação pixel por pixel). Pode ser null. */
+    public static NativeImage image(String corps) {
+        get(corps);
+        return SOURCE.computeIfAbsent(corps, c -> {
+            try (InputStream in = Minecraft.getInstance().getResourceManager()
+                    .open(LanternaMod.id("textures/uniform/" + c + ".png"))) {
+                return NativeImage.read(in);
+            } catch (Exception e) {
+                return null;
+            }
+        });
+    }
 
     public static Path folder() {
         return FMLPaths.CONFIGDIR.get().resolve("lanterna").resolve("uniformes");
@@ -36,6 +50,9 @@ public final class UniformTextures {
         if (Files.isRegularFile(custom)) {
             try (InputStream in = Files.newInputStream(custom)) {
                 NativeImage image = NativeImage.read(in);
+                NativeImage copy = new NativeImage(image.getWidth(), image.getHeight(), false);
+                copy.copyFrom(image);
+                SOURCE.put(corps, copy);
                 ResourceLocation id = LanternaMod.id("dynamic/uniform_" + corps);
                 Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(image));
                 LanternaMod.LOGGER.info("Lanterna: uniforme personalizado carregado: {}", custom);

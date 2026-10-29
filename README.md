@@ -52,6 +52,6 @@ Precisa de um mundo chamado `test` em `run/saves`. O código de teste (`client/d
 - No espaço só o anel ligado dá oxigênio (gasta 1 de carga por segundo). O anel voa 4x mais rápido no vácuo.
 
 ## Uniformes
-Ligar o anel (G) veste o uniforme da Tropa com uma animação que sai da mão do anel.
+Ligar o anel (G) veste o uniforme da Tropa: ele se forma pixel por pixel, subindo dos pés até a cabeça, com os pixels novos brilhando na cor da Tropa.
 Para usar suas próprias texturas: coloque skins 64x64 em `config/lanterna/uniformes/<tropa>.png` (veja o LEIA-ME que o mod cria lá).
 Peças 3D de uniforme (capacete, ombreiras...) e troca dos modelos do anel e da bateria: veja `docs/COMO_TROCAR_MODELOS.md` e os moldes em `blockbench_templates/`.

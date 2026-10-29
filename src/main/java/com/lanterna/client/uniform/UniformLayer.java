@@ -14,15 +14,12 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.HumanoidArm;
 
 /**
  * Desenha o uniforme da Tropa por cima da skin, um pouquinho maior que o corpo.
  *
- * Transformação (estilo nanotecnologia): cada parte do corpo "cresce" coberta pelo uniforme,
- * nesta ordem: braço do anel (da mão para o ombro) -> peito -> cabeça e o outro braço -> pernas.
- * A parte que está sendo coberta brilha na cor da Tropa.
+ * Transformação: o uniforme se forma pixel por pixel, subindo dos pés até a cabeça
+ * (veja {@link UniformDissolve}). Os pixels recém-formados brilham na cor da Tropa.
  */
 public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private final PlayerModel<AbstractClientPlayer> wide;
@@ -34,16 +31,6 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         this.wide = wide;
         this.slim = slim;
     }
-
-    private record Stage(float start, float end) {
-        float local(float p) { return Mth.clamp((p - start) / (end - start), 0f, 1f); }
-    }
-
-    private static final Stage MAIN_ARM = new Stage(0.00f, 0.35f);
-    private static final Stage BODY = new Stage(0.22f, 0.55f);
-    private static final Stage HEAD = new Stage(0.42f, 0.72f);
-    private static final Stage OTHER_ARM = new Stage(0.45f, 0.78f);
-    private static final Stage LEGS = new Stage(0.62f, 1.00f);
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int light, AbstractClientPlayer player,
@@ -61,61 +48,28 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         model.leftPants.visible = false;
         model.rightPants.visible = false;
 
-        boolean rightMain = player.getMainArm() == HumanoidArm.RIGHT;
-        ModelPart mainArm = rightMain ? model.rightArm : model.leftArm;
-        ModelPart otherArm = rightMain ? model.leftArm : model.rightArm;
+        String corps = UniformTransition.corpsOf(player);
+        int color = ClientVisibleRings.of(player.getId()).color();
+        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
+        ResourceLocation texture = UniformTextures.get(corps);
+        ResourceLocation[] stage = p < 1f ? UniformDissolve.stage(corps, p) : null;
 
-        float qMain = MAIN_ARM.local(p), qBody = BODY.local(p), qHead = HEAD.local(p);
-        float qOther = OTHER_ARM.local(p), qLegs = LEGS.local(p);
+        // Uniforme: inteiro, ou só os pixels que já se formaram (subindo dos pés até a cabeça)
+        VertexConsumer vc = buffer.getBuffer(RenderType.entityTranslucent(stage != null ? stage[0] : texture));
+        model.renderToBuffer(poseStack, vc, light, overlay, 1f, 1f, 1f, 1f);
 
-        // Braço do anel: cresce a partir da MÃO (o braço vai de -2 a 10 a partir do ombro)
-        grow(mainArm, qMain, 12f, 10f);
-        grow(model.body, qBody, 12f, 0f);
-        grow(model.head, qHead, 8f, 0f);
-        grow(otherArm, qOther, 12f, 0f);
-        grow(model.rightLeg, qLegs, 12f, 0f);
-        grow(model.leftLeg, qLegs, 12f, 0f);
+        // Peças 3D do uniforme (capacete, ombreiras, botas...): aparecem quando a frente passa por elas
+        UniformPieces.render(model, corps, color, p, poseStack, buffer, light);
 
-        ResourceLocation texture = UniformTextures.get(UniformTransition.corpsOf(player));
-        VertexConsumer vc = buffer.getBuffer(RenderType.entityTranslucent(texture));
-        model.renderToBuffer(poseStack, vc, light, LivingEntityRenderer.getOverlayCoords(player, 0f), 1f, 1f, 1f, 1f);
-
-        // Peças 3D do uniforme (capacete, ombreiras, botas...), se existirem
-        UniformPieces.render(model, UniformTransition.corpsOf(player), ClientVisibleRings.of(player.getId()).color(),
-                poseStack, buffer, light);
-
-        // Brilho da nanotecnologia nas partes que estão se formando
-        if (p < 1f) {
-            int color = ClientVisibleRings.of(player.getId()).color();
+        // Pixels recém-formados brilhando na cor da Tropa
+        if (stage != null) {
             float r = ((color >> 16) & 0xFF) / 255f, g = ((color >> 8) & 0xFF) / 255f, b = (color & 0xFF) / 255f;
-            glowOnly(model, mainArm, otherArm, qMain, qBody, qHead, qOther, qLegs);
-            float alpha = 0.55f + 0.25f * Mth.sin(ageInTicks * 1.3f);
-            VertexConsumer glow = buffer.getBuffer(RenderType.entityTranslucentEmissive(texture));
-            model.renderToBuffer(poseStack, glow, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, r, g, b, alpha);
+            VertexConsumer glow = buffer.getBuffer(RenderType.entityTranslucentEmissive(stage[1]));
+            model.renderToBuffer(poseStack, glow, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+                    Math.min(1f, r + 0.35f), Math.min(1f, g + 0.35f), Math.min(1f, b + 0.35f), 1f);
         }
 
         resetScale(model);
-    }
-
-    /**
-     * Mostra só a fração q da parte. anchor = de onde ela cresce (em pixels a partir do pivô):
-     * 0 = do pivô (ombro, quadril, pescoço), 10 = da ponta da mão.
-     */
-    private static void grow(ModelPart part, float q, float length, float anchor) {
-        part.visible = q > 0f;
-        part.yScale = Math.max(q, 0.001f);
-        if (anchor != 0f) part.y += anchor * (1f - q);
-    }
-
-    /** Na passada de brilho, só aparecem as partes que ainda estão se formando. */
-    private static void glowOnly(PlayerModel<?> model, ModelPart mainArm, ModelPart otherArm,
-                                 float qMain, float qBody, float qHead, float qOther, float qLegs) {
-        mainArm.visible = qMain > 0f && qMain < 1f;
-        model.body.visible = qBody > 0f && qBody < 1f;
-        model.head.visible = qHead > 0f && qHead < 1f;
-        otherArm.visible = qOther > 0f && qOther < 1f;
-        model.rightLeg.visible = qLegs > 0f && qLegs < 1f;
-        model.leftLeg.visible = qLegs > 0f && qLegs < 1f;
     }
 
     private static void resetScale(PlayerModel<?> model) {
