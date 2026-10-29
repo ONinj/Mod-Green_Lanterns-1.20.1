@@ -24,7 +24,7 @@ public final class FlightPose {
         Minecraft mc = Minecraft.getInstance();
         if (player == mc.player && mc.screen != null) return; // na tela do inventário fica em pé
         float k = ClientFlight.tilt(player, partialTick);
-        if (k <= 0.001f) return;
+        if (Math.abs(k) <= 0.001f) return;
 
         float pitch = player.getViewXRot(partialTick);
         float angle = k * (-90f - pitch);
@@ -42,7 +42,10 @@ public final class FlightPose {
         if (!(entity instanceof Player player) || !ClientFlight.isFlying(player) || player.onGround()) return;
 
         float partial = Minecraft.getInstance().getFrameTime();
-        float k = ClientFlight.tilt(player, partial);
+        float tilt = ClientFlight.tilt(player, partial);
+        float k = Math.max(0f, tilt);
+        // Freio aerodinâmico: corpo inclinado para trás, braços abertos contra o vento
+        float flare = Math.max(0f, -tilt) / 0.45f;
         float bob = Mth.sin(ageInTicks * 0.12f);
 
         // Sem agachar no ar (Shift é "descer")
@@ -87,6 +90,15 @@ public final class FlightPose {
         model.leftLeg.yRot = 0;
         model.rightLeg.zRot = Mth.lerp(k, 0.05f, 0.02f);
         model.leftLeg.zRot = Mth.lerp(k, -0.05f, -0.02f);
+
+        if (flare > 0f) {
+            front.xRot = Mth.lerp(flare, front.xRot, -1.35f);
+            back.xRot = Mth.lerp(flare, back.xRot, -1.35f);
+            front.zRot = side * Mth.lerp(flare, front.zRot * side, 0.55f);
+            back.zRot = -side * Mth.lerp(flare, -back.zRot * side, 0.55f);
+            model.rightLeg.xRot = Mth.lerp(flare, model.rightLeg.xRot, -0.55f);
+            model.leftLeg.xRot = Mth.lerp(flare, model.leftLeg.xRot, -0.35f);
+        }
 
         // Cabeça olhando para frente mesmo com o corpo deitado
         model.head.xRot = Mth.lerp(k, model.head.xRot, -(float) Math.PI * 0.42f);

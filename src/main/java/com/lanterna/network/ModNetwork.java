@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "1";
+    private static final String VERSION = "2";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -66,6 +66,12 @@ public final class ModNetwork {
                 .encoder(SyncVisibleRingPacket::encode)
                 .decoder(SyncVisibleRingPacket::decode)
                 .consumerMainThread(SyncVisibleRingPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(FlightModePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(FlightModePacket::encode)
+                .decoder(FlightModePacket::decode)
+                .consumerMainThread(FlightModePacket::handle)
                 .add();
     }
 

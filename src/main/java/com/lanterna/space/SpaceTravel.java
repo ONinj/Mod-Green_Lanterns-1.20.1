@@ -134,6 +134,7 @@ public final class SpaceTravel {
                                float yaw, float pitch, String messageKey) {
         ServerLevel level = player.server.getLevel(dimension);
         if (level == null) return;
+        LanternaMod.LOGGER.debug("Lanterna: {} viajou para {} em {}", player.getName().getString(), dimension.location(), pos);
         player.teleportTo(level, pos.x, pos.y, pos.z, yaw, pitch);
         player.fallDistance = 0;
         level.playSound(null, player.blockPosition(), SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.25f, 1.6f);
@@ -146,7 +147,11 @@ public final class SpaceTravel {
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) updateGravity(player);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            updateGravity(player);
+            // A hiperpropulsão acaba ao sair do espaço (o piloto automático continua)
+            ModCapabilities.get(player).ifPresent(d -> d.setFlightMode(false, d.autopilot()));
+        }
     }
 
     @SubscribeEvent

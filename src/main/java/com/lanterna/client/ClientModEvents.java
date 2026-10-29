@@ -38,6 +38,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.POCKET_RECHARGE);
         event.register(KeyBindings.OPEN_LANTERN);
         event.register(KeyBindings.TOGGLE_POWER);
+        event.register(KeyBindings.STAR_MAP);
     }
 
     /** Liga a tela da aba "Lanterna". */
@@ -90,6 +91,7 @@ public final class ClientModEvents {
         event.registerAboveAll("ring_hud", RingHudOverlay.HUD);
         event.registerAboveAll("selection_cutscene", CutsceneOverlay.OVERLAY);
         event.registerAboveAll("space_nav", com.lanterna.client.space.SpaceHud.HUD);
+        event.registerAboveAll("flight_hud", com.lanterna.client.flight.FlightHud.HUD);
     }
 
     /** Pinta a pedra do anel (camada 1) e o núcleo da bateria (tint 0) na cor da Tropa. */

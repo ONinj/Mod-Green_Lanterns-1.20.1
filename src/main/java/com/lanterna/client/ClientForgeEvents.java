@@ -49,6 +49,10 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.STAR_MAP.consumeClick()) {
+            // Com o piloto ligado, a tecla abre o mapa (onde dá para parar ou trocar o destino)
+            Minecraft.getInstance().setScreen(new com.lanterna.client.screen.StarMapScreen());
+        }
         while (KeyBindings.TOGGLE_POWER.consumeClick()) {
             if (ClientRingData.hasRing) {
                 ModNetwork.sendToServer(new TogglePowerPacket());
@@ -64,6 +68,7 @@ public final class ClientForgeEvents {
                 UniformTransition.tick(player);
             }
             ClientFlight.tickShake();
+            com.lanterna.client.flight.HyperEffects.tick();
             ClientRecharge.tick();
         }
     }
@@ -132,7 +137,7 @@ public final class ClientForgeEvents {
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !ClientFlight.isFlying(mc.player)) return;
-        float bank = ClientFlight.bank(mc.player, (float) event.getPartialTick());
+        float bank = ClientFlight.cameraBank(mc.player, (float) event.getPartialTick());
         float amount = mc.options.getCameraType().isFirstPerson() ? 0.3f : 0.15f;
         event.setRoll(event.getRoll() - bank * amount);
 
@@ -151,6 +156,9 @@ public final class ClientForgeEvents {
         Minecraft mc = Minecraft.getInstance();
         if (event.getPlayer() != mc.player || !ClientFlight.isFlying(mc.player)) return;
         float extra = (float) Math.min(0.3, ClientFlight.localSpeed() * 0.2);
+        // Hiperpropulsão: a visão "estica" com a velocidade
+        if (ClientFlight.hyperOn()) extra = 0.3f + (float) ClientFlight.hyperFraction() * 0.25f;
+        extra += ClientFlight.hyperCharge() * 0.08f;
         event.setNewFovModifier(1.0f + extra);
     }
 
@@ -175,6 +183,7 @@ public final class ClientForgeEvents {
         var buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         ClientRecharge.render(event.getPoseStack(), buffer, event.getCamera().getPosition(), event.getPartialTick());
         buffer.endBatch();
+        com.lanterna.client.flight.HyperEffects.render(event.getPoseStack(), buffer, event.getCamera().getPosition(), event.getPartialTick());
     }
 
     @SubscribeEvent
@@ -185,6 +194,7 @@ public final class ClientForgeEvents {
         ClientFlight.clear();
         UniformTransition.clear();
         ClientRecharge.clear();
+        com.lanterna.client.flight.HyperEffects.clear();
     }
 
     private ClientForgeEvents() {}

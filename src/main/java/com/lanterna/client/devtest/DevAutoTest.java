@@ -50,17 +50,17 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         if (sideCam == null || mc.player == null) return;
         double yaw = Math.toRadians(mc.player.getYRot() + camSide);
-        double x = mc.player.getX() - Math.sin(yaw) * camDist;
-        double z = mc.player.getZ() + Math.cos(yaw) * camDist;
-        double y = mc.player.getY() + camUp - sideCam.getEyeHeight() + 0.9;
-        sideCam.setPos(x, y, z);
-        sideCam.xo = x; sideCam.yo = y; sideCam.zo = z;
-        sideCam.xOld = x; sideCam.yOld = y; sideCam.zOld = z;
-        double dx = mc.player.getX() - x, dz = mc.player.getZ() - z;
-        double dy = (mc.player.getY() + 0.9) - (y + sideCam.getEyeHeight());
-        float yawDeg = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90);
-        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-        sideCam.setYRot(yawDeg); sideCam.yRotO = yawDeg; sideCam.setYHeadRot(yawDeg);
+        double ox = -Math.sin(yaw) * camDist, oz = Math.cos(yaw) * camDist;
+        double oy = camUp - sideCam.getEyeHeight() + 0.9;
+        // Posição atual e anterior seguem o jogador (para a câmera não "ficar para trás" em alta velocidade)
+        sideCam.setPos(mc.player.getX() + ox, mc.player.getY() + oy, mc.player.getZ() + oz);
+        sideCam.xo = sideCam.xOld = mc.player.xo + ox;
+        sideCam.yo = sideCam.yOld = mc.player.yo + oy;
+        sideCam.zo = sideCam.zOld = mc.player.zo + oz;
+        double dy = 0.9 - (oy + sideCam.getEyeHeight());
+        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(ox * ox + oz * oz)));
+        float look = (float) Math.toDegrees(Math.atan2(ox, -oz));
+        sideCam.setYRot(look); sideCam.yRotO = look; sideCam.setYHeadRot(look);
         sideCam.setXRot(pitch); sideCam.xRotO = pitch;
     }
 
@@ -74,7 +74,14 @@ public final class DevAutoTest {
     private static void shot(String name) {
         Minecraft mc = Minecraft.getInstance();
         Screenshot.grab(mc.gameDirectory, "lanterna_" + name + ".png", mc.getMainRenderTarget(), msg -> {});
-        LanternaMod.LOGGER.info("AUTOTEST shot {}", name);
+        LanternaMod.LOGGER.info("AUTOTEST shot {} dim={} pos={} screen={}", name,
+                mc.player != null ? mc.player.level().dimension().location() : null,
+                mc.player != null ? mc.player.position() : null, mc.screen);
+        if (mc.player != null) LanternaMod.LOGGER.info("AUTOTEST state fwd={} up={} flight={} active={} auto={} hyper={} speed={} chunk={}",
+                mc.player.input.forwardImpulse, mc.options.keyUp.isDown(), com.lanterna.client.ClientRingData.flight,
+                com.lanterna.client.ClientRingData.active, com.lanterna.client.flight.Autopilot.active(),
+                com.lanterna.client.flight.ClientFlight.hyperOn(), com.lanterna.client.flight.ClientFlight.localSpeed(),
+                mc.level.hasChunkAt(mc.player.getBlockX(), mc.player.getBlockZ()));
     }
 
     private static void look(float yaw, float pitch) {
@@ -104,27 +111,80 @@ public final class DevAutoTest {
                 cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s saturation 99999 1 true");
                 cmd("gamerule doMobSpawning false"); cmd("kill @e[type=!player]");
                 cmd("lanterna resetar"); cmd("clear @s");
-                cmd("tp @s 0.5 150 0.5"); cmd("effect give @s slow_falling 30 0 true");
+                cmd("execute in minecraft:overworld run tp @s 0.5 150 0.5"); cmd("effect give @s slow_falling 30 0 true");
                 look(0, 0);
             });
             at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
             at(20, () -> cmd("lanterna escolher lanterna:green"));
-            at(200, () -> { look(0, 0); sideCamera(true, -25, 2.7, 0.3); });
-            at(10, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
-            at(50, () -> shot("t0_off"));
-            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
-            at(3, () -> shot("t1_forming"));
-            at(3, () -> shot("t2_forming"));
-            at(3, () -> shot("t3_forming"));
-            at(3, () -> shot("t4_forming"));
-            at(3, () -> shot("t5_forming"));
-            at(3, () -> shot("t6_forming"));
-            at(3, () -> shot("t7_forming"));
-            at(3, () -> shot("t8_forming"));
-            at(20, () -> shot("t9_done"));
-            at(5, () -> ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
-            at(8, () -> shot("u1_undoing"));
-            at(8, () -> shot("u2_undoing"));
+            at(200, () -> { look(0, 0); cmd("lanterna carga 1000"); });
+            // ---- Mapa estelar ----
+            at(5, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
+            at(20, () -> shot("p0_starmap"));
+            // ---- Manobras: parafuso e freio ----
+            at(5, () -> { mc.setScreen(null); ModNetwork.sendToServer(new ToggleFlightPacket()); });
+            at(30, () -> { hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); sideCamera(true, 120, 5, 0.8); });
+            at(30, () -> { hold(mc.options.keyLeft, true); });
+            at(1, () -> hold(mc.options.keyLeft, false));
+            at(2, () -> hold(mc.options.keyLeft, true));
+            at(1, () -> hold(mc.options.keyLeft, false));
+            at(5, () -> shot("p1_barrel_roll"));
+            at(6, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); hold(mc.options.keyDown, true); });
+            at(4, () -> shot("p2_air_brake"));
+            at(10, () -> hold(mc.options.keyDown, false));
+            // ---- Piloto automático: Terra -> Oa ----
+            at(20, () -> { look(0, 0); com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId("oa")); sideCamera(false, 0, 0, 0); camera(CameraType.THIRD_PERSON_BACK); });
+            at(25, () -> shot("p3_auto_ascend"));
+            at(25, () -> shot("p4_auto_ascend2"));
+            at(15, () -> shot("p5_auto_t"));
+            at(15, () -> shot("p6_auto_t"));
+            at(15, () -> shot("p7_auto_t"));
+            at(15, () -> shot("p8_auto_t"));
+            at(15, () -> shot("p9_auto_t"));
+            at(15, () -> shot("p10_auto_t"));
+            at(15, () -> shot("p11_auto_t"));
+            at(15, () -> shot("p12_auto_t"));
+            at(15, () -> shot("p13_auto_t"));
+            at(15, () -> shot("p14_auto_t"));
+            at(15, () -> shot("p15_auto_t"));
+            at(15, () -> shot("p16_auto_t"));
+            at(3, () -> camera(CameraType.FIRST_PERSON));
+            at(3, () -> shot("p17_auto_firstperson"));
+            at(3, () -> camera(CameraType.THIRD_PERSON_BACK));
+            at(25, () -> shot("p18_auto_late"));
+            at(25, () -> shot("p19_auto_late"));
+            at(25, () -> shot("p20_auto_late"));
+            at(25, () -> shot("p21_auto_late"));
+            at(25, () -> shot("p22_auto_late"));
+            at(25, () -> shot("p23_auto_late"));
+            at(25, () -> shot("p24_auto_late"));
+            at(25, () -> shot("p25_auto_late"));
+            at(25, () -> shot("p26_auto_late"));
+            at(25, () -> shot("p27_auto_late"));
+            at(25, () -> shot("p28_auto_late"));
+            at(25, () -> shot("p29_auto_late"));
+            at(30, () -> shot("p30_auto_late"));
+            at(30, () -> shot("p31_auto_late"));
+            at(30, () -> shot("p32_auto_late"));
+            at(30, () -> shot("p33_auto_late"));
+            at(30, () -> shot("p34_auto_late"));
+            at(30, () -> shot("p35_auto_late"));
+            at(30, () -> shot("p36_auto_late"));
+            at(30, () -> shot("p37_auto_late"));
+            at(30, () -> shot("p38_auto_late"));
+            at(30, () -> shot("p39_auto_late"));
+            // ---- Hiperpropulsão manual no espaço ----
+            at(10, () -> { com.lanterna.client.flight.Autopilot.stop(null); cmd("execute in lanterna:space run tp @s 0 0 0 90 0"); });
+            at(40, () -> { look(90, 0); hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); camera(CameraType.THIRD_PERSON_BACK); });
+            at(30, () -> shot("h1_charging"));
+            at(20, () -> shot("h2_hyper"));
+            at(20, () -> shot("h3_hyper"));
+            at(5, () -> camera(CameraType.THIRD_PERSON_FRONT));
+            at(5, () -> shot("h4_hyper_front"));
+            at(5, () -> camera(CameraType.FIRST_PERSON));
+            at(5, () -> shot("h5_firstperson"));
+            at(10, () -> shot("h6_firstperson"));
+            at(5, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); });
+            at(30, () -> shot("h7_after"));
             at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
         }
     }

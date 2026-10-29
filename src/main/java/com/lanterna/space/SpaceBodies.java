@@ -29,6 +29,21 @@ public final class SpaceBodies {
         public String nameKey() {
             return "planet.lanterna." + id;
         }
+
+        public net.minecraft.network.chat.Component displayName() {
+            return net.minecraft.network.chat.Component.translatable(nameKey());
+        }
+    }
+
+    /** Todos os corpos celestes (fixos). */
+    public static List<Body> allBodies() {
+        return BODIES;
+    }
+
+    /** O corpo celeste cujo mundo é este (e, nos mundos compartilhados, a região x/z). */
+    @Nullable
+    public static Body bodyAt(ResourceKey<Level> dimension, double x, double z) {
+        return byDimension(dimension);
     }
 
     private static ResourceKey<Level> planet(String id) {

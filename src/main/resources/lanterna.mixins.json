@@ -5,14 +5,19 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "lanterna.refmap.json",
   "mixins": [
-    "WorldDimensionsMixin"
+    "WorldDimensionsMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ChunkMapMixin"
   ],
   "client": [
     "HumanoidModelMixin",
     "LivingEntityRendererMixin",
     "MinecraftMixin",
     "EntityMixin",
-    "CapeLayerMixin"
+    "CapeLayerMixin",
+    "LocalPlayerMixin",
+    "ClientLevelMixin",
+    "MouseHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

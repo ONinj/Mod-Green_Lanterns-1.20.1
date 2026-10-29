@@ -76,7 +76,8 @@ public final class RingPowers {
     /** Avisa quem está vendo este jogador (e ele mesmo) qual anel desenhar na mão. */
     public static void syncVisibleRing(ServerPlayer player, RingData data, boolean force) {
         String key = data.hasRing()
-                ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled() : "";
+                ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled()
+                + "|" + data.hyper() + "|" + data.autopilot() : "";
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
                 SyncVisibleRingPacket.of(player.getId(), data));
@@ -251,8 +252,22 @@ public final class RingPowers {
         }
     }
 
+    /** O cliente avisa que entrou/saiu da hiperpropulsão ou do piloto automático. */
+    public static void setFlightMode(ServerPlayer player, boolean hyper, boolean autopilot) {
+        RingData data = ModCapabilities.get(player).orElse(null);
+        if (data == null) return;
+        boolean canFly = data.hasRing() && data.powerActive() && data.flightEnabled();
+        boolean inSpace = player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE);
+        data.setFlightMode(canFly && hyper && inSpace, canFly && autopilot);
+        syncVisibleRing(player, data, false);
+    }
+
     private static void tickFlight(ServerPlayer player, RingData data) {
         if (!data.flightEnabled()) return;
+        // Hiperpropulsão só existe no espaço
+        if (data.hyper() && !player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)) {
+            data.setFlightMode(false, data.autopilot());
+        }
 
         // Outro mod ou troca de modo de jogo pode ter tirado a permissão de voo
         if (!player.getAbilities().mayfly) applyFlightAbility(player, data);
@@ -262,7 +277,8 @@ public final class RingPowers {
         if (!player.onGround() && !player.isCreative() && !player.isSpectator()
                 && data.nextFlightTick() % 20 == 0) {
             CorpsDefinition def = CorpsManager.get(data.corps());
-            setCharge(player, data, data.charge() - def.flightDrain());
+            // Hiperpropulsão gasta o triplo
+            setCharge(player, data, data.charge() - def.flightDrain() * (data.hyper() ? 3 : 1));
             if (data.charge() <= 0) {
                 data.setFlightEnabled(false);
                 applyFlightAbility(player, data);

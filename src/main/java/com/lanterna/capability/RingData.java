@@ -148,11 +148,24 @@ public class RingData implements INBTSerializable<CompoundTag> {
         if (flightEnabled != value) {
             flightEnabled = value;
             flightTickCounter = 0;
+            if (!value) { hyper = false; autopilot = false; }
             markDirty();
         }
     }
 
     public int nextFlightTick() { return ++flightTickCounter; }
+
+    // --- Modos de voo avançados (só em memória; o cliente avisa) ---
+    /** Hiperpropulsão no espaço (velocidade altíssima). */
+    private transient boolean hyper;
+    /** Piloto automático ligado (mostra a cúpula de energia para todos). */
+    private transient boolean autopilot;
+    public boolean hyper() { return hyper; }
+    public boolean autopilot() { return autopilot; }
+    public void setFlightMode(boolean hyper, boolean autopilot) {
+        this.hyper = hyper;
+        this.autopilot = autopilot;
+    }
 
     // ===== Seleção =====
 

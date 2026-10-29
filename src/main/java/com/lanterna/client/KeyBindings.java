@@ -36,5 +36,12 @@ public final class KeyBindings {
             GLFW.GLFW_KEY_G,
             CATEGORY);
 
+    public static final KeyMapping STAR_MAP = new KeyMapping(
+            "key.lanterna.star_map",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
+            CATEGORY);
+
     private KeyBindings() {}
 }
