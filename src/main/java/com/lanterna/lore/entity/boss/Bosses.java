@@ -183,7 +183,8 @@ public final class Bosses {
         @Override
         public void aiStep() {
             super.aiStep();
-            if (level().isClientSide) return;
+            // Morto não engole mais nada (senão ele suga o próprio drop durante a animação de morte)
+            if (level().isClientSide || isDeadOrDying()) return;
             setDeltaMovement(0, getDeltaMovement().y, 0);
             // Suga os itens do chão
             Vec3 mouth = mouth();
