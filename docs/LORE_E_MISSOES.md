@@ -189,7 +189,18 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 - Tipos: Lanceira (1 lugar), Patrulha, Cargueiro, Pirata e Capitânia Pirata, além de destroços para saquear.
 - Item de nave: clique num bloco para colocar. Nave sem dono: monte nela para tomar e ganhar a Chave da Nave.
 - Controles pilotando: W/A/S/D e mouse, Espaço sobe, **C** desce, Ctrl turbo, **X** atira, **B** abre/fecha a porta, **H** abre o hangar (Capitânia).
-- **Shift + clique** na nave: entra no interior. Clique na porta externa da sala para sair.
+- **Shift + clique** na nave: entra no interior. Clique na porta externa da sala para sair (o alçapão do chão foi tirado).
+- Blocos do interior:
+  | Bloco | O que faz |
+  |---|---|
+  | Console (painel) | contratos da sua Tropa |
+  | Holomapa | abre o mapa estelar |
+  | Estação de recarga | enche o anel (qualquer Tropa); depois espera 5 min |
+  | Cadeira | clique para sentar, Shift levanta |
+  | Armário | guarda 27 itens |
+  | Beliche | renascer na nave, cura um pouco e, se for noite lá fora, passa a noite |
+  | Luz do teto | clique liga/desliga |
+- Destroços não são sólidos: dá para andar por dentro deles; clique neles para saquear.
 - Fragmento de Casco na mão + clique: conserta a nave.
 - A nave viaja com quem está dentro entre a Terra, o espaço e os planetas.
 

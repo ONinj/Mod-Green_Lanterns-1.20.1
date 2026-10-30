@@ -1015,5 +1015,12 @@
   "contrato.lanterna.nave_alheia": "This console belongs to a ship that isn't yours.",
   "contrato.lanterna.so_tropa": "Your Corps contracts are on %s or on your ship's console.",
   "starmap.lanterna.search": "Search planet, type or Corps...",
-  "starmap.lanterna.search_none": "Nothing found"
+  "starmap.lanterna.search_none": "Nothing found",
+  "nave.lanterna.recarga.sem_anel": "You're not wearing a ring.",
+  "nave.lanterna.recarga.cheio": "Your ring is already full.",
+  "nave.lanterna.recarga.espera": "The station is still charging: %s s.",
+  "nave.lanterna.recarga.ok": "Ring recharged by the ship's station.",
+  "nave.lanterna.beliche.dormiu": "You slept in the bunk. The night passed and you'll respawn here.",
+  "nave.lanterna.beliche.descansou": "You rested. You'll respawn here in the ship now.",
+  "entity.lanterna.assento": "Seat"
 }

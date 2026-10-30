@@ -1,6 +1,9 @@
 {
  "variants": {
-  "": {
+  "lit=true": {
+   "model": "lanterna:block/nave_luz"
+  },
+  "lit=false": {
    "model": "lanterna:block/nave_luz"
   }
  }

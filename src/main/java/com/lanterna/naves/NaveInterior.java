@@ -78,6 +78,12 @@ public final class NaveInterior {
                 return;
             }
             sala.built = true;
+            sala.semEscotilha = true;
+            dados.setDirty();
+        } else if (!sala.semEscotilha) {
+            // salas feitas antes da 0.13.4: tira o alçapão do chão
+            tirarEscotilhas(dim, sala.origem, sala.tamanho);
+            sala.semEscotilha = true;
             dados.setDirty();
         }
         CompoundTag back = new CompoundTag();
@@ -133,6 +139,7 @@ public final class NaveInterior {
         StructurePlaceSettings settings = new StructurePlaceSettings();
         tpl.placeInWorld(dim, origin, origin, settings, dim.random, 2);
         Vec3i size = tpl.getSize();
+        tirarEscotilhas(dim, origin, new BlockPos(size.getX(), size.getY(), size.getZ()));
         BlockPos door = null;
         for (StructureTemplate.StructureBlockInfo info : tpl.filterBlocks(BlockPos.ZERO, settings, NaveBlocks.NAVE_PORTA.get())) {
             BlockPos p = info.pos();
@@ -150,6 +157,13 @@ public final class NaveInterior {
         sala.olhar = in.toYRot();
         sala.tamanho = new BlockPos(size.getX(), size.getY(), size.getZ());
         return true;
+    }
+
+    /** O alçapão do chão levava para fora da sala (no vazio): vira piso. A entrada e saída é só pela porta. */
+    private static void tirarEscotilhas(ServerLevel dim, BlockPos o, BlockPos t) {
+        for (BlockPos p : BlockPos.betweenClosed(o, o.offset(Math.max(0, t.getX() - 1), Math.max(0, t.getY() - 1), Math.max(0, t.getZ() - 1)))) {
+            if (dim.getBlockState(p).is(NaveBlocks.NAVE_ESCOTILHA.get())) dim.setBlock(p, NaveBlocks.NAVE_PISO.get().defaultBlockState(), 2);
+        }
     }
 
     /** Clicar na porta externa da sala leva de volta para fora da nave. */
@@ -216,7 +230,7 @@ public final class NaveInterior {
         int indice;
         BlockPos origem = BlockPos.ZERO, porta = BlockPos.ZERO, dentro = BlockPos.ZERO, tamanho = BlockPos.ZERO;
         float olhar;
-        boolean built;
+        boolean built, semEscotilha;
         @Nullable UUID dono;
 
         CompoundTag save() {
@@ -229,6 +243,7 @@ public final class NaveInterior {
             t.putFloat("Y", olhar);
             t.putBoolean("B", built);
             if (dono != null) t.putUUID("Dono", dono);
+            t.putBoolean("SemEscotilha", semEscotilha);
             return t;
         }
 
@@ -242,6 +257,7 @@ public final class NaveInterior {
             s.olhar = t.getFloat("Y");
             s.built = t.getBoolean("B");
             if (t.hasUUID("Dono")) s.dono = t.getUUID("Dono");
+            s.semEscotilha = t.getBoolean("SemEscotilha");
             return s;
         }
     }

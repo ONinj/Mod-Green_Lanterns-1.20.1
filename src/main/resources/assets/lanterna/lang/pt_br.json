@@ -1015,5 +1015,12 @@
   "contrato.lanterna.nave_alheia": "Este painel é de uma nave que não é sua.",
   "contrato.lanterna.so_tropa": "Os contratos da sua Tropa ficam em %s ou no painel da sua nave.",
   "starmap.lanterna.search": "Buscar planeta, tipo ou Tropa...",
-  "starmap.lanterna.search_none": "Nada encontrado"
+  "starmap.lanterna.search_none": "Nada encontrado",
+  "nave.lanterna.recarga.sem_anel": "Você não está com um anel.",
+  "nave.lanterna.recarga.cheio": "O anel já está com carga máxima.",
+  "nave.lanterna.recarga.espera": "A estação ainda está carregando: %s s.",
+  "nave.lanterna.recarga.ok": "Anel recarregado pela estação da nave.",
+  "nave.lanterna.beliche.dormiu": "Você dormiu no beliche. A noite passou e você vai renascer aqui.",
+  "nave.lanterna.beliche.descansou": "Você descansou. Agora vai renascer aqui na nave.",
+  "entity.lanterna.assento": "Assento"
 }

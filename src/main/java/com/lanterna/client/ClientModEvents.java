@@ -100,6 +100,7 @@ public final class ClientModEvents {
         event.registerEntityRenderer(com.lanterna.naves.NaveEntities.NAVE.get(),
                 ctx -> new com.lanterna.naves.client.NaveRenderer<>(ctx, LanternaMod.MODID));
         event.registerEntityRenderer(com.lanterna.tropa.TropaEntities.TIRO_PLASMA.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerEntityRenderer(com.lanterna.naves.NaveEntities.ASSENTO.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
     }
 
     @SubscribeEvent

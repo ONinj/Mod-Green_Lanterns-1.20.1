@@ -721,8 +721,83 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Blocos do interior funcionando, sem alçapão, e destroços sem parede invisível. */
+    private static final java.util.Map<String, net.minecraft.core.BlockPos> BLOCOS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static void usar(String nome) {
+        Minecraft mc = Minecraft.getInstance();
+        var pos = BLOCOS.get(nome);
+        if (pos == null) { LanternaMod.LOGGER.info("AUTOTEST bloco {} nao achado", nome); return; }
+        mc.player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, net.minecraft.world.phys.Vec3.atCenterOf(pos));
+        mc.gameMode.useItemOn(mc.player, net.minecraft.world.InteractionHand.MAIN_HAND,
+                new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false));
+    }
+    private static void sceneBlocos() {
+        Minecraft mc = Minecraft.getInstance();
+        Runnable tela = () -> LanternaMod.LOGGER.info("AUTOTEST tela={} veiculo={} carga={}", mc.screen == null ? null : mc.screen.getClass().getSimpleName(),
+                mc.player.getVehicle() == null ? null : mc.player.getVehicle().getClass().getSimpleName(), com.lanterna.client.ClientRingData.charge);
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200))) n.discard(); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld"), 400);
+        // ---- destroço: dá para entrar no meio ----
+        at(30, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "fill 870 -61 870 930 -61 930 minecraft:smooth_stone");
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.DESTROCOS_2, "");
+            n.moveTo(900.5, -60, 912.5, 30, 0); sp.level().addFreshEntity(n);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            sp.teleportTo(sp.serverLevel(), 900.5, -60, 896.5, 0f, 10f); }));
+        at(20, () -> { mc.player.setXRot(10); mc.options.keyUp.setDown(true); });
+        at(60, () -> { mc.options.keyUp.setDown(false); LanternaMod.LOGGER.info("AUTOTEST destroco jogador z={} (centro 912.5)", mc.player.getZ()); });
+        at(10, () -> shot("b0_destroco"));
+        // ---- interior ----
+        at(5, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green");
+            n.moveTo(880.5, -60, 880.5, 0, 0); n.setDono(sp.getUUID()); sp.level().addFreshEntity(n);
+            com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(40, () -> server(sp -> {
+            BLOCOS.clear(); int esc = 0;
+            for (var p : net.minecraft.core.BlockPos.betweenClosed(sp.blockPosition().offset(-12, -3, -12), sp.blockPosition().offset(12, 6, 12))) {
+                var b = sp.level().getBlockState(p).getBlock();
+                String id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(b).getPath();
+                if (id.equals("nave_escotilha")) esc++;
+                if (id.startsWith("nave_") && !BLOCOS.containsKey(id)) BLOCOS.put(id, p.immutable());
+            }
+            LanternaMod.LOGGER.info("AUTOTEST escotilhas={} blocos={}", esc, BLOCOS.keySet());
+        }));
+        at(5, () -> shot("b1_sala"));
+        at(5, () -> { cmd("lanterna carga 10"); });
+        at(20, () -> { tela.run(); usar("nave_recarga"); });
+        at(20, tela);
+        at(5, () -> usar("nave_recarga"));
+        at(10, () -> usar("nave_cadeira"));
+        at(20, () -> { tela.run(); shot("b2_sentado"); });
+        at(5, () -> { mc.options.keyShift.setDown(true); });
+        at(10, () -> { mc.options.keyShift.setDown(false); tela.run(); });
+        at(10, () -> usar("nave_armario"));
+        at(20, () -> { tela.run(); shot("b3_armario"); });
+        at(5, () -> mc.player.closeContainer());
+        at(10, () -> usar("nave_luz"));
+        at(20, () -> LanternaMod.LOGGER.info("AUTOTEST luz={}", mc.level.getBlockState(BLOCOS.get("nave_luz"))));
+        at(5, () -> usar("nave_holomapa"));
+        at(20, () -> { tela.run(); shot("b4_holomapa"); });
+        at(5, () -> mc.setScreen(null));
+        at(5, () -> server(sp -> sp.server.overworld().setDayTime(18000)));
+        at(10, () -> usar("nave_beliche"));
+        at(20, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST tempo={} renasce={} {}", sp.server.overworld().getDayTime() % 24000, sp.getRespawnDimension().location(), sp.getRespawnPosition())));
+        at(5, () -> usar("nave_console"));
+        at(20, tela);
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("quadro")) sceneQuadro();
+        if (ENABLED && SCENE.equals("blocos")) sceneBlocos();
+        else if (ENABLED && SCENE.equals("quadro")) sceneQuadro();
         else if (ENABLED && SCENE.equals("pilotar")) scenePilotar();
         else if (ENABLED && SCENE.equals("encontro")) sceneEncontro();
         else if (ENABLED && SCENE.equals("navesfoto")) sceneNavesFoto();

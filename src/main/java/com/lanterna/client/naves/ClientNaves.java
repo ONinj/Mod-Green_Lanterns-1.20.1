@@ -52,4 +52,9 @@ public final class ClientNaves {
     }
 
     private ClientNaves() {}
+
+    /** Holomapa da nave: abre o mapa estelar. */
+    public static void abrirMapa() {
+        net.minecraft.client.Minecraft.getInstance().setScreen(new com.lanterna.client.screen.StarMapScreen());
+    }
 }

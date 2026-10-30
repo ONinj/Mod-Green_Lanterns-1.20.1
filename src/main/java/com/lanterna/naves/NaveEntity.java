@@ -224,11 +224,17 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
                 minX = Math.min(minX, wx); maxX = Math.max(maxX, wx);
                 minZ = Math.min(minZ, wz); maxZ = Math.max(maxZ, wz);
             }
-            float w = (float) Math.max(maxX - minX, maxZ - minZ);
             float h = (float) (c[4] / 16);
-            // Caixas muito compridas na diagonal viram quadrados grandes: limita à menor dimensão para não criar "paredes invisíveis"
-            float wMin = (float) Math.min(maxX - minX, maxZ - minZ);
-            p.resize(Math.max(0.3f, Math.min(w, wMin + 1.5f)), Math.max(0.3f, h));
+            double ex = maxX - minX, ez = maxZ - minZ;
+            // Nave virada na diagonal: a caixa alinhada que contém a peça girada fica enorme; limita para não criar "paredes invisíveis"
+            float yawMod = Math.abs(Mth.wrapDegrees(getYRot())) % 90f;
+            boolean diagonal = Math.min(yawMod, 90f - yawMod) > 15f;
+            if (diagonal) {
+                double lim = Math.min(ex, ez) + 1.5;
+                ex = Math.min(ex, lim);
+                ez = Math.min(ez, lim);
+            }
+            p.resize(Math.max(0.3, ex), Math.max(0.3, ez), Math.max(0.3f, h));
             p.setPos(getX() + (minX + maxX) / 2, getY() + c[1] / 16, getZ() + (minZ + maxZ) / 2);
             p.xo = p.getX(); p.yo = p.getY(); p.zo = p.getZ();
             p.xOld = p.getX(); p.yOld = p.getY(); p.zOld = p.getZ();

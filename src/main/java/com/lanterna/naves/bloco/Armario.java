@@ -14,8 +14,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
-/** Armário embutido: clique abre e fecha a porta. */
-public class Armario extends Horizontal {
+/** Armário embutido: guarda 27 itens (a porta abre enquanto está em uso). */
+public class Armario extends Horizontal implements net.minecraft.world.level.block.EntityBlock {
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
     public Armario(Properties p) {
@@ -32,9 +32,23 @@ public class Armario extends Horizontal {
     @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        boolean open = !state.getValue(OPEN);
-        level.setBlock(pos, state.setValue(OPEN, open), 3);
-        level.playSound(null, pos, open ? SoundEvents.IRON_TRAPDOOR_OPEN : SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.7f, 1.2f);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.getBlockEntity(pos) instanceof ArmarioEntity be) player.openMenu(be);
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new ArmarioEntity(pos, state);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ArmarioEntity be) {
+            net.minecraft.world.Containers.dropContents(level, pos, be);
+            level.updateNeighbourForOutputSignal(pos, this);
+        }
+        super.onRemove(state, level, pos, newState, moved);
     }
 }

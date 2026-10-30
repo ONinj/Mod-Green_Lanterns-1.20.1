@@ -189,6 +189,7 @@ public class StarMapScreen extends Screen {
         var player = Minecraft.getInstance().player;
         Destinations.Destination d = selected == null ? null : Destinations.byId(selected);
         goButton.active = d != null && player != null && !Destinations.isHere(player, d)
+                && !player.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM)
                 && ClientRingData.hasRing && ClientRingData.active;
         stopButton.visible = Autopilot.active();
     }

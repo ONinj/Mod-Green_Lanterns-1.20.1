@@ -12,6 +12,10 @@ public final class NaveEntities {
                     .sized(3f, 2.4f).fireImmune().clientTrackingRange(16).updateInterval(1)
                     .setShouldReceiveVelocityUpdates(true).build(LanternaMod.id("nave").toString()));
 
+    public static final RegistryObject<EntityType<AssentoEntity>> ASSENTO = ModEntities.ENTITIES.register("assento",
+            () -> EntityType.Builder.<AssentoEntity>of(AssentoEntity::new, MobCategory.MISC)
+                    .sized(0.4f, 0.3f).noSummon().clientTrackingRange(8).build(LanternaMod.id("assento").toString()));
+
     public static void init() {
         Object o = NaveItem.ITEMS; // carrega os itens das naves
     }

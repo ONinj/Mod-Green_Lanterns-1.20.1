@@ -46,16 +46,21 @@ public final class NaveBlocks {
     public static final RegistryObject<Block> NAVE_PORTA = ModBlocks.BLOCKS.register("nave_porta",
             () -> new net.minecraft.world.level.block.DoorBlock(metal(0).noOcclusion(), METAL_NAVE));
     public static final RegistryObject<Block> NAVE_CONSOLE = reg("nave_console", () -> new Horizontal(metal(6).noOcclusion()), true);
-    public static final RegistryObject<Block> NAVE_CADEIRA = reg("nave_cadeira", () -> new Horizontal(metal(0).noOcclusion()), true);
+    public static final RegistryObject<Block> NAVE_CADEIRA = reg("nave_cadeira", () -> new Cadeira(metal(0).noOcclusion()), true);
     public static final RegistryObject<Block> NAVE_HOLOMAPA = reg("nave_holomapa", () -> new Simples(metal(10).noOcclusion()), true);
-    public static final RegistryObject<Block> NAVE_RECARGA = reg("nave_recarga", () -> new Horizontal(metal(6).noOcclusion()), true);
+    public static final RegistryObject<Block> NAVE_RECARGA = reg("nave_recarga", () -> new Recarga(metal(6).noOcclusion()), true);
     public static final RegistryObject<Block> NAVE_BELICHE = ModBlocks.BLOCKS.register("nave_beliche",
             () -> new Beliche(metal(0).noOcclusion().strength(2f)));
     public static final RegistryObject<Block> NAVE_ARMARIO = reg("nave_armario", () -> new Armario(metal(0).noOcclusion()), true);
-    public static final RegistryObject<Block> NAVE_LUZ = reg("nave_luz", () -> new Luz(metal(15).noOcclusion()), true);
+    public static final RegistryObject<Block> NAVE_LUZ = reg("nave_luz", () -> new Luz(metal(0).noOcclusion().lightLevel(st -> st.getValue(Luz.LIT) ? 15 : 0)), true);
     public static final RegistryObject<Block> NAVE_ESCOTILHA = reg("nave_escotilha",
             () -> new net.minecraft.world.level.block.TrapDoorBlock(metal(0).noOcclusion(), METAL_NAVE), true);
     public static final RegistryObject<Block> QUADRO_CONTRATOS = reg("quadro_contratos", () -> new QuadroContratos(metal(4).noOcclusion()), false);
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<net.minecraft.world.level.block.entity.BlockEntityType<ArmarioEntity>> ARMARIO_BE =
+            com.lanterna.registry.ModBlockEntities.BLOCK_ENTITIES.register("nave_armario",
+                    () -> net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(ArmarioEntity::new, NAVE_ARMARIO.get()).build(null));
 
     static {
         ALL.add(NAVE_PORTA);

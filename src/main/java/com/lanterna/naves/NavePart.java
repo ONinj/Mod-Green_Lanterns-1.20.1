@@ -17,12 +17,26 @@ import net.minecraftforge.entity.PartEntity;
 /** Uma das caixas de colisão da nave (col_N). Sólida: dá para pisar, bater e atirar nela. */
 public class NavePart extends PartEntity<NaveEntity> implements TiroPlasma.NavePartLike {
     private EntityDimensions size = EntityDimensions.fixed(0.1f, 0.1f);
+    /** Meia-largura real em x e z (a caixa não precisa ser quadrada). */
+    private double hx = 0.05, hz = 0.05;
     final int index;
 
     public NavePart(NaveEntity parent, int index) {
         super(parent);
         this.index = index;
         refreshDimensions();
+    }
+
+    /** Caixa retangular (x por z), mais justa que a quadrada do Minecraft. */
+    void resize(double wx, double wz, float h) {
+        hx = wx / 2; hz = wz / 2;
+        resize((float) Math.max(wx, wz), h);
+    }
+
+    @Override
+    protected net.minecraft.world.phys.AABB makeBoundingBox() {
+        if (size == null) return super.makeBoundingBox(); // chamado pelo construtor do Entity, antes dos campos existirem
+        return new net.minecraft.world.phys.AABB(getX() - hx, getY(), getZ() - hz, getX() + hx, getY() + size.height, getZ() + hz);
     }
 
     void resize(float w, float h) {
@@ -44,9 +58,10 @@ public class NavePart extends PartEntity<NaveEntity> implements TiroPlasma.NaveP
         return size.width > 0.2f;
     }
 
+    /** Destroços não são sólidos: dá para entrar no meio deles (clicar ainda saqueia). */
     @Override
     public boolean canBeCollidedWith() {
-        return size.width > 0.2f;
+        return size.width > 0.2f && !getParent().tipo().destrocos();
     }
 
     @Override
