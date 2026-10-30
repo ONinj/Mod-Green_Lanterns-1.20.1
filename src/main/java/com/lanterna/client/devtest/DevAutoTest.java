@@ -1261,8 +1261,121 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Auditoria: toda missão de "derrotar N" precisa ser possível de completar. */
+    private static final java.util.List<String> AUD_LOG = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private static void sceneAuditoria() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s regeneration 99999 4 true"); cmd("time set 6000");
+            cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) d.abandon(id);
+            com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(46), null);
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) d.abandon(id);
+            Auditoria.iniciar(sp);
+        }));
+        waitFor(() -> Auditoria.FIM.get(), 20 * 60 * 30);
+        at(20, () -> { for (String l : AUD_LOG) LanternaMod.LOGGER.info("AUTOTEST AUDIT {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    static final class Auditoria {
+        static final java.util.concurrent.atomic.AtomicBoolean FIM = new java.util.concurrent.atomic.AtomicBoolean();
+        record Caso(String id, String planeta, @org.jetbrains.annotations.Nullable net.minecraft.core.BlockPos onde) {}
+        static final java.util.List<Caso> CASOS = new java.util.ArrayList<>();
+        static int atual = -1, ciclos, maxVivos, mortos;
+        static net.minecraft.server.level.ServerPlayer P;
+
+        static String contrato(net.minecraft.server.level.ServerPlayer sp, String tipo) {
+            long hoje = com.lanterna.tropa.Contratos.dia(sp);
+            for (long dd = hoje + 2000; dd < hoje + 2400; dd++) for (String id : com.lanterna.tropa.Contratos.ofertas("korugar", dd)) {
+                var m = com.lanterna.tropa.Contratos.mission(id);
+                if (m == null) continue;
+                String t = m.objectives().get(0).target();
+                if (tipo.equals("piratas") && t.equals("papel:pirata")) return id;
+                if (tipo.equals("ecos") && t.equals("lanterna:eco_cinzento")) return id;
+                if (tipo.equals("invasores") && t.equals("papel:inimigo")) return id;
+                if (tipo.equals("capitao") && t.equals("papel:capitao")) return id;
+            }
+            return null;
+        }
+
+        static void iniciar(net.minecraft.server.level.ServerPlayer sp) {
+            P = sp;
+            for (String t : new String[]{"piratas", "ecos", "invasores", "capitao"}) { String id = contrato(sp, t); if (id != null) CASOS.add(new Caso(id, null, null)); }
+            for (String id : new String[]{"cid_korugar_comandante_1", "cid_korugar_comandante_2", "cid_korugar_medico_1", "cid_korugar_carcereiro_1",
+                    "cid_korugar_instrutor_2", "cid_korugar_instrutor_3", "cid_korugar_carcereiro_3"}) CASOS.add(new Caso(id, null, null));
+            for (String id : new String[]{"prov_bastiao", "prov_onda", "prov_armadura", "prov_comando"}) CASOS.add(new Caso(id, null, null));
+            CASOS.add(new Caso("prova_green", "odym", new net.minecraft.core.BlockPos(260, 0, 260)));
+            CASOS.add(new Caso("patrulha", "oa", new net.minecraft.core.BlockPos(300, 0, 300)));
+            CASOS.add(new Caso("inicio_green_3", "oa", com.lanterna.lore.PlanetLore.HUB.offset(4, 0, 12)));
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(Auditoria::tick);
+            proximo();
+        }
+
+        static void proximo() {
+            atual++;
+            ciclos = 0; maxVivos = 0; mortos = 0;
+            if (atual >= CASOS.size()) { FIM.set(true); return; }
+            Caso c = CASOS.get(atual);
+            var d = com.lanterna.mission.LoreCapability.get(P).orElse(null);
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) d.abandon(id);
+            d.completed().remove(c.id);
+            com.lanterna.mission.MissionManager.start(P, c.id);
+            var m = com.lanterna.mission.Missions.get(c.id);
+            // vai até o lugar do primeiro objetivo de derrotar (ou o lugar do caso)
+            String planeta = c.planeta;
+            net.minecraft.core.BlockPos onde = c.onde;
+            for (var o : m.objectives()) if ((o.type() == com.lanterna.mission.Objective.Type.KILL || o.type() == com.lanterna.mission.Objective.Type.DUMMY) && o.pos() != null) { planeta = o.planet(); onde = o.pos(); break; }
+            var body = com.lanterna.space.SpaceBodies.byId(planeta);
+            var lvl = P.server.getLevel(body.dimension());
+            int x = onde.getX() + 8, z = onde.getZ() + 8;
+            lvl.getChunk(x >> 4, z >> 4);
+            int y = onde.getY() >= 150 ? onde.getY() : lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            P.teleportTo(lvl, x + 0.5, y + 1, z + 0.5, 0, 0);
+            AUD_LOG.add("INICIO " + c.id + " em " + planeta + " " + new net.minecraft.core.BlockPos(x, y, z).toShortString());
+        }
+
+        static void tick(net.minecraftforge.event.TickEvent.ServerTickEvent ev) {
+            if (ev.phase != net.minecraftforge.event.TickEvent.Phase.END || FIM.get() || atual < 0 || atual >= CASOS.size()) return;
+            if (ev.getServer().getTickCount() % 40 != 0) return;
+            Caso c = CASOS.get(atual);
+            var d = com.lanterna.mission.LoreCapability.get(P).orElse(null);
+            var m = com.lanterna.mission.Missions.get(c.id);
+            ciclos++;
+            var lvl = P.serverLevel();
+            // derrota o que conta para a missão
+            boolean tudo = true;
+            StringBuilder prog = new StringBuilder();
+            for (int i = 0; i < m.objectives().size(); i++) {
+                var o = m.objectives().get(i);
+                int pr = d.isActive(c.id) ? d.progress(c.id, i) : (d.isDone(c.id) ? o.count() : -1);
+                if (o.type() != com.lanterna.mission.Objective.Type.KILL && o.type() != com.lanterna.mission.Objective.Type.DUMMY) continue;
+                prog.append(o.target()).append(' ').append(pr).append('/').append(o.count()).append(' ');
+                if (pr < o.count()) tudo = false; else continue;
+                var vivos = lvl.getEntities((Entity) null, P.getBoundingBox().inflate(130, 90, 130), e -> o.type() == com.lanterna.mission.Objective.Type.DUMMY
+                        ? e.getType() == com.lanterna.lore.LoreEntities.ALVO_TREINO.get() && e.isAlive() : com.lanterna.mission.AlvosGarantidos.conta(e, o.target()));
+                maxVivos = Math.max(maxVivos, vivos.size());
+                for (Entity e : vivos) { e.hurt(P.damageSources().playerAttack(P), 5000); mortos++; }
+            }
+            if (tudo || d.isDone(c.id)) {
+                AUD_LOG.add("OK    " + c.id + " em " + (ciclos * 2) + " s | " + prog + "| vivos de uma vez=" + maxVivos + " derrotados=" + mortos);
+                proximo();
+            } else if (ciclos > 75) {
+                AUD_LOG.add("FALHA " + c.id + " | " + prog + "| vivos de uma vez=" + maxVivos + " derrotados=" + mortos);
+                proximo();
+            }
+        }
+    }
+
     static {
-        if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();
+        if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();
+        else if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();
         else if (ENABLED && SCENE.equals("barreira")) sceneBarreira();
         else if (ENABLED && SCENE.equals("trono")) sceneTrono();
         else if (ENABLED && SCENE.equals("cidade2")) sceneCidade2();

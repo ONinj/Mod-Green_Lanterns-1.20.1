@@ -296,3 +296,17 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 | Salto de Dobra | Lumiae Sorn | nível 38, Gênese revelado | passar pelos 5 anéis no céu |
 | Armadura de Construto | Brakhul | nível 42, 7 bosses | vencer o duelo contra Brakhul |
 | Comando | Qiri Nox | nível 45, Prova da Emoção iniciada | lidere aliados contra 6 invasores |
+
+# 0.15.1 — Alvos garantidos nas missões de derrotar
+
+Auditoria automática de todas as missões de "derrotar N" (contratos de piratas, Ecos, invasores e capitão; cadeias
+da cidade; provas do Palácio; Prova da Emoção; Patrulha; destruir alvos de treino). Três casos podiam travar:
+
+- **Patrulha** (8 Ecos sem lugar marcado): o planeta só deixa uns 3 Ecos por perto, então faltavam alvos.
+- **Prova da Emoção** (3 capitães piratas sem lugar marcado): nada fazia capitães aparecerem.
+- **Destruir alvos de treino** na base: os alvos não voltavam se faltassem.
+
+Agora (`mission/AlvosGarantidos`): para cada objetivo de derrotar que ainda falta e não tem quem cuide dele, se houver
+menos alvos vivos num raio de 48 blocos do que o necessário (até 4 por vez), chegam os que faltam a 16–26 blocos do
+jogador, em chão firme (aviso "Alvos se aproximando"). Repete a cada 20 s enquanto faltar. Os alvos de treino voltam
+perto da base. Contratos, cidade e Palácio continuam com os próprios reforços.

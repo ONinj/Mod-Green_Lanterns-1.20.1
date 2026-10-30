@@ -42,6 +42,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.16 ✅ (0.13) Tropas vivas: 18 espécies de Lanternas NPC, piratas e mercadores; naves pilotáveis com interior; nível e postos; contratos; encontros no espaço; Prova da Emoção. Detalhes em `docs/LORE_E_MISSOES.md`
 1.17 ✅ (0.14) Cidades das Tropas com Bateria Central, patrulha de setores e exploração por posto, piloto automático da nave, trava de mira, laser contínuo
 1.18 ✅ (0.15) Cidade completa com interiores, lojas e missões dos NPCs; Palácio dos Guardiões; Técnicas dos Capitães
+1.19 ✅ (0.15.1) Auditoria das missões de derrotar: toda missão de "matar N" garante alvos suficientes
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
