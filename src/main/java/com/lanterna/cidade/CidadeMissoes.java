@@ -361,6 +361,7 @@ public final class CidadeMissoes {
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d == null) return;
         List<String> ids = ofertas(p, d, funcao, planet);
+        lembrarConversa(p, funcao, planet);
         enviarPainel(p, d, npc.getDisplayName(), ids);
         CidadeNpcs.fala(p, npc, Component.translatable("cidade.lanterna.fala." + (funcao.startsWith("cidadao") ? "cidadao" : funcao.startsWith("capitao_") ? "capitao" : funcao)));
     }
@@ -398,7 +399,22 @@ public final class CidadeMissoes {
             return;
         }
         MissionManager.start(p, id);
+        // Quem deu a missão já está conversando com você: "fale com ..." dele mesmo conta na hora
+        CompoundTag u = p.getPersistentData().getCompound(ULTIMA_CONVERSA);
+        if (!u.isEmpty() && p.level().getGameTime() - u.getLong("t") < 20 * 60)
+            MissionManager.onTalk(p, u.getString("papel"), u.getString("planeta"));
         p.closeContainer();
+    }
+
+    private static final String ULTIMA_CONVERSA = "lanterna_ultima_conversa";
+
+    /** Guarda com quem o jogador acabou de falar (para aceitar a missão contar a conversa). */
+    public static void lembrarConversa(ServerPlayer p, String papel, String planeta) {
+        CompoundTag u = new CompoundTag();
+        u.putString("papel", papel);
+        u.putString("planeta", planeta);
+        u.putLong("t", p.level().getGameTime());
+        p.getPersistentData().put(ULTIMA_CONVERSA, u);
     }
 
     public static void desistir(ServerPlayer p, String id) {

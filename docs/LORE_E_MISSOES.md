@@ -310,3 +310,11 @@ Agora (`mission/AlvosGarantidos`): para cada objetivo de derrotar que ainda falt
 menos alvos vivos num raio de 48 blocos do que o necessário (até 4 por vez), chegam os que faltam a 16–26 blocos do
 jogador, em chão firme (aviso "Alvos se aproximando"). Repete a cada 20 s enquanto faltar. Os alvos de treino voltam
 perto da base. Contratos, cidade e Palácio continuam com os próprios reforços.
+
+# 0.15.2 — Juramento da Guarda de Honra
+
+- Os Guardiões do Conselho ficam 4 blocos acima do chão do Grande Salão; a pé não dava para alcançá-los, então
+  "Apresente-se à Anciã Miraeth" não concluía. Agora cada trono tem uma escadinha de 3 degraus na frente. Mundos que
+  já têm o Palácio recebem os degraus sozinhos quando o jogador chega perto.
+- Aceitar uma missão de "fale com X" direto do próprio X conta a conversa na hora (antes era preciso clicar de novo).
+- A Guarda de Honra agora é oferecida só pela Miraeth (o Varo também mostrava a missão, mas ela pede a Miraeth).

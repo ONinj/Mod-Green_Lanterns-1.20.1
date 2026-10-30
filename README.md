@@ -43,6 +43,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.17 ✅ (0.14) Cidades das Tropas com Bateria Central, patrulha de setores e exploração por posto, piloto automático da nave, trava de mira, laser contínuo
 1.18 ✅ (0.15) Cidade completa com interiores, lojas e missões dos NPCs; Palácio dos Guardiões; Técnicas dos Capitães
 1.19 ✅ (0.15.1) Auditoria das missões de derrotar: toda missão de "matar N" garante alvos suficientes
+1.20 ✅ (0.15.2) Juramento com a Anciã Miraeth: degraus nos tronos do Conselho e "fale com" conta ao aceitar
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

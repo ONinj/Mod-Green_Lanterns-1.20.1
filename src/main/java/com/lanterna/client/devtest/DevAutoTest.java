@@ -1373,8 +1373,72 @@ public final class DevAutoTest {
         }
     }
 
+    private static void sceneMiraeth() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.TickEvent.ServerTickEvent ev) -> {
+            if (ev.phase == net.minecraftforge.event.TickEvent.Phase.END && ev.getServer().getTickCount() % 40 == 0 && !TEM_VARO.get()) {
+                var lvl = ev.getServer().getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+                if (lvl != null) for (Entity e : lvl.getAllEntities()) if (e instanceof com.lanterna.lore.entity.RaceEntity r && r.role().equals("conselho_varo")) { TEM_VARO.set(true); break; }
+            }
+        });
+        Runnable clicar = () -> { int id = CLICAR.getAndSet(-1); var e = id >= 0 ? mc.level.getEntity(id) : null;
+            if (e != null) mc.gameMode.interact(mc.player, e, net.minecraft.world.InteractionHand.MAIN_HAND);
+            LanternaMod.LOGGER.info("AUTOTEST clicou {} tela={}", e, mc.screen == null ? null : mc.screen.getClass().getSimpleName()); };
+        Runnable estado = () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            LanternaMod.LOGGER.info("AUTOTEST estado nivel={} ativas={} feitas={} pos={}", com.lanterna.tropa.Nivel.nivel(d.xp()),
+                d.active().keySet(), d.completed().stream().filter(x -> x.startsWith("pal_") || x.startsWith("prov_")).toList(), sp.blockPosition());
+            for (String r : new String[]{"conselho_dorvek", "conselho_miraeth", "conselho_varo", "conselho_ilyss", "conselho_selun"}) {
+                var e = achar(r, sp); LanternaMod.LOGGER.info("AUTOTEST guardiao {} {}", r, e == null ? "SUMIU" : e.blockPosition() + " " + e.getClass().getSimpleName()); } });
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 200 -360"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
+        at(40, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })));
+        at(10, () -> server(sp -> { var w = com.lanterna.lore.LoreWorldData.get(sp.server); w.resetSite("oa:palacio"); }));
+        at(80, () -> {});
+        waitFor(() -> TEM_VARO.get(), 3000);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2400);
+        at(5, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(41), null);
+            for (String b : new String[]{"vorgath", "mammok", "thessara", "morrow", "penitente"}) d.addBossKill(b); }));
+        at(260, () -> cmd("tp @s 0.5 171 -440"));
+        at(100, estado);
+        at(5, () -> clicarNpc("conselho_varo"));
+        at(30, clicar);
+        at(10, () -> mc.setScreen(null));
+        at(5, () -> clicarNpc("conselho_selun"));
+        at(30, clicar);
+        at(5, () -> { mc.setScreen(null); clicarNpc("capitao_comando"); });
+        at(30, clicar);
+        at(10, () -> mc.setScreen(null));
+        at(5, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            com.lanterna.cidade.Tecnicas.desbloquear(sp, d, "onda"); com.lanterna.cidade.Tecnicas.desbloquear(sp, d, "bastiao");
+            d.completed().add("prov_onda"); d.completed().add("prov_bastiao"); }));
+        at(10, estado);
+        // jeito real: sobe os degraus do trono da Miraeth e olha para ela
+        at(5, () -> server(sp -> { var t = com.lanterna.cidade.Palacio.SALAO.offset(-5, 0, -9);
+            sp.teleportTo(sp.serverLevel(), t.getX() + 0.5, t.getY(), t.getZ() + 6.5, 180f, -10f); }));
+        at(40, () -> shot("m0_degraus"));
+        at(5, () -> server(sp -> { Entity e = achar("conselho_miraeth", sp); var t = com.lanterna.cidade.Palacio.SALAO.offset(-5, 0, -9);
+            double x = t.getX() + 0.5, y = t.getY() + 3, z = t.getZ() + 2.5;
+            double dx = e.getX() - x, dz = e.getZ() - z, dy = e.getEyeY() - (y + 1.62);
+            sp.teleportTo(sp.serverLevel(), x, y, z, (float) Math.toDegrees(Math.atan2(-dx, dz)), (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)))); }));
+        at(40, () -> { LanternaMod.LOGGER.info("AUTOTEST mira {} {} y={}", mc.hitResult == null ? null : mc.hitResult.getType(), mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh ? eh.getEntity() : "", mc.player.getY());
+            shot("m1_trono");
+            if (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh) mc.gameMode.interact(mc.player, eh.getEntity(), net.minecraft.world.InteractionHand.MAIN_HAND); });
+        at(30, () -> { LanternaMod.LOGGER.info("AUTOTEST tela {}", mc.screen == null ? null : mc.screen.getClass().getSimpleName()); shot("m2_painel"); });
+        at(5, () -> { com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.tropa.ContratoPacket("pal_honra", true)); mc.setScreen(null); });
+        at(30, estado);
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();
+        if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();
+        else if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();
         else if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();
         else if (ENABLED && SCENE.equals("barreira")) sceneBarreira();
         else if (ENABLED && SCENE.equals("trono")) sceneTrono();

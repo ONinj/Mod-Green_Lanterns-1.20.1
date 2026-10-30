@@ -78,11 +78,19 @@ public final class Palacio {
     // ===================== Construção =====================
 
     public static void construir(ServerLevel level) {
+        Kit k = kit(level);
+        construirCom(level, k);
+    }
+
+    private static Kit kit(ServerLevel level) {
         Paleta pal = new Paleta(b(LoreBlocks.ROCHA_POLIDA_VERIDIA.get()), b(Blocks.QUARTZ_BRICKS), b(Blocks.LIME_CONCRETE), b(Blocks.LIME_STAINED_GLASS),
                 b(Blocks.SEA_LANTERN), b(Blocks.WHITE_CONCRETE), b(Blocks.EMERALD_BLOCK), b(Blocks.VERDANT_FROGLIGHT), b(Blocks.QUARTZ_PILLAR),
                 Blocks.BIRCH_PLANKS, Blocks.QUARTZ_STAIRS, Blocks.SMOOTH_QUARTZ_SLAB, Blocks.LIME_WOOL, Blocks.LIME_CARPET, Blocks.LIME_BED,
                 Blocks.LIME_STAINED_GLASS_PANE);
-        Kit k = new Kit(level, pal);
+        return new Kit(level, pal);
+    }
+
+    private static void construirCom(ServerLevel level, Kit k) {
         for (int x0 = -R; x0 <= R; x0 += 8) { int f = x0; Obra.etapa(level, l -> ilha(k, CENTRO, R, f, Math.min(R, f + 7), 34)); }
         for (int x0 = -22; x0 <= 22; x0 += 8) { int f = x0; Obra.etapa(level, l -> ilha(k, CAMPO, 22, f, Math.min(22, f + 7), 18)); }
         Obra.etapa(level, l -> portaoEPatio(k));
@@ -195,8 +203,8 @@ public final class Palacio {
             for (int y = 3; y < 8; y++) k.s(t.offset(0, y, -1), y == 7 ? k.p.nucleo() : k.p.pilar());
             k.s(t.offset(-1, 3, -1), k.p.destaque());
             k.s(t.offset(1, 3, -1), k.p.destaque());
-            k.s(t.offset(0, 2, 2), degrau(Blocks.QUARTZ_STAIRS, Direction.NORTH));
         }
+        degrausTronos(k);
         // portas: sul (pátio) e norte (câmara)
         for (int dx = -2; dx <= 2; dx++) for (int y = 0; y < 8; y++) { k.s(c.offset(dx, y, r), b(Blocks.AIR)); k.s(c.offset(dx, y, -r), b(Blocks.AIR)); }
         // estandartes
@@ -472,6 +480,28 @@ public final class Palacio {
         l.playSound(null, p.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1f, 1.2f);
     }
 
+    /**
+     * Escadinha na frente de cada trono (o Guardião fica 4 blocos acima do chão: sem degraus só dava para falar voando).
+     * Do último degrau o jogador fica cara a cara com o Guardião.
+     */
+    private static void degrausTronos(Kit k) {
+        for (int a : new int[]{-60, -30, 0, 30, 60}) {
+            double rad = Math.toRadians(a);
+            BlockPos t = SALAO.offset((int) Math.round(Math.sin(rad) * 10), 0, (int) Math.round(-Math.cos(rad) * 10));
+            for (int i = 0; i < 3; i++) {
+                BlockPos q = t.offset(0, 2 - i, 2 + i);
+                k.s(q, degrau(Blocks.QUARTZ_STAIRS, Direction.NORTH));
+                for (int y = 0; y < q.getY() - t.getY(); y++) k.s(q.atY(t.getY() + y), k.p.parede());
+                for (int y = 1; y <= 3; y++) k.s(q.above(y), b(Blocks.AIR));
+            }
+        }
+    }
+
+    /** Põe os degraus dos tronos num Palácio já construído (mundos de versões antigas). */
+    public static void consertarTronos(ServerLevel level) {
+        degrausTronos(kit(level));
+    }
+
     /** Conversa com um Guardião do Conselho. */
     public static void conselho(ServerPlayer p, RaceEntity npc) {
         String role = npc.role();
@@ -480,7 +510,8 @@ public final class Palacio {
         if (d == null) return;
         p.sendSystemMessage(Component.literal("<").append(npc.getDisplayName()).append("> ")
                 .append(Component.translatable("palacio.lanterna.fala." + role)).withStyle(s -> s.withColor(0xBFF5CF)));
-        if (role.equals("conselho_varo") || role.equals("conselho_miraeth")) {
+        CidadeMissoes.lembrarConversa(p, role, "oa");
+        if (role.equals("conselho_miraeth")) {
             CidadeMissoes.enviarPainel(p, d, npc.getDisplayName(), List.of("pal_honra"));
         }
     }
