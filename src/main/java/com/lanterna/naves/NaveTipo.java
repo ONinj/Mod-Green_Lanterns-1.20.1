@@ -36,6 +36,14 @@ public enum NaveTipo {
         this.assentos = assentos; this.bocas = bocas; this.colisao = colisao; this.porta = porta; this.torres = torres;
     }
 
+    /** Pintura que existe para este tipo (corrige valores vazios ou errados, ex.: /summon sem NBT). */
+    public String pinturaValida(String p) {
+        if (pinturas.isEmpty()) return "";
+        if (pinturas.equals("12")) return p.equals("1") || p.equals("2") ? p : "1";
+        for (String c : new String[]{"green", "yellow", "red", "blue", "violet", "indigo", "orange", "black"}) if (c.equals(p)) return p;
+        return "green";
+    }
+
     public boolean destrocos() {
         return id.startsWith("destrocos");
     }

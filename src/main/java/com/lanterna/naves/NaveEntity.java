@@ -130,8 +130,8 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     }
 
     public NaveTipo tipo() { return NaveTipo.byId(entityData.get(TIPO)); }
-    @Override public String getTipoNave() { return entityData.get(TIPO); }
-    @Override public String getPintura() { return entityData.get(PINTURA); }
+    @Override public String getTipoNave() { return tipo().id; }
+    @Override public String getPintura() { return tipo().pinturaValida(entityData.get(PINTURA)); }
     public float hp() { return entityData.get(HP); }
     public boolean pousada() { return entityData.get(POUSADA); }
     public boolean turbo() { return entityData.get(TURBO); }
@@ -161,8 +161,10 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-        entityData.set(TIPO, tag.getString("Tipo"));
-        entityData.set(PINTURA, tag.getString("Pintura"));
+        // /summon sem NBT: vira uma Lanceira verde em vez de procurar um modelo de nome vazio
+        NaveTipo t = NaveTipo.byId(tag.getString("Tipo"));
+        entityData.set(TIPO, t.id);
+        entityData.set(PINTURA, t.pinturaValida(tag.getString("Pintura")));
         entityData.set(HP, tag.contains("Hp") ? tag.getFloat("Hp") : tipo().maxHp);
         entityData.set(IA, tag.getString("Ia"));
         if (tag.hasUUID("Dono")) setDono(tag.getUUID("Dono"));
