@@ -72,14 +72,14 @@ public final class HyperEffects {
                 // De dentro da cúpula (câmera em primeira pessoa) ela fica bem sutil, para não tingir a tela
                 boolean inside = cam.distanceTo(center) < 1.7;
                 dome(vc, m, cam, center, dir, color, time, inside ? 0.12f : 1f);
-                if (path != null) tube(vc, m, cam, center, path, color, time, 1.0, 0.32f, true);
+                if (path != null) tube(vc, m, cam, center, dir, path, color, time, 0.55, 0.3f, true);
             } else if (hyper) {
                 cone(vc, m, cam, center, dir, color, time, cam.distanceTo(center) < 2.5 ? 0.3f : 1f);
                 final int c2 = color; final Vec3 cc = center, dd = dir; final int id = p.getId();
                 if (!firstPerson) glowPass.add(() -> windLines(buffers.getBuffer(LanternaRenderTypes.GLOW), m, cam, cc, dd, c2, time, id));
-                if (path != null) tube(vc, m, cam, center, path, color, time, 0.45, 0.4f, false);
+                if (path != null) tube(vc, m, cam, center, dir, path, color, time, 0.2, 0.38f, false);
             } else if (path != null) {
-                tube(vc, m, cam, center, path, color, time, 0.3, 0.25f, false);
+                tube(vc, m, cam, center, dir, path, color, time, 0.14, 0.25f, false);
             }
 
             if (p == mc.player && firstPerson && p.level().dimension().equals(SpaceBodies.SPACE) && speed > 3) {
@@ -131,11 +131,14 @@ public final class HyperEffects {
 
     // ===================== Tubo de energia (rastro físico) =====================
 
-    private static void tube(VertexConsumer vc, Matrix4f m, Vec3 cam, Vec3 head, Deque<Vec3> path, int color,
+    private static void tube(VertexConsumer vc, Matrix4f m, Vec3 cam, Vec3 head, Vec3 fwd, Deque<Vec3> path, int color,
                              float time, double radius, float alpha, boolean spiral) {
         List<Vec3> pts = new ArrayList<>(path.size() + 1);
         pts.add(head);
         for (Vec3 v : path) {
+            // O caminho é gravado por tick, mas o jogador é desenhado entre dois ticks: em alta velocidade o ponto
+            // mais novo fica À FRENTE dele. Só entra no rastro o que está atrás do corpo.
+            if (pts.size() == 1 && v.subtract(head).dot(fwd) > -0.3) continue;
             if (v.distanceToSqr(pts.get(pts.size() - 1)) > 0.01) pts.add(v);
         }
         int n = pts.size();
@@ -177,7 +180,9 @@ public final class HyperEffects {
                                    boolean spiral) {
         double t = (double) k / (n - 1);
         double phi = Math.PI * 2 * j / seg;
-        double r = radius * Math.pow(1 - t, 0.9) + 0.03;
+        // Nasce fino nas costas, engrossa logo atrás e vai afinando até sumir
+        double grow = Mth.clamp(t / 0.12, 0.25, 1.0);
+        double r = radius * grow * Math.pow(1 - t, 1.1) + 0.02;
         Vec3 dirOut = nrm[k].scale(Math.cos(phi)).add(bin[k].scale(Math.sin(phi)));
         Vec3 pos = pts.get(k).add(dirOut.scale(r));
         Vec3 toCam = cam.subtract(pos).normalize();
@@ -185,7 +190,7 @@ public final class HyperEffects {
         double stripes = spiral ? 0.55 + 0.45 * Math.sin(phi * 3 + k * 1.1 - time * 0.6) : 1.0;
         double a = alpha * Math.pow(1 - t, 1.6) * stripes * (0.2 + 1.0 * rim * rim);
         // Some perto da câmera (em terceira pessoa a câmera fica em cima do rastro)
-        a *= Mth.clamp((cam.distanceTo(pos) - 2.0) / 10.0, 0, 1);
+        a *= Mth.clamp((cam.distanceTo(pos) - 3.0) / 14.0, 0, 1);
         put(vc, m, cam, pos, color, (float) Math.min(a, 0.95));
     }
 
@@ -201,8 +206,8 @@ public final class HyperEffects {
     private static void cone(VertexConsumer vc, Matrix4f m, Vec3 cam, Vec3 c, Vec3 dir, int color, float time, float base) {
         final int S = 12, SEG = 24;
         Vec3[] b = basis(dir);
-        Vec3 tip = c.add(dir.scale(2.4));
-        Vec3 back = c.subtract(dir.scale(1.1));
+        Vec3 tip = c.add(dir.scale(1.5));
+        Vec3 back = c.subtract(dir.scale(0.7));
         int col = ClientFlight.lighten(color, 0.55f);
         for (int s = 0; s < S; s++) {
             for (int j = 0; j < SEG; j++) {
@@ -219,7 +224,7 @@ public final class HyperEffects {
         double s = (double) si / slices;
         double phi = Math.PI * 2 * j / seg;
         Vec3 radial = b[1].scale(Math.cos(phi)).add(b[2].scale(Math.sin(phi)));
-        Vec3 pos = tip.add(back.subtract(tip).scale(s)).add(radial.scale(1.4 * Math.pow(s, 0.75)));
+        Vec3 pos = tip.add(back.subtract(tip).scale(s)).add(radial.scale(0.85 * Math.pow(s, 0.75)));
         // Corpo do cone: forte no meio, some na ponta e na boca
         double body = Math.sqrt(s) * Math.pow(1 - s, 0.8) * 1.6;
         double shimmer = 0.6 + 0.4 * Math.sin(phi * 6 + time * 1.7 + s * 12);
@@ -230,7 +235,7 @@ public final class HyperEffects {
             double d = (s - sp) / 0.06;
             shock += Math.exp(-d * d) * (1 - sp);
         }
-        double a = (body * shimmer * 0.35 + shock * 0.5) * base;
+        double a = (body * shimmer * 0.2 + shock * 0.3) * base;
         put(vc, m, cam, pos, color, (float) Math.min(a, 0.85));
     }
 
@@ -242,7 +247,7 @@ public final class HyperEffects {
             double r1 = hash(seed * 31 + i * 7), r2 = hash(seed * 17 + i * 13), r3 = hash(seed * 5 + i * 29);
             double phi = r1 * Math.PI * 2;
             double radius = 0.9 + r2 * 1.8;
-            double z = 3 - frac(r3 + time * 0.22) * 12;
+            double z = 0.5 - frac(r3 + time * 0.22) * 10;
             double len = 2.5 + r2 * 4;
             Vec3 radial = b[1].scale(Math.cos(phi) * radius).add(b[2].scale(Math.sin(phi) * radius));
             Vec3 p0 = c.add(dir.scale(z)).add(radial);

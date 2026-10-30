@@ -234,16 +234,26 @@ public final class ClientFlight {
             double thrust = (boost ? THRUST_BOOST : THRUST) * thrustScale;
             // Mergulho dá velocidade; subir custa um pouco (só onde há gravidade)
             if (!inSpace) thrust += -look.y * 0.02;
-            v = v.add(look.scale(thrust * forward));
+            // Empurra forte parado e vai suavizando perto da velocidade máxima (sem "bater no teto")
+            double ease = Math.max(0.12, 1 - Math.pow(Mth.clamp(speed / maxSpeed, 0, 1), 2));
 
-            // Curva: parte do embalo lateral é "puxada" para a nova direção, o resto escorrega
-            Vec3 along = look.scale(v.dot(look));
-            Vec3 lateral = v.subtract(along);
-            double fast = Mth.clamp(speed / maxBoost, 0, 1);
-            double grip = Mth.lerp(fast, 0.16, 0.06);
-            if (inSpace) grip *= 0.6; // no vácuo não há ar para "agarrar" a curva
-            Vec3 carried = look.scale(lateral.length() * grip * 0.75);
-            v = along.add(lateral.scale(1 - grip)).add(carried);
+            // Curva: o embalo GIRA para onde você olha (como um arco), sem perder a velocidade de uma vez.
+            // Devagar vira rápido; muito rápido, a curva fica mais aberta e escorrega um pouco.
+            if (speed > 0.04) {
+                Vec3 dirV = v.scale(1 / speed);
+                double ang = Math.acos(Mth.clamp(dirV.dot(look), -1, 1));
+                double fast = Mth.clamp(speed / maxBoost, 0, 1);
+                double maxTurn = Math.toRadians(Mth.lerp(fast, 14, 4.5)) * (inSpace ? 0.75 : 1);
+                if (ang > 1.0E-4) {
+                    double k = Math.min(1, maxTurn / ang);
+                    // suaviza o começo e o fim da curva
+                    k = k * (0.55 + 0.45 * Math.min(1, ang / Math.toRadians(25)));
+                    Vec3 nd = dirV.lerp(look, k).normalize();
+                    double loss = 1 - Math.min(0.06, ang * 0.025) * fast;
+                    v = nd.scale(speed * loss);
+                }
+            }
+            v = v.add(look.scale(thrust * forward * ease));
             v = v.scale(inSpace ? 0.997 : DRAG);
         } else if (forward < 0) {
             // S: freio. Em alta velocidade é o freio aerodinâmico (corpo contra o vento)
@@ -256,8 +266,15 @@ public final class ClientFlight {
         }
 
         if (strafe != 0) v = v.add(left.scale(STRAFE * strafe * (inSpace ? 2 : 1)));
-        if (up) v = v.add(0, LIFT * (inSpace ? 2 : 1), 0);
-        if (down) v = v.add(0, -LIFT * (inSpace ? 2 : 1), 0);
+        // Subir/descer: chega na velocidade vertical aos poucos (sem tranco) e para suave ao soltar
+        double vMax = (inSpace ? 1.4 : 0.7) * (boost ? 1.6 : 1);
+        if (auto != null) {
+            // piloto automático: sobe e desce como antes (rápido, como foguete)
+            if (up) v = v.add(0, LIFT * (inSpace ? 2 : 1), 0);
+            if (down) v = v.add(0, -LIFT * (inSpace ? 2 : 1), 0);
+        } else if (up && !down) v = new Vec3(v.x, v.y + (vMax - v.y) * (inSpace ? 0.09 : 0.12) + LIFT * 0.25, v.z);
+        else if (down && !up) v = new Vec3(v.x, v.y + (-vMax - v.y) * (inSpace ? 0.09 : 0.12) - LIFT * 0.25, v.z);
+        if (!up && !down && forward == 0 && !inSpace) v = new Vec3(v.x, v.y * 0.86, v.z);
         if (!anyInput) v = v.scale(inSpace ? SPACE_IDLE_DRAG : IDLE_DRAG);
         if (forward <= 0 && !inSpace) v = v.scale(0.97);
 
@@ -273,9 +290,10 @@ public final class ClientFlight {
             }
             // Turbulência: em alta velocidade o vento sacode de leve
             if (speed > 1.0) {
-                var r = player.getRandom();
-                double k = (speed - 1.0) * 0.012;
-                v = v.add((r.nextDouble() - 0.5) * k, (r.nextDouble() - 0.5) * k, (r.nextDouble() - 0.5) * k);
+                // ruído suave (ondas), não um tranco aleatório a cada tick
+                float tt = player.tickCount;
+                double k = (speed - 1.0) * 0.006;
+                v = v.add(Mth.sin(tt * 0.31f) * Mth.sin(tt * 0.13f) * k, Mth.sin(tt * 0.23f + 1.7f) * k, Mth.cos(tt * 0.27f) * Mth.sin(tt * 0.11f + 0.6f) * k);
             }
             // Rasante: perto do chão descendo rápido, o ar "amortece" e vira embalo para frente
             if (v.y < -0.4 && forward > 0 && nearGround(player, 3)) {
@@ -773,12 +791,14 @@ public final class ClientFlight {
         int color = player == mc.player ? ClientRingData.color : ClientVisibleRings.of(player.getId()).color();
 
         Vec3 look = player.getLookAngle();
-        Vec3 center = player.position().add(0, 0.9, 0);
+        // Parte de onde o jogador ESTAVA no começo do tick: o corpo é desenhado entre os ticks, então a posição
+        // atual fica na frente dele em alta velocidade (as bolinhas apareciam à frente do jogador)
+        Vec3 center = new Vec3(player.xo, player.yo + 0.9, player.zo);
         int count = speed > 0.9 ? 9 : 5;
         var rnd = player.getRandom();
 
         for (int i = 0; i < count; i++) {
-            double along = -0.95 + Math.pow(rnd.nextDouble(), 1.6) * 1.8;
+            double along = -1.1 + Math.pow(rnd.nextDouble(), 1.6) * 1.2;
             Vec3 p = center.add(look.scale(along)).add(
                     (rnd.nextDouble() - 0.5) * 0.45, (rnd.nextDouble() - 0.5) * 0.45, (rnd.nextDouble() - 0.5) * 0.45);
             int c = rnd.nextInt(6) == 0 ? lighten(color, 0.45f) : color;

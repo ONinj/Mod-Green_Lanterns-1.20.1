@@ -302,6 +302,7 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             }
         } else {
             tickAnimacao();
+            tickInclinacao();
         }
         if (level().isClientSide && !t.destrocos() && !pousada() && tickCount % 2 == 0) {
             // Rastro dos motores
@@ -325,28 +326,61 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     private void pilot(NaveTipo t, boolean espaco) {
         if (!(getControllingPassenger() instanceof Player pilot)) return;
         Input in = level().isClientSide ? CLIENT_INPUT.apply(this) : new Input(0, 0, false, false, false);
-        float turn = 9f / (1f + t.width * 0.35f);
+        // Curva com embalo: vira mais rápido no começo e assenta suave no rumo (naves grandes viram mais devagar)
+        float turnMax = 7f / (1f + t.width * 0.3f);
         float diff = Mth.wrapDegrees(pilot.getYRot() - getYRot());
-        setYRot(getYRot() + Mth.clamp(diff, -turn, turn));
+        float step = Mth.clamp(diff * 0.22f, -turnMax, turnMax);
+        setYRot(getYRot() + step);
         float boostMul = in.boost() ? (espaco ? 6f : 2.2f) : 1f;
         double max = t.speed * boostMul;
-        Vec3 v = getDeltaMovement().scale(0.93);
+
+        // Velocidade desejada (para onde o nariz aponta) — a nave "persegue" ela aos poucos:
+        // acelera e freia com inércia, e nas curvas o embalo escorrega um pouco antes de alinhar
+        Vec3 alvo = Vec3.ZERO;
         if (in.forward() != 0) {
-            Vec3 dir = Vec3.directionFromRotation(Mth.clamp(pilot.getXRot(), -60, 60), getYRot());
-            v = v.add(dir.scale(in.forward() * max * 0.09));
+            Vec3 dir = Vec3.directionFromRotation(Mth.clamp(pilot.getXRot(), -50, 50), getYRot());
+            alvo = alvo.add(dir.scale(in.forward() > 0 ? max * in.forward() : max * 0.4 * in.forward()));
         }
-        if (in.strafe() != 0) {
-            Vec3 side = Vec3.directionFromRotation(0, getYRot() - 90).scale(in.strafe() * max * 0.04);
-            v = v.add(side);
-        }
-        if (in.up()) v = v.add(0, max * 0.06, 0);
-        if (in.down()) v = v.add(0, -max * 0.06, 0);
-        if (!in.up() && !in.down() && in.forward() == 0) v = new Vec3(v.x, v.y * 0.8, v.z);
-        if (v.length() > max) v = v.normalize().scale(max);
+        if (in.strafe() != 0) alvo = alvo.add(Vec3.directionFromRotation(0, getYRot() - 90).scale(in.strafe() * max * 0.45));
+        if (in.up()) alvo = alvo.add(0, max * 0.55, 0);
+        if (in.down()) alvo = alvo.add(0, -max * 0.55, 0);
+        Vec3 v = getDeltaMovement();
+        double ganho = in.forward() != 0 || in.up() || in.down() || in.strafe() != 0
+                ? (in.boost() ? 0.1 : 0.08)
+                : (espaco ? 0.015 : 0.06);
+        // horizontal mais "pesado" que o vertical: parece uma nave com massa
+        v = new Vec3(Mth.lerp(ganho, v.x, alvo.x), Mth.lerp(ganho * 1.4, v.y, alvo.y), Mth.lerp(ganho, v.z, alvo.z));
+        // Parada sem nada apertado no ar (fora do espaço): flutua com um balanço leve
+        if (!espaco && alvo.lengthSqr() == 0 && !onGround()) v = v.add(0, Mth.sin(tickCount * 0.08f) * 0.004, 0);
         if (onGround() && in.forward() == 0 && !in.up()) v = new Vec3(v.x * 0.6, Math.min(0, v.y), v.z * 0.6);
         setDeltaMovement(v);
         move(MoverType.SELF, v);
     }
+
+    // ===================== Inclinação visual (só no cliente) =====================
+
+    private float visRoll, visRollO, visPitch, visPitchO;
+
+    /** Inclina de lado nas curvas e levanta/baixa o nariz ao subir/descer. */
+    private void tickInclinacao() {
+        visRollO = visRoll;
+        visPitchO = visPitch;
+        float alvoRoll = 0, alvoPitch = 0;
+        if (!pousada() && !tipo().destrocos()) {
+            float yawRate = Mth.wrapDegrees(getYRot() - yRotO);
+            double dx = getX() - xo, dy = getY() - yo, dz = getZ() - zo;
+            double hs = Math.sqrt(dx * dx + dz * dz);
+            float fator = (float) Mth.clamp(hs / 0.5, 0.35, 1.3);
+            float limite = tipo().width > 4 ? 14f : 22f;
+            alvoRoll = Mth.clamp(-yawRate * 3.2f * fator, -limite, limite);
+            alvoPitch = (float) Mth.clamp(Math.toDegrees(Math.atan2(dy, Math.max(hs, 0.25))) * 0.55, -16, 16);
+        }
+        visRoll += (alvoRoll - visRoll) * 0.12f;
+        visPitch += (alvoPitch - visPitch) * 0.1f;
+    }
+
+    public float visRoll(float pt) { return Mth.lerp(pt, visRollO, visRoll); }
+    public float visPitch(float pt) { return Mth.lerp(pt, visPitchO, visPitch); }
 
     @Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps, boolean teleport) {

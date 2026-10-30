@@ -795,8 +795,58 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Voo do anel (normal e hiperpropulsão, rastro) e da nave (curva com inclinação). */
+    private static void sceneVoo() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 0"); });
+        at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(300))) n.discard(); }));
+        // ---- Nave: curva para a direita e subida ----
+        at(10, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green");
+            n.moveTo(900.5, -55, 905.5, 0, 0); n.setDono(sp.getUUID()); sp.level().addFreshEntity(n);
+            sp.startRiding(n, true); }));
+        at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.player.setXRot(0); mc.options.keyUp.setDown(true); });
+        at(40, () -> {});
+        for (int k = 0; k < 12; k++) at(2, () -> mc.player.setYRot(mc.player.getYRot() + 6));
+        at(1, () -> { var v = mc.player.getVehicle(); if (v instanceof com.lanterna.naves.NaveEntity n)
+            LanternaMod.LOGGER.info("AUTOTEST nave curva roll={} pitch={} yaw={}", n.visRoll(1), n.visPitch(1), n.getYRot()); shot("v1_nave_curva_direita"); });
+        at(30, () -> mc.options.keyJump.setDown(true));
+        at(14, () -> { var v = mc.player.getVehicle(); if (v instanceof com.lanterna.naves.NaveEntity n)
+            LanternaMod.LOGGER.info("AUTOTEST nave subindo roll={} pitch={}", n.visRoll(1), n.visPitch(1)); shot("v2_nave_subindo"); });
+        at(5, () -> { mc.options.keyJump.setDown(false); mc.options.keyUp.setDown(false); });
+        at(20, () -> server(sp -> { var v = sp.getVehicle(); sp.stopRiding(); if (v != null) v.discard(); }));
+        // ---- Anel: voo normal com curva ----
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })));
+        at(10, () -> { mc.player.setXRot(-5); mc.options.keyUp.setDown(true); mc.options.keySprint.setDown(true); });
+        at(50, () -> {});
+        for (int k = 0; k < 10; k++) at(2, () -> mc.player.setYRot(mc.player.getYRot() - 5));
+        at(1, () -> shot("v3_anel_curva"));
+        at(10, () -> { mc.options.keyUp.setDown(false); mc.options.keySprint.setDown(false); });
+        // ---- Espaço: hiperpropulsão e rastro ----
+        at(20, () -> cmd("execute in lanterna:space run tp @s 300 -200 300 0 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("space") && mc.screen == null, 600);
+        at(40, () -> { com.lanterna.client.flight.Autopilot.clear(); server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })); });
+        at(10, () -> { mc.player.setXRot(0); mc.player.setYRot(90); mc.options.keyUp.setDown(true); mc.options.keySprint.setDown(true); });
+        at(40, () -> shot("v4_espaco_rapido"));
+        at(120, () -> { LanternaMod.LOGGER.info("AUTOTEST hiper vel={}", mc.player.getDeltaMovement().length()); shot("v5_hiper_tras"); });
+        at(2, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(3, () -> shot("v6_hiper_frente"));
+        at(10, () -> { mc.player.setYRot(mc.player.getYRot() + 40); });
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(6, () -> shot("v7_hiper_curva"));
+        at(5, () -> { mc.options.keyUp.setDown(false); mc.options.keySprint.setDown(false); });
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("blocos")) sceneBlocos();
+        if (ENABLED && SCENE.equals("voo")) sceneVoo();
+        else if (ENABLED && SCENE.equals("blocos")) sceneBlocos();
         else if (ENABLED && SCENE.equals("quadro")) sceneQuadro();
         else if (ENABLED && SCENE.equals("pilotar")) scenePilotar();
         else if (ENABLED && SCENE.equals("encontro")) sceneEncontro();

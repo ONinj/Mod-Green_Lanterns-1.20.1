@@ -30,6 +30,16 @@ public class NaveRenderer<T extends Entity & GeoAnimatable & TemNave> extends Ge
     @Override
     protected void applyRotations(T e, PoseStack pose, float ageInTicks, float rotationYaw, float partialTick) {
         super.applyRotations(e, pose, ageInTicks, net.minecraft.util.Mth.rotLerp(partialTick, e.yRotO, e.getYRot()), partialTick);
+        if (e instanceof com.lanterna.naves.NaveEntity n) {
+            float roll = n.visRoll(partialTick), pitch = n.visPitch(partialTick);
+            if (Math.abs(roll) > 0.01f || Math.abs(pitch) > 0.01f) {
+                float h = e.getBbHeight() * 0.5f;
+                pose.translate(0, h, 0);
+                pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(pitch));
+                pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(roll));
+                pose.translate(0, -h, 0);
+            }
+        }
     }
 
     /** a nave é grande: continua sendo desenhada mesmo com o centro fora da tela */
