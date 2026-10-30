@@ -90,7 +90,38 @@ public final class NaveInterior {
         player.getPersistentData().put(RETURN, back);
         BlockPos in = sala.dentro;
         player.teleportTo(dim, in.getX() + 0.5, in.getY(), in.getZ() + 0.5, sala.olhar, 0);
+        player.fallDistance = 0;
         dim.playSound(null, in, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.8f, 1f);
+        // A sala às vezes chega ao cliente antes dos blocos colados: reenvia os chunks dela logo depois
+        CHEGANDO.put(player.getUUID(), new long[]{player.server.getTickCount() + 5, sala.origem.asLong(), sala.tamanho.asLong(), 0});
+    }
+
+    private static final Map<UUID, long[]> CHEGANDO = new HashMap<>();
+
+    @SubscribeEvent
+    public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || CHEGANDO.isEmpty()) return;
+        MinecraftServer server = event.getServer();
+        int now = server.getTickCount();
+        CHEGANDO.entrySet().removeIf(e -> {
+            long[] v = e.getValue();
+            if (now < v[0]) return false;
+            ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+            if (p == null || !p.level().dimension().equals(DIM)) return true;
+            ServerLevel dim = p.serverLevel();
+            BlockPos o = BlockPos.of(v[1]), t = BlockPos.of(v[2]);
+            for (int cx = o.getX() >> 4; cx <= (o.getX() + Math.max(1, t.getX())) >> 4; cx++) {
+                for (int cz = o.getZ() >> 4; cz <= (o.getZ() + Math.max(1, t.getZ())) >> 4; cz++) {
+                    var chunk = dim.getChunk(cx, cz);
+                    p.connection.send(new net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket(chunk, dim.getLightEngine(), null, null));
+                }
+            }
+            // segura o jogador no lugar enquanto o cliente monta a sala
+            p.fallDistance = 0;
+            p.connection.teleport(p.getX(), p.getY(), p.getZ(), p.getYRot(), p.getXRot());
+            if (v[3] == 0) { v[3] = 1; v[0] = now + 20; return false; }
+            return true;
+        });
     }
 
     /** Cola a estrutura e acha a porta externa (uma nave_porta de baixo na borda da sala). */

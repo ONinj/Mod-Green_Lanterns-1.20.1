@@ -18,7 +18,8 @@
     "CapeLayerMixin",
     "LocalPlayerMixin",
     "ClientLevelMixin",
-    "MouseHandlerMixin"
+    "MouseHandlerMixin",
+    "CameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1

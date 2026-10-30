@@ -576,8 +576,95 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Teste de verdade: põe a nave pelo item, Shift+clique entra, clica na porta para sair, monta e pilota virando. */
+    private static void scenePilotar() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<String> cmdServer = c -> server(sp -> sp.server.getCommands().performPrefixedCommand(
+                sp.createCommandSourceStack().withSuppressedOutput().withPermission(4), c));
+        Runnable info = () -> LanternaMod.LOGGER.info("AUTOTEST hit={} dim={} veiculo={} pos={}",
+                mc.hitResult == null ? null : (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult eh ? "entity:" + eh.getEntity().getClass().getSimpleName() + "#" + eh.getEntity().getId() : mc.hitResult.getType()),
+                mc.level.dimension().location(), mc.player.getVehicle(), mc.player.position());
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> {
+            mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear"); cmd("gamerule doMobSpawning false");
+            cmd("effect give @s resistance 99999 4 true");
+            cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -40 900.5");
+        });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.level.hasChunkAt(900, 900) && mc.player.blockPosition().getY() < -30, 400);
+        at(20, () -> {
+            cmdServer.accept("fill 860 -61 860 960 -61 960 minecraft:smooth_stone");
+            cmdServer.accept("fill 860 -60 860 960 -40 960 minecraft:air");
+            cmdServer.accept("kill @e[type=!player]");
+        });
+        at(20, () -> { cmd("tp @s 900.5 -60 900.5 0 40"); cmd("give @s lanterna:nave_lanceira"); });
+        at(30, () -> { mc.player.getInventory().selected = 0; info.run(); KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(20, () -> server(sp -> {
+            var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 30, x -> true);
+            LanternaMod.LOGGER.info("AUTOTEST nave colocada={} yaw={}", n == null ? null : n.position(), n == null ? 0 : n.getYRot());
+        }));
+        // Afasta e olha para a nave
+        at(5, () -> server(sp -> {
+            var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 30, x -> true);
+            if (n != null) { sp.teleportTo(sp.serverLevel(), n.getX() + 3.2, n.getY(), n.getZ(), 90f, 20f); }
+        }));
+        at(20, () -> { info.run(); mc.options.keyShift.setDown(true); });
+        at(10, () -> { info.run(); KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(5, () -> mc.options.keyShift.setDown(false));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves"), 200);
+        at(2, () -> { info.run(); var bp = mc.player.blockPosition().below();
+            LanternaMod.LOGGER.info("AUTOTEST cliente chao={} chunk={}", mc.level.getBlockState(bp), mc.level.hasChunkAt(bp));
+            server(sp -> LanternaMod.LOGGER.info("AUTOTEST servidor pos={} chao={}", sp.position(), sp.level().getBlockState(sp.blockPosition().below()))); });
+        at(40, () -> { info.run(); shot("p1_interior"); var bp = mc.player.blockPosition().below();
+            LanternaMod.LOGGER.info("AUTOTEST cliente chao={} chunk={}", mc.level.getBlockState(bp), mc.level.hasChunkAt(bp)); });
+        at(60, () -> { info.run(); shot("p1b_interior"); });
+        // Vira para a porta externa e clica nela
+        at(5, () -> { mc.player.setYRot(mc.player.getYRot() + 180); mc.player.setXRot(10); });
+        at(10, () -> { info.run(); KeyMapping.click(mc.options.keyUse.getKey()); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.screen == null, 300);
+        at(40, () -> { info.run(); shot("p2_saiu");
+            for (var e : mc.level.entitiesForRendering()) if (e instanceof com.lanterna.naves.NaveEntity n)
+                LanternaMod.LOGGER.info("AUTOTEST volta cliente nave #{} {} pos={}", n.getId(), n.getUUID(), n.position());
+            server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(300)))
+                LanternaMod.LOGGER.info("AUTOTEST volta servidor nave #{} {} pos={}", n.getId(), n.getUUID(), n.position()); }); });
+        // Monta e pilota
+        at(5, () -> server(sp -> {
+            var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 30, x -> true);
+            if (n != null) sp.teleportTo(sp.serverLevel(), n.getX() + 3.2, n.getY(), n.getZ(), 90f, 20f);
+        }));
+        at(15, () -> { info.run(); KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(20, () -> { info.run(); mc.options.keyJump.setDown(true); });
+        at(30, () -> { mc.options.keyJump.setDown(false); mc.options.keyUp.setDown(true); });
+        for (int k = 0; k < 6; k++) {
+            int kk = k;
+            at(15, () -> mc.player.setYRot(mc.player.getYRot() + 30));
+            at(10, () -> {
+                var v = mc.player.getVehicle();
+                LanternaMod.LOGGER.info("AUTOTEST curva{} jogadorYaw={} naveYawCliente={} pos={}", kk, mc.player.getYRot(), v == null ? null : v.getYRot(), v == null ? null : v.position());
+                server(sp -> { var sv = sp.getVehicle(); LanternaMod.LOGGER.info("AUTOTEST curva{} naveYawServidor={}", kk, sv == null ? null : sv.getYRot()); });
+            });
+        }
+        at(5, () -> { mc.options.keyUp.setDown(false); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(30, () -> shot("p3_pilotando_3a_pessoa"));
+        at(5, () -> mc.player.setYRot(mc.player.getYRot() + 90));
+        at(30, () -> shot("p4_virou_90"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); server(sp -> {
+            var v = sp.getVehicle(); sp.stopRiding();
+            if (v != null) { v.setYRot(45); sp.teleportTo(sp.serverLevel(), v.getX(), v.getY() + 6, v.getZ() - 16, 0f, 15f); } }); });
+        at(40, () -> shot("p5_de_fora_yaw45"));
+        at(5, () -> {
+            for (var e : mc.level.entitiesForRendering()) if (e instanceof com.lanterna.naves.NaveEntity n)
+                LanternaMod.LOGGER.info("AUTOTEST cliente nave #{} {} pos={} removida={}", n.getId(), n.getUUID(), n.position(), n.isRemoved());
+            server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(300)))
+                LanternaMod.LOGGER.info("AUTOTEST servidor nave #{} {} pos={}", n.getId(), n.getUUID(), n.position()); });
+        });
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("encontro")) sceneEncontro();
+        if (ENABLED && SCENE.equals("pilotar")) scenePilotar();
+        else if (ENABLED && SCENE.equals("encontro")) sceneEncontro();
         else if (ENABLED && SCENE.equals("navesfoto")) sceneNavesFoto();
         else if (ENABLED && SCENE.equals("naves")) sceneNaves();
         else if (ENABLED && SCENE.equals("morte")) sceneMorte();

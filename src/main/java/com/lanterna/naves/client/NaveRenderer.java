@@ -26,6 +26,12 @@ public class NaveRenderer<T extends Entity & GeoAnimatable & TemNave> extends Ge
         super.preRender(pose, e, model, buf, vc, isReRender, partialTick, light, overlay, r, g, b, a);
     }
 
+    /** O GeckoLib só gira entidades vivas pelo corpo; a nave gira pelo yaw da própria entidade. */
+    @Override
+    protected void applyRotations(T e, PoseStack pose, float ageInTicks, float rotationYaw, float partialTick) {
+        super.applyRotations(e, pose, ageInTicks, net.minecraft.util.Mth.rotLerp(partialTick, e.yRotO, e.getYRot()), partialTick);
+    }
+
     /** a nave é grande: continua sendo desenhada mesmo com o centro fora da tela */
     @Override public boolean shouldRender(T e, net.minecraft.client.renderer.culling.Frustum f, double x, double y, double z) {
         return f.isVisible(e.getBoundingBox().inflate(6));

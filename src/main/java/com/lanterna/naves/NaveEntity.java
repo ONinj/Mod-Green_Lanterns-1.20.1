@@ -95,7 +95,8 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     public NaveEntity(EntityType<? extends NaveEntity> type, Level level) {
         super(type, level);
         for (int i = 0; i < parts.length; i++) parts[i] = new NavePart(this, i);
-        setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + parts.length + 1);
+        // reserva os ids seguintes para as partes (como o Ender Dragon): nave = v+1, partes = v+2..v+9
+        setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + 1);
     }
 
     @Override
@@ -291,7 +292,10 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             if (tickCount % 20 == 0 && !t.destrocos() && hp() < t.maxHp * 0.3f) {
                 ((ServerLevel) level()).sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + t.height, getZ(), 3, t.width / 3, 0.3, t.width / 3, 0.01);
             }
-        } else if (!t.destrocos() && !pousada() && tickCount % 2 == 0) {
+        } else {
+            tickAnimacao();
+        }
+        if (level().isClientSide && !t.destrocos() && !pousada() && tickCount % 2 == 0) {
             // Rastro dos motores
             for (int i = 0; i < 2; i++) {
                 Vec3 back = TemNave.posicaoAssento(position(), getYRot(), (i == 0 ? -1 : 1) * t.width * 3, t.height * 5, t.width * 12);
@@ -575,23 +579,26 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
 
     // ===================== Animações =====================
 
-    private boolean lastGround = true;
+    // Estado da animação (só no cliente), com folga para não piscar entre pousada e voando a cada pulinho
+    private boolean animNoAr;
+    private int animChao, animAr, animTroca = -100;
+
+    private void tickAnimacao() {
+        if (pousada()) { animChao++; animAr = 0; } else { animAr++; animChao = 0; }
+        if (animNoAr && animChao > 4) { animNoAr = false; animTroca = tickCount < 10 ? -100 : tickCount; }
+        else if (!animNoAr && animAr > 4) { animNoAr = true; animTroca = tickCount < 10 ? -100 : tickCount; }
+    }
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "movimento", 6, state -> {
             NaveTipo t = tipo();
             if (t.destrocos()) return state.setAndContinue(level().dimension().equals(SpaceBodies.SPACE) ? FLOAT : IDLE);
-            boolean ground = pousada();
+            int since = tickCount - animTroca;
             RawAnimation want;
-            if (ground) want = lastGround ? IDLE : LAND;
+            if (!animNoAr) want = animTroca > 0 && since < 30 ? LAND : IDLE;
             else if (turbo()) want = BOOST;
-            else want = lastGround ? TAKEOFF : FLY;
-            if (ground != lastGround) {
-                lastGround = ground;
-                state.getController().forceAnimationReset();
-            }
-            if (want == LAND && state.getController().hasAnimationFinished()) want = IDLE;
+            else want = animTroca > 0 && since < 30 ? TAKEOFF : FLY;
             return state.setAndContinue(want);
         }));
         controllers.add(new AnimationController<>(this, "porta", 0, state -> PlayState.STOP)
