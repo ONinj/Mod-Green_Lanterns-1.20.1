@@ -57,6 +57,9 @@ public final class KeyBindings {
             "key.lanterna.journal", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
 
     // ---- Naves ----
+    public static final KeyMapping TRAVAR_MIRA = new KeyMapping(
+            "key.lanterna.travar_mira", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_TAB, CATEGORY);
+
     public static final KeyMapping NAVE_DESCER = new KeyMapping(
             "key.lanterna.nave_descer", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
     public static final KeyMapping NAVE_PORTA = new KeyMapping(

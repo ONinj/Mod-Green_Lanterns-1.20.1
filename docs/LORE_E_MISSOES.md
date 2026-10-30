@@ -231,3 +231,32 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 - O Armário só abre e fecha (não guarda itens).
 - O interior é uma dimensão separada: lá fora o mundo continua sem você.
 - Os bosses não ficam mais fortes com o nível; a dificuldade vem dos níveis pedidos para forjar.
+
+
+---
+
+# 0.14 — Cidades das Tropas, piloto automático da nave e mira travada
+
+## Cidades das Tropas
+- Em cada planeta de Tropa, **150 blocos ao norte da base**, fica a cidade da Tropa (construída quando você chega perto).
+- No centro, a **Bateria Central** gigante no formato da bateria da Tropa: lanterna (Verde), torre de lâminas (Amarelo), braseiro (Vermelho), farol (Azul), relicário (Laranja), drusa (Violeta), caveira (Preto) e o Cajado da Compaixão (Índigo, em Nok).
+- Em volta: Salão da Tropa (norte, com o quadro de contratos, console e holomapa), alojamento (leste, beliches, armários e recarga), campo de treino (oeste, forja, bateria e alvos), pouso de naves (sul), quatro torres de vigia, ruas iluminadas e muralha com portões.
+- Seis Lanternas da Tropa moram lá (dois oficiais).
+
+## Missões por posto
+- **Patrulha de setores** (a partir de Patrulheiro, nível 10): passe por 3 setores do espaço longe do planeta da Tropa e derrube 2 naves piratas (elas aparecem nos setores). 900 XP.
+- **Exploração** (a partir de Oficial, nível 20): pouse num planeta que você nunca visitou. 1200 XP.
+- Aparecem como contratos extras no quadro da sua Tropa.
+
+## Piloto automático da nave
+- Dentro da nave, abra o **holomapa**, escolha o destino e clique em **Levar a nave até lá**.
+- A nave sai de onde estava e viaja sozinha (8 a 120 s, conforme a distância). Durante a viagem a porta fica fechada.
+- Ao chegar, saia pela porta: você e a nave estão no destino.
+
+## Trava de mira (Tab)
+- **Tab** trava a mira no inimigo mais perto do centro da tela; a câmera segue o alvo suavemente e aparece uma mira com nome, distância e vida.
+- Tab de novo solta; solta sozinha se o alvo morrer, ficar longe ou sumir de vista.
+
+## Outras mudanças
+- Laser do punho mais fino, com pulsos correndo, e contínuo (a repetição da tecla reiniciava o feixe).
+- Cargueiro e Capitânia: todas as portas da parede de fora saem da nave; portas lado a lado viram portas duplas.

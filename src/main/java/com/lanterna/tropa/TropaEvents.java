@@ -120,6 +120,7 @@ public final class TropaEvents {
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d != null && d.visitar(b.id())) {
             Nivel.addXp(p, 150, Component.translatable("nivel.lanterna.descoberta", b.displayName()));
+            if (b.procedural() != null) MissionManager.onDescobrir(p);
         }
     }
 

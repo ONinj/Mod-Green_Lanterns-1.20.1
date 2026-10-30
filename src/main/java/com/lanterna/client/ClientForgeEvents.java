@@ -63,6 +63,7 @@ public final class ClientForgeEvents {
             Minecraft.getInstance().setScreen(new com.lanterna.client.mission.JournalScreen());
         }
         com.lanterna.client.construct.ClientConstructs.tick();
+        com.lanterna.client.combat.MiraTravada.tick();
         com.lanterna.client.naves.ClientNaves.tick();
         com.lanterna.client.mission.ClientLoreData.tick();
 
@@ -182,6 +183,12 @@ public final class ClientForgeEvents {
         pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-35f * k));
     }
 
+    /** Trava de mira: vira a câmera a cada quadro (suave como o mouse). */
+    @SubscribeEvent
+    public static void onRenderTick(net.minecraftforge.event.TickEvent.RenderTickEvent event) {
+        if (event.phase == net.minecraftforge.event.TickEvent.Phase.START) com.lanterna.client.combat.MiraTravada.frame(event.renderTickTime);
+    }
+
     /** Desenha o portal e a bateria da recarga no mundo. */
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
@@ -211,6 +218,7 @@ public final class ClientForgeEvents {
         com.lanterna.client.alien.AlienModel.clearCache();
         com.lanterna.client.mission.ClientLoreData.reset();
         com.lanterna.client.construct.ClientConstructs.clear();
+        com.lanterna.client.combat.MiraTravada.clear();
     }
 
     private ClientForgeEvents() {}

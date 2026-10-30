@@ -177,6 +177,11 @@ public class StarMapScreen extends Screen {
         return super.keyPressed(key, scan, mods);
     }
 
+    private static boolean naSala() {
+        var p = Minecraft.getInstance().player;
+        return p != null && p.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM);
+    }
+
     private Vec3 here() {
         return Minecraft.getInstance().player != null ? Destinations.spacePosition(Minecraft.getInstance().player) : Vec3.ZERO;
     }
@@ -188,14 +193,22 @@ public class StarMapScreen extends Screen {
     private void updateButtons() {
         var player = Minecraft.getInstance().player;
         Destinations.Destination d = selected == null ? null : Destinations.byId(selected);
-        goButton.active = d != null && player != null && !Destinations.isHere(player, d)
-                && !player.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM)
-                && ClientRingData.hasRing && ClientRingData.active;
+        boolean naNave = player != null && player.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM);
+        goButton.active = d != null && player != null && (naNave || (!Destinations.isHere(player, d)
+                && ClientRingData.hasRing && ClientRingData.active));
+        goButton.setMessage(Component.translatable(naNave ? "starmap.lanterna.go_ship" : "starmap.lanterna.go"));
         stopButton.visible = Autopilot.active();
     }
 
     private void go() {
         Destinations.Destination d = Destinations.byId(selected);
+        var pl = Minecraft.getInstance().player;
+        if (d != null && pl != null && pl.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM)) {
+            // Na sala da nave: a nave voa sozinha até lá
+            com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.naves.NaveAutoPacket(d.id()));
+            onClose();
+            return;
+        }
         Component error = Autopilot.start(d);
         if (error != null) {
             if (minecraft != null && minecraft.player != null) minecraft.player.displayClientMessage(error, true);
@@ -297,7 +310,8 @@ public class StarMapScreen extends Screen {
             g.drawString(font, name, x - w / 2, y + r + 3, important ? 0xFFFFFFFF : 0xFFB8C0D0, true);
         }
 
-        // Você
+        // Você (dentro da sala da nave a posição não é a do espaço: não mostra)
+        if (naSala()) { g.disableScissor(); return; }
         int px = sx(here.x), py = sy(here.z);
         float yaw = minecraft != null && minecraft.player != null ? minecraft.player.getYRot() : 0;
         double fx = -Math.sin(Math.toRadians(yaw)), fz = Math.cos(Math.toRadians(yaw));
@@ -346,7 +360,9 @@ public class StarMapScreen extends Screen {
             g.drawString(font, d.name(), listX + 16, y + 3, 0xFFFFFFFF, false);
             boolean isHere = player != null && Destinations.isHere(player, d);
             Component info;
-            if (isHere) {
+            if (naSala()) {
+                info = Component.translatable("starmap.lanterna.ship_dest");
+            } else if (isHere) {
                 info = Component.translatable("starmap.lanterna.here");
             } else {
                 double dist = Math.max(0, d.center().distanceTo(here) - d.radius());

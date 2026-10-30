@@ -69,6 +69,8 @@ public final class ClientConstructs {
             return;
         }
         if (cooldown(type) > 0) return;
+        // Segurando a tecla, o teclado "repete" o clique: o construto contínuo já está ligado, não reinicia
+        if (type.hold && holding == type) return;
         ModNetwork.sendToServer(new ConstructCastPacket(type.id, true));
         if (type.hold) {
             holding = type;

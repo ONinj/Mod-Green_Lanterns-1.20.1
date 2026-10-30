@@ -75,7 +75,10 @@ public final class Contratos {
     public static List<String> ofertas(ServerPlayer p, String planet, long day) {
         CompoundTag novos = p.getPersistentData().getCompound(NOVO);
         List<String> l = new ArrayList<>();
-        for (int i = 0; i < POR_DIA; i++) {
+        int posto = Nivel.posto(Nivel.nivel(p));
+        // Patrulha de setor a partir de Patrulheiro (nível 10); descoberta de planeta a partir de Oficial (nível 20)
+        int slots = POR_DIA + (posto >= 1 ? 1 : 0) + (posto >= 2 ? 1 : 0);
+        for (int i = 0; i < slots; i++) {
             int n = novos.getInt(planet + "_" + day + "_" + i);
             l.add("ct_" + planet + "_" + day + "_" + i + (n > 0 ? "_" + n : ""));
         }
@@ -120,7 +123,9 @@ public final class Contratos {
             case 0 -> r.nextBoolean() ? "piratas" : "ecos";
             case 1 -> r.nextBoolean() ? "resgate" : "entrega";
             case 2 -> r.nextBoolean() ? "invasores" : "piratas";
-            default -> r.nextInt(3) == 0 ? "nave" : "capitao";
+            case 3 -> r.nextInt(3) == 0 ? "nave" : "capitao";
+            case 4 -> "patrulha";
+            default -> "descoberta";
         };
         double a = r.nextDouble() * Math.PI * 2;
         double dist = 160 + r.nextInt(240);
@@ -147,6 +152,8 @@ public final class Contratos {
             case "invasores" -> 420;
             case "capitao" -> 700;
             case "nave" -> 480;
+            case "patrulha" -> 900;
+            case "descoberta" -> 1200;
             default -> 150;
         };
         return new Dados(tipo, planet, count, pos, dest, xp, slot);
@@ -171,6 +178,14 @@ public final class Contratos {
             case "capitao" -> List.of(Objective.of(Type.KILL, "papel:capitao", 1, p, d.pos),
                     Objective.of(Type.KILL, "papel:pirata", 3, p, d.pos));
             case "nave" -> List.of(Objective.of(Type.KILL, "papel:nave_pirata", 1, null, null));
+            case "patrulha" -> {
+                List<Objective> l = new ArrayList<>();
+                List<BlockPos> setores = setores(id);
+                for (int i = 0; i < setores.size(); i++) l.add(Objective.of(Type.SETOR, "setor:" + i, 1, "space", setores.get(i)));
+                l.add(Objective.of(Type.KILL, "papel:nave_pirata", 2, null, null));
+                yield l;
+            }
+            case "descoberta" -> List.of(Objective.of(Type.DESCOBRIR, "novo", 1, null, null));
             default -> List.of();
         };
         int tier = d.tier;
@@ -184,6 +199,31 @@ public final class Contratos {
         }, d.xp, null, null);
         CACHE.put(id, m);
         return m;
+    }
+
+    /** Três pontos de patrulha no espaço, longe do planeta da Tropa (setores vizinhos). */
+    public static List<BlockPos> setores(String id) {
+        Dados d = dados(id);
+        List<BlockPos> l = new ArrayList<>();
+        if (d == null) return l;
+        SpaceBodies.Body home = SpaceBodies.byId(d.planet);
+        net.minecraft.world.phys.Vec3 c = home != null ? home.center() : net.minecraft.world.phys.Vec3.ZERO;
+        Random r = new Random(id.hashCode() * 0x9E3779B97F4A7C15L);
+        double a = r.nextDouble() * Math.PI * 2;
+        for (int i = 0; i < 3; i++) {
+            a += 0.6 + r.nextDouble() * 1.4;
+            double dist = 2500 + r.nextInt(3500) + i * 900;
+            l.add(new BlockPos((int) (c.x + Math.cos(a) * dist), (int) c.y + r.nextInt(200) - 100, (int) (c.z + Math.sin(a) * dist)));
+        }
+        return l;
+    }
+
+    /** Nome do setor (pela posição): "Setor K-12". */
+    public static Component nomeSetor(@Nullable BlockPos p) {
+        if (p == null) return Component.empty();
+        int gx = Math.floorDiv(p.getX(), 1000), gz = Math.floorDiv(p.getZ(), 1000);
+        char letra = (char) ('A' + Math.floorMod(gx, 26));
+        return Component.translatable("setor.lanterna.nome", letra + "-" + Math.abs(gz));
     }
 
     public static Component titulo(String id) {
@@ -205,6 +245,8 @@ public final class Contratos {
         Dados d = dados(id);
         return d == null ? 1 : switch (d.tipo) {
             case "capitao" -> 20;
+            case "patrulha" -> 15;
+            case "descoberta" -> 22;
             case "invasores", "nave" -> 12;
             case "piratas" -> 4 + 3 * d.tier;
             default -> 1;
@@ -314,6 +356,17 @@ public final class Contratos {
                 if (p.level().dimension().equals(SpaceBodies.SPACE)) Encontros.forcarPirata(p, id);
                 continue;
             }
+            if (dd.tipo.equals("patrulha")) {
+                // Nos setores da patrulha aparecem piratas
+                if (p.level().dimension().equals(SpaceBodies.SPACE)) {
+                    for (BlockPos s : setores(id)) {
+                        double dx = p.getX() - s.getX(), dz = p.getZ() - s.getZ();
+                        if (dx * dx + dz * dz < 500 * 500) { Encontros.forcarPirata(p, id); break; }
+                    }
+                }
+                continue;
+            }
+            if (dd.tipo.equals("descoberta")) continue;
             if (here == null || !here.id().equals(dd.planet)) continue;
             double dx = p.getX() - dd.pos.getX(), dz = p.getZ() - dd.pos.getZ();
             if (dx * dx + dz * dz > 110 * 110) continue;

@@ -77,6 +77,17 @@ public final class Waypoints {
 
     @Nullable
     public static Target resolve(LocalPlayer player, Objective o, int color) {
+        if ("space".equals(o.planet()) && o.pos() != null) {
+            // Ponto no espaço (patrulha de setor)
+            Vec3 at = Vec3.atCenterOf(o.pos());
+            Component nome = com.lanterna.tropa.Contratos.nomeSetor(o.pos());
+            if (player.level().dimension().equals(SpaceBodies.SPACE)) {
+                return new Target(at, at.distanceTo(player.position()), Component.translatable("waypoint.lanterna.setor", nome), o.label(0), color, "space");
+            }
+            Vec3 up = new Vec3(player.getX(), SpaceTravel.EXIT_HEIGHT, player.getZ());
+            double total = Destinations.spacePosition(player).distanceTo(at) + Math.max(0, SpaceTravel.EXIT_HEIGHT - player.getY());
+            return new Target(up, total, Component.translatable("waypoint.lanterna.go_space", nome), o.label(0), color, "space");
+        }
         SpaceBodies.Body body = SpaceBodies.byId(o.planet());
         if (body == null) return null;
         Component planetName = body.displayName();

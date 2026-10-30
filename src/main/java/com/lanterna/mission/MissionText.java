@@ -37,7 +37,8 @@ public final class MissionText {
             case BOSS -> Component.translatable("entity.lanterna." + t);
             case RING -> Component.translatable(CorpsDefinition.nameKey(LanternaMod.id(t)));
             case REP -> Component.translatable("race.lanterna." + t);
-            case FUSION, AFFINITY, LEVEL, EMOCAO -> Component.empty();
+            case FUSION, AFFINITY, LEVEL, EMOCAO, DESCOBRIR -> Component.empty();
+            case SETOR -> com.lanterna.tropa.Contratos.nomeSetor(o.pos());
         };
     }
 

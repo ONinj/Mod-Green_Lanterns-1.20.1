@@ -41,7 +41,11 @@ public record Objective(Type type, String target, int count, @Nullable String pl
         /** Nível do Lanterna. */
         LEVEL,
         /** Pontos de emoção da Tropa (Prova da Emoção). */
-        EMOCAO
+        EMOCAO,
+        /** Chegar a um ponto do espaço (patrulha de setor). planet = "space", pos = ponto. */
+        SETOR,
+        /** Pousar num planeta que ainda não visitou. */
+        DESCOBRIR
     }
 
     public static Objective of(Type type, String target, int count, @Nullable String planet, @Nullable BlockPos pos) {

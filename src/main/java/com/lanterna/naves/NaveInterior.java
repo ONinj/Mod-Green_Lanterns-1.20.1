@@ -24,6 +24,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.Mth;
 import net.minecraft.core.Vec3i;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -79,11 +80,14 @@ public final class NaveInterior {
             }
             sala.built = true;
             sala.semEscotilha = true;
+            sala.portasOk = true;
             dados.setDirty();
-        } else if (!sala.semEscotilha) {
-            // salas feitas antes da 0.13.4: tira o alçapão do chão
+        } else if (!sala.semEscotilha || !sala.portasOk) {
+            // salas feitas antes: tira o alçapão do chão e arruma as portas lado a lado
             tirarEscotilhas(dim, sala.origem, sala.tamanho);
+            arrumarPortas(dim, sala.origem, sala.tamanho);
             sala.semEscotilha = true;
+            sala.portasOk = true;
             dados.setDirty();
         }
         CompoundTag back = new CompoundTag();
@@ -140,6 +144,7 @@ public final class NaveInterior {
         tpl.placeInWorld(dim, origin, origin, settings, dim.random, 2);
         Vec3i size = tpl.getSize();
         tirarEscotilhas(dim, origin, new BlockPos(size.getX(), size.getY(), size.getZ()));
+        arrumarPortas(dim, origin, new BlockPos(size.getX(), size.getY(), size.getZ()));
         BlockPos door = null;
         for (StructureTemplate.StructureBlockInfo info : tpl.filterBlocks(BlockPos.ZERO, settings, NaveBlocks.NAVE_PORTA.get())) {
             BlockPos p = info.pos();
@@ -160,6 +165,34 @@ public final class NaveInterior {
     }
 
     /** O alçapão do chão levava para fora da sala (no vazio): vira piso. A entrada e saída é só pela porta. */
+    /**
+     * Portas lado a lado (rampa do cargueiro, hangar da Capitânia) vinham todas com a dobradiça do mesmo lado
+     * e batiam umas nas outras: vira pares de portas duplas (esquerda/direita alternando).
+     */
+    private static void arrumarPortas(ServerLevel dim, BlockPos o, BlockPos t) {
+        java.util.Set<BlockPos> feitas = new java.util.HashSet<>();
+        for (BlockPos p : BlockPos.betweenClosed(o, o.offset(Math.max(0, t.getX() - 1), Math.max(0, t.getY() - 1), Math.max(0, t.getZ() - 1)))) {
+            BlockState st = dim.getBlockState(p);
+            if (!st.is(NaveBlocks.NAVE_PORTA.get()) || st.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER || feitas.contains(p)) continue;
+            Direction f = st.getValue(DoorBlock.FACING);
+            Direction lado = f.getClockWise();
+            // começo da fileira
+            BlockPos ini = p.immutable();
+            while (dim.getBlockState(ini.relative(lado.getOpposite())).is(NaveBlocks.NAVE_PORTA.get())) ini = ini.relative(lado.getOpposite());
+            int i = 0;
+            for (BlockPos q = ini; dim.getBlockState(q).is(NaveBlocks.NAVE_PORTA.get()); q = q.relative(lado), i++) {
+                BlockState qs = dim.getBlockState(q);
+                if (qs.getValue(DoorBlock.HALF) != DoubleBlockHalf.LOWER) break;
+                var hinge = i % 2 == 0 ? net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT
+                        : net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT;
+                dim.setBlock(q, qs.setValue(DoorBlock.HINGE, hinge), 2);
+                BlockState up = dim.getBlockState(q.above());
+                if (up.is(NaveBlocks.NAVE_PORTA.get())) dim.setBlock(q.above(), up.setValue(DoorBlock.HINGE, hinge), 2);
+                feitas.add(q.immutable());
+            }
+        }
+    }
+
     private static void tirarEscotilhas(ServerLevel dim, BlockPos o, BlockPos t) {
         for (BlockPos p : BlockPos.betweenClosed(o, o.offset(Math.max(0, t.getX() - 1), Math.max(0, t.getY() - 1), Math.max(0, t.getZ() - 1)))) {
             if (dim.getBlockState(p).is(NaveBlocks.NAVE_ESCOTILHA.get())) dim.setBlock(p, NaveBlocks.NAVE_PISO.get().defaultBlockState(), 2);
@@ -180,9 +213,181 @@ public final class NaveInterior {
         if (!state.is(NaveBlocks.NAVE_PORTA.get())) return;
         BlockPos lower = state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER ? event.getPos().below() : event.getPos();
         Sala sala = Dados.get(player.server).porPorta(lower);
+        if (sala == null) sala = Dados.get(player.server).portaDaBorda(lower);
         if (sala == null) return;
         event.setCanceled(true);
+        if (sala.destino != null) {
+            long falta = Math.max(0, sala.chegada - player.server.overworld().getGameTime()) / 20;
+            player.displayClientMessage(Component.translatable("nave.lanterna.auto.em_viagem", falta), true);
+            return;
+        }
         sair(player);
+    }
+
+    // ===================== Piloto automático pelo holomapa =====================
+
+    /** UUID da nave da sala onde o jogador está (se for dele), ou null. */
+    @Nullable
+    private static Map.Entry<UUID, Sala> salaDoJogador(ServerPlayer player) {
+        if (!player.level().dimension().equals(DIM)) return null;
+        BlockPos pos = player.blockPosition();
+        for (Map.Entry<UUID, Sala> e : Dados.get(player.server).salas.entrySet()) {
+            Sala s = e.getValue();
+            BlockPos o = s.origem, t = s.tamanho;
+            if (!s.built || pos.getX() < o.getX() - 1 || pos.getX() > o.getX() + t.getX() || pos.getZ() < o.getZ() - 1
+                    || pos.getZ() > o.getZ() + t.getZ()) continue;
+            return e;
+        }
+        return null;
+    }
+
+    /** Posição "no espaço" de um lugar (para calcular a distância da viagem). */
+    private static Vec3 noEspaco(ResourceKey<Level> dim, double x, double y, double z) {
+        if (dim.equals(com.lanterna.space.SpaceBodies.SPACE)) return new Vec3(x, y, z);
+        com.lanterna.space.SpaceBodies.Body b = com.lanterna.space.SpaceBodies.bodyAt(dim, x, z);
+        if (b == null && dim.equals(Level.OVERWORLD)) b = com.lanterna.space.SpaceBodies.EARTH;
+        return b != null ? b.center() : Vec3.ZERO;
+    }
+
+    public static void iniciarViagem(ServerPlayer player, String destId) {
+        if (!salaPropria(player)) {
+            player.displayClientMessage(Component.translatable("contrato.lanterna.nave_alheia"), true);
+            return;
+        }
+        var entry = salaDoJogador(player);
+        com.lanterna.space.SpaceBodies.Body body = com.lanterna.space.SpaceBodies.byId(destId);
+        if (entry == null || body == null || !body.landable() || body.dimension() == null) return;
+        Sala sala = entry.getValue();
+        if (sala.destino != null) {
+            player.displayClientMessage(Component.translatable("nave.lanterna.auto.ja_viajando"), true);
+            return;
+        }
+        CompoundTag back = player.getPersistentData().getCompound(RETURN);
+        if (!back.contains("Dim") || !back.hasUUID("Nave") || !back.getUUID("Nave").equals(entry.getKey())) {
+            player.displayClientMessage(Component.translatable("nave.lanterna.auto.sem_nave"), true);
+            return;
+        }
+        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(back.getString("Dim")));
+        if (dimKey.equals(body.dimension()) && com.lanterna.space.SpaceBodies.bodyAt(dimKey, back.getDouble("X"), back.getDouble("Z")) == body) {
+            player.displayClientMessage(Component.translatable("nave.lanterna.auto.ja_aqui", body.displayName()), true);
+            return;
+        }
+        sala.destino = destId;
+        sala.fase = 0;
+        sala.inicio = player.server.overworld().getGameTime();
+        sala.origemDim = back.getString("Dim");
+        sala.ox = back.getDouble("X"); sala.oy = back.getDouble("Y"); sala.oz = back.getDouble("Z");
+        Dados.get(player.server).setDirty();
+        ServerLevel src = player.server.getLevel(dimKey);
+        if (src != null) src.setChunkForced(((int) Math.floor(sala.ox)) >> 4, ((int) Math.floor(sala.oz)) >> 4, true);
+        player.displayClientMessage(Component.translatable("nave.lanterna.auto.preparando", body.displayName()), true);
+        player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1f, 0.7f);
+    }
+
+    @SubscribeEvent
+    public static void onViagemTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+        MinecraftServer server = event.getServer();
+        if (server.getTickCount() % 5 != 0) return;
+        Dados dados = Dados.get(server);
+        long now = server.overworld().getGameTime();
+        for (Map.Entry<UUID, Sala> e : dados.salas.entrySet()) {
+            Sala sala = e.getValue();
+            if (sala.destino == null) continue;
+            com.lanterna.space.SpaceBodies.Body body = com.lanterna.space.SpaceBodies.byId(sala.destino);
+            if (body == null || body.dimension() == null) { sala.destino = null; dados.setDirty(); continue; }
+            if (sala.fase == 0) buscarNave(server, dados, e.getKey(), sala, body, now);
+            else if (now >= sala.chegada) chegar(server, dados, e.getKey(), sala, body);
+            else if (server.getTickCount() % 100 == 0) avisar(server, e.getKey(), Component.translatable("nave.lanterna.auto.viajando",
+                    body.displayName(), (sala.chegada - now) / 20), false);
+        }
+    }
+
+    /** Fase 0: carrega o lugar onde a nave ficou, guarda ela "em viagem" e calcula quanto tempo leva. */
+    private static void buscarNave(MinecraftServer server, Dados dados, UUID id, Sala sala, com.lanterna.space.SpaceBodies.Body body, long now) {
+        ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(sala.origemDim));
+        ServerLevel src = server.getLevel(dimKey);
+        int cx = ((int) Math.floor(sala.ox)) >> 4, cz = ((int) Math.floor(sala.oz)) >> 4;
+        if (src != null && src.getEntity(id) instanceof NaveEntity n) {
+            n.ejectPassengers();
+            CompoundTag tag = new CompoundTag();
+            if (!n.save(tag)) return;
+            sala.naveNbt = tag;
+            Vec3 de = noEspaco(dimKey, n.getX(), n.getY(), n.getZ());
+            n.discard();
+            src.setChunkForced(cx, cz, false);
+            double dist = de.distanceTo(body.center());
+            long segundos = (long) Mth.clamp(8 + dist / 1200.0, 8, 120);
+            sala.chegada = now + segundos * 20;
+            sala.fase = 1;
+            dados.setDirty();
+            avisar(server, id, Component.translatable("nave.lanterna.auto.partiu", body.displayName(), segundos), true);
+            return;
+        }
+        if (now - sala.inicio > 20 * 15 || src == null) {
+            if (src != null) src.setChunkForced(cx, cz, false);
+            sala.destino = null;
+            dados.setDirty();
+            avisar(server, id, Component.translatable("nave.lanterna.auto.sem_nave"), true);
+        }
+    }
+
+    /** Chegou: a nave aparece pousada no destino e a porta da sala passa a sair lá. */
+    private static void chegar(MinecraftServer server, Dados dados, UUID id, Sala sala, com.lanterna.space.SpaceBodies.Body body) {
+        ServerLevel dest = server.getLevel(body.dimension());
+        if (dest == null || sala.naveNbt == null) { sala.destino = null; dados.setDirty(); return; }
+        Vec3 lp;
+        if (body == com.lanterna.space.SpaceBodies.EARTH) {
+            BlockPos sp = dest.getSharedSpawnPos();
+            lp = new Vec3(sp.getX() + 24, 0, sp.getZ() + 24);
+        } else {
+            Vec3 de = noEspaco(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(sala.origemDim)), sala.ox, sala.oy, sala.oz);
+            lp = com.lanterna.space.SpaceTravel.landingPoint(body, de);
+        }
+        dest.getChunk(((int) Math.floor(lp.x)) >> 4, ((int) Math.floor(lp.z)) >> 4);
+        int y = dest.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(lp.x), (int) Math.floor(lp.z));
+        if (y <= dest.getMinBuildHeight() + 1) y = 100;
+        final double fy = y + 0.5;
+        net.minecraft.world.entity.Entity ent = net.minecraft.world.entity.EntityType.loadEntityRecursive(sala.naveNbt, dest, en -> {
+            en.moveTo(lp.x, fy, lp.z, en.getYRot(), 0);
+            return en;
+        });
+        if (ent == null) { sala.destino = null; dados.setDirty(); return; }
+        ent.setDeltaMovement(Vec3.ZERO);
+        dest.addFreshEntity(ent);
+        dest.playSound(null, ent.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.NEUTRAL, 1.5f, 0.6f);
+        // A volta de quem está na sala passa a ser o destino
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            CompoundTag back = p.getPersistentData().getCompound(RETURN);
+            if (!back.hasUUID("Nave") || !back.getUUID("Nave").equals(id)) continue;
+            Vec3 out = ent instanceof NaveEntity n ? n.getDismountLocationForPassenger(p) : ent.position().add(3, 0.5, 0);
+            back.putString("Dim", dest.dimension().location().toString());
+            back.putDouble("X", out.x);
+            back.putDouble("Y", out.y);
+            back.putDouble("Z", out.z);
+            p.getPersistentData().put(RETURN, back);
+        }
+        sala.destino = null;
+        sala.naveNbt = null;
+        dados.setDirty();
+        avisar(server, id, Component.translatable("nave.lanterna.auto.chegou", body.displayName()), true);
+    }
+
+    /** Mensagem para quem está dentro desta nave. */
+    private static void avisar(MinecraftServer server, UUID nave, Component msg, boolean som) {
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (!p.level().dimension().equals(DIM)) continue;
+            CompoundTag back = p.getPersistentData().getCompound(RETURN);
+            if (!back.hasUUID("Nave") || !back.getUUID("Nave").equals(nave)) continue;
+            p.displayClientMessage(msg, !som);
+            if (som) p.playNotifySound(SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.8f, 1.2f);
+        }
+    }
+
+    /** A nave está em viagem (o holomapa mostra isso)? */
+    public static boolean emViagem(ServerPlayer p) {
+        var e = salaDoJogador(p);
+        return e != null && e.getValue().destino != null;
     }
 
     /** O jogador está numa sala de nave que é dele (dono, chave da nave, ou nave sem dono)? */
@@ -230,7 +435,14 @@ public final class NaveInterior {
         int indice;
         BlockPos origem = BlockPos.ZERO, porta = BlockPos.ZERO, dentro = BlockPos.ZERO, tamanho = BlockPos.ZERO;
         float olhar;
-        boolean built, semEscotilha;
+        boolean built, semEscotilha, portasOk;
+        /** Piloto automático: destino, quando chega, fase (0 = buscando a nave, 1 = viajando) e a nave guardada. */
+        @Nullable String destino;
+        long chegada, inicio;
+        int fase;
+        @Nullable CompoundTag naveNbt;
+        @Nullable String origemDim;
+        double ox, oy, oz;
         @Nullable UUID dono;
 
         CompoundTag save() {
@@ -244,6 +456,16 @@ public final class NaveInterior {
             t.putBoolean("B", built);
             if (dono != null) t.putUUID("Dono", dono);
             t.putBoolean("SemEscotilha", semEscotilha);
+            t.putBoolean("PortasOk", portasOk);
+            if (destino != null) {
+                t.putString("Destino", destino);
+                t.putLong("Chegada", chegada);
+                t.putLong("Inicio", inicio);
+                t.putInt("Fase", fase);
+                if (naveNbt != null) t.put("NaveNbt", naveNbt);
+                if (origemDim != null) t.putString("OrigemDim", origemDim);
+                t.putDouble("OX", ox); t.putDouble("OY", oy); t.putDouble("OZ", oz);
+            }
             return t;
         }
 
@@ -258,6 +480,16 @@ public final class NaveInterior {
             s.built = t.getBoolean("B");
             if (t.hasUUID("Dono")) s.dono = t.getUUID("Dono");
             s.semEscotilha = t.getBoolean("SemEscotilha");
+            s.portasOk = t.getBoolean("PortasOk");
+            if (t.contains("Destino")) {
+                s.destino = t.getString("Destino");
+                s.chegada = t.getLong("Chegada");
+                s.inicio = t.getLong("Inicio");
+                s.fase = t.getInt("Fase");
+                if (t.contains("NaveNbt")) s.naveNbt = t.getCompound("NaveNbt");
+                if (t.contains("OrigemDim")) s.origemDim = t.getString("OrigemDim");
+                s.ox = t.getDouble("OX"); s.oy = t.getDouble("OY"); s.oz = t.getDouble("OZ");
+            }
             return s;
         }
     }
@@ -279,6 +511,19 @@ public final class NaveInterior {
                 setDirty();
                 return s;
             });
+        }
+
+        /** Qualquer porta na parede de fora da sala também sai (cargueiro tem rampa com 4 portas, a Capitânia um hangar). */
+        @Nullable
+        Sala portaDaBorda(BlockPos p) {
+            for (Sala s : salas.values()) {
+                if (!s.built) continue;
+                BlockPos o = s.origem, t = s.tamanho;
+                int x = p.getX() - o.getX(), z = p.getZ() - o.getZ(), y = p.getY() - o.getY();
+                if (x < 0 || z < 0 || y < 0 || x >= t.getX() || z >= t.getZ() || y >= t.getY()) continue;
+                if (x == 0 || z == 0 || x == t.getX() - 1 || z == t.getZ() - 1) return s;
+            }
+            return null;
         }
 
         @Nullable

@@ -94,6 +94,11 @@ public final class MissionManager {
         bump(player, Objective.Type.BOSS, boss, 1, false);
     }
 
+    /** Pousou pela primeira vez num planeta gerado (missão de descoberta). */
+    public static void onDescobrir(ServerPlayer player) {
+        bump(player, Objective.Type.DESCOBRIR, "novo", 1, false);
+    }
+
     /** Nave destruída: conta como "nave_pirata" (piratas) ou "nave_inimiga". */
     public static void onShip(ServerPlayer player, String kind) {
         bump(player, Objective.Type.KILL, "papel:" + kind, 1, false);
@@ -167,6 +172,12 @@ public final class MissionManager {
             case AFFINITY -> Affinity.level(data.affinity()) >= o.count() ? o.count() : Affinity.level(data.affinity());
             case LEVEL -> Math.min(o.count(), com.lanterna.tropa.Nivel.nivel(data.xp()));
             case EMOCAO -> Math.min(o.count(), data.emocao());
+            case SETOR -> {
+                if (current >= 1) yield 1;
+                if (o.pos() == null || !player.level().dimension().equals(SpaceBodies.SPACE)) yield 0;
+                double dx = player.getX() - o.pos().getX(), dz = player.getZ() - o.pos().getZ();
+                yield dx * dx + dz * dz < 300 * 300 ? 1 : 0;
+            }
             case FUSION -> {
                 int n = fusionCount(player);
                 if (n >= 14) data.setGeneseRevealed(true);

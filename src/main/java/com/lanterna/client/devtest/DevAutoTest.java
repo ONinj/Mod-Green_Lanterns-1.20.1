@@ -6,6 +6,7 @@ import com.lanterna.network.OpenLanternMenuPacket;
 import com.lanterna.network.ToggleFlightPacket;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
+import com.lanterna.client.KeyBindings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.client.Screenshot;
@@ -916,8 +917,139 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** 0.14: laser contínuo, trava de mira, piloto automático da nave, portas do cargueiro, missões novas. */
+    private static void sceneNovidades() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<String> cs = c -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> cs.accept("lanterna escolher lanterna:green"));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 0"); });
+        at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(300), e -> !(e instanceof net.minecraft.world.entity.player.Player))) n.discard(); }));
+        at(5, () -> cs.accept("fill 870 -61 870 930 -61 930 minecraft:smooth_stone"));
+        if (SCENE.equals("auto")) { sceneNovidadesAuto(); return; }
+        // ---- Trava de mira ----
+        at(20, () -> server(sp -> {
+            var e = com.lanterna.especies.LanternaEntity.pirata(sp.serverLevel(), false);
+            e.moveTo(906.5, -60, 912.5, 0, 0); e.setNoAi(true); sp.serverLevel().addFreshEntity(e); }));
+        at(20, () -> { mc.player.setYRot(-20); mc.player.setXRot(0); KeyMapping.click(KeyBindings.TRAVAR_MIRA.getKey()); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST mira alvo={}", com.lanterna.client.combat.MiraTravada.alvo()); mc.player.setYRot(mc.player.getYRot() + 70); });
+        at(30, () -> { var a = com.lanterna.client.combat.MiraTravada.alvo();
+            double want = a == null ? 0 : Math.toDegrees(Math.atan2(-(a.getX() - mc.player.getX()), a.getZ() - mc.player.getZ()));
+            LanternaMod.LOGGER.info("AUTOTEST mira yaw={} esperado~{}", net.minecraft.util.Mth.wrapDegrees(mc.player.getYRot()), want); shot("n1_mira"); });
+        // ---- Laser contínuo (segurando X com repetição de tecla) ----
+        at(5, () -> { cs.accept("lanterna afinidade 24000"); });
+        at(20, () -> { KeyBindings.CONSTRUCT_USE.setDown(true); KeyMapping.click(KeyBindings.CONSTRUCT_USE.getKey()); });
+        for (int k = 0; k < 12; k++) {
+            int kk = k;
+            at(5, () -> { KeyMapping.click(KeyBindings.CONSTRUCT_USE.getKey()); // repetição do teclado
+                if (kk % 3 == 0) server(sp -> { var l = sp.serverLevel().getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(10));
+                    LanternaMod.LOGGER.info("AUTOTEST laser t={} feixes={} idade={}", kk, l.size(), l.isEmpty() ? -1 : l.get(0).age()); }); });
+        }
+        at(1, () -> shot("n2_laser"));
+        at(2, () -> { KeyBindings.CONSTRUCT_USE.setDown(false); KeyMapping.click(KeyBindings.TRAVAR_MIRA.getKey()); });
+        // ---- Missões por posto ----
+        at(10, () -> server(sp -> { com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(21), null);
+            var of = com.lanterna.tropa.Contratos.ofertas(sp, "oa", com.lanterna.tropa.Contratos.dia(sp));
+            LanternaMod.LOGGER.info("AUTOTEST ofertas nivel={} {}", com.lanterna.tropa.Nivel.nivel(sp), of);
+            for (String id : of) { var m = com.lanterna.tropa.Contratos.mission(id);
+                LanternaMod.LOGGER.info("AUTOTEST oferta {} -> {} objetivos={}", id, com.lanterna.tropa.Contratos.titulo(id).getString(), m == null ? null : m.objectives().size()); }
+            com.lanterna.tropa.Contratos.aceitar(sp, of.get(4)); }));
+        // ---- Cargueiro: todas as portas da borda saem ----
+        at(20, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_CARGUEIRO, "1");
+            n.moveTo(890.5, -60, 890.5, 0, 0); n.setDono(sp.getUUID()); sp.level().addFreshEntity(n);
+            com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(30, () -> server(sp -> {
+            BLOCOS.clear();
+            int i = 0;
+            for (var p : net.minecraft.core.BlockPos.betweenClosed(sp.blockPosition().offset(-24, -3, -24), sp.blockPosition().offset(24, 6, 24))) {
+                var st = sp.level().getBlockState(p);
+                if (st.is(com.lanterna.naves.bloco.NaveBlocks.NAVE_PORTA.get()) && st.getValue(net.minecraft.world.level.block.DoorBlock.HALF) == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER)
+                    { BLOCOS.put("porta" + (i++), p.immutable()); LanternaMod.LOGGER.info("AUTOTEST porta {} hinge={}", p, st.getValue(net.minecraft.world.level.block.DoorBlock.HINGE)); }
+            }
+        }));
+        at(5, () -> shot("n3_cargueiro"));
+        for (int k = 0; k < 7; k++) {
+            String nome = "porta" + k;
+            at(10, () -> { if (BLOCOS.containsKey(nome)) { server(sp -> { var p = BLOCOS.get(nome); sp.teleportTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5); }); } });
+            at(10, () -> { if (BLOCOS.containsKey(nome)) usar(nome); });
+            at(30, () -> { LanternaMod.LOGGER.info("AUTOTEST {} -> dim={}", nome, mc.level.dimension().location());
+                if (!mc.level.dimension().location().getPath().equals("interior_naves")) server(sp -> {
+                    var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(40)).stream().findFirst().orElse(null);
+                    if (n != null) com.lanterna.naves.NaveInterior.entrar(sp, n); }); });
+            at(30, () -> {});
+        }
+        // ---- Piloto automático: da Terra até Oa ----
+        at(20, () -> server(sp -> { if (!sp.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM)) {
+            var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(40)).stream().findFirst().orElse(null);
+            if (n != null) com.lanterna.naves.NaveInterior.entrar(sp, n); } }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(20, () -> server(sp -> com.lanterna.naves.NaveInterior.iniciarViagem(sp, "oa")));
+        for (int k = 0; k < 12; k++) at(40, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST viagem emViagem={} volta={}", com.lanterna.naves.NaveInterior.emViagem(sp),
+                sp.getPersistentData().getCompound("lanterna_interior_volta").getString("Dim"))));
+        waitFor(() -> false, 1);
+        at(20, () -> server(com.lanterna.naves.NaveInterior::sair));
+        waitFor(() -> !mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 600);
+        at(40, () -> { LanternaMod.LOGGER.info("AUTOTEST saiu em {} pos={}", mc.level.dimension().location(), mc.player.position());
+            server(sp -> LanternaMod.LOGGER.info("AUTOTEST nave perto={}", sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(30)).size()));
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(20, () -> shot("n4_chegou"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneNovidadesAuto() {
+        Minecraft mc = Minecraft.getInstance();
+        at(20, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_CARGUEIRO, "1");
+            n.moveTo(890.5, -60, 890.5, 0, 0); n.setDono(sp.getUUID()); sp.level().addFreshEntity(n);
+            com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(30, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
+        at(20, () -> { try { var f = com.lanterna.client.screen.StarMapScreen.class.getDeclaredField("selected"); f.setAccessible(true); f.set(mc.screen, "oa");
+            var g = com.lanterna.client.screen.StarMapScreen.class.getDeclaredMethod("go"); g.setAccessible(true); shot("n5_holomapa"); g.invoke(mc.screen); } catch (Exception e) { LanternaMod.LOGGER.error("x", e); } });
+        for (int k = 0; k < 14; k++) at(40, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST viagem emViagem={} volta={}", com.lanterna.naves.NaveInterior.emViagem(sp),
+                sp.getPersistentData().getCompound("lanterna_interior_volta").getString("Dim"))));
+        at(20, () -> server(com.lanterna.naves.NaveInterior::sair));
+        waitFor(() -> !mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 600);
+        at(60, () -> { LanternaMod.LOGGER.info("AUTOTEST saiu em {} pos={}", mc.level.dimension().location(), mc.player.position());
+            server(sp -> LanternaMod.LOGGER.info("AUTOTEST nave perto={}", sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(30)).size()));
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(20, () -> shot("n4_chegou"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** As cidades das Tropas, vistas do alto. */
+    private static void sceneCidades() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamemode spectator"); cmd("time set 6000"); });
+        for (String pl : new String[]{"oa", "korugar", "ysmault", "odym", "okaara", "nok", "zamaron", "ryut"}) {
+            at(10, () -> server(sp -> com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(pl + ":cidade")));
+            at(10, () -> cmd("gamemode survival"));
+            at(10, () -> cmd("execute in lanterna:" + pl + " run tp @s 0 200 -150"));
+            waitFor(() -> mc.level.dimension().location().getPath().equals(pl) && mc.screen == null, 600);
+            at(60, () -> {});
+            at(40, () -> cmd("gamemode spectator"));
+            at(5, () -> server(sp -> { int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, -150);
+                sp.teleportTo(sp.serverLevel(), 0.5, y + 34, -150 + 52, 180f, 32f); }));
+            at(80, () -> shot("cid_" + pl));
+            at(5, () -> server(sp -> { int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, -150);
+                sp.teleportTo(sp.serverLevel(), 0.5, y + 6, -150 + 20, 180f, -8f); }));
+            at(40, () -> shot("cid_" + pl + "_bateria"));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("contrato")) sceneContrato();
+        if (ENABLED && (SCENE.equals("novidades") || SCENE.equals("auto"))) sceneNovidades();
+        else if (ENABLED && SCENE.equals("cidades")) sceneCidades();
+        else if (ENABLED && SCENE.equals("contrato")) sceneContrato();
         else if (ENABLED && SCENE.equals("voo")) sceneVoo();
         else if (ENABLED && SCENE.equals("blocos")) sceneBlocos();
         else if (ENABLED && SCENE.equals("quadro")) sceneQuadro();

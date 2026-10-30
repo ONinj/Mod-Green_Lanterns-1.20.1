@@ -40,6 +40,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.14 ✅ Lore completa (pacote Lore3D): 9 raças + Guardiões do Universo, 9 bosses com mecânicas, minérios e blocos de cada planeta, Gênese escondido, missões com HUD e diário (M), afinidade do anel, 12 construtos com roda (Z/X) e presets, anéis forjados com rituais, Anel Branco por fusão. Detalhes em `docs/LORE_E_MISSOES.md`
 1.15 ✅ Ser escolhido na Terra: O Chamado (conquistas) e O Anel Caído (cratera, Anel Apagado e Bateria Cinzelada). Todo anel leva ao planeta da Tropa, Guardião Emissário em cada planeta, Tropas inimigas, bônus passivos do anel e menos mobs nos planetas
 1.16 ✅ (0.13) Tropas vivas: 18 espécies de Lanternas NPC, piratas e mercadores; naves pilotáveis com interior; nível e postos; contratos; encontros no espaço; Prova da Emoção. Detalhes em `docs/LORE_E_MISSOES.md`
+1.17 ✅ (0.14) Cidades das Tropas com Bateria Central, patrulha de setores e exploração por posto, piloto automático da nave, trava de mira, laser contínuo
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

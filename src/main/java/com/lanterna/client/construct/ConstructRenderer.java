@@ -42,17 +42,28 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
         switch (e.kind()) {
             case BEAM -> {
                 Vec3 end = e.end().subtract(origin);
-                float w = 0.09f + 0.02f * Mth.sin(age * 1.7f);
-                EnergyShapes.tube(pose, glow, Vec3.ZERO, end, w * 2.6f, color, 0.35f * alpha);
-                EnergyShapes.tube(pose, body, Vec3.ZERO, end, w * 1.4f, color, 0.65f * alpha);
-                EnergyShapes.tube(pose, glow, Vec3.ZERO, end, w * 0.6f, 0xFFFFFF, 0.8f * alpha);
+                // Feixe fino e contínuo: halo suave, corpo fino e um fio branco no meio
+                float w = 0.04f + 0.006f * Mth.sin(age * 1.7f);
+                EnergyShapes.tube(pose, glow, Vec3.ZERO, end, w * 2.4f, color, 0.28f * alpha);
+                EnergyShapes.tube(pose, body, Vec3.ZERO, end, w * 1.1f, color, 0.7f * alpha);
+                EnergyShapes.tube(pose, glow, Vec3.ZERO, end, w * 0.45f, 0xFFFFFF, 0.9f * alpha);
+                // Pulsos de energia correndo do punho até o alvo
+                double len = end.length();
+                if (len > 0.5) {
+                    Vec3 dir = end.scale(1 / len);
+                    for (int k = 0; k < 4; k++) {
+                        double t = ((age * 0.9 + k * len / 4) % len);
+                        Vec3 a = dir.scale(t), b = dir.scale(Math.min(len, t + 0.9));
+                        EnergyShapes.tube(pose, glow, a, b, w * 1.6f, lighten(color), 0.55f * alpha);
+                    }
+                }
                 pose.pushPose();
                 pose.translate(end.x, end.y, end.z);
-                float f = 0.25f + 0.08f * Mth.sin(age * 2.3f);
+                float f = 0.11f + 0.04f * Mth.sin(age * 2.3f);
                 EnergyShapes.box(pose, body, glow, -f, -f, -f, f, f, f, color, alpha);
                 pose.popPose();
                 // anel no punho
-                EnergyShapes.box(pose, body, glow, -0.12f, -0.12f, -0.12f, 0.12f, 0.12f, 0.12f, color, alpha);
+                EnergyShapes.box(pose, body, glow, -0.06f, -0.06f, -0.06f, 0.06f, 0.06f, 0.06f, color, alpha);
             }
             case HAMMER -> hammer(e, pose, body, glow, color, age, alpha, s, owner);
             case FIST -> {
@@ -183,5 +194,10 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
     @Override
     public ResourceLocation getTextureLocation(ConstructEntity e) {
         return TextureAtlas.LOCATION_BLOCKS;
+    }
+
+    private static int lighten(int rgb) {
+        int r = (rgb >> 16) & 0xFF, g = (rgb >> 8) & 0xFF, b = rgb & 0xFF;
+        return ((r + (255 - r) / 2) << 16) | ((g + (255 - g) / 2) << 8) | (b + (255 - b) / 2);
     }
 }

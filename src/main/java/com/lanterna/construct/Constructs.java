@@ -123,6 +123,8 @@ public final class Constructs {
             return;
         }
         if (type.hold) {
+            Active cur = ACTIVE.get(player.getUUID());
+            if (cur != null && cur.type == type && cur.visual != null && cur.visual.isAlive()) return; // já está ligado
             release(player, null);
             Active a = new Active(type);
             ACTIVE.put(player.getUUID(), a);
