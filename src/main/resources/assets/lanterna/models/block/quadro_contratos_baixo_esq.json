@@ -1,0 +1,79 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/quadro_contratos_baixo_esq",
+  "frente": "lanterna:block/quadro_contratos_baixo_esq",
+  "lado": "lanterna:block/nave_placa"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    14
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#frente"
+    },
+    "south": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      0,
+      0,
+      2,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      14,
+      0,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      0,
+      14,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "down": {
+     "uv": [
+      0,
+      0,
+      16,
+      2
+     ],
+     "texture": "#lado"
+    }
+   }
+  }
+ ]
+}

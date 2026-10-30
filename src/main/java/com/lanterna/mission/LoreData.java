@@ -32,6 +32,16 @@ public class LoreData implements INBTSerializable<CompoundTag> {
     /** Afinidade do anel em uso (espelho do anel, para o HUD). */
     private int affinity;
 
+    // ---- Nível do Lanterna ----
+    private int xp;
+    /** Posto mais alto cujas recompensas já foram entregues. */
+    private int postoEntregue;
+    /** Pontos de emoção (Prova da Emoção). */
+    private int emocao;
+    /** Concluiu a Prova: o anel se recarrega com a emoção da Tropa. */
+    private boolean autoRecarga;
+    /** Planetas já visitados (para a descoberta). */
+    private final Set<String> visitados = new LinkedHashSet<>();
     private transient boolean dirty = true;
 
     // ===================== Missões =====================
@@ -173,6 +183,20 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         }
     }
 
+    public int xp() { return xp; }
+    public void setXp(int v) { if (xp != v) { xp = v; dirty = true; } }
+    public int postoEntregue() { return postoEntregue; }
+    public void setPostoEntregue(int v) { postoEntregue = v; dirty = true; }
+    public int emocao() { return emocao; }
+    public void addEmocao(int v) { if (v != 0) { emocao = Math.max(0, emocao + v); dirty = true; } }
+    public boolean autoRecarga() { return autoRecarga; }
+    public void setAutoRecarga(boolean v) { autoRecarga = v; dirty = true; }
+    public boolean visitar(String planet) {
+        boolean added = visitados.add(planet);
+        if (added) dirty = true;
+        return added;
+    }
+
     public boolean isDirty() {
         return dirty;
     }
@@ -211,6 +235,11 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         tag.putLong("PassiveKill", lastPassiveKill);
         tag.putBoolean("Genese", geneseRevealed);
         tag.putInt("Affinity", affinity);
+        tag.putInt("Xp", xp);
+        tag.putInt("PostoEntregue", postoEntregue);
+        tag.putInt("Emocao", emocao);
+        tag.putBoolean("AutoRecarga", autoRecarga);
+        tag.put("Visitados", strings(visitados));
         return tag;
     }
 
@@ -238,6 +267,12 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         lastPassiveKill = tag.contains("PassiveKill") ? tag.getLong("PassiveKill") : -1_000_000L;
         geneseRevealed = tag.getBoolean("Genese");
         affinity = tag.getInt("Affinity");
+        xp = tag.getInt("Xp");
+        postoEntregue = tag.getInt("PostoEntregue");
+        emocao = tag.getInt("Emocao");
+        autoRecarga = tag.getBoolean("AutoRecarga");
+        visitados.clear();
+        tag.getList("Visitados", Tag.TAG_STRING).forEach(t -> visitados.add(t.getAsString()));
         dirty = true;
     }
 

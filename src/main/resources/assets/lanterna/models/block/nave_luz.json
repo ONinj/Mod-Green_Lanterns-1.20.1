@@ -1,0 +1,108 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/nave_luz",
+  "base": "lanterna:block/nave_luz",
+  "brilho": "lanterna:block/nave_luz_brilho"
+ },
+ "elements": [
+  {
+   "from": [
+    1,
+    14,
+    1
+   ],
+   "to": [
+    15,
+    16,
+    15
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      1,
+      0,
+      15,
+      2
+     ],
+     "texture": "#base"
+    },
+    "south": {
+     "uv": [
+      1,
+      0,
+      15,
+      2
+     ],
+     "texture": "#base"
+    },
+    "east": {
+     "uv": [
+      1,
+      0,
+      15,
+      2
+     ],
+     "texture": "#base"
+    },
+    "west": {
+     "uv": [
+      1,
+      0,
+      15,
+      2
+     ],
+     "texture": "#base"
+    },
+    "up": {
+     "uv": [
+      1,
+      1,
+      15,
+      15
+     ],
+     "texture": "#base"
+    },
+    "down": {
+     "uv": [
+      1,
+      1,
+      15,
+      15
+     ],
+     "texture": "#base"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    13.5,
+    2
+   ],
+   "to": [
+    14,
+    14,
+    14
+   ],
+   "faces": {
+    "down": {
+     "uv": [
+      2,
+      2,
+      14,
+      14
+     ],
+     "texture": "#brilho",
+     "tintindex": 0
+    }
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  }
+ ]
+}

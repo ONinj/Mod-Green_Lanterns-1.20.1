@@ -1,0 +1,64 @@
+{
+ "variants": {
+  "facing=north,parte=cima_esq": {
+   "model": "lanterna:block/quadro_contratos_cima_esq"
+  },
+  "facing=north,parte=cima_dir": {
+   "model": "lanterna:block/quadro_contratos_cima_dir"
+  },
+  "facing=north,parte=baixo_esq": {
+   "model": "lanterna:block/quadro_contratos_baixo_esq"
+  },
+  "facing=north,parte=baixo_dir": {
+   "model": "lanterna:block/quadro_contratos_baixo_dir"
+  },
+  "facing=east,parte=cima_esq": {
+   "model": "lanterna:block/quadro_contratos_cima_esq",
+   "y": 90
+  },
+  "facing=east,parte=cima_dir": {
+   "model": "lanterna:block/quadro_contratos_cima_dir",
+   "y": 90
+  },
+  "facing=east,parte=baixo_esq": {
+   "model": "lanterna:block/quadro_contratos_baixo_esq",
+   "y": 90
+  },
+  "facing=east,parte=baixo_dir": {
+   "model": "lanterna:block/quadro_contratos_baixo_dir",
+   "y": 90
+  },
+  "facing=south,parte=cima_esq": {
+   "model": "lanterna:block/quadro_contratos_cima_esq",
+   "y": 180
+  },
+  "facing=south,parte=cima_dir": {
+   "model": "lanterna:block/quadro_contratos_cima_dir",
+   "y": 180
+  },
+  "facing=south,parte=baixo_esq": {
+   "model": "lanterna:block/quadro_contratos_baixo_esq",
+   "y": 180
+  },
+  "facing=south,parte=baixo_dir": {
+   "model": "lanterna:block/quadro_contratos_baixo_dir",
+   "y": 180
+  },
+  "facing=west,parte=cima_esq": {
+   "model": "lanterna:block/quadro_contratos_cima_esq",
+   "y": 270
+  },
+  "facing=west,parte=cima_dir": {
+   "model": "lanterna:block/quadro_contratos_cima_dir",
+   "y": 270
+  },
+  "facing=west,parte=baixo_esq": {
+   "model": "lanterna:block/quadro_contratos_baixo_esq",
+   "y": 270
+  },
+  "facing=west,parte=baixo_dir": {
+   "model": "lanterna:block/quadro_contratos_baixo_dir",
+   "y": 270
+  }
+ }
+}

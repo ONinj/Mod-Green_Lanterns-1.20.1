@@ -1,0 +1,60 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.extra": {
+   "loop": true,
+   "animation_length": 4,
+   "bones": {
+    "extra_cabeca_cabelo_1": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 0) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 0) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 50) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 40) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_3": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 100) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 80) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_4": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 150) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 120) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_5": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 200) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 160) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_6": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 250) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 200) * 4"
+     ]
+    },
+    "extra_cabeca_cabelo_7": {
+     "rotation": [
+      "math.sin(query.anim_time * 90 + 300) * 6",
+      0,
+      "math.cos(query.anim_time * 70 + 240) * 4"
+     ]
+    }
+   }
+  }
+ }
+}

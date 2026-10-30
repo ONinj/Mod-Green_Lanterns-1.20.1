@@ -89,6 +89,11 @@ public final class ForgeRituals {
             }
         }
 
+        int req = com.lanterna.tropa.Nivel.nivelParaForjar(planet);
+        if (!player.isCreative() && com.lanterna.tropa.Nivel.nivel(player) < req) {
+            player.displayClientMessage(Component.translatable("nivel.lanterna.precisa_forja", req), true);
+            return;
+        }
         if (MissionManager.hasRing(player, planet.corps.id().getPath())) {
             player.displayClientMessage(Component.translatable("message.lanterna.forge_has_ring", planet.planetName()), true);
             return;

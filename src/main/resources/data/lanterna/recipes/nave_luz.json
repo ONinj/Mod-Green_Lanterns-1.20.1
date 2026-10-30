@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "GGG"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    },
+    "G": {
+      "item": "minecraft:glowstone"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_luz",
+    "count": 3
+  }
+}

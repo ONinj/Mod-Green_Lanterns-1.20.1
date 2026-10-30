@@ -1,0 +1,109 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/nave_escotilha",
+  "tampa": "lanterna:block/nave_escotilha",
+  "lado": "lanterna:block/nave_placa",
+  "luz": "lanterna:block/nave_escotilha_luz"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    13
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#tampa"
+    },
+    "south": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#tampa"
+    },
+    "east": {
+     "uv": [
+      0,
+      0,
+      3,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      13,
+      0,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      0,
+      13,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "down": {
+     "uv": [
+      0,
+      0,
+      16,
+      3
+     ],
+     "texture": "#lado"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    13
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#luz",
+     "tintindex": 0
+    }
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  }
+ ]
+}

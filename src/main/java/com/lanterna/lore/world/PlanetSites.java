@@ -49,8 +49,9 @@ public final class PlanetSites {
         // Uma construção por vez (a cada segundo), para não travar o servidor
         if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220)
                 && !tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140)
-                && planet != PlanetLore.OA && planet != PlanetLore.GENESE)
-            tryBuild(level, data, planet, "guardiao", PlanetLore.HUB, player, 120);
+                && (planet == PlanetLore.OA || planet == PlanetLore.GENESE || !tryBuild(level, data, planet, "guardiao", PlanetLore.HUB, player, 120))
+                && planet != PlanetLore.GENESE)
+            tryBuild(level, data, planet, "tropa", PlanetLore.HUB, player, 120);
     }
 
     private static boolean tryBuild(ServerLevel level, LoreWorldData data, PlanetLore planet, String kind, BlockPos at, ServerPlayer near, int radius) {
@@ -62,6 +63,8 @@ public final class PlanetSites {
         try {
             if (kind.equals("guardiao")) {
                 placeGuardian(level, planet);
+            } else if (kind.equals("tropa")) {
+                placeTropa(level, planet);
             } else if (planet == PlanetLore.GENESE) {
                 if (kind.equals("hub")) buildGeneseAltar(level, at);
                 else buildRift(level, at);
@@ -204,6 +207,39 @@ public final class PlanetSites {
         for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) set(level, new BlockPos(spot.getX() + dx, y, spot.getZ() + dz), stone);
         set(level, new BlockPos(spot.getX(), y, spot.getZ()), Blocks.EMERALD_BLOCK.defaultBlockState());
         npc(level, Race.GUARDIAO, new BlockPos(spot.getX(), y + 1, spot.getZ()), "guardiao", "npc.lanterna.name.guardiao_emissario");
+    }
+
+    /**
+     * A Tropa do planeta na base: 3 Lanternas NPCs (um oficial) que patrulham e ajudam quem é da mesma cor,
+     * e o quadro de contratos numa parede ao norte.
+     */
+    private static void placeTropa(ServerLevel level, PlanetLore planet) {
+        BlockPos c = PlanetLore.HUB;
+        com.lanterna.corps.BuiltinCorps corps = planet.corps;
+        for (int i = 0; i < 3; i++) {
+            var l = com.lanterna.especies.LanternaEntity.lanterna(level, corps, i == 0);
+            BlockPos at = new BlockPos(c.getX() - 6 + i * 6, 0, c.getZ() + 4);
+            int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at.getX(), at.getZ());
+            l.moveTo(at.getX() + 0.5, y, at.getZ() + 0.5, level.random.nextFloat() * 360, 0);
+            l.restrictTo(new BlockPos(at.getX(), y, at.getZ()), 20);
+            level.addFreshEntity(l);
+        }
+        // Parede com o quadro de contratos
+        BlockPos w = new BlockPos(c.getX() + 3, 0, c.getZ() - 12);
+        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, w.getX(), w.getZ());
+        BlockState stone = planet.stoneBlock().defaultBlockState();
+        for (int dx = -2; dx <= 1; dx++) {
+            for (int dy = 0; dy < 3; dy++) set(level, new BlockPos(w.getX() + dx, y + dy, w.getZ()), stone);
+            set(level, new BlockPos(w.getX() + dx, y + 3, w.getZ()), com.lanterna.naves.bloco.NaveBlocks.NAVE_PLACA_FAIXA.get().defaultBlockState());
+        }
+        var q = com.lanterna.naves.bloco.NaveBlocks.QUADRO_CONTRATOS.get().defaultBlockState()
+                .setValue(com.lanterna.naves.bloco.QuadroContratos.FACING, net.minecraft.core.Direction.SOUTH);
+        BlockPos a = new BlockPos(w.getX(), y + 1, w.getZ() + 1);
+        // facing=south: a parte _esq fica a oeste (-x) da _dir
+        set(level, a, q.setValue(com.lanterna.naves.bloco.QuadroContratos.PARTE, com.lanterna.naves.bloco.QuadroContratos.Parte.BAIXO_DIR));
+        set(level, a.west(), q.setValue(com.lanterna.naves.bloco.QuadroContratos.PARTE, com.lanterna.naves.bloco.QuadroContratos.Parte.BAIXO_ESQ));
+        set(level, a.above(), q.setValue(com.lanterna.naves.bloco.QuadroContratos.PARTE, com.lanterna.naves.bloco.QuadroContratos.Parte.CIMA_DIR));
+        set(level, a.above().west(), q.setValue(com.lanterna.naves.bloco.QuadroContratos.PARTE, com.lanterna.naves.bloco.QuadroContratos.Parte.CIMA_ESQ));
     }
 
     // ===================== Base comum =====================

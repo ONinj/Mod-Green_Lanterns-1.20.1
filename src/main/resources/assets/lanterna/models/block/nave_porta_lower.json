@@ -1,0 +1,119 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/nave_porta_baixo",
+  "porta": "lanterna:block/nave_porta_baixo",
+  "trilho": "lanterna:block/nave_porta_trilho",
+  "luz": "lanterna:block/nave_porta_luz"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    6.5
+   ],
+   "to": [
+    16,
+    16,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#porta"
+    },
+    "south": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#porta"
+    },
+    "east": {
+     "uv": [
+      6.5,
+      0,
+      9.5,
+      16
+     ],
+     "texture": "#trilho"
+    },
+    "west": {
+     "uv": [
+      6.5,
+      0,
+      9.5,
+      16
+     ],
+     "texture": "#trilho"
+    },
+    "up": {
+     "uv": [
+      0,
+      6.5,
+      16,
+      9.5
+     ],
+     "texture": "#trilho"
+    },
+    "down": {
+     "uv": [
+      0,
+      6.5,
+      16,
+      9.5
+     ],
+     "texture": "#trilho"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    0,
+    6.5
+   ],
+   "to": [
+    16,
+    16,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#luz",
+     "tintindex": 0
+    },
+    "south": {
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ],
+     "texture": "#luz",
+     "tintindex": 0
+    }
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  }
+ ]
+}

@@ -22,11 +22,13 @@ public record Mission(String id, String line, int color, List<Objective> objecti
                       int affinity, @Nullable String next, @Nullable String titleArg) {
 
     public Component title() {
+        if (id.startsWith("ct_")) return com.lanterna.tropa.Contratos.titulo(id);
         return titleArg == null ? Component.translatable("mission.lanterna." + id + ".title")
                 : Component.translatable("mission.lanterna." + id + ".title", Component.translatable(titleArg));
     }
 
     public Component description() {
+        if (id.startsWith("ct_")) return com.lanterna.tropa.Contratos.descricao(id);
         return Component.translatable("mission.lanterna." + id + ".desc");
     }
 

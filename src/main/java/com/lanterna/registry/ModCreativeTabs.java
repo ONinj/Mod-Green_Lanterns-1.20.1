@@ -41,5 +41,30 @@ public final class ModCreativeTabs {
                     })
                     .build());
 
+    /** Aba "Naves": naves (todas as pinturas), blocos de interior, itens das Tropas e o ovo das espécies. */
+    public static final RegistryObject<CreativeModeTab> NAVES = TABS.register("naves",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.lanterna.naves"))
+                    .withTabsBefore(MAIN.getId())
+                    .icon(() -> com.lanterna.naves.NaveItem.of(com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green"))
+                    .displayItems((params, output) -> {
+                        for (var t : com.lanterna.naves.NaveTipo.values()) {
+                            if (t.destrocos()) continue;
+                            if (t.pinturas.equals("tropa")) {
+                                for (BuiltinCorps c : BuiltinCorps.values()) {
+                                    if (c != BuiltinCorps.WHITE) output.accept(com.lanterna.naves.NaveItem.of(t, c.id().getPath()));
+                                }
+                            } else {
+                                output.accept(com.lanterna.naves.NaveItem.of(t, "1"));
+                                output.accept(com.lanterna.naves.NaveItem.of(t, "2"));
+                            }
+                        }
+                        output.accept(com.lanterna.naves.NaveItem.of(com.lanterna.naves.NaveTipo.DESTROCOS_1, ""));
+                        for (var b : com.lanterna.naves.bloco.NaveBlocks.ITEMS) output.accept(b.get());
+                        for (var i : com.lanterna.tropa.TropaItems.ALL) output.accept(i.get());
+                        output.accept(com.lanterna.especies.EspeciesEntities.OVO.get());
+                    })
+                    .build());
+
     private ModCreativeTabs() {}
 }

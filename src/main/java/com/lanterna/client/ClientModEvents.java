@@ -43,11 +43,15 @@ public final class ClientModEvents {
         event.register(KeyBindings.CONSTRUCT_USE);
         for (var k : KeyBindings.PRESETS) event.register(k);
         event.register(KeyBindings.JOURNAL);
+        event.register(KeyBindings.NAVE_DESCER);
+        event.register(KeyBindings.NAVE_PORTA);
+        event.register(KeyBindings.NAVE_HANGAR);
     }
 
     /** Liga a tela da aba "Lanterna". */
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
+        com.lanterna.client.naves.ClientNaves.init();
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new);
             // Modelo do anel e da bateria de cada Tropa (overrides "lanterna:corps" nos modelos de item)
@@ -86,6 +90,16 @@ public final class ClientModEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(com.lanterna.registry.ModEntities.ALIEN.get(), com.lanterna.client.alien.AlienRenderer::new);
         com.lanterna.client.lore.LoreRenderers.register(event);
+        event.registerEntityRenderer(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(),
+                ctx -> new com.lanterna.especies.client.EspecieRenderer<>(ctx, LanternaMod.MODID) {
+                    @Override
+                    protected float getDeathMaxRotation(com.lanterna.especies.LanternaEntity e) {
+                        return 0f; // a animação misc.death já derruba o corpo
+                    }
+                });
+        event.registerEntityRenderer(com.lanterna.naves.NaveEntities.NAVE.get(),
+                ctx -> new com.lanterna.naves.client.NaveRenderer<>(ctx, LanternaMod.MODID));
+        event.registerEntityRenderer(com.lanterna.tropa.TropaEntities.TIRO_PLASMA.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
     }
 
     @SubscribeEvent
@@ -119,6 +133,7 @@ public final class ClientModEvents {
         event.registerAboveAll("flight_hud", com.lanterna.client.flight.FlightHud.HUD);
         event.registerAboveAll("mission_hud", com.lanterna.client.mission.MissionHud.HUD);
         event.registerAboveAll("construct_bar", com.lanterna.client.construct.ConstructBarHud.HUD);
+        event.registerAboveAll("xp_ganho", com.lanterna.client.tropa.TropaHud.HUD);
     }
 
     /** Pinta a pedra do anel (camada 1) e o núcleo da bateria (tint 0) na cor da Tropa. */
@@ -128,10 +143,19 @@ public final class ClientModEvents {
                 ModItems.POWER_RING.get());
         event.register((stack, tintIndex) -> tintIndex >= 0 ? PowerBatteryItem.getColor(stack) : -1,
                 ModItems.POWER_BATTERY.get());
+        // Itens dos blocos das naves (faixas no tintindex 0) e chave/insígnia (camada 1) na cor da Tropa
+        for (var b : com.lanterna.naves.bloco.NaveBlocks.TINGIDOS) {
+            event.register((stack, tint) -> tint == 0 ? 0x46E66E : -1, b.get().asItem());
+        }
+        event.register((stack, tint) -> tint == 1 ? com.lanterna.tropa.TropaItems.corDaTropa(stack) : -1,
+                com.lanterna.tropa.TropaItems.CHAVE_NAVE.get(), com.lanterna.tropa.TropaItems.INSIGNIA_GUARDA_HONRA.get());
     }
 
     @SubscribeEvent
     public static void blockColors(RegisterColorHandlersEvent.Block event) {
+        for (var b : com.lanterna.naves.bloco.NaveBlocks.TINGIDOS) {
+            event.register((state, level, pos, tint) -> tint == 0 ? com.lanterna.client.naves.ClientNaves.corBloco(pos) : -1, b.get());
+        }
         event.register((state, level, pos, tintIndex) -> {
             if (tintIndex < 0 || level == null || pos == null) return -1;
             if (level.getBlockEntity(pos) instanceof PowerBatteryBlockEntity battery) {

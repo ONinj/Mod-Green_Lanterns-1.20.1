@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "P  ",
+    "PWP",
+    "P P"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    },
+    "W": {
+      "item": "minecraft:gray_wool"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_cadeira",
+    "count": 1
+  }
+}

@@ -116,6 +116,15 @@ public final class Missions {
         return Objective.of(Type.TALK, who, 1, planet, PlanetLore.HUB);
     }
 
+    static {
+        com.lanterna.tropa.Prova.registrar(ALL::put);
+        // Treino: chegar a um nível (a linha principal espera o Lanterna ficar forte o bastante)
+        for (int lvl : new int[]{5, 8, 12, 16, 20, 25, 30, 35}) {
+            ALL.put("treino_" + lvl, new Mission("treino_" + lvl, "principal", 0xFFD040,
+                    List.of(Objective.of(Type.LEVEL, "nivel", lvl, null, null)), items(), 0, null, null));
+        }
+    }
+
     @SafeVarargs
     private static Supplier<List<ItemStack>> items(Supplier<ItemStack>... stacks) {
         return () -> {
@@ -132,7 +141,10 @@ public final class Missions {
 
     @Nullable
     public static Mission get(@Nullable String id) {
-        return id == null ? null : ALL.get(id);
+        if (id == null) return null;
+        Mission m = ALL.get(id);
+        if (m == null && id.startsWith("ct_")) return com.lanterna.tropa.Contratos.mission(id);
+        return m;
     }
 
     public static Collection<Mission> all() {

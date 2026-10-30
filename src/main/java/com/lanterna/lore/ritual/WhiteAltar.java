@@ -40,6 +40,11 @@ public final class WhiteAltar {
             level.playSound(null, pos, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.BLOCKS, 1f, 1.6f);
             return;
         }
+        if (!player.isCreative() && com.lanterna.tropa.Nivel.nivel(player) < com.lanterna.tropa.Nivel.nivelParaForjar(com.lanterna.lore.PlanetLore.GENESE)) {
+            player.displayClientMessage(Component.translatable("nivel.lanterna.precisa_forja",
+                    com.lanterna.tropa.Nivel.nivelParaForjar(com.lanterna.lore.PlanetLore.GENESE)), true);
+            return;
+        }
         if (MissionManager.hasRing(player, "white")) {
             player.displayClientMessage(Component.translatable("message.lanterna.altar_already_white"), true);
             return;

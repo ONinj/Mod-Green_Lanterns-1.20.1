@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IFI",
+    "F F",
+    "IFI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "F": {
+      "item": "lanterna:fragmento_casco"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_placa",
+    "count": 8
+  }
+}

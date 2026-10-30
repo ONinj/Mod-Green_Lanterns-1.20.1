@@ -127,24 +127,49 @@ public final class SpaceTravel {
             return;
         }
 
-        // Ponto de pouso depende de que lado do planeta você entrou
-        Vec3 dir = player.position().subtract(body.center());
-        Vec3 flat = new Vec3(dir.x, 0, dir.z);
-        if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
-        flat = flat.normalize().scale(body.procedural() != null ? 256 : 40);
-        // Planetas gerados ficam numa região própria do mundo do tipo deles
-        double ox = body.procedural() != null ? body.procedural().regionX() : 0;
-        double oz = body.procedural() != null ? body.procedural().regionZ() : 0;
-        x = ox + flat.x;
-        z = oz + flat.z;
         // Chega no alto do céu e desce enquanto o terreno carrega (sem travar o servidor)
-        travel(player, target.dimension(), new Vec3(x, 300, z), player.getYRot(), 35f, "space.lanterna.landing");
+        travel(player, target.dimension(), landingPoint(body, player.position()), player.getYRot(), 35f, "space.lanterna.landing");
         RingData data = ModCapabilities.get(player).orElse(null);
         boolean flying = data != null && data.hasRing() && data.powerActive() && data.flightEnabled();
         if (!flying) {
             player.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                     net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20 * 30, 0, false, false));
         }
+    }
+
+    /** Ponto de pouso num planeta: depende de que lado do planeta se entrou. */
+    public static Vec3 landingPoint(SpaceBodies.Body body, Vec3 spacePos) {
+        Vec3 dir = spacePos.subtract(body.center());
+        Vec3 flat = new Vec3(dir.x, 0, dir.z);
+        if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
+        flat = flat.normalize().scale(body.procedural() != null ? 256 : 40);
+        // Planetas gerados ficam numa região própria do mundo do tipo deles
+        double ox = body.procedural() != null ? body.procedural().regionX() : 0;
+        double oz = body.procedural() != null ? body.procedural().regionZ() : 0;
+        return new Vec3(ox + flat.x, 300, oz + flat.z);
+    }
+
+    /** Ponto do espaço ao sair de um mundo (Terra ou planeta) pelo alto. Guarda a volta para a Terra. */
+    public static Vec3 exitPoint(ServerPlayer saver, net.minecraft.resources.ResourceKey<Level> from, double x, double z) {
+        if (from.equals(Level.OVERWORLD)) {
+            if (saver != null) {
+                CompoundTag back = new CompoundTag();
+                back.putDouble("x", x);
+                back.putDouble("z", z);
+                saver.getPersistentData().put(RETURN_TAG, back);
+            }
+            return SpaceBodies.arrivalFromEarth(x, z);
+        }
+        SpaceBodies.Body here = SpaceBodies.bodyAt(from, x, z);
+        return here != null ? here.center().add(here.radius() + 60, 0, 0) : ProceduralPlanets.spacePointForRegion(x, z);
+    }
+
+    /** Onde voltar na Terra (de onde o jogador saiu). */
+    public static Vec3 earthReturn(@org.jetbrains.annotations.Nullable ServerPlayer player, ServerLevel earth) {
+        CompoundTag back = player != null ? player.getPersistentData().getCompound(RETURN_TAG) : new CompoundTag();
+        BlockPos spawn = earth.getSharedSpawnPos();
+        return new Vec3(back.contains("x") ? back.getDouble("x") : spawn.getX(), EXIT_HEIGHT - 20,
+                back.contains("z") ? back.getDouble("z") : spawn.getZ());
     }
 
     private static void travel(ServerPlayer player, net.minecraft.resources.ResourceKey<Level> dimension, Vec3 pos,

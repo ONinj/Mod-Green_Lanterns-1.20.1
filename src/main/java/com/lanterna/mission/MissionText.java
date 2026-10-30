@@ -16,11 +16,13 @@ public final class MissionText {
         return switch (o.type()) {
             case GOTO -> Component.translatable("planet.lanterna." + t);
             case TALK -> {
+                if (t.startsWith("resgate:")) yield Component.translatable("alvo.lanterna.resgate");
                 String[] parts = t.split(":");
                 yield Component.translatable("npc.lanterna.role." + parts[0],
                         Component.translatable("planet.lanterna." + (parts.length > 1 ? parts[1] : "oa")));
             }
             case KILL -> {
+                if (t.startsWith("papel:")) yield Component.translatable("alvo.lanterna." + t.substring(6));
                 ResourceLocation id = ResourceLocation.tryParse(t);
                 EntityType<?> type = id == null ? null : ForgeRegistries.ENTITY_TYPES.getValue(id);
                 yield type != null ? type.getDescription() : Component.literal(t);
@@ -35,7 +37,7 @@ public final class MissionText {
             case BOSS -> Component.translatable("entity.lanterna." + t);
             case RING -> Component.translatable(CorpsDefinition.nameKey(LanternaMod.id(t)));
             case REP -> Component.translatable("race.lanterna." + t);
-            case FUSION, AFFINITY -> Component.empty();
+            case FUSION, AFFINITY, LEVEL, EMOCAO -> Component.empty();
         };
     }
 

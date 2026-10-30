@@ -37,7 +37,11 @@ public record Objective(Type type, String target, int count, @Nullable String pl
         /** Ter os sete anéis da fusão e os sete drops dos bosses. */
         FUSION,
         /** Afinidade com o anel (nível). */
-        AFFINITY
+        AFFINITY,
+        /** Nível do Lanterna. */
+        LEVEL,
+        /** Pontos de emoção da Tropa (Prova da Emoção). */
+        EMOCAO
     }
 
     public static Objective of(Type type, String target, int count, @Nullable String planet, @Nullable BlockPos pos) {
@@ -47,6 +51,7 @@ public record Objective(Type type, String target, int count, @Nullable String pl
     public Component label(int progress) {
         String key = "objective.lanterna." + type.name().toLowerCase() + (type == Type.REP ? "." + target : "");
         Component base = Component.translatable(key, MissionText.targetName(this), count);
+        if (type == Type.LEVEL) return base;
         if (count > 1 || type == Type.REP || type == Type.COLLECT || type == Type.KILL || type == Type.DUMMY || type == Type.CONSTRUCT) {
             return base.copy().append(Component.literal("  " + Math.min(progress, count) + "/" + count));
         }

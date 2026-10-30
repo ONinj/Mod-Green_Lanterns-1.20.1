@@ -1,0 +1,7 @@
+{
+ "parent": "item/generated",
+ "textures": {
+  "layer0": "lanterna:item/insignia_guarda_honra",
+  "layer1": "lanterna:item/insignia_guarda_honra_luz"
+ }
+}

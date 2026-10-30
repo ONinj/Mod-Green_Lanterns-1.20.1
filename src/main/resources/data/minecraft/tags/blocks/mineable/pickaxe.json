@@ -19,6 +19,21 @@
     "lanterna:pedra_do_templo_taleun",
     "lanterna:perola_do_amanha_minerio",
     "lanterna:rocha_cristalina_selenaar",
-    "lanterna:rocha_polida_veridia"
+    "lanterna:rocha_polida_veridia",
+    "lanterna:nave_placa",
+    "lanterna:nave_placa_faixa",
+    "lanterna:nave_piso",
+    "lanterna:nave_placa_avariada",
+    "lanterna:nave_janela",
+    "lanterna:nave_console",
+    "lanterna:nave_cadeira",
+    "lanterna:nave_holomapa",
+    "lanterna:nave_recarga",
+    "lanterna:nave_armario",
+    "lanterna:nave_luz",
+    "lanterna:nave_escotilha",
+    "lanterna:quadro_contratos",
+    "lanterna:nave_porta",
+    "lanterna:nave_beliche"
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FNF",
+    "FDF",
+    "FNF"
+  ],
+  "key": {
+    "F": {
+      "item": "lanterna:fragmento_casco"
+    },
+    "N": {
+      "item": "lanterna:nucleo_propulsor"
+    },
+    "D": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_lanceira",
+    "count": 1
+  }
+}

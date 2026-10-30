@@ -82,12 +82,21 @@ public final class MissionManager {
     public static void onKill(ServerPlayer player, Entity victim) {
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
         if (id != null) bump(player, Objective.Type.KILL, id.toString(), 1, false);
+        if (victim instanceof com.lanterna.especies.LanternaEntity l) {
+            bump(player, Objective.Type.KILL, "papel:" + l.papel().id, 1, false);
+            if (l.papel() == com.lanterna.especies.Especie.Papel.LANTERNA) bump(player, Objective.Type.KILL, "papel:inimigo", 1, false);
+        }
     }
 
     public static void onBoss(ServerPlayer player, String boss) {
         LoreData data = data(player);
         if (data != null) data.addBossKill(boss);
         bump(player, Objective.Type.BOSS, boss, 1, false);
+    }
+
+    /** Nave destruída: conta como "nave_pirata" (piratas) ou "nave_inimiga". */
+    public static void onShip(ServerPlayer player, String kind) {
+        bump(player, Objective.Type.KILL, "papel:" + kind, 1, false);
     }
 
     public static void onConstruct(ServerPlayer player, String construct) {
@@ -156,6 +165,8 @@ public final class MissionManager {
             case REP -> Math.min(o.count(), Math.max(0, data.rep(o.target())));
             case RING -> hasRing(player, o.target()) ? 1 : 0;
             case AFFINITY -> Affinity.level(data.affinity()) >= o.count() ? o.count() : Affinity.level(data.affinity());
+            case LEVEL -> Math.min(o.count(), com.lanterna.tropa.Nivel.nivel(data.xp()));
+            case EMOCAO -> Math.min(o.count(), data.emocao());
             case FUSION -> {
                 int n = fusionCount(player);
                 if (n >= 14) data.setGeneseRevealed(true);
@@ -216,12 +227,15 @@ public final class MissionManager {
             if (!player.getInventory().add(reward.copy())) player.drop(reward.copy(), false);
         }
         if (m.affinity() > 0) Affinity.add(player, m.affinity());
+        // XP do Lanterna: o mesmo valor da afinidade da missão
+        if (m.affinity() > 0) com.lanterna.tropa.Nivel.addXp(player, m.affinity(), m.title());
         // Missões cumpridas: os Veltari (juízes das Tropas) passam a respeitar mais
         data.addRep("veltari", 1);
         toast(player, MissionToastPacket.Kind.COMPLETED, m);
         player.level().playSound(null, player.blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.6f, 1.0f);
         player.sendSystemMessage(Component.translatable("mission.lanterna.completed_chat", m.title())
                 .withStyle(s -> s.withColor(m.color())));
+        if (m.line().equals("prova")) com.lanterna.tropa.Prova.concluir(player);
         String next = routeNext(player, data, m);
         if (next != null) start(player, next);
         sync(player, data);
@@ -238,6 +252,7 @@ public final class MissionManager {
         String id = m.id();
         ResourceLocation corps = ModCapabilities.get(player).map(r -> r.hasRing() ? r.corps() : null).orElse(null);
         if (id.startsWith("inicio_") && id.endsWith("_4")) return nextPlanetLine(data, corps);
+        if (id.startsWith("treino_")) return nextPlanetLine(data, corps);
         if (id.startsWith("main_") && !id.startsWith("main_genese")) {
             String[] parts = id.split("_");
             if (parts.length != 3) return m.next();
@@ -262,18 +277,43 @@ public final class MissionManager {
         return data.isDone("main_" + planet + "_5") || (isOwnPlanet(planet, corps) && data.isDone("main_" + planet + "_4"));
     }
 
-    /** Próximo planeta da linha principal: começa no planeta da Tropa e dá a volta. */
+    /**
+     * Próximo planeta da linha principal: começa no planeta da Tropa e dá a volta, mas só nos planetas
+     * que o nível do Lanterna já permite. Se nenhum estiver liberado, começa um treino até o nível pedido.
+     * (Também dá para escolher outro planeta liberado falando com o Guardião ou o líder dele.)
+     */
     public static String nextPlanetLine(LoreData data, ResourceLocation corps) {
         PlanetLore[] order = Missions.MAIN_ORDER;
         int start = 0;
         for (int i = 0; i < order.length; i++) if (corps != null && order[i].corps.id().equals(corps)) start = i;
+        int lvl = com.lanterna.tropa.Nivel.nivel(data.xp());
+        com.lanterna.corps.BuiltinCorps own = com.lanterna.lore.Factions.of(corps);
+        int needed = Integer.MAX_VALUE;
         for (int k = 0; k < order.length; k++) {
             PlanetLore p = order[(start + k) % order.length];
             if (lineDone(data, p.planet, corps)) continue;
             for (int s = 1; s <= 5; s++) if (data.isActive("main_" + p.planet + "_" + s)) return null;
-            return "main_" + p.planet + "_1";
+            int req = com.lanterna.tropa.Nivel.nivelDoPlaneta(p, own);
+            if (lvl >= req) return "main_" + p.planet + "_1";
+            needed = Math.min(needed, req);
         }
+        if (needed != Integer.MAX_VALUE) return treino(needed);
+        if (lvl < 35) return treino(35);
         return "main_genese_1";
+    }
+
+    private static String treino(int lvl) {
+        for (int t : new int[]{5, 8, 12, 16, 20, 25, 30, 35}) if (t >= lvl) return "treino_" + t;
+        return "treino_35";
+    }
+
+    /** Linha principal ativa agora (ou null). */
+    @org.jetbrains.annotations.Nullable
+    public static String activeMainPlanet(LoreData data) {
+        for (String id : data.active().keySet()) {
+            if (id.startsWith("main_") && !id.startsWith("main_genese")) return id.split("_")[1];
+        }
+        return null;
     }
 
     public static void removeItems(ServerPlayer player, Item item, int count) {

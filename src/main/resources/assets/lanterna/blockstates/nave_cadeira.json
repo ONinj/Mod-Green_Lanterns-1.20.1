@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "lanterna:block/nave_cadeira"
+  },
+  "facing=east": {
+   "model": "lanterna:block/nave_cadeira",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "lanterna:block/nave_cadeira",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "lanterna:block/nave_cadeira",
+   "y": 270
+  }
+ }
+}

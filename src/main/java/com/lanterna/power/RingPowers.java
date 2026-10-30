@@ -318,7 +318,7 @@ public final class RingPowers {
                 && data.nextFlightTick() % 20 == 0 && !homing(player)) {
             CorpsDefinition def = CorpsManager.get(data.corps());
             // Hiperpropulsão gasta o triplo
-            setCharge(player, data, data.charge() - def.flightDrain() * (data.hyper() ? 3 : 1));
+            setCharge(player, data, data.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, def.flightDrain() * (data.hyper() ? 3 : 1)));
             if (data.charge() <= 0) {
                 data.setFlightEnabled(false);
                 applyFlightAbility(player, data);

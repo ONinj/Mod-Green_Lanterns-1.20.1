@@ -1,0 +1,10 @@
+{
+ "variants": {
+  "open=false": {
+   "model": "lanterna:block/nave_escotilha"
+  },
+  "open=true": {
+   "model": "lanterna:block/nave_escotilha_open"
+  }
+ }
+}

@@ -50,7 +50,7 @@ public final class RingPassives {
         RingData ring = ModCapabilities.get(player).orElse(null);
         if (!powered(ring)) return;
         int lvl = Affinity.level(Affinity.points(EquipmentHelper.ring(player)));
-        event.setAmount(event.getAmount() + Affinity.punchBonus(lvl) * Constructs.corpsPower(ring));
+        event.setAmount(event.getAmount() + Affinity.punchBonus(lvl) * Constructs.corpsPower(ring) * com.lanterna.tropa.Nivel.forca(player));
     }
 
     private RingPassives() {}

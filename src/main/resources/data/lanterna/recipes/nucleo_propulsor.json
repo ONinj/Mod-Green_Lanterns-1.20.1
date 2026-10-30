@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FBF",
+    "BRB",
+    "FBF"
+  ],
+  "key": {
+    "F": {
+      "item": "lanterna:fragmento_casco"
+    },
+    "B": {
+      "item": "minecraft:blaze_powder"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "lanterna:nucleo_propulsor",
+    "count": 1
+  }
+}

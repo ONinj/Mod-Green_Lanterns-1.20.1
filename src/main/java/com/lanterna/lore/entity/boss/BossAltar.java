@@ -37,6 +37,11 @@ public final class BossAltar {
             player.displayClientMessage(Component.translatable("message.lanterna.altar_busy"), true);
             return;
         }
+        int req = com.lanterna.tropa.Nivel.nivelDoPlaneta(planet, com.lanterna.lore.Factions.playerCorps(player));
+        if (!player.isCreative() && com.lanterna.tropa.Nivel.nivel(player) < req) {
+            player.displayClientMessage(Component.translatable("nivel.lanterna.precisa", req, planet.bossName()), true);
+            return;
+        }
         if (!player.isCreative() && MissionManager.countItem(player, planet.oreItem()) < ORE_COST) {
             player.displayClientMessage(Component.translatable("message.lanterna.altar_needs", ORE_COST, planet.oreItem().getDescription(),
                     planet.bossName()), true);

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_escotilha",
+    "count": 2
+  }
+}

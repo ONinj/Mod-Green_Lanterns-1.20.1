@@ -1,0 +1,71 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.idle": {
+   "loop": true,
+   "animation_length": 4.0,
+   "bones": {
+    "faisca_1": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)"
+     ]
+    },
+    "faisca_2": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)"
+     ]
+    },
+    "faisca_3": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)"
+     ]
+    }
+   }
+  },
+  "misc.float": {
+   "loop": true,
+   "animation_length": 12.0,
+   "bones": {
+    "faisca_1": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1503 + 70) * 2.2 - 1.2)"
+     ]
+    },
+    "faisca_2": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 1836 + 140) * 2.2 - 1.2)"
+     ]
+    },
+    "faisca_3": {
+     "scale": [
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)",
+      "math.max(0, math.sin(query.anim_time * 2169 + 210) * 2.2 - 1.2)"
+     ]
+    },
+    "casco": {
+     "rotation": [
+      "math.sin(query.anim_time * 30) * 6",
+      "query.anim_time * 30",
+      "math.cos(query.anim_time * 30) * 4"
+     ],
+     "position": [
+      0,
+      "math.sin(query.anim_time * 60) * 2",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

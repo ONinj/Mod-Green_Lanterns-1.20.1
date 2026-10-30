@@ -1,0 +1,342 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/nave_console_lado",
+  "lado": "lanterna:block/nave_console_lado",
+  "topo": "lanterna:block/nave_console_topo",
+  "tela": "lanterna:block/nave_console_tela",
+  "luz": "lanterna:block/nave_console_luz"
+ },
+ "elements": [
+  {
+   "from": [
+    1,
+    0,
+    4
+   ],
+   "to": [
+    15,
+    10,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      1,
+      6,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "south": {
+     "uv": [
+      1,
+      6,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      0,
+      6,
+      12,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      4,
+      6,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      1,
+      4,
+      15,
+      16
+     ],
+     "texture": "#topo"
+    },
+    "down": {
+     "uv": [
+      1,
+      0,
+      15,
+      12
+     ],
+     "texture": "#lado"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    0,
+    4
+   ],
+   "to": [
+    15,
+    10,
+    16
+   ],
+   "faces": {
+    "up": {
+     "uv": [
+      1,
+      4,
+      15,
+      16
+     ],
+     "texture": "#luz",
+     "tintindex": 0
+    }
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  },
+  {
+   "from": [
+    1,
+    10,
+    9
+   ],
+   "to": [
+    15,
+    15,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      1,
+      1,
+      15,
+      6
+     ],
+     "texture": "#lado"
+    },
+    "south": {
+     "uv": [
+      1,
+      1,
+      15,
+      6
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      0,
+      1,
+      7,
+      6
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      9,
+      1,
+      16,
+      6
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      1,
+      9,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    10,
+    9
+   ],
+   "to": [
+    14,
+    19,
+    10
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      2,
+      0,
+      14,
+      9
+     ],
+     "texture": "#tela"
+    },
+    "south": {
+     "uv": [
+      2,
+      0,
+      14,
+      9
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      6,
+      0,
+      7,
+      9
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      9,
+      0,
+      10,
+      9
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      2,
+      9,
+      14,
+      10
+     ],
+     "texture": "#lado"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     10,
+     10
+    ],
+    "axis": "x",
+    "angle": 22.5
+   }
+  },
+  {
+   "from": [
+    2.5,
+    10.5,
+    8.9
+   ],
+   "to": [
+    13.5,
+    18.5,
+    9
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      2.5,
+      0,
+      13.5,
+      8.0
+     ],
+     "texture": "#tela"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     10,
+     10
+    ],
+    "axis": "x",
+    "angle": 22.5
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  },
+  {
+   "from": [
+    0,
+    0,
+    3
+   ],
+   "to": [
+    16,
+    2,
+    4
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      0,
+      14,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "south": {
+     "uv": [
+      0,
+      14,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      12,
+      14,
+      13,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      3,
+      14,
+      4,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      0,
+      3,
+      16,
+      4
+     ],
+     "texture": "#lado"
+    },
+    "down": {
+     "uv": [
+      0,
+      12,
+      16,
+      13
+     ],
+     "texture": "#lado"
+    }
+   }
+  }
+ ]
+}

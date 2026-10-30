@@ -34,7 +34,7 @@ public final class RingHudOverlay {
         var font = Hud.font();
         int color = ClientRingData.color;
         int x = 6, y = 6;
-        Hud.panel(g, x, y, W, 64, color, 0.92f);
+        Hud.panel(g, x, y, W, 76, color, 0.92f);
         x += 8;
 
         // Nome da Tropa
@@ -67,8 +67,15 @@ public final class RingHudOverlay {
         Hud.textRight(g, lname, 6 + W - 6, y + 28, 0xFFD8DEE4);
         g.fill(x + 44, y + 37, x + 44 + (int) (48 * Affinity.progress(pts)), y + 38, Hud.argb(color, 200));
 
+        // Nível do Lanterna e posto
+        int xp = ClientLoreData.DATA.xp();
+        int nivel = com.lanterna.tropa.Nivel.nivel(xp);
+        g.drawString(font, Hud.body(Component.translatable("hud.lanterna.nivel", nivel)), x, y + 40, 0xFFFFD870, false);
+        Hud.bar(g, x + 44, y + 42, 50, 4, com.lanterna.tropa.Nivel.progresso(xp), 0xFFD040, false);
+        Hud.textRight(g, Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel))), 6 + W - 6, y + 40, 0xFFD8DEE4);
+
         // Planeta da Tropa e distância
-        g.drawString(font, home(mc), x, y + 40, 0xFFE0E6EA, false);
+        g.drawString(font, home(mc), x, y + 52, 0xFFE0E6EA, false);
 
         // Voo e bateria de bolso
         Component status;
@@ -78,10 +85,10 @@ public final class RingHudOverlay {
         Component flight = ClientRingData.active && ClientRingData.flight ? Component.translatable("hud.lanterna.flight_on") : Component.empty();
         Component line = flight.getString().isEmpty() ? status
                 : status.getString().isEmpty() ? flight : flight.copy().append(Component.literal("  ·  ")).append(status);
-        g.drawString(font, Hud.body(line), x, y + 52, low && blink ? 0xFFFF5050 : 0xFFB8C4CC, false);
+        g.drawString(font, Hud.body(line), x, y + 64, low && blink ? 0xFFFF5050 : 0xFFB8C4CC, false);
         if (low) {
             Component warn = Hud.bold(Component.translatable("hud.lanterna.low_charge"));
-            g.drawString(font, warn, 6, y + 68, blink ? 0xFFFF4040 : 0xFF902020, true);
+            g.drawString(font, warn, 6, y + 80, blink ? 0xFFFF4040 : 0xFF902020, true);
         }
     };
 

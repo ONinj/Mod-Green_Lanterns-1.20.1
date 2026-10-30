@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "lanterna:block/nave_recarga"
+  },
+  "facing=east": {
+   "model": "lanterna:block/nave_recarga",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "lanterna:block/nave_recarga",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "lanterna:block/nave_recarga",
+   "y": 270
+  }
+ }
+}

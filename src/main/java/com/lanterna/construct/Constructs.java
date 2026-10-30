@@ -79,7 +79,7 @@ public final class Constructs {
     }
 
     public static float power(ServerPlayer player, RingData ring) {
-        return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * corpsPower(ring);
+        return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * corpsPower(ring) * com.lanterna.tropa.Nivel.forca(player);
     }
 
     public static int level(ServerPlayer player) {
@@ -133,7 +133,7 @@ public final class Constructs {
         } else {
             boolean ok = perform(player, ring, type, lvl);
             if (!ok) return;
-            if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - cost);
+            if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, cost));
             cds.put(type, now + type.cooldown);
         }
         LAST_USED.put(player.getUUID(), type);
@@ -315,7 +315,7 @@ public final class Constructs {
             return;
         }
         a.ticks++;
-        if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - cost(a.type, level(player)));
+        if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, cost(a.type, level(player))));
         if (a.ticks % 40 == 0) Affinity.add(player, 1);
         if (a.type == ConstructType.PICARETA) mine(player, ring, a);
         if (a.ticks > 20 * 60 * 5) release(player, null);

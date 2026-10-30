@@ -341,8 +341,246 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Cena: espécies, roupas, naves (pilotar, atirar, interior), blocos, nível, contratos e encontros. */
+    private static void sceneNaves() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<String> cmdServer = c -> server(sp -> sp.server.getCommands().performPrefixedCommand(
+                sp.createCommandSourceStack().withSuppressedOutput().withPermission(4), c));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> {
+            mc.options.hideGui = false;
+            mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("gamerule doMobSpawning false");
+            cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 600.5 -40 600.5");
+        });
+        waitFor(() -> mc.level.hasChunkAt(600, 600) && mc.player.blockPosition().getY() < -30, 400);
+        at(20, () -> {
+            cmdServer.accept("fill 560 -61 560 660 -61 660 minecraft:smooth_stone");
+            cmdServer.accept("fill 560 -60 560 660 -40 600 minecraft:air");
+            cmdServer.accept("fill 560 -60 600 660 -40 660 minecraft:air");
+            cmdServer.accept("kill @e[type=!player]");
+        });
+        // ---- 18 espécies com o uniforme verde, e corrompidas ----
+        at(20, () -> server(sp -> {
+            var all = com.lanterna.especies.Especie.values();
+            for (int i = 0; i < all.length; i++) {
+                for (int row = 0; row < 2; row++) {
+                    var e = new com.lanterna.especies.LanternaEntity(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(), sp.level());
+                    e.setup(all[i], 1 + (i % 3), com.lanterna.especies.Especie.Papel.LANTERNA, com.lanterna.corps.BuiltinCorps.GREEN,
+                            row == 0 ? "roupa_tropa_green" : "roupa_tropa_black", i % 5 == 0, row == 1);
+                    e.moveTo(574 + i * 3 + 0.5, -60, 580 + row * 5 + 0.5, 180, 0);
+                    e.setNoAi(true);
+                    sp.level().addFreshEntity(e);
+                }
+            }
+        }));
+        at(40, () -> cmd("tp @s 600.5 -56 570 0 10"));
+        at(60, () -> shot("n1_especies"));
+        at(5, () -> cmd("tp @s 585.5 -57 574 0 12"));
+        at(40, () -> shot("n2_especies_perto"));
+        // Piratas, capitão, mercador, sem roupa, peles
+        at(5, () -> server(sp -> {
+            String[][] list = {{"drevan", "pirata"}, {"brutor", "capitao"}, {"qiri", "mercador"}, {"ilith", "nua"}, {"lumiae", "nua"}, {"aurith", "nua"}};
+            for (int i = 0; i < list.length; i++) {
+                var e = new com.lanterna.especies.LanternaEntity(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(), sp.level());
+                var esp = com.lanterna.especies.Especie.byId(list[i][0]);
+                switch (list[i][1]) {
+                    case "pirata" -> e.setup(esp, 1, com.lanterna.especies.Especie.Papel.PIRATA, null, "roupa_pirata", false, false);
+                    case "capitao" -> e.setup(esp, 2, com.lanterna.especies.Especie.Papel.CAPITAO, null, "roupa_capitao", false, false);
+                    case "mercador" -> e.setup(esp, 3, com.lanterna.especies.Especie.Papel.MERCADOR, null, "roupa_mercador", false, false);
+                    default -> e.setup(esp, 1 + i % 3, com.lanterna.especies.Especie.Papel.LANTERNA, com.lanterna.corps.BuiltinCorps.BLUE, null, false, false);
+                }
+                e.moveTo(578 + i * 3 + 0.5, -60, 596.5, 180, 0);
+                e.setNoAi(true);
+                sp.level().addFreshEntity(e);
+                if (i < 3) e.triggerAnim("acao", i == 0 ? "attack.beam" : i == 1 ? "misc.salute" : "misc.talk");
+            }
+        }));
+        at(5, () -> cmd("tp @s 585.5 -57 590 0 12"));
+        at(40, () -> shot("n3_papeis"));
+        // ---- Naves no chão ----
+        at(5, () -> server(sp -> {
+            String[][] ships = {{"nave_lanceira", "green"}, {"nave_patrulha", "yellow"}, {"nave_pirata", "1"}, {"nave_cargueiro", "2"},
+                    {"nave_pirata_capitania", "1"}, {"destrocos_2", ""}};
+            int[][] at = {{575, 615}, {592, 615}, {612, 615}, {635, 615}, {600, 645}, {645, 640}};
+            for (int i = 0; i < ships.length; i++) {
+                var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.byId(ships[i][0]), ships[i][1]);
+                n.moveTo(at[i][0] + 0.5, -60, at[i][1] + 0.5, 30, 0);
+                sp.level().addFreshEntity(n);
+            }
+        }));
+        at(60, () -> cmd("tp @s 600.5 -40 595 0 30"));
+        at(60, () -> shot("n4_naves"));
+        at(5, () -> cmd("tp @s 600.5 -45 620 0 25"));
+        at(50, () -> shot("n5_capitania"));
+        // ---- Blocos de interior ----
+        at(5, () -> server(sp -> {
+            int x = 570;
+            for (var b : com.lanterna.naves.bloco.NaveBlocks.ALL) {
+                if (b == com.lanterna.naves.bloco.NaveBlocks.QUADRO_CONTRATOS || b == com.lanterna.naves.bloco.NaveBlocks.NAVE_PORTA
+                        || b == com.lanterna.naves.bloco.NaveBlocks.NAVE_BELICHE) continue;
+                sp.level().setBlock(new BlockPos(x, -60, 562), b.get().defaultBlockState(), 3);
+                x += 2;
+            }
+            var porta = com.lanterna.naves.bloco.NaveBlocks.NAVE_PORTA.get().defaultBlockState();
+            sp.level().setBlock(new BlockPos(x, -60, 562), porta, 3);
+            sp.level().setBlock(new BlockPos(x, -59, 562), porta.setValue(net.minecraft.world.level.block.DoorBlock.HALF,
+                    net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER), 3);
+        }));
+        at(5, () -> cmd("tp @s 585.5 -58 568 180 15"));
+        at(40, () -> shot("n6_blocos"));
+        // ---- Pilotar a Lanceira ----
+        at(5, () -> server(sp -> {
+            var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 80, x -> x.getTipoNave().equals("nave_lanceira"));
+            LanternaMod.LOGGER.info("AUTOTEST lanceira={}", n);
+            if (n != null) { sp.teleportTo(n.getX(), n.getY() + 2, n.getZ()); sp.startRiding(n, true); }
+        }));
+        at(30, () -> { camera(CameraType.THIRD_PERSON_BACK); LanternaMod.LOGGER.info("AUTOTEST riding={}", mc.player.getVehicle()); shot("n7_cabine"); });
+        at(5, () -> com.lanterna.naves.NaveEntity.CLIENT_INPUT = n -> new com.lanterna.naves.NaveEntity.Input(1f, 0, true, false, false));
+        at(50, () -> { shot("n8_voando"); LanternaMod.LOGGER.info("AUTOTEST voo pos={}", mc.player.getVehicle() != null ? mc.player.getVehicle().position() : null); });
+        at(5, () -> com.lanterna.client.naves.ClientNaves.fire());
+        at(4, () -> shot("n9_tiro"));
+        at(5, () -> { com.lanterna.client.naves.ClientNaves.init(); });
+        at(40, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST nave server pos={} pousada={}", sp.getVehicle() != null ? sp.getVehicle().position() : null,
+                sp.getVehicle() instanceof com.lanterna.naves.NaveEntity n ? n.pousada() : null)));
+        // ---- Interior ----
+        at(5, () -> server(sp -> {
+            if (sp.getVehicle() instanceof com.lanterna.naves.NaveEntity n) { sp.stopRiding(); com.lanterna.naves.NaveInterior.entrar(sp, n); }
+        }));
+        at(60, () -> { camera(CameraType.FIRST_PERSON); LanternaMod.LOGGER.info("AUTOTEST interior dim={} pos={}", mc.player.level().dimension().location(), mc.player.position()); shot("n10_interior"); });
+        at(5, () -> look(mc.player.getYRot() + 180, 10));
+        at(20, () -> shot("n11_interior_b"));
+        at(5, () -> server(sp -> com.lanterna.naves.NaveInterior.sair(sp)));
+        at(40, () -> LanternaMod.LOGGER.info("AUTOTEST saiu dim={} pos={}", mc.player.level().dimension().location(), mc.player.position()));
+        // ---- Nível: XP e HUD ----
+        at(5, () -> { cmd("lanterna escolher lanterna:green"); });
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        at(40, () -> { cmd("gamemode survival"); server(sp -> com.lanterna.tropa.Nivel.addXp(sp, 3200, net.minecraft.network.chat.Component.literal("teste"))); });
+        at(10, () -> shot("n12_nivel"));
+        at(30, () -> server(sp -> com.lanterna.mission.LoreCapability.get(sp).ifPresent(d ->
+                LanternaMod.LOGGER.info("AUTOTEST xp={} nivel={} hp={} active={}", d.xp(), com.lanterna.tropa.Nivel.nivel(d.xp()), sp.getMaxHealth(), d.active().keySet()))));
+        // ---- Base de Oa: Lanternas e quadro de contratos ----
+        waitFor(() -> mc.player.level().dimension().location().getPath().equals("oa") || !com.lanterna.client.flight.Autopilot.active(), 3000);
+        waitFor(() -> !com.lanterna.client.flight.Autopilot.active(), 1500);
+        at(10, () -> { cmd("gamemode creative"); cmd("execute in lanterna:oa run tp @s 0.5 120 -4.5"); });
+        at(80, () -> server(sp -> {
+            int y = sp.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 3, -8);
+            sp.teleportTo(3.5, y, -6.5);
+            sp.setYRot(180);
+        }));
+        at(80, () -> { look(180, 0); shot("n13_quadro"); });
+        at(5, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        waitFor(() -> mc.screen != null, 200);
+        at(20, () -> shot("n14_quadro_tela"));
+        at(5, () -> { mc.setScreen(null); server(sp -> {
+            var ids = com.lanterna.tropa.Contratos.ofertas("oa", com.lanterna.tropa.Contratos.dia(sp));
+            com.lanterna.tropa.Contratos.aceitar(sp, ids.get(0));
+            com.lanterna.tropa.Contratos.aceitar(sp, ids.get(1));
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> LanternaMod.LOGGER.info("AUTOTEST contratos active={}", d.active().keySet()));
+            var lanternas = sp.level().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40));
+            LanternaMod.LOGGER.info("AUTOTEST lanternas na base={}", lanternas.size());
+        }); });
+        at(5, () -> cmd("tp @s 0.5 ~ 8.5 180 10"));
+        at(40, () -> shot("n15_base_lanternas"));
+        // ---- Encontro no espaço ----
+        at(5, () -> cmd("execute in lanterna:space run tp @s 0 -200 0"));
+        waitFor(() -> mc.player.level().dimension().location().getPath().equals("space"), 400);
+        at(40, () -> server(sp -> com.lanterna.tropa.Encontros.forcar(sp, "pirata")));
+        at(5, () -> server(sp -> com.lanterna.tropa.Encontros.forcar(sp, "patrulha")));
+        at(160, () -> { shot("n16_encontro"); server(sp -> {
+            for (var n : sp.level().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(250)))
+                LanternaMod.LOGGER.info("AUTOTEST encontro {} ia={} dist={} hp={} piloto={}", n.getTipoNave(), n.ia(), (int) n.distanceTo(sp), n.hp(), n.getControllingPassenger());
+        }); });
+        at(5, () -> server(sp -> {
+            var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 250, x -> x.ia().equals("pirata"));
+            if (n != null) { sp.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.position()); }
+        }));
+        at(30, () -> shot("n17_pirata"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** Fotos das naves em 3/4, uma por vez (espectador, sem cair). */
+    private static void sceneNavesFoto() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<String> cmdServer = c -> server(sp -> sp.server.getCommands().performPrefixedCommand(
+                sp.createCommandSourceStack().withSuppressedOutput().withPermission(4), c));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.hideGui = true; cmd("gamemode spectator"); cmd("time set 6000");
+            cmd("execute in minecraft:overworld run tp @s 800.5 -50 800.5"); });
+        waitFor(() -> mc.level.hasChunkAt(800, 800), 400);
+        at(20, () -> { cmdServer.accept("kill @e[type=!player]"); cmdServer.accept("fill 760 -61 760 840 -61 840 minecraft:smooth_stone"); });
+        String[][] ships = {{"nave_lanceira", "green", "16"}, {"nave_pirata", "1", "26"}, {"nave_patrulha", "violet", "24"},
+                {"nave_cargueiro", "1", "34"}, {"nave_pirata_capitania", "2", "60"}, {"destrocos_2", "", "24"}};
+        for (String[] sh : ships) {
+            at(10, () -> server(sp -> {
+                for (var o : sp.level().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200))) o.discard();
+                var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.byId(sh[0]), sh[1]);
+                n.moveTo(800.5, -60, 800.5, 0, 0);
+                sp.level().addFreshEntity(n);
+            }));
+            double d = Double.parseDouble(sh[2]);
+            // nave olha para +z (yaw 0); câmera na frente-esquerda, olhando para ela
+            at(10, () -> cmd(String.format(java.util.Locale.ROOT, "tp @s %.1f %.1f %.1f %.1f %.1f", 800.5 + d * 0.7, -60 + d * 0.45, 800.5 + d * 0.7, 135.0, 22.0)));
+            at(60, () -> shot("f_" + sh[0] + "_frente"));
+            at(5, () -> cmd(String.format(java.util.Locale.ROOT, "tp @s %.1f %.1f %.1f %.1f %.1f", 800.5 - d * 0.7, -60 + d * 0.45, 800.5 - d * 0.7, -45.0, 22.0)));
+            at(40, () -> shot("f_" + sh[0] + "_tras"));
+        }
+        // Espécies de frente
+        at(10, () -> server(sp -> {
+            for (var o : sp.level().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200))) o.discard();
+            var all = com.lanterna.especies.Especie.values();
+            for (int i = 0; i < all.length; i++) {
+                var e = new com.lanterna.especies.LanternaEntity(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(), sp.level());
+                var c = all[i].tropa != null ? all[i].tropa : com.lanterna.corps.BuiltinCorps.GREEN;
+                e.setup(all[i], 1, com.lanterna.especies.Especie.Papel.LANTERNA, c, "roupa_tropa_" + c.id().getPath(), i % 4 == 0, false);
+                e.moveTo(786 + (i % 9) * 3 + 0.5, -60, 800 + (i / 9) * 4 + 0.5, 180, 0);
+                e.setYBodyRot(180); e.setYHeadRot(180);
+                e.setNoAi(true);
+                sp.level().addFreshEntity(e);
+            }
+        }));
+        at(10, () -> cmd("tp @s 798.5 -56.5 815 180 12"));
+        at(60, () -> shot("f_especies_frente"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** Encontros no espaço. */
+    private static void sceneEncontro() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); });
+        at(20, () -> cmd("lanterna escolher lanterna:green"));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        at(10, () -> { cmd("execute in lanterna:space run tp @s 300 -200 300"); });
+        waitFor(() -> mc.player.level().dimension().location().getPath().equals("space"), 600);
+        at(60, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("tp @s 300 -200 300"); });
+        at(60, () -> server(sp -> { com.lanterna.tropa.Encontros.forcar(sp, "pirata"); com.lanterna.tropa.Encontros.forcar(sp, "patrulha");
+            com.lanterna.tropa.Encontros.forcar(sp, "cargueiro"); }));
+        for (int k = 0; k < 4; k++) {
+            int kk = k;
+            at(80, () -> server(sp -> {
+                for (var n : sp.level().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(250)))
+                    LanternaMod.LOGGER.info("AUTOTEST encontro{} {} ia={} dist={} hp={} piloto={}", kk, n.getTipoNave(), n.ia(), (int) n.distanceTo(sp), n.hp(),
+                            n.getControllingPassenger() != null ? n.getControllingPassenger().getType().toShortString() : null);
+                LanternaMod.LOGGER.info("AUTOTEST jogador hp={} tiros={}", sp.getHealth(),
+                        sp.level().getEntitiesOfClass(com.lanterna.tropa.TiroPlasma.class, sp.getBoundingBox().inflate(80)).size());
+            }));
+            at(2, () -> server(sp -> {
+                var n = nearest(com.lanterna.naves.NaveEntity.class, sp, 250, x -> !x.ia().isEmpty());
+                if (n != null) sp.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.position());
+            }));
+            at(4, () -> shot("e_" + kk));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("morte")) sceneMorte();
+        if (ENABLED && SCENE.equals("encontro")) sceneEncontro();
+        else if (ENABLED && SCENE.equals("navesfoto")) sceneNavesFoto();
+        else if (ENABLED && SCENE.equals("naves")) sceneNaves();
+        else if (ENABLED && SCENE.equals("morte")) sceneMorte();
         else if (ENABLED && SCENE.equals("caido")) sceneCaido();
         else if (ENABLED) {
             Minecraft mc = Minecraft.getInstance();

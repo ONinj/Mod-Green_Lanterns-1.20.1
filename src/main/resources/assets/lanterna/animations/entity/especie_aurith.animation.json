@@ -1,0 +1,32 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.extra": {
+   "loop": true,
+   "animation_length": 4,
+   "bones": {
+    "extra_corpo_asa_r": {
+     "rotation": [
+      0,
+      "math.sin(query.anim_time * 540) * 25",
+      0
+     ]
+    },
+    "extra_corpo_asa_l": {
+     "rotation": [
+      0,
+      "-math.sin(query.anim_time * 540) * 25",
+      0
+     ]
+    },
+    "extra_cabeca_antenas": {
+     "rotation": [
+      "math.sin(query.anim_time * 120) * 5",
+      0,
+      0
+     ]
+    }
+   }
+  }
+ }
+}

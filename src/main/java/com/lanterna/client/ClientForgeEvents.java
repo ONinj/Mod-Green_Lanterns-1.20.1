@@ -63,6 +63,7 @@ public final class ClientForgeEvents {
             Minecraft.getInstance().setScreen(new com.lanterna.client.mission.JournalScreen());
         }
         com.lanterna.client.construct.ClientConstructs.tick();
+        com.lanterna.client.naves.ClientNaves.tick();
         com.lanterna.client.mission.ClientLoreData.tick();
 
         // Pose de voo e partículas de todos os jogadores visíveis

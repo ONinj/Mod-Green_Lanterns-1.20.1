@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "PPP"
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:gray_wool"
+    },
+    "P": {
+      "item": "lanterna:nave_placa"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_beliche",
+    "count": 1
+  }
+}

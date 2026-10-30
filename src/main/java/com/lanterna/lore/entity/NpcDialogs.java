@@ -86,7 +86,28 @@ public final class NpcDialogs {
         // Missões que este NPC oferece
         if (data != null) {
             boolean introDone = data.completed().stream().anyMatch(k -> k.startsWith("inicio_") && k.endsWith("_4"));
-            if (race == Race.GUARDIAO && introDone && !data.isActive("ryut_1") && !data.isDone("ryut_1")) options.add("accept:ryut_1");
+            if (race == Race.GUARDIAO && introDone && !data.isActive("ryut_1") && !data.isDone("ryut_1")
+                    && com.lanterna.tropa.Nivel.nivel(data.xp()) >= 32) options.add("accept:ryut_1");
+            // Ordem livre: o Guardião ou o líder do planeta oferecem a linha deste planeta, se o nível deixar
+            if (introDone && (race == Race.GUARDIAO || role.equals("lider"))) {
+                com.lanterna.lore.PlanetLore pl = com.lanterna.lore.PlanetLore.byPlanet(planet);
+                RingData rd = ModCapabilities.get(player).orElse(null);
+                var own = rd != null && rd.hasRing() ? com.lanterna.lore.Factions.of(rd.corps()) : null;
+                if (pl != null && java.util.Arrays.asList(Missions.MAIN_ORDER).contains(pl)
+                        && !data.isDone("main_" + pl.planet + "_5") && !(own == pl.corps && data.isDone("main_" + pl.planet + "_4"))
+                        && MissionManager.activeMainPlanet(data) == null
+                        && com.lanterna.tropa.Nivel.nivel(data.xp()) >= com.lanterna.tropa.Nivel.nivelDoPlaneta(pl, own)) {
+                    options.add("accept:main_" + pl.planet + "_1");
+                }
+            }
+            // Prova da Emoção (nível 50) com o Guardião
+            if (race == Race.GUARDIAO && com.lanterna.tropa.Nivel.nivel(data.xp()) >= com.lanterna.tropa.Nivel.MAX && !data.autoRecarga()) {
+                RingData rd = ModCapabilities.get(player).orElse(null);
+                if (rd != null && rd.hasRing() && !rd.corps().getPath().equals("white")) {
+                    String prova = "prova_" + rd.corps().getPath();
+                    if (!data.isActive(prova)) options.add("accept:" + prova);
+                }
+            }
             if (race == Race.VELTARI && role.equals("instrutor") && introDone && !data.isActive("patrulha")) options.add("accept:patrulha");
             if (race == Race.GUARDIAO && data.active().isEmpty() && !introDone) {
                 // Quem chegou a Oa sem passar pelo início da própria Tropa começa por aqui
@@ -131,6 +152,10 @@ public final class NpcDialogs {
         }
         if (action.startsWith("accept:")) {
             String id = action.substring(7);
+            if (id.startsWith("main_")) {
+                LoreData d = MissionManager.data(player);
+                if (d != null) for (String a : new java.util.ArrayList<>(d.active().keySet())) if (a.startsWith("treino_")) d.abandon(a);
+            }
             if (Missions.get(id) != null) MissionManager.start(player, id);
         }
     }

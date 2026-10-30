@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PGP",
+    "GGG",
+    "PGP"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_janela",
+    "count": 4
+  }
+}

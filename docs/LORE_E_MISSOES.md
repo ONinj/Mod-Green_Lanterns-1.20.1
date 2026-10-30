@@ -150,3 +150,67 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
   - Nyrielle `orbita_1..6`
   - Devorador `cabeca_*`
   - Guardião `halo`
+
+
+---
+
+# 0.13 — Tropas vivas, naves e nível
+
+## Nível e postos (separado da afinidade)
+- XP vem de: piratas (30), capitães (250), Lanternas inimigos (60, oficial 120), bosses (400), Ecos (10), outros hostis (2), naves destruídas (200; Capitânia 1200), saquear destroços (25), primeira visita a um planeta (150) e missões/contratos.
+- Nível 1 a 50. Cada nível custa 100 + 40×nível de XP (~54 mil no total).
+- A cada 5 níveis: +1 coração. Construtos e voo gastam 1% menos carga por nível (até 40%). Força dos construtos e do soco: +1% por nível.
+- Postos (recompensa ao subir):
+  | Nível | Posto | Presente |
+  |---|---|---|
+  | 10 | Patrulheiro | insígnia + nave Lanceira |
+  | 20 | Oficial | insígnia + nave Patrulha |
+  | 30 | Veterano | insígnia + 3 núcleos propulsores + 8 diamantes |
+  | 40 | Guarda de Honra | insígnia + 16 Méritos |
+- O HUD do anel mostra nível, barra de XP e posto.
+
+## Ordem livre das missões
+- Cada anel só pode ser forjado a partir de um nível: Odym 5, Oa 8, Okaara 12, Ysmault 16, Zamaron 20, Korugar 25, Nok 30, Ryut 32, Gênese 35.
+- Fale com o Guardião ou o líder de qualquer planeta liberado para pegar a linha dele, na ordem que quiser.
+- Sem nenhum planeta liberado, o diário passa um "treino" (subir até o nível pedido) usando contratos e encontros.
+
+## Contratos (missões secundárias)
+- Quadro de Contratos: fica na base de cada Tropa (ao lado de 3 Lanternas da Tropa) e também pode ser fabricado.
+- 4 contratos novos por dia, até 3 ativos. Tipos: caçar piratas, derrubar um capitão (com uma nave pirata estacionada que dá para roubar), limpar Ecos, invasores, resgatar um Lanterna ferido, entrega para outro planeta e derrubar uma nave pirata.
+- O alvo aparece quando você chega a 110 blocos do local.
+
+## Lanternas NPC e Tropas inimigas
+- 18 espécies com 3 corpos (padrão, grande e pequeno), cada uma com Tropa preferida.
+- Lanternas voam, atiram raios do anel, criam martelos e escudos. Os da sua Tropa ajudam na briga; os de Tropas inimigas atacam.
+- Piratas usam pistolas de plasma; capitães são mais fortes e deixam o Blaster de Capitão.
+- Mercadores aparecem nos cargueiros e fazem trocas.
+
+## Naves
+- Tipos: Lanceira (1 lugar), Patrulha, Cargueiro, Pirata e Capitânia Pirata, além de destroços para saquear.
+- Item de nave: clique num bloco para colocar. Nave sem dono: monte nela para tomar e ganhar a Chave da Nave.
+- Controles pilotando: W/A/S/D e mouse, Espaço sobe, **C** desce, Ctrl turbo, **X** atira, **B** abre/fecha a porta, **H** abre o hangar (Capitânia).
+- **Shift + clique** na nave: entra no interior. Clique na porta externa da sala para sair.
+- Fragmento de Casco na mão + clique: conserta a nave.
+- A nave viaja com quem está dentro entre a Terra, o espaço e os planetas.
+
+## Encontros no espaço
+- Voando no espaço às vezes aparecem: piratas, a Capitânia pirata (nível 25+), patrulhas da sua Tropa, patrulhas inimigas, cargueiros e destroços.
+
+## Prova da Emoção (nível 50)
+- Junte 3000 pontos da emoção da sua Tropa (Verde: lutar ferido; Amarelo: espalhar medo; Vermelho: causar dano; Azul: curar e estar com aliados; Laranja: coletar; Índigo: ver outros se curarem; Violeta: estar perto de quem protege; Preto: mortes por perto), derrote 3 capitães piratas e fale com o Guardião do seu planeta.
+- Recompensa: o anel passa a se recarregar da sua própria emoção (um pouco o tempo todo e mais quando você sente a emoção da Tropa).
+
+## Novos comandos de teste
+| Comando | O que faz |
+|---|---|
+| `/lanterna xp <n>` | soma XP |
+| `/lanterna spawn <espécie> [papel= tropa= roupa= pele= oficial corrompido]` | cria um NPC |
+| `/lanterna encontro <pirata\|capitania\|patrulha\|inimiga\|cargueiro\|destrocos>` | força um encontro |
+| `/lanterna interior` | entra na nave mais próxima |
+| `/lanterna contratos` | abre o quadro de contratos |
+
+## Limitações conhecidas
+- A cor das faixas e luzes do interior vem da região da sala (cada Tropa tem a sua).
+- O Armário só abre e fecha (não guarda itens).
+- O interior é uma dimensão separada: lá fora o mundo continua sem você.
+- Os bosses não ficam mais fortes com o nível; a dificuldade vem dos níveis pedidos para forjar.

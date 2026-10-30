@@ -39,6 +39,11 @@ public final class ClientConstructs {
             holding = null;
             holdingKey = null;
         }
+        // Pilotando uma nave: X atira com os canhões
+        if (mc.player.getVehicle() instanceof com.lanterna.naves.NaveEntity) {
+            while (KeyBindings.CONSTRUCT_USE.consumeClick()) com.lanterna.client.naves.ClientNaves.fire();
+            return;
+        }
         while (KeyBindings.CONSTRUCT_USE.consumeClick()) use(selected(), KeyBindings.CONSTRUCT_USE);
         for (int i = 0; i < KeyBindings.PRESETS.length; i++) {
             while (KeyBindings.PRESETS[i].consumeClick()) use(ConstructType.byId(ClientLoreData.DATA.preset(i)), KeyBindings.PRESETS[i]);

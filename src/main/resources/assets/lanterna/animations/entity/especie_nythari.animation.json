@@ -1,0 +1,25 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.extra": {
+   "loop": true,
+   "animation_length": 4,
+   "bones": {
+    "extra_cabeca_mandibula_r": {
+     "rotation": [
+      0,
+      "math.max(0, math.sin(query.anim_time * 360)) * 14",
+      0
+     ]
+    },
+    "extra_cabeca_mandibula_l": {
+     "rotation": [
+      0,
+      "-math.max(0, math.sin(query.anim_time * 360)) * 14",
+      0
+     ]
+    }
+   }
+  }
+ }
+}

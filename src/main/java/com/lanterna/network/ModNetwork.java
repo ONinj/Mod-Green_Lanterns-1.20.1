@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "3";
+    private static final String VERSION = "4";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -120,6 +120,26 @@ public final class ModNetwork {
                 .encoder(com.lanterna.network.lore.ConstructSelectPacket::encode)
                 .decoder(com.lanterna.network.lore.ConstructSelectPacket::decode)
                 .consumerNetworkThread(com.lanterna.network.lore.ConstructSelectPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.naves.NaveControlPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.naves.NaveControlPacket::encode)
+                .decoder(com.lanterna.naves.NaveControlPacket::decode)
+                .consumerNetworkThread(com.lanterna.naves.NaveControlPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.tropa.TropaSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.tropa.TropaSyncPacket::encode)
+                .decoder(com.lanterna.tropa.TropaSyncPacket::decode)
+                .consumerMainThread(com.lanterna.tropa.TropaSyncPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.tropa.ContratoPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.tropa.ContratoPacket::encode)
+                .decoder(com.lanterna.tropa.ContratoPacket::decode)
+                .consumerNetworkThread(com.lanterna.tropa.ContratoPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.tropa.QuadroPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.tropa.QuadroPacket::encode)
+                .decoder(com.lanterna.tropa.QuadroPacket::decode)
+                .consumerMainThread(com.lanterna.tropa.QuadroPacket::handle)
                 .add();
     }
 

@@ -64,6 +64,43 @@ public final class LanternaCommand {
                         .requires(source -> source.hasPermission(2))
                         .executes(LanternaCommand::reset))
 
+                // ---- Espécies, naves, nível (para testar) ----
+                .then(Commands.literal("spawn").requires(src -> src.hasPermission(2))
+                        .then(Commands.argument("especie", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(com.lanterna.especies.Especie.values()).map(e -> e.id), b))
+                                .executes(c -> spawnNpc(c, ""))
+                                .then(Commands.argument("opcoes", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                        .executes(c -> spawnNpc(c, com.mojang.brigadier.arguments.StringArgumentType.getString(c, "opcoes"))))))
+                .then(Commands.literal("xp").requires(src -> src.hasPermission(2))
+                        .then(Commands.argument("pontos", IntegerArgumentType.integer(0))
+                                .executes(c -> {
+                                    com.lanterna.tropa.Nivel.addXp(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "pontos"),
+                                            Component.literal("comando"));
+                                    return 1;
+                                })))
+                .then(Commands.literal("encontro").requires(src -> src.hasPermission(2))
+                        .then(Commands.argument("tipo", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"pirata", "capitania", "patrulha", "inimiga", "cargueiro", "destrocos"}, b))
+                                .executes(c -> {
+                                    com.lanterna.tropa.Encontros.forcar(c.getSource().getPlayerOrException(),
+                                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "tipo"));
+                                    return 1;
+                                })))
+                .then(Commands.literal("interior").requires(src -> src.hasPermission(2))
+                        .executes(c -> {
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            var naves = p.level().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, p.getBoundingBox().inflate(48),
+                                    n -> n.tipo().interior() != null);
+                            if (naves.isEmpty()) return 0;
+                            com.lanterna.naves.NaveInterior.entrar(p, naves.get(0));
+                            return 1;
+                        }))
+                .then(Commands.literal("contratos").requires(src -> src.hasPermission(2))
+                        .executes(c -> {
+                            com.lanterna.tropa.Contratos.abrirQuadro(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+
                 // ---- Lore (para testar) ----
                 .then(Commands.literal("missao").requires(source -> source.hasPermission(2))
                         .then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word())
@@ -168,6 +205,43 @@ public final class LanternaCommand {
             com.lanterna.mission.MissionManager.sync(player, lore);
         });
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.reset"), false);
+        return 1;
+    }
+
+    /** /lanterna spawn <espécie> [papel=lanterna|pirata|capitao|mercador] [tropa=green..] [roupa=...|nenhuma] [pele=1..3] [oficial] [corrompido] */
+    private static int spawnNpc(CommandContext<CommandSourceStack> ctx, String opts) throws CommandSyntaxException {
+        ServerPlayer p = ctx.getSource().getPlayerOrException();
+        var esp = com.lanterna.especies.Especie.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "especie"));
+        var papel = esp.papel != null ? esp.papel : com.lanterna.especies.Especie.Papel.LANTERNA;
+        com.lanterna.corps.BuiltinCorps corps = esp.tropa;
+        String roupa = null;
+        int pele = 1;
+        boolean oficial = false, corrompido = false, roupaSet = false;
+        for (String o : opts.split(" ")) {
+            if (o.isBlank()) continue;
+            String[] kv = o.split("=", 2);
+            switch (kv[0]) {
+                case "papel" -> papel = com.lanterna.especies.Especie.Papel.byId(kv[1]);
+                case "tropa" -> { for (var c : com.lanterna.corps.BuiltinCorps.values()) if (c.id().getPath().equals(kv[1])) corps = c; }
+                case "roupa" -> { roupa = kv[1].equals("nenhuma") ? null : kv[1]; roupaSet = true; }
+                case "pele" -> pele = Integer.parseInt(kv[1]);
+                case "oficial" -> oficial = true;
+                case "corrompido" -> corrompido = true;
+                default -> {}
+            }
+        }
+        if (papel != com.lanterna.especies.Especie.Papel.LANTERNA) corps = null;
+        else if (corps == null) corps = com.lanterna.corps.BuiltinCorps.GREEN;
+        if (!roupaSet) roupa = switch (papel) {
+            case LANTERNA -> "roupa_tropa_" + corps.id().getPath();
+            case PIRATA -> "roupa_pirata";
+            case CAPITAO -> "roupa_capitao";
+            case MERCADOR -> "roupa_mercador";
+        };
+        var e = new com.lanterna.especies.LanternaEntity(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(), p.level());
+        e.setup(esp, pele, papel, corps, roupa, oficial, corrompido);
+        e.moveTo(p.getX() + p.getLookAngle().x * 3, p.getY(), p.getZ() + p.getLookAngle().z * 3, p.getYRot() + 180, 0);
+        p.level().addFreshEntity(e);
         return 1;
     }
 

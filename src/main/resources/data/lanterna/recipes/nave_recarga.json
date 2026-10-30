@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PRP",
+    "PLP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "L": {
+      "item": "minecraft:lantern"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_recarga",
+    "count": 1
+  }
+}

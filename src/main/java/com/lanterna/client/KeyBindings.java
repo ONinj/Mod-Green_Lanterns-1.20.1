@@ -56,6 +56,14 @@ public final class KeyBindings {
     public static final KeyMapping JOURNAL = new KeyMapping(
             "key.lanterna.journal", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
 
+    // ---- Naves ----
+    public static final KeyMapping NAVE_DESCER = new KeyMapping(
+            "key.lanterna.nave_descer", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, CATEGORY);
+    public static final KeyMapping NAVE_PORTA = new KeyMapping(
+            "key.lanterna.nave_porta", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
+    public static final KeyMapping NAVE_HANGAR = new KeyMapping(
+            "key.lanterna.nave_hangar", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
+
     private static KeyMapping preset(int n, int key) {
         return new KeyMapping("key.lanterna.preset_" + n, KeyConflictContext.IN_GAME,
                 net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, key, CATEGORY);

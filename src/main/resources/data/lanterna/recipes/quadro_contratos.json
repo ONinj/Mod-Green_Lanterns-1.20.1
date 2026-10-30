@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "PMP",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "lanterna:nave_placa"
+    },
+    "M": {
+      "item": "minecraft:paper"
+    }
+  },
+  "result": {
+    "item": "lanterna:quadro_contratos",
+    "count": 1
+  }
+}

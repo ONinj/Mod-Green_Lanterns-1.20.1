@@ -1,0 +1,110 @@
+{
+ "parent": "block/block",
+ "render_type": "cutout",
+ "textures": {
+  "particle": "lanterna:block/nave_armario_frente",
+  "frente": "lanterna:block/nave_armario_frente",
+  "lado": "lanterna:block/nave_armario_lado",
+  "dentro": "lanterna:block/nave_armario_dentro",
+  "luz": "lanterna:block/nave_armario_luz"
+ },
+ "elements": [
+  {
+   "from": [
+    1,
+    0,
+    1
+   ],
+   "to": [
+    15,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      1,
+      0,
+      15,
+      16
+     ],
+     "texture": "#frente"
+    },
+    "south": {
+     "uv": [
+      1,
+      0,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "east": {
+     "uv": [
+      0,
+      0,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "west": {
+     "uv": [
+      1,
+      0,
+      16,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "up": {
+     "uv": [
+      1,
+      1,
+      15,
+      16
+     ],
+     "texture": "#lado"
+    },
+    "down": {
+     "uv": [
+      1,
+      0,
+      15,
+      15
+     ],
+     "texture": "#lado"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    0,
+    1
+   ],
+   "to": [
+    15,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "uv": [
+      1,
+      0,
+      15,
+      16
+     ],
+     "texture": "#luz",
+     "tintindex": 0
+    }
+   },
+   "forge_data": {
+    "block_light": 15,
+    "sky_light": 15
+   },
+   "shade": false
+  }
+ ]
+}

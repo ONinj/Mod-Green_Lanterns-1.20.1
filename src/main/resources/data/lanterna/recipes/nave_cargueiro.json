@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "INI",
+    "FCF",
+    "INI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "N": {
+      "item": "lanterna:nucleo_propulsor"
+    },
+    "F": {
+      "item": "lanterna:fragmento_casco"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "item": "lanterna:nave_cargueiro",
+    "count": 1
+  }
+}
