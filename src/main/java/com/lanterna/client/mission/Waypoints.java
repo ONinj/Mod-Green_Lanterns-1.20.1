@@ -102,7 +102,8 @@ public final class Waypoints {
             int y = player.level().hasChunk(p.getX() >> 4, p.getZ() >> 4)
                     ? player.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) : (int) player.getY();
             Vec3 at = new Vec3(p.getX() + 0.5, y + 1.5, p.getZ() + 0.5);
-            String place = p.equals(PlanetLore.HUB) ? "waypoint.lanterna.hub" : "waypoint.lanterna.arena";
+            String place = p.equals(PlanetLore.HUB) ? "waypoint.lanterna.hub" : p.equals(PlanetLore.arena(PlanetLore.byPlanet(o.planet())))
+                    ? "waypoint.lanterna.arena" : "waypoint.lanterna.local";
             return new Target(at, at.distanceTo(player.position()), Component.translatable(place, planetName), label, color, o.planet());
         }
         if (dim.equals(SpaceBodies.SPACE)) {

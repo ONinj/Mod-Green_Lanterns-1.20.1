@@ -23,12 +23,14 @@ public record Mission(String id, String line, int color, List<Objective> objecti
 
     public Component title() {
         if (id.startsWith("ct_")) return com.lanterna.tropa.Contratos.titulo(id);
+        if (com.lanterna.cidade.CidadeMissoes.eDaCidade(id)) return com.lanterna.cidade.CidadeMissoes.titulo(id);
         return titleArg == null ? Component.translatable("mission.lanterna." + id + ".title")
                 : Component.translatable("mission.lanterna." + id + ".title", Component.translatable(titleArg));
     }
 
     public Component description() {
         if (id.startsWith("ct_")) return com.lanterna.tropa.Contratos.descricao(id);
+        if (com.lanterna.cidade.CidadeMissoes.eDaCidade(id)) return com.lanterna.cidade.CidadeMissoes.descricao(id);
         return Component.translatable("mission.lanterna." + id + ".desc");
     }
 

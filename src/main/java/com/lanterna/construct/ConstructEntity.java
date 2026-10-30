@@ -176,7 +176,8 @@ public class ConstructEntity extends Entity {
                 if (owner != null) updateBeam(owner);
             }
             case SHIELD, BLADE -> {
-                if (owner != null) setPos(owner.getX(), owner.getY(), owner.getZ());
+                // escudo grande (Bastião) fica parado onde foi criado
+                if (owner != null && !(kind() == Kind.SHIELD && scale() >= 2.5f)) setPos(owner.getX(), owner.getY(), owner.getZ());
             }
             case FIST, BOLT -> {
                 if (!level().isClientSide) moveProjectile(owner);

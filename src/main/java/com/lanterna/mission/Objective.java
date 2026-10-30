@@ -45,7 +45,9 @@ public record Objective(Type type, String target, int count, @Nullable String pl
         /** Chegar a um ponto do espaço (patrulha de setor). planet = "space", pos = ponto. */
         SETOR,
         /** Pousar num planeta que ainda não visitou. */
-        DESCOBRIR
+        DESCOBRIR,
+        /** Chegar a um ponto de um planeta (anéis de corrida, teste de voo). planet + pos. */
+        PONTO
     }
 
     public static Objective of(Type type, String target, int count, @Nullable String planet, @Nullable BlockPos pos) {

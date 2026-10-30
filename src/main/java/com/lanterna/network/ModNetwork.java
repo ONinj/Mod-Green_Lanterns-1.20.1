@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "5";
+    private static final String VERSION = "6";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -140,6 +140,11 @@ public final class ModNetwork {
                 .encoder(com.lanterna.naves.NaveAutoPacket::encode)
                 .decoder(com.lanterna.naves.NaveAutoPacket::decode)
                 .consumerNetworkThread(com.lanterna.naves.NaveAutoPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.cidade.TecnicaPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.cidade.TecnicaPacket::encode)
+                .decoder(com.lanterna.cidade.TecnicaPacket::decode)
+                .consumerNetworkThread(com.lanterna.cidade.TecnicaPacket::handle)
                 .add();
         CHANNEL.messageBuilder(com.lanterna.tropa.QuadroPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.tropa.QuadroPacket::encode)

@@ -29,6 +29,10 @@ import java.util.Map;
 public final class NpcDialogs {
 
     public static void open(ServerPlayer player, RaceEntity npc) {
+        if (npc.role().startsWith("conselho_")) {
+            com.lanterna.cidade.Palacio.conselho(player, npc);
+            return;
+        }
         Race race = npc.race();
         String role = npc.role();
         SpaceBodies.Body body = SpaceBodies.bodyAt(npc.level().dimension(), npc.getX(), npc.getZ());

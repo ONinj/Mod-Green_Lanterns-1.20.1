@@ -175,6 +175,11 @@ public final class CidadeTropa {
 
     // ===================== A Bateria Central =====================
 
+    /** Usado pela cidade completa (0.15): só a bateria gigante, com degraus. */
+    public static void bateriaCentral(ServerLevel level, BlockPos base, PlanetLore planet) {
+        bateria(level, base, planet, paleta(planet));
+    }
+
     private static void bateria(ServerLevel level, BlockPos base, PlanetLore planet, Paleta pal) {
         // degraus de base
         for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {

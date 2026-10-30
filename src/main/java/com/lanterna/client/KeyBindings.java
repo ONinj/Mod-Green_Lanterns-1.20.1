@@ -57,6 +57,13 @@ public final class KeyBindings {
             "key.lanterna.journal", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, CATEGORY);
 
     // ---- Naves ----
+    public static final KeyMapping TECNICAS = new KeyMapping(
+            "key.lanterna.tecnicas", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_O, CATEGORY);
+    public static final KeyMapping[] TECNICA = {
+            new KeyMapping("key.lanterna.tecnica_1", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Y, CATEGORY),
+            new KeyMapping("key.lanterna.tecnica_2", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, CATEGORY),
+            new KeyMapping("key.lanterna.tecnica_3", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, CATEGORY)};
+
     public static final KeyMapping TRAVAR_MIRA = new KeyMapping(
             "key.lanterna.travar_mira", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_TAB, CATEGORY);
 

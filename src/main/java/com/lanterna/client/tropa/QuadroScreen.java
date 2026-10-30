@@ -39,7 +39,7 @@ public class QuadroScreen extends Screen {
             if (st == 0) {
                 Button b = Button.builder(Component.translatable("contrato.lanterna.aceitar"),
                         btn -> ModNetwork.sendToServer(new ContratoPacket(id, true))).bounds(left + W - 84, y + 5, 76, 18).build();
-                b.active = data.ativos() < Contratos.MAX_ATIVOS;
+                b.active = !data.tituloJson().isEmpty() || data.ativos() < Contratos.MAX_ATIVOS;
                 addRenderableWidget(b);
             } else if (st == 1) {
                 addRenderableWidget(Button.builder(Component.translatable("contrato.lanterna.desistir"),
@@ -54,10 +54,12 @@ public class QuadroScreen extends Screen {
         renderBackground(g);
         int left = (width - W) / 2, top = (height - H) / 2;
         Hud.panel(g, left, top, W, H, 0xFFD040, 0.95f);
-        g.drawString(font, Hud.title(Component.translatable("contrato.lanterna.quadro_de",
-                Component.translatable("planet.lanterna." + data.planet()))), left + 10, top + 8, 0xFFFFD870, false);
-        Hud.textRight(g, Hud.body(Component.translatable("contrato.lanterna.ativos", data.ativos(), Contratos.MAX_ATIVOS)),
+        Component titulo = data.tituloJson().isEmpty() ? Component.translatable("contrato.lanterna.quadro_de",
+                Component.translatable("planet.lanterna." + data.planet())) : Component.Serializer.fromJson(data.tituloJson());
+        g.drawString(font, Hud.title(titulo == null ? Component.empty() : titulo), left + 10, top + 8, 0xFFFFD870, false);
+        if (data.tituloJson().isEmpty()) Hud.textRight(g, Hud.body(Component.translatable("contrato.lanterna.ativos", data.ativos(), Contratos.MAX_ATIVOS)),
                 left + W - 10, top + 9, 0xFFB8C4CC);
+        if (data.ids().isEmpty()) g.drawString(font, Hud.body(Component.translatable("cidade.lanterna.nada_agora")), left + 12, top + 34, 0xFF9AA8B0, false);
         for (int i = 0; i < data.ids().size(); i++) {
             String id = data.ids().get(i);
             Mission m = Missions.get(id);
@@ -67,9 +69,13 @@ public class QuadroScreen extends Screen {
             g.fill(left + 6, y, left + W - 6, y + ROW - 3, 0x40000000);
             g.drawString(font, Hud.bold(m.title()), left + 12, y + 4, st == 2 ? 0xFF6A7880 : 0xFFFFFFFF, false);
             Hud.wrapped(g, Hud.body(m.description()), left + 12, y + 16, W - 110, 0xFF9AA8B0, 9);
-            Component tag = st == 2 ? Component.translatable("contrato.lanterna.feito")
-                    : Component.translatable("contrato.lanterna.recomendado", Contratos.recomendado(id));
-            Hud.textRight(g, Hud.body(tag), left + W - 10, y + 27, st == 2 ? 0xFF60D070 : 0xFFB8A060);
+            Component tag;
+            if (st == 2) tag = Component.translatable("contrato.lanterna.feito");
+            else if (i < data.notasJson().size() && !data.notasJson().get(i).isEmpty()) {
+                Component n = Component.Serializer.fromJson(data.notasJson().get(i));
+                tag = n == null ? Component.empty() : n;
+            } else tag = Component.translatable("contrato.lanterna.recomendado", Contratos.recomendado(id));
+            Hud.textRight(g, Hud.body(tag), left + W - 10, y + 27, st == 2 ? 0xFF60D070 : st == 3 ? 0xFFE07060 : 0xFFB8A060);
         }
         super.render(g, mx, my, pt);
     }

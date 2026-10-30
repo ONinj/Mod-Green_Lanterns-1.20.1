@@ -52,7 +52,10 @@ public final class PlanetSites {
                 && (planet == PlanetLore.OA || planet == PlanetLore.GENESE || !tryBuild(level, data, planet, "guardiao", PlanetLore.HUB, player, 120))
                 && planet != PlanetLore.GENESE
                 && !tryBuild(level, data, planet, "tropa", PlanetLore.HUB, player, 120))
-            tryBuild(level, data, planet, "cidade", CidadeTropa.CENTRO, player, 170);
+        {
+            if (!tryBuild(level, data, planet, "cidade2", com.lanterna.cidade.Cidade.CENTRO, player, 200) && planet == PlanetLore.OA)
+                tryBuild(level, data, planet, "palacio", com.lanterna.cidade.Palacio.CENTRO.atY(0), player, 260);
+        }
     }
 
     private static boolean tryBuild(ServerLevel level, LoreWorldData data, PlanetLore planet, String kind, BlockPos at, ServerPlayer near, int radius) {
@@ -68,6 +71,10 @@ public final class PlanetSites {
                 placeTropa(level, planet);
             } else if (kind.equals("cidade")) {
                 CidadeTropa.construir(level, planet);
+            } else if (kind.equals("cidade2")) {
+                com.lanterna.cidade.Cidade.construir(level, planet);
+            } else if (kind.equals("palacio")) {
+                com.lanterna.cidade.Palacio.construir(level);
             } else if (planet == PlanetLore.GENESE) {
                 if (kind.equals("hub")) buildGeneseAltar(level, at);
                 else buildRift(level, at);
@@ -89,7 +96,8 @@ public final class PlanetSites {
         LoreWorldData data = LoreWorldData.get(level.getServer());
         data.resetSite(planet.planet + ":hub");
         data.resetSite(planet.planet + ":arena");
-        data.resetSite(planet.planet + ":cidade");
+        data.resetSite(planet.planet + ":cidade2");
+        data.resetSite(planet.planet + ":palacio");
     }
 
     // ===================== Ajudantes =====================

@@ -355,6 +355,21 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         return papel() == Especie.Papel.LANTERNA && e instanceof LoreCreatures.Eco;
     }
 
+    /** Função na cidade/palácio ("armeiro", "engenheiro", "capitao_salto"...), ou vazio. */
+    public String funcao() {
+        return getPersistentData().getString("lanterna_funcao");
+    }
+
+    public void setFuncao(String f) {
+        getPersistentData().putString("lanterna_funcao", f);
+    }
+
+    /** Fica bravo com o jogador (duelos de treino). */
+    public void irritar(Player p) {
+        angry.add(p.getUUID());
+        setTarget(p);
+    }
+
     /** Aliado de um jogador (mesma Tropa)? */
     public boolean aliadoDe(Player p) {
         BuiltinCorps mine = Factions.playerCorps(p);
@@ -580,6 +595,12 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         if (level().isClientSide) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
         if (getTarget() == player) return InteractionResult.PASS;
+        // NPCs da cidade e do palácio (lojas, missões, capitães)
+        String funcao = funcao();
+        if (!funcao.isEmpty()) {
+            getLookControl().setLookAt(player);
+            return com.lanterna.cidade.CidadeNpcs.interagir(sp, this, funcao);
+        }
         if (papel() == Especie.Papel.MERCADOR) {
             if (getOffers().isEmpty()) return InteractionResult.CONSUME;
             setTradingPlayer(sp);

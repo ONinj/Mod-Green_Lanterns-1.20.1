@@ -260,3 +260,39 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 ## Outras mudanças
 - Laser do punho mais fino, com pulsos correndo, e contínuo (a repetição da tecla reiniciava o feixe).
 - Cargueiro e Capitânia: todas as portas da parede de fora saem da nave; portas lado a lado viram portas duplas.
+
+
+---
+
+# 0.15 — Cidade completa, Palácio dos Guardiões e Técnicas dos Capitães
+
+## Cidade da Tropa (substitui a da 0.14, no mesmo lugar: 150 blocos ao norte da base)
+- 128 x 128 blocos, mesma planta em todas as Tropas com os materiais de cada uma; muralha, 4 portões, torres nos cantos.
+- **Praça** com a Bateria Central gigante, fontes e bancos.
+- **Quartel-General** (3 andares): térreo com o Oficial de Contratos e o quadro; 1º andar sala de briefing; 2º andar sala do Comandante (varanda para a praça). Em Oa, o **Arauto** leva ao Palácio.
+- **Mercado**: barracas (Intendente, Cartógrafo, Relíquias) e lojas (Armeiro, Boticário).
+- **Hangar** (Engenheiro-chefe e Estaleiro), **Enfermaria** (Médica), **Arquivo** (Arquivista), **Celas** (Carcereiro), **Academia e arena** (Instrutor), **6 casas** com interior, guardas e cidadãos.
+
+## Lojas (pagas em Méritos) e reputação
+- Cada cidade tem reputação própria: Desconhecido, Conhecido (50), Respeitado (150), Herói (300). Mais reputação, mais itens nas lojas (naves no Estaleiro, blaster de capitão no Armeiro, Anel Vazio nas Relíquias...).
+- Lanternas de Tropas inimigas da cidade entram, mas lojas e quem dá missões não atendem.
+
+## Missões dos NPCs ("!" no nome)
+- Cadeia de 3 missões com história: Comandante (sabotagem no hangar), Engenheiro (peças e teste de voo pelos anéis no céu), Médica (Ecos, ingredientes, resgate), Arquivista (registros, planeta novo, setores), Instrutor (disciplina, duelo, simulação), Carcereiro (fuga e o chefe da fuga).
+- Diárias de cada um e pedidos dos cidadãos. Até 4 missões da cidade ao mesmo tempo.
+
+## Palácio dos Guardiões (Oa)
+- Ilha flutuante a 320 blocos ao norte da cidade de Oa, ligada a ela por uma ponte de luz. Só entra quem foi chamado (nível 30).
+- Portão com as 7 emoções (só o verde aceso), pátio com estátuas, Grande Salão com o Conselho nos tronos, Câmara da Bateria Primordial (recarrega o anel), biblioteca, observatório, celas, 6 alas de Capitães e o Campo de Provas.
+- Conselho: Ancião Varo, Ancião Selun (biblioteca), Anciã Miraeth, Ancião Dorvek, Anciã Ilyss.
+- Linha: O Chamado de Oa (nível 30) → Diante do Conselho → provações → A Guarda de Honra (nível 40 e 2 provações: equipa 3 técnicas).
+
+## Técnicas (tela: O · teclas: Y, U, I)
+| Técnica | Capitão | Requisitos | Provação |
+|---|---|---|---|
+| Olhar do Anel | Aurith Tal | nível 30, 2 bosses | achar 3 relíquias no palácio |
+| Bastião | Ilith Vey | nível 32, 4 bosses | derrotar 12 Ecos no Campo de Provas |
+| Onda de Vontade | Drevan Kael | nível 35, 5 bosses | derrotar 12 piratas no Campo de Provas |
+| Salto de Dobra | Lumiae Sorn | nível 38, Gênese revelado | passar pelos 5 anéis no céu |
+| Armadura de Construto | Brakhul | nível 42, 7 bosses | vencer o duelo contra Brakhul |
+| Comando | Qiri Nox | nível 45, Prova da Emoção iniciada | lidere aliados contra 6 invasores |

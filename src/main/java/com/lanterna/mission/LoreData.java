@@ -42,6 +42,11 @@ public class LoreData implements INBTSerializable<CompoundTag> {
     private boolean autoRecarga;
     /** Planetas já visitados (para a descoberta). */
     private final Set<String> visitados = new LinkedHashSet<>();
+    /** Técnicas ensinadas pelos Capitães, e as equipadas nas teclas (até 3). */
+    private final Set<String> tecnicas = new LinkedHashSet<>();
+    private final String[] slotsTecnica = {"", "", ""};
+    /** Guarda de Honra (3 técnicas equipadas). */
+    private boolean honra;
     private transient boolean dirty = true;
 
     // ===================== Missões =====================
@@ -197,6 +202,18 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         return added;
     }
 
+    public Set<String> tecnicas() { return tecnicas; }
+    public void addTecnica(String t) { if (tecnicas.add(t)) dirty = true; }
+    public String slotTecnica(int i) { return i >= 0 && i < 3 ? slotsTecnica[i] : ""; }
+    public void setSlotTecnica(int i, String t) {
+        if (i < 0 || i >= 3) return;
+        for (int j = 0; j < 3; j++) if (slotsTecnica[j].equals(t)) slotsTecnica[j] = "";
+        slotsTecnica[i] = t;
+        dirty = true;
+    }
+    public boolean honra() { return honra; }
+    public void setHonra(boolean v) { honra = v; dirty = true; }
+
     public boolean isDirty() {
         return dirty;
     }
@@ -240,6 +257,11 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         tag.putInt("Emocao", emocao);
         tag.putBoolean("AutoRecarga", autoRecarga);
         tag.put("Visitados", strings(visitados));
+        tag.put("Tecnicas", strings(tecnicas));
+        ListTag sl = new ListTag();
+        for (String t : slotsTecnica) sl.add(StringTag.valueOf(t));
+        tag.put("SlotsTecnica", sl);
+        tag.putBoolean("Honra", honra);
         return tag;
     }
 
@@ -273,6 +295,11 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         autoRecarga = tag.getBoolean("AutoRecarga");
         visitados.clear();
         tag.getList("Visitados", Tag.TAG_STRING).forEach(t -> visitados.add(t.getAsString()));
+        tecnicas.clear();
+        tag.getList("Tecnicas", Tag.TAG_STRING).forEach(t -> tecnicas.add(t.getAsString()));
+        ListTag sl = tag.getList("SlotsTecnica", Tag.TAG_STRING);
+        for (int i = 0; i < 3; i++) slotsTecnica[i] = i < sl.size() ? sl.getString(i) : "";
+        honra = tag.getBoolean("Honra");
         dirty = true;
     }
 

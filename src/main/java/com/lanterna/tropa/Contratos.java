@@ -373,7 +373,13 @@ public final class Contratos {
             LoreWorldData wd = LoreWorldData.get(p.server);
             String site = "ct:" + id + ":" + p.getStringUUID();
             if (wd.siteBuilt(site)) {
-                reforcos(p, d, id, dd);
+                // espera os alvos que já existem carregarem antes de contar (senão vêm reforços repetidos)
+                CompoundTag perto = p.getPersistentData().getCompound("lanterna_ct_perto");
+                long agora = p.level().getGameTime();
+                if (!perto.contains(id) || agora - perto.getLong(id + "_ult") > 100) perto.putLong(id, agora);
+                else if (agora - perto.getLong(id) >= 100) reforcos(p, d, id, dd);
+                perto.putLong(id + "_ult", agora);
+                p.getPersistentData().put("lanterna_ct_perto", perto);
                 continue;
             }
             wd.markSite(site);

@@ -8,6 +8,7 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import com.lanterna.client.KeyBindings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -1027,7 +1028,7 @@ public final class DevAutoTest {
     private static void sceneCidades() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
             cmd("gamemode spectator"); cmd("time set 6000"); });
         for (String pl : new String[]{"oa", "korugar", "ysmault", "odym", "okaara", "nok", "zamaron", "ryut"}) {
             at(10, () -> server(sp -> com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(pl + ":cidade")));
@@ -1046,8 +1047,227 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Protótipos (pilotos) dos prédios da cidade da Tropa, para as fotos de conceito. */
+    private static void scenePiloto() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamemode spectator"); cmd("time set 6000"); cmd("weather clear"); cmd("gamerule doDaylightCycle false");
+            cmd("execute in minecraft:overworld run tp @s 1100 -40 1000"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.screen == null, 400);
+        at(60, () -> server(sp -> { for (int cx = 975 >> 4; cx <= 1215 >> 4; cx++) for (int cz = 975 >> 4; cz <= 1030 >> 4; cz++) sp.serverLevel().getChunk(cx, cz);
+            for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, new net.minecraft.world.phys.AABB(960, -70, 960, 1240, 0, 1050), e -> !(e instanceof net.minecraft.world.entity.player.Player))) e.discard();
+            PilotoCidade.construir(sp.serverLevel()); }));
+        Object[][] fotos = {
+                {"p_mercado_rua", 1016.5, -55.0, 1000.5, 90f, 14f},
+                {"p_mercado_loja", 1000.5, -58.3, 1006.8, 0f, 12f},
+                {"p_qg_briefing", 1060.5, -55.0, 1005.5, 180f, 22f},
+                {"p_hangar", 1120.5, -52.0, 1024.5, 180f, 14f},
+                {"p_casa", 1180.5, -56.5, 1009.5, 180f, 16f},
+                {"p_mercado_alto", 1016.5, -46.0, 986.5, 48f, 32f}};
+        for (Object[] f : fotos) {
+            at(10, () -> server(sp -> sp.teleportTo(sp.serverLevel(), (double) f[1], (double) f[2], (double) f[3], (float) f[4], (float) f[5])));
+            at(50, () -> shot((String) f[0]));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** Cidade completa (0.15): construção e fotos por dentro e por fora. */
+    private static void sceneCidade2() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamemode creative"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false"); cmd("weather clear"); });
+        for (String pl : new String[]{"oa", "korugar"}) {
+            at(10, () -> server(sp -> { var w = com.lanterna.lore.LoreWorldData.get(sp.server); w.resetSite(pl + ":cidade2"); w.resetSite(pl + ":palacio");
+                w.markSite(pl + ":palacio"); }));
+            at(10, () -> cmd("execute in lanterna:" + pl + " run tp @s 0 200 -150"));
+            waitFor(() -> mc.level.dimension().location().getPath().equals(pl) && mc.screen == null, 600);
+            at(60, () -> {});
+            waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2400);
+            at(40, () -> cmd("gamemode spectator"));
+            int[] y = new int[1];
+            at(5, () -> server(sp -> { y[0] = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 30, -150); }));
+            Object[][] fotos = {
+                    {"alto", 0.5, 70.0, -150 + 95.0, 180f, 35f},
+                    {"praca", 0.5, 8.0, -150 + 22.0, 180f, 12f},
+                    {"qg_terreo", 0.5, 2.5, -150 - 30.5, 180f, 8f},
+                    {"qg_briefing", 0.5, 9.5, -150 - 31.0, 180f, 22f},
+                    {"qg_comandante", 6.5, 15.0, -150 - 32.0, 150f, 18f},
+                    {"mercado", 58.5, 6.0, -150 + 0.5, 90f, 14f},
+                    {"loja", 27.5, 1.5, -150 + 10.0, 0f, 10f},
+                    {"hangar", 0.5, 8.0, -150 + 66.0, 180f, 10f},
+                    {"arquivo", 36.5, 3.5, -150 - 30.5, 180f, 12f},
+                    {"celas", -36.5, 2.5, -150 - 30.5, 180f, 10f},
+                    {"enfermaria", 36.5, 2.5, -150 + 30.5, 0f, 10f},
+                    {"academia", -38.5, 12.0, -150 + 36.0, 180f, 30f},
+                    {"casa", -34.5, 2.0, -150 + 41.0, 180f, 15f}};
+            for (Object[] f : fotos) {
+                at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), (double) f[1], (double) f[2] + y[0], (double) f[3], (float) f[4], (float) f[5])));
+                at(40, () -> shot("c2_" + pl + "_" + f[0]));
+            }
+            at(5, () -> cmd("gamemode creative"));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** Palácio dos Guardiões: barreira, Conselho, provação, técnica e loja da cidade. */
+    private static Entity achar(String funcao, net.minecraft.server.level.ServerPlayer sp) {
+        for (Entity e : sp.serverLevel().getAllEntities()) {
+            if (e instanceof com.lanterna.especies.LanternaEntity l && l.funcao().equals(funcao)) return e;
+            if (e instanceof com.lanterna.lore.entity.RaceEntity r && r.role().equals(funcao)) return e;
+        }
+        return null;
+    }
+    private static void clicarNpc(String funcao) {
+        Minecraft mc = Minecraft.getInstance();
+        server(sp -> {
+            Entity e = achar(funcao, sp);
+            if (e == null) { LanternaMod.LOGGER.info("AUTOTEST npc {} nao achado", funcao); return; }
+            sp.teleportTo(sp.serverLevel(), e.getX() + 1.5, e.getY(), e.getZ() + 1.5, 135f, 10f);
+            int id = e.getId();
+            mc.execute(() -> mc.tell(() -> {}));
+            sp.server.execute(() -> {});
+            LanternaMod.LOGGER.info("AUTOTEST npc {} em {}", funcao, e.blockPosition());
+            CLICAR.set(id);
+        });
+    }
+    private static final java.util.concurrent.atomic.AtomicInteger CLICAR = new java.util.concurrent.atomic.AtomicInteger(-1);
+    private static final java.util.concurrent.atomic.AtomicBoolean TEM_VARO = new java.util.concurrent.atomic.AtomicBoolean();
+    private static void sceneTrono() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.TickEvent.ServerTickEvent ev) -> {
+            if (ev.phase == net.minecraftforge.event.TickEvent.Phase.END && ev.getServer().getTickCount() % 40 == 0 && !TEM_VARO.get()) {
+                var lvl = ev.getServer().getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+                if (lvl != null) for (Entity e : lvl.getAllEntities()) if (e instanceof com.lanterna.lore.entity.RaceEntity r && r.role().equals("conselho_varo")) { TEM_VARO.set(true); break; }
+            }
+        });
+        Runnable clicar = () -> { int id = CLICAR.getAndSet(-1); var e = id >= 0 ? mc.level.getEntity(id) : null;
+            if (e != null) mc.gameMode.interact(mc.player, e, net.minecraft.world.InteractionHand.MAIN_HAND);
+            LanternaMod.LOGGER.info("AUTOTEST clicou {} tela={}", e, mc.screen == null ? null : mc.screen.getClass().getSimpleName()); };
+        Runnable estado = () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            LanternaMod.LOGGER.info("AUTOTEST estado nivel={} ativas={} feitas={} tecnicas={} slots={},{} pos={} dim={}", com.lanterna.tropa.Nivel.nivel(d.xp()),
+                d.active().keySet(), d.completed().stream().filter(x -> x.startsWith("pal_") || x.startsWith("prov_") || x.startsWith("cid_")).toList(),
+                d.tecnicas(), d.slotTecnica(0), d.slotTecnica(1), sp.blockPosition(), sp.level().dimension().location()); });
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 200 -150"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
+        at(60, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2400);
+        // ---- loja e painel na cidade ----
+        at(40, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })));
+        at(5, () -> clicarNpc("intendente"));
+        at(30, clicar);
+        at(20, () -> shot("t1_loja"));
+        at(5, () -> mc.setScreen(null));
+        at(5, () -> clicarNpc("comandante"));
+        at(30, clicar);
+        at(20, () -> shot("t2_painel_comandante"));
+        at(5, () -> { com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.tropa.ContratoPacket("cid_oa_comandante_1", true)); mc.setScreen(null); });
+        at(20, estado);
+        // ---- barreira (nível baixo) ----
+        at(10, () -> server(sp -> { var w = com.lanterna.lore.LoreWorldData.get(sp.server); w.resetSite("oa:palacio"); }));
+        at(10, () -> cmd("tp @s 0 200 -360"));
+        at(80, () -> {});
+        waitFor(() -> TEM_VARO.get(), 3000);
+        at(60, () -> cmd("tp @s 0.5 171 -440"));
+        at(60, estado);
+        // ---- chamado ----
+        at(5, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(36), null);
+            for (String b : new String[]{"vorgath", "mammok", "thessara", "morrow", "penitente"}) d.addBossKill(b); }));
+        at(260, estado);
+        at(5, () -> cmd("tp @s 0.5 171 -436"));
+        at(60, () -> shot("t3_portao"));
+        at(5, () -> clicarNpc("conselho_varo"));
+        at(30, clicar);
+        at(20, () -> { mc.setScreen(null); shot("t4_salao"); });
+        at(5, () -> clicarNpc("conselho_selun"));
+        at(30, clicar);
+        at(5, () -> { mc.setScreen(null); clicarNpc("capitao_comando"); });
+        at(30, clicar);
+        at(10, () -> mc.setScreen(null));
+        at(10, estado);
+        // ---- provação da Onda ----
+        at(5, () -> clicarNpc("capitao_onda"));
+        at(30, clicar);
+        at(20, () -> shot("t5_capitao"));
+        at(5, () -> { com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.tropa.ContratoPacket("prov_onda", true)); mc.setScreen(null); });
+        at(20, () -> server(sp -> sp.teleportTo(sp.serverLevel(), com.lanterna.cidade.Palacio.CAMPO.getX() + 10.5, com.lanterna.cidade.Palacio.Y, com.lanterna.cidade.Palacio.CAMPO.getZ() + 0.5, 90f, 10f)));
+        at(80, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST piratas no campo={}", sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), e -> e.isPirata()).size())));
+        at(5, () -> shot("t6_campo"));
+        at(5, () -> server(sp -> { for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), e -> e.isPirata()))
+            e.hurt(sp.damageSources().playerAttack(sp), 1000); }));
+        at(40, estado);
+        // ---- usar técnica ----
+        at(5, () -> server(sp -> { var e = com.lanterna.especies.LanternaEntity.pirata(sp.serverLevel(), false); e.moveTo(sp.getX() + 3, sp.getY(), sp.getZ(), 0, 0); sp.serverLevel().addFreshEntity(e);
+            var e2 = com.lanterna.especies.LanternaEntity.pirata(sp.serverLevel(), false); e2.moveTo(sp.getX() - 3, sp.getY(), sp.getZ() + 2, 0, 0); sp.serverLevel().addFreshEntity(e2); }));
+        at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); KeyMapping.click(KeyBindings.TECNICA[0].getKey()); });
+        at(3, () -> shot("t7_onda"));
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); com.lanterna.cidade.Tecnicas.desbloquear(sp, d, "bastiao"); }));
+        at(60, () -> KeyMapping.click(KeyBindings.TECNICA[1].getKey()));
+        at(10, () -> shot("t8_bastiao"));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.setScreen(new com.lanterna.client.cidade.ClientTecnicas.Tela()); });
+        at(20, () -> shot("t9_tela"));
+        at(5, () -> mc.setScreen(null));
+        // ---- fotos do palácio ----
+        Object[][] fotos = {{"pal_alto", 0.5, 230.0, -330.0, 180f, 30f}, {"pal_patio", 0.5, 176.0, -414.0, 180f, 8f}, {"pal_salao_dentro", 0.5, 174.0, -464.0, 180f, 5f},
+                {"pal_camara", 0.5, 173.0, -496.0, 180f, -5f}, {"pal_biblioteca", -24.5, 173.0, -498.0, 180f, 15f}, {"pal_ala", -27.5, 173.0, -484.0, 90f, 12f},
+                {"pal_ponte", 0.5, 150.0, -280.0, 180f, 5f}};
+        at(5, () -> cmd("gamemode spectator"));
+        for (Object[] f : fotos) {
+            at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), (double) f[1], (double) f[2], (double) f[3], (float) f[4], (float) f[5])));
+            at(70, () -> shot((String) f[0]));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneBarreira() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in lanterna:oa run tp @s 0.5 175 -440"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
+        for (int k = 0; k < 4; k++) at(30, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST barreira pos={} permitido={} criativo={} dim={} oa={}", sp.blockPosition(),
+                com.lanterna.cidade.Palacio.permitido(sp), sp.isCreative(), sp.level().dimension().location(), com.lanterna.space.SpaceBodies.byId("oa").dimension())));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneFotos15() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamemode creative"); cmd("time set 6000"); });
+        // sabotador da 1ª missão do Comandante (aceita no teste anterior)
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0.5 80 -110"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
+        at(200, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST sabotador={}", sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class,
+                sp.getBoundingBox().inflate(120), e -> "sabotador".equals(e.getPersistentData().getString("lanterna_alvo"))).size())));
+        at(5, () -> cmd("gamemode spectator"));
+        Object[][] fotos = {
+                {"oa", "f_cidade_oa", 70.5, 140.0, -60.0, 135f, 30f},
+                {"oa", "f_palacio", 70.5, 215.0, -400.0, 135f, 22f},
+                {"oa", "f_palacio_portao", 0.5, 178.0, -395.0, 180f, 4f},
+                {"oa", "f_ponte", 30.5, 120.0, -230.0, 150f, 12f},
+                {"korugar", "f_cidade_korugar", 70.5, 140.0, -60.0, 135f, 30f}};
+        for (Object[] f : fotos) {
+            at(5, () -> cmd("execute in lanterna:" + f[0] + " run tp @s " + f[2] + " " + f[3] + " " + f[4] + " " + f[5] + " " + f[6]));
+            at(240, () -> shot((String) f[1]));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && (SCENE.equals("novidades") || SCENE.equals("auto"))) sceneNovidades();
+        if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();
+        else if (ENABLED && SCENE.equals("barreira")) sceneBarreira();
+        else if (ENABLED && SCENE.equals("trono")) sceneTrono();
+        else if (ENABLED && SCENE.equals("cidade2")) sceneCidade2();
+        else if (ENABLED && SCENE.equals("piloto")) scenePiloto();
+        else if (ENABLED && (SCENE.equals("novidades") || SCENE.equals("auto"))) sceneNovidades();
         else if (ENABLED && SCENE.equals("cidades")) sceneCidades();
         else if (ENABLED && SCENE.equals("contrato")) sceneContrato();
         else if (ENABLED && SCENE.equals("voo")) sceneVoo();

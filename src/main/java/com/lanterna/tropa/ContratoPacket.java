@@ -21,7 +21,10 @@ public record ContratoPacket(String id, boolean aceitar) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer p = ctx.get().getSender();
             if (p == null) return;
-            if (m.aceitar) Contratos.aceitar(p, m.id);
+            if (com.lanterna.cidade.CidadeMissoes.eDaCidade(m.id)) {
+                if (m.aceitar) com.lanterna.cidade.CidadeMissoes.aceitar(p, m.id);
+                else com.lanterna.cidade.CidadeMissoes.desistir(p, m.id);
+            } else if (m.aceitar) Contratos.aceitar(p, m.id);
             else Contratos.desistir(p, m.id);
         });
         ctx.get().setPacketHandled(true);

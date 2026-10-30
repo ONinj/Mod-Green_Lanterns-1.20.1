@@ -39,6 +39,7 @@ public final class MissionText {
             case REP -> Component.translatable("race.lanterna." + t);
             case FUSION, AFFINITY, LEVEL, EMOCAO, DESCOBRIR -> Component.empty();
             case SETOR -> com.lanterna.tropa.Contratos.nomeSetor(o.pos());
+            case PONTO -> Component.translatable("objective.lanterna.ponto.alvo");
         };
     }
 

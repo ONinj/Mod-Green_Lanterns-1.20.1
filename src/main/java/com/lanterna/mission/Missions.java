@@ -144,6 +144,7 @@ public final class Missions {
         if (id == null) return null;
         Mission m = ALL.get(id);
         if (m == null && id.startsWith("ct_")) return com.lanterna.tropa.Contratos.mission(id);
+        if (m == null && com.lanterna.cidade.CidadeMissoes.eDaCidade(id)) return com.lanterna.cidade.CidadeMissoes.mission(id);
         return m;
     }
 

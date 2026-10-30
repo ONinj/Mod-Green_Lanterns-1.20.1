@@ -47,6 +47,8 @@ public final class ClientModEvents {
         event.register(KeyBindings.NAVE_PORTA);
         event.register(KeyBindings.NAVE_HANGAR);
         event.register(KeyBindings.TRAVAR_MIRA);
+        event.register(KeyBindings.TECNICAS);
+        for (var k : KeyBindings.TECNICA) event.register(k);
     }
 
     /** Liga a tela da aba "Lanterna". */
@@ -131,6 +133,7 @@ public final class ClientModEvents {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("ring_hud", RingHudOverlay.HUD);
         event.registerAboveAll("mira_travada", com.lanterna.client.combat.MiraTravada.HUD);
+        event.registerAboveAll("tecnicas", com.lanterna.client.cidade.ClientTecnicas.HUD);
         event.registerAboveAll("selection_cutscene", CutsceneOverlay.OVERLAY);
         event.registerAboveAll("space_nav", com.lanterna.client.space.SpaceHud.HUD);
         event.registerAboveAll("flight_hud", com.lanterna.client.flight.FlightHud.HUD);

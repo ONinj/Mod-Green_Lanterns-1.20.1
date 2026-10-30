@@ -82,6 +82,9 @@ public final class MissionManager {
     public static void onKill(ServerPlayer player, Entity victim) {
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
         if (id != null) bump(player, Objective.Type.KILL, id.toString(), 1, false);
+        // Alvos com nome de missão (sabotador, fugitivo, duelista...)
+        String alvo = victim.getPersistentData().getString("lanterna_alvo");
+        if (!alvo.isEmpty()) bump(player, Objective.Type.KILL, "alvo:" + alvo, 1, false);
         if (victim instanceof com.lanterna.especies.LanternaEntity l) {
             bump(player, Objective.Type.KILL, "papel:" + l.papel().id, 1, false);
             if (l.papel() == com.lanterna.especies.Especie.Papel.LANTERNA) bump(player, Objective.Type.KILL, "papel:inimigo", 1, false);
@@ -172,6 +175,17 @@ public final class MissionManager {
             case AFFINITY -> Affinity.level(data.affinity()) >= o.count() ? o.count() : Affinity.level(data.affinity());
             case LEVEL -> Math.min(o.count(), com.lanterna.tropa.Nivel.nivel(data.xp()));
             case EMOCAO -> Math.min(o.count(), data.emocao());
+            case PONTO -> {
+                if (current >= 1) yield 1;
+                if (o.pos() == null || o.planet() == null) yield 0;
+                SpaceBodies.Body here = SpaceBodies.bodyAt(player.level().dimension(), player.getX(), player.getZ());
+                if (here == null || !here.id().equals(o.planet())) yield 0;
+                if (o.pos().getY() >= 120) yield player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(o.pos())) < 5 ? 1 : 0;
+                // altura relativa ao chão (anéis da cidade): basta passar voando por dentro
+                double hx = player.getX() - o.pos().getX() - 0.5, hz = player.getZ() - o.pos().getZ() - 0.5;
+                int chao = player.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, o.pos().getX(), o.pos().getZ());
+                yield hx * hx + hz * hz < 25 && Math.abs(player.getY() - (chao + o.pos().getY())) < 6 ? 1 : 0;
+            }
             case SETOR -> {
                 if (current >= 1) yield 1;
                 if (o.pos() == null || !player.level().dimension().equals(SpaceBodies.SPACE)) yield 0;
@@ -247,6 +261,7 @@ public final class MissionManager {
         player.sendSystemMessage(Component.translatable("mission.lanterna.completed_chat", m.title())
                 .withStyle(s -> s.withColor(m.color())));
         if (m.line().equals("prova")) com.lanterna.tropa.Prova.concluir(player);
+        com.lanterna.cidade.CidadeMissoes.aoConcluir(player, data, m);
         String next = routeNext(player, data, m);
         if (next != null) start(player, next);
         sync(player, data);

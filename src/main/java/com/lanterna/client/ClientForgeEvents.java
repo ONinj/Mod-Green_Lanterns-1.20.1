@@ -64,6 +64,7 @@ public final class ClientForgeEvents {
         }
         com.lanterna.client.construct.ClientConstructs.tick();
         com.lanterna.client.combat.MiraTravada.tick();
+        com.lanterna.client.cidade.ClientTecnicas.tick();
         com.lanterna.client.naves.ClientNaves.tick();
         com.lanterna.client.mission.ClientLoreData.tick();
 
