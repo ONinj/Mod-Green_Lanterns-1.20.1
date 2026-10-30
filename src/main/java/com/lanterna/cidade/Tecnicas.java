@@ -233,7 +233,7 @@ public final class Tecnicas {
         for (Entity e : l.getEntities(p, p.getBoundingBox().inflate(8), x -> inimigo(p, x))) {
             double d = e.distanceTo(p);
             if (d > 8) continue;
-            e.hurt(p.damageSources().playerAttack(p), dano * (float) (1.2 - d / 10));
+            com.lanterna.combate.Equilibrio.ferirComPoder(e, p.damageSources().playerAttack(p), dano * (float) (1.2 - d / 10));
             Vec3 push = e.position().subtract(p.position()).normalize().scale(2.2 - d * 0.15);
             e.push(push.x, 0.55, push.z);
             e.hurtMarked = true;

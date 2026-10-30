@@ -19,6 +19,15 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> CALL_ADVANCEMENTS;
     public static final ForgeConfigSpec.IntValue CALL_REQUIRED;
 
+    public static final ForgeConfigSpec.DoubleValue VIDA_POR_NIVEL;
+    public static final ForgeConfigSpec.DoubleValue ARMADURA_POR_NIVEL;
+    public static final ForgeConfigSpec.DoubleValue DUREZA_POR_NIVEL;
+    public static final ForgeConfigSpec.DoubleValue PVP_DANO;
+    public static final ForgeConfigSpec.DoubleValue PVP_RESISTENCIA_POR_NIVEL;
+    public static final ForgeConfigSpec.DoubleValue PVP_DIFERENCA_NIVEL;
+    public static final ForgeConfigSpec.DoubleValue PVP_TETO_GOLPE;
+    public static final ForgeConfigSpec.BooleanValue PVP_MESMA_TROPA;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -77,6 +86,33 @@ public final class LanternaConfig {
         POCKET_RECHARGE_COOLDOWN_SECONDS = b
                 .comment("Tempo de espera em segundos entre recargas usando a bateria do slot (tecla R)")
                 .defineInRange("espera_recarga_bolso_segundos", 60, 0, 3600);
+        b.pop();
+
+        b.comment("Combate e equilíbrio (pensado para multiplayer)").push("combate");
+        VIDA_POR_NIVEL = b
+                .comment("Vida máxima a mais por nível da Tropa (2 = um coração). No nível 50 com 0.8: +40 de vida (20 corações a mais)")
+                .defineInRange("vida_por_nivel", 0.8, 0.0, 10.0);
+        ARMADURA_POR_NIVEL = b
+                .comment("Armadura a mais por nível (vale contra tudo). No nível 50 com 0.16: +8 de armadura")
+                .defineInRange("armadura_por_nivel", 0.16, 0.0, 2.0);
+        DUREZA_POR_NIVEL = b
+                .comment("Dureza de armadura a mais por nível (reduz golpes fortes). No nível 50 com 0.1: +5")
+                .defineInRange("dureza_por_nivel", 0.1, 0.0, 2.0);
+        PVP_DANO = b
+                .comment("Jogador contra jogador: fração do dano que passa (os poderes do anel são feitos para derrubar monstros grandes)")
+                .defineInRange("pvp_dano", 0.4, 0.0, 1.0);
+        PVP_RESISTENCIA_POR_NIVEL = b
+                .comment("Jogador contra jogador: resistência a mais por nível de quem apanha. No nível 50 com 0.005: 25% a menos")
+                .defineInRange("pvp_resistencia_por_nivel", 0.005, 0.0, 0.02);
+        PVP_DIFERENCA_NIVEL = b
+                .comment("Jogador contra jogador: quanto cada nível de diferença muda o dano (0.015 = 1,5% por nível; limitado entre -40% e +25%)")
+                .defineInRange("pvp_diferenca_nivel", 0.015, 0.0, 0.1);
+        PVP_TETO_GOLPE = b
+                .comment("Jogador contra jogador: um golpe tira no máximo esta fração da vida máxima (0.3 = 30%; acaba com o hit kill)")
+                .defineInRange("pvp_teto_golpe", 0.3, 0.05, 1.0);
+        PVP_MESMA_TROPA = b
+                .comment("Jogadores da mesma Tropa podem se ferir? (o pvp do servidor também precisa estar ligado)")
+                .define("pvp_mesma_tropa", true);
         b.pop();
 
         SPEC = b.build();

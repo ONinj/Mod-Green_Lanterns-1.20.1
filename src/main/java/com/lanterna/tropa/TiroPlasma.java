@@ -72,7 +72,7 @@ public class TiroPlasma extends ThrowableProjectile {
         Entity owner = getOwner();
         if (target == owner || (owner != null && target.isPassengerOfSameVehicle(owner))) return;
         if (owner != null && target instanceof NavePartLike part && part.naveOwner() == owner.getVehicle()) return;
-        target.hurt(damageSources().indirectMagic(this, owner instanceof LivingEntity l ? l : null), damage);
+        com.lanterna.combate.Equilibrio.ferirComPoder(target, damageSources().indirectMagic(this, owner instanceof LivingEntity l ? l : null), damage);
     }
 
     @Override

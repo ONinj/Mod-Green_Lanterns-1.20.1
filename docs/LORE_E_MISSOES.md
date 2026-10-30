@@ -318,3 +318,25 @@ perto da base. Contratos, cidade e Palácio continuam com os próprios reforços
   já têm o Palácio recebem os degraus sozinhos quando o jogador chega perto.
 - Aceitar uma missão de "fale com X" direto do próprio X conta a conversa na hora (antes era preciso clicar de novo).
 - A Guarda de Honra agora é oferecida só pela Miraeth (o Varo também mostrava a missão, mas ela pede a Miraeth).
+
+# 0.16 — Equilíbrio para multiplayer
+
+**Defesa pelo nível** (vale contra tudo): a cada nível o Lanterna ganha vida, armadura e dureza.
+
+| Nível | Vida | Armadura | Dureza |
+|---|---|---|---|
+| 1 | 20 | 0 | 0 |
+| 10 | 26 | 1,5 | 1 |
+| 25 | 38 | 4 | 2,5 |
+| 50 | 58 | 8 | 5 |
+
+**Jogador contra jogador** (`combate/Equilibrio`):
+1. Poderes do anel (construtos, técnicas, tiros de plasma, soco com o anel) passam 40% do dano; armas comuns passam inteiras.
+2. Resistência contra jogadores: 0,5% por nível de quem apanha (25% no 50).
+3. Diferença de nível: 1,5% por nível (entre -40% e +25%).
+4. Depois da armadura, um golpe tira no máximo 30% da vida máxima: acabou o hit kill.
+
+Medido no jogo (martelo de construto, mesmo nível): antes matava com 1 golpe a partir do nível 25; agora são 4–5 golpes.
+
+Tudo ajustável em `config/lanterna-common.toml`, seção `[combate]` (inclui `pvp_mesma_tropa` para desligar o fogo amigo
+entre jogadores da mesma Tropa). Ao subir de nível, o chat mostra a defesa nova.

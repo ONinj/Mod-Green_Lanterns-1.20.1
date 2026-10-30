@@ -1436,8 +1436,65 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Equilíbrio PvP: mede o dano real de cada golpe entre jogadores de vários níveis, e de monstros. */
+    private static void scenePvp() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("effect clear @s"); cmd("difficulty normal"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(160, () -> server(sp -> {
+            var lvl = sp.serverLevel();
+            LanternaMod.LOGGER.info("AUTOTEST modo {} dificuldade {}", sp.gameMode.getGameModeForPlayer(), lvl.getDifficulty());
+            var rival = net.minecraftforge.common.util.FakePlayerFactory.get(lvl, new com.mojang.authlib.GameProfile(java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"), "Rival"));
+            rival.moveTo(sp.getX() + 2, sp.getY(), sp.getZ());
+            var zumbi = net.minecraft.world.entity.EntityType.ZOMBIE.create(lvl);
+            int[][] pares = {{1, 1}, {10, 10}, {25, 25}, {50, 50}, {50, 10}, {10, 50}, {50, 30}};
+            for (int[] par : pares) {
+                int na = par[0], nv = par[1];
+                int afA = na >= 50 ? 5 : na >= 25 ? 3 : na >= 10 ? 1 : 0;
+                float forca = 1f + 0.01f * na, pow = (1f + 0.2f * afA) * forca;
+                com.lanterna.mission.LoreCapability.get(rival).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(na)));
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(nv)));
+                com.lanterna.tropa.Nivel.aplicar(sp);
+                float hp = sp.getMaxHealth();
+                double oldHp = 20 + (nv / 5) * 2;
+                StringBuilder sb = new StringBuilder(String.format("PVP atacante nv%d x alvo nv%d | vida %.0f armadura %.1f dureza %.1f |", na, nv, hp,
+                        sp.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR), sp.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS)));
+                Object[][] golpes = {{"soco", 1f + (1.5f + afA) * forca}, {"punho", 10f * pow}, {"martelo", 18f * pow}, {"onda", 12f * forca}, {"raio", 3f * pow}, {"espada", 7f}};
+                for (Object[] g : golpes) {
+                    float bruto = (float) g[1];
+                    sp.setHealth(hp); sp.invulnerableTime = 0;
+                    String nome = (String) g[0];
+                    rival.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, nome.equals("espada") ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD) : net.minecraft.world.item.ItemStack.EMPTY);
+                    if (nome.equals("soco") || nome.equals("espada")) sp.hurt(sp.damageSources().playerAttack(rival), bruto);
+                    else com.lanterna.combate.Equilibrio.ferirComPoder(sp, sp.damageSources().playerAttack(rival), bruto);
+                    float tirou = hp - sp.getHealth();
+                    sb.append(String.format(" %s: antes %.0f/%.0f (%s) agora %.1f (%d golpes) |", g[0], bruto, oldHp, bruto >= oldHp ? "HIT KILL" : (int) Math.ceil(oldHp / bruto) + " golpes",
+                            tirou, tirou <= 0 ? 0 : (int) Math.ceil(hp / tirou)));
+                }
+                AUD_LOG.add(sb.toString());
+            }
+            for (int nv : new int[]{1, 25, 50}) {
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(nv)));
+                com.lanterna.tropa.Nivel.aplicar(sp);
+                float hp = sp.getMaxHealth();
+                StringBuilder sb = new StringBuilder(String.format("MOB contra nv%d vida %.0f |", nv, hp));
+                for (float dmg : new float[]{3, 7, 16}) {
+                    sp.setHealth(hp); sp.invulnerableTime = 0;
+                    sp.hurt(sp.damageSources().mobAttack(zumbi), dmg);
+                    float tirou = hp - sp.getHealth();
+                    sb.append(String.format(" golpe %.0f tirou %.1f (%d golpes) |", dmg, tirou, (int) Math.ceil(hp / tirou)));
+                }
+                AUD_LOG.add(sb.toString());
+            }
+            sp.setHealth(sp.getMaxHealth());
+        }));
+        at(40, () -> { for (String l : AUD_LOG) LanternaMod.LOGGER.info("AUTOTEST {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();
+        if (ENABLED && SCENE.equals("pvp")) scenePvp();
+        else if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();
         else if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();
         else if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();
         else if (ENABLED && SCENE.equals("barreira")) sceneBarreira();

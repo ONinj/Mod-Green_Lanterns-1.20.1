@@ -1219,5 +1219,6 @@
   "key.lanterna.tecnica_1": "Técnica 1",
   "key.lanterna.tecnica_2": "Técnica 2",
   "key.lanterna.tecnica_3": "Técnica 3",
-  "missao.lanterna.alvos_perto": "Alvos da sua missão apareceram por perto."
+  "missao.lanterna.alvos_perto": "Alvos da sua missão apareceram por perto.",
+  "nivel.lanterna.defesa": "Vida +%s ❤ · Armadura +%s · Dureza +%s · Resistência contra jogadores %s%%"
 }

@@ -44,6 +44,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.18 ✅ (0.15) Cidade completa com interiores, lojas e missões dos NPCs; Palácio dos Guardiões; Técnicas dos Capitães
 1.19 ✅ (0.15.1) Auditoria das missões de derrotar: toda missão de "matar N" garante alvos suficientes
 1.20 ✅ (0.15.2) Juramento com a Anciã Miraeth: degraus nos tronos do Conselho e "fale com" conta ao aceitar
+1.21 ✅ (0.16) Equilíbrio para multiplayer: vida, armadura e dureza por nível; PvP sem hit kill (configurável)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

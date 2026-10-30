@@ -1219,5 +1219,6 @@
   "key.lanterna.tecnica_1": "Technique 1",
   "key.lanterna.tecnica_2": "Technique 2",
   "key.lanterna.tecnica_3": "Technique 3",
-  "missao.lanterna.alvos_perto": "Targets for your mission showed up nearby."
+  "missao.lanterna.alvos_perto": "Targets for your mission showed up nearby.",
+  "nivel.lanterna.defesa": "Health +%s ❤ · Armor +%s · Toughness +%s · Resistance vs players %s%%"
 }

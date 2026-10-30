@@ -40,6 +40,8 @@ import java.util.UUID;
 public final class Nivel {
     public static final int MAX = 50;
     private static final UUID VIDA = UUID.fromString("0a3f7e42-5b8c-4d1e-9f2a-6c7b8d9e0f11");
+    private static final UUID ARMADURA = UUID.fromString("5d2b1c0e-8a4f-4b6d-9e3a-1f7c2d8b4a61");
+    private static final UUID DUREZA = UUID.fromString("9c4e7a12-3b5d-4f8e-a6c1-2d9b0e7f3a52");
 
     /** XP para ir do nível n para o n+1. */
     public static int custo(int n) {
@@ -115,6 +117,8 @@ public final class Nivel {
         ModNetwork.sendTo(player, new TropaSyncPacket(amount, motivo == null ? "" : motivo.getString()));
         if (after > before) {
             player.sendSystemMessage(Component.translatable("nivel.lanterna.subiu", after).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            player.sendSystemMessage(Component.translatable("nivel.lanterna.defesa", vidaExtra(after) / 2, fmt(armaduraExtra(after)), fmt(durezaExtra(after)),
+                    Math.round(Math.min(0.5, (after - 1) * com.lanterna.LanternaConfig.PVP_RESISTENCIA_POR_NIVEL.get()) * 100)).withStyle(ChatFormatting.GRAY));
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.8f);
             aplicar(player);
             promover(player, data, after);
@@ -123,14 +127,34 @@ public final class Nivel {
         MissionManager.sync(player, data);
     }
 
-    /** Vida extra pelo nível (chamado ao entrar, renascer e subir de nível). */
+    /** Vida extra pelo nível: em corações inteiros. */
+    public static int vidaExtra(int nivel) {
+        double v = (nivel - 1) * com.lanterna.LanternaConfig.VIDA_POR_NIVEL.get();
+        return (int) Math.floor(v / 2) * 2;
+    }
+
+    public static double armaduraExtra(int nivel) {
+        return Math.round((nivel - 1) * com.lanterna.LanternaConfig.ARMADURA_POR_NIVEL.get() * 2) / 2.0;
+    }
+
+    public static double durezaExtra(int nivel) {
+        return Math.round((nivel - 1) * com.lanterna.LanternaConfig.DUREZA_POR_NIVEL.get() * 2) / 2.0;
+    }
+
+    /** Vida, armadura e dureza pelo nível (chamado ao entrar, renascer e subir de nível). */
     public static void aplicar(ServerPlayer player) {
-        AttributeInstance hp = player.getAttribute(Attributes.MAX_HEALTH);
-        if (hp == null) return;
-        hp.removeModifier(VIDA);
-        int extra = (nivel(player) / 5) * 2;
-        if (extra > 0) hp.addPermanentModifier(new AttributeModifier(VIDA, "lanterna_nivel", extra, AttributeModifier.Operation.ADDITION));
+        int n = nivel(player);
+        modificar(player, Attributes.MAX_HEALTH, VIDA, "lanterna_nivel", vidaExtra(n));
+        modificar(player, Attributes.ARMOR, ARMADURA, "lanterna_nivel_armadura", armaduraExtra(n));
+        modificar(player, Attributes.ARMOR_TOUGHNESS, DUREZA, "lanterna_nivel_dureza", durezaExtra(n));
         if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
+    }
+
+    private static void modificar(ServerPlayer player, net.minecraft.world.entity.ai.attributes.Attribute attr, UUID id, String nome, double valor) {
+        AttributeInstance inst = player.getAttribute(attr);
+        if (inst == null) return;
+        inst.removeModifier(id);
+        if (valor > 0) inst.addPermanentModifier(new AttributeModifier(id, nome, valor, AttributeModifier.Operation.ADDITION));
     }
 
     /** Entrega as recompensas dos postos ainda não entregues. */
@@ -158,6 +182,10 @@ public final class Nivel {
                 default -> {}
             }
         }
+    }
+
+    private static String fmt(double v) {
+        return v == Math.floor(v) ? String.valueOf((int) v) : String.valueOf(v);
     }
 
     private static void give(ServerPlayer p, ItemStack s) {

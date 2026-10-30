@@ -236,7 +236,7 @@ public class ConstructEntity extends Entity {
         ServerLevel sl = (ServerLevel) level();
         sl.sendParticles(dust(), stop.x, stop.y, stop.z, 4, 0.1, 0.1, 0.1, 0);
         if (hit != null) {
-            hit.hurt(source(owner), damage);
+            com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
             hit.invulnerableTime = 0;
             sl.sendParticles(ParticleTypes.CRIT, stop.x, stop.y, stop.z, 3, 0.2, 0.2, 0.2, 0.1);
         }
@@ -275,7 +275,7 @@ public class ConstructEntity extends Entity {
             if (e == owner || !e.isAlive()) continue;
             double d = e.position().distanceTo(c);
             if (d > radius + e.getBbWidth()) continue;
-            e.hurt(source(owner), damage * (float) Math.max(0.4, 1.0 - d / (radius * 1.6)));
+            com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage * (float) Math.max(0.4, 1.0 - d / (radius * 1.6)));
             Vec3 push = e.position().subtract(c).normalize();
             e.push(push.x * 1.2, 0.6, push.z * 1.2);
             e.hurtMarked = true;
@@ -302,7 +302,7 @@ public class ConstructEntity extends Entity {
         }
         ServerLevel sl = (ServerLevel) level();
         if (hit != null) {
-            hit.hurt(source(owner), damage);
+            com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
             Vec3 push = velocity.normalize().scale(kind() == Kind.FIST ? 1.8 : 0.4);
             hit.push(push.x, kind() == Kind.FIST ? 0.5 : 0.1, push.z);
             hit.hurtMarked = true;
@@ -329,7 +329,7 @@ public class ConstructEntity extends Entity {
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, owner.getBoundingBox().inflate(r, 1, r))) {
             if (e == owner || !e.isAlive() || e.distanceTo(owner) > r + 0.5) continue;
             if (e instanceof Player p && owner instanceof Player) continue;
-            e.hurt(source(owner), damage);
+            com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage);
             e.invulnerableTime = 0;
         }
         if (tickCount % 16 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 1.4f);
@@ -374,7 +374,7 @@ public class ConstructEntity extends Entity {
             // ...e volta trazendo o alvo
             Vec3 d = front.subtract(t.position());
             if (d.length() < 1.2) {
-                if (t instanceof LivingEntity le) le.hurt(source(owner), damage);
+                if (t instanceof LivingEntity le) com.lanterna.combate.Equilibrio.ferirComPoder(le, source(owner), damage);
                 discard();
                 return;
             }
