@@ -189,6 +189,68 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             if (apparent > 0.012 || isSun) {
                 drawAtmosphere(pose, pos, radius * (isSun ? 1.25f : 1.06f), body.atmosphere(), (isSun ? 0.9f : 0.75f) * closeness);
             }
+            // Planeta de guilda: campo de escudo na cor da Tropa e o símbolo da guilda virado para você
+            var dono = com.lanterna.client.guilda.ClientGuildas.planeta(body.id());
+            if (dono != null && apparent > 0.004) {
+                var gd = com.lanterna.client.guilda.ClientGuildas.guilda(dono.guilda());
+                if (gd != null) drawGuild(pose, pos, radius, gd, dono, time);
+            }
+        }
+    }
+
+    private static void drawGuild(Matrix4f pose, Vec3 center, float radius, com.lanterna.guilda.GuildasSyncPacket.G g,
+                                  com.lanterna.guilda.GuildasSyncPacket.P p, float time) {
+        boolean escudo = com.lanterna.client.guilda.ClientGuildas.escudoRestante(p) > 0;
+        int color = p.invadindo() ? 0xFF3030 : g.cor();
+        float pulse = 0.75f + 0.25f * Mth.sin(time * (p.invadindo() ? 0.4f : 0.06f));
+        float strength = (escudo ? 1.0f : 0.45f) * pulse;
+        float r = ((color >> 16) & 0xFF) / 255f, gg = ((color >> 8) & 0xFF) / 255f, bl = (color & 0xFF) / 255f;
+        float shell = radius * 1.16f;
+        // bolha (brilho na borda) e malha do campo
+        drawAtmosphere(pose, center, shell, color, 1.6f * strength);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+        Vec3 toCam = center.scale(-1).normalize();
+        BufferBuilder b = Tesselator.getInstance().getBuilder();
+        b.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
+        int lat = 12, lon = 24;
+        float spin = time * 0.0004f;
+        for (int i = 1; i < lat; i++) for (int j = 0; j < lon; j++) {
+            gridLine(b, pose, center, shell, i, j, i, j + 1, lat, lon, spin, toCam, r, gg, bl, 0.35f * strength);
+            gridLine(b, pose, center, shell, i, j, i + 1, j, lat, lon, spin, toCam, r, gg, bl, 0.35f * strength);
+        }
+        BufferUploader.drawWithShader(b.end());
+        RenderSystem.defaultBlendFunc();
+        // símbolo
+        Vec3 right = new Vec3(0, 1, 0).cross(toCam);
+        if (right.lengthSqr() < 1e-6) right = new Vec3(1, 0, 0);
+        right = right.normalize();
+        Vec3 up = toCam.cross(right).normalize();
+        Vec3 c = center.add(toCam.scale(shell * 1.01));
+        float s = radius * 0.28f;
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, com.lanterna.client.guilda.ClientGuildas.simbolo(g.id()));
+        float a = escudo ? 0.95f : 0.6f;
+        BufferBuilder q = Tesselator.getInstance().getBuilder();
+        q.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        Vec3[] cs = {c.add(right.scale(-s)).add(up.scale(s)), c.add(right.scale(-s)).add(up.scale(-s)),
+                c.add(right.scale(s)).add(up.scale(-s)), c.add(right.scale(s)).add(up.scale(s))};
+        float[][] uv = {{0, 0}, {0, 1}, {1, 1}, {1, 0}};
+        RenderSystem.disableCull();
+        for (int k = 0; k < 4; k++) q.vertex(pose, (float) cs[k].x, (float) cs[k].y, (float) cs[k].z).uv(uv[k][0], uv[k][1]).color(1f, 1f, 1f, a).endVertex();
+        BufferUploader.drawWithShader(q.end());
+        RenderSystem.enableCull();
+    }
+
+    private static void gridLine(BufferBuilder b, Matrix4f pose, Vec3 c, float radius, int i0, int j0, int i1, int j1, int lat, int lon,
+                                 float spin, Vec3 toCam, float r, float g, float bl, float alpha) {
+        for (int[] v : new int[][]{{i0, j0}, {i1, j1}}) {
+            float theta = (float) Math.PI * v[0] / lat;
+            float phi = (float) Math.PI * 2 * v[1] / lon + spin;
+            float nx = Mth.sin(theta) * Mth.cos(phi), ny = Mth.cos(theta), nz = Mth.sin(theta) * Mth.sin(phi);
+            float facing = (float) (nx * toCam.x + ny * toCam.y + nz * toCam.z);
+            float a = alpha * Mth.clamp(0.35f + facing * 0.65f, 0.1f, 1f);
+            b.vertex(pose, (float) (c.x + nx * radius), (float) (c.y + ny * radius), (float) (c.z + nz * radius)).color(r, g, bl, a).endVertex();
         }
     }
 

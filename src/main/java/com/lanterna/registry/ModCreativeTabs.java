@@ -62,6 +62,9 @@ public final class ModCreativeTabs {
                         output.accept(com.lanterna.naves.NaveItem.of(com.lanterna.naves.NaveTipo.DESTROCOS_1, ""));
                         for (var b : com.lanterna.naves.bloco.NaveBlocks.ITEMS) output.accept(b.get());
                         for (var i : com.lanterna.tropa.TropaItems.ALL) output.accept(i.get());
+                        output.accept(com.lanterna.guilda.GuildaItems.BANDEIRA_ITEM.get());
+                        output.accept(com.lanterna.guilda.GuildaItems.ESSENCIA.get());
+                        output.accept(com.lanterna.guilda.GuildaItems.ANEL_RECRUTA.get());
                         output.accept(com.lanterna.especies.EspeciesEntities.OVO.get());
                     })
                     .build());

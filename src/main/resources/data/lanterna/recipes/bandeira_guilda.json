@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" E ", "DBD", "GGG"],
+  "key": {
+    "E": { "item": "minecraft:emerald_block" },
+    "D": { "item": "minecraft:diamond" },
+    "B": { "tag": "minecraft:banners" },
+    "G": { "item": "minecraft:gold_ingot" }
+  },
+  "result": { "item": "lanterna:bandeira_guilda" }
+}

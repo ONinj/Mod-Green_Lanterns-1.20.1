@@ -340,6 +340,8 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     /** Quer brigar com este alvo? */
     public boolean hostilA(LivingEntity e) {
         if (e == this || !e.isAlive() || papel() == Especie.Papel.MERCADOR) return false;
+        String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
+        if (!guilda.isEmpty()) return hostilGuilda(e, guilda);
         if (e instanceof Player p) {
             if (p.isCreative() || p.isSpectator()) return false;
             if (angry.contains(p.getUUID())) return true;
@@ -353,6 +355,25 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
             return Factions.enemies(tropa(), o.tropa());
         }
         return papel() == Especie.Papel.LANTERNA && e instanceof LoreCreatures.Eco;
+    }
+
+    /** Tropas de guilda: a defesa briga com quem não é da guilda; o ataque, com a guilda dona do planeta. */
+    private boolean hostilGuilda(LivingEntity e, String guilda) {
+        if (funcao().startsWith("guilda_")) return false; // minerador e general não brigam
+        if (e instanceof LanternaEntity o && o.funcao().startsWith("guilda_")) return false;
+        String alvo = getPersistentData().getString(com.lanterna.guilda.Invasao.TAG_ALVO);
+        java.util.UUID minha = java.util.UUID.fromString(guilda);
+        if (e instanceof Player p) {
+            if (p.isCreative() || p.isSpectator()) return false;
+            if (!alvo.isEmpty()) return com.lanterna.guilda.Guildas.membro(java.util.UUID.fromString(alvo), p);
+            return !com.lanterna.guilda.Guildas.membro(minha, p);
+        }
+        if (e instanceof LanternaEntity o) {
+            String og = o.getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
+            if (!og.isEmpty()) return !og.equals(guilda);
+            return o.isPirata();
+        }
+        return false;
     }
 
     /** Função na cidade/palácio ("armeiro", "engenheiro", "capitao_salto"...), ou vazio. */
@@ -372,12 +393,20 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
 
     /** Aliado de um jogador (mesma Tropa)? */
     public boolean aliadoDe(Player p) {
+        String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
+        if (!guilda.isEmpty()) return com.lanterna.guilda.Guildas.membro(java.util.UUID.fromString(guilda), p);
         BuiltinCorps mine = Factions.playerCorps(p);
         return papel() == Especie.Papel.LANTERNA && mine != null && mine == tropa() && !angry.contains(p.getUUID());
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
+        if (!guilda.isEmpty() && !level().isClientSide) {
+            // sem fogo amigo entre a mesma guilda
+            if (source.getEntity() instanceof LanternaEntity o && guilda.equals(o.getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA))) return false;
+            if (source.getEntity() instanceof Player p && !p.isCreative() && com.lanterna.guilda.Guildas.membro(java.util.UUID.fromString(guilda), p)) return false;
+        }
         if (shieldTicks > 0) amount *= 0.35f;
         boolean hit = super.hurt(source, amount);
         if (hit && !level().isClientSide) {
@@ -409,6 +438,11 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
             ((ServerLevel) level()).sendParticles(new net.minecraft.core.particles.DustParticleOptions(
                     new org.joml.Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 1.6f),
                     getX(), getY() + getBbHeight() / 2, getZ(), 6, getBbWidth(), getBbHeight() / 2, getBbWidth(), 0);
+        }
+        // Tropas de guilda não sobem demais (a briga fica perto da base)
+        if (tickCount % 5 == 0 && !getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA).isEmpty()) {
+            int chao = level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, getBlockX(), getBlockZ());
+            if (getY() > chao + 18) setDeltaMovement(getDeltaMovement().x, Math.min(getDeltaMovement().y, -0.35), getDeltaMovement().z);
         }
         // Pousou: para de voar
         if (voando() && onGround() && getTarget() == null) setVoando(false);

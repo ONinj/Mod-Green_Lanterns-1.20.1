@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "minecraft:block/emerald_block",
+    "base": "minecraft:block/polished_deepslate",
+    "topo": "minecraft:block/emerald_block",
+    "nucleo": "minecraft:block/sea_lantern",
+    "mastro": "minecraft:block/quartz_pillar"
+  },
+  "elements": [
+    { "from": [1, 0, 1], "to": [15, 2, 15],
+      "faces": { "down": {"texture": "#base"}, "up": {"texture": "#base"}, "north": {"texture": "#base"}, "south": {"texture": "#base"}, "west": {"texture": "#base"}, "east": {"texture": "#base"} } },
+    { "from": [3, 2, 3], "to": [13, 4, 13],
+      "faces": { "up": {"texture": "#topo"}, "north": {"texture": "#topo"}, "south": {"texture": "#topo"}, "west": {"texture": "#topo"}, "east": {"texture": "#topo"} } },
+    { "from": [5.5, 4, 5.5], "to": [10.5, 6, 10.5],
+      "faces": { "up": {"texture": "#nucleo"}, "north": {"texture": "#nucleo"}, "south": {"texture": "#nucleo"}, "west": {"texture": "#nucleo"}, "east": {"texture": "#nucleo"} } },
+    { "from": [7, 6, 7], "to": [9, 16, 9],
+      "faces": { "north": {"texture": "#mastro"}, "south": {"texture": "#mastro"}, "west": {"texture": "#mastro"}, "east": {"texture": "#mastro"} } }
+  ]
+}

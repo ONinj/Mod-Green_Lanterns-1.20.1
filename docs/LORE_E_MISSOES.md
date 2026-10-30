@@ -340,3 +340,31 @@ Medido no jogo (martelo de construto, mesmo nível): antes matava com 1 golpe a 
 
 Tudo ajustável em `config/lanterna-common.toml`, seção `[combate]` (inclui `pvp_mesma_tropa` para desligar o fogo amigo
 entre jogadores da mesma Tropa). Ao subir de nível, o chat mostra a defesa nova.
+
+# 0.17 — Guildas e conquista de planetas
+
+**Guilda** (`/guilda`): `criar <nome>` (precisa ter anel; a cor da guilda é a da sua Tropa) · `simbolo` (editor 16x16) ·
+`convidar <jogador>` · `entrar <guilda>` · `sair` · `expulsar <nome>` · `desfazer` · `info [guilda]` · `lista` ·
+`abandonar` (no planeta). Admin: `/guilda admin tropas <n>`, `admin defesa <n>`, `admin sem_escudo`.
+
+**Bandeira da Guilda** (receita: bloco de esmeralda em cima, diamante · estandarte · diamante no meio, 3 ouros embaixo).
+Fincada num **planeta gerado** sem dono: o planeta é da guilda e aparece a base pronta (praça com a bandeira, Cabana
+Principal, Cabana do Minerador, Quartel do General com pátio de treino, muralha com 4 portões), nas cores da Tropa.
+Máximo de 3 planetas por guilda. Território: 64 blocos em volta da bandeira; só a guilda quebra/constrói ali.
+
+**Economia** (tempo real, funciona offline):
+- **Minerador**: junta 1 Essência de Poder a cada 3 min (até 64). Forja **Anel de Recruta** com 8 essências.
+  O Anel de Recruta não pode ser usado por jogador.
+- **General**: cada anel vira 1 tropa em 60 s — **defensor** (fica no planeta, máx. 20) ou **tropa de ataque**
+  (da guilda, máx. 30, vai junto nas invasões). As tropas são Lanternas NPC na cor da Tropa da guilda.
+
+**No espaço**: planeta conquistado tem campo de escudo na cor da guilda com o símbolo virado para você. Olhando para
+ele aparece o painel: guilda, dono, tropas de defesa, suas tropas de ataque e o estado do escudo.
+
+**Invasão**: alguém de outra guilda pousa no território com o escudo desligado → 10 s de aviso → começa (barra no topo).
+Os defensores saem da praça; as tropas de ataque da guilda invasora chegam junto do invasor; os membros da guilda
+invasora no planeta participam. Vitória do invasor: derrotar todos os defensores (a bandeira desce a meio-mastro e
+fica quebrável) e **derrubar a bandeira** → o planeta e a base passam para a guilda invasora. Vitória da defesa: o
+tempo (10 min) acaba ou não sobra invasor no território por 30 s; os defensores vivos voltam a contar. Depois de
+qualquer invasão: 4 h de escudo (2 h depois de fincar a bandeira). Tropas de ataque que sobrevivem voltam.
+Sem fogo amigo entre a mesma guilda. Tudo ajustável em `lanterna-common.toml`, seção `[guildas]`.

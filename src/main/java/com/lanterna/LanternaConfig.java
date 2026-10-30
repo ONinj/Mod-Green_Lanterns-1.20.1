@@ -27,6 +27,19 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.DoubleValue PVP_DIFERENCA_NIVEL;
     public static final ForgeConfigSpec.DoubleValue PVP_TETO_GOLPE;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_TROPA;
+    public static final ForgeConfigSpec.BooleanValue PVP_MESMA_GUILDA;
+
+    public static final ForgeConfigSpec.IntValue GUILDA_MAX_PLANETAS;
+    public static final ForgeConfigSpec.IntValue GUILDA_MAX_MEMBROS;
+    public static final ForgeConfigSpec.IntValue GUILDA_MAX_DEFESA;
+    public static final ForgeConfigSpec.IntValue GUILDA_MAX_ATAQUE;
+    public static final ForgeConfigSpec.IntValue GUILDA_MIN_ESSENCIA;
+    public static final ForgeConfigSpec.IntValue GUILDA_ESSENCIA_ANEL;
+    public static final ForgeConfigSpec.IntValue GUILDA_SEG_TREINO;
+    public static final ForgeConfigSpec.DoubleValue GUILDA_ESCUDO_CONQUISTA;
+    public static final ForgeConfigSpec.DoubleValue GUILDA_ESCUDO_INVASAO;
+    public static final ForgeConfigSpec.IntValue GUILDA_MIN_INVASAO;
+    public static final ForgeConfigSpec.IntValue GUILDA_RAIO;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -113,6 +126,23 @@ public final class LanternaConfig {
         PVP_MESMA_TROPA = b
                 .comment("Jogadores da mesma Tropa podem se ferir? (o pvp do servidor também precisa estar ligado)")
                 .define("pvp_mesma_tropa", true);
+        PVP_MESMA_GUILDA = b
+                .comment("Jogadores da mesma guilda podem se ferir?")
+                .define("pvp_mesma_guilda", false);
+        b.pop();
+
+        b.comment("Guildas e conquista de planetas").push("guildas");
+        GUILDA_MAX_PLANETAS = b.comment("Quantos planetas uma guilda pode ter ao mesmo tempo").defineInRange("max_planetas", 3, 1, 50);
+        GUILDA_MAX_MEMBROS = b.comment("Máximo de jogadores numa guilda").defineInRange("max_membros", 20, 1, 500);
+        GUILDA_MAX_DEFESA = b.comment("Máximo de tropas de defesa em cada planeta").defineInRange("max_defesa", 20, 1, 200);
+        GUILDA_MAX_ATAQUE = b.comment("Máximo de tropas de ataque guardadas pela guilda").defineInRange("max_ataque", 30, 1, 300);
+        GUILDA_MIN_ESSENCIA = b.comment("Minutos (tempo real) para o minerador juntar 1 Essência de Poder").defineInRange("minutos_por_essencia", 3, 1, 1440);
+        GUILDA_ESSENCIA_ANEL = b.comment("Essências para forjar 1 Anel de Recruta").defineInRange("essencias_por_anel", 8, 1, 640);
+        GUILDA_SEG_TREINO = b.comment("Segundos (tempo real) para o general treinar 1 tropa").defineInRange("segundos_treino", 60, 1, 86400);
+        GUILDA_ESCUDO_CONQUISTA = b.comment("Horas de escudo (sem invasões) depois de fincar a bandeira").defineInRange("escudo_horas_conquista", 2.0, 0.0, 720.0);
+        GUILDA_ESCUDO_INVASAO = b.comment("Horas de escudo depois de cada invasão (ganhando ou perdendo)").defineInRange("escudo_horas_invasao", 4.0, 0.0, 720.0);
+        GUILDA_MIN_INVASAO = b.comment("Duração máxima de uma invasão, em minutos").defineInRange("minutos_invasao", 10, 1, 120);
+        GUILDA_RAIO = b.comment("Raio do território em volta da bandeira (só a guilda constrói/quebra; a invasão começa aqui)").defineInRange("raio_territorio", 64, 24, 512);
         b.pop();
 
         SPEC = b.build();

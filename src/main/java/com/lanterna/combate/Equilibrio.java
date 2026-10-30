@@ -76,6 +76,10 @@ public final class Equilibrio {
         if (!(event.getEntity() instanceof ServerPlayer alvo)) return;
         Player atk = atacante(event.getSource());
         if (atk == null || atk == alvo) return;
+        if (!LanternaConfig.PVP_MESMA_GUILDA.get() && com.lanterna.guilda.Guildas.mesmaGuilda(atk, alvo)) {
+            event.setCanceled(true);
+            return;
+        }
         if (!LanternaConfig.PVP_MESMA_TROPA.get()) {
             var a = Factions.playerCorps(atk);
             if (a != null && a == Factions.playerCorps(alvo)) {

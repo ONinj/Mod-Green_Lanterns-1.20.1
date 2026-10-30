@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "liberada=false": { "model": "lanterna:block/bandeira_guilda" },
+    "liberada=true": { "model": "lanterna:block/bandeira_guilda" }
+  }
+}

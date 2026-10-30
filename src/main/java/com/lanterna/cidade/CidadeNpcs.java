@@ -78,6 +78,7 @@ public final class CidadeNpcs {
     }
 
     public static InteractionResult interagir(ServerPlayer p, LanternaEntity npc, String funcao) {
+        if (funcao.startsWith("guilda_")) return com.lanterna.guilda.GuildaNpcs.interagir(p, npc, funcao);
         PlanetLore pl = planeta(npc);
         String planet = pl != null ? pl.planet : "oa";
         // Conversar com o NPC conta para "fale com..."

@@ -104,6 +104,7 @@ public final class ClientModEvents {
                 ctx -> new com.lanterna.naves.client.NaveRenderer<>(ctx, LanternaMod.MODID));
         event.registerEntityRenderer(com.lanterna.tropa.TropaEntities.TIRO_PLASMA.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerEntityRenderer(com.lanterna.naves.NaveEntities.ASSENTO.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
+        event.registerBlockEntityRenderer(com.lanterna.guilda.GuildaItems.BANDEIRA_BE.get(), com.lanterna.client.guilda.BandeiraRenderer::new);
     }
 
     @SubscribeEvent
@@ -136,6 +137,7 @@ public final class ClientModEvents {
         event.registerAboveAll("tecnicas", com.lanterna.client.cidade.ClientTecnicas.HUD);
         event.registerAboveAll("selection_cutscene", CutsceneOverlay.OVERLAY);
         event.registerAboveAll("space_nav", com.lanterna.client.space.SpaceHud.HUD);
+        event.registerAboveAll("guilda_planeta", com.lanterna.client.guilda.GuildaHud.HUD);
         event.registerAboveAll("flight_hud", com.lanterna.client.flight.FlightHud.HUD);
         event.registerAboveAll("mission_hud", com.lanterna.client.mission.MissionHud.HUD);
         event.registerAboveAll("construct_bar", com.lanterna.client.construct.ConstructBarHud.HUD);

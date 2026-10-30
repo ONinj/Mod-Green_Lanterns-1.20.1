@@ -1492,8 +1492,214 @@ public final class DevAutoTest {
         at(40, () -> { for (String l : AUD_LOG) LanternaMod.LOGGER.info("AUTOTEST {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Guildas: criar, símbolo, bandeira (base pronta), minerador, general, escudo/HUD no espaço e invasão completa. */
+    private static final java.util.List<String> GLOG = new java.util.concurrent.CopyOnWriteArrayList<>();
+    private static final String[] G_PLANETAS = new String[2];
+    private static void glog(String s) { GLOG.add(s); LanternaMod.LOGGER.info("AUTOTEST G {}", s); }
+    private static void sceneGuilda() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s regeneration 99999 4 true"); cmd("difficulty normal");
+            cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            for (var g : new java.util.ArrayList<>(gs.guildas.values())) { for (var c : gs.planetasDe(g.id)) com.lanterna.guilda.Conquistas.largar(sp.server, c); gs.desfazer(g); }
+            // dois planetas gerados
+            int n = 0;
+            for (int r = 2; r < 6 && n < 2; r++) for (int sx = -r; sx <= r && n < 2; sx++) {
+                var b = com.lanterna.space.ProceduralPlanets.inSector(sx, r);
+                if (b != null && sp.server.getLevel(b.dimension()) != null) G_PLANETAS[n++] = b.id();
+            }
+            glog("planetas " + G_PLANETAS[0] + " " + G_PLANETAS[1]);
+        }));
+        // ---- criar a guilda (abre o editor de símbolo) ----
+        at(10, () -> cmd("guilda criar Zezinho do Grau"));
+        at(30, () -> { glog("tela " + (mc.screen == null ? null : mc.screen.getClass().getSimpleName())); shot("g1_editor_vazio"); });
+        at(5, () -> {
+            // desenha um "Z" com raio (símbolo da guilda) e salva pelo próprio pacote do editor
+            byte[] px = new byte[256];
+            for (int x = 2; x <= 13; x++) { px[2 * 16 + x] = 7; px[3 * 16 + x] = 7; px[12 * 16 + x] = 7; px[13 * 16 + x] = 7; }
+            for (int i = 0; i < 9; i++) { int x = 12 - i, y = 4 + i; px[y * 16 + x] = 1; px[y * 16 + x + 1] = 1; if (x - 1 >= 0) px[y * 16 + x - 1] = 4; }
+            for (int y = 0; y < 16; y++) { px[y * 16] = 9; px[y * 16 + 15] = 9; }
+            if (mc.screen instanceof com.lanterna.client.guilda.SimboloScreen) {
+                try { var f = com.lanterna.client.guilda.SimboloScreen.class.getDeclaredField("px"); f.setAccessible(true); System.arraycopy(px, 0, (byte[]) f.get(mc.screen), 0, 256); } catch (Exception e) { throw new RuntimeException(e); }
+            }
+        });
+        at(10, () -> shot("g2_editor_desenhado"));
+        at(5, () -> { try { var f = com.lanterna.client.guilda.SimboloScreen.class.getDeclaredField("px"); f.setAccessible(true);
+            com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket("", "simbolo", ((byte[]) f.get(mc.screen)).clone())); } catch (Exception e) { throw new RuntimeException(e); }
+            mc.setScreen(null); });
+        // ---- fincar a bandeira no planeta A ----
+        at(20, () -> server(sp -> {
+            var b = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[0]);
+            var lvl = sp.server.getLevel(b.dimension());
+            int x = b.procedural().regionX() + 40, z = b.procedural().regionZ() + 40;
+            lvl.getChunk(x >> 4, z >> 4);
+            int y = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            sp.teleportTo(lvl, x + 0.5, y + 1, z + 4.5, 180, 20);
+        }));
+        at(60, () -> server(sp -> {
+            var lvl = sp.serverLevel();
+            BlockPos pos = sp.blockPosition().offset(0, 0, -4);
+            pos = pos.atY(lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ()));
+            var st = com.lanterna.guilda.GuildaItems.BANDEIRA.get().defaultBlockState();
+            lvl.setBlock(pos, st, 3);
+            st.getBlock().setPlacedBy(lvl, pos, st, sp, new net.minecraft.world.item.ItemStack(com.lanterna.guilda.GuildaItems.BANDEIRA_ITEM.get()));
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            glog("bandeira em " + pos.toShortString() + " conquista=" + (gs.conquistas.get(G_PLANETAS[0]) != null));
+        }));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2000);
+        at(40, () -> { cmd("gamemode spectator"); server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]);
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 0.5, c.bandeira.getY() + 34, c.bandeira.getZ() + 38.5, 180, 38); }); });
+        at(80, () -> shot("g3_base_alto"));
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]);
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 30.5, c.bandeira.getY() + 18, c.bandeira.getZ() - 30.5, 45, 25); }));
+        at(60, () -> shot("g3b_base_lado"));
+        at(5, () -> cmd("gamemode survival"));
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]);
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 6.5, c.bandeira.getY() + 2, c.bandeira.getZ() + 7.5, 140, -12); }));
+        at(60, () -> shot("g4_bandeira"));
+        // ---- minerador e general ----
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]); c.essencia = 20; }));
+        at(5, () -> clicarNpc("guilda_minerador"));
+        at(30, () -> { int id = CLICAR.getAndSet(-1); var e = mc.level.getEntity(id); if (e != null) mc.gameMode.interact(mc.player, e, net.minecraft.world.InteractionHand.MAIN_HAND); });
+        at(30, () -> { glog("tela minerador " + (mc.screen == null ? null : mc.screen.getClass().getSimpleName())); shot("g5_minerador"); });
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "forjar")));
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "forjar")));
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "coletar")));
+        at(10, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]);
+            glog("depois de forjar: estoque=" + c.essencia + " aneis=" + count(sp, com.lanterna.guilda.GuildaItems.ANEL_RECRUTA.get()) + " essencia_inv=" + count(sp, com.lanterna.guilda.GuildaItems.ESSENCIA.get()));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.guilda.GuildaItems.ANEL_RECRUTA.get(), 4)); }));
+        at(5, () -> { mc.setScreen(null); clicarNpc("guilda_general"); });
+        at(30, () -> { int id = CLICAR.getAndSet(-1); var e = mc.level.getEntity(id); if (e != null) mc.gameMode.interact(mc.player, e, net.minecraft.world.InteractionHand.MAIN_HAND); });
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "treinar_defesa")));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "treinar_defesa")));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "treinar_defesa")));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "treinar_ataque")));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "treinar_ataque")));
+        at(20, () -> { glog("tela general " + (mc.screen == null ? null : mc.screen.getClass().getSimpleName())); shot("g6_general"); });
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[0]); glog("fila=" + c.fila.size()); c.proximaTropa = 0; }));
+        at(60, () -> server(sp -> { var gs = com.lanterna.guilda.Guildas.get(sp.server); var c = gs.conquistas.get(G_PLANETAS[0]);
+            glog("treinadas: defesa=" + c.defesa + " ataque=" + gs.guildas.get(c.guilda).ataque + " fila=" + c.fila.size()); }));
+        at(5, () -> mc.setScreen(null));
+        // ---- espaço: escudo, símbolo e HUD ----
+        at(5, () -> server(sp -> {
+            var b = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[0]);
+            var sl = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
+            net.minecraft.world.phys.Vec3 at = b.center().add(0, b.radius() * 0.3, b.radius() * 2.6);
+            sp.teleportTo(sl, at.x, at.y, at.z, 180, 6);
+        }));
+        at(100, () -> server(sp -> { var b = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[0]);
+            var rel = b.center().subtract(sp.getEyePosition());
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), (float) Math.toDegrees(Math.atan2(-rel.x, rel.z)), (float) -Math.toDegrees(Math.atan2(rel.y, Math.hypot(rel.x, rel.z)))); }));
+        at(40, () -> shot("g7_espaco_seu"));
+        // ---- guilda rival dona do planeta B ----
+        at(5, () -> server(sp -> {
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            var b = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[1]);
+            var lvl = sp.server.getLevel(b.dimension());
+            var rival = net.minecraftforge.common.util.FakePlayerFactory.get(lvl, new com.mojang.authlib.GameProfile(java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"), "Lorde_Atrocitus"));
+            var g = gs.criar(rival, "Lordes de Ysmault", "red");
+            for (int i = 0; i < 256; i++) { int x = i % 16, y = i / 16; double d = Math.hypot(x - 7.5, y - 7.5); g.simbolo[i] = (byte) (d < 7 && d > 5 ? 5 : (Math.abs(x - 7.5) < 1.5 && y > 3 && y < 12) ? 4 : 0); }
+            int x = b.procedural().regionX() + 40, z = b.procedural().regionZ() + 40;
+            lvl.getChunk(x >> 4, z >> 4);
+            int y = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            BlockPos pos = new BlockPos(x, y, z);
+            lvl.setBlock(pos, com.lanterna.guilda.GuildaItems.BANDEIRA.get().defaultBlockState(), 3);
+            var erro = com.lanterna.guilda.Conquistas.fincar(rival, lvl, pos);
+            var c = gs.conquistas.get(G_PLANETAS[1]);
+            glog("rival fincou erro=" + (erro == null ? null : erro.getString()) + " c=" + (c != null));
+            c.defesa = 5;
+            c.escudoAte = System.currentTimeMillis() + 3_600_000L;
+            gs.guildas.get(gs.daJogador(sp.getUUID()).id).ataque = 4;
+            gs.mudou();
+            var bb = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[1]);
+            var sl = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
+            net.minecraft.world.phys.Vec3 at = bb.center().add(bb.radius() * 1.4, bb.radius() * 0.4, bb.radius() * 1.9);
+            sp.teleportTo(sl, at.x, at.y, at.z, 0, 0);
+        }));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2000);
+        at(60, () -> server(sp -> { var b = com.lanterna.space.SpaceBodies.byId(G_PLANETAS[1]);
+            var rel = b.center().subtract(sp.getEyePosition());
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), (float) Math.toDegrees(Math.atan2(-rel.x, rel.z)), (float) -Math.toDegrees(Math.atan2(rel.y, Math.hypot(rel.x, rel.z)))); }));
+        at(40, () -> shot("g8_espaco_rival_escudo"));
+        at(5, () -> server(sp -> { var gs = com.lanterna.guilda.Guildas.get(sp.server); gs.conquistas.get(G_PLANETAS[1]).escudoAte = 0; gs.mudou(); }));
+        at(30, () -> shot("g9_espaco_rival_vulneravel"));
+        // ---- pousar no território rival: proteção e aviso de invasão ----
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            var lvl = sp.server.getLevel(c.mundo);
+            sp.teleportTo(lvl, c.bandeira.getX() + 0.5, c.bandeira.getY(), c.bandeira.getZ() + 14.5, 180, 10); }));
+        at(40, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            BlockPos q = c.bandeira.offset(3, -1, 3);
+            var antes = sp.serverLevel().getBlockState(q);
+            sp.gameMode.destroyBlock(q);
+            glog("quebrar bloco no territorio rival: protegido=" + (sp.serverLevel().getBlockState(q) == antes)); }));
+        at(100, () -> shot("g10_aviso"));
+        waitFor(() -> com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]) != null, 600);
+        at(60, () -> { glog("invasao ativa=" + (com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]) != null)); shot("g11_invasao"); });
+        at(5, () -> server(sp -> {
+            var defs = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(80),
+                    e -> "defesa".equals(e.getPersistentData().getString(com.lanterna.guilda.Invasao.TAG_PAPEL)));
+            var atk = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(80),
+                    e -> "ataque".equals(e.getPersistentData().getString(com.lanterna.guilda.Invasao.TAG_PAPEL)));
+            glog("defensores=" + defs.size() + " cor=" + (defs.isEmpty() ? null : defs.get(0).tropa()) + " tropasAtaque=" + atk.size() + " cor=" + (atk.isEmpty() ? null : atk.get(0).tropa())
+                    + " alvoDefensor=" + (defs.isEmpty() || defs.get(0).getTarget() == null ? null : defs.get(0).getTarget().getName().getString()));
+            // a bandeira ainda não quebra
+            var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            sp.gameMode.destroyBlock(c.bandeira);
+            glog("bandeira antes da defesa cair: ainda la=" + sp.serverLevel().getBlockState(c.bandeira).is(com.lanterna.guilda.GuildaItems.BANDEIRA.get()));
+        }));
+        at(100, () -> shot("g12_batalha"));
+        at(5, () -> server(sp -> { glog("jogador em " + sp.blockPosition().toShortString() + " " + sp.level().dimension().location() + " " + com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]).debug());
+            for (var u : new java.util.ArrayList<>(com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]).defensoresIds())) {
+            if (!(sp.serverLevel().getEntity(u) instanceof com.lanterna.especies.LanternaEntity e)) continue;
+            e.invulnerableTime = 0; boolean ok = e.hurt(sp.damageSources().playerAttack(sp), 5000);
+            glog("ferir defensor ok=" + ok + " vivo=" + e.isAlive() + " vida=" + e.getHealth() + " pos=" + e.blockPosition().toShortString()); } }));
+        at(30, () -> server(sp -> { var inv = com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]); glog("inv defensores restantes=" + (inv == null ? -1 : inv.debug())); }));
+        at(60, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            glog("liberada=" + sp.serverLevel().getBlockState(c.bandeira).getValue(com.lanterna.guilda.BandeiraBlock.LIBERADA));
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 3.5, c.bandeira.getY(), c.bandeira.getZ() + 4.5, 145, 15); }));
+        at(40, () -> shot("g13_bandeira_liberada"));
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            sp.gameMode.destroyBlock(c.bandeira);
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            glog("depois de derrubar: dono=" + gs.guildas.get(gs.conquistas.get(G_PLANETAS[1]).guilda).nome + " invasao=" + (com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]) != null)
+                    + " ataqueDeVolta=" + gs.daJogador(sp.getUUID()).ataque); }));
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(G_PLANETAS[1]);
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 7.5, c.bandeira.getY() + 3, c.bandeira.getZ() + 9.5, 145, -8); }));
+        at(80, () -> shot("g14_tomado"));
+        // ---- defesa vence (invasores somem do território) ----
+        at(5, () -> server(sp -> {
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            var c = gs.conquistas.get(G_PLANETAS[1]);
+            c.defesa = 3;
+            var rivalG = gs.porNome("Lordes de Ysmault");
+            rivalG.ataque = 2;
+            var rival = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"), "Lorde_Atrocitus"));
+            rival.moveTo(c.bandeira.getX() + 20, c.bandeira.getY(), c.bandeira.getZ());
+            com.lanterna.guilda.Invasao.comecar(rival, c, rivalG);
+            glog("contra-ataque comecou=" + (com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]) != null));
+        }));
+        at(60, () -> shot("g15_contra_ataque"));
+        at(5, () -> server(sp -> { for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(120),
+                e -> "ataque".equals(e.getPersistentData().getString(com.lanterna.guilda.Invasao.TAG_PAPEL)))) e.hurt(sp.damageSources().playerAttack(sp), 5000); }));
+        waitFor(() -> com.lanterna.guilda.Invasao.ativa(G_PLANETAS[1]) == null, 1200);
+        at(20, () -> server(sp -> { var gs = com.lanterna.guilda.Guildas.get(sp.server); var c = gs.conquistas.get(G_PLANETAS[1]);
+            glog("defesa venceu: dono=" + gs.guildas.get(c.guilda).nome + " defesa=" + c.defesa + " escudo_h=" + (c.escudoAte - System.currentTimeMillis()) / 3_600_000.0); }));
+        at(20, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+    private static int count(net.minecraft.server.level.ServerPlayer sp, net.minecraft.world.item.Item it) {
+        int n = 0; for (var s : sp.getInventory().items) if (s.is(it)) n += s.getCount(); return n;
+    }
+
     static {
-        if (ENABLED && SCENE.equals("pvp")) scenePvp();
+        if (ENABLED && SCENE.equals("guilda")) sceneGuilda();
+        else if (ENABLED && SCENE.equals("pvp")) scenePvp();
         else if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();
         else if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();
         else if (ENABLED && SCENE.equals("fotos15")) sceneFotos15();

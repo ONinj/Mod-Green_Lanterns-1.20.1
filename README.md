@@ -45,6 +45,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.19 ✅ (0.15.1) Auditoria das missões de derrotar: toda missão de "matar N" garante alvos suficientes
 1.20 ✅ (0.15.2) Juramento com a Anciã Miraeth: degraus nos tronos do Conselho e "fale com" conta ao aceitar
 1.21 ✅ (0.16) Equilíbrio para multiplayer: vida, armadura e dureza por nível; PvP sem hit kill (configurável)
+1.22 ✅ (0.17) Guildas e conquista de planetas: bandeira com base pronta, minerador, general, tropas, escudo com símbolo, HUD e invasões
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

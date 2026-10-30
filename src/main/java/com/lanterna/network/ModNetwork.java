@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "6";
+    private static final String VERSION = "7";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -150,6 +150,26 @@ public final class ModNetwork {
                 .encoder(com.lanterna.tropa.QuadroPacket::encode)
                 .decoder(com.lanterna.tropa.QuadroPacket::decode)
                 .consumerMainThread(com.lanterna.tropa.QuadroPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.guilda.GuildasSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.guilda.GuildasSyncPacket::encode)
+                .decoder(com.lanterna.guilda.GuildasSyncPacket::decode)
+                .consumerMainThread(com.lanterna.guilda.GuildasSyncPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.guilda.GuildaPainelPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.guilda.GuildaPainelPacket::encode)
+                .decoder(com.lanterna.guilda.GuildaPainelPacket::decode)
+                .consumerMainThread(com.lanterna.guilda.GuildaPainelPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.guilda.AbrirSimboloPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.guilda.AbrirSimboloPacket::encode)
+                .decoder(com.lanterna.guilda.AbrirSimboloPacket::decode)
+                .consumerMainThread(com.lanterna.guilda.AbrirSimboloPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.guilda.GuildaAcaoPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.guilda.GuildaAcaoPacket::encode)
+                .decoder(com.lanterna.guilda.GuildaAcaoPacket::decode)
+                .consumerMainThread(com.lanterna.guilda.GuildaAcaoPacket::handle)
                 .add();
     }
 
