@@ -1022,5 +1022,7 @@
   "nave.lanterna.recarga.ok": "Ring recharged by the ship's station.",
   "nave.lanterna.beliche.dormiu": "You slept in the bunk. The night passed and you'll respawn here.",
   "nave.lanterna.beliche.descansou": "You rested. You'll respawn here in the ship now.",
-  "entity.lanterna.assento": "Seat"
+  "entity.lanterna.assento": "Seat",
+  "contrato.lanterna.local_destruido": "You gave up: the contract site was destroyed and a new contract appeared on the board.",
+  "contrato.lanterna.reforcos": "Reinforcements arrived at the contract site!"
 }

@@ -18,6 +18,7 @@ import com.lanterna.naves.NaveTipo;
 import com.lanterna.network.ModNetwork;
 import com.lanterna.space.SpaceBodies;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,24 +69,53 @@ public final class Contratos {
         return l;
     }
 
+    private static final String NOVO = "lanterna_ct_novo";
+
+    /** Ofertas do dia para este jogador: um contrato abandonado (local destruído) vira um novo no mesmo espaço. */
+    public static List<String> ofertas(ServerPlayer p, String planet, long day) {
+        CompoundTag novos = p.getPersistentData().getCompound(NOVO);
+        List<String> l = new ArrayList<>();
+        for (int i = 0; i < POR_DIA; i++) {
+            int n = novos.getInt(planet + "_" + day + "_" + i);
+            l.add("ct_" + planet + "_" + day + "_" + i + (n > 0 ? "_" + n : ""));
+        }
+        return l;
+    }
+
+    private static void renovar(ServerPlayer p, String id) {
+        String[] s = id.split("_");
+        if (s.length < 4) return;
+        CompoundTag novos = p.getPersistentData().getCompound(NOVO);
+        String k = s[1] + "_" + s[2] + "_" + s[3];
+        novos.putInt(k, novos.getInt(k) + 1);
+        // limpa os dias velhos para não crescer para sempre
+        long hoje = dia(p);
+        for (String key : new ArrayList<>(novos.getAllKeys())) {
+            String[] q = key.split("_");
+            try { if (q.length == 3 && Long.parseLong(q[1]) < hoje - 1) novos.remove(key); } catch (NumberFormatException ignored) {}
+        }
+        p.getPersistentData().put(NOVO, novos);
+    }
+
     private record Dados(String tipo, String planet, int count, BlockPos pos, String dest, int xp, int tier) {}
 
     @Nullable
     private static Dados dados(String id) {
         String[] p = id.split("_");
-        if (p.length != 4) return null;
+        if (p.length != 4 && p.length != 5) return null;
         String planet = p[1];
         PlanetLore pl = PlanetLore.byPlanet(planet);
         if (pl == null || pl == PlanetLore.GENESE) return null;
         long day;
-        int slot;
+        int slot, novo;
         try {
             day = Long.parseLong(p[2]);
             slot = Integer.parseInt(p[3]);
+            novo = p.length == 5 ? Integer.parseInt(p[4]) : 0;
         } catch (NumberFormatException e) {
             return null;
         }
-        Random r = new Random(planet.hashCode() * 31L + day * 1_000_003L + slot * 7919L);
+        Random r = new Random(planet.hashCode() * 31L + day * 1_000_003L + slot * 7919L + novo * 104_729L);
         String tipo = switch (slot) {
             case 0 -> r.nextBoolean() ? "piratas" : "ecos";
             case 1 -> r.nextBoolean() ? "resgate" : "entrega";
@@ -199,7 +229,7 @@ public final class Contratos {
         }
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d == null) return;
-        List<String> ids = ofertas(pl.planet, dia(p));
+        List<String> ids = ofertas(p, pl.planet, dia(p));
         List<Integer> estado = new ArrayList<>();
         for (String id : ids) estado.add(d.isDone(id) ? 2 : d.isActive(id) ? 1 : 0);
         int ativos = (int) d.active().keySet().stream().filter(k -> k.startsWith("ct_")).count();
@@ -242,7 +272,7 @@ public final class Contratos {
         LoreData d = LoreCapability.get(p).orElse(null);
         Dados dd = dados(id);
         if (d == null || dd == null) return;
-        if (!ofertas(dd.planet, dia(p)).contains(id)) {
+        if (!ofertas(p, dd.planet, dia(p)).contains(id)) {
             p.displayClientMessage(Component.translatable("contrato.lanterna.expirou"), true);
             return;
         }
@@ -261,6 +291,10 @@ public final class Contratos {
         if (d == null || !id.startsWith("ct_") || !d.isActive(id)) return;
         d.abandon(id);
         MissionManager.sync(p, d);
+        // O local do contrato é destruído e no lugar dele aparece um contrato novo (outro lugar, outros alvos)
+        destruirLocal(p, id);
+        renovar(p, id);
+        p.displayClientMessage(Component.translatable("contrato.lanterna.local_destruido"), false);
         abrirQuadro(p, true);
     }
 
@@ -285,27 +319,159 @@ public final class Contratos {
             if (dx * dx + dz * dz > 110 * 110) continue;
             LoreWorldData wd = LoreWorldData.get(p.server);
             String site = "ct:" + id + ":" + p.getStringUUID();
-            if (wd.siteBuilt(site)) continue;
+            if (wd.siteBuilt(site)) {
+                reforcos(p, d, id, dd);
+                continue;
+            }
             wd.markSite(site);
-            spawnAlvo(p.serverLevel(), dd, PlanetLore.byPlanet(dd.planet));
+            spawnAlvo(p.serverLevel(), dd, PlanetLore.byPlanet(dd.planet), tag(id, p));
         }
     }
 
-    private static void spawnAlvo(ServerLevel level, Dados d, PlanetLore pl) {
+    // ===================== Alvos marcados, reforços e destruir o local =====================
+
+    public static final String TAG = "lanterna_ct";
+
+    private static String tag(String id, ServerPlayer p) {
+        return id + ":" + p.getStringUUID();
+    }
+
+    /** O alvo conta para este tipo de objetivo? */
+    private static boolean eAlvo(net.minecraft.world.entity.Entity e, String alvo) {
+        return switch (alvo) {
+            case "papel:pirata" -> e instanceof LanternaEntity l && l.papel() == com.lanterna.especies.Especie.Papel.PIRATA;
+            case "papel:capitao" -> e instanceof LanternaEntity l && l.papel() == com.lanterna.especies.Especie.Papel.CAPITAO;
+            case "papel:inimigo" -> e instanceof LanternaEntity l && l.papel() == com.lanterna.especies.Especie.Papel.LANTERNA;
+            case "lanterna:eco_cinzento" -> e.getType() == LoreEntities.ECO_CINZENTO.get();
+            default -> false;
+        };
+    }
+
+    /**
+     * Faltam alvos vivos para terminar o contrato (algum caiu num buraco, morreu na lava, foi morto por outro bicho...)?
+     * Chegam reforços a cada 30 s até dar para completar.
+     */
+    private static void reforcos(ServerPlayer p, LoreData d, String id, Dados dd) {
+        Mission m = mission(id);
+        if (m == null) return;
+        String cdKey = "lanterna_ct_reforco";
+        long now = p.level().getGameTime();
+        CompoundTag cds = p.getPersistentData().getCompound(cdKey);
+        if (now < cds.getLong(id)) return;
+        ServerLevel level = p.serverLevel();
+        String tag = tag(id, p);
+        BlockPos c = surface(level, dd.pos);
+        boolean veio = false;
+        for (int i = 0; i < m.objectives().size(); i++) {
+            Objective o = m.objectives().get(i);
+            if (o.type() != Type.KILL) continue;
+            int falta = o.count() - d.progress(id, i);
+            if (falta <= 0) continue;
+            String alvo = o.target();
+            int vivos = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, new net.minecraft.world.phys.AABB(c).inflate(120, 80, 120),
+                    e -> e.isAlive() && tag.equals(e.getPersistentData().getString(TAG)) && eAlvo(e, alvo)).size();
+            if (vivos < falta) LanternaMod.LOGGER.debug("Contrato {}: faltam {} alvos vivos ({} vivos), chegam reforços", id, falta - vivos, vivos);
+            for (int k = vivos; k < falta; k++) {
+                veio = true;
+                switch (alvo) {
+                    case "papel:pirata" -> add(level, LanternaEntity.pirata(level, false), c, 7, tag);
+                    case "papel:capitao" -> add(level, LanternaEntity.pirata(level, true), c, 3, tag);
+                    case "papel:inimigo" -> {
+                        PlanetLore pl = PlanetLore.byPlanet(dd.planet);
+                        add(level, LanternaEntity.lanterna(level, inimigoDe(level, pl), false), c, 5, tag);
+                    }
+                    case "lanterna:eco_cinzento" -> eco(level, c, tag);
+                    default -> {}
+                }
+            }
+        }
+        cds.putLong(id, now + 20 * 30);
+        p.getPersistentData().put(cdKey, cds);
+        if (veio) p.displayClientMessage(Component.translatable("contrato.lanterna.reforcos"), true);
+    }
+
+    private static BuiltinCorps inimigoDe(ServerLevel level, PlanetLore pl) {
+        List<BuiltinCorps> enemies = new ArrayList<>();
+        for (BuiltinCorps x : BuiltinCorps.values()) if (x != BuiltinCorps.WHITE && Factions.enemies(pl.corps, x)) enemies.add(x);
+        return enemies.isEmpty() ? BuiltinCorps.BLACK : enemies.get(level.random.nextInt(enemies.size()));
+    }
+
+    private static void eco(ServerLevel level, BlockPos c, String tag) {
+        var e = LoreEntities.ECO_CINZENTO.get().create(level);
+        if (e == null) return;
+        BlockPos q = surface(level, c.offset(level.random.nextInt(13) - 6, 0, level.random.nextInt(13) - 6));
+        e.moveTo(q.getX() + 0.5, q.getY(), q.getZ() + 0.5, level.random.nextFloat() * 360, 0);
+        e.setPersistenceRequired();
+        e.getPersistentData().putString(TAG, tag);
+        level.addFreshEntity(e);
+    }
+
+    /** Desistir: some com os alvos, a fogueira e os destroços do local (os que não estão carregados somem ao carregar). */
+    private static void destruirLocal(ServerPlayer p, String id) {
+        Dados dd = dados(id);
+        LoreWorldData wd = LoreWorldData.get(p.server);
+        String tag = tag(id, p);
+        wd.markSite("ctx:" + tag);
+        if (dd == null || dd.tipo.equals("nave")) return;
+        SpaceBodies.Body body = SpaceBodies.byId(dd.planet);
+        ServerLevel level = body != null && body.dimension() != null ? p.server.getLevel(body.dimension()) : null;
+        if (level == null) return;
+        List<net.minecraft.world.entity.Entity> sumir = new ArrayList<>();
+        for (var e : level.getAllEntities()) {
+            if (e != null && tag.equals(e.getPersistentData().getString(TAG)) && !(e instanceof NaveEntity n && n.dono() != null)) sumir.add(e);
+        }
+        if (level.hasChunkAt(dd.pos)) {
+            BlockPos c = surface(level, dd.pos);
+            // locais criados antes desta versão não têm marca: limpa piratas e destroços em volta do centro
+            for (var e : level.getEntities((net.minecraft.world.entity.Entity) null, new net.minecraft.world.phys.AABB(c).inflate(28, 20, 28),
+                    e -> (e instanceof LanternaEntity l && (l.papel() == com.lanterna.especies.Especie.Papel.PIRATA || l.papel() == com.lanterna.especies.Especie.Papel.CAPITAO))
+                            || (e instanceof NaveEntity n && n.tipo().destrocos()))) sumir.add(e);
+            for (BlockPos q : BlockPos.betweenClosed(c.offset(-2, -3, -2), c.offset(2, 3, 2))) {
+                if (level.getBlockState(q).is(Blocks.CAMPFIRE)) level.removeBlock(q, false);
+            }
+        }
+        for (var e : sumir) if (!e.isRemoved()) e.discard();
+    }
+
+    /** Alvos de um local destruído que estavam longe (chunk descarregado) somem quando carregam. */
+    @SubscribeEvent
+    public static void onJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || event.loadedFromDisk() == false) return;
+        String tag = event.getEntity().getPersistentData().getString(TAG);
+        if (tag.isEmpty() || !(event.getLevel() instanceof ServerLevel sl)) return;
+        if (LoreWorldData.get(sl.getServer()).siteBuilt("ctx:" + tag)
+                && !(event.getEntity() instanceof NaveEntity n && n.dono() != null)) event.setCanceled(true);
+    }
+
+    /** Alvo do contrato morto por outro (aliado, outro bicho, queda): conta para quem tem o contrato, se estiver perto. */
+    public static void creditar(net.minecraft.world.entity.LivingEntity victim, @Nullable net.minecraft.world.entity.Entity killer) {
+        String tag = victim.getPersistentData().getString(TAG);
+        if (tag.isEmpty() || !(victim.level() instanceof ServerLevel sl)) return;
+        int i = tag.lastIndexOf(':');
+        if (i < 0) return;
+        java.util.UUID uuid;
+        try { uuid = java.util.UUID.fromString(tag.substring(i + 1)); } catch (IllegalArgumentException e) { return; }
+        ServerPlayer owner = sl.getServer().getPlayerList().getPlayer(uuid);
+        if (owner == null || owner == killer || owner.level() != sl || owner.distanceTo(victim) > 96) return;
+        MissionManager.onKill(owner, victim);
+    }
+
+    private static void spawnAlvo(ServerLevel level, Dados d, PlanetLore pl, String tag) {
         BlockPos c = surface(level, d.pos);
         switch (d.tipo) {
             case "piratas" -> {
-                acampamento(level, c);
-                for (int i = 0; i < d.count; i++) add(level, LanternaEntity.pirata(level, false), c, 6);
+                acampamento(level, c, tag);
+                for (int i = 0; i < d.count; i++) add(level, LanternaEntity.pirata(level, false), c, 6, tag);
             }
             case "capitao" -> {
-                acampamento(level, c);
-                add(level, LanternaEntity.pirata(level, true), c, 3);
-                for (int i = 0; i < 4; i++) add(level, LanternaEntity.pirata(level, false), c, 7);
+                acampamento(level, c, tag);
+                add(level, LanternaEntity.pirata(level, true), c, 3, tag);
+                for (int i = 0; i < 4; i++) add(level, LanternaEntity.pirata(level, false), c, 7, tag);
                 // A nave do capitão fica parada: quem vencer pode levá-la
                 NaveEntity ship = NaveEntity.create(level, NaveTipo.NAVE_PIRATA, String.valueOf(1 + level.random.nextInt(2)));
                 BlockPos s = surface(level, c.offset(14, 0, 0));
                 ship.moveTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5, level.random.nextFloat() * 360, 0);
+                ship.getPersistentData().putString(TAG, tag);
                 level.addFreshEntity(ship);
             }
             case "ecos" -> {
@@ -315,6 +481,7 @@ public final class Contratos {
                     BlockPos q = surface(level, c.offset(level.random.nextInt(13) - 6, 0, level.random.nextInt(13) - 6));
                     e.moveTo(q.getX() + 0.5, q.getY(), q.getZ() + 0.5, level.random.nextFloat() * 360, 0);
                     e.setPersistenceRequired();
+                    e.getPersistentData().putString(TAG, tag);
                     level.addFreshEntity(e);
                 }
             }
@@ -323,12 +490,12 @@ public final class Contratos {
                 List<BuiltinCorps> enemies = new ArrayList<>();
                 for (BuiltinCorps x : BuiltinCorps.values()) if (x != BuiltinCorps.WHITE && Factions.enemies(home, x)) enemies.add(x);
                 BuiltinCorps foe = enemies.isEmpty() ? BuiltinCorps.BLACK : enemies.get(level.random.nextInt(enemies.size()));
-                for (int i = 0; i < d.count; i++) add(level, LanternaEntity.lanterna(level, foe, i == 0), c, 5);
+                for (int i = 0; i < d.count; i++) add(level, LanternaEntity.lanterna(level, foe, i == 0), c, 5, tag);
             }
             case "resgate" -> {
                 LanternaEntity w = LanternaEntity.lanterna(level, pl.corps == BuiltinCorps.WHITE ? BuiltinCorps.GREEN : pl.corps, false);
                 w.getPersistentData().putBoolean("lanterna_resgate", true);
-                add(level, w, c, 0);
+                add(level, w, c, 0, tag);
                 w.setHealth(w.getMaxHealth() * 0.3f);
                 for (int i = 0; i < 3; i++) {
                     var e = LoreEntities.ECO_CINZENTO.get().create(level);
@@ -336,6 +503,7 @@ public final class Contratos {
                     BlockPos q = surface(level, c.offset(level.random.nextInt(11) - 5, 0, level.random.nextInt(11) - 5));
                     e.moveTo(q.getX() + 0.5, q.getY(), q.getZ() + 0.5, 0, 0);
                     e.setPersistenceRequired();
+                    e.getPersistentData().putString(TAG, tag);
                     level.addFreshEntity(e);
                 }
             }
@@ -343,7 +511,8 @@ public final class Contratos {
         }
     }
 
-    private static void add(ServerLevel level, LanternaEntity e, BlockPos c, int spread) {
+    private static void add(ServerLevel level, LanternaEntity e, BlockPos c, int spread, String tag) {
+        e.getPersistentData().putString(TAG, tag);
         BlockPos q = spread > 0 ? surface(level, c.offset(level.random.nextInt(spread * 2 + 1) - spread, 0,
                 level.random.nextInt(spread * 2 + 1) - spread)) : c;
         e.moveTo(q.getX() + 0.5, q.getY(), q.getZ() + 0.5, level.random.nextFloat() * 360, 0);
@@ -351,12 +520,13 @@ public final class Contratos {
         level.addFreshEntity(e);
     }
 
-    private static void acampamento(ServerLevel level, BlockPos c) {
+    private static void acampamento(ServerLevel level, BlockPos c, String tag) {
         level.setBlock(c, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.SIGNAL_FIRE, false), 3);
         NaveTipo d = NaveTipo.values()[NaveTipo.DESTROCOS_1.ordinal() + level.random.nextInt(3)];
         NaveEntity w = NaveEntity.create(level, d, "");
         BlockPos s = surface(level, c.offset(-9, 0, 4));
         w.moveTo(s.getX() + 0.5, s.getY(), s.getZ() + 0.5, level.random.nextFloat() * 360, 0);
+        w.getPersistentData().putString(TAG, tag);
         level.addFreshEntity(w);
         for (int i = 0; i < 3; i++) {
             BlockPos b = surface(level, c.offset(level.random.nextInt(9) - 4, 0, level.random.nextInt(9) - 4));

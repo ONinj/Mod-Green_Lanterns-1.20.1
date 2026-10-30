@@ -53,6 +53,7 @@ public final class TropaEvents {
         for (ServerPlayer p : victim.level().getEntitiesOfClass(ServerPlayer.class, victim.getBoundingBox().inflate(16))) {
             if (p != victim && is(p, BuiltinCorps.BLACK)) emocao(p, 10);
         }
+        Contratos.creditar(victim, event.getSource().getEntity());
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer)) return;
         int xp = 0;
         Component why = victim.getDisplayName();

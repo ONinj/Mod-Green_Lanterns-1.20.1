@@ -844,8 +844,81 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Contrato de piratas: reforços quando faltam alvos, completar, e desistir destruindo o local. */
+    private static final String[] CT = new String[2];
+    private static void sceneContrato() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.function.Consumer<net.minecraft.server.level.ServerPlayer> estado = sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            String id = CT[0];
+            var m = com.lanterna.tropa.Contratos.mission(id);
+            int vivos = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(200),
+                    e -> e.getPersistentData().getString("lanterna_ct").startsWith(id + ":")).size();
+            StringBuilder sb = new StringBuilder();
+            int tot = 0;
+            for (var e : sp.serverLevel().getAllEntities()) if (e != null && e.getPersistentData().getString("lanterna_ct").startsWith(id + ":")) {
+                tot++; if (sb.length() < 300) sb.append(e.getType().toShortString()).append('@').append(e.blockPosition().toShortString()).append(e.isAlive() ? "" : "(morto)").append(' ');
+            }
+            LanternaMod.LOGGER.info("AUTOTEST contrato {} ativo={} feito={} progresso={}/{} perto={} total={} jogador={} {}", id, d.isActive(id), d.isDone(id),
+                    d.isActive(id) ? d.progress(id, 0) : -1, m.objectives().get(0).count(), vivos, tot, sp.blockPosition().toShortString(), sb);
+        };
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode creative"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 120 0"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
+        at(20, () -> server(sp -> {
+            long hoje = com.lanterna.tropa.Contratos.dia(sp);
+            outer:
+            for (long dd = hoje + 50 + (System.currentTimeMillis() / 1000) % 500; dd < hoje + 1000; dd++) for (String id : com.lanterna.tropa.Contratos.ofertas("oa", dd)) {
+                var m = com.lanterna.tropa.Contratos.mission(id);
+                if (m != null && m.objectives().get(0).target().equals("papel:pirata")) {
+                    sp.server.overworld().setDayTime(dd * 24000 + 6000);
+                    CT[0] = id; break outer;
+                }
+            }
+            for (String id : com.lanterna.tropa.Contratos.ofertas("oa", com.lanterna.tropa.Contratos.dia(sp))) if (!id.equals(CT[0])) { CT[1] = id; break; }
+            com.lanterna.tropa.Contratos.aceitar(sp, CT[0]);
+            var pos = com.lanterna.tropa.Contratos.mission(CT[0]).objectives().get(0).pos();
+            LanternaMod.LOGGER.info("AUTOTEST aceitou {} em {}", CT[0], pos);
+            sp.teleportTo(sp.serverLevel(), pos.getX() + 20, 120, pos.getZ(), 90f, 30f);
+        }));
+        at(10, () -> mc.setScreen(null));
+        for (int k = 0; k < 6; k++) at(20, () -> server(estado));
+        // some com 3 piratas (como se tivessem caído num buraco): sem crédito
+        at(5, () -> server(sp -> { int n = 0;
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(200),
+                    e -> e.getPersistentData().getString("lanterna_ct").startsWith(CT[0] + ":"))) if (n++ < 3) e.discard(); }));
+        at(5, () -> server(estado));
+        for (int k = 0; k < 8; k++) at(100, () -> server(estado));   // depois dos reforços
+        at(5, () -> shot("c1_reforcos"));
+        // mata todos os marcados como o jogador
+        at(5, () -> server(sp -> {
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(200),
+                    e -> e.getPersistentData().getString("lanterna_ct").startsWith(CT[0] + ":"))) e.hurt(sp.damageSources().playerAttack(sp), 1000);
+        }));
+        at(20, () -> server(estado));
+        // ---- desistir de outro contrato ----
+        at(10, () -> server(sp -> {
+            com.lanterna.tropa.Contratos.aceitar(sp, CT[1]);
+            LanternaMod.LOGGER.info("AUTOTEST aceitou2 {} ofertas={}", CT[1], com.lanterna.tropa.Contratos.ofertas(sp, "oa", com.lanterna.tropa.Contratos.dia(sp)));
+            var pos = com.lanterna.tropa.Contratos.mission(CT[1]).objectives().get(0).pos();
+            if (pos != null) sp.teleportTo(sp.serverLevel(), pos.getX() + 20, 120, pos.getZ(), 90f, 30f);
+        }));
+        at(120, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST antes de desistir marcados={}", sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(200),
+                e -> e.getPersistentData().getString("lanterna_ct").startsWith(CT[1] + ":")).size())));
+        at(5, () -> server(sp -> com.lanterna.tropa.Contratos.desistir(sp, CT[1])));
+        at(10, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST depois de desistir marcados={} ofertas={}", sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(200),
+                e -> e.getPersistentData().getString("lanterna_ct").startsWith(CT[1] + ":")).size(), com.lanterna.tropa.Contratos.ofertas(sp, "oa", com.lanterna.tropa.Contratos.dia(sp)))));
+        at(10, () -> shot("c2_quadro_novo"));
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("voo")) sceneVoo();
+        if (ENABLED && SCENE.equals("contrato")) sceneContrato();
+        else if (ENABLED && SCENE.equals("voo")) sceneVoo();
         else if (ENABLED && SCENE.equals("blocos")) sceneBlocos();
         else if (ENABLED && SCENE.equals("quadro")) sceneQuadro();
         else if (ENABLED && SCENE.equals("pilotar")) scenePilotar();

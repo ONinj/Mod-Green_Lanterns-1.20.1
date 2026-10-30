@@ -1022,5 +1022,7 @@
   "nave.lanterna.recarga.ok": "Anel recarregado pela estação da nave.",
   "nave.lanterna.beliche.dormiu": "Você dormiu no beliche. A noite passou e você vai renascer aqui.",
   "nave.lanterna.beliche.descansou": "Você descansou. Agora vai renascer aqui na nave.",
-  "entity.lanterna.assento": "Assento"
+  "entity.lanterna.assento": "Assento",
+  "contrato.lanterna.local_destruido": "Você desistiu: o local do contrato foi destruído e um contrato novo apareceu no quadro.",
+  "contrato.lanterna.reforcos": "Reforços chegaram ao local do contrato!"
 }

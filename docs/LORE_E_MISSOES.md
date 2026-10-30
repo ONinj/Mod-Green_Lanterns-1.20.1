@@ -178,6 +178,9 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 - Onde pegar: no Quadro de Contratos da base do planeta da **sua** Tropa, ou no **painel (console) dentro da sua nave**. Os quadros de outras Tropas e as naves de outros donos não abrem. O Lanterna Branco usa os contratos de Oa.
 - 4 contratos novos por dia, até 3 ativos. Tipos: caçar piratas, derrubar um capitão (com uma nave pirata estacionada que dá para roubar), limpar Ecos, invasores, resgatar um Lanterna ferido, entrega para outro planeta e derrubar uma nave pirata.
 - O alvo aparece quando você chega a 110 blocos do local.
+- Se faltarem alvos vivos para terminar (um caiu num buraco, morreu na lava, foi morto por outro bicho), chegam reforços a cada 30 s enquanto você estiver perto.
+- Alvos mortos por aliados ou por outra coisa perto de você (até 96 blocos) também contam.
+- **Desistir** de um contrato destrói o local (some com os alvos, a fogueira e os destroços) e coloca um contrato novo no mesmo espaço do quadro, em outro lugar.
 
 ## Lanternas NPC e Tropas inimigas
 - 18 espécies com 3 corpos (padrão, grande e pequeno), cada uma com Tropa preferida.
