@@ -175,7 +175,7 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 - Sem nenhum planeta liberado, o diário passa um "treino" (subir até o nível pedido) usando contratos e encontros.
 
 ## Contratos (missões secundárias)
-- Quadro de Contratos: fica na base de cada Tropa (ao lado de 3 Lanternas da Tropa) e também pode ser fabricado.
+- Onde pegar: no Quadro de Contratos da base do planeta da **sua** Tropa, ou no **painel (console) dentro da sua nave**. Os quadros de outras Tropas e as naves de outros donos não abrem. O Lanterna Branco usa os contratos de Oa.
 - 4 contratos novos por dia, até 3 ativos. Tipos: caçar piratas, derrubar um capitão (com uma nave pirata estacionada que dá para roubar), limpar Ecos, invasores, resgatar um Lanterna ferido, entrega para outro planeta e derrubar uma nave pirata.
 - O alvo aparece quando você chega a 110 blocos do local.
 
@@ -192,6 +192,9 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 - **Shift + clique** na nave: entra no interior. Clique na porta externa da sala para sair.
 - Fragmento de Casco na mão + clique: conserta a nave.
 - A nave viaja com quem está dentro entre a Terra, o espaço e os planetas.
+
+## Mapa estelar (J)
+- Campo de busca acima da lista: procure pelo nome do planeta, pelo tipo (gelado, vulcânico, oceânico...) ou pela Tropa (verde, amarelo...). Funciona em português e inglês. Enter escolhe o primeiro resultado e centraliza o mapa nele; a busca olha bem mais longe que a lista normal.
 
 ## Encontros no espaço
 - Voando no espaço às vezes aparecem: piratas, a Capitânia pirata (nível 25+), patrulhas da sua Tropa, patrulhas inimigas, cargueiros e destroços.

@@ -901,7 +901,7 @@
   "contrato.lanterna.desistir": "Desistir",
   "contrato.lanterna.feito": "Concluído hoje",
   "contrato.lanterna.recomendado": "Nível recomendado: %s",
-  "contrato.lanterna.so_nas_bases": "O quadro só funciona nos planetas das Tropas.",
+  "contrato.lanterna.so_nas_bases": "O quadro só funciona no planeta da sua Tropa ou no painel da sua nave.",
   "contrato.lanterna.expirou": "Esse contrato já expirou. Veja os de hoje.",
   "contrato.lanterna.limite": "Você já tem %s contratos.",
   "contrato.lanterna.piratas.title": "Acampamento Pirata em %s",
@@ -1010,5 +1010,10 @@
   "block.lanterna.nave_armario": "Armário",
   "block.lanterna.nave_luz": "Luminária de Teto",
   "block.lanterna.nave_escotilha": "Escotilha",
-  "block.lanterna.quadro_contratos": "Quadro de Contratos"
+  "block.lanterna.quadro_contratos": "Quadro de Contratos",
+  "contrato.lanterna.sem_anel": "Você precisa de um anel de Tropa para pegar contratos.",
+  "contrato.lanterna.nave_alheia": "Este painel é de uma nave que não é sua.",
+  "contrato.lanterna.so_tropa": "Os contratos da sua Tropa ficam em %s ou no painel da sua nave.",
+  "starmap.lanterna.search": "Buscar planeta, tipo ou Tropa...",
+  "starmap.lanterna.search_none": "Nada encontrado"
 }

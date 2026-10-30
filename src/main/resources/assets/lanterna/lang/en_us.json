@@ -901,7 +901,7 @@
   "contrato.lanterna.desistir": "Desistir",
   "contrato.lanterna.feito": "Concluído hoje",
   "contrato.lanterna.recomendado": "Nível recomendado: %s",
-  "contrato.lanterna.so_nas_bases": "O quadro só funciona nos planetas das Tropas.",
+  "contrato.lanterna.so_nas_bases": "The board only works on your Corps world or on your ship's console.",
   "contrato.lanterna.expirou": "Esse contrato já expirou. Veja os de hoje.",
   "contrato.lanterna.limite": "Você já tem %s contratos.",
   "contrato.lanterna.piratas.title": "Acampamento Pirata em %s",
@@ -1010,5 +1010,10 @@
   "block.lanterna.nave_armario": "Locker",
   "block.lanterna.nave_luz": "Ceiling Light",
   "block.lanterna.nave_escotilha": "Hatch",
-  "block.lanterna.quadro_contratos": "Contract Board"
+  "block.lanterna.quadro_contratos": "Contract Board",
+  "contrato.lanterna.sem_anel": "You need a Corps ring to take contracts.",
+  "contrato.lanterna.nave_alheia": "This console belongs to a ship that isn't yours.",
+  "contrato.lanterna.so_tropa": "Your Corps contracts are on %s or on your ship's console.",
+  "starmap.lanterna.search": "Search planet, type or Corps...",
+  "starmap.lanterna.search_none": "Nothing found"
 }

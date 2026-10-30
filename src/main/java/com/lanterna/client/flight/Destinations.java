@@ -21,10 +21,15 @@ public final class Destinations {
 
     /** Destinos conhecidos: Terra, planetas das Tropas e planetas gerados em volta de você. */
     public static List<Destination> all() {
+        return all(MAP_SECTORS);
+    }
+
+    /** Destinos num raio de setores (a busca do mapa olha mais longe). */
+    public static List<Destination> all(int sectors) {
         var player = net.minecraft.client.Minecraft.getInstance().player;
         Vec3 here = player != null ? spacePosition(player) : Vec3.ZERO;
         List<Destination> list = new ArrayList<>();
-        for (SpaceBodies.Body b : SpaceBodies.near(here, MAP_SECTORS)) {
+        for (SpaceBodies.Body b : SpaceBodies.near(here, sectors)) {
             if (!b.landable() || b.dimension() == null) continue;
             if (SpaceBodies.isHidden(b.id()) && !com.lanterna.client.mission.ClientLoreData.geneseRevealed()) continue;
             list.add(new Destination(b.id(), b.displayName(), b.dimension(), b.center(), b.radius(), b.atmosphere()));

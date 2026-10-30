@@ -88,6 +88,7 @@ public final class NaveInterior {
         back.putDouble("Y", out.y);
         back.putDouble("Z", out.z);
         player.getPersistentData().put(RETURN, back);
+        if (nave.dono() != null && !nave.dono().equals(sala.dono)) { sala.dono = nave.dono(); dados.setDirty(); }
         BlockPos in = sala.dentro;
         player.teleportTo(dim, in.getX() + 0.5, in.getY(), in.getZ() + 0.5, sala.olhar, 0);
         player.fallDistance = 0;
@@ -156,12 +157,38 @@ public final class NaveInterior {
     public static void onUseDoor(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !player.level().dimension().equals(DIM)) return;
         BlockState state = player.level().getBlockState(event.getPos());
+        // Painel da nave: contratos da sua Tropa
+        if (state.is(NaveBlocks.NAVE_CONSOLE.get())) {
+            event.setCanceled(true);
+            if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) com.lanterna.tropa.Contratos.abrirQuadro(player);
+            return;
+        }
         if (!state.is(NaveBlocks.NAVE_PORTA.get())) return;
         BlockPos lower = state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER ? event.getPos().below() : event.getPos();
         Sala sala = Dados.get(player.server).porPorta(lower);
         if (sala == null) return;
         event.setCanceled(true);
         sair(player);
+    }
+
+    /** O jogador está numa sala de nave que é dele (dono, chave da nave, ou nave sem dono)? */
+    public static boolean salaPropria(ServerPlayer player) {
+        if (!player.level().dimension().equals(DIM)) return false;
+        Dados dados = Dados.get(player.server);
+        BlockPos pos = player.blockPosition();
+        for (Map.Entry<UUID, Sala> e : dados.salas.entrySet()) {
+            Sala s = e.getValue();
+            if (!s.built) continue;
+            BlockPos o = s.origem, t = s.tamanho;
+            if (pos.getX() < o.getX() - 1 || pos.getX() > o.getX() + t.getX() || pos.getZ() < o.getZ() - 1 || pos.getZ() > o.getZ() + t.getZ()
+                    || pos.getY() < o.getY() - 2 || pos.getY() > o.getY() + t.getY() + 1) continue;
+            if (player.isCreative() || s.dono == null || s.dono.equals(player.getUUID())) return true;
+            for (var st : player.getInventory().items) {
+                if (st.getItem() instanceof com.lanterna.tropa.TropaItems.ChaveNave && e.getKey().equals(com.lanterna.tropa.TropaItems.ChaveNave.ship(st))) return true;
+            }
+            return e.getKey().equals(com.lanterna.tropa.TropaItems.ChaveNave.ship(player.getOffhandItem()));
+        }
+        return false;
     }
 
     public static void sair(ServerPlayer player) {
@@ -190,6 +217,7 @@ public final class NaveInterior {
         BlockPos origem = BlockPos.ZERO, porta = BlockPos.ZERO, dentro = BlockPos.ZERO, tamanho = BlockPos.ZERO;
         float olhar;
         boolean built;
+        @Nullable UUID dono;
 
         CompoundTag save() {
             CompoundTag t = new CompoundTag();
@@ -200,6 +228,7 @@ public final class NaveInterior {
             t.putLong("T", tamanho.asLong());
             t.putFloat("Y", olhar);
             t.putBoolean("B", built);
+            if (dono != null) t.putUUID("Dono", dono);
             return t;
         }
 
@@ -212,6 +241,7 @@ public final class NaveInterior {
             s.tamanho = BlockPos.of(t.getLong("T"));
             s.olhar = t.getFloat("Y");
             s.built = t.getBoolean("B");
+            if (t.hasUUID("Dono")) s.dono = t.getUUID("Dono");
             return s;
         }
     }

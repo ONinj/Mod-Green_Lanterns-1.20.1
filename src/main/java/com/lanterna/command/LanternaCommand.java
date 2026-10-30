@@ -97,7 +97,7 @@ public final class LanternaCommand {
                         }))
                 .then(Commands.literal("contratos").requires(src -> src.hasPermission(2))
                         .executes(c -> {
-                            com.lanterna.tropa.Contratos.abrirQuadro(c.getSource().getPlayerOrException());
+                            com.lanterna.tropa.Contratos.abrirQuadro(c.getSource().getPlayerOrException(), true);
                             return 1;
                         }))
 

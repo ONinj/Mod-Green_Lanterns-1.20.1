@@ -470,7 +470,7 @@ public final class DevAutoTest {
             sp.setYRot(180);
         }));
         at(80, () -> { look(180, 0); shot("n13_quadro"); });
-        at(5, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(5, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp, true)));
         waitFor(() -> mc.screen != null, 200);
         at(20, () -> shot("n14_quadro_tela"));
         at(5, () -> { mc.setScreen(null); server(sp -> {
@@ -662,8 +662,68 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Quadro de contratos só na Tropa/nave própria, e a busca do mapa estelar. */
+    private static void sceneQuadro() {
+        Minecraft mc = Minecraft.getInstance();
+        Runnable tela = () -> LanternaMod.LOGGER.info("AUTOTEST tela={} dim={}", mc.screen == null ? null : mc.screen.getClass().getSimpleName(), mc.level.dimension().location());
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> {});
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green"); }));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        // 1) Terra: não abre
+        at(40, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(10, tela);
+        // 2) Planeta de outra Tropa (Korugar): não abre
+        at(5, () -> cmd("execute in lanterna:korugar run tp @s 0 120 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("korugar"), 400);
+        at(40, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(10, tela);
+        // 3) Oa: abre
+        at(5, () -> cmd("execute in lanterna:oa run tp @s 0 120 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa"), 400);
+        at(40, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(10, tela);
+        at(10, () -> shot("q1_oa"));
+        at(5, () -> mc.setScreen(null));
+        // 4) Painel da própria nave
+        at(5, () -> cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.screen == null, 400);
+        at(20, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green");
+            n.moveTo(sp.getX() + 6, sp.getY(), sp.getZ(), 0, 0); n.setDono(sp.getUUID()); sp.level().addFreshEntity(n);
+            com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(40, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(10, tela);
+        at(5, () -> shot("q2_nave"));
+        at(5, () -> mc.setScreen(null));
+        // 5) Nave de outro dono
+        at(5, () -> server(sp -> { var d = sp.server.getPlayerList(); com.lanterna.naves.NaveInterior.sair(sp); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.screen == null, 400);
+        at(20, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.level(), com.lanterna.naves.NaveTipo.NAVE_PATRULHA, "blue");
+            n.moveTo(sp.getX() - 10, sp.getY(), sp.getZ(), 0, 0); n.setDono(java.util.UUID.randomUUID()); sp.level().addFreshEntity(n);
+            com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
+        at(40, () -> server(sp -> com.lanterna.tropa.Contratos.abrirQuadro(sp)));
+        at(10, tela);
+        // 6) Mapa estelar com busca
+        at(5, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
+        at(20, () -> shot("q3_mapa"));
+        for (String q : new String[]{"gelado", "verde", "korug"}) {
+            at(5, () -> { try { var f = com.lanterna.client.screen.StarMapScreen.class.getDeclaredField("search"); f.setAccessible(true);
+                ((net.minecraft.client.gui.components.EditBox) f.get(mc.screen)).setValue(q); } catch (Exception e) { LanternaMod.LOGGER.error("x", e); } });
+            at(20, () -> shot("q4_busca_" + q));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("pilotar")) scenePilotar();
+        if (ENABLED && SCENE.equals("quadro")) sceneQuadro();
+        else if (ENABLED && SCENE.equals("pilotar")) scenePilotar();
         else if (ENABLED && SCENE.equals("encontro")) sceneEncontro();
         else if (ENABLED && SCENE.equals("navesfoto")) sceneNavesFoto();
         else if (ENABLED && SCENE.equals("naves")) sceneNaves();

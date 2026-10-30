@@ -33,6 +33,12 @@ public class StarMapScreen extends Screen {
     private boolean dragging;
     private Button goButton, stopButton;
     private List<Destinations.Destination> destinations;
+    /** Busca: o que aparece na lista (todos, ou só os que batem com o texto). */
+    private List<Destinations.Destination> shown;
+    private net.minecraft.client.gui.components.EditBox search;
+    private String query = "";
+    private static final int SEARCH_SECTORS = 12;
+    private static final int SEARCH_H = 20;
 
     public StarMapScreen() {
         super(Component.translatable("starmap.lanterna.title"));
@@ -69,6 +75,15 @@ public class StarMapScreen extends Screen {
             if (Autopilot.active() && Autopilot.target() != null) selected = Autopilot.target().id();
         }
 
+        search = new net.minecraft.client.gui.components.EditBox(font, listX + 1, mapY + 1, LIST_W - 2, 14,
+                Component.translatable("starmap.lanterna.search"));
+        search.setHint(Component.translatable("starmap.lanterna.search").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        search.setMaxLength(40);
+        search.setValue(query);
+        search.setResponder(this::filtrar);
+        addRenderableWidget(search);
+        filtrar(query);
+
         int by = top + panelH - 26;
         goButton = addRenderableWidget(Button.builder(Component.translatable("starmap.lanterna.go"), b -> go())
                 .bounds(listX, by, LIST_W, 20).build());
@@ -79,6 +94,87 @@ public class StarMapScreen extends Screen {
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(mapX + mapW - 70, by, 70, 20).build());
         updateButtons();
+    }
+
+    /** Normaliza para a busca: minúsculas e sem acento. */
+    private static String norm(String s) {
+        return java.text.Normalizer.normalize(s.toLowerCase(java.util.Locale.ROOT), java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+    }
+
+    /** Texto em que a busca procura: nome, tipo do planeta e a Tropa dona dele. */
+    private static String chave(Destinations.Destination d) {
+        StringBuilder sb = new StringBuilder(d.name().getString());
+        var body = SpaceBodies.byId(d.id());
+        if (body != null && body.procedural() != null) {
+            String tipo = body.procedural().type().id;
+            sb.append(' ').append(Component.translatable(body.procedural().type().nameKey()).getString())
+              .append(' ').append(tipo).append(' ').append(TIPOS.getOrDefault(tipo, ""));
+        }
+        var lore = com.lanterna.lore.PlanetLore.byPlanet(d.id());
+        if (lore != null) {
+            String cor = lore.corps.id().getPath();
+            sb.append(' ').append(Component.translatable("corps.lanterna." + cor).getString())
+              .append(' ').append(cor).append(' ').append(CORES.getOrDefault(cor, "")).append(" tropa corps base");
+        }
+        return norm(sb.toString());
+    }
+
+    /** Palavras extras para a busca funcionar em português e inglês, qualquer que seja o idioma do jogo. */
+    private static final java.util.Map<String, String> TIPOS = java.util.Map.of(
+            "lush", "verdejante floresta verde", "desert", "desertico deserto areia", "ice", "gelado gelo neve icy frozen",
+            "volcanic", "vulcanico vulcao lava", "ocean", "oceanico oceano agua mar water", "crystal", "cristalino cristal",
+            "fungal", "fungico fungo cogumelo mushroom", "barren", "rochoso rocha pedra rocky");
+    private static final java.util.Map<String, String> CORES = java.util.Map.of(
+            "green", "verde vontade will", "yellow", "amarelo amarela medo fear", "red", "vermelho vermelha raiva rage",
+            "blue", "azul esperanca hope", "orange", "laranja avareza avarice", "indigo", "indigo compaixao compassion",
+            "violet", "violeta amor love", "black", "preto preta morte death", "white", "branco branca vida life");
+
+    private void filtrar(String text) {
+        query = text == null ? "" : text.trim();
+        listScroll = 0;
+        if (query.isEmpty()) {
+            shown = destinations;
+            return;
+        }
+        String q = norm(query);
+        List<Destinations.Destination> found = new java.util.ArrayList<>();
+        for (var d : Destinations.all(SEARCH_SECTORS)) {
+            boolean ok = true;
+            String k = chave(d);
+            for (String part : q.split("\\s+")) if (!k.contains(part)) { ok = false; break; }
+            if (ok) found.add(d);
+        }
+        Vec3 here = here();
+        found.sort(Comparator.comparingDouble(d -> d.center().distanceTo(here) - d.radius()));
+        shown = found;
+    }
+
+    private boolean bate(Destinations.Destination d) {
+        if (query.isEmpty()) return true;
+        for (var s2 : shown) if (s2.id().equals(d.id())) return true;
+        return false;
+    }
+
+    /** Centraliza o mapa num destino (e aproxima se ele estiver fora da tela). */
+    private void centralizar(Destinations.Destination d) {
+        viewX = d.center().x;
+        viewZ = d.center().z;
+        double need = Math.max(d.radius() * 6, 600) / (Math.min(mapW, mapH) / 2.0);
+        if (zoom > need * 4) zoom = need;
+    }
+
+    @Override
+    public boolean keyPressed(int key, int scan, int mods) {
+        if (search != null && search.isFocused()) {
+            if ((key == 257 || key == 335) && !shown.isEmpty()) { // Enter: escolhe o primeiro resultado
+                select(shown.get(0));
+                centralizar(shown.get(0));
+                return true;
+            }
+            if (key != 256 && search.keyPressed(key, scan, mods)) return true;
+            if (key != 256) return true; // não deixa as teclas do jogo (J, E...) agirem enquanto digita
+        }
+        return super.keyPressed(key, scan, mods);
     }
 
     private Vec3 here() {
@@ -162,12 +258,16 @@ public class StarMapScreen extends Screen {
         // Planetas (primeiro as bolinhas, depois os nomes que couberem sem encavalar)
         java.util.List<int[]> labels = new java.util.ArrayList<>();
         String hoverId = null;
-        for (var d : destinations) {
+        java.util.List<Destinations.Destination> desenhar = new java.util.ArrayList<>(destinations);
+        if (!query.isEmpty()) for (var d : shown) if (desenhar.stream().noneMatch(o -> o.id().equals(d.id()))) desenhar.add(d);
+        for (var d : desenhar) {
+            boolean match = bate(d);
             int x = sx(d.center().x), y = sy(d.center().z);
             if (x < mapX - 40 || x > mapX + mapW + 40 || y < mapY - 40 || y > mapY + mapH + 40) continue;
             int r = Math.max(2, (int) (d.radius() / zoom));
-            disc(g, x, y, r, 0xFF000000 | darken(d.color(), 0.55f));
-            disc(g, x - r / 4, y - r / 4, Math.max(1, r * 2 / 3), 0xFF000000 | d.color());
+            disc(g, x, y, r, 0xFF000000 | darken(d.color(), match ? 0.55f : 0.18f));
+            disc(g, x - r / 4, y - r / 4, Math.max(1, r * 2 / 3), 0xFF000000 | (match ? d.color() : darken(d.color(), 0.3f)));
+            if (match && !query.isEmpty()) ring(g, x, y, r + 5, 0xAA000000 | ClientRingData.color);
             if (d.id().equals(selected)) ring(g, x, y, r + 3, 0xFFFFFFFF);
             if (Math.hypot(mouseX - x, mouseY - y) <= r + 3) {
                 hoverId = d.id();
@@ -175,7 +275,8 @@ public class StarMapScreen extends Screen {
             }
         }
         // Nomes: escolhido e o do mouse primeiro, depois os planetas das Tropas, depois os gerados
-        java.util.List<Destinations.Destination> order = new java.util.ArrayList<>(destinations);
+        java.util.List<Destinations.Destination> order = new java.util.ArrayList<>(desenhar);
+        order.removeIf(d -> !bate(d) && !d.id().equals(selected));
         final String hov = hoverId;
         order.sort(Comparator.comparingInt(d -> d.id().equals(selected) || d.id().equals(hov) ? 0
                 : com.lanterna.space.ProceduralPlanets.byId(d.id()) == null ? 1 : 2));
@@ -223,13 +324,18 @@ public class StarMapScreen extends Screen {
     }
 
     private void renderList(GuiGraphics g, int mouseX, int mouseY) {
-        int y = mapY;
+        int y = mapY + SEARCH_H;
         int rowH = 24;
-        int visible = Math.max(1, (mapH) / rowH);
+        int visible = Math.max(1, (mapH - SEARCH_H) / rowH);
+        List<Destinations.Destination> destinations = shown;
         listScroll = Mth.clamp(listScroll, 0, Math.max(0, destinations.size() - visible));
+        if (destinations.isEmpty()) {
+            g.drawString(font, Component.translatable("starmap.lanterna.search_none"), listX + 4, y + 4, 0xFF8C96AA, false);
+            return;
+        }
         Vec3 here = here();
         var player = Minecraft.getInstance().player;
-        g.enableScissor(listX, mapY, listX + LIST_W, mapY + mapH);
+        g.enableScissor(listX, mapY + SEARCH_H, listX + LIST_W, mapY + mapH);
         for (int i = listScroll; i < destinations.size() && i < listScroll + visible; i++) {
             var d = destinations.get(i);
             boolean sel = d.id().equals(selected);
@@ -269,14 +375,21 @@ public class StarMapScreen extends Screen {
         if (super.mouseClicked(mx, my, button)) return true;
         if (button != 0) return false;
         // Lista
-        if (mx >= listX && mx < listX + LIST_W && my >= mapY && my < mapY + mapH) {
-            int idx = listScroll + (int) ((my - mapY) / 24);
-            if (idx >= 0 && idx < destinations.size()) select(destinations.get(idx));
+        if (mx >= listX && mx < listX + LIST_W && my >= mapY + SEARCH_H && my < mapY + mapH) {
+            int idx = listScroll + (int) ((my - mapY - SEARCH_H) / 24);
+            if (idx >= 0 && idx < shown.size()) {
+                select(shown.get(idx));
+                centralizar(shown.get(idx));
+            }
+            setFocused(null);
+            search.setFocused(false);
             return true;
         }
         // Mapa
         if (inMap(mx, my)) {
-            for (var d : destinations) {
+            java.util.List<Destinations.Destination> clicaveis = new java.util.ArrayList<>(destinations);
+            if (!query.isEmpty()) clicaveis.addAll(shown);
+            for (var d : clicaveis) {
                 int x = sx(d.center().x), y = sy(d.center().z);
                 int r = Math.max(3, (int) (d.radius() / zoom));
                 if (Math.hypot(mx - x, my - y) <= r + 4) {
@@ -285,6 +398,8 @@ public class StarMapScreen extends Screen {
                 }
             }
             dragging = true;
+            setFocused(null);
+            search.setFocused(false);
             return true;
         }
         return false;

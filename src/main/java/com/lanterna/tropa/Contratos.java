@@ -184,10 +184,17 @@ public final class Contratos {
     // ===================== Quadro =====================
 
     public static void abrirQuadro(ServerPlayer p) {
-        SpaceBodies.Body b = SpaceBodies.bodyAt(p.level().dimension(), p.getX(), p.getZ());
-        PlanetLore pl = b != null ? PlanetLore.byPlanet(b.id()) : null;
-        if (pl == null || pl == PlanetLore.GENESE) {
-            p.displayClientMessage(Component.translatable("contrato.lanterna.so_nas_bases"), true);
+        abrirQuadro(p, false);
+    }
+
+    /**
+     * Abre os contratos da Tropa do jogador. Só funciona no planeta da própria Tropa ou no painel (console)
+     * de uma nave sua. {@code livre} = sem essa checagem (comando de teste e atualização depois de aceitar).
+     */
+    public static void abrirQuadro(ServerPlayer p, boolean livre) {
+        PlanetLore pl = livre ? casa(p) : origem(p);
+        if (pl == null) {
+            if (livre) p.displayClientMessage(Component.translatable("contrato.lanterna.sem_anel"), true);
             return;
         }
         LoreData d = LoreCapability.get(p).orElse(null);
@@ -197,6 +204,38 @@ public final class Contratos {
         for (String id : ids) estado.add(d.isDone(id) ? 2 : d.isActive(id) ? 1 : 0);
         int ativos = (int) d.active().keySet().stream().filter(k -> k.startsWith("ct_")).count();
         ModNetwork.sendTo(p, new QuadroPacket(pl.planet, ids, estado, ativos));
+    }
+
+    /** Planeta da Tropa do jogador (o Branco usa os contratos de Oa, dos Guardiões). */
+    @Nullable
+    public static PlanetLore casa(ServerPlayer p) {
+        BuiltinCorps c = Factions.playerCorps(p);
+        if (c == null) return null;
+        if (c == BuiltinCorps.WHITE) return PlanetLore.OA;
+        for (PlanetLore x : PlanetLore.values()) if (x.corps == c && x != PlanetLore.GENESE) return x;
+        return null;
+    }
+
+    /** De onde o jogador está abrindo o quadro; null (com aviso) se não pode. */
+    @Nullable
+    private static PlanetLore origem(ServerPlayer p) {
+        PlanetLore casa = casa(p);
+        if (casa == null) {
+            p.displayClientMessage(Component.translatable("contrato.lanterna.sem_anel"), true);
+            return null;
+        }
+        if (p.level().dimension().equals(com.lanterna.naves.NaveInterior.DIM)) {
+            if (com.lanterna.naves.NaveInterior.salaPropria(p)) return casa;
+            p.displayClientMessage(Component.translatable("contrato.lanterna.nave_alheia"), true);
+            return null;
+        }
+        SpaceBodies.Body b = SpaceBodies.bodyAt(p.level().dimension(), p.getX(), p.getZ());
+        PlanetLore aqui = b != null ? PlanetLore.byPlanet(b.id()) : null;
+        if (aqui == casa) return casa;
+        SpaceBodies.Body home = SpaceBodies.byId(casa.planet);
+        p.displayClientMessage(Component.translatable("contrato.lanterna.so_tropa",
+                home != null ? home.displayName() : Component.literal(casa.planet)), true);
+        return null;
     }
 
     public static void aceitar(ServerPlayer p, String id) {
@@ -214,7 +253,7 @@ public final class Contratos {
         }
         if (d.isDone(id) || d.isActive(id)) return;
         MissionManager.start(p, id);
-        abrirQuadro(p);
+        abrirQuadro(p, true);
     }
 
     public static void desistir(ServerPlayer p, String id) {
@@ -222,7 +261,7 @@ public final class Contratos {
         if (d == null || !id.startsWith("ct_") || !d.isActive(id)) return;
         d.abandon(id);
         MissionManager.sync(p, d);
-        abrirQuadro(p);
+        abrirQuadro(p, true);
     }
 
     // ===================== Os alvos aparecem quando o Lanterna chega perto =====================
