@@ -49,6 +49,9 @@ public class LoreData implements INBTSerializable<CompoundTag> {
     private boolean honra;
     /** Corrupção da Morte: 0 nada, 1 acabou de morrer corrompido (falta renascer), 2 corrompido, 3 dominou (Lanterna Negro). */
     private int morte;
+    /** Porta Estelar (teleporte do anel) liberada pelos Guardiões, e quando pode ser usada de novo (ms). */
+    private boolean portal;
+    private long portalCd;
     /** Última vez (ms, tempo real) que o Lanterna Negro ceifou um portador de anel. */
     private long ultimaCeifa;
     /** Tropas que este jogador atacou (invadiu planeta delas): ficam hostis com ele. */
@@ -217,6 +220,12 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         slotsTecnica[i] = t;
         dirty = true;
     }
+    public boolean portal() { return portal; }
+    public void setPortal(boolean v) { portal = v; dirty = true; }
+    public long portalCd() { return portalCd; }
+    public void setPortalCd(long v) { portalCd = v; dirty = true; }
+    public java.util.Set<String> visitados() { return visitados; }
+
     public int morte() { return morte; }
     public void setMorte(int v) { morte = v; dirty = true; }
     public long ultimaCeifa() { return ultimaCeifa; }
@@ -276,6 +285,8 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         tag.put("SlotsTecnica", sl);
         tag.putBoolean("Honra", honra);
         tag.putInt("Morte", morte);
+        tag.putBoolean("Portal", portal);
+        tag.putLong("PortalCd", portalCd);
         tag.putLong("UltimaCeifa", ultimaCeifa);
         tag.put("TropasHostis", strings(tropasHostis));
         return tag;
@@ -317,6 +328,8 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         for (int i = 0; i < 3; i++) slotsTecnica[i] = i < sl.size() ? sl.getString(i) : "";
         honra = tag.getBoolean("Honra");
         morte = tag.getInt("Morte");
+        portal = tag.getBoolean("Portal");
+        portalCd = tag.getLong("PortalCd");
         ultimaCeifa = tag.getLong("UltimaCeifa");
         tropasHostis.clear();
         tag.getList("TropasHostis", Tag.TAG_STRING).forEach(t -> tropasHostis.add(t.getAsString()));

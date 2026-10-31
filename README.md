@@ -48,6 +48,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.22 ✅ (0.17) Guildas e conquista de planetas: bandeira com base pronta, minerador, general, tropas, escudo com símbolo, HUD e invasões
 1.23 ✅ (0.18) Minerador com 4 níveis; Anéis Supremos (Branco e Preto); Anel Preto só por corrupção na morte (linha "A Morte"); linha principal mais longa e travada por nível; planetas das Tropas NPC; mais piratas e saque melhor
 1.24 ✅ (0.19) Construto próprio de cada Tropa (Pavor trava construtos), animações de lançar, laser novo e polimento visual de todos os construtos
+1.25 ✅ (0.20) Porta Estelar: linha dos Guardiões (nível 32, afinidade Confiável) e teleporte animado para planetas visitados (tecla N)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

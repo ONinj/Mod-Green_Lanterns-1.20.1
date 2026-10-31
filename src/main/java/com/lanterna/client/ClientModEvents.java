@@ -39,6 +39,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.OPEN_LANTERN);
         event.register(KeyBindings.TOGGLE_POWER);
         event.register(KeyBindings.STAR_MAP);
+        event.register(KeyBindings.PORTAL);
         event.register(KeyBindings.CONSTRUCT_WHEEL);
         event.register(KeyBindings.CONSTRUCT_USE);
         for (var k : KeyBindings.PRESETS) event.register(k);
@@ -133,6 +134,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("pavor", com.lanterna.client.construct.PavorTela.HUD);
+        event.registerAboveAll("portal", com.lanterna.client.portal.PortalCliente.HUD);
         event.registerAboveAll("ring_hud", RingHudOverlay.HUD);
         event.registerAboveAll("mira_travada", com.lanterna.client.combat.MiraTravada.HUD);
         event.registerAboveAll("tecnicas", com.lanterna.client.cidade.ClientTecnicas.HUD);

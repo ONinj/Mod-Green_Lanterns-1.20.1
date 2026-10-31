@@ -188,6 +188,7 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
             case CRYSTAL -> crystal(e, pose, body, glow, color, gc, age, alpha);
             case TENDRIL -> tendril(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt);
             case DEADHANDS -> deadHands(e, pose, body, glow, color, gc, age, alpha, origin, s);
+            case DOOR -> door(e, pose, body, glow, color, gc, age, life);
         }
     }
 
@@ -502,6 +503,66 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
                 pose.popPose();
             }
             pose.popPose();
+        }
+        pose.popPose();
+    }
+
+    /**
+     * Porta Estelar: a moldura sobe dos pés até o topo, o arco se fecha, o miolo vira um redemoinho de luz;
+     * no fim a porta se fecha encolhendo para o meio.
+     */
+    private static void door(ConstructEntity e, PoseStack pose, VertexConsumer body, VertexConsumer glow, int c, int gc, float age, float life) {
+        float W = 1.15f, H = 3.4f, T = 0.12f;
+        float sobe = Mth.clamp(age / 10f, 0, 1);
+        float arco = Mth.clamp((age - 7) / 5f, 0, 1);
+        float miolo = Mth.clamp((age - 9) / 6f, 0, 1);
+        float fecha = Mth.clamp((life - age) / 8f, 0, 1);
+        float a = Mth.clamp(age / 2f, 0, 1);
+        pose.pushPose();
+        pose.mulPose(Axis.YP.rotationDegrees(-e.getYRot()));
+        pose.translate(0, H / 2, 0);
+        pose.scale(0.15f + 0.85f * fecha, fecha, 1);
+        pose.translate(0, -H / 2, 0);
+        // soleira e colunas (sobem de baixo para cima)
+        EnergyShapes.box(pose, body, glow, -W - 0.25f, -0.08f, -0.25f, W + 0.25f, 0.06f, 0.25f, c, a);
+        float hc = H * sobe;
+        EnergyShapes.box(pose, body, glow, -W - T, 0, -T, -W + T, hc, T, c, a);
+        EnergyShapes.box(pose, body, glow, W - T, 0, -T, W + T, hc, T, c, a);
+        // detalhes nas colunas
+        for (int i = 1; i <= 3; i++) {
+            float y = H * i / 4f;
+            if (y > hc) break;
+            EnergyShapes.box(pose, body, glow, -W - T * 1.8f, y - 0.06f, -T * 1.8f, -W + T * 1.8f, y + 0.06f, T * 1.8f, c, a);
+            EnergyShapes.box(pose, body, glow, W - T * 1.8f, y - 0.06f, -T * 1.8f, W + T * 1.8f, y + 0.06f, T * 1.8f, c, a);
+        }
+        // arco: lintel que se fecha do meio para fora, com o "anel" no topo
+        if (arco > 0) {
+            float hw = (W + T) * arco;
+            EnergyShapes.box(pose, body, glow, -hw, H - T, -T, hw, H + T, T, c, a);
+            pose.pushPose();
+            pose.translate(0, H + 0.35f, 0);
+            pose.mulPose(Axis.ZP.rotationDegrees(age * 6));
+            float k = 0.26f * arco;
+            EnergyShapes.box(pose, body, glow, -k, -k, -0.06f, k, k, 0.06f, c, a);
+            pose.popPose();
+        }
+        // miolo: redemoinho de luz
+        if (miolo > 0) {
+            pose.pushPose();
+            pose.translate(0, H / 2, 0);
+            pose.scale(W * 0.92f, (H / 2) * 0.92f, 1);
+            pose.mulPose(Axis.XP.rotationDegrees(90));
+            EnergyShapes.disco(pose, glow, 1f, gc, 0.55f * miolo * a, 0.12f * miolo * a);
+            EnergyShapes.disco(pose, body, 1f, c, 0.35f * miolo * a, 0.25f * miolo * a);
+            for (int i = 0; i < 5; i++) {
+                float r = 1f - ((age * 0.04f + i * 0.2f) % 1f);
+                pose.pushPose();
+                pose.mulPose(Axis.YP.rotationDegrees(age * (8 + i * 3) * (i % 2 == 0 ? 1 : -1)));
+                EnergyShapes.anel(pose, glow, r, 0.07f, 0.001f, EnergyShapes.clarear(gc, 0.3f), 0.6f * miolo * a * r);
+                pose.popPose();
+            }
+            pose.popPose();
+            EnergyShapes.clarao(pose, glow, new Vec3(0, H / 2, 0), 0.9f * miolo, gc, 0.7f * miolo * a, 6);
         }
         pose.popPose();
     }

@@ -33,7 +33,7 @@ import org.joml.Vector3f;
  * Pode pertencer a um jogador ou a um boss (o Vigia Partido copia os construtos do jogador).
  */
 public class ConstructEntity extends Entity {
-    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS }
+    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS, DOOR }
 
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
@@ -204,7 +204,7 @@ public class ConstructEntity extends Entity {
         }
 
         if (owner == null || !owner.isAlive()) {
-            if (kind() != Kind.FIST && kind() != Kind.BOLT && kind() != Kind.HAMMER && kind() != Kind.RAM && kind() != Kind.DEADHANDS
+            if (kind() != Kind.FIST && kind() != Kind.BOLT && kind() != Kind.HAMMER && kind() != Kind.RAM && kind() != Kind.DEADHANDS && kind() != Kind.DOOR
                     && kind() != Kind.FEAR && kind() != Kind.NOVA) {
                 discard();
                 return;
@@ -391,6 +391,16 @@ public class ConstructEntity extends Entity {
                 Vec3 e = end();
                 if (tickCount % 2 == 0) level().addParticle(ParticleTypes.SMOKE, e.x + (random.nextDouble() - 0.5) * 7 * scale(), e.y + 0.1,
                         e.z + (random.nextDouble() - 0.5) * 7 * scale(), 0, 0.03, 0);
+            }
+            case DOOR -> {
+                // faíscas sendo puxadas para o meio da porta
+                double yaw = Math.toRadians(getYRot());
+                double sx = Math.cos(yaw), sz = Math.sin(yaw);
+                for (int i = 0; i < 2; i++) {
+                    double ox = (random.nextDouble() - 0.5) * 3.2, oy = random.nextDouble() * 3.4;
+                    double px = getX() + sx * ox, pz = getZ() + sz * ox, py = getY() + oy;
+                    level().addParticle(d, px, py, pz, (getX() - px) * 0.08, (getY() + 1.7 - py) * 0.08, (getZ() - pz) * 0.08);
+                }
             }
             case CRYSTAL -> {
                 if (tickCount % 3 == 0) level().addParticle(ParticleTypes.END_ROD, getX() + (random.nextDouble() - 0.5) * 1.6,

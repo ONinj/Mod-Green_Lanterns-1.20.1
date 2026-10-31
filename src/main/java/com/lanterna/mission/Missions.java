@@ -154,6 +154,15 @@ public final class Missions {
         add("morte_ceifa", "patrulha", black, List.of(Objective.of(Type.KILL, "jogador_anel", 1, null, null)),
                 items(() -> new ItemStack(LoreItems.ALMA.get(), 12)), 800, "morte_ceifa");
 
+        // ---------------- A Porta Estelar (Guardiões, nível 32 + afinidade Confiável) ----------------
+        int verdeClaro = 0x7CFFB0;
+        add("portal_1", "portal", verdeClaro, List.of(talk("guardiao:oa", "oa")), items(), 300, "portal_2");
+        add("portal_2", "portal", verdeClaro, List.of(goTo("odym"), goTo("korugar"), goTo("zamaron"),
+                Objective.of(Type.AFFINITY, "afinidade", com.lanterna.portal.PortalEstelar.AFINIDADE, null, null),
+                Objective.of(Type.LEVEL, "nivel", com.lanterna.portal.PortalEstelar.NIVEL, null, null)),
+                items(() -> new ItemStack(LoreItems.MERITO.get(), 8)), 600, "portal_3");
+        add("portal_3", "portal", verdeClaro, List.of(talk("guardiao:oa", "oa")), items(), 800, null);
+
         // ---------------- Patrulha (repetível, dos Veltari) ----------------
         add("patrulha", "patrulha", PlanetLore.OA.color(), List.of(Objective.of(Type.KILL, "lanterna:eco_cinzento", 8, null, null)),
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 3)), 200, null);

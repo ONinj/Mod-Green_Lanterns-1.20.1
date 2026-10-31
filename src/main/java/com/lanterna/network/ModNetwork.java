@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "8";
+    private static final String VERSION = "9";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -150,6 +150,21 @@ public final class ModNetwork {
                 .encoder(com.lanterna.tropa.QuadroPacket::encode)
                 .decoder(com.lanterna.tropa.QuadroPacket::decode)
                 .consumerMainThread(com.lanterna.tropa.QuadroPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.portal.PortalPackets.Pedido.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.portal.PortalPackets.Pedido::encode)
+                .decoder(com.lanterna.portal.PortalPackets.Pedido::decode)
+                .consumerMainThread(com.lanterna.portal.PortalPackets.Pedido::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.portal.PortalPackets.Lista.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.portal.PortalPackets.Lista::encode)
+                .decoder(com.lanterna.portal.PortalPackets.Lista::decode)
+                .consumerMainThread(com.lanterna.portal.PortalPackets.Lista::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.portal.PortalPackets.Anim.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.portal.PortalPackets.Anim::encode)
+                .decoder(com.lanterna.portal.PortalPackets.Anim::decode)
+                .consumerMainThread(com.lanterna.portal.PortalPackets.Anim::handle)
                 .add();
         CHANNEL.messageBuilder(com.lanterna.construct.CastAnimPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.construct.CastAnimPacket::encode)

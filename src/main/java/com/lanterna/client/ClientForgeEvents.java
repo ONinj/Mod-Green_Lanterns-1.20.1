@@ -49,6 +49,10 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.PORTAL.consumeClick()) {
+            if (ClientRingData.hasRing && !com.lanterna.client.portal.PortalCliente.ativo())
+                ModNetwork.sendToServer(new com.lanterna.portal.PortalPackets.Pedido(""));
+        }
         while (KeyBindings.STAR_MAP.consumeClick()) {
             // Com o piloto ligado, a tecla abre o mapa (onde dá para parar ou trocar o destino)
             Minecraft.getInstance().setScreen(new com.lanterna.client.screen.StarMapScreen());

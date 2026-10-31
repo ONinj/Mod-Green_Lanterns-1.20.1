@@ -437,3 +437,19 @@ calculado no próprio jogo (gruda na mira sem atraso).
 fantasmas quando se movem (punho, rajada, aríete, lâminas) e rastro de partículas; punho com dedos, polegar e antebraço;
 martelo com onda de choque em anel; escudo com malha de luz; corrente do gancho com elos alternados; textura nova e
 animada dos blocos de construto (parede, ponte, jaula); o Preto brilha num cinza-violeta (antes sumia).
+
+# 0.20 — A Porta Estelar
+
+**Como liberar**: nível 32 e afinidade **Confiável** (3) com o anel → os Guardiões chamam (linha "A Porta Estelar"):
+1. **O Chamado da Porta** — falar com o Guardião de Oa.
+2. **Os Caminhos do Vazio** — visitar Odym, Korugar e Zamaron (com nível 32 e afinidade Confiável).
+3. **A Primeira Porta** — voltar ao Guardião de Oa. Pronto: o poder está liberado.
+
+**Como usar**: tecla **N** abre a tela da Porta Estelar com a Terra e todos os planetas já visitados (com busca).
+Escolha e aperte "Abrir a porta". Custa 300 de carga; espera de 3 minutos entre portas.
+
+**A animação**: a câmera vai para a terceira pessoa; o Lanterna sobe no ar e estende o braço; a energia corre do anel
+até a frente dele e a porta nasce (colunas subindo, arco se fechando, redemoinho de luz no meio); ele voa para dentro e
+a tela clareia; do outro lado a câmera fica de frente e ele sai de outra porta, que se fecha atrás dele. A chegada
+procura chão firme e seco perto da base do planeta (ou perto de onde se pousa num planeta gerado). Ninguém fere quem
+está atravessando. Se o planeta ainda está carregando, a animação de chegada espera o chão aparecer.

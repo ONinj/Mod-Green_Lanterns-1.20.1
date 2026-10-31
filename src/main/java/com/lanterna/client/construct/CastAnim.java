@@ -125,6 +125,18 @@ public final class CastAnim {
         return estendido ? ombro.add(look.scale(0.72)) : ombro.add(0, -0.6, 0);
     }
 
+    /** Segura o braço estendido (pose de mira) por alguns ticks — usado pela Porta Estelar. */
+    private static final Map<Integer, Long> SEGURA = new HashMap<>();
+
+    public static void segurar(int entityId, int ticks) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) SEGURA.put(entityId, mc.level.getGameTime() + ticks);
+    }
+
+    public static void soltar(int entityId) {
+        SEGURA.remove(entityId);
+    }
+
     public static boolean mirando(int entityId) {
         return MIRANDO.containsKey(entityId);
     }
@@ -141,6 +153,8 @@ public final class CastAnim {
         long now = mc.level.getGameTime();
         ANIMS.values().removeIf(a -> now - a.inicio > a.dur + 2);
         MIRANDO.clear();
+        SEGURA.values().removeIf(t -> t < now);
+        for (var e2 : SEGURA.keySet()) MIRANDO.put(e2, 0);
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e instanceof ConstructEntity c && (c.kind() == ConstructEntity.Kind.BEAM || c.kind() == ConstructEntity.Kind.STREAM
                     || c.kind() == ConstructEntity.Kind.PICKAXE)) {

@@ -1870,6 +1870,7 @@ public final class DevAutoTest {
         }
     }
     private static final java.util.concurrent.atomic.AtomicInteger CAM = new java.util.concurrent.atomic.AtomicInteger(-1);
+    private static double CAM_DX = 9, CAM_DZ = 3;
     /** Câmera parada de lado (um suporte de armadura invisível) para ver o construto inteiro. */
     private static void camLateral(boolean ligar) {
         Minecraft mc = Minecraft.getInstance();
@@ -1882,7 +1883,7 @@ public final class DevAutoTest {
                 st.addTag("cam"); st.setInvisible(true); st.setNoGravity(true); st.setInvulnerable(true);
                 lvl.addFreshEntity(st);
             }
-            double cx = sp.getX() + 9, cy = sp.getY() + 3.2, cz = sp.getZ() + 3;
+            double cx = sp.getX() + CAM_DX, cy = sp.getY() + 3.2, cz = sp.getZ() + CAM_DZ;
             double tx = sp.getX(), ty = sp.getY() + 1, tz = sp.getZ() + 4;
             float yaw = (float) Math.toDegrees(Math.atan2(-(tx - cx), tz - cz));
             float pitch = (float) -Math.toDegrees(Math.atan2(ty - (cy + 1.7), Math.hypot(tx - cx, tz - cz)));
@@ -1991,8 +1992,67 @@ public final class DevAutoTest {
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Porta Estelar: linha dos Guardiões, tela de destinos e a viagem animada até Oa. */
+    private static void scenePortal() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect clear @s"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) d.abandon(id);
+            d.setPortal(false); d.completed().removeIf(x -> x.startsWith("portal_"));
+            glog("antes: pode abrir? " + d.portal());
+            com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(33), null);
+            com.lanterna.construct.Affinity.add(sp, 7000);
+        }));
+        at(120, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("linha liberada: portal_1 ativa=" + d.isActive("portal_1"));
+            com.lanterna.mission.MissionManager.onTalk(sp, "guardiao", "oa"); }));
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("portal_2 ativa=" + d.isActive("portal_2") + " objetivos=" + com.lanterna.mission.Missions.get("portal_2").objectives().size());
+            for (int i = 0; i < 3; i++) d.setProgress("portal_2", i, 1);
+            for (String pl : new String[]{"odym", "korugar", "zamaron", "oa", "nok"}) d.visitar(pl);
+            com.lanterna.mission.MissionManager.evaluate(sp, d); }));
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("portal_3 ativa=" + d.isActive("portal_3")); com.lanterna.mission.MissionManager.onTalk(sp, "guardiao", "oa"); }));
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("aprendeu=" + d.portal());
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+            com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge()); }));
+        at(20, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.portal.PortalPackets.Pedido("")));
+        at(20, () -> { glog("tela=" + (mc.screen == null ? null : mc.screen.getClass().getSimpleName())); shot("p1_tela"); });
+        at(5, () -> { if (mc.screen instanceof com.lanterna.client.portal.PortalScreen ps) ps.escolher("oa"); });
+        at(5, () -> shot("p2_escolhido"));
+        at(5, () -> { mc.setScreen(null); com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.portal.PortalPackets.Pedido("oa")); });
+        int[] quando = {5, 11, 9, 8, 6, 3};
+        String[] nomes = {"p3_sobe", "p4_porta_nasce", "p5_porta_aberta", "p6_voando", "p7_dentro", "p8_clarao"};
+        for (int i = 0; i < quando.length; i++) { int k = i; at(quando[i], () -> shot(nomes[k])); }
+        waitFor(() -> !(mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen) && mc.level.dimension().location().getPath().equals("oa"), 400);
+        at(3, () -> shot("p9_chega"));
+        at(5, () -> shot("p10_saindo"));
+        at(7, () -> shot("p11_fora"));
+        at(30, () -> { shot("p12_fim"); server(sp -> glog("chegou em " + sp.level().dimension().location() + " " + sp.blockPosition().toShortString()
+                + " camera=" + mc.options.getCameraType() + " carga=" + com.lanterna.capability.ModCapabilities.get(sp).map(r -> r.charge()).orElse(-1))); });
+        // a mesma viagem vista de lado (outro destino), com a câmera parada
+        at(20, () -> server(sp -> { sp.teleportTo(sp.server.overworld(), 900.5, -60, 900.5, 0, 5);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setPortalCd(0)); }));
+        at(40, () -> { CAM_DX = 7; CAM_DZ = 10; camLateral(true); });
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.portal.PortalPackets.Pedido("nok")));
+        at(1, () -> { var e = mc.level.getEntity(CAM.get()); if (e != null) mc.setCameraEntity(e); });
+        at(8, () -> shot("pl1_sobe"));
+        at(14, () -> shot("pl2_porta"));
+        at(14, () -> shot("pl3_voando"));
+        at(5, () -> camLateral(false));
+        at(60, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("fist")) sceneFist();
+        if (ENABLED && SCENE.equals("portal")) scenePortal();
+        else if (ENABLED && SCENE.equals("fist")) sceneFist();
         else if (ENABLED && SCENE.equals("construtos")) sceneConstrutos();
         else if (ENABLED && SCENE.equals("v18")) sceneV18();
         else if (ENABLED && SCENE.equals("guilda")) sceneGuilda();

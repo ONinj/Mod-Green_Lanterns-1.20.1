@@ -268,6 +268,7 @@ public final class MissionManager {
                 .withStyle(s -> s.withColor(m.color())));
         if (m.line().equals("prova")) com.lanterna.tropa.Prova.concluir(player);
         com.lanterna.morte.Corrupcao.aoConcluir(player, data, m);
+        com.lanterna.portal.PortalEstelar.aoConcluir(player, data, m);
         com.lanterna.cidade.CidadeMissoes.aoConcluir(player, data, m);
         String next = routeNext(player, data, m);
         if (next != null) start(player, next);
