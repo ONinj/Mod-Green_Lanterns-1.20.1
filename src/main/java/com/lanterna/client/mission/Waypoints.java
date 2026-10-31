@@ -95,11 +95,19 @@ public final class Waypoints {
         var dim = player.level().dimension();
         boolean onPlanet = body.dimension() != null && dim.equals(body.dimension());
         if (onPlanet) {
+            // Quem você procura já está carregado por perto? Então o marcador vai em cima dele (na altura certa,
+            // mesmo dentro de prédios, no Palácio ou embaixo da terra)
+            net.minecraft.world.entity.Entity alvo = alvoPerto(player, o);
+            if (alvo != null) {
+                Vec3 at = alvo.position().add(0, alvo.getBbHeight() + 0.7, 0);
+                return new Target(at, at.distanceTo(player.position()), Component.translatable(o.type() == Objective.Type.TALK ? "waypoint.lanterna.alvo" : "waypoint.lanterna.alvo_luta", alvo.getDisplayName()), label, color, o.planet());
+            }
             if (o.pos() == null) {
                 return null;
             }
             BlockPos p = o.pos();
-            int y = player.level().hasChunk(p.getX() >> 4, p.getZ() >> 4)
+            // Pontos com altura definida (Palácio, salas, hangar) ficam na altura deles; só a base (y = 0) usa o chão
+            int y = p.getY() != 0 ? p.getY() : player.level().hasChunk(p.getX() >> 4, p.getZ() >> 4)
                     ? player.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) : (int) player.getY();
             Vec3 at = new Vec3(p.getX() + 0.5, y + 1.5, p.getZ() + 0.5);
             String place = p.equals(PlanetLore.HUB) ? "waypoint.lanterna.hub" : p.equals(PlanetLore.arena(PlanetLore.byPlanet(o.planet())))
@@ -116,6 +124,39 @@ public final class Waypoints {
         Vec3 space = Destinations.spacePosition(player);
         double total = Math.max(0, space.distanceTo(body.center()) - body.radius()) + Math.max(0, SpaceTravel.EXIT_HEIGHT - player.getY());
         return new Target(up, total, Component.translatable("waypoint.lanterna.go_space", planetName), label, color, o.planet());
+    }
+
+    /** NPC (falar) ou criatura (derrotar) do objetivo, já carregado perto do jogador. */
+    @Nullable
+    private static net.minecraft.world.entity.Entity alvoPerto(LocalPlayer player, Objective o) {
+        java.util.function.Predicate<net.minecraft.world.entity.Entity> ok;
+        String t = o.target();
+        switch (o.type()) {
+            case TALK -> {
+                String role = t.split(":")[0];
+                String chave = "cidade.lanterna.npc." + role;
+                ok = e -> {
+                    if (e instanceof com.lanterna.lore.entity.RaceEntity r)
+                        return r.role().equals(role) || (role.equals("lider") && r.role().equals("guardiao"));
+                    return e.getCustomName() != null && e.getCustomName().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc
+                            && tc.getKey().equals(chave);
+                };
+            }
+            case KILL, BOSS -> {
+                net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.tryParse(o.type() == Objective.Type.BOSS ? "lanterna:" + t : t);
+                var type = id == null ? null : net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(id);
+                if (type == null || !net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.containsKey(id)) return null;
+                ok = e -> e.getType() == type && e.isAlive();
+            }
+            default -> { return null; }
+        }
+        net.minecraft.world.entity.Entity best = null;
+        double bd = 160 * 160;
+        for (net.minecraft.world.entity.Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(160), ok)) {
+            double d = e.distanceToSqr(player);
+            if (d < bd) { bd = d; best = e; }
+        }
+        return best;
     }
 
     private Waypoints() {}

@@ -284,6 +284,7 @@ public class ConstructEntity extends Entity {
             e.invulnerableTime = 0;
             e.setSecondsOnFire(4);
         }
+        navesNaArea(owner, new AABB(to, to).inflate(1.8), damage);
         ServerLevel sl = (ServerLevel) level();
         sl.sendParticles(ParticleTypes.FLAME, to.x, to.y, to.z, 4, 0.4, 0.4, 0.4, 0.03);
         if (tickCount % 12 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.7f, 0.7f);
@@ -410,6 +411,54 @@ public class ConstructEntity extends Entity {
         }
     }
 
+    // ---- Naves (piratas, cargueiros, capitânias): o anel também fura casco ----
+
+    /** Energia do anel contra casco de nave rende mais (senão uma capitânia levaria minutos). */
+    private static final float CONTRA_NAVE = 2.2f;
+
+    private static boolean naveAlvo(@Nullable LivingEntity owner, com.lanterna.naves.NaveEntity n) {
+        if (n.isRemoved() || n.tipo().destrocos()) return false;
+        if (owner == null) return true;
+        if (n.hasPassenger(owner) || owner.getVehicle() == n) return false;
+        return !(owner instanceof Player p && p.getUUID().equals(n.dono()));
+    }
+
+    private static com.lanterna.naves.NaveEntity naveDe(Entity e) {
+        return e instanceof com.lanterna.naves.NavePart p ? p.getParent() : e instanceof com.lanterna.naves.NaveEntity n ? n : null;
+    }
+
+    /** Primeira nave cortada pela linha: fere (se dmg > 0) e devolve o ponto atingido, ou null. */
+    @Nullable
+    Vec3 naveNaLinha(@Nullable LivingEntity owner, Vec3 from, Vec3 to, double inflate, float dmg) {
+        Entity best = null;
+        Vec3 bestP = null;
+        double bd = Double.MAX_VALUE;
+        for (Entity e : level().getEntities((Entity) null, new AABB(from, to).inflate(inflate + 1), x -> naveDe(x) != null)) {
+            if (!naveAlvo(owner, naveDe(e))) continue;
+            var clip = e.getBoundingBox().inflate(inflate).clip(from, to);
+            if (clip.isEmpty()) continue;
+            double d = clip.get().distanceToSqr(from);
+            if (d < bd) { bd = d; best = e; bestP = clip.get(); }
+        }
+        if (best != null && dmg > 0 && !level().isClientSide) {
+            best.hurt(source(owner), dmg * CONTRA_NAVE);
+            ServerLevel sl = (ServerLevel) level();
+            sl.sendParticles(ParticleTypes.LAVA, bestP.x, bestP.y, bestP.z, 2, 0.3, 0.3, 0.3, 0);
+            sl.sendParticles(dust(), bestP.x, bestP.y, bestP.z, 10, 0.4, 0.4, 0.4, 0.1);
+        }
+        return bestP;
+    }
+
+    /** Fere (uma vez cada) as naves que encostam na área. */
+    void navesNaArea(@Nullable LivingEntity owner, AABB box, float dmg) {
+        if (level().isClientSide || dmg <= 0) return;
+        java.util.Set<com.lanterna.naves.NaveEntity> feridas = new java.util.HashSet<>();
+        for (Entity e : level().getEntities((Entity) null, box, x -> naveDe(x) != null)) {
+            var n = naveDe(e);
+            if (naveAlvo(owner, n) && feridas.add(n)) n.hurt(source(owner), dmg * CONTRA_NAVE);
+        }
+    }
+
     // ---- Laser ----
 
     void updateBeam(LivingEntity owner) {
@@ -423,7 +472,9 @@ public class ConstructEntity extends Entity {
         BlockHitResult block = level().clip(new ClipContext(owner.getEyePosition(), far, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
         Vec3 stop = block.getType() == HitResult.Type.MISS ? far : block.getLocation();
         LivingEntity hit = firstEntityOnLine(owner, owner.getEyePosition(), stop);
-        setEnd(hit != null ? hit.position().add(0, hit.getBbHeight() * 0.6, 0) : stop);
+        Vec3 end = hit != null ? hit.position().add(0, hit.getBbHeight() * 0.6, 0) : stop;
+        Vec3 nave = naveNaLinha(owner, owner.getEyePosition(), end, 0.2, 0);
+        setEnd(nave != null ? nave : end);
     }
 
     private void beamHit(LivingEntity owner) {
@@ -435,6 +486,8 @@ public class ConstructEntity extends Entity {
             com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
             hit.invulnerableTime = 0;
             sl.sendParticles(ParticleTypes.CRIT, stop.x, stop.y, stop.z, 3, 0.2, 0.2, 0.2, 0.1);
+        } else {
+            naveNaLinha(owner, owner.getEyePosition(), stop.add(owner.getViewVector(1f).scale(0.6)), 0.3, damage);
         }
         if (tickCount % 12 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8f, 2f);
     }
@@ -467,6 +520,7 @@ public class ConstructEntity extends Entity {
         sl.sendParticles(dust(), c.x, c.y + 0.3, c.z, 80, radius * 0.6, 0.3, radius * 0.6, 0.1);
         level().playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.5f, 0.5f);
         level().playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.0f, 1.3f);
+        navesNaArea(owner, new AABB(c, c).inflate(radius, radius, radius), damage);
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(radius, radius, radius))) {
             if (e == owner || !e.isAlive()) continue;
             double d = e.position().distanceTo(c);
@@ -486,6 +540,22 @@ public class ConstructEntity extends Entity {
         BlockHitResult block = level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 stop = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
         float size = (kind() == Kind.FIST ? 0.7f : kind() == Kind.RAM ? 1.3f : 0.3f) * scale();
+        // Bateu numa nave antes do bloco: fere o casco e acaba aqui
+        Vec3 naveHit = naveNaLinha(owner, from, stop, size * 0.6, 0);
+        if (naveHit != null) {
+            LivingEntity antes = null;
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, naveHit).inflate(size + 0.5), x -> inimigo(owner, x))) {
+                if (e.getBoundingBox().inflate(size).clip(from, naveHit).isPresent()) { antes = e; break; }
+            }
+            if (antes == null) {
+                naveNaLinha(owner, from, stop, size * 0.6, damage * (kind() == Kind.RAM ? 1.5f : 1f));
+                ServerLevel sln = (ServerLevel) level();
+                sln.sendParticles(kind() == Kind.BOLT ? ParticleTypes.CRIT : ParticleTypes.EXPLOSION, naveHit.x, naveHit.y, naveHit.z, kind() == Kind.BOLT ? 6 : 2, 0.3, 0.3, 0.3, 0);
+                level().playSound(null, naveHit.x, naveHit.y, naveHit.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, kind() == Kind.BOLT ? 0.4f : 1.0f, 1.4f);
+                discard();
+                return;
+            }
+        }
         if (kind() == Kind.RAM) {
             ServerLevel sl0 = (ServerLevel) level();
             for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 0.5), x -> inimigo(owner, x))) {
@@ -551,6 +621,7 @@ public class ConstructEntity extends Entity {
             com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage);
             e.invulnerableTime = 0;
         }
+        navesNaArea(owner, owner.getBoundingBox().inflate(r, 1, r), damage);
         if (tickCount % 16 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 1.4f);
     }
 

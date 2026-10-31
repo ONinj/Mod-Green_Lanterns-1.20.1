@@ -30,6 +30,7 @@ public final class ModCreativeTabs {
                         }
                         // Uniformes 3D das 9 Tropas (máscara, peitoral, calça e botas)
                         for (var piece : com.lanterna.armor.ModArmorItems.all()) output.accept(piece);
+                        for (var t : com.lanterna.armor.ModTrajes.TODOS.values()) output.accept(t.get());
                         // Lore: minérios, drops dos bosses, moedas, presentes, blocos das bases e ovos
                         for (var item : com.lanterna.lore.LoreItems.ALL) output.accept(item.get());
                         for (var block : com.lanterna.lore.LoreBlocks.ALL) output.accept(block.get());

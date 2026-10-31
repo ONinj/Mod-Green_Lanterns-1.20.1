@@ -49,6 +49,9 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.PERFIL.consumeClick()) {
+            com.lanterna.client.visual.PerfilScreen.abrir(com.lanterna.client.visual.PerfilScreen.Aba.ESTATISTICAS);
+        }
         while (KeyBindings.PORTAL.consumeClick()) {
             if (ClientRingData.hasRing && !com.lanterna.client.portal.PortalCliente.ativo())
                 ModNetwork.sendToServer(new com.lanterna.portal.PortalPackets.Pedido(""));
@@ -215,6 +218,7 @@ public final class ClientForgeEvents {
         ClientRingData.reset();
         ClientCutscene.reset();
         ClientVisibleRings.clear();
+        com.lanterna.client.visual.ClientVisual.clear();
         ClientFlight.clear();
         UniformTransition.clear();
         ClientRecharge.clear();

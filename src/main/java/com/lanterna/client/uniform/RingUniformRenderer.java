@@ -32,6 +32,8 @@ public class RingUniformRenderer extends UniformeRenderer {
     private static final float BAND = 0.08f;
 
     private Mode mode = Mode.NORMAL;
+    /** Trajes "segunda pele" não têm camada de base em layout de skin: tudo aparece cubinho por cubinho. */
+    private boolean semBase;
     private float progress = 1f;
     private float cr = 1f, cg = 1f, cb = 1f;
     private ResourceLocation baseTexture, bandTexture;
@@ -53,6 +55,11 @@ public class RingUniformRenderer extends UniformeRenderer {
 
     public void reset() {
         mode = Mode.NORMAL;
+        semBase = false;
+    }
+
+    public void setSemBase(boolean v) {
+        semBase = v;
     }
 
     @Override
@@ -81,7 +88,7 @@ public class RingUniformRenderer extends UniformeRenderer {
             super.renderCube(poseStack, cube, buffer, light, overlay, red, green, blue, alpha);
             return;
         }
-        boolean base = baseCubes.computeIfAbsent(cube, RingUniformRenderer::isBase);
+        boolean base = !semBase && baseCubes.computeIfAbsent(cube, RingUniformRenderer::isBase);
         switch (mode) {
             case BASE -> { if (base) super.renderCube(poseStack, cube, buffer, light, overlay, red, green, blue, alpha); }
             case BAND -> { if (base) super.renderCube(poseStack, cube, buffer, LightTexture.FULL_BRIGHT, overlay, cr, cg, cb, alpha); }

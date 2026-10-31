@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "9";
+    private static final String VERSION = "10";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -191,6 +191,18 @@ public final class ModNetwork {
                 .decoder(com.lanterna.guilda.GuildaAcaoPacket::decode)
                 .consumerMainThread(com.lanterna.guilda.GuildaAcaoPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(com.lanterna.visual.VisualPackets.Pedido.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.visual.VisualPackets.Pedido::encode).decoder(com.lanterna.visual.VisualPackets.Pedido::decode)
+                .consumerMainThread(com.lanterna.visual.VisualPackets.Pedido::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.visual.VisualPackets.Sync.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.visual.VisualPackets.Sync::encode).decoder(com.lanterna.visual.VisualPackets.Sync::decode)
+                .consumerMainThread(com.lanterna.visual.VisualPackets.Sync::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.visual.VisualPackets.FichaPedido.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.visual.VisualPackets.FichaPedido::encode).decoder(com.lanterna.visual.VisualPackets.FichaPedido::decode)
+                .consumerMainThread(com.lanterna.visual.VisualPackets.FichaPedido::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.visual.VisualPackets.Ficha.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.visual.VisualPackets.Ficha::encode).decoder(com.lanterna.visual.VisualPackets.Ficha::decode)
+                .consumerMainThread(com.lanterna.visual.VisualPackets.Ficha::handle).add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

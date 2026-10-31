@@ -1993,6 +1993,164 @@ public final class DevAutoTest {
     }
 
     /** Porta Estelar: linha dos Guardiões, tela de destinos e a viagem animada até Oa. */
+    private static boolean hurtHook;
+    private static void sceneReceber() {
+        Minecraft mc = Minecraft.getInstance();
+        if (!hurtHook) { hurtHook = true; net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.entity.living.LivingHurtEvent e) -> {
+            if (e.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) glog("DANO " + e.getSource().getMsgId() + " " + e.getAmount() + " dim=" + sp.level().dimension().location()
+                    + " y=" + (int) sp.getY() + " auto=" + com.lanterna.client.flight.Autopilot.phase() + " hp=" + sp.getHealth()); }); }
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("difficulty normal"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
+            cmd("execute in minecraft:overworld run tp @s 300.5 120 300.5 0 0"); });
+        at(60, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        for (int i = 0; i < 90; i++) {
+            final int k = i;
+            at(40, () -> {
+                var p = mc.player; if (p == null) return;
+                glog("t=" + k * 2 + "s dim=" + p.level().dimension().location().getPath() + " y=" + (int) p.getY() + " hp=" + p.getHealth()
+                    + " auto=" + com.lanterna.client.flight.Autopilot.phase() + " fly=" + com.lanterna.client.ClientRingData.flight + " on=" + com.lanterna.client.ClientRingData.active
+                    + " carga=" + com.lanterna.client.ClientRingData.charge + " scr=" + (mc.screen == null ? "-" : mc.screen.getClass().getSimpleName()) + " cut=" + com.lanterna.client.ClientCutscene.active());
+                if (k == 12 || k == 30) shot("receber_" + k);
+            });
+        }
+        at(20, () -> shot("receber_fim"));
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.OpenLanternMenuPacket()));
+        at(30, () -> shot("tela_k"));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneV22() {
+        Minecraft mc = Minecraft.getInstance();
+        if (!hurtHook) { hurtHook = true; net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.entity.living.LivingHurtEvent e) -> {
+            if (e.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) glog("DANO " + e.getSource().getMsgId() + " " + e.getAmount() + " dim=" + sp.level().dimension().location()
+                    + " y=" + (int) sp.getY() + " auto=" + com.lanterna.client.flight.Autopilot.phase()); }); }
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("difficulty normal"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
+            cmd("execute in minecraft:overworld run tp @s 300.5 -60 300.5 0 0"); });
+        at(40, () -> cmd("fill 296 -44 296 304 -42 304 minecraft:stone"));
+        at(20, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.flight.Autopilot.phase() == com.lanterna.client.flight.Autopilot.Phase.ASCEND, 900);
+        at(1, () -> glog("comecou a subir em " + String.format("%.1f %.1f %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ())));
+        at(30, () -> { glog("subindo y=" + (int) mc.player.getY()); shot("v22_subindo"); });
+        at(60, () -> server(sp -> { int ar = 0; StringBuilder sb = new StringBuilder();
+            for (int x = 296; x <= 304; x++) for (int y = -44; y <= -42; y++) for (int z = 296; z <= 304; z++)
+                if (sp.serverLevel().getBlockState(new net.minecraft.core.BlockPos(x, y, z)).isAir()) { ar++; if (ar < 12) sb.append(x).append(",").append(y).append(",").append(z).append(" "); }
+            glog("teto: blocos quebrados=" + ar + " [" + sb + "] y=" + (int) sp.getY()); }));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && !com.lanterna.client.flight.Autopilot.active() && mc.screen == null, 3000);
+        at(60, () -> { glog("chegou y=" + (int) mc.player.getY() + " hp=" + mc.player.getHealth() + "/" + mc.player.getMaxHealth()); shot("v22_missao"); });
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.OpenLanternMenuPacket()));
+        at(30, () -> shot("v22_tela_k"));
+        at(5, () -> { mc.player.closeContainer(); com.lanterna.client.visual.PerfilScreen.abrir(com.lanterna.client.visual.PerfilScreen.Aba.ESTATISTICAS); });
+        at(40, () -> shot("v22_estatisticas"));
+        at(5, () -> com.lanterna.client.visual.PerfilScreen.abrir(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL));
+        at(5, () -> ((com.lanterna.client.visual.PerfilScreen) mc.screen).escolher("a", 3));
+        at(30, () -> shot("v22_visual_a"));
+        at(5, () -> mc.setScreen(null));
+        at(5, () -> { camera(CameraType.THIRD_PERSON_FRONT); mc.options.hideGui = true; });
+        at(30, () -> shot("v22_traje_a"));
+        for (String v : new String[]{"b", "padrao"}) {
+            at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null); });
+            at(30, () -> shot("v22_traje_" + v));
+        }
+        at(5, () -> server(sp -> glog("visual servidor=" + com.lanterna.visual.Visual.traje(sp) + " mascara=" + com.lanterna.visual.Visual.mascara(sp))));
+        at(5, () -> { camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; });
+        // ---- voo de combate ----
+        at(5, () -> { look(0, 0); if (!com.lanterna.client.ClientRingData.flight) com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.ToggleFlightPacket()); });
+        at(20, () -> { cmd("tp @s ~ ~25 ~"); });
+        at(20, () -> hold(mc.options.keyUp, true));
+        at(10, () -> glog("W 10t vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"));
+        at(30, () -> glog("W 40t vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"));
+        at(1, () -> hold(mc.options.keyUp, false));
+        at(10, () -> glog("solto 10t vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"));
+        at(5, () -> { hold(mc.options.keyLeft, true); });
+        at(15, () -> { glog("A 15t vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"); hold(mc.options.keyLeft, false); });
+        at(5, () -> { hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); });
+        at(60, () -> glog("Ctrl+W 60t vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"));
+        at(1, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); });
+        at(40, () -> glog("parado vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s"));
+        // ---- nave pirata x laser e punho ----
+        int[] nave = new int[1];
+        at(5, () -> server(sp -> {
+            var n = com.lanterna.naves.NaveEntity.create(sp.serverLevel(), com.lanterna.naves.NaveTipo.NAVE_PIRATA, "1");
+            n.moveTo(sp.getX(), sp.getY() - 1, sp.getZ() + 22, 0, 0);
+            sp.serverLevel().addFreshEntity(n); nave[0] = n.getId();
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge());
+            com.lanterna.construct.Affinity.add(sp, 30000);
+            glog("nave hp=" + n.hp());
+        }));
+        Runnable mira = () -> { var e = mc.level.getEntity(nave[0]); if (e == null) return;
+            var d = e.position().add(0, 2.5, 0).subtract(mc.player.getEyePosition());
+            look((float) Math.toDegrees(Math.atan2(-d.x, d.z)), (float) -Math.toDegrees(Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)))); };
+        at(30, () -> { mira.run(); server(sp -> { var e = sp.serverLevel().getEntity(nave[0]); glog("nave y=" + (e == null ? "?" : (int) e.getY()) + " jogador y=" + (int) sp.getY()); }); });
+        at(5, () -> { mira.run(); server(sp -> com.lanterna.construct.Constructs.cast(sp, "laser")); });
+        for (int i = 0; i < 16; i++) at(5, mira);
+        at(1, () -> shot("v22_laser_nave"));
+        at(5, () -> server(sp -> { com.lanterna.construct.Constructs.release(sp, null);
+            var e = sp.serverLevel().getEntity(nave[0]); glog("depois do laser hp=" + (e instanceof com.lanterna.naves.NaveEntity n ? n.hp() : -1)); }));
+        at(20, () -> { mira.run(); server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge());
+            com.lanterna.construct.Constructs.cast(sp, "punho"); }); });
+        at(30, () -> server(sp -> { var e = sp.serverLevel().getEntity(nave[0]); glog("depois do punho hp=" + (e instanceof com.lanterna.naves.NaveEntity n ? n.hp() + " vivo=" + n.isAlive() : "sumiu")); }));
+        // ---- galeria dos trajes em suportes de armadura ----
+        at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); }); }));
+        at(10, () -> { cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 8"); cmd("time set 6000"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.screen == null, 600);
+        at(20, () -> cmd("fill 310 -60 326 331 -55 345 minecraft:air"));
+        for (String v : new String[]{"a", "b"}) {
+            at(30, () -> server(sp -> {
+                for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.decoration.ArmorStand.class, sp.getBoundingBox().inflate(30))) e.discard();
+                String[] tr = com.lanterna.armor.ModTrajes.TROPAS;
+                for (int i = 0; i < tr.length; i++) {
+                    var st = new net.minecraft.world.entity.decoration.ArmorStand(sp.serverLevel(), 320.5 + (i - 4) * 1.6, -60, 337.5);
+                    st.setYRot(180); st.setYBodyRot(180); st.setYHeadRot(180);
+                    for (var slot : new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
+                            net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET})
+                        st.setItemSlot(slot, new net.minecraft.world.item.ItemStack(com.lanterna.armor.ModTrajes.peca(tr[i], v, slot)));
+                    st.setNoGravity(true);
+                    sp.serverLevel().addFreshEntity(st);
+                }
+                sp.teleportTo(320.5, -60, 330.0); sp.setYRot(0); sp.setXRot(6);
+            }));
+            at(5, () -> { look(0, 6); mc.options.hideGui = true; });
+            at(40, () -> shot("v22_galeria_" + v));
+        }
+        at(5, () -> mc.options.hideGui = false);
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneTeto() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 520.5 -60 520.5 0 0"); });
+        at(30, () -> { cmd("fill 510 -59 510 530 -50 530 minecraft:air"); });
+        at(10, () -> { cmd("fill 516 -55 516 524 -53 524 minecraft:stone"); });
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
+        at(20, () -> com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId("oa")));
+        for (int i = 0; i < 30; i++) at(5, () -> {
+            var p = mc.player;
+            int ar = 0; for (int x = 516; x <= 524; x++) for (int y = -55; y <= -53; y++) for (int z = 516; z <= 524; z++)
+                if (mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z)).isAir()) ar++;
+            glog("y=" + String.format("%.2f", p.getY()) + " ar=" + ar + " vcol=" + p.verticalCollision + " fase=" + com.lanterna.client.flight.Autopilot.phase() + " voo=" + com.lanterna.client.ClientRingData.flight + " hp=" + p.getHealth());
+        });
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneTeto2() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 620.5 -60 620.5 0 0"); });
+        at(30, () -> { cmd("fill 610 -59 610 630 -40 630 minecraft:air"); });
+        at(10, () -> { cmd("fill 616 -50 616 624 -48 624 minecraft:stone"); });
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        for (int i = 0; i < 40; i++) at(5, () -> {
+            var p = mc.player;
+            int ar = 0; for (int x = 616; x <= 624; x++) for (int y = -50; y <= -48; y++) for (int z = 616; z <= 624; z++)
+                if (mc.level.getBlockState(new net.minecraft.core.BlockPos(x, y, z)).isAir()) ar++;
+            glog("y=" + String.format("%.2f", p.getY()) + " ar=" + ar + " vcol=" + p.verticalCollision + " fase=" + com.lanterna.client.flight.Autopilot.phase() + " voo=" + com.lanterna.client.ClientRingData.flight + " hp=" + p.getHealth());
+        });
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void opc(String c) {
         server(sp -> {
             int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c);
@@ -2113,6 +2271,10 @@ public final class DevAutoTest {
     static {
         if (ENABLED && SCENE.equals("portal")) scenePortal();
         else if (ENABLED && SCENE.equals("comandos")) sceneComandos();
+        else if (ENABLED && SCENE.equals("receber")) sceneReceber();
+        else if (ENABLED && SCENE.equals("v22")) sceneV22();
+        else if (ENABLED && SCENE.equals("teto")) sceneTeto();
+        else if (ENABLED && SCENE.equals("teto2")) sceneTeto2();
         else if (ENABLED && SCENE.equals("fist")) sceneFist();
         else if (ENABLED && SCENE.equals("construtos")) sceneConstrutos();
         else if (ENABLED && SCENE.equals("v18")) sceneV18();

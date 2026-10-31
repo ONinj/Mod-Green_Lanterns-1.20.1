@@ -18,8 +18,11 @@ public final class MissionText {
             case TALK -> {
                 if (t.startsWith("resgate:")) yield Component.translatable("alvo.lanterna.resgate");
                 String[] parts = t.split(":");
-                yield Component.translatable("npc.lanterna.role." + parts[0],
-                        Component.translatable("planet.lanterna." + (parts.length > 1 ? parts[1] : "oa")));
+                Component planeta = Component.translatable("planet.lanterna." + (parts.length > 1 ? parts[1] : "oa"));
+                // Papéis da lore (líder, instrutor, Guardiões) têm frase própria; os NPCs da cidade e do Palácio usam o nome deles
+                if (java.util.Set.of("lider", "instrutor", "guardiao").contains(parts[0]))
+                    yield Component.translatable("npc.lanterna.role." + parts[0], planeta);
+                yield Component.translatable("npc.lanterna.role.cidade", Component.translatable("cidade.lanterna.npc." + parts[0]), planeta);
             }
             case KILL -> {
                 if (t.startsWith("papel:")) yield Component.translatable("alvo.lanterna." + t.substring(6));

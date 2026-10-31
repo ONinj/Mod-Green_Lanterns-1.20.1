@@ -37,6 +37,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.TOGGLE_FLIGHT);
         event.register(KeyBindings.POCKET_RECHARGE);
         event.register(KeyBindings.OPEN_LANTERN);
+        event.register(KeyBindings.PERFIL);
         event.register(KeyBindings.TOGGLE_POWER);
         event.register(KeyBindings.STAR_MAP);
         event.register(KeyBindings.PORTAL);

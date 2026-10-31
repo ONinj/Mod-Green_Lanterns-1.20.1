@@ -477,3 +477,38 @@ está atravessando. Se o planeta ainda está carregando, a animação de chegada
 
 Os comandos antigos continuam: `escolher`, `xp`, `afinidade`, `respeito`, `encontro`, `genese`, `contratos`, `interior`,
 `reconstruir`, `resetar`, `/guilda admin ...`.
+
+# 0.22 — Perfil, trajes, voo de combate e correções
+
+**Perfil do Lanterna (tecla H, ou as abas da tela K)**
+- *Estatísticas*: Tropa, posto, nível com XP, guilda, vida, armadura, dureza, resistência contra jogadores, carga,
+  afinidade, força dos construtos, desconto de carga, velocidade de voo, recarga sem bateria, Porta Estelar, técnicas,
+  missões concluídas, planetas visitados, chefes derrotados, Guarda de Honra, Tropas inimigas e a linha da Morte.
+- *Visual*: o uniforme que o anel veste — Padrão da Tropa, os dois trajes "segunda pele" da sua Tropa ou nenhum — e a
+  altura da máscara (de -2 a +2 pixels, em passos de 1/4), com o rosto ampliado para acertar nos olhos da skin.
+  Fica salvo no jogador e todos os jogadores veem.
+
+**Trajes "segunda pele"**: 18 trajes (2 por Tropa), também como itens vestíveis (72 peças na aba do mod):
+Patrulheiro e Sentinela (Verde), Espectro e Arauto do Terror (Amarelo), Berserker e Sangue Fervente (Vermelho),
+Tesoureiro e Saqueador (Laranja), Aurora e Estrela-Guia (Azul), Peregrino e Xamã (Índigo), Safira e Coração Estelar
+(Violeta), Ossuário e Ceifador (Preto), Gênese e Fênix (Branco).
+
+**Tela K** e **HUD de missões** redesenhados (objetivo atual em destaque com barra, seta relativa à sua visão, marcador
+com o que fazer em cima). O marcador vai em cima do NPC (ou da criatura a derrotar) quando ele está carregado por
+perto, e os pontos com altura (Palácio, salas) ficam na altura certa. "Fale com" mostra o nome do NPC (antes aparecia o
+nome interno, ex.: no "O Chamado de Oa" do Palácio).
+
+**Voo**: nos planetas, sem Ctrl, é o voo de combate — vai direto para onde você manda (23 blocos/s), para no ar ao
+soltar, S recua, A/D deslizam, dois toques em A/D esquivam. Com Ctrl, o impulso chega a 48 blocos/s com curvas mais
+fechadas. No espaço continua igual.
+
+**Piloto automático**: S cancela em qualquer fase (inclusive a viagem do anel novo); desligar o voo (V) também cancela.
+O anel abre caminho quebrando os blocos na frente (não quebra baús, blocos inquebráveis, nem as cidades e o Palácio).
+Durante o piloto o anel protege de batidas, quedas e falta de ar; a primeira viagem do anel novo não causa mais dano
+no espaço.
+
+**Naves**: o laser, o punho, a rajada, o aríete, o martelo, as lâminas e o napalm do anel ferem naves (piratas,
+cargueiros, capitânias) — energia do anel rende 2,2x contra casco. Não acerta a sua própria nave nem a que você pilota.
+
+**Recarga sem bateria** (depois da Prova da Emoção): ~1,2% da carga a cada 2 s, o dobro parado no chão sem voar,
+e a emoção da Tropa recarrega o dobro de antes.

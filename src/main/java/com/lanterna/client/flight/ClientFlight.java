@@ -44,13 +44,13 @@ import java.util.Map;
  */
 public final class ClientFlight {
     // Velocidades em blocos por tick (x20 = blocos por segundo)
-    private static final double MAX_CRUISE = 0.75;   // 15 blocos/s
-    private static final double MAX_BOOST = 1.6;     // 32 blocos/s
+    private static final double MAX_CRUISE = 1.15;   // 23 blocos/s (modo combate)
+    private static final double MAX_BOOST = 2.4;     // 48 blocos/s (Ctrl)
     private static final double SPACE_CRUISE = 3.0;  // 60 blocos/s
     private static final double SPACE_BOOST = 6.4;   // 128 blocos/s
     public static final double HYPER_MAX = 90.0;     // 1.800 blocos/s
     private static final double THRUST = 0.045;
-    private static final double THRUST_BOOST = 0.085;
+    private static final double THRUST_BOOST = 0.14;
     private static final double STRAFE = 0.03;
     private static final double LIFT = 0.045;
     private static final double DRAG = 0.985;        // resistência do ar com o anel empurrando
@@ -106,7 +106,11 @@ public final class ClientFlight {
         // O piloto pode estar esperando o voo ligar
         Autopilot.Control auto = null;
         if (Autopilot.active()) {
-            if (player.input.forwardImpulse < 0 && Autopilot.phase() != Autopilot.Phase.WAIT_FLIGHT) {
+            // S cancela em qualquer fase (inclusive a viagem automática do anel novo)
+            if (player.input.forwardImpulse < 0) {
+                Autopilot.stop(Component.translatable("autopilot.lanterna.cancelled"));
+            } else if (!flying && Autopilot.phase() != Autopilot.Phase.WAIT_FLIGHT) {
+                // desligou o voo (V): o piloto também desliga, e o mouse volta a virar o jogador
                 Autopilot.stop(Component.translatable("autopilot.lanterna.cancelled"));
             } else if (!ClientRingData.hasRing || !ClientRingData.active || player.isDeadOrDying()) {
                 Autopilot.stop(Component.translatable("autopilot.lanterna.cancelled"));
@@ -182,7 +186,7 @@ public final class ClientFlight {
         // ---- Parafuso: dois toques em A ou D ----
         tickRoll(player);
         if (rollTicks > 0) {
-            v = v.add(left.scale(rollDir * (rollTicks > ROLL_TIME - 4 ? 0.22 : 0.0)));
+            v = v.add(left.scale(rollDir * (rollTicks > ROLL_TIME - 4 ? (inSpaceNow(player) ? 0.22 : 0.55) : 0.0)));
         }
 
         // ---- Hiperpropulsão (espaço) ----
@@ -223,6 +227,8 @@ public final class ClientFlight {
     private static Vec3 normalPhysics(LocalPlayer player, Vec3 v, Vec3 look, Vec3 left, float forward, float strafe,
                                       boolean up, boolean down, boolean boost, boolean inSpace,
                                       double maxCruise, double maxBoost, Autopilot.Control auto) {
+        // Nos planetas, sem o Ctrl: voo de combate (direto e preciso, para lutar)
+        if (!inSpace && auto == null && !boost) return combatPhysics(player, v, look, left, forward, strafe, up, down, maxCruise);
         double speed = v.length();
         double maxSpeed = boost ? maxBoost : maxCruise;
         // Piloto automático saindo da atmosfera: sobe como foguete
@@ -244,7 +250,7 @@ public final class ClientFlight {
                 Vec3 dirV = v.scale(1 / speed);
                 double ang = Math.acos(Mth.clamp(dirV.dot(look), -1, 1));
                 double fast = Mth.clamp(speed / maxBoost, 0, 1);
-                double maxTurn = Math.toRadians(Mth.lerp(fast, 14, 4.5)) * (inSpace ? 0.75 : 1);
+                double maxTurn = Math.toRadians(Mth.lerp(fast, inSpace ? 14 : 24, inSpace ? 4.5 : 8)) * (inSpace ? 0.75 : 1);
                 if (ang > 1.0E-4) {
                     double k = Math.min(1, maxTurn / ang);
                     // suaviza o começo e o fim da curva
@@ -314,6 +320,39 @@ public final class ClientFlight {
             v = new Vec3(v.x, v.y + Mth.sin(player.tickCount * 0.1f) * 0.0035, v.z);
         }
         return v;
+    }
+
+    /**
+     * Voo de combate (planetas, sem Ctrl): a velocidade vai direto para onde você manda, com aceleração rápida e
+     * parada rápida. W segue a mira (inclusive para cima/baixo), S recua, A/D deslizam de lado, Espaço/Shift sobem e
+     * descem, e soltando tudo você para no ar. Dá para mirar e desviar ao mesmo tempo.
+     */
+    private static Vec3 combatPhysics(LocalPlayer player, Vec3 v, Vec3 look, Vec3 left, float forward, float strafe,
+                                      boolean up, boolean down, double cruise) {
+        Vec3 flat = new Vec3(look.x, 0, look.z);
+        flat = flat.lengthSqr() > 1.0E-4 ? flat.normalize() : Vec3.ZERO;
+        Vec3 want = Vec3.ZERO;
+        if (forward > 0) want = want.add(look.scale(forward));
+        if (forward < 0) want = want.add(flat.scale(forward * 0.75));
+        if (strafe != 0) want = want.add(left.scale(strafe * 0.9));
+        if (up && !down) want = want.add(0, 0.85, 0);
+        if (down && !up) want = want.add(0, -0.85, 0);
+        Vec3 target = want.lengthSqr() > 1.0E-4 ? want.normalize().scale(cruise * Math.min(1, want.length())) : Vec3.ZERO;
+        if (player.isInWater()) target = target.scale(0.45);
+        double speed = v.length();
+        // Acelera e para rápido; vindo do impulso (Ctrl), perde o excesso de velocidade aos poucos
+        double k = speed > cruise * 1.15 && target.lengthSqr() > 0 ? 0.08 : target.lengthSqr() > 0 ? 0.24 : 0.2;
+        v = v.add(target.subtract(v).scale(k));
+        if (player.isInWater() && player.tickCount % 2 == 0) bubbles(player);
+        else if (wasInWater && !player.isInWater() && speed > 0.35) waterBurst(player, v);
+        wasInWater = player.isInWater();
+        // Pairando: um balanço bem leve
+        if (target.lengthSqr() == 0 && v.lengthSqr() < 0.003) v = new Vec3(v.x, v.y + Mth.sin(player.tickCount * 0.1f) * 0.0035, v.z);
+        return v;
+    }
+
+    private static boolean inSpaceNow(Player player) {
+        return player.level().dimension().equals(SpaceBodies.SPACE);
     }
 
     // ===================== Hiperpropulsão =====================

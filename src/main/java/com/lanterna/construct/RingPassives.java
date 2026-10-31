@@ -53,5 +53,18 @@ public final class RingPassives {
         event.setAmount(event.getAmount() + Affinity.punchBonus(lvl) * Constructs.corpsPower(ring) * com.lanterna.tropa.Nivel.forca(player));
     }
 
+    /** Piloto automático (e a primeira viagem do anel novo): o anel protege de batidas, quedas e sufocamento. */
+    @SubscribeEvent
+    public static void onAttackedAutopilot(net.minecraftforge.event.entity.living.LivingAttackEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        RingData ring = ModCapabilities.get(player).orElse(null);
+        if (!powered(ring) || !(ring.autopilot() || RingPowers.homing(player))) return;
+        var s = event.getSource();
+        if (s.is(net.minecraft.tags.DamageTypeTags.IS_FALL) || s.is(net.minecraft.world.damagesource.DamageTypes.FLY_INTO_WALL)
+                || s.is(net.minecraft.world.damagesource.DamageTypes.IN_WALL) || s.is(net.minecraft.world.damagesource.DamageTypes.DROWN)) {
+            event.setCanceled(true);
+        }
+    }
+
     private RingPassives() {}
 }

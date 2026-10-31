@@ -304,6 +304,7 @@ public final class RingPowers {
 
     private static void tickFlight(ServerPlayer player, RingData data) {
         if (!data.flightEnabled()) return;
+        if (data.autopilot()) abrirCaminho(player);
         // Hiperpropulsão só existe no espaço
         if (data.hyper() && !player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)) {
             data.setFlightMode(false, data.autopilot());
@@ -325,6 +326,37 @@ public final class RingPowers {
                 player.displayClientMessage(Component.translatable("message.lanterna.charge_depleted"), true);
                 player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_DEACTIVATE,
                         SoundSource.PLAYERS, 1.0f, 0.7f);
+            }
+        }
+    }
+
+    /**
+     * Piloto automático: o anel abre caminho quebrando os blocos que estão na frente (teto de caverna, árvore, morro).
+     * Não quebra baús e outros blocos com conteúdo, nem blocos inquebráveis, nem nas cidades e no Palácio dos
+     * planetas da lore. A quebra passa pelas proteções (guildas, spawn) como se o jogador quebrasse.
+     */
+    private static void abrirCaminho(ServerPlayer player) {
+        var level = player.serverLevel();
+        if (level.dimension().equals(com.lanterna.space.SpaceBodies.SPACE) || player.isSpectator()) return;
+        if (com.lanterna.lore.PlanetLore.byDimension(level.dimension()) != null
+                && (Math.abs(player.getX()) < 220 && Math.abs(player.getZ()) < 220
+                || player.blockPosition().distSqr(com.lanterna.cidade.Palacio.CENTRO) < 140 * 140)) return;
+        net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(0.15);
+        int quebrados = 0;
+        for (double k = 0.6; k <= 2.4 && quebrados < 8; k += 0.9) {
+            net.minecraft.world.phys.AABB b = box.move(look.scale(k));
+            for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(
+                    net.minecraft.util.Mth.floor(b.minX), net.minecraft.util.Mth.floor(b.minY), net.minecraft.util.Mth.floor(b.minZ),
+                    net.minecraft.util.Mth.floor(b.maxX), net.minecraft.util.Mth.floor(b.maxY), net.minecraft.util.Mth.floor(b.maxZ))) {
+                if (quebrados >= 8) break;
+                var state = level.getBlockState(pos);
+                if (state.isAir() || !state.getFluidState().isEmpty() && state.getCollisionShape(level, pos).isEmpty()) continue;
+                if (state.getCollisionShape(level, pos).isEmpty() && !state.is(net.minecraft.tags.BlockTags.LEAVES)) continue;
+                float dureza = state.getDestroySpeed(level, pos);
+                if (dureza < 0 || dureza >= 50 || level.getBlockEntity(pos) != null) continue;
+                com.lanterna.construct.Constructs.breakBlock(player, pos.immutable());
+                quebrados++;
             }
         }
     }

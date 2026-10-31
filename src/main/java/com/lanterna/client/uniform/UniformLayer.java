@@ -42,6 +42,8 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         // Uniforme 3D da Tropa (GeckoLib). A skin da pasta config/lanterna/uniformes, se existir, tem prioridade.
         String corpsId = UniformTransition.corpsOf(player);
         String tropa = com.lanterna.armor.ModArmorItems.tropaOf(com.lanterna.LanternaMod.id(corpsId));
+        String traje = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
+        if ("nenhum".equals(traje)) return; // escolheu ficar sem uniforme
         if (!UniformTextures.hasCustom(corpsId) && UniformDissolve3D.exists(tropa)) {
             render3D(poseStack, light, player, tropa, p);
             return;
@@ -91,18 +93,28 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         if (renderer3D == null) renderer3D = new RingUniformRenderer();
         int color = ClientVisibleRings.of(player.getId()).color();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
-        ResourceLocation[] stage = p < 1f ? UniformDissolve3D.stage(tropa, p) : null;
+        // Traje escolhido na Personalização: o padrão da Tropa ou um dos trajes "segunda pele" (a, b)
+        String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
+        boolean traje = var.equals("a") || var.equals("b");
+        ResourceLocation[] stage = p < 1f && !traje ? UniformDissolve3D.stage(tropa, p) : null;
+        boolean formando = p < 1f;
         org.joml.Matrix4f layerPose = new org.joml.Matrix4f(poseStack.last().pose());
 
         for (var slot : SLOTS) {
             if (!player.getItemBySlot(slot).isEmpty()) continue;
-            net.minecraft.world.item.ItemStack piece = PIECES.computeIfAbsent(tropa + "|" + slot, k -> {
-                var item = com.lanterna.armor.ModArmorItems.pieceFor(tropa, slot);
+            net.minecraft.world.item.ItemStack piece = PIECES.computeIfAbsent(tropa + "|" + var + "|" + slot, k -> {
+                var item = traje ? com.lanterna.armor.ModTrajes.peca(tropa, var, slot) : com.lanterna.armor.ModArmorItems.pieceFor(tropa, slot);
                 return item == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(item);
             });
             if (piece.isEmpty()) continue;
             renderer3D.prepForRender(player, piece, slot, getParentModel());
-            if (stage == null) {
+            if (traje && formando) {
+                // traje: forma cubinho por cubinho, subindo dos pés à cabeça
+                renderer3D.setSemBase(true);
+                renderer3D.setup(RingUniformRenderer.Mode.DETAIL, p, color, null, layerPose);
+                renderer3D.renderToBuffer(poseStack, null, light, overlay, 1f, 1f, 1f, 1f);
+                renderer3D.setSemBase(false);
+            } else if (stage == null) {
                 renderer3D.setup(RingUniformRenderer.Mode.NORMAL, 1f, color, null, layerPose);
                 renderer3D.renderToBuffer(poseStack, null, light, overlay, 1f, 1f, 1f, 1f);
             } else {

@@ -39,6 +39,11 @@ public class UniformeTropaItem extends ArmorItem implements GeoItem {
         return "lanterna:textures/item/armor/uniforme_" + tropa + ".png";
     }
 
+    /** Nome base dos arquivos (modelo, textura, animação): uniforme_<tropa>, ou traje_<tropa>_<variante>. */
+    public String arquivo() {
+        return "uniforme_" + tropa;
+    }
+
     /** "verde", "vermelho", "laranja", "amarelo", "azul", "indigo", "violeta", "preto" ou "branco" */
     public String getTropa() {
         return this.tropa;
@@ -72,7 +77,7 @@ public class UniformeTropaItem extends ArmorItem implements GeoItem {
         controllers.add(new software.bernie.geckolib.core.animation.AnimationController<>(this, "uniforme", 5, state -> {
             net.minecraft.world.entity.Entity entity = state.getData(software.bernie.geckolib.constant.DataTickets.ENTITY);
             boolean moving = entity != null && entity.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4;
-            if (moving && com.lanterna.armor.UniformeAnimations.has(this.tropa, "misc.walk")) {
+            if (moving && com.lanterna.armor.UniformeAnimations.has(arquivo(), "misc.walk")) {
                 return state.setAndContinue(WALK);
             }
             return state.setAndContinue(IDLE);

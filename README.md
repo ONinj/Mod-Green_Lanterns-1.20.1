@@ -50,6 +50,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.24 ✅ (0.19) Construto próprio de cada Tropa (Pavor trava construtos), animações de lançar, laser novo e polimento visual de todos os construtos
 1.25 ✅ (0.20) Porta Estelar: linha dos Guardiões (nível 32, afinidade Confiável) e teleporte animado para planetas visitados (tecla N)
 1.26 ✅ (0.21) Comandos de teste (op): anel de qualquer Tropa, nível, afinidade, técnicas, poderes, linha da Morte, missões, invocar NPCs/chefes/naves e kits (`/lanterna ajuda`)
+1.27 ✅ (0.22) Trajes "segunda pele" (18), Perfil do Lanterna (H: estatísticas e visual, com ajuste da máscara), tela K e HUD de missões novos, voo de combate, piloto que abre caminho, naves destrutíveis pelo anel
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

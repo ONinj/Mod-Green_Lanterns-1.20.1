@@ -506,7 +506,7 @@ public final class Constructs {
     }
 
     /** Quebra como se fosse uma picareta de netherite (os minérios caem certinho). */
-    private static void breakBlock(ServerPlayer player, BlockPos pos) {
+    public static void breakBlock(ServerPlayer player, BlockPos pos) {
         ServerLevel level = player.serverLevel();
         BlockState state = level.getBlockState(pos);
         if (state.is(ConstructRegistry.CONSTRUCT_BLOCK.get())) return;

@@ -10,16 +10,16 @@ public class UniformeModel extends GeoModel<UniformeTropaItem> {
 
     @Override
     public ResourceLocation getModelResource(UniformeTropaItem item) {
-        return LanternaMod.id("geo/item/armor/uniforme_" + item.getTropa() + ".geo.json");
+        return LanternaMod.id("geo/item/armor/" + item.arquivo() + ".geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(UniformeTropaItem item) {
-        return LanternaMod.id("textures/item/armor/uniforme_" + item.getTropa() + ".png");
+        return LanternaMod.id("textures/item/armor/" + item.arquivo() + ".png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(UniformeTropaItem item) {
-        return LanternaMod.id("animations/item/armor/uniforme_" + item.getTropa() + ".animation.json");
+        return LanternaMod.id("animations/item/armor/" + item.arquivo() + ".animation.json");
     }
 }

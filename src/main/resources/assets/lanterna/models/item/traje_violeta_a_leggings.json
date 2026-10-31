@@ -1,0 +1,6 @@
+{
+ "parent": "item/generated",
+ "textures": {
+  "layer0": "lanterna:item/traje_violeta_a_leggings"
+ }
+}
