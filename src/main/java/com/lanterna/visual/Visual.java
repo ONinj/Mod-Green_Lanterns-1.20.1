@@ -113,7 +113,7 @@ public final class Visual {
         String s = "lanterna";
         l.add(new VisualPackets.Linha(s, k("tropa"), anel ? Component.translatable(CorpsDefinition.nameKey(r.corps())) : k("sem_anel"), -1, cor));
         l.add(new VisualPackets.Linha(s, k("posto"), Component.translatable("posto.lanterna." + Nivel.posto(nivel)), -1, cor));
-        Component nv = nivel >= Nivel.MAX ? Component.literal(nivel + " (máx.)")
+        Component nv = nivel >= Nivel.MAX ? Component.translatable("perfil.lanterna.nivel_max", nivel)
                 : Component.literal(nivel + "  ·  " + (xp - Nivel.total(nivel)) + " / " + (Nivel.total(nivel + 1) - Nivel.total(nivel)) + " XP");
         l.add(new VisualPackets.Linha(s, k("nivel"), nv, Nivel.progresso(xp), cor));
         var gs = com.lanterna.guilda.Guildas.get();
@@ -123,7 +123,7 @@ public final class Visual {
         // ---- Corpo ----
         s = "corpo";
         double vida = p.getMaxHealth();
-        l.add(new VisualPackets.Linha(s, k("vida"), Component.literal(num(p.getHealth()) + " / " + num(vida) + "  (+" + Nivel.vidaExtra(nivel) + " pelo nível)"),
+        l.add(new VisualPackets.Linha(s, k("vida"), Component.translatable("perfil.lanterna.vida_val", num(p.getHealth()), num(vida), Nivel.vidaExtra(nivel)),
                 (float) (p.getHealth() / vida), 0xE5484D));
         l.add(new VisualPackets.Linha(s, k("armadura"), Component.literal(num(p.getAttributeValue(Attributes.ARMOR))), -1, 0xC8D0D8));
         l.add(new VisualPackets.Linha(s, k("dureza"), Component.literal(num(p.getAttributeValue(Attributes.ARMOR_TOUGHNESS))), -1, 0xC8D0D8));
@@ -146,8 +146,8 @@ public final class Visual {
             if (d != null) {
                 l.add(new VisualPackets.Linha(s, k("autorecarga"), sim(d.autoRecarga()), -1, cor));
                 l.add(new VisualPackets.Linha(s, k("portal"), sim(d.portal()), -1, cor));
-                l.add(new VisualPackets.Linha(s, k("tecnicas"), Component.literal(d.tecnicas().size() + " / " + com.lanterna.cidade.CidadeMissoes.TECNICAS.size()
-                        + "  ·  " + com.lanterna.cidade.Tecnicas.slots(d) + " espaços"), -1, cor));
+                l.add(new VisualPackets.Linha(s, k("tecnicas"), Component.translatable("perfil.lanterna.tecnicas_val", d.tecnicas().size(), com.lanterna.cidade.CidadeMissoes.TECNICAS.size(),
+                        com.lanterna.cidade.Tecnicas.slots(d)), -1, cor));
             }
         } else {
             l.add(new VisualPackets.Linha(s, k("carga"), k("sem_anel"), -1, 0x9AA4AE));

@@ -52,6 +52,10 @@ public final class CidadeNpcs {
 
     /** Cria um NPC da cidade/palácio no lugar dado, preso num raio pequeno em volta. */
     public static LanternaEntity npc(ServerLevel level, BlockPos at, String funcao, BuiltinCorps corps, boolean oficial, float yaw, int raio) {
+        if (Moradores.censo()) {
+            Moradores.anotar(new Moradores.Morador("npc", at, funcao, corps, oficial, yaw, raio));
+            return null;
+        }
         LanternaEntity e = new LanternaEntity(EspeciesEntities.LANTERNA_NPC.get(), level);
         boolean civil = CIVIS.contains(funcao);
         Especie esp = civil ? Especie.paraPapel(Especie.Papel.MERCADOR, level.random) : Especie.paraTropa(corps, level.random);

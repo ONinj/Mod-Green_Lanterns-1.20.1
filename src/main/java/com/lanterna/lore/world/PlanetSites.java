@@ -260,6 +260,36 @@ public final class PlanetSites {
         set(level, a.above().west(), q.setValue(com.lanterna.naves.bloco.QuadroContratos.PARTE, com.lanterna.naves.bloco.QuadroContratos.Parte.CIMA_ESQ));
     }
 
+    // ===================== Vigia dos NPCs da base =====================
+
+    /**
+     * Os NPCs de missão da base (líder do povo, Guardião emissário, os três Guardiões e o Instrutor de Oa) nasciam
+     * só quando a base era construída. Se sumirem, voltam ao lugar deles (chamado pelo vigia de moradores).
+     */
+    public static int vigiarBase(ServerLevel level, PlanetLore planet) {
+        BlockPos c = PlanetLore.HUB;
+        if (!level.isLoaded(c)) return 0;
+        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(c).inflate(48, 40, 48);
+        java.util.function.Function<String, Long> quantos = role -> level.getEntitiesOfClass(RaceEntity.class, area,
+                e -> e.isAlive() && e.role().equals(role)).stream().count();
+        java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) ->
+                level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.getX() + x, c.getZ() + z);
+        int n = 0;
+        if (planet == PlanetLore.OA) {
+            String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
+            for (long i = quantos.apply("guardiao"); i < 3; i++, n++) {
+                int x = -3 + (int) i * 3;
+                npc(level, Race.GUARDIAO, new BlockPos(c.getX() + x, chao.apply(x, 10), c.getZ() + 10), "guardiao", names[(int) i]);
+            }
+            if (quantos.apply("instrutor") == 0) { npc(level, Race.VELTARI, new BlockPos(c.getX(), chao.apply(0, -8), c.getZ() - 8), "instrutor", "npc.lanterna.name.oa_instrutor"); n++; }
+        } else if (planet != PlanetLore.GENESE) {
+            Race race = planet == PlanetLore.RYUT ? Race.COLETOR : Race.ofPlanet(planet.planet);
+            if (race != null && quantos.apply("lider") == 0) { npc(level, race, new BlockPos(c.getX() - 3, chao.apply(-3, -3), c.getZ() - 3), "lider", "npc.lanterna.name." + planet.planet); n++; }
+            if (quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 3, chao.apply(3, 9), c.getZ() + 9), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
+        }
+        return n;
+    }
+
     // ===================== Base comum =====================
 
     private static void buildHub(ServerLevel level, PlanetLore planet) {

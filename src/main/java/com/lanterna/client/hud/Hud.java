@@ -112,9 +112,10 @@ public final class Hud {
 
     /** Distância bonita: 850 m, 12,4 mil, 1,2 mi. */
     public static String distance(double blocks) {
-        if (blocks < 1000) return String.format(java.util.Locale.ROOT, "%d blocos", (int) blocks);
-        if (blocks < 1_000_000) return String.format(new java.util.Locale("pt", "BR"), "%.1f mil blocos", blocks / 1000.0);
-        return String.format(new java.util.Locale("pt", "BR"), "%.2f mi blocos", blocks / 1_000_000.0);
+        java.util.Locale loc = net.minecraft.client.resources.language.I18n.get("hud.lanterna.decimal").equals(",") ? new java.util.Locale("pt", "BR") : java.util.Locale.US;
+        if (blocks < 1000) return net.minecraft.client.resources.language.I18n.get("hud.lanterna.blocos", (int) blocks);
+        if (blocks < 1_000_000) return net.minecraft.client.resources.language.I18n.get("hud.lanterna.mil_blocos", String.format(loc, "%.1f", blocks / 1000.0));
+        return net.minecraft.client.resources.language.I18n.get("hud.lanterna.mi_blocos", String.format(loc, "%.2f", blocks / 1_000_000.0));
     }
 
     private static final String[] ARROWS = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};

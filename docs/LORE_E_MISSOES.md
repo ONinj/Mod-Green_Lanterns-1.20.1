@@ -512,3 +512,24 @@ cargueiros, capitânias) — energia do anel rende 2,2x contra casco. Não acert
 
 **Recarga sem bateria** (depois da Prova da Emoção): ~1,2% da carga a cada 2 s, o dobro parado no chão sem voar,
 e a emoção da Tropa recarrega o dobro de antes.
+
+# 0.23 — Hiperpropulsão nos planetas, moradores que voltam e polimento
+
+**Hiperpropulsão nos planetas**: em impulso máximo (Ctrl + W, ~48 blocos/s), segure por 1,5 s: o anel rompe a
+barreira e dispara a **70 blocos/s** (o Branco e o Preto um pouco mais). Curvas mais abertas; soltar W ou Ctrl,
+entrar na água ou bater em algo desliga na hora. Gasta o triplo de carga, como no espaço. Pose nova: os dois
+punhos à frente.
+
+**Moradores que voltam**: os NPCs de missão (Capitães e Anciões do Palácio, Comandante, Instrutor, lojistas e guardas
+das cidades, os Guardiões e o Instrutor da base de Oa, o líder e o Guardião emissário de cada planeta) só nasciam uma
+vez. Agora, com um jogador por perto, a lista é conferida a cada 30 s e quem faltar volta ao lugar dele (só o que falta:
+não duplica). Era isso que deixava "Fale com a Capitã Qiri Nox" sem ninguém no Palácio.
+
+**Uniforme**: com o uniforme do anel vestido, a segunda camada da skin (cabelo, chapéu, jaqueta, mangas, calça) fica
+escondida onde o uniforme cobre. Ela é maior que o uniforme e aparecia por cima como faixas pretas (ou da cor do
+cabelo) em cima e embaixo da máscara.
+
+**Polimento**: ícones novos dos 36 itens de uniforme (renderizados do próprio modelo 3D, no mesmo estilo dos trajes);
+barra de carga que desliza e mostra em branco o que foi gasto; painel de missão entra deslizando ao trocar de missão,
+objetivo cumprido pisca em verde; aviso de missão nova "salta"; a seta do objetivo não fica mais em cima da barra de
+itens. O inglês (en_us) foi traduzido por completo (antes ~800 textos estavam em português no jogo em inglês).

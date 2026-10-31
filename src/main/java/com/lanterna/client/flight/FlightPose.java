@@ -91,6 +91,18 @@ public final class FlightPose {
         model.rightLeg.zRot = Mth.lerp(k, 0.05f, 0.02f);
         model.leftLeg.zRot = Mth.lerp(k, -0.05f, -0.02f);
 
+        // Hiperpropulsão: os dois punhos à frente, pernas juntas e esticadas (como uma flecha)
+        if (ClientFlight.isHyper(player) && k > 0.5f) {
+            float h = (k - 0.5f) * 2f;
+            back.xRot = Mth.lerp(h, back.xRot, -(float) Math.PI * 0.97f);
+            back.zRot = -side * Mth.lerp(h, -back.zRot * side, -0.12f);
+            front.zRot = side * Mth.lerp(h, front.zRot * side, -0.12f);
+            model.rightLeg.xRot = Mth.lerp(h, model.rightLeg.xRot, 0f);
+            model.leftLeg.xRot = Mth.lerp(h, model.leftLeg.xRot, 0f);
+            model.rightLeg.zRot = Mth.lerp(h, model.rightLeg.zRot, 0.01f);
+            model.leftLeg.zRot = Mth.lerp(h, model.leftLeg.zRot, -0.01f);
+        }
+
         if (flare > 0f) {
             front.xRot = Mth.lerp(flare, front.xRot, -1.35f);
             back.xRot = Mth.lerp(flare, back.xRot, -1.35f);

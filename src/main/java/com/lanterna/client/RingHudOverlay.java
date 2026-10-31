@@ -26,6 +26,9 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
  *   VOO · Bateria pronta (R)
  */
 public final class RingHudOverlay {
+    private static float suave = 1f, rastro = 1f;
+    private static long ultimoQuadro = System.currentTimeMillis();
+
     private static final int W = 170;
 
     public static final IGuiOverlay HUD = (ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) -> {
@@ -53,7 +56,19 @@ public final class RingHudOverlay {
         boolean low = percent <= 15;
         boolean blink = mc.level != null && (mc.level.getGameTime() / 8) % 2 == 0;
         g.drawString(font, Hud.body(Component.translatable("hud.lanterna.battery")), x, y + 17, 0xFF9AA8B0, false);
-        Hud.bar(g, x + 44, y + 19, 86, 5, charge / (float) max, low && blink ? 0xFF4040 : color, true);
+        // barra suave: a carga desliza até o valor novo, e o que foi gasto fica um instante em branco atrás
+        float alvo = charge / (float) max;
+        long agora = System.currentTimeMillis();
+        float dt = Math.min(0.1f, (agora - ultimoQuadro) / 1000f);
+        ultimoQuadro = agora;
+        suave += (alvo - suave) * Math.min(1f, dt * 10f);
+        if (alvo >= rastro) rastro = alvo; else rastro += (alvo - rastro) * Math.min(1f, dt * 2.5f);
+        if (rastro > suave + 0.002f) {
+            int rx0 = x + 44 + Math.round(86 * suave), rx1 = x + 44 + Math.round(86 * rastro);
+            g.fill(rx0, y + 19, rx1, y + 24, 0xB0FFFFFF);
+        }
+        Hud.bar(g, x + 44, y + 19, 86, 5, suave, low && blink ? 0xFF4040 : color, true);
+        if (rastro > suave + 0.002f) g.fill(x + 44 + Math.round(86 * suave), y + 19, x + 44 + Math.round(86 * rastro), y + 24, 0x90FFFFFF);
         Hud.textRight(g, Hud.bold(Component.literal(percent + "%")), 6 + W - 6, y + 17, low && blink ? 0xFFFF5050 : 0xFFFFFFFF);
 
         // Afinidade

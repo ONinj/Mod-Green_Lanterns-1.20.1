@@ -2151,6 +2151,79 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+    private static void sceneCabecas() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("execute in minecraft:overworld run tp @s 720.5 -60 720.5 0 0"); });
+        at(30, () -> cmd("fill 705 -60 715 735 -50 735 minecraft:air"));
+        for (String v : new String[]{"padrao", "a", "b"}) {
+            at(30, () -> server(sp -> {
+                for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.decoration.ArmorStand.class, sp.getBoundingBox().inflate(30))) e.discard();
+                String[] tr = com.lanterna.armor.ModTrajes.TROPAS;
+                for (int i = 0; i < tr.length; i++) {
+                    var st = new net.minecraft.world.entity.decoration.ArmorStand(sp.serverLevel(), 720.5 + (i - 4) * 1.05, -60, 723.2);
+                    st.setYRot(180); st.setYBodyRot(180); st.setYHeadRot(180);
+                    for (var slot : new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST}) {
+                        var item = v.equals("padrao") ? com.lanterna.armor.ModArmorItems.pieceFor(tr[i], slot) : com.lanterna.armor.ModTrajes.peca(tr[i], v, slot);
+                        st.setItemSlot(slot, new net.minecraft.world.item.ItemStack(item));
+                    }
+                    st.setNoGravity(true); st.setInvisible(false);
+                    sp.serverLevel().addFreshEntity(st);
+                }
+                sp.teleportTo(720.5, -59.3, 719.6); sp.setYRot(0); sp.setXRot(14);
+            }));
+            at(5, () -> { look(0, 14); mc.options.hideGui = true; });
+            at(40, () -> shot("cab_" + v));
+        }
+        at(10, () -> { mc.options.hideGui = false; LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneV23() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); });
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna nivel 35")));
+        // ---- Palácio: moradores ----
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0 172 -440"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(20, () -> server(sp -> { var w = com.lanterna.lore.LoreWorldData.get(sp.server); glog("palacio construido=" + w.siteBuilt("oa:palacio") + " cidade=" + w.siteBuilt("oa:cidade2")); }));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 6000);
+        at(200, () -> server(sp -> { int n = 0; for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(120)))
+                if (e.funcao().startsWith("capitao_")) n++; glog("capitaes perto=" + n); }));
+        at(10, () -> server(sp -> { int n = 0; for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(120)))
+                if (e.funcao().equals("capitao_comando")) { e.discard(); n++; } glog("capita qiri removida=" + n); }));
+        at(800, () -> server(sp -> { int n = 0; for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(120)))
+                if (e.funcao().equals("capitao_comando")) { n++; glog("qiri de volta em " + e.blockPosition()); } glog("qiri vivas=" + n); }));
+        // ---- Cidade ----
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0 120 -150"));
+        at(700, () -> server(sp -> { glog("altura estimada da cidade=" + com.lanterna.cidade.Moradores.alturaCidade(sp.serverLevel(), com.lanterna.cidade.Cidade.CENTRO));
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(100, 80, 100)))
+                if (!e.funcao().isEmpty()) glog("  npc " + e.funcao() + " em " + e.blockPosition()); }));
+        // ---- uniforme sem a segunda camada da skin ----
+        at(10, () -> { cmd("gamemode survival"); cmd("execute in lanterna:oa run tp @s 30 120 -150"); });
+        at(60, () -> { mc.options.hideGui = false; shot("v23_hud"); });
+        at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); }); }));
+        at(80, () -> { camera(CameraType.THIRD_PERSON_FRONT); mc.options.hideGui = true; look(0, 0); });
+        for (String v : new String[]{"padrao", "a", "b"}) {
+            at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null); });
+            at(40, () -> shot("v23_rosto_" + v));
+        }
+        at(5, () -> { camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; });
+        // ---- hiperpropulsão no planeta ----
+        at(5, () -> { cmd("execute in lanterna:oa run tp @s 0 160 -150"); look(0, 0); });
+        at(20, () -> { if (!com.lanterna.client.ClientRingData.flight) com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.ToggleFlightPacket()); });
+        at(40, () -> { look(0, 0); hold(mc.options.keyUp, true); hold(mc.options.keySprint, true); glog("voo=" + com.lanterna.client.ClientRingData.flight + " tela=" + mc.screen); });
+        for (int i = 1; i <= 8; i++) { int k = i; at(20, () -> glog("Ctrl+W " + k + "s vel=" + String.format("%.1f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " hiper=" + com.lanterna.client.flight.ClientFlight.hyperOn())); }
+        at(1, () -> { camera(CameraType.THIRD_PERSON_BACK); });
+        at(3, () -> shot("v23_hiper"));
+        at(1, () -> camera(CameraType.FIRST_PERSON));
+        at(1, () -> { hold(mc.options.keyUp, false); hold(mc.options.keySprint, false); });
+        at(30, () -> glog("soltou vel=" + String.format("%.1f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " hiper=" + com.lanterna.client.flight.ClientFlight.hyperOn()));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void opc(String c) {
         server(sp -> {
             int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c);
@@ -2274,6 +2347,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("receber")) sceneReceber();
         else if (ENABLED && SCENE.equals("v22")) sceneV22();
         else if (ENABLED && SCENE.equals("teto")) sceneTeto();
+        else if (ENABLED && SCENE.equals("v23")) sceneV23();
+        else if (ENABLED && SCENE.equals("cabecas")) sceneCabecas();
         else if (ENABLED && SCENE.equals("teto2")) sceneTeto2();
         else if (ENABLED && SCENE.equals("fist")) sceneFist();
         else if (ENABLED && SCENE.equals("construtos")) sceneConstrutos();

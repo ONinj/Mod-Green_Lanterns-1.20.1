@@ -68,6 +68,11 @@ public final class Cidade {
         Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: cidade completa da Tropa pronta em {}", planet.planet));
     }
 
+    /** Lista dos moradores da cidade já construída (para o vigia de moradores). */
+    static void censo(ServerLevel level, PlanetLore planet) {
+        moradores(level, CENTRO.atY(Moradores.alturaCidade(level, CENTRO)), planet);
+    }
+
     private static int chao(ServerLevel level) {
         int sum = 0, n = 0;
         for (int dx = -R; dx <= R; dx += 16) for (int dz = -R; dz <= R; dz += 16) {
@@ -518,6 +523,7 @@ public final class Cidade {
             CidadeNpcs.npc(l, c.offset(g[0], 0, g[1]), "guarda", corps, false, 0, 10);
         }
         // presos (não fazem nada, não morrem)
+        if (Moradores.censo()) return;
         for (int[] p : new int[][]{{-42, -44}, {-30, -39}, {-42, -34}}) {
             LanternaEntity e = LanternaEntity.pirata(l, false);
             e.moveTo(c.getX() + p[0] + 0.5, c.getY(), c.getZ() + p[1] + 0.5, 90, 0);

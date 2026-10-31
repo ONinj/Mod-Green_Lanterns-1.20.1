@@ -298,17 +298,13 @@ public final class RingPowers {
         if (data == null) return;
         boolean canFly = data.hasRing() && data.powerActive() && data.flightEnabled();
         boolean inSpace = player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE);
-        data.setFlightMode(canFly && hyper && inSpace, canFly && autopilot);
+        data.setFlightMode(canFly && hyper, canFly && autopilot);
         syncVisibleRing(player, data, false);
     }
 
     private static void tickFlight(ServerPlayer player, RingData data) {
         if (!data.flightEnabled()) return;
         if (data.autopilot()) abrirCaminho(player);
-        // Hiperpropulsão só existe no espaço
-        if (data.hyper() && !player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)) {
-            data.setFlightMode(false, data.autopilot());
-        }
 
         // Outro mod ou troca de modo de jogo pode ter tirado a permissão de voo
         if (!player.getAbilities().mayfly) applyFlightAbility(player, data);

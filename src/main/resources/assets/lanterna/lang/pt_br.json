@@ -1670,5 +1670,12 @@
   "traje.lanterna.preto_b": "Ceifador",
   "traje.lanterna.branco_a": "Gênese",
   "traje.lanterna.branco_b": "Fênix",
-  "hud.lanterna.mission.diario": "[M] diário"
+  "hud.lanterna.mission.diario": "[M] diário",
+  "hud.lanterna.decimal": ",",
+  "hud.lanterna.blocos": "%s blocos",
+  "hud.lanterna.mil_blocos": "%s mil blocos",
+  "hud.lanterna.mi_blocos": "%s mi blocos",
+  "perfil.lanterna.nivel_max": "%s (máx.)",
+  "perfil.lanterna.vida_val": "%s / %s  (+%s pelo nível)",
+  "perfil.lanterna.tecnicas_val": "%s / %s  ·  %s espaços"
 }

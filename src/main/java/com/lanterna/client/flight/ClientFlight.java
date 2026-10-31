@@ -174,7 +174,13 @@ public final class ClientFlight {
 
         // ---- Impacto contra parede em alta velocidade ----
         if (player.horizontalCollision) {
-            if (lastLocalSpeed > 0.9 && !hyperOn) impact(player, v);
+            if (hyperOn && !inSpaceNow(player)) {
+                // hiperpropulsão no planeta batendo em algo: perde o embalo na hora
+                hyperOn = false;
+                hyperCharge = 0;
+                hyperSpeed = 0;
+                impact(player, v);
+            } else if (lastLocalSpeed > 0.9 && !hyperOn) impact(player, v);
             v = new Vec3(v.x * 0.2, v.y, v.z * 0.2);
         }
         // Só zera a vertical se estiver indo CONTRA o chão ou o teto (senão a arrancada não sai)
@@ -193,10 +199,11 @@ public final class ClientFlight {
         double sup = com.lanterna.client.ClientRingData.hasRing ? com.lanterna.combate.Supremos.voo(com.lanterna.client.ClientRingData.corps) : 1.0;
         double maxBoost = (inSpace ? SPACE_BOOST : MAX_BOOST) * sup;
         double maxCruise = (inSpace ? SPACE_CRUISE : MAX_CRUISE) * sup;
-        boolean wantHyper = inSpace && boost && forward > 0 && hyperAllowed;
-        if (!inSpace) dropHyper();
+        boolean wantHyper = boost && forward > 0 && hyperAllowed && auto == null || inSpace && boost && forward > 0 && hyperAllowed;
+        // Nos planetas também há hiperpropulsão, mais curta: ~70 blocos/s (no espaço chega a 1.800)
+        if (!inSpace && player.isInWater()) { if (hyperOn) dropHyper(); wantHyper = false; }
 
-        if (inSpace && !hyperOn) {
+        if (!hyperOn) {
             if (wantHyper && speedBefore > maxBoost * 0.85) {
                 hyperCharge += 1f / (auto != null ? HYPER_CHARGE_TICKS / 2f : HYPER_CHARGE_TICKS);
                 chargeEffects(player, hyperCharge);
@@ -357,8 +364,12 @@ public final class ClientFlight {
 
     // ===================== Hiperpropulsão =====================
 
+    /** Hiperpropulsão dentro dos planetas: 3,5 blocos por tick = 70 blocos/s. */
+    public static final double HYPER_PLANETA = 3.5;
+
     private static Vec3 hyperPhysics(LocalPlayer player, Vec3 v, Vec3 look, Vec3 left, float strafe,
                                      boolean up, boolean down, boolean want) {
+        if (!inSpaceNow(player)) return hyperPlaneta(player, v, look, left, strafe, up, down, want);
         double brake = brakeLimit(player.position());
         if (want) {
             double target = Math.min(HYPER_MAX, brake);
@@ -383,6 +394,34 @@ public final class ClientFlight {
             hyperCharge = 0;
             exitHyper(player);
             return dir.scale(Math.min(hyperSpeed, SPACE_BOOST));
+        }
+        return out;
+    }
+
+    private static Vec3 hyperPlaneta(LocalPlayer player, Vec3 v, Vec3 look, Vec3 left, float strafe,
+                                     boolean up, boolean down, boolean want) {
+        double max = HYPER_PLANETA * (ClientRingData.hasRing ? com.lanterna.combate.Supremos.voo(ClientRingData.corps) : 1.0);
+        if (want) hyperSpeed += (max - hyperSpeed) * 0.08;
+        else hyperSpeed *= 0.8;
+        Vec3 dir = v.lengthSqr() > 1.0E-4 ? v.normalize() : look;
+        dir = dir.lerp(look, 0.16).normalize();
+        Vec3 out = dir.scale(hyperSpeed);
+        if (strafe != 0) out = out.add(left.scale(strafe * 0.3));
+        if (up) out = out.add(0, 0.3, 0);
+        if (down) out = out.add(0, -0.3, 0);
+        // rastro de energia logo atrás (as linhas de velocidade da tela já mostram o resto)
+        if (player.tickCount % 2 == 0) {
+            Vec3 c = player.position().add(0, 0.9, 0).subtract(dir.scale(2.5));
+            var rnd = player.getRandom();
+            for (int i = 0; i < 2; i++)
+                player.level().addParticle(GlowOrbOptions.of(lighten(ClientRingData.color, 0.3f), 0.12f), c.x + (rnd.nextDouble() - 0.5) * 0.5,
+                        c.y + (rnd.nextDouble() - 0.5) * 0.5, c.z + (rnd.nextDouble() - 0.5) * 0.5, 0, 0, 0);
+        }
+        if (hyperSpeed < MAX_BOOST * 0.9) {
+            hyperOn = false;
+            hyperCharge = 0;
+            exitHyper(player);
+            return dir.scale(Math.min(hyperSpeed, MAX_BOOST));
         }
         return out;
     }
@@ -416,7 +455,7 @@ public final class ClientFlight {
     private static void engageHyper(LocalPlayer player, Vec3 v) {
         hyperOn = true;
         hyperCharge = 1f;
-        hyperSpeed = Math.max(v.length(), SPACE_BOOST);
+        hyperSpeed = Math.max(v.length(), inSpaceNow(player) ? SPACE_BOOST : MAX_BOOST);
         Vec3 center = player.position().add(0, 0.9, 0);
         Vec3 look = player.getLookAngle();
         int color = ClientRingData.color;

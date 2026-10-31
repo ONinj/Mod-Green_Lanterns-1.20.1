@@ -25,6 +25,10 @@ public final class MissionHud {
     private static long toastStart = -1000;
     /** Altura usada pelo HUD do espaço (o painel de missão fica logo abaixo). */
     public static int topOffset = 8;
+    private static String ultimaMissao = "";
+    private static long entrada;
+    /** Quando cada objetivo foi cumprido (para o brilho de "feito!"). */
+    private static final java.util.Map<Integer, Long> feitos = new java.util.HashMap<>();
 
     public static void toast(boolean completed, String mission) {
         toastMission = Missions.get(mission);
@@ -40,7 +44,19 @@ public final class MissionHud {
         if (m == null) return;
         Waypoints.Target target = Waypoints.current();
         if (target != null) drawMarker(g, target, width, height);
+        // troca de missão: o painel entra deslizando da direita
+        long agora = System.currentTimeMillis();
+        if (!m.id().equals(ultimaMissao)) {
+            ultimaMissao = m.id(); entrada = agora; feitos.clear();
+            for (int i = 0; i < m.objectives().size(); i++)
+                if (ClientLoreData.DATA.progress(m.id(), i) >= m.objectives().get(i).count()) feitos.put(i, 0L);
+        }
+        float k = Math.min(1f, (agora - entrada) / 350f);
+        float ease = 1f - (1f - k) * (1f - k) * (1f - k);
+        g.pose().pushPose();
+        g.pose().translate((1f - ease) * (WIDTH + 12), 0, 0);
         drawTracker(g, m, target, width);
+        g.pose().popPose();
     };
 
     /**
@@ -85,6 +101,9 @@ public final class MissionHud {
             String str = label.getString();
             Component shown = font.width(label) > lw ? Hud.body(font.plainSubstrByWidth(str, lw - 6) + "…") : label;
             if (done) {
+                long quando = feitos.computeIfAbsent(i, q -> System.currentTimeMillis());
+                float brilho = 1f - Math.min(1f, (System.currentTimeMillis() - quando) / 900f);
+                if (brilho > 0) g.fill(x + 5, ty - 2, x + WIDTH - 5, ty + 9, Hud.argb(0x6FD98A, (int) (110 * brilho)));
                 g.drawString(font, Component.literal("✔"), x + 8, ty, 0xFF6FD98A, true);
                 g.drawString(font, shown.copy().withStyle(net.minecraft.ChatFormatting.STRIKETHROUGH), x + 18, ty, 0xFF5E6E66, false);
             } else if (now) {
@@ -140,7 +159,9 @@ public final class MissionHud {
         if (off) {
             float dx = x - cx, dy = y - cy;
             if (Math.abs(dx) < 1e-3 && Math.abs(dy) < 1e-3) dy = -1;
-            float scale = Math.min((cx - margin) / Math.max(1e-3f, Math.abs(dx)), (cy - margin) / Math.max(1e-3f, Math.abs(dy)));
+            // embaixo fica a barra de itens e a vida: a seta para antes delas
+            float baixo = dy > 0 ? (h - 72) - cy : cy - margin;
+            float scale = Math.min((cx - margin) / Math.max(1e-3f, Math.abs(dx)), baixo / Math.max(1e-3f, Math.abs(dy)));
             x = cx + dx * scale;
             y = cy + dy * scale;
         }
@@ -200,8 +221,9 @@ public final class MissionHud {
         Hud.panel(g, x, y, w, 36, color, a);
         g.drawString(font, head, width / 2 - font.width(head) / 2, y + 5, Hud.argb(color, alpha), false);
         g.pose().pushPose();
+        float pop = t < 0.25f ? 1.5f + (0.25f - t) * 2.4f : 1.5f;
         g.pose().translate(width / 2f, y + 17, 0);
-        g.pose().scale(1.5f, 1.5f, 1);
+        g.pose().scale(pop, pop, 1);
         g.drawString(font, title, -font.width(title) / 2, 0, Hud.argb(0xFFFFFF, alpha), true);
         g.pose().popPose();
     }

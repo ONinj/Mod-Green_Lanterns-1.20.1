@@ -372,7 +372,11 @@ public final class Palacio {
 
     // ===================== Moradores =====================
 
-    private static RaceEntity guardiao(ServerLevel l, BlockPos at, String role) {
+    static RaceEntity guardiao(ServerLevel l, BlockPos at, String role) {
+        if (Moradores.censo()) {
+            Moradores.anotar(new Moradores.Morador("guardiao", at, role, BuiltinCorps.GREEN, true, 0, 2));
+            return null;
+        }
         RaceEntity e = LoreEntities.typeOf(Race.GUARDIAO).create(l);
         if (e == null) return null;
         e.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0, 0);
@@ -398,15 +402,14 @@ public final class Palacio {
         for (String t : CidadeMissoes.TECNICAS) {
             BlockPos a = ala(t);
             LanternaEntity cap = CidadeNpcs.npc(l, a.offset(a.getX() < 0 ? -2 : 2, 0, 0), "capitao_" + t, BuiltinCorps.GREEN, true, a.getX() < 0 ? 270 : 90, 2);
-            cap.setup(com.lanterna.especies.Especie.byId(especie(t)), 2, com.lanterna.especies.Especie.Papel.LANTERNA, BuiltinCorps.GREEN,
-                    "roupa_tropa_green", true, false);
-            cap.setCustomName(CidadeNpcs.nome("capitao_" + t));
+            if (cap != null) vestirCapitao(cap, t);
         }
         // Guarda de Honra
         for (int[] g : new int[][]{{-4, 56}, {4, 56}, {-4, 12}, {4, 12}, {-4, -22}, {4, -22}, {-12, 4}, {12, 4}}) {
             CidadeNpcs.npc(l, CENTRO.offset(g[0], 0, g[1]), "honra", BuiltinCorps.GREEN, true, 0, 3);
         }
         // Presos
+        if (Moradores.censo()) return;
         for (int i = -1; i <= 1; i++) {
             LanternaEntity e = LanternaEntity.lanterna(l, BuiltinCorps.BLACK, false);
             e.moveTo(CENTRO.getX() + 30 + 4.5, Y, CENTRO.getZ() + 36 + i * 3 + 0.5, 270, 0);
@@ -416,6 +419,18 @@ public final class Palacio {
             e.setFuncao("preso");
             l.addFreshEntity(e);
         }
+    }
+
+    /** Lista dos moradores do Palácio (para o vigia de moradores). */
+    static void censo(ServerLevel l) {
+        moradores(l);
+    }
+
+    /** Capitão: espécie própria, uniforme verde e o nome dele. */
+    static void vestirCapitao(LanternaEntity cap, String t) {
+        cap.setup(com.lanterna.especies.Especie.byId(especie(t)), 2, com.lanterna.especies.Especie.Papel.LANTERNA, BuiltinCorps.GREEN,
+                "roupa_tropa_green", true, false);
+        cap.setCustomName(CidadeNpcs.nome("capitao_" + t));
     }
 
     /** Espécie de cada Capitão (os modelos que já existem). */
