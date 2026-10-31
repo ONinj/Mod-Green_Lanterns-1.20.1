@@ -406,3 +406,34 @@ nunca mais volta a ser da Tropa.
 
 **Espaço**: encontros mais frequentes (a cada ~1–2 min) e mais piratas; nave pirata derrubada dá 2–4 Méritos, às vezes
 Essência de Poder e diamante; a capitânia dá 8–12 Méritos, 6 Essências, diamantes e às vezes Relíquia.
+
+# 0.19 — Construtos das Tropas, animações e polimento
+
+**Construto próprio de cada Tropa** (aparece na roda só para o anel daquela Tropa; libera com afinidade "Tolerante"):
+
+| Tropa | Construto | O que faz |
+|---|---|---|
+| Verde | Aríete de Vontade | cunha gigante que atravessa tudo em linha reta e arremessa |
+| Amarelo | Onda do Pavor | explosão de medo em volta: **Pavor** — jogador não faz construtos, tela treme e escurece, coração bate; criaturas fogem |
+| Vermelho | Jorro de Ira | (segurar) cone de plasma que queima |
+| Azul | Luz da Esperança | cura aliados, Regeneração, tira o Pavor; fere mortos-vivos e Lanternas Negros |
+| Violeta | Cristal do Amor | prende o alvo num cristal; ao quebrar, **Encanto** (criaturas param de brigar, jogadores ficam fracos) |
+| Índigo | Salto Índigo | teleporta para onde olha; quem está na chegada sente náusea e fraqueza |
+| Laranja | Garras da Avareza | até 4 garras sugam vida (e carga de anel de outros Lanternas) |
+| Preto | Mãos dos Mortos | mãos de ossos brotam do chão: prendem, Wither, roubam vida |
+| Branco | Explosão da Vida | cura e protege aliados, limpa efeitos ruins, arrasa inimigos |
+
+O Amarelo é imune ao próprio Pavor. Aliados (mesma guilda, Lanternas aliados, bichos domados) não são atingidos.
+
+**Animações de lançar** (terceira e primeira pessoa): estocada (punho, rajada, aríete, mão, gancho...), golpe por cima
+da cabeça (martelo, mãos dos mortos), empurrão com os dois braços (parede, escudo, ondas), varrida (lâminas) e mira
+contínua (laser, picareta, napalm: o braço aponta para onde você olha). O anel solta um clarão na cor da Tropa.
+
+**Laser do punho**: sai da mão de verdade, "corre" até o alvo ao ligar, é redondo com miolo branco, duas espirais
+girando, pulsos correndo e clarões no punho e no ponto de impacto (com faíscas). Para quem atira, o fim do feixe é
+calculado no próprio jogo (gruda na mira sem atraso).
+
+**Polimento**: construtos em "luz sólida" com contornos nas arestas, entram com um pulo de escala, deixam imagens
+fantasmas quando se movem (punho, rajada, aríete, lâminas) e rastro de partículas; punho com dedos, polegar e antebraço;
+martelo com onda de choque em anel; escudo com malha de luz; corrente do gancho com elos alternados; textura nova e
+animada dos blocos de construto (parede, ponte, jaula); o Preto brilha num cinza-violeta (antes sumia).

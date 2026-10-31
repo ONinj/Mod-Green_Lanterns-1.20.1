@@ -67,7 +67,7 @@ public class ConstructWheelScreen extends Screen {
         ring(g, cx, cy, (int) (OUTER * 1.18f * k), Hud.argb(color, 160));
         ring(g, cx, cy, (int) (INNER * k), Hud.argb(color, 90));
 
-        ConstructType[] all = ConstructType.values();
+        ConstructType[] all = ConstructType.daRoda(ClientRingData.corps).toArray(new ConstructType[0]);
         double dx = mx - cx, dy = my - cy;
         double dist = Math.sqrt(dx * dx + dy * dy);
         hovered = null;
@@ -87,7 +87,7 @@ public class ConstructWheelScreen extends Screen {
             boolean locked = lvl < t.unlockLevel;
             boolean hov = t == hovered;
             int size = hov ? 30 : 24;
-            int frame = locked ? 0x404448 : t.category.color;
+            int frame = locked ? 0x404448 : t.corps != null ? color : t.category.color;
             g.fill(ix - size / 2 - 2, iy - size / 2 - 2, ix + size / 2 + 2, iy + size / 2 + 2, Hud.argb(frame, hov ? 230 : 120));
             g.fill(ix - size / 2, iy - size / 2, ix + size / 2, iy + size / 2, Hud.argb(0x101418, 235));
             if (t == sel) g.fill(ix - size / 2, iy + size / 2 - 2, ix + size / 2, iy + size / 2, Hud.argb(color, 255));

@@ -1854,8 +1854,147 @@ public final class DevAutoTest {
         at(20, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Construtos: os 9 das Tropas, o laser novo, polimento dos antigos e o Pavor travando construtos. */
+    private static void anelDe(net.minecraft.server.level.ServerPlayer sp, com.lanterna.corps.BuiltinCorps c) {
+        com.lanterna.power.EquipmentHelper.take(sp, com.lanterna.capability.RingData.RING_SLOT);
+        com.lanterna.power.EquipmentHelper.equip(sp, com.lanterna.capability.RingData.RING_SLOT, com.lanterna.item.PowerRingItem.create(c.id(), c.color(), -1));
+    }
+    private static void alvos(net.minecraft.server.level.ServerPlayer sp, int n, double dist) {
+        for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(40))) e.discard();
+        for (int i = 0; i < n; i++) {
+            var z = net.minecraft.world.entity.EntityType.HUSK.create(sp.serverLevel());
+            z.moveTo(sp.getX() + (i - (n - 1) / 2.0) * 1.6, sp.getY(), sp.getZ() + dist + (i % 2) * 1.2, 180, 0);
+            z.setNoAi(true); z.setPersistenceRequired(); z.setSilent(true);
+            z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(400); z.setHealth(400);
+            sp.serverLevel().addFreshEntity(z);
+        }
+    }
+    private static final java.util.concurrent.atomic.AtomicInteger CAM = new java.util.concurrent.atomic.AtomicInteger(-1);
+    /** Câmera parada de lado (um suporte de armadura invisível) para ver o construto inteiro. */
+    private static void camLateral(boolean ligar) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!ligar) { mc.setCameraEntity(mc.player); return; }
+        server(sp -> {
+            var lvl = sp.serverLevel();
+            var st = lvl.getEntitiesOfClass(net.minecraft.world.entity.decoration.ArmorStand.class, sp.getBoundingBox().inflate(30), e -> e.getTags().contains("cam")).stream().findFirst().orElse(null);
+            if (st == null) {
+                st = net.minecraft.world.entity.EntityType.ARMOR_STAND.create(lvl);
+                st.addTag("cam"); st.setInvisible(true); st.setNoGravity(true); st.setInvulnerable(true);
+                lvl.addFreshEntity(st);
+            }
+            double cx = sp.getX() + 9, cy = sp.getY() + 3.2, cz = sp.getZ() + 3;
+            double tx = sp.getX(), ty = sp.getY() + 1, tz = sp.getZ() + 4;
+            float yaw = (float) Math.toDegrees(Math.atan2(-(tx - cx), tz - cz));
+            float pitch = (float) -Math.toDegrees(Math.atan2(ty - (cy + 1.7), Math.hypot(tx - cx, tz - cz)));
+            st.moveTo(cx, cy, cz, yaw, pitch);
+            st.setYHeadRot(yaw);
+            CAM.set(st.getId());
+        });
+    }
+    private static void sceneConstrutos() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect clear @s"); cmd("effect give @s resistance 99999 4 true"); cmd("difficulty normal"); cmd("gamerule doDaylightCycle false");
+            cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            sp.getPersistentData().putBoolean("lanterna_devtest", true);
+        }));
+        String[][] lista = {{"green", "ariete", "3"}, {"yellow", "pavor", "7"}, {"red", "napalm", "14"}, {"blue", "esperanca", "8"},
+                {"violet", "cristal", "16"}, {"indigo", "teleporte", "3"}, {"orange", "avareza", "12"}, {"black", "ceifa", "26"}, {"white", "vida", "8"}};
+        for (String[] l : lista) {
+            at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+                server(sp -> { sp.teleportTo(sp.serverLevel(), 900.5, -60, 900.5, 0, 12);
+                    anelDe(sp, java.util.Arrays.stream(com.lanterna.corps.BuiltinCorps.values()).filter(c -> c.id().getPath().equals(l[0])).findFirst().get());
+                    alvos(sp, 5, 7); }); });
+            at(2, () -> camLateral(true));
+            at(30, () -> server(sp -> { com.lanterna.construct.Affinity.add(sp, 30000);
+                var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+                com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge()); }));
+            at(10, () -> server(sp -> com.lanterna.construct.Constructs.cast(sp, l[1])));
+            at(Integer.parseInt(l[2]), () -> shot("c_" + l[1]));
+            at(1, () -> { var e = mc.level.getEntity(CAM.get()); if (e != null) mc.setCameraEntity(e); });
+            at(3, () -> shot("c_" + l[1] + "_lado"));
+            at(1, () -> camLateral(false));
+            at(20, () -> server(sp -> {
+                StringBuilder b = new StringBuilder();
+                for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(40)))
+                    b.append(String.format("%.0f", 400 - z.getHealth())).append(z.hasEffect(com.lanterna.construct.ModEfeitos.PAVOR.get()) ? "P" : "")
+                            .append(z.hasEffect(com.lanterna.construct.ModEfeitos.ENCANTO.get()) ? "E" : "").append(z.isOnFire() ? "F" : "")
+                            .append(z.hasEffect(net.minecraft.world.effect.MobEffects.WITHER) ? "W" : "").append(' ');
+                glog(l[1] + " (" + l[0] + "): dano nos alvos [" + b.toString().trim() + "] jogador em " + sp.blockPosition().toShortString() + " vida " + sp.getHealth());
+                com.lanterna.construct.Constructs.release(sp, null);
+            }));
+            at(60, () -> {});
+        }
+        // ---- laser novo ----
+        at(5, () -> server(sp -> { sp.teleportTo(sp.serverLevel(), 900.5, -60, 900.5, 0, 6); anelDe(sp, com.lanterna.corps.BuiltinCorps.GREEN); alvos(sp, 1, 9); }));
+        at(20, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+            com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge()); com.lanterna.construct.Constructs.cast(sp, "laser"); }));
+        at(2, () -> camLateral(true));
+        at(14, () -> shot("c_laser_3a"));
+        at(1, () -> { var e = mc.level.getEntity(CAM.get()); if (e != null) mc.setCameraEntity(e); });
+        at(3, () -> shot("c_laser_lado"));
+        at(1, () -> camLateral(false));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        at(10, () -> shot("c_laser_1a"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(10, () -> shot("c_laser_frente"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> com.lanterna.construct.Constructs.release(sp, null)); });
+        // ---- polimento: punho, martelo, escudo, lâminas, gancho ----
+        at(5, () -> server(sp -> com.lanterna.construct.Affinity.add(sp, 30000)));
+        String[][] velhos = {{"punho", "2"}, {"martelo", "9"}, {"martelo", "13"}, {"escudo", "10"}, {"lamina", "10"}, {"rajada", "1"}, {"gancho", "1"}, {"mao", "6"}};
+        for (String[] v : velhos) {
+            at(2, () -> camLateral(true));
+            at(20, () -> server(sp -> { sp.teleportTo(sp.serverLevel(), 900.5, -60, 900.5, 0, 12); alvos(sp, 3, 8);
+                var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge());
+                com.lanterna.construct.Constructs.cast(sp, v[0]); }));
+            at(Integer.parseInt(v[1]), () -> { var e = mc.level.getEntity(CAM.get()); if (e != null) mc.setCameraEntity(e); });
+            at(1, () -> shot("c_" + v[0] + "_" + v[1] + "_lado"));
+            at(1, () -> camLateral(false));
+            at(60, () -> {});
+        }
+        // ---- Pavor trava construtos ----
+        at(5, () -> server(sp -> { sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.lanterna.construct.ModEfeitos.PAVOR.get(), 200, 0));
+            for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(40))) z.discard();
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            int antes = r.charge();
+            com.lanterna.construct.Constructs.cast(sp, "punho");
+            glog("com Pavor: carga antes=" + antes + " depois=" + r.charge() + " (igual = travou)"); }));
+        at(30, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(20, () -> shot("c_pavor_tela"));
+        at(20, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneFist() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { cmd("gamemode survival"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); }); }));
+        at(10, () -> camLateral(true));
+        at(5, () -> { var e = mc.level.getEntity(CAM.get()); if (e != null) mc.setCameraEntity(e); });
+        at(5, () -> mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN));
+        String[][] q = {{"punho", "2"}, {"rajada", "1"}, {"martelo", "8"}, {"martelo", "13"}, {"lamina", "8"}, {"escudo", "8"}};
+        at(5, () -> server(sp -> { com.lanterna.construct.Affinity.add(sp, 30000); alvos(sp, 3, 10); }));
+        for (String[] x : q) {
+            at(30, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge());
+                com.lanterna.construct.Constructs.cast(sp, x[0]); }));
+            at(Integer.parseInt(x[1]), () -> shot("f_" + x[0] + x[1]));
+        }
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("v18")) sceneV18();
+        if (ENABLED && SCENE.equals("fist")) sceneFist();
+        else if (ENABLED && SCENE.equals("construtos")) sceneConstrutos();
+        else if (ENABLED && SCENE.equals("v18")) sceneV18();
         else if (ENABLED && SCENE.equals("guilda")) sceneGuilda();
         else if (ENABLED && SCENE.equals("pvp")) scenePvp();
         else if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();

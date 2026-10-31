@@ -33,7 +33,7 @@ import org.joml.Vector3f;
  * Pode pertencer a um jogador ou a um boss (o Vigia Partido copia os construtos do jogador).
  */
 public class ConstructEntity extends Entity {
-    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND }
+    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS }
 
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
@@ -47,6 +47,8 @@ public class ConstructEntity extends Entity {
     float damage;
     private Vec3 velocity = Vec3.ZERO;
     private boolean grabbed;
+    /** Quem o aríete já atravessou (acerta cada um uma vez só). */
+    private final java.util.Set<Integer> atravessados = new java.util.HashSet<>();
 
     public ConstructEntity(EntityType<?> type, Level level) {
         super(type, level);
@@ -179,16 +181,31 @@ public class ConstructEntity extends Entity {
                 // escudo grande (Bastião) fica parado onde foi criado
                 if (owner != null && !(kind() == Kind.SHIELD && scale() >= 2.5f)) setPos(owner.getX(), owner.getY(), owner.getZ());
             }
-            case FIST, BOLT -> {
+            case FIST, BOLT, RAM -> {
                 if (!level().isClientSide) moveProjectile(owner);
-                else setPos(getX() + getDeltaMovement().x, getY() + getDeltaMovement().y, getZ() + getDeltaMovement().z);
+                else {
+                    setPos(getX() + getDeltaMovement().x, getY() + getDeltaMovement().y, getZ() + getDeltaMovement().z);
+                    rastro();
+                }
+            }
+            case STREAM -> {
+                if (owner != null) updateStream(owner);
+            }
+            case CRYSTAL, TENDRIL -> {
+                Entity t = target();
+                if (t != null && kind() == Kind.CRYSTAL) setPos(t.getX(), t.getY(), t.getZ());
+                if (t != null && kind() == Kind.TENDRIL) setEnd(t.position().add(0, t.getBbHeight() * 0.55, 0));
             }
             default -> {}
         }
-        if (level().isClientSide) return;
+        if (level().isClientSide) {
+            efeitosCliente();
+            return;
+        }
 
         if (owner == null || !owner.isAlive()) {
-            if (kind() != Kind.FIST && kind() != Kind.BOLT && kind() != Kind.HAMMER) {
+            if (kind() != Kind.FIST && kind() != Kind.BOLT && kind() != Kind.HAMMER && kind() != Kind.RAM && kind() != Kind.DEADHANDS
+                    && kind() != Kind.FEAR && kind() != Kind.NOVA) {
                 discard();
                 return;
             }
@@ -209,9 +226,178 @@ public class ConstructEntity extends Entity {
             case HAND -> {
                 if (owner != null) handPull(owner);
             }
+            case STREAM -> {
+                if (tickCount % 4 == 0 && owner != null) streamHit(owner);
+            }
+            case CRYSTAL -> crystalHold(owner);
+            case TENDRIL -> {
+                if (owner != null && tickCount % 10 == 5) tendrilDrain(owner);
+            }
+            case DEADHANDS -> {
+                if (tickCount % 10 == 0) deadHands(owner);
+            }
             default -> {}
         }
-        if (tickCount >= life()) discard();
+        if (tickCount >= life()) {
+            if (kind() == Kind.CRYSTAL && target() instanceof LivingEntity le) {
+                le.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEfeitos.ENCANTO.get(), 200, 0, false, false, true));
+                if (le instanceof Player) le.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 200, 1));
+                ((ServerLevel) level()).sendParticles(ParticleTypes.HEART, le.getX(), le.getY() + le.getBbHeight(), le.getZ(), 6, 0.4, 0.3, 0.4, 0);
+                level().playSound(null, le.getX(), le.getY(), le.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.2f, 1.2f);
+            }
+            discard();
+        }
+    }
+
+    // ===================== Construtos das Tropas =====================
+
+    /** Feixe de napalm (Vermelho): cone que acompanha o olhar do dono. */
+    public static ConstructEntity spawnStream(LivingEntity owner, int color, float damage, int life) {
+        ConstructEntity e = create(owner, Kind.STREAM, color, life, damage, 1f);
+        e.updateStream(owner);
+        owner.level().addFreshEntity(e);
+        return e;
+    }
+
+    void updateStream(LivingEntity owner) {
+        Vec3 look = owner.getViewVector(1f);
+        Vec3 mouth = owner.getEyePosition().add(look.scale(0.6)).add(0, -0.25, 0);
+        setPos(mouth.x, mouth.y, mouth.z);
+        Vec3 far = owner.getEyePosition().add(look.scale(8));
+        BlockHitResult block = level().clip(new ClipContext(owner.getEyePosition(), far, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
+        setEnd(block.getType() == HitResult.Type.MISS ? far : block.getLocation());
+    }
+
+    private void streamHit(LivingEntity owner) {
+        Vec3 from = position(), to = end();
+        Vec3 axis = to.subtract(from);
+        double len = axis.length();
+        if (len < 0.5) return;
+        Vec3 dir = axis.scale(1 / len);
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(2.5), x -> inimigo(owner, x))) {
+            Vec3 rel = e.position().add(0, e.getBbHeight() / 2, 0).subtract(from);
+            double t = rel.dot(dir);
+            if (t < 0 || t > len + 1) continue;
+            double raio = 0.6 + t * 0.28;
+            if (rel.subtract(dir.scale(t)).length() > raio + e.getBbWidth() / 2) continue;
+            com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage);
+            e.invulnerableTime = 0;
+            e.setSecondsOnFire(4);
+        }
+        ServerLevel sl = (ServerLevel) level();
+        sl.sendParticles(ParticleTypes.FLAME, to.x, to.y, to.z, 4, 0.4, 0.4, 0.4, 0.03);
+        if (tickCount % 12 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.7f, 0.7f);
+    }
+
+    /** Cristal do Amor (Violeta): prende o alvo; ao quebrar, deixa Encanto. */
+    private void crystalHold(@Nullable LivingEntity owner) {
+        if (!(target() instanceof LivingEntity t) || !t.isAlive()) {
+            discard();
+            return;
+        }
+        t.setDeltaMovement(0, Math.min(0, t.getDeltaMovement().y), 0);
+        t.hurtMarked = true;
+        if (t instanceof net.minecraft.world.entity.Mob m) m.setTarget(null);
+        if (tickCount % 20 == 0 && owner != null) com.lanterna.combate.Equilibrio.ferirComPoder(t, source(owner), damage);
+    }
+
+    /** Garra da Avareza (Laranja): suga a vida (e a carga do anel) do alvo para o dono. */
+    private void tendrilDrain(LivingEntity owner) {
+        if (!(target() instanceof LivingEntity t) || !t.isAlive()) {
+            discard();
+            return;
+        }
+        if (com.lanterna.combate.Equilibrio.ferirComPoder(t, source(owner), damage)) owner.heal(damage * 0.5f);
+        t.invulnerableTime = 0;
+        if (t instanceof net.minecraft.server.level.ServerPlayer vp && owner instanceof net.minecraft.server.level.ServerPlayer op) {
+            var rv = com.lanterna.capability.ModCapabilities.get(vp).orElse(null);
+            var ro = com.lanterna.capability.ModCapabilities.get(op).orElse(null);
+            if (rv != null && ro != null && rv.hasRing() && ro.hasRing()) {
+                int roubo = Math.min(40, rv.charge());
+                com.lanterna.power.RingPowers.setCharge(vp, rv, rv.charge() - roubo);
+                com.lanterna.power.RingPowers.setCharge(op, ro, Math.min(ro.maxCharge(), ro.charge() + roubo));
+            }
+        }
+        Vec3 p = t.position().add(0, t.getBbHeight() * 0.5, 0);
+        ((ServerLevel) level()).sendParticles(dust(), p.x, p.y, p.z, 6, 0.2, 0.2, 0.2, 0);
+    }
+
+    /** Mãos dos Mortos (Preto): brotam do chão, prendem, secam e devolvem vida ao dono. */
+    private void deadHands(@Nullable LivingEntity owner) {
+        Vec3 c = end();
+        double r = 4.0 * scale();
+        ServerLevel sl = (ServerLevel) level();
+        sl.sendParticles(ParticleTypes.SCULK_SOUL, c.x, c.y + 0.3, c.z, 6, r * 0.5, 0.2, r * 0.5, 0.01);
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r, 2, r), x -> inimigo(owner, x))) {
+            if (e.position().distanceTo(c) > r + 0.5) continue;
+            e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 30, 3));
+            e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WITHER, 60, 1));
+            if (owner != null && com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage)) owner.heal(damage * 0.3f);
+            e.invulnerableTime = 0;
+        }
+        if (tickCount % 30 == 0) level().playSound(null, c.x, c.y, c.z, SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 0.5f, 0.6f);
+    }
+
+    /** Pode ferir este? (não acerta o dono, aliados da mesma guilda/Tropa nem bichos do dono) */
+    public static boolean inimigo(@Nullable LivingEntity owner, LivingEntity e) {
+        if (e == owner || !e.isAlive() || e.isSpectator()) return false;
+        if (e instanceof net.minecraft.world.entity.decoration.ArmorStand) return false;
+        if (owner instanceof Player op) {
+            if (e instanceof Player p && (p.isCreative() || com.lanterna.guilda.Guildas.mesmaGuilda(op, p))) return false;
+            if (e instanceof com.lanterna.especies.LanternaEntity l && l.aliadoDe(op)) return false;
+            if (e instanceof net.minecraft.world.entity.TamableAnimal ta && op.getUUID().equals(ta.getOwnerUUID())) return false;
+            if (e instanceof net.minecraft.world.entity.npc.AbstractVillager && !(e instanceof com.lanterna.especies.LanternaEntity)) return false;
+        }
+        return true;
+    }
+
+    // ---- Efeitos só de tela (rastros e faíscas) ----
+
+    private void rastro() {
+        int c = color();
+        Vec3 v = getDeltaMovement();
+        float s = kind() == Kind.BOLT ? 0.7f : 1.3f;
+        for (int i = 0; i < (kind() == Kind.BOLT ? 1 : 3); i++) {
+            double k = random.nextDouble();
+            level().addParticle(new DustParticleOptions(new Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), s),
+                    getX() - v.x * k + (random.nextDouble() - 0.5) * 0.4 * scale(), getY() - v.y * k + (random.nextDouble() - 0.5) * 0.4 * scale(),
+                    getZ() - v.z * k + (random.nextDouble() - 0.5) * 0.4 * scale(), 0, 0, 0);
+        }
+    }
+
+    private void efeitosCliente() {
+        int c = color();
+        DustParticleOptions d = new DustParticleOptions(new Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 1.1f);
+        switch (kind()) {
+            case BEAM -> {
+                // faíscas e brilho onde o laser bate
+                Vec3 e = end();
+                if (tickCount % 2 == 0) level().addParticle(d, e.x + (random.nextDouble() - 0.5) * 0.3, e.y + (random.nextDouble() - 0.5) * 0.3,
+                        e.z + (random.nextDouble() - 0.5) * 0.3, 0, 0, 0);
+                if (random.nextInt(3) == 0) level().addParticle(ParticleTypes.ELECTRIC_SPARK, e.x, e.y, e.z,
+                        (random.nextDouble() - 0.5) * 0.4, random.nextDouble() * 0.3, (random.nextDouble() - 0.5) * 0.4);
+            }
+            case STREAM -> {
+                Vec3 a = position(), b = end();
+                for (int i = 0; i < 3; i++) {
+                    double t = random.nextDouble();
+                    Vec3 p = a.lerp(b, t);
+                    double r = 0.2 + t * 1.2;
+                    level().addParticle(random.nextInt(3) == 0 ? ParticleTypes.FLAME : d, p.x + (random.nextDouble() - 0.5) * r,
+                            p.y + (random.nextDouble() - 0.5) * r, p.z + (random.nextDouble() - 0.5) * r, 0, 0.02, 0);
+                }
+            }
+            case DEADHANDS -> {
+                Vec3 e = end();
+                if (tickCount % 2 == 0) level().addParticle(ParticleTypes.SMOKE, e.x + (random.nextDouble() - 0.5) * 7 * scale(), e.y + 0.1,
+                        e.z + (random.nextDouble() - 0.5) * 7 * scale(), 0, 0.03, 0);
+            }
+            case CRYSTAL -> {
+                if (tickCount % 3 == 0) level().addParticle(ParticleTypes.END_ROD, getX() + (random.nextDouble() - 0.5) * 1.6,
+                        getY() + random.nextDouble() * 2.2, getZ() + (random.nextDouble() - 0.5) * 1.6, 0, 0.01, 0);
+            }
+            default -> {}
+        }
     }
 
     // ---- Laser ----
@@ -289,7 +475,30 @@ public class ConstructEntity extends Entity {
         Vec3 to = from.add(velocity);
         BlockHitResult block = level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 stop = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
-        float size = (kind() == Kind.FIST ? 0.7f : 0.3f) * scale();
+        float size = (kind() == Kind.FIST ? 0.7f : kind() == Kind.RAM ? 1.3f : 0.3f) * scale();
+        if (kind() == Kind.RAM) {
+            ServerLevel sl0 = (ServerLevel) level();
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 0.5), x -> inimigo(owner, x))) {
+                if (atravessados.contains(e.getId()) || e.getBoundingBox().inflate(size).clip(from, stop).isEmpty()) continue;
+                atravessados.add(e.getId());
+                com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage);
+                Vec3 push = velocity.normalize().scale(2.6);
+                e.push(push.x, 0.7, push.z);
+                e.hurtMarked = true;
+                sl0.sendParticles(dust(), e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 30, 0.5, 0.5, 0.5, 0.12);
+                level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3f, 0.5f);
+            }
+            if (block.getType() != HitResult.Type.MISS) {
+                sl0.sendParticles(ParticleTypes.EXPLOSION, stop.x, stop.y, stop.z, 2, 0.3, 0.3, 0.3, 0);
+                sl0.sendParticles(dust(), stop.x, stop.y, stop.z, 40, 0.8, 0.8, 0.8, 0.15);
+                level().playSound(null, stop.x, stop.y, stop.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8f, 1.4f);
+                discard();
+                return;
+            }
+            setPos(to.x, to.y, to.z);
+            setDeltaMovement(velocity);
+            return;
+        }
         LivingEntity hit = null;
         double best = Double.MAX_VALUE;
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 0.5),

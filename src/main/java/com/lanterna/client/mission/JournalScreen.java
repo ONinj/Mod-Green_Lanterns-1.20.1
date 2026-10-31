@@ -201,13 +201,15 @@ public class JournalScreen extends Screen {
                 Affinity.foodSeconds(lvl), Affinity.regenSeconds(lvl), String.format("%.1f", Affinity.punchBonus(lvl)),
                 String.format("%.1f", Affinity.power(pts)))), left + 10, y, Hud.argb(ClientRingData.color, 255), false);
         y += 14;
-        for (ConstructType t : ConstructType.values()) {
+        int idx = 0;
+        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
             boolean ok = lvl >= t.unlockLevel;
             Component line = Component.literal(ok ? "◆ " : "◇ ").append(t.displayName())
                     .append(Component.literal("  ")).append(Component.translatable("journal.lanterna.unlock", Affinity.levelName(t.unlockLevel)));
-            int col = (t.ordinal() % 2) * 190;
-            g.drawString(font, Hud.body(line), left + 10 + col, y, ok ? Hud.argb(t.category.color, 255) : 0xFF5E6A70, false);
-            if (t.ordinal() % 2 == 1) y += 11;
+            int col = (idx % 2) * 190;
+            g.drawString(font, Hud.body(line), left + 10 + col, y, ok ? Hud.argb(t.corps != null ? ClientRingData.color : t.category.color, 255) : 0xFF5E6A70, false);
+            if (idx % 2 == 1) y += 11;
+            idx++;
         }
     }
 

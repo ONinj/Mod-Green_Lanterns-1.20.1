@@ -69,6 +69,7 @@ public final class ClientConstructs {
             return;
         }
         if (cooldown(type) > 0) return;
+        if (!type.disponivel(ClientRingData.corps)) return;
         // Segurando a tecla, o teclado "repete" o clique: o construto contínuo já está ligado, não reinicia
         if (type.hold && holding == type) return;
         ModNetwork.sendToServer(new ConstructCastPacket(type.id, true));
@@ -78,7 +79,8 @@ public final class ClientConstructs {
         } else {
             COOLDOWN_UNTIL.put(type, System.currentTimeMillis() + type.cooldown * 50L);
         }
-        mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        // A animação do braço vem do servidor (CastAnim); o balanço normal só nos de toque
+        if (!type.hold && CastAnim.estilo(type) == CastAnim.Estilo.ESTOCADA) mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
     }
 
     public static int level() {

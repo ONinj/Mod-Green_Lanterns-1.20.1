@@ -25,7 +25,18 @@ public enum ConstructType {
     GANCHO("gancho", Category.UTILITY, 30, false, 3, 16),
     JAULA("jaula", Category.CONTROL, 110, false, 3, 160),
     LAMINA("lamina", Category.ATTACK, 90, false, 4, 70),
-    MAO("mao", Category.CONTROL, 50, false, 4, 50);
+    MAO("mao", Category.CONTROL, 50, false, 4, 50),
+
+    // ---- Construtos próprios de cada Tropa (só o anel daquela Tropa faz) ----
+    ARIETE("ariete", Category.ATTACK, 80, false, 1, 60, "green"),
+    PAVOR("pavor", Category.CONTROL, 100, false, 1, 160, "yellow"),
+    NAPALM("napalm", Category.ATTACK, 3, true, 1, 0, "red"),
+    ESPERANCA("esperanca", Category.DEFENSE, 90, false, 1, 300, "blue"),
+    CRISTAL("cristal", Category.CONTROL, 110, false, 1, 200, "violet"),
+    TELEPORTE("teleporte", Category.UTILITY, 60, false, 1, 120, "indigo"),
+    AVAREZA("avareza", Category.CONTROL, 100, false, 1, 160, "orange"),
+    CEIFA("ceifa", Category.ATTACK, 120, false, 1, 180, "black"),
+    VIDA("vida", Category.DEFENSE, 150, false, 1, 300, "white");
 
     public enum Category {
         ATTACK(0xFF5A5A), DEFENSE(0x5AB0FF), UTILITY(0xFFD35A), CONTROL(0xC07AFF);
@@ -47,14 +58,40 @@ public enum ConstructType {
     public final boolean hold;
     public final int unlockLevel;
     public final int cooldown;
+    /** Tropa dona do construto (path: "green"...), ou null se qualquer anel faz. */
+    @Nullable public final String corps;
 
     ConstructType(String id, Category category, int cost, boolean hold, int unlockLevel, int cooldown) {
+        this(id, category, cost, hold, unlockLevel, cooldown, null);
+    }
+
+    ConstructType(String id, Category category, int cost, boolean hold, int unlockLevel, int cooldown, @Nullable String corps) {
         this.id = id;
         this.category = category;
         this.cost = cost;
         this.hold = hold;
         this.unlockLevel = unlockLevel;
         this.cooldown = cooldown;
+        this.corps = corps;
+    }
+
+    /** Este anel (Tropa) pode fazer o construto? */
+    public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
+        return corps == null || (ringCorps != null && ringCorps.getPath().equals(corps));
+    }
+
+    /** Construtos que este anel mostra na roda: os de todos + o próprio da Tropa. */
+    public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
+        java.util.List<ConstructType> l = new java.util.ArrayList<>();
+        for (ConstructType t : values()) if (t.disponivel(ringCorps)) l.add(t);
+        return l;
+    }
+
+    /** O construto próprio da Tropa (ou null). */
+    @Nullable
+    public static ConstructType daTropa(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
+        for (ConstructType t : values()) if (t.corps != null && t.disponivel(ringCorps)) return t;
+        return null;
     }
 
     public Component displayName() {

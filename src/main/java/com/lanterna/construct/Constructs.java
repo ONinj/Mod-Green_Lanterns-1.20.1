@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,6 +44,7 @@ import org.joml.Vector3f;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -101,6 +103,13 @@ public final class Constructs {
             player.displayClientMessage(Component.translatable("message.lanterna.power_needed"), true);
             return;
         }
+        if (!type.disponivel(ring.corps())) return;
+        // Pavor: o medo trava a vontade (o Amarelo é imune ao próprio medo)
+        if (ModEfeitos.comPavor(player) && !ring.corps().getPath().equals("yellow")) {
+            player.displayClientMessage(Component.translatable("message.lanterna.pavor_trava").withStyle(s -> s.withColor(0xFFD21E)), true);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1f, 1.2f);
+            return;
+        }
         int lvl = level(player);
         if (lvl < type.unlockLevel) {
             player.displayClientMessage(Component.translatable("message.lanterna.construct_locked", type.displayName(),
@@ -131,6 +140,10 @@ public final class Constructs {
                 a.visual = ConstructEntity.spawnBeam(player, ring.color(), 3.0f * power(player, ring), 20 * 60 * 10);
                 player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.8f);
             }
+            if (type == ConstructType.NAPALM) {
+                a.visual = ConstructEntity.spawnStream(player, ring.color(), 1.5f * power(player, ring), 20 * 60 * 10);
+                player.level().playSound(null, player.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 0.6f);
+            }
         } else {
             boolean ok = perform(player, ring, type, lvl);
             if (!ok) return;
@@ -138,6 +151,8 @@ public final class Constructs {
             cds.put(type, now + type.cooldown);
         }
         LAST_USED.put(player.getUUID(), type);
+        com.lanterna.network.ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+                new CastAnimPacket(player.getId(), type.id, ring.color()));
         Affinity.add(player, type.hold ? 1 : 3);
         MissionManager.onConstruct(player, type.id);
         spark(player, ring.color());
@@ -231,6 +246,122 @@ public final class Constructs {
                 chain.setEnd(hit.getLocation());
                 level.addFreshEntity(chain);
                 level.playSound(null, player.blockPosition(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1f, 1.2f);
+            }
+            // ---------------- Construtos das Tropas ----------------
+            case ARIETE -> {
+                ConstructEntity ram = ConstructEntity.spawnProjectile(player, ConstructEntity.Kind.RAM, look, 1.1, color, 14f * pow, 1.6f + 0.1f * lvl);
+                ram.setLife(40);
+                level.playSound(null, player.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 0.8f, 1.4f);
+            }
+            case PAVOR -> {
+                double r = 9 + lvl;
+                ConstructEntity wave = ConstructEntity.create(player, ConstructEntity.Kind.FEAR, color, 22, 0, (float) r);
+                wave.setPos(player.getX(), player.getY() + 0.1, player.getZ());
+                level.addFreshEntity(wave);
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(r, 4, r),
+                        x -> ConstructEntity.inimigo(player, x) && x.distanceTo(player) <= r)) {
+                    com.lanterna.combate.Equilibrio.ferirComPoder(e, player.damageSources().playerAttack(player), 6f * pow);
+                    int dur = 20 * (8 + lvl);
+                    e.addEffect(new MobEffectInstance(ModEfeitos.PAVOR.get(), dur, 0, false, false, true));
+                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
+                    if (e instanceof net.minecraft.world.entity.player.Player) e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0));
+                }
+                level.playSound(null, player.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 1.2f, 1.3f);
+            }
+            case ESPERANCA -> {
+                double r = 10;
+                ConstructEntity nova = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 26, 0, (float) r);
+                nova.setPos(player.getX(), player.getY() + 1, player.getZ());
+                level.addFreshEntity(nova);
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(r), x -> x.distanceTo(player) <= r)) {
+                    if (!ConstructEntity.inimigo(player, e)) {
+                        e.heal(8 + 2 * lvl);
+                        e.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 160, 1));
+                        e.removeEffect(ModEfeitos.PAVOR.get());
+                    } else if (e.isInvertedHealAndHarm() || e instanceof com.lanterna.especies.LanternaEntity l && l.tropa() == com.lanterna.corps.BuiltinCorps.BLACK) {
+                        com.lanterna.combate.Equilibrio.ferirComPoder(e, player.damageSources().playerAttack(player), 8f * pow);
+                    }
+                }
+                level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.4f, 1.6f);
+                level.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.4f, 1.8f);
+            }
+            case CRISTAL -> {
+                LivingEntity target = lookedEntity(player, 24);
+                if (target == null) {
+                    player.displayClientMessage(Component.translatable("message.lanterna.construct_no_target"), true);
+                    return false;
+                }
+                ConstructEntity c = ConstructEntity.create(player, ConstructEntity.Kind.CRYSTAL, color, 100 + 10 * lvl, 2f * pow, 1f);
+                c.setTarget(target);
+                c.setPos(target.getX(), target.getY(), target.getZ());
+                level.addFreshEntity(c);
+                level.playSound(null, target.blockPosition(), SoundEvents.AMETHYST_CLUSTER_PLACE, SoundSource.PLAYERS, 1.4f, 0.8f);
+            }
+            case TELEPORTE -> {
+                Vec3 eye = player.getEyePosition();
+                Vec3 far = eye.add(look.scale(24 + 2 * lvl));
+                BlockHitResult hit = level.clip(new ClipContext(eye, far, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+                Vec3 dest = hit.getType() == HitResult.Type.MISS ? far : hit.getLocation().subtract(look.scale(0.8));
+                ConstructEntity from = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 14, 0, 2f);
+                from.setPos(player.getX(), player.getY() + 1, player.getZ());
+                level.addFreshEntity(from);
+                level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1, player.getZ(), 40, 0.4, 0.8, 0.4, 0.2);
+                player.teleportTo(dest.x, dest.y, dest.z);
+                player.fallDistance = 0;
+                ConstructEntity to = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 18, 0, 4f);
+                to.setPos(dest.x, dest.y + 1, dest.z);
+                level.addFreshEntity(to);
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(4), x -> ConstructEntity.inimigo(player, x))) {
+                    // Compaixão: sentem a dor que causaram
+                    e.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 120, 0));
+                    e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 1));
+                    com.lanterna.combate.Equilibrio.ferirComPoder(e, player.damageSources().playerAttack(player), 4f * pow);
+                }
+                level.playSound(null, dest.x, dest.y, dest.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1f, 1.4f);
+            }
+            case AVAREZA -> {
+                List<LivingEntity> alvos = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(12), x -> ConstructEntity.inimigo(player, x));
+                alvos.sort(java.util.Comparator.comparingDouble(x -> x.distanceToSqr(player)));
+                if (alvos.isEmpty()) {
+                    player.displayClientMessage(Component.translatable("message.lanterna.construct_no_target"), true);
+                    return false;
+                }
+                for (int i = 0; i < Math.min(4, alvos.size()); i++) {
+                    ConstructEntity t = ConstructEntity.create(player, ConstructEntity.Kind.TENDRIL, color, 50, 4f * pow, 1f);
+                    t.setTarget(alvos.get(i));
+                    t.setEnd(alvos.get(i).position());
+                    level.addFreshEntity(t);
+                }
+                level.playSound(null, player.blockPosition(), SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1f, 0.8f);
+            }
+            case CEIFA -> {
+                Vec3 spot = groundAhead(player, 20);
+                ConstructEntity hands = ConstructEntity.create(player, ConstructEntity.Kind.DEADHANDS, color, 100 + 10 * lvl, 3f * pow, 1f);
+                hands.setPos(spot.x, spot.y, spot.z);
+                hands.setEnd(spot);
+                level.addFreshEntity(hands);
+                level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 1.2f, 0.6f);
+            }
+            case VIDA -> {
+                double r = 12;
+                ConstructEntity nova = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 30, 0, (float) r);
+                nova.setPos(player.getX(), player.getY() + 1, player.getZ());
+                level.addFreshEntity(nova);
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(r), x -> x.distanceTo(player) <= r)) {
+                    if (!ConstructEntity.inimigo(player, e)) {
+                        e.heal(12);
+                        e.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 400, 1));
+                        for (var ef : new java.util.ArrayList<>(e.getActiveEffects()))
+                            if (ef.getEffect().getCategory() == net.minecraft.world.effect.MobEffectCategory.HARMFUL) e.removeEffect(ef.getEffect());
+                    } else {
+                        boolean morto = e.isInvertedHealAndHarm() || e instanceof com.lanterna.especies.LanternaEntity l && l.tropa() == com.lanterna.corps.BuiltinCorps.BLACK;
+                        com.lanterna.combate.Equilibrio.ferirComPoder(e, player.damageSources().playerAttack(player), (morto ? 20f : 10f) * pow);
+                        Vec3 push = e.position().subtract(player.position()).normalize();
+                        e.push(push.x * 1.5, 0.5, push.z * 1.5);
+                        e.hurtMarked = true;
+                    }
+                }
+                level.playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1f, 1.2f);
             }
             default -> {
                 return false;

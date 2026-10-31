@@ -18,5 +18,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> {
         FlightPose.applyLimbs((HumanoidModel<?>) (Object) this, entity, ageInTicks);
         com.lanterna.client.recharge.ClientRecharge.applyArm((HumanoidModel<?>) (Object) this, entity,
                 net.minecraft.client.Minecraft.getInstance().getFrameTime());
+        com.lanterna.client.construct.CastAnim.apply((HumanoidModel<?>) (Object) this, entity,
+                net.minecraft.client.Minecraft.getInstance().getFrameTime());
     }
 }

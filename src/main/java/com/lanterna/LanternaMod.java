@@ -49,6 +49,7 @@ public class LanternaMod {
         ModCreativeTabs.TABS.register(modBus);
         ModMenus.MENUS.register(modBus);
         ModParticles.PARTICLES.register(modBus);
+        com.lanterna.construct.ModEfeitos.init(modBus);
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModCapabilities::register);
