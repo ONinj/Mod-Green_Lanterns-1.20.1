@@ -1522,5 +1522,7 @@
   "mission.lanterna.portal_2.desc": "Visite Odym, Korugar e Zamaron para o anel aprender os caminhos. Precisa estar no nível 32 com afinidade Confiável.",
   "mission.lanterna.portal_3.title": "A Primeira Porta",
   "mission.lanterna.portal_3.desc": "Volte ao Guardião de Oa. Ele vai mostrar como o anel desenha a porta.",
-  "mission.lanterna.portal_3.talk": "Estenda o braço. Imagine o lugar, não o caminho. O anel desenha a moldura, a sua vontade abre o resto. Agora você leva o Vazio na mão."
+  "mission.lanterna.portal_3.talk": "Estenda o braço. Imagine o lugar, não o caminho. O anel desenha a moldura, a sua vontade abre o resto. Agora você leva o Vazio na mão.",
+  "hud.lanterna.mission.prova": "Prova da Tropa",
+  "hud.lanterna.mission.contrato": "Contrato"
 }

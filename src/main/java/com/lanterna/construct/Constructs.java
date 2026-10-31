@@ -598,5 +598,10 @@ public final class Constructs {
         COOLDOWNS.remove(id);
     }
 
+    /** Zera todas as recargas de construtos do jogador (comando de teste). */
+    public static void zerarRecargas(UUID id) {
+        COOLDOWNS.remove(id);
+    }
+
     private Constructs() {}
 }

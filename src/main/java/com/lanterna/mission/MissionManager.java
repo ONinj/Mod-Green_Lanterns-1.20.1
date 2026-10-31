@@ -248,6 +248,16 @@ public final class MissionManager {
 
     // ===================== Concluir =====================
 
+    /** Conclui a missão na hora, com recompensas e a próxima da linha (comando de teste). */
+    public static boolean forcarConclusao(ServerPlayer player, String id) {
+        LoreData data = data(player);
+        Mission m = Missions.get(id);
+        if (data == null || m == null) return false;
+        if (!data.isActive(id)) data.start(m);
+        complete(player, data, m);
+        return true;
+    }
+
     private static void complete(ServerPlayer player, LoreData data, Mission m) {
         // Entrega os itens de "coletar"
         for (Objective o : m.objectives()) {

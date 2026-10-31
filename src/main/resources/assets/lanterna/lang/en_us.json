@@ -1522,5 +1522,7 @@
   "mission.lanterna.portal_2.desc": "Visit Odym, Korugar and Zamaron so the ring learns the paths. You must be level 32 with Confiável (Trusted) affinity.",
   "mission.lanterna.portal_3.title": "The First Door",
   "mission.lanterna.portal_3.desc": "Return to the Guardian of Oa. He will show how the ring draws the door.",
-  "mission.lanterna.portal_3.talk": "Stretch out your arm. Picture the place, not the path. The ring draws the frame, your will opens the rest. Now you carry the Void in your hand."
+  "mission.lanterna.portal_3.talk": "Stretch out your arm. Picture the place, not the path. The ring draws the frame, your will opens the rest. Now you carry the Void in your hand.",
+  "hud.lanterna.mission.prova": "Corps Trial",
+  "hud.lanterna.mission.contrato": "Contract"
 }

@@ -453,3 +453,27 @@ até a frente dele e a porta nasce (colunas subindo, arco se fechando, redemoinh
 a tela clareia; do outro lado a câmera fica de frente e ele sai de outra porta, que se fecha atrás dele. A chegada
 procura chão firme e seco perto da base do planeta (ou perto de onde se pousa num planeta gerado). Ninguém fere quem
 está atravessando. Se o planeta ainda está carregando, a animação de chegada espera o chão aparecer.
+
+# 0.21 — Comandos de teste (só operador / cheats ligados)
+
+`/lanterna ajuda` mostra tudo no jogo. Todos os argumentos têm autocompletar com Tab.
+
+| Comando | O que faz |
+|---|---|
+| `/lanterna anel <tropa>` | Equipa o anel de qualquer Tropa (green, yellow, red, blue, violet, indigo, orange, black, white). O antigo vai para o inventário. O Preto já vem "dominado". |
+| `/lanterna cheio` | Carga cheia, poder ligado, zera recargas dos construtos e a espera da Porta Estelar. |
+| `/lanterna nivel <1-50>` | Muda o nível da Tropa (ao subir dá as recompensas de posto). |
+| `/lanterna afinidade_nivel <0-5>` | Afinidade do anel equipado (libera os construtos). |
+| `/lanterna tecnica <id\|todas>` | Técnicas dos Capitães: olhar, bastiao, onda, salto, armadura, comando. |
+| `/lanterna poder <portal\|autorecarga\|honra\|genese\|tudo>` | Porta Estelar, autorrecarga (Prova da Emoção), Guarda de Honra (3º espaço), Gênese, ou tudo (nível 50, afinidade máxima, todas as técnicas e planetas visitados). |
+| `/lanterna morte <corromper\|dominar\|faminto\|alimentar\|limpar>` | Linha da Morte / Anel Preto e a fome do Lanterna Negro. |
+| `/lanterna missao_iniciar <id>` · `missao_concluir <id>` · `missao_abandonar <id>` | Missões (concluir dá recompensas e abre a próxima da linha). |
+| `/lanterna missao_limpar` · `missao_concluidas_limpar` | Abandona todas as ativas / apaga o histórico para refazer. |
+| `/lanterna visitar <planeta\|todos>` | Marca planetas como visitados (aparecem na Porta Estelar). |
+| `/lanterna tropa_hostil <tropa\|limpar>` | Inimizade com uma Tropa (como se tivesse invadido o planeta dela). |
+| `/lanterna invocar <o_que> [qtd]` | pirata, capitao, mercador, eco, alvo_treino, broto, lanterna_<tropa>, oficial_<tropa>, boss_<nome>. |
+| `/lanterna nave <tipo> [pintura]` | Item de nave. |
+| `/lanterna kit <aneis\|materiais\|reliquias\|guilda\|naves\|tudo>` | Itens. |
+
+Os comandos antigos continuam: `escolher`, `xp`, `afinidade`, `respeito`, `encontro`, `genese`, `contratos`, `interior`,
+`reconstruir`, `resetar`, `/guilda admin ...`.

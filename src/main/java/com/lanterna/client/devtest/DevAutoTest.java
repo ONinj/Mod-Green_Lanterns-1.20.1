@@ -1993,6 +1993,66 @@ public final class DevAutoTest {
     }
 
     /** Porta Estelar: linha dos Guardiões, tela de destinos e a viagem animada até Oa. */
+    private static void opc(String c) {
+        server(sp -> {
+            int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c);
+            glog("/" + c + " -> " + r);
+        });
+    }
+
+    private static void sceneComandos() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+            cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> opc("lanterna ajuda"));
+        at(10, () -> opc("lanterna anel white"));
+        at(20, () -> server(sp -> glog("anel=" + com.lanterna.power.EquipmentHelper.ring(sp).getHoverName().getString())));
+        at(10, () -> opc("lanterna anel black"));
+        at(20, () -> server(sp -> glog("anel=" + com.lanterna.power.EquipmentHelper.ring(sp).getHoverName().getString()
+                + " morte=" + com.lanterna.mission.LoreCapability.get(sp).orElse(null).morte())));
+        at(10, () -> opc("lanterna anel green"));
+        at(10, () -> opc("lanterna nivel 37"));
+        at(10, () -> server(sp -> glog("nivel=" + com.lanterna.tropa.Nivel.nivel(com.lanterna.mission.LoreCapability.get(sp).orElse(null).xp()))));
+        at(10, () -> opc("lanterna nivel 5"));
+        at(10, () -> server(sp -> glog("nivel=" + com.lanterna.tropa.Nivel.nivel(com.lanterna.mission.LoreCapability.get(sp).orElse(null).xp()))));
+        at(10, () -> opc("lanterna afinidade_nivel 4"));
+        at(10, () -> server(sp -> glog("afin=" + com.lanterna.construct.Affinity.points(com.lanterna.power.EquipmentHelper.ring(sp)))));
+        at(10, () -> opc("lanterna tecnica todas"));
+        at(10, () -> opc("lanterna poder portal"));
+        at(10, () -> opc("lanterna poder honra"));
+        at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("portal=" + d.portal() + " honra=" + d.honra() + " slots=" + com.lanterna.cidade.Tecnicas.slots(d)); }));
+        at(10, () -> opc("lanterna morte corromper"));
+        at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("morte=" + d.morte() + " ativas=" + d.active().keySet()); }));
+        at(10, () -> opc("lanterna morte limpar"));
+        at(10, () -> opc("lanterna missao_iniciar ryut_1"));
+        at(10, () -> opc("lanterna missao_concluir ryut_1"));
+        at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("ryut_1 feita=" + d.completed().contains("ryut_1") + " ativas=" + d.active().keySet()); }));
+        at(10, () -> opc("lanterna missao_concluir portal_3"));
+        at(10, () -> opc("lanterna missao_limpar"));
+        at(10, () -> opc("lanterna visitar todos"));
+        at(10, () -> opc("lanterna tropa_hostil yellow"));
+        at(10, () -> opc("lanterna tropa_hostil limpar"));
+        at(10, () -> opc("lanterna invocar pirata 2"));
+        at(10, () -> opc("lanterna invocar oficial_yellow"));
+        at(10, () -> opc("lanterna invocar lanterna_red"));
+        at(10, () -> opc("lanterna invocar eco"));
+        at(10, () -> opc("lanterna invocar mercador"));
+        at(10, () -> opc("lanterna invocar alvo_treino"));
+        at(10, () -> server(sp -> { for (String b : com.lanterna.lore.LoreEntities.bosses().keySet()) {
+            int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna invocar boss_" + b);
+            glog("boss_" + b + " -> " + r); } }));
+        at(10, () -> opc("lanterna nave nave_lanceira yellow"));
+        at(10, () -> opc("lanterna kit tudo"));
+        at(10, () -> opc("lanterna poder tudo"));
+        at(10, () -> opc("lanterna cheio"));
+        at(10, () -> opc("lanterna morte dominar"));
+        at(10, () -> opc("lanterna invocar nada"));
+        at(40, () -> shot("comandos"));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void scenePortal() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -2052,6 +2112,7 @@ public final class DevAutoTest {
 
     static {
         if (ENABLED && SCENE.equals("portal")) scenePortal();
+        else if (ENABLED && SCENE.equals("comandos")) sceneComandos();
         else if (ENABLED && SCENE.equals("fist")) sceneFist();
         else if (ENABLED && SCENE.equals("construtos")) sceneConstrutos();
         else if (ENABLED && SCENE.equals("v18")) sceneV18();

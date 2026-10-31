@@ -49,6 +49,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.23 ✅ (0.18) Minerador com 4 níveis; Anéis Supremos (Branco e Preto); Anel Preto só por corrupção na morte (linha "A Morte"); linha principal mais longa e travada por nível; planetas das Tropas NPC; mais piratas e saque melhor
 1.24 ✅ (0.19) Construto próprio de cada Tropa (Pavor trava construtos), animações de lançar, laser novo e polimento visual de todos os construtos
 1.25 ✅ (0.20) Porta Estelar: linha dos Guardiões (nível 32, afinidade Confiável) e teleporte animado para planetas visitados (tecla N)
+1.26 ✅ (0.21) Comandos de teste (op): anel de qualquer Tropa, nível, afinidade, técnicas, poderes, linha da Morte, missões, invocar NPCs/chefes/naves e kits (`/lanterna ajuda`)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
