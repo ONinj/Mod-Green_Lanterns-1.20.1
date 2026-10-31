@@ -62,6 +62,9 @@ public final class UniformTransition {
 
     /** Anel de faíscas subindo junto com a frente de energia (na altura onde os pixels estão se formando). */
     private static void spawnFront(Player player, float p, int color) {
+        // em primeira pessoa as bolinhas nasceriam dentro da câmera (quadrados enormes): a tela mostra a transformação
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (player == mc.player && mc.options.getCameraType().isFirstPerson()) return;
         var rnd = player.getRandom();
         double height = p * 1.95;
         for (int i = 0; i < 6; i++) {

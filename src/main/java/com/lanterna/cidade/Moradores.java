@@ -100,11 +100,22 @@ public final class Moradores {
             minZ = Math.min(minZ, m.pos().getZ()); maxZ = Math.max(maxZ, m.pos().getZ());
             minY = Math.min(minY, m.pos().getY()); maxY = Math.max(maxY, m.pos().getY());
         }
-        AABB area = new AABB(minX - 40, minY - 30, minZ - 40, maxX + 40, maxY + 30, maxZ + 40);
-        Map<String, Integer> existem = new HashMap<>();
+        AABB area = new AABB(minX - 40, level.getMinBuildHeight(), minZ - 40, maxX + 40, level.getMaxBuildHeight(), maxZ + 40);
+        Map<String, Integer> esperados = new HashMap<>();
+        for (Morador m : lista) esperados.merge(m.funcao(), 1, Integer::sum);
+        Map<String, List<Entity>> achados = new HashMap<>();
         for (Entity e : level.getEntities((Entity) null, area, Entity::isAlive)) {
             String f = funcao(e);
-            if (!f.isEmpty()) existem.merge(f, 1, Integer::sum);
+            if (esperados.containsKey(f)) achados.computeIfAbsent(f, k -> new ArrayList<>()).add(e);
+        }
+        // Repetidos (sobrando além do esperado) vão embora
+        Map<String, Integer> existem = new HashMap<>();
+        for (var en : achados.entrySet()) {
+            List<Entity> l = en.getValue();
+            l.sort(java.util.Comparator.comparingInt(Entity::getId));
+            int max = esperados.get(en.getKey());
+            for (int i = max; i < l.size(); i++) l.get(i).discard();
+            existem.put(en.getKey(), Math.min(max, l.size()));
         }
         int voltaram = 0;
         for (Morador m : lista) {

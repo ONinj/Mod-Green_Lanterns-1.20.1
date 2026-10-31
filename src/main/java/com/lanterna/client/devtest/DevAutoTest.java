@@ -2224,6 +2224,83 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+    private static void sceneV24b() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("execute in lanterna:oa run tp @s 0 120 20"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        Runnable conta = () -> server(sp -> { int toran = 0, guard = 0;
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(-60, -64, -60, 60, 320, 60))) {
+                if (e.role().equals("instrutor")) { toran++; glog("  instrutor em " + e.blockPosition() + " vivo=" + e.isAlive()); } if (e.role().equals("guardiao")) guard++; }
+            glog("base de Oa: instrutores=" + toran + " guardioes=" + guard + " hub construido=" + com.lanterna.lore.LoreWorldData.get(sp.server).siteBuilt("oa:hub")); });
+        at(60, conta);
+        at(300, conta);
+        at(700, conta);
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneV24c() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("time set 6000"); cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 0"); });
+        for (String t : new String[]{"white", "yellow", "green"}) for (String v : new String[]{"padrao", "a"}) {
+            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t)));
+            at(5, () -> cmd("clear @s"));
+            at(10, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null);
+                camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; mc.player.getInventory().selected = 8; look(0, 10); });
+            at(40, () -> shot("v24c_" + t + "_" + v));
+        }
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+        at(40, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+        at(11, () -> shot("v24c_ligando"));
+        at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static void sceneV24() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 0"); });
+        at(30, () -> cmd("fill 310 -60 320 331 -50 345 minecraft:air"));
+        String[] tropas = {"white", "green", "yellow", "black"};
+        for (String t : tropas) {
+            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t)));
+            at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
+            for (String v : new String[]{"padrao", "a", "b"}) {
+                at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null);
+                    camera(CameraType.THIRD_PERSON_FRONT); mc.options.hideGui = true; look(0, 10); });
+                at(40, () -> shot("v24_" + t + "_" + v));
+            }
+        }
+        // ---- primeira pessoa: braço com o uniforme e a transformação ----
+        at(5, () -> { camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0); mc.setScreen(null); });
+        at(5, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
+        at(10, () -> { mc.player.getInventory().selected = 8; look(0, 10); });
+        at(30, () -> shot("v24_braco"));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+        at(40, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
+        at(9, () -> shot("v24_ligando"));
+        at(30, () -> shot("v24_ligado"));
+        // ---- laser em terceira pessoa ----
+        at(5, () -> { camera(CameraType.THIRD_PERSON_BACK); look(30, 0); });
+        at(5, () -> server(sp -> com.lanterna.construct.Constructs.cast(sp, "laser")));
+        at(15, () -> shot("v24_laser_f5"));
+        at(5, () -> { camera(CameraType.THIRD_PERSON_FRONT); });
+        at(5, () -> shot("v24_laser_frente"));
+        at(5, () -> { server(sp -> com.lanterna.construct.Constructs.release(sp, null)); camera(CameraType.FIRST_PERSON); });
+        // ---- base de Oa: sem Mestres Toran repetidos ----
+        at(5, () -> cmd("execute in lanterna:oa run tp @s 0 120 20"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        Runnable conta = () -> server(sp -> { int toran = 0, guard = 0;
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(-60, -64, -60, 60, 320, 60))) {
+                if (e.role().equals("instrutor")) toran++; if (e.role().equals("guardiao")) guard++; }
+            glog("base de Oa: instrutores=" + toran + " guardioes=" + guard); });
+        at(60, conta);
+        at(700, conta);
+        at(700, conta);
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void opc(String c) {
         server(sp -> {
             int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c);
@@ -2347,6 +2424,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("receber")) sceneReceber();
         else if (ENABLED && SCENE.equals("v22")) sceneV22();
         else if (ENABLED && SCENE.equals("teto")) sceneTeto();
+        else if (ENABLED && SCENE.equals("v24")) sceneV24();
+        else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
+        else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
         else if (ENABLED && SCENE.equals("v23")) sceneV23();
         else if (ENABLED && SCENE.equals("cabecas")) sceneCabecas();
         else if (ENABLED && SCENE.equals("teto2")) sceneTeto2();

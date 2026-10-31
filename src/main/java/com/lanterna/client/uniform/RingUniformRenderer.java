@@ -58,6 +58,21 @@ public class RingUniformRenderer extends UniformeRenderer {
         semBase = false;
     }
 
+    @org.jetbrains.annotations.Nullable private net.minecraft.world.entity.HumanoidArm soBraco;
+
+    /** Primeira pessoa: só o braço deste lado aparece. */
+    public void setSoBraco(@org.jetbrains.annotations.Nullable net.minecraft.world.entity.HumanoidArm arm) {
+        soBraco = arm;
+    }
+
+    @Override
+    protected void applyBoneVisibilityBySlot(net.minecraft.world.entity.EquipmentSlot slot) {
+        super.applyBoneVisibilityBySlot(slot);
+        if (soBraco == null) return;
+        setAllBonesVisible(false);
+        setBoneVisible(soBraco == net.minecraft.world.entity.HumanoidArm.RIGHT ? rightArm : leftArm, true);
+    }
+
     public void setSemBase(boolean v) {
         semBase = v;
     }

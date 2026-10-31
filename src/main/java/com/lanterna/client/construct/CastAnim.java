@@ -121,7 +121,7 @@ public final class CastAnim {
         Anim a = ANIMS.get(e.getId());
         boolean estendido = MIRANDO.containsKey(e.getId()) || (a != null && e.level().getGameTime() - a.inicio < a.dur);
         Vec3 look = e.getViewVector(pt);
-        Vec3 ombro = pos.add(0, e.getBbHeight() * 0.76, 0).add(right.scale(-0.36 * side));
+        Vec3 ombro = pos.add(0, e.getBbHeight() * 0.76, 0).add(right.scale(0.36 * side));
         return estendido ? ombro.add(look.scale(0.72)) : ombro.add(0, -0.6, 0);
     }
 

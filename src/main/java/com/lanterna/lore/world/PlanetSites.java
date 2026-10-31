@@ -269,7 +269,19 @@ public final class PlanetSites {
     public static int vigiarBase(ServerLevel level, PlanetLore planet) {
         BlockPos c = PlanetLore.HUB;
         if (!level.isLoaded(c)) return 0;
-        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(c).inflate(48, 40, 48);
+        // a base fica em cima do terreno: a busca vai do fundo ao teto do mundo
+        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(c.getX() - 48, level.getMinBuildHeight(), c.getZ() - 48,
+                c.getX() + 48, level.getMaxBuildHeight(), c.getZ() + 48);
+        // Limpa repetidos (a 0.23 criava um novo a cada 30 s): fica só a quantidade certa de cada um
+        java.util.Map<String, Integer> limite = new java.util.HashMap<>();
+        if (planet == PlanetLore.OA) { limite.put("guardiao", 3); limite.put("instrutor", 1); }
+        else { limite.put("guardiao", 1); limite.put("lider", planet == PlanetLore.ZAMARON ? 2 : 1); }
+        for (var en : limite.entrySet()) {
+            java.util.List<RaceEntity> l = level.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.role().equals(en.getKey()));
+            l.sort(java.util.Comparator.comparingInt(net.minecraft.world.entity.Entity::getId));
+            for (int i = en.getValue(); i < l.size(); i++) l.get(i).discard();
+            if (l.size() > en.getValue()) LanternaMod.LOGGER.info("Lanterna: {} {} repetido(s) removido(s) em {}", l.size() - en.getValue(), en.getKey(), planet.planet);
+        }
         java.util.function.Function<String, Long> quantos = role -> level.getEntitiesOfClass(RaceEntity.class, area,
                 e -> e.isAlive() && e.role().equals(role)).stream().count();
         java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) ->

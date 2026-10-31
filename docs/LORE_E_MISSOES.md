@@ -533,3 +533,16 @@ cabelo) em cima e embaixo da máscara.
 barra de carga que desliza e mostra em branco o que foi gasto; painel de missão entra deslizando ao trocar de missão,
 objetivo cumprido pisca em verde; aviso de missão nova "salta"; a seta do objetivo não fica mais em cima da barra de
 itens. O inglês (en_us) foi traduzido por completo (antes ~800 textos estavam em português no jogo em inglês).
+
+# 0.24 — Primeira pessoa, laser e correções
+
+- **NPCs repetidos (0.23)**: o vigia da base procurava o Mestre Toran e os Guardiões perto de Y 0 e não achava ninguém
+  (a base fica em cima do terreno), então criava outro a cada 30 s. Agora procura do fundo ao teto do mundo e, ao
+  passar perto, **apaga os repetidos** (fica 1 Instrutor e 3 Guardiões em Oa; 1 líder e 1 Guardião nos outros
+  planetas; nas cidades e no Palácio, a quantidade certa de cada função).
+- **Laser do punho em terceira pessoa (F5)**: saía do lado esquerdo; agora sai da mão do anel.
+- **Primeira pessoa**: com o anel ligado, o braço que você vê usa a manga do uniforme (o mesmo escolhido no Perfil:
+  padrão, traje A ou B). Ao ligar/desligar o anel, a manga se forma da mão até o ombro (e se desfaz ao contrário),
+  com uma faixa de luz da cor da Tropa atravessando a tela e as bordas brilhando.
+- **Trajes "segunda pele"**: as faces escondidas dos modelos (mapeadas num pixel do canto) estavam brilhando na
+  camada de brilho e apareciam como placas por cima da cabeça e do corpo. O pixel foi apagado nas 18 _glowmask.

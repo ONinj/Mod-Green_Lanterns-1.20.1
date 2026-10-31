@@ -136,6 +136,7 @@ public final class ClientModEvents {
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAboveAll("pavor", com.lanterna.client.construct.PavorTela.HUD);
         event.registerAboveAll("portal", com.lanterna.client.portal.PortalCliente.HUD);
+        event.registerAboveAll("uniforme_transformacao", com.lanterna.client.uniform.UniformeBraco.HUD);
         event.registerAboveAll("ring_hud", RingHudOverlay.HUD);
         event.registerAboveAll("mira_travada", com.lanterna.client.combat.MiraTravada.HUD);
         event.registerAboveAll("tecnicas", com.lanterna.client.cidade.ClientTecnicas.HUD);
