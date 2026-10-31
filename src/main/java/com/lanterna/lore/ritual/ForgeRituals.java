@@ -89,6 +89,10 @@ public final class ForgeRituals {
             }
         }
 
+        if (planet == PlanetLore.RYUT && !player.isCreative() && !com.lanterna.morte.Corrupcao.podeForjar(player)) {
+            player.sendSystemMessage(Component.translatable("morte.lanterna.forja_recusa").withStyle(s -> s.withColor(planet.color()).withItalic(true)));
+            return;
+        }
         int req = com.lanterna.tropa.Nivel.nivelParaForjar(planet);
         if (!player.isCreative() && com.lanterna.tropa.Nivel.nivel(player) < req) {
             player.displayClientMessage(Component.translatable("nivel.lanterna.precisa_forja", req), true);

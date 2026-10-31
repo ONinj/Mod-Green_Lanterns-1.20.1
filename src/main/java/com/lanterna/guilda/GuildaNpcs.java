@@ -52,15 +52,23 @@ public final class GuildaNpcs {
         Component titulo;
         if (!general) {
             titulo = Component.translatable("cidade.lanterna.npc.guilda_minerador");
-            long passo = LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L;
-            linhas.add(Component.translatable("guilda.lanterna.min.guardada", c.essencia, Guildas.ESSENCIA_MAX));
-            linhas.add(c.essencia >= Guildas.ESSENCIA_MAX ? Component.translatable("guilda.lanterna.min.cheio")
+            long passo = c.passoMinerador(LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L);
+            linhas.add(Component.translatable("guilda.lanterna.min.nivel", c.minerador, c.qtdMinerador(), Invasao.tempo(passo)).withStyle(ChatFormatting.GOLD));
+            linhas.add(Component.translatable("guilda.lanterna.min.guardada", c.essencia, c.depositoMinerador()));
+            linhas.add(c.essencia >= c.depositoMinerador() ? Component.translatable("guilda.lanterna.min.cheio")
                     : Component.translatable("guilda.lanterna.min.proxima", Invasao.tempo(Math.max(0, c.ultimaEssencia + passo - agora))));
             int bolso = conta(p, GuildaItems.ESSENCIA.get().getDefaultInstance());
             linhas.add(Component.translatable("guilda.lanterna.min.custo", custo, bolso));
+            Melhoria prox = melhoria(c.minerador);
+            if (prox != null) linhas.add(Component.translatable("guilda.lanterna.min.melhoria", c.minerador + 1, prox.essencia, prox.diamantes, prox.meritos,
+                    prox.netherite).withStyle(ChatFormatting.AQUA));
+            else linhas.add(Component.translatable("guilda.lanterna.min.maximo").withStyle(ChatFormatting.AQUA));
             linhas.add(Component.translatable("guilda.lanterna.min.dica").withStyle(ChatFormatting.GRAY));
             acoes.add("coletar"); rot.add(Component.translatable("guilda.lanterna.min.coletar")); at.add(c.essencia > 0);
             acoes.add("forjar"); rot.add(Component.translatable("guilda.lanterna.min.forjar")); at.add(c.essencia + bolso >= custo);
+            if (prox != null) {
+                acoes.add("melhorar"); rot.add(Component.translatable("guilda.lanterna.min.melhorar", c.minerador + 1)); at.add(podeMelhorar(p, c, prox));
+            }
         } else {
             titulo = Component.translatable("cidade.lanterna.npc.guilda_general");
             int maxD = LanternaConfig.GUILDA_MAX_DEFESA.get(), maxA = LanternaConfig.GUILDA_MAX_ATAQUE.get();
@@ -103,6 +111,22 @@ public final class GuildaNpcs {
                 p.level().playSound(null, p.blockPosition(), SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 0.8f, 1.4f);
                 p.displayClientMessage(Component.translatable("guilda.lanterna.min.forjou").withStyle(ChatFormatting.GREEN), true);
             }
+            case "melhorar" -> {
+                Melhoria m = melhoria(c.minerador);
+                if (m == null || !podeMelhorar(p, c, m)) return;
+                int doEstoque = Math.min(c.essencia, m.essencia);
+                c.essencia -= doEstoque;
+                tirar(p, GuildaItems.ESSENCIA.get().getDefaultInstance(), m.essencia - doEstoque);
+                tirar(p, new ItemStack(net.minecraft.world.item.Items.DIAMOND), m.diamantes);
+                tirar(p, new ItemStack(com.lanterna.lore.LoreItems.MERITO.get()), m.meritos);
+                tirar(p, new ItemStack(net.minecraft.world.item.Items.NETHERITE_INGOT), m.netherite);
+                c.minerador++;
+                p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1.2f);
+                Conquistas.avisarGuilda(p.server, c.guilda, Component.translatable("guilda.lanterna.min.subiu", c.minerador).withStyle(ChatFormatting.GOLD));
+                gs.mudou();
+                painel(p, c, false);
+                return;
+            }
             case "treinar_defesa", "treinar_ataque" -> {
                 boolean defesa = acao.equals("treinar_defesa");
                 long filaD = c.fila.stream().filter(b -> b).count(), filaA = c.fila.size() - filaD;
@@ -119,6 +143,27 @@ public final class GuildaNpcs {
         }
         gs.mudou();
         painel(p, c, acao.startsWith("treinar"));
+    }
+
+    /** Custo para o Minerador subir do nível atual para o próximo (null = já no 4). */
+    public record Melhoria(int essencia, int diamantes, int meritos, int netherite) {}
+
+    @org.jetbrains.annotations.Nullable
+    public static Melhoria melhoria(int nivelAtual) {
+        return switch (nivelAtual) {
+            case 1 -> new Melhoria(32, 8, 8, 0);
+            case 2 -> new Melhoria(96, 16, 24, 1);
+            case 3 -> new Melhoria(192, 32, 48, 4);
+            default -> null;
+        };
+    }
+
+    static boolean podeMelhorar(ServerPlayer p, Conquista c, Melhoria m) {
+        if (p.isCreative()) return true;
+        return c.essencia + conta(p, GuildaItems.ESSENCIA.get().getDefaultInstance()) >= m.essencia
+                && conta(p, new ItemStack(net.minecraft.world.item.Items.DIAMOND)) >= m.diamantes
+                && conta(p, new ItemStack(com.lanterna.lore.LoreItems.MERITO.get())) >= m.meritos
+                && conta(p, new ItemStack(net.minecraft.world.item.Items.NETHERITE_INGOT)) >= m.netherite;
     }
 
     static int conta(ServerPlayer p, ItemStack tipo) {

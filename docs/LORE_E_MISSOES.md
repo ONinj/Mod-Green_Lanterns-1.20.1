@@ -368,3 +368,41 @@ fica quebrável) e **derrubar a bandeira** → o planeta e a base passam para a 
 tempo (10 min) acaba ou não sobra invasor no território por 30 s; os defensores vivos voltam a contar. Depois de
 qualquer invasão: 4 h de escudo (2 h depois de fincar a bandeira). Tropas de ataque que sobrevivem voltam.
 Sem fogo amigo entre a mesma guilda. Tudo ajustável em `lanterna-common.toml`, seção `[guildas]`.
+
+# 0.18 — Supremos, a Morte, Tropas NPC e a linha principal mais longa
+
+**Minerador da guilda: 4 níveis** (melhora no painel dele).
+
+| Nível | Essências por coleta | Tempo (base 3 min) | Depósito | Custo para chegar |
+|---|---|---|---|---|
+| 1 | 1 | 3 min | 64 | — |
+| 2 | 2 | 2 min | 128 | 32 essências, 8 diamantes, 8 Méritos |
+| 3 | 3 | 81 s | 192 | 96 essências, 16 diamantes, 24 Méritos, 1 netherita |
+| 4 | 4 | 54 s | 256 | 192 essências, 32 diamantes, 48 Méritos, 4 netheritas |
+
+**Anéis Supremos** (Branco e Preto): os mais fortes do jogo.
+Branco: dano x1,7, voo x1,4, +20 de vida, +6 armadura, +4 dureza, 20% a menos de dano de jogadores, cura devagar.
+Preto: dano x1,6, voo x1,32, +16 de vida, +5 armadura, +3 dureza, 15% a menos de dano de jogadores, rouba 15% do dano como vida.
+
+**O Anel Preto não se ganha mais por meios normais** (nem anel dormente, nem o Chamado, nem morrer de wither, nem a linha
+de Ryut). Toda morte de um portador de anel (nível 15+) tem 0,4% de chance de corromper o anel (8% se quem matou foi um
+Lanterna Negro). O corrompido renasce com a linha **A Morte**: O Sussurro (Ryut, Coletor) → Colheita (60 criaturas,
+24 almas) → Os Silentes (nível 25, respeito 6) → Os Mortos Andam (15 Lanternas inimigos, 12 Obsidianas do Fim) → O Preço
+do Coletor (3 Relíquias, 32 almas) → O Devorador (nível 35, 6 capitães, boss de Ryut) → Os Sete Túmulos (Odym, Okaara,
+Zamaron, Nok, 150 criaturas, 48 almas) → Dominar a Morte (nível 42, forjar o Anel Preto em Ryut).
+Corrompidos colhem almas ao matar. O Lanterna Negro tem o dever **Ceifar** (repetível: derrotar portadores de anel); se
+passar 3 dias (tempo real) sem ceifar, fica faminto (dano cai para x0,9). Tudo em `[morte]` na config.
+
+**Linha principal mais longa e travada por nível**: em cada planeta (que não é o da sua Tropa) agora são 7 passos —
+chegar, respeito, **Rastro** (ir a outro planeta: 10 piratas + 4 minérios de lá), minério, **Provação** (nível do
+planeta +4, 3 capitães e 15 Ecos), boss, forja. Níveis: Odym 6, Oa 12, Okaara 17, Ysmault 22, Zamaron 27, Korugar 32,
+Nok 37, Ryut 40, Gênese 46. Antes da fusão: **O Juramento da Vida** (nível 46, 25 Lanternas inimigos, 10 capitães,
+32 Méritos).
+
+**Planetas das Tropas NPC**: ~7% dos planetas gerados já são de uma Tropa (base pronta, 10–16 defensores da cor dela,
+defesa volta 1 a cada 10 min). Dá para invadir (precisa de guilda; não dá para invadir a sua própria Tropa). Quem invade
+vira **inimigo daquela Tropa**: os Lanternas dela atacam você e as cidades dela não atendem. Depois de tomado, o planeta
+nunca mais volta a ser da Tropa.
+
+**Espaço**: encontros mais frequentes (a cada ~1–2 min) e mais piratas; nave pirata derrubada dá 2–4 Méritos, às vezes
+Essência de Poder e diamante; a capitânia dá 8–12 Méritos, 6 Essências, diamantes e às vezes Relíquia.

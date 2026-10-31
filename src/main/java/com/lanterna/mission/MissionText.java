@@ -23,6 +23,7 @@ public final class MissionText {
             }
             case KILL -> {
                 if (t.startsWith("papel:")) yield Component.translatable("alvo.lanterna." + t.substring(6));
+                if (t.equals("qualquer") || t.equals("jogador_anel")) yield Component.translatable("alvo.lanterna." + t);
                 ResourceLocation id = ResourceLocation.tryParse(t);
                 EntityType<?> type = id == null ? null : ForgeRegistries.ENTITY_TYPES.getValue(id);
                 yield type != null ? type.getDescription() : Component.literal(t);

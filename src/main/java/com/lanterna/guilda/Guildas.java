@@ -32,6 +32,8 @@ public final class Guildas extends SavedData {
     public final Map<String, Conquista> conquistas = new LinkedHashMap<>();
     /** Convites pendentes: jogador -> guilda (não salva). */
     public final Map<UUID, UUID> convites = new HashMap<>();
+    /** Planetas das Tropas NPC que já foram tomados alguma vez (não voltam a ser da Tropa). */
+    public final Set<String> liberados = new LinkedHashSet<>();
     private static boolean sincronizar;
 
     public static Guildas get(MinecraftServer server) {
@@ -109,6 +111,7 @@ public final class Guildas extends SavedData {
             Guildas gs = get(server);
             if (gs.produzir(System.currentTimeMillis())) gs.mudou();
         }
+        if (server.getTickCount() % 40 == 17) TropasNpc.verificar(server);
         if (sincronizar) {
             sincronizar = false;
             Guildas gs = get(server);
@@ -119,15 +122,21 @@ public final class Guildas extends SavedData {
     /** Minerador junta essência; general solta as tropas treinadas. */
     boolean produzir(long agora) {
         boolean mudou = false;
-        long passo = LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L;
+        long base = LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L;
         for (Conquista c : conquistas.values()) {
+            if (c.daTropa) {
+                if (TropasNpc.recompor(c, agora)) mudou = true;
+                continue;
+            }
+            long passo = c.passoMinerador(base);
+            int max = c.depositoMinerador();
             if (c.ultimaEssencia == 0) c.ultimaEssencia = agora;
-            while (c.essencia < ESSENCIA_MAX && agora - c.ultimaEssencia >= passo) {
-                c.essencia++;
+            while (c.essencia < max && agora - c.ultimaEssencia >= passo) {
+                c.essencia = Math.min(max, c.essencia + c.qtdMinerador());
                 c.ultimaEssencia += passo;
                 mudou = true;
             }
-            if (c.essencia >= ESSENCIA_MAX) c.ultimaEssencia = agora;
+            if (c.essencia >= max) c.ultimaEssencia = agora;
             Guilda g = guildas.get(c.guilda);
             while (!c.fila.isEmpty() && agora >= c.proximaTropa && g != null) {
                 boolean defesa = c.fila.poll();
@@ -164,6 +173,9 @@ public final class Guildas extends SavedData {
         ListTag cl = new ListTag();
         for (Conquista c : conquistas.values()) cl.add(c.save());
         tag.put("conquistas", cl);
+        ListTag lib = new ListTag();
+        for (String x : liberados) lib.add(net.minecraft.nbt.StringTag.valueOf(x));
+        tag.put("liberados", lib);
         return tag;
     }
 
@@ -177,6 +189,7 @@ public final class Guildas extends SavedData {
             Conquista c = Conquista.load((CompoundTag) t);
             if (gs.guildas.containsKey(c.guilda)) gs.conquistas.put(c.planeta, c);
         }
+        for (Tag t : tag.getList("liberados", Tag.TAG_STRING)) gs.liberados.add(t.getAsString());
         return gs;
     }
 }

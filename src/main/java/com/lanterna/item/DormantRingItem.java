@@ -34,10 +34,10 @@ import java.util.List;
  */
 public class DormantRingItem extends Item {
 
-    /** Tropas que o anel pode escolher (o Branco só nasce da fusão). */
+    /** Tropas que o anel pode escolher (o Branco só nasce da fusão; o Preto só da morte — veja morte/Corrupcao). */
     public static final BuiltinCorps[] FALLEN = {
             BuiltinCorps.GREEN, BuiltinCorps.YELLOW, BuiltinCorps.RED, BuiltinCorps.BLUE,
-            BuiltinCorps.VIOLET, BuiltinCorps.INDIGO, BuiltinCorps.ORANGE, BuiltinCorps.BLACK};
+            BuiltinCorps.VIOLET, BuiltinCorps.INDIGO, BuiltinCorps.ORANGE};
 
     public DormantRingItem(Properties properties) {
         super(properties);

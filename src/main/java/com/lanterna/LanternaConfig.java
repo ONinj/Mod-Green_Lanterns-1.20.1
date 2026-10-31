@@ -40,6 +40,12 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.DoubleValue GUILDA_ESCUDO_INVASAO;
     public static final ForgeConfigSpec.IntValue GUILDA_MIN_INVASAO;
     public static final ForgeConfigSpec.IntValue GUILDA_RAIO;
+    public static final ForgeConfigSpec.DoubleValue TROPAS_CHANCE_PLANETA;
+
+    public static final ForgeConfigSpec.DoubleValue MORTE_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue MORTE_CHANCE_CEIFADOR;
+    public static final ForgeConfigSpec.IntValue MORTE_NIVEL_MIN;
+    public static final ForgeConfigSpec.IntValue MORTE_DIAS_FOME;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -143,6 +149,19 @@ public final class LanternaConfig {
         GUILDA_ESCUDO_INVASAO = b.comment("Horas de escudo depois de cada invasão (ganhando ou perdendo)").defineInRange("escudo_horas_invasao", 4.0, 0.0, 720.0);
         GUILDA_MIN_INVASAO = b.comment("Duração máxima de uma invasão, em minutos").defineInRange("minutos_invasao", 10, 1, 120);
         GUILDA_RAIO = b.comment("Raio do território em volta da bandeira (só a guilda constrói/quebra; a invasão começa aqui)").defineInRange("raio_territorio", 64, 24, 512);
+        b.pop();
+
+        b.comment("Planetas das Tropas (NPC)").push("tropas");
+        TROPAS_CHANCE_PLANETA = b.comment("Chance de um planeta gerado já ser de uma Tropa (com base e defensores). Invadir deixa a Tropa hostil a você.")
+                .defineInRange("chance_planeta_tropa", 0.07, 0.0, 1.0);
+        b.pop();
+
+        b.comment("O Anel Preto (Morte)").push("morte");
+        MORTE_CHANCE = b.comment("Chance de o anel se corromper quando o portador morre (0.004 = 0,4%)").defineInRange("chance_corrupcao", 0.004, 0.0, 1.0);
+        MORTE_CHANCE_CEIFADOR = b.comment("Chance quando quem matou foi um Lanterna Negro (jogador)").defineInRange("chance_corrupcao_ceifador", 0.08, 0.0, 1.0);
+        MORTE_NIVEL_MIN = b.comment("Nível mínimo para o anel poder se corromper").defineInRange("nivel_minimo", 15, 1, 50);
+        MORTE_DIAS_FOME = b.comment("Dias (tempo real) que o Lanterna Negro aguenta sem ceifar um portador de anel antes de enfraquecer (0 desliga)")
+                .defineInRange("dias_fome", 3, 0, 365);
         b.pop();
 
         SPEC = b.build();

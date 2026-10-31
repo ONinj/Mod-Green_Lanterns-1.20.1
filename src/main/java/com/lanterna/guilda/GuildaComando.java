@@ -206,9 +206,9 @@ public final class GuildaComando {
 
     private static int lista(CommandContext<CommandSourceStack> c) {
         Guildas gs = Guildas.get(c.getSource().getServer());
-        if (gs.guildas.isEmpty()) return erro(c, "guilda.lanterna.nenhuma");
+        if (gs.guildas.values().stream().allMatch(g -> g.npc)) return erro(c, "guilda.lanterna.nenhuma");
         for (Guilda g : gs.guildas.values())
-            msg(c, Component.literal("■ ").withStyle(s -> s.withColor(g.cor())).append(Component.translatable("guilda.lanterna.linha",
+            if (!g.npc) msg(c, Component.literal("■ ").withStyle(s -> s.withColor(g.cor())).append(Component.translatable("guilda.lanterna.linha",
                     g.nome, g.donoNome(), g.membros.size(), gs.planetasDe(g.id).size()).withStyle(ChatFormatting.WHITE)));
         return 1;
     }

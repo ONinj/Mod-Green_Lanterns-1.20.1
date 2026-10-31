@@ -186,8 +186,9 @@ public final class ClientFlight {
         }
 
         // ---- Hiperpropulsão (espaço) ----
-        double maxBoost = inSpace ? SPACE_BOOST : MAX_BOOST;
-        double maxCruise = inSpace ? SPACE_CRUISE : MAX_CRUISE;
+        double sup = com.lanterna.client.ClientRingData.hasRing ? com.lanterna.combate.Supremos.voo(com.lanterna.client.ClientRingData.corps) : 1.0;
+        double maxBoost = (inSpace ? SPACE_BOOST : MAX_BOOST) * sup;
+        double maxCruise = (inSpace ? SPACE_CRUISE : MAX_CRUISE) * sup;
         boolean wantHyper = inSpace && boost && forward > 0 && hyperAllowed;
         if (!inSpace) dropHyper();
 

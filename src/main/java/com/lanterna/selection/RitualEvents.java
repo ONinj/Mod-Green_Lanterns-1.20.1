@@ -220,9 +220,7 @@ public final class RitualEvents {
         RingData data = dataOf(player);
         if (data != null && data.diedWithering()) {
             data.setDiedWithering(false);
-            if (canBeChosen(player, data)) {
-                SelectionManager.startSelection(player, BuiltinCorps.BLACK.id());
-            }
+            // O Anel Preto não escolhe mais por ritual: ele só nasce da corrupção (morte/Corrupcao)
         }
     }
 

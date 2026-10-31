@@ -47,6 +47,12 @@ public class LoreData implements INBTSerializable<CompoundTag> {
     private final String[] slotsTecnica = {"", "", ""};
     /** Guarda de Honra (3 técnicas equipadas). */
     private boolean honra;
+    /** Corrupção da Morte: 0 nada, 1 acabou de morrer corrompido (falta renascer), 2 corrompido, 3 dominou (Lanterna Negro). */
+    private int morte;
+    /** Última vez (ms, tempo real) que o Lanterna Negro ceifou um portador de anel. */
+    private long ultimaCeifa;
+    /** Tropas que este jogador atacou (invadiu planeta delas): ficam hostis com ele. */
+    private final java.util.Set<String> tropasHostis = new java.util.LinkedHashSet<>();
     private transient boolean dirty = true;
 
     // ===================== Missões =====================
@@ -211,6 +217,13 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         slotsTecnica[i] = t;
         dirty = true;
     }
+    public int morte() { return morte; }
+    public void setMorte(int v) { morte = v; dirty = true; }
+    public long ultimaCeifa() { return ultimaCeifa; }
+    public void setUltimaCeifa(long v) { ultimaCeifa = v; dirty = true; }
+    public java.util.Set<String> tropasHostis() { return tropasHostis; }
+    public void addTropaHostil(String corps) { if (tropasHostis.add(corps)) dirty = true; }
+
     public boolean honra() { return honra; }
     public void setHonra(boolean v) { honra = v; dirty = true; }
 
@@ -262,6 +275,9 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         for (String t : slotsTecnica) sl.add(StringTag.valueOf(t));
         tag.put("SlotsTecnica", sl);
         tag.putBoolean("Honra", honra);
+        tag.putInt("Morte", morte);
+        tag.putLong("UltimaCeifa", ultimaCeifa);
+        tag.put("TropasHostis", strings(tropasHostis));
         return tag;
     }
 
@@ -300,6 +316,10 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         ListTag sl = tag.getList("SlotsTecnica", Tag.TAG_STRING);
         for (int i = 0; i < 3; i++) slotsTecnica[i] = i < sl.size() ? sl.getString(i) : "";
         honra = tag.getBoolean("Honra");
+        morte = tag.getInt("Morte");
+        ultimaCeifa = tag.getLong("UltimaCeifa");
+        tropasHostis.clear();
+        tag.getList("TropasHostis", Tag.TAG_STRING).forEach(t -> tropasHostis.add(t.getAsString()));
         dirty = true;
     }
 

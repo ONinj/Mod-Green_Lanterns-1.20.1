@@ -82,6 +82,12 @@ public final class MissionManager {
     public static void onKill(ServerPlayer player, Entity victim) {
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
         if (id != null) bump(player, Objective.Type.KILL, id.toString(), 1, false);
+        if (victim instanceof net.minecraft.world.entity.player.Player vp) {
+            var r = ModCapabilities.get(vp).orElse(null);
+            if (r != null && r.hasRing()) bump(player, Objective.Type.KILL, "jogador_anel", 1, false);
+        } else if (victim instanceof net.minecraft.world.entity.LivingEntity && !(victim instanceof net.minecraft.world.entity.decoration.ArmorStand)) {
+            bump(player, Objective.Type.KILL, "qualquer", 1, false);
+        }
         // Alvos com nome de missão (sabotador, fugitivo, duelista...)
         String alvo = victim.getPersistentData().getString("lanterna_alvo");
         if (!alvo.isEmpty()) bump(player, Objective.Type.KILL, "alvo:" + alvo, 1, false);
@@ -261,6 +267,7 @@ public final class MissionManager {
         player.sendSystemMessage(Component.translatable("mission.lanterna.completed_chat", m.title())
                 .withStyle(s -> s.withColor(m.color())));
         if (m.line().equals("prova")) com.lanterna.tropa.Prova.concluir(player);
+        com.lanterna.morte.Corrupcao.aoConcluir(player, data, m);
         com.lanterna.cidade.CidadeMissoes.aoConcluir(player, data, m);
         String next = routeNext(player, data, m);
         if (next != null) start(player, next);
@@ -286,9 +293,9 @@ public final class MissionManager {
             int step;
             try { step = Integer.parseInt(parts[2]); } catch (NumberFormatException e) { return m.next(); }
             boolean own = isOwnPlanet(planet, corps);
-            int n = step + 1;
-            while (own && (n == 3 || n == 5)) n++;
-            if (n <= 5) return "main_" + planet + "_" + n;
+            // Ordem dos passos: chegar, respeito, rastro (outro planeta), minério, provação (nível), boss, forja
+            int[] ordem = own ? new int[]{1, 2, 6, 4} : new int[]{1, 2, 6, 3, 7, 4, 5};
+            for (int k = 0; k < ordem.length - 1; k++) if (ordem[k] == step) return "main_" + planet + "_" + ordem[k + 1];
             return nextPlanetLine(data, corps);
         }
         return m.next();
@@ -318,19 +325,19 @@ public final class MissionManager {
         for (int k = 0; k < order.length; k++) {
             PlanetLore p = order[(start + k) % order.length];
             if (lineDone(data, p.planet, corps)) continue;
-            for (int s = 1; s <= 5; s++) if (data.isActive("main_" + p.planet + "_" + s)) return null;
+            for (int s = 1; s <= 7; s++) if (data.isActive("main_" + p.planet + "_" + s)) return null;
             int req = com.lanterna.tropa.Nivel.nivelDoPlaneta(p, own);
             if (lvl >= req) return "main_" + p.planet + "_1";
             needed = Math.min(needed, req);
         }
         if (needed != Integer.MAX_VALUE) return treino(needed);
-        if (lvl < 35) return treino(35);
-        return "main_genese_1";
+        int gen = com.lanterna.tropa.Nivel.nivelParaForjar(PlanetLore.GENESE);
+        if (lvl < gen) return treino(gen);
+        return data.isDone("main_genese_0") ? "main_genese_1" : "main_genese_0";
     }
 
     private static String treino(int lvl) {
-        for (int t : new int[]{5, 8, 12, 16, 20, 25, 30, 35}) if (t >= lvl) return "treino_" + t;
-        return "treino_35";
+        return "treino_" + Math.max(2, Math.min(50, lvl));
     }
 
     /** Linha principal ativa agora (ou null). */

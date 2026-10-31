@@ -34,7 +34,7 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class Encontros {
     private static final String CD = "lanterna_encontro_cd";
-    private static final int MIN_INTERVALO = 20 * 90;
+    private static final int MIN_INTERVALO = 20 * 60;
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -44,8 +44,8 @@ public final class Encontros {
         long cd = p.getPersistentData().getLong(CD);
         if (now < cd) return;
         if (!p.level().getEntitiesOfClass(NaveEntity.class, p.getBoundingBox().inflate(220), n -> !n.ia().isEmpty()).isEmpty()) return;
-        if (p.getRandom().nextInt(40) != 0) return;
-        p.getPersistentData().putLong(CD, now + MIN_INTERVALO + p.getRandom().nextInt(20 * 60));
+        if (p.getRandom().nextInt(25) != 0) return;
+        p.getPersistentData().putLong(CD, now + MIN_INTERVALO + p.getRandom().nextInt(20 * 45));
         sortear(p);
     }
 
@@ -53,11 +53,11 @@ public final class Encontros {
         BuiltinCorps mine = Factions.playerCorps(p);
         int lvl = Nivel.nivel(p);
         int r = p.getRandom().nextInt(100);
-        if (lvl >= 25 && r < 6) capitania(p);
-        else if (r < 40) pirata(p, null);
-        else if (r < 58 && mine != null && mine != BuiltinCorps.WHITE) patrulha(p, mine, "patrulha");
-        else if (r < 72 && mine != null && inimigo(mine, p) != null) patrulha(p, inimigo(mine, p), "inimiga");
-        else if (r < 88) cargueiro(p);
+        if (lvl >= 20 && r < 9) capitania(p);
+        else if (r < 52) pirata(p, null);
+        else if (r < 66 && mine != null && mine != BuiltinCorps.WHITE) patrulha(p, mine, "patrulha");
+        else if (r < 80 && mine != null && inimigo(mine, p) != null) patrulha(p, inimigo(mine, p), "inimiga");
+        else if (r < 91) cargueiro(p);
         else destrocos(p);
     }
 

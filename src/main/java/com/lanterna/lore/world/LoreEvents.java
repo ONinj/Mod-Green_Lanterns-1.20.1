@@ -74,7 +74,8 @@ public final class LoreEvents {
 
         // Almas: quem mata com o Anel Preto ligado recolhe a alma (moeda do Coletor)
         RingData ring = ModCapabilities.get(player).orElse(null);
-        if (ring != null && ring.hasRing() && ring.powerActive() && ring.corps().equals(BuiltinCorps.BLACK.id())
+        if ((ring != null && ring.hasRing() && ring.powerActive() && ring.corps().equals(BuiltinCorps.BLACK.id())
+                || com.lanterna.morte.Corrupcao.colheAlmas(player))
                 && !(victim instanceof RaceEntity r && r.race() == Race.GUARDIAO)) {
             boolean big = victim instanceof LoreBoss || victim.getMaxHealth() >= 40;
             if (big || player.getRandom().nextFloat() < 0.6f) {

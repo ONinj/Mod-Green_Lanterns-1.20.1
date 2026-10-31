@@ -66,6 +66,10 @@ public final class Conquistas {
         Guildas gs = Guildas.get(server);
         Guilda velha = gs.guildas.get(c.guilda);
         ServerLevel level = server.getLevel(c.mundo);
+        if (c.daTropa) gs.liberados.add(c.planeta);
+        c.daTropa = false;
+        c.construida = true;
+        c.minerador = 1;
         c.guilda = nova.id;
         c.defesa = 0;
         c.fila.clear();
@@ -88,6 +92,7 @@ public final class Conquistas {
     public static void largar(MinecraftServer server, Conquista c) {
         Guildas gs = Guildas.get(server);
         gs.conquistas.remove(c.planeta);
+        gs.liberados.add(c.planeta);
         gs.mudou();
         ServerLevel level = server.getLevel(c.mundo);
         if (level != null) {

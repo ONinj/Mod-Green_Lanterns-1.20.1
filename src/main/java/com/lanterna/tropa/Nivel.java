@@ -90,15 +90,15 @@ public final class Nivel {
     /** Nível pedido para forjar o anel de cada planeta (o da própria Tropa não precisa ser forjado). */
     public static int nivelParaForjar(PlanetLore p) {
         return switch (p) {
-            case ODYM -> 5;
-            case OA -> 8;
-            case OKAARA -> 12;
-            case YSMAULT -> 16;
-            case ZAMARON -> 20;
-            case KORUGAR -> 25;
-            case NOK -> 30;
-            case RYUT -> 32;
-            case GENESE -> 35;
+            case ODYM -> 6;
+            case OA -> 12;
+            case OKAARA -> 17;
+            case YSMAULT -> 22;
+            case ZAMARON -> 27;
+            case KORUGAR -> 32;
+            case NOK -> 37;
+            case RYUT -> 40;
+            case GENESE -> 46;
         };
     }
 

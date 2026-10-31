@@ -1697,8 +1697,166 @@ public final class DevAutoTest {
         int n = 0; for (var s : sp.getInventory().items) if (s.is(it)) n += s.getCount(); return n;
     }
 
+    /** 0.18: minerador nível 4, planetas de Tropa NPC + inimizade, corrupção da Morte, rota da linha principal, supremos. */
+    private static final String[] V18_PLANETA = new String[1];
+    private static void sceneV18() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("difficulty normal");
+            cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
+        for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            for (var g : new java.util.ArrayList<>(gs.guildas.values())) { for (var c : gs.planetasDe(g.id)) com.lanterna.guilda.Conquistas.largar(sp.server, c); gs.guildas.remove(g.id); }
+            gs.liberados.clear(); gs.conquistas.clear(); gs.mudou();
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) d.abandon(id);
+            d.setMorte(0); d.tropasHostis().clear();
+            // ---- dormente nunca dá Preto ----
+            boolean temPreto = java.util.Arrays.asList(com.lanterna.item.DormantRingItem.FALLEN).contains(com.lanterna.corps.BuiltinCorps.BLACK);
+            glog("anel dormente pode dar Preto? " + temPreto);
+            // ---- rota da linha principal ----
+            try {
+                var rn = com.lanterna.mission.MissionManager.class.getDeclaredMethod("routeNext", net.minecraft.server.level.ServerPlayer.class, com.lanterna.mission.LoreData.class, com.lanterna.mission.Mission.class);
+                rn.setAccessible(true);
+                StringBuilder a = new StringBuilder("rota odym (outro):"), b = new StringBuilder(" rota oa (propria):");
+                String id = "main_odym_1";
+                for (int i = 0; i < 8 && id != null && id.startsWith("main_odym"); i++) { a.append(' ').append(id); id = (String) rn.invoke(null, sp, d, com.lanterna.mission.Missions.get(id)); }
+                a.append(" -> ").append(id);
+                id = "main_oa_1";
+                for (int i = 0; i < 8 && id != null && id.startsWith("main_oa"); i++) { b.append(' ').append(id); id = (String) rn.invoke(null, sp, d, com.lanterna.mission.Missions.get(id)); }
+                b.append(" -> ").append(id);
+                glog(a.toString() + b);
+                var m7 = com.lanterna.mission.Missions.get("main_zamaron_7");
+                glog("provacao zamaron: " + m7.objectives().get(0).count() + " | forja zamaron nivel " + com.lanterna.tropa.Nivel.nivelParaForjar(com.lanterna.lore.PlanetLore.ZAMARON)
+                        + " | genese " + com.lanterna.tropa.Nivel.nivelParaForjar(com.lanterna.lore.PlanetLore.GENESE) + " | rastro odym: " + com.lanterna.mission.Missions.get("main_odym_6").objectives());
+                glog("proximo planeta nivel 1 (verde): " + com.lanterna.mission.MissionManager.nextPlanetLine(d, com.lanterna.corps.BuiltinCorps.GREEN.id()));
+            } catch (Exception e) { glog("rota ERRO " + e); }
+            // ---- supremos ----
+            glog("vida antes (verde) " + sp.getMaxHealth() + " armadura " + sp.getArmorValue());
+        }));
+        at(5, () -> server(sp -> { var velho = com.lanterna.power.EquipmentHelper.take(sp, com.lanterna.capability.RingData.RING_SLOT);
+            sp.getPersistentData().put("v18_anel", velho.save(new net.minecraft.nbt.CompoundTag()));
+            com.lanterna.power.EquipmentHelper.equip(sp, com.lanterna.capability.RingData.RING_SLOT,
+                com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLACK.id(), com.lanterna.corps.BuiltinCorps.BLACK.color(), -1)); }));
+        at(60, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            glog("anel agora " + r.corps() + " vida " + sp.getMaxHealth() + " armadura " + sp.getArmorValue() + " dano x" + com.lanterna.combate.Supremos.dano(r.corps(), sp)
+                    + " voo x" + com.lanterna.combate.Supremos.voo(r.corps())); }));
+        at(5, () -> server(sp -> { com.lanterna.power.EquipmentHelper.take(sp, com.lanterna.capability.RingData.RING_SLOT);
+            com.lanterna.power.EquipmentHelper.equip(sp, com.lanterna.capability.RingData.RING_SLOT, net.minecraft.world.item.ItemStack.of(sp.getPersistentData().getCompound("v18_anel"))); }));
+        at(60, () -> server(sp -> glog("voltou verde: vida " + sp.getMaxHealth() + " armadura " + sp.getArmorValue())));
+        // ---- corrupção da Morte ----
+        at(5, () -> server(sp -> {
+            com.lanterna.LanternaConfig.MORTE_CHANCE.set(1.0);
+            com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(20), null);
+            glog("forja de Ryut antes: pode=" + com.lanterna.morte.Corrupcao.podeForjar(sp));
+        }));
+        at(5, () -> cmd("effect clear @s"));
+        at(10, () -> server(sp -> sp.hurt(sp.damageSources().fellOutOfWorld(), 10000)));
+        at(40, () -> { mc.player.respawn(); mc.setScreen(null); });
+        at(60, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            com.lanterna.LanternaConfig.MORTE_CHANCE.set(0.004);
+            glog("depois de morrer: morte=" + d.morte() + " ativas=" + d.active().keySet() + " colheAlmas=" + com.lanterna.morte.Corrupcao.colheAlmas(sp));
+            for (int i = 0; i < 6; i++) { var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel());
+            z.moveTo(sp.getX() + 2, sp.getY(), sp.getZ() + i * 0.3, 0, 0); sp.serverLevel().addFreshEntity(z);
+            z.hurt(sp.damageSources().playerAttack(sp), 1000); }
+        }));
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            var almas = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(8), e -> e.getItem().is(com.lanterna.lore.LoreItems.ALMA.get()));
+            glog("almas no chao=" + almas.stream().mapToInt(e -> e.getItem().getCount()).sum() + " de 6 zumbis; progresso morte_2? " + d.isActive("morte_2") + " morte_1 prog=" + java.util.Arrays.toString(d.active().get("morte_1"))); }));
+        at(20, () -> shot("v1_corrompido"));
+        // ---- guilda + minerador nível 4 ----
+        at(10, () -> { cmd("effect give @s resistance 99999 4 true"); cmd("guilda criar Zezinho do Grau"); });
+        at(20, () -> mc.setScreen(null));
+        at(5, () -> server(sp -> {
+            var gs = com.lanterna.guilda.Guildas.get(sp.server);
+            int n = 0;
+            String livre = null, tropa = null;
+            for (int r = 2; r < 12 && (livre == null || tropa == null); r++) for (int sx = -r; sx <= r; sx++) for (int sz : new int[]{-r, r}) {
+                var b = com.lanterna.space.ProceduralPlanets.inSector(sx, sz);
+                if (b == null || sp.server.getLevel(b.dimension()) == null) continue;
+                var dono = com.lanterna.guilda.TropasNpc.donoDe(b);
+                if (dono == null && livre == null) livre = b.id();
+                if (dono != null && dono != com.lanterna.corps.BuiltinCorps.GREEN && tropa == null) tropa = b.id();
+            }
+            G_PLANETAS[0] = livre; V18_PLANETA[0] = tropa;
+            glog("planeta livre " + livre + " planeta de tropa " + tropa + " (" + com.lanterna.guilda.TropasNpc.donoDe(com.lanterna.space.SpaceBodies.byId(tropa)) + ")");
+            var b = com.lanterna.space.SpaceBodies.byId(livre);
+            var lvl = sp.server.getLevel(b.dimension());
+            int x = b.procedural().regionX() + 40, z = b.procedural().regionZ() + 40;
+            lvl.getChunk(x >> 4, z >> 4);
+            int y = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            sp.teleportTo(lvl, x + 0.5, y + 1, z + 4.5, 180, 20);
+            BlockPos pos = new BlockPos(x, y, z);
+            var st = com.lanterna.guilda.GuildaItems.BANDEIRA.get().defaultBlockState();
+            lvl.setBlock(pos, st, 3);
+            st.getBlock().setPlacedBy(lvl, pos, st, sp, new net.minecraft.world.item.ItemStack(com.lanterna.guilda.GuildaItems.BANDEIRA_ITEM.get()));
+            var c = gs.conquistas.get(livre);
+            c.essencia = 256;
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND, 64));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.MERITO.get(), 64));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.MERITO.get(), 64));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.guilda.GuildaItems.ESSENCIA.get(), 64));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_INGOT, 5));
+        }));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2000);
+        at(20, () -> clicarNpc("guilda_minerador"));
+        at(30, () -> { int id = CLICAR.getAndSet(-1); var e = mc.level.getEntity(id); if (e != null) mc.gameMode.interact(mc.player, e, net.minecraft.world.InteractionHand.MAIN_HAND); });
+        at(20, () -> shot("v2_minerador_1"));
+        for (int k = 0; k < 3; k++) at(15, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.guilda.GuildaAcaoPacket(G_PLANETAS[0], "melhorar")));
+        at(20, () -> shot("v3_minerador_4"));
+        at(5, () -> server(sp -> { var gs = com.lanterna.guilda.Guildas.get(sp.server); var c = gs.conquistas.get(G_PLANETAS[0]);
+            c.essencia = 0; long agora = System.currentTimeMillis(); c.ultimaEssencia = agora - 10 * 60_000L;
+            try { var m = com.lanterna.guilda.Guildas.class.getDeclaredMethod("produzir", long.class); m.setAccessible(true); m.invoke(gs, agora); } catch (Exception e) { glog("ERRO " + e); }
+            glog("minerador nivel=" + c.minerador + " em 10 min juntou " + c.essencia + " (nivel 1 juntaria 3) deposito=" + c.depositoMinerador()
+                    + " diamantes restantes=" + count(sp, net.minecraft.world.item.Items.DIAMOND) + " netherita=" + count(sp, net.minecraft.world.item.Items.NETHERITE_INGOT)); }));
+        at(5, () -> mc.setScreen(null));
+        // ---- planeta de Tropa NPC ----
+        at(5, () -> server(sp -> {
+            var b = com.lanterna.space.SpaceBodies.byId(V18_PLANETA[0]);
+            var sl = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
+            net.minecraft.world.phys.Vec3 at = b.center().add(b.radius() * 1.3, b.radius() * 0.5, b.radius() * 2.0);
+            sp.teleportTo(sl, at.x, at.y, at.z, 0, 0);
+        }));
+        at(80, () -> server(sp -> { var b = com.lanterna.space.SpaceBodies.byId(V18_PLANETA[0]);
+            var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(V18_PLANETA[0]);
+            glog("registrado no espaco: " + (c != null) + (c == null ? "" : " daTropa=" + c.daTropa + " defesa=" + c.defesa + " construida=" + c.construida));
+            var rel = b.center().subtract(sp.getEyePosition());
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), (float) Math.toDegrees(Math.atan2(-rel.x, rel.z)), (float) -Math.toDegrees(Math.atan2(rel.y, Math.hypot(rel.x, rel.z)))); }));
+        at(40, () -> shot("v4_planeta_tropa_espaco"));
+        at(5, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(V18_PLANETA[0]);
+            var lvl = sp.server.getLevel(c.mundo);
+            lvl.getChunk(c.bandeira.getX() >> 4, c.bandeira.getZ() >> 4);
+            int y = lvl.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.bandeira.getX() + 100, c.bandeira.getZ());
+            sp.teleportTo(lvl, c.bandeira.getX() + 100.5, y + 2, c.bandeira.getZ() + 0.5, 90, 10); }));
+        at(100, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 2000);
+        at(60, () -> server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(V18_PLANETA[0]);
+            glog("base da tropa construida=" + c.construida + " bandeira=" + c.bandeira.toShortString() + " bloco=" + sp.serverLevel().getBlockState(c.bandeira).getBlock());
+            cmd("gamemode spectator");
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 0.5, c.bandeira.getY() + 30, c.bandeira.getZ() + 36.5, 180, 38); }));
+        at(80, () -> shot("v5_base_tropa"));
+        at(5, () -> { cmd("gamemode survival"); server(sp -> { var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(V18_PLANETA[0]);
+            sp.teleportTo(sp.serverLevel(), c.bandeira.getX() + 0.5, c.bandeira.getY() + 1, c.bandeira.getZ() + 16.5, 180, 10); }); });
+        waitFor(() -> com.lanterna.guilda.Invasao.ativa(V18_PLANETA[0]) != null, 800);
+        at(60, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            var c = com.lanterna.guilda.Guildas.get(sp.server).conquistas.get(V18_PLANETA[0]);
+            var dono = com.lanterna.guilda.TropasNpc.donoDe(com.lanterna.space.SpaceBodies.byId(V18_PLANETA[0]));
+            var e = com.lanterna.especies.LanternaEntity.lanterna(sp.serverLevel(), dono, false);
+            e.moveTo(sp.getX() + 600, 200, sp.getZ());
+            glog("invasao de planeta de Tropa ativa=" + (com.lanterna.guilda.Invasao.ativa(V18_PLANETA[0]) != null) + " tropasHostis=" + d.tropasHostis()
+                    + " lanterna " + dono + " qualquer hostil a mim=" + e.hostilA(sp)); }));
+        at(60, () -> shot("v6_invasao_tropa"));
+        at(20, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
-        if (ENABLED && SCENE.equals("guilda")) sceneGuilda();
+        if (ENABLED && SCENE.equals("v18")) sceneV18();
+        else if (ENABLED && SCENE.equals("guilda")) sceneGuilda();
         else if (ENABLED && SCENE.equals("pvp")) scenePvp();
         else if (ENABLED && SCENE.equals("miraeth")) sceneMiraeth();
         else if (ENABLED && SCENE.equals("auditoria")) sceneAuditoria();

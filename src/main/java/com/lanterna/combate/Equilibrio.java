@@ -87,7 +87,10 @@ public final class Equilibrio {
                 return;
             }
         }
-        event.setAmount(event.getAmount() * multiplicador(Nivel.nivel(atk), Nivel.nivel(alvo), doAnel(event.getSource(), atk)));
+        float m = multiplicador(Nivel.nivel(atk), Nivel.nivel(alvo), doAnel(event.getSource(), atk));
+        var ra = com.lanterna.capability.ModCapabilities.get(alvo).orElse(null);
+        if (ra != null && ra.hasRing()) m *= 1f - Supremos.resistenciaPvp(ra.corps());
+        event.setAmount(event.getAmount() * m);
     }
 
     /** Depois da armadura: nada de hit kill. */

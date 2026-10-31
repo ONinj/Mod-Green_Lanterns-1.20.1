@@ -86,6 +86,10 @@ public final class CidadeNpcs {
         npc.triggerAnim("acao", "misc.talk");
         boolean palacio = funcao.startsWith("capitao_") || funcao.equals("honra");
         BuiltinCorps casa = pl != null ? pl.corps : null;
+        if (!palacio && casa != null && com.lanterna.guilda.TropasNpc.hostil(p, casa)) {
+            fala(p, npc, Component.translatable("cidade.lanterna.recusa_traidor"));
+            return InteractionResult.CONSUME;
+        }
         if (!palacio && casa != null && Factions.enemies(casa, Factions.playerCorps(p)) && !funcao.equals("guarda") && !funcao.equals("preso")) {
             fala(p, npc, Component.translatable("cidade.lanterna.recusa", Component.translatable("corps.lanterna." + Factions.playerCorps(p).id().getPath())));
             return InteractionResult.CONSUME;

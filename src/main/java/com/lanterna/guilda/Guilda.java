@@ -26,6 +26,8 @@ public final class Guilda {
     /** Tropas de ataque prontas (treinadas por qualquer general da guilda). */
     public int ataque;
     public long criada;
+    /** Guilda de mentira que representa uma Tropa NPC (dona dos planetas das Tropas). */
+    public boolean npc;
 
     public Guilda(UUID id, String nome, UUID dono, String donoNome, String tropa) {
         this.id = id;
@@ -62,6 +64,7 @@ public final class Guilda {
         t.putByteArray("simbolo", simbolo);
         t.putInt("ataque", ataque);
         t.putLong("criada", criada);
+        t.putBoolean("npc", npc);
         ListTag l = new ListTag();
         for (var e : membros.entrySet()) {
             CompoundTag m = new CompoundTag();
@@ -84,6 +87,7 @@ public final class Guilda {
         if (s.length == 256) g.simbolo = s;
         g.ataque = t.getInt("ataque");
         g.criada = t.getLong("criada");
+        g.npc = t.getBoolean("npc");
         return g;
     }
 }

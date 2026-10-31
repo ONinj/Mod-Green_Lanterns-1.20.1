@@ -346,6 +346,7 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
             if (p.isCreative() || p.isSpectator()) return false;
             if (angry.contains(p.getUUID())) return true;
             if (isPirata()) return true;
+            if (com.lanterna.guilda.TropasNpc.hostil(p, tropa())) return true;
             return Factions.enemies(tropa(), Factions.playerCorps(p));
         }
         if (e instanceof LanternaEntity o) {
@@ -396,7 +397,8 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
         if (!guilda.isEmpty()) return com.lanterna.guilda.Guildas.membro(java.util.UUID.fromString(guilda), p);
         BuiltinCorps mine = Factions.playerCorps(p);
-        return papel() == Especie.Papel.LANTERNA && mine != null && mine == tropa() && !angry.contains(p.getUUID());
+        return papel() == Especie.Papel.LANTERNA && mine != null && mine == tropa() && !angry.contains(p.getUUID())
+                && !com.lanterna.guilda.TropasNpc.hostil(p, tropa());
     }
 
     @Override

@@ -73,13 +73,12 @@ public final class Constructs {
     // ===================== Força =====================
 
     public static float corpsPower(RingData ring) {
-        if (ring.corps().equals(BuiltinCorps.WHITE.id())) return 1.5f;
-        if (ring.corps().equals(BuiltinCorps.BLACK.id())) return 1.35f;
-        return 1.0f;
+        return com.lanterna.combate.Supremos.dano(ring.corps(), null);
     }
 
     public static float power(ServerPlayer player, RingData ring) {
-        return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * corpsPower(ring) * com.lanterna.tropa.Nivel.forca(player);
+        return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * com.lanterna.combate.Supremos.dano(ring.corps(), player)
+                * com.lanterna.tropa.Nivel.forca(player);
     }
 
     public static int level(ServerPlayer player) {

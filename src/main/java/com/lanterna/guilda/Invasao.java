@@ -86,6 +86,13 @@ public final class Invasao {
         return Collections.unmodifiableSet(defensores);
     }
 
+    /** Invadir um planeta de Tropa NPC: a Tropa vira inimiga de quem participa. */
+    void inimizade(ServerPlayer p) {
+        Guilda dona = Guildas.get(p.server).guildas.get(defensora);
+        var tropa = TropasNpc.tropaDe(dona);
+        if (tropa != null) TropasNpc.declararInimigo(p, tropa);
+    }
+
     public boolean participa(Player p) {
         return Guildas.membro(atacante, p);
     }
@@ -104,11 +111,18 @@ public final class Invasao {
         Guildas gs = Guildas.get(p.server);
         Invasao inv = ATIVAS.get(c.planeta);
         if (inv != null) {
-            if (inv.participa(p)) inv.jogadores.add(p.getUUID());
+            if (inv.participa(p) && inv.jogadores.add(p.getUUID())) inv.inimizade(p);
             if (inv.participa(p) || Guildas.membro(c.guilda, p)) inv.barra.addPlayer(p);
             return;
         }
-        if (Guildas.membro(c.guilda, p) || p.isCreative()) return;
+        if (Guildas.membro(c.guilda, p) || p.isCreative() || !c.construida) return;
+        if (c.daTropa) {
+            var dona0 = gs.guildas.get(c.guilda);
+            if (dona0 != null && dona0.tropa.equals(com.lanterna.lore.Factions.playerCorps(p) == null ? "" : com.lanterna.lore.Factions.playerCorps(p).id().getPath())) {
+                if (p.tickCount % 100 == 3) p.displayClientMessage(Component.translatable("guilda.lanterna.propria_tropa").withStyle(ChatFormatting.AQUA), true);
+                return;
+            }
+        }
         long agora = System.currentTimeMillis();
         Guilda dona = gs.guildas.get(c.guilda);
         if (c.protegido(agora)) {
@@ -167,6 +181,7 @@ public final class Invasao {
             tropa(level, minha, q, "ataque", dona.id, c.planeta, i % 4 == 0, inv.tropas);
         }
         inv.jogadores.add(p.getUUID());
+        inv.inimizade(p);
         inv.barra.addPlayer(p);
         if (nDef == 0) inv.liberar();
         inv.atualizarBarra();

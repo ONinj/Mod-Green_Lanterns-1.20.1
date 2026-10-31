@@ -93,6 +93,20 @@ public final class TropaEvents {
         int xp = t == NaveTipo.NAVE_PIRATA_CAPITANIA ? 1200 : 200;
         Nivel.addXp(p, xp, Component.translatable("entity.lanterna." + t.id));
         if (n.ia().equals("pirata")) MissionManager.onShip(p, t == NaveTipo.NAVE_PIRATA_CAPITANIA ? "capitania" : "nave_pirata");
+        // Saque de nave pirata: Méritos, às vezes Essência de Poder (guildas) e, da capitânia, coisa boa
+        if (n.ia().equals("pirata")) {
+            boolean cap = t == NaveTipo.NAVE_PIRATA_CAPITANIA;
+            var r = p.getRandom();
+            java.util.List<net.minecraft.world.item.ItemStack> saque = new java.util.ArrayList<>();
+            saque.add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.MERITO.get(), cap ? 8 + r.nextInt(5) : 2 + r.nextInt(3)));
+            if (cap || r.nextFloat() < 0.35f)
+                saque.add(new net.minecraft.world.item.ItemStack(com.lanterna.guilda.GuildaItems.ESSENCIA.get(), cap ? 6 : 1 + r.nextInt(2)));
+            if (cap) saque.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND, 2 + r.nextInt(3)));
+            if (cap && r.nextFloat() < 0.25f) saque.add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.RELIQUIA.get()));
+            if (!cap && r.nextFloat() < 0.12f) saque.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND));
+            for (var st : saque) if (!p.getInventory().add(st)) p.drop(st, false);
+            p.displayClientMessage(Component.translatable("encontro.lanterna.saque_pirata").withStyle(net.minecraft.ChatFormatting.GOLD), true);
+        }
         if (n.ia().equals("inimiga")) MissionManager.onShip(p, "nave_inimiga");
     }
 
