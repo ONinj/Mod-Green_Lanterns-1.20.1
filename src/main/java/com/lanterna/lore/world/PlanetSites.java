@@ -53,10 +53,19 @@ public final class PlanetSites {
                 && planet != PlanetLore.GENESE
                 && !tryBuild(level, data, planet, "tropa", PlanetLore.HUB, player, 120))
         {
+            boolean ocupada = com.lanterna.cidade.Obra.ocupada();
             if (!tryBuild(level, data, planet, "cidade2", com.lanterna.cidade.Cidade.CENTRO, player, 200) && planet == PlanetLore.OA)
                 if (!tryBuild(level, data, planet, "palacio", com.lanterna.cidade.Palacio.CENTRO.atY(0), player, 260)
-                        && data.siteBuilt("oa:palacio") && !com.lanterna.cidade.Obra.ocupada())
+                        && data.siteBuilt("oa:palacio") && !ocupada)
                     tryBuild(level, data, planet, "palacio_degraus", com.lanterna.cidade.Palacio.CENTRO.atY(0), player, 120);
+            ocupada = com.lanterna.cidade.Obra.ocupada();
+            // consertos de construções antigas (uma vez por mundo) e a cidade dos nativos
+            if (!ocupada && planet == PlanetLore.OA && data.siteBuilt("oa:palacio"))
+                tryBuild(level, data, planet, "palacio_fontes", com.lanterna.cidade.Palacio.CENTRO.atY(0), player, 140);
+            if (!com.lanterna.cidade.Obra.ocupada() && data.siteBuilt(planet.planet + ":cidade2"))
+                tryBuild(level, data, planet, "cidade2_agua", com.lanterna.cidade.Cidade.CENTRO, player, 160);
+            if (!com.lanterna.cidade.Obra.ocupada() && planet != PlanetLore.GENESE)
+                tryBuild(level, data, planet, "nativa", com.lanterna.cidade.CidadeNativa.CENTRO, player, 220);
         }
     }
 
@@ -73,13 +82,21 @@ public final class PlanetSites {
                 placeTropa(level, planet);
             } else if (kind.equals("cidade")) {
                 CidadeTropa.construir(level, planet);
+            } else if (kind.equals("palacio_fontes")) {
+                com.lanterna.cidade.Palacio.consertarFontes(level);
+            } else if (kind.equals("cidade2_agua")) {
+                com.lanterna.cidade.Cidade.consertarAgua(level);
+            } else if (kind.equals("nativa")) {
+                com.lanterna.cidade.CidadeNativa.construir(level, planet);
             } else if (kind.equals("palacio_degraus")) {
                 com.lanterna.cidade.Palacio.consertarTronos(level);
             } else if (kind.equals("cidade2")) {
                 com.lanterna.cidade.Cidade.construir(level, planet);
+                data.markSite(planet.planet + ":cidade2_agua"); // a cidade nova já vem selada
             } else if (kind.equals("palacio")) {
                 com.lanterna.cidade.Palacio.construir(level);
                 data.markSite(planet.planet + ":palacio_degraus"); // o Palácio novo já vem com os degraus
+                data.markSite(planet.planet + ":palacio_fontes");
             } else if (planet == PlanetLore.GENESE) {
                 if (kind.equals("hub")) buildGeneseAltar(level, at);
                 else buildRift(level, at);
@@ -182,6 +199,12 @@ public final class PlanetSites {
             case KORUGAR -> Blocks.OCHRE_FROGLIGHT.defaultBlockState();
             default -> Blocks.GLOWSTONE.defaultBlockState();
         };
+    }
+
+    /** Um morador comum do povo do planeta (para a cidade dos nativos). */
+    @Nullable
+    public static RaceEntity nativo(ServerLevel level, Race race, BlockPos at) {
+        return npc(level, race, at, "", null);
     }
 
     @Nullable

@@ -546,3 +546,24 @@ itens. O inglês (en_us) foi traduzido por completo (antes ~800 textos estavam e
   com uma faixa de luz da cor da Tropa atravessando a tela e as bordas brilhando.
 - **Trajes "segunda pele"**: as faces escondidas dos modelos (mapeadas num pixel do canto) estavam brilhando na
   camada de brilho e apareciam como placas por cima da cabeça e do corpo. O pixel foi apagado nas 18 _glowmask.
+
+# 0.25 — A cidade dos nativos
+
+Em cada planeta das Tropas (menos Gênese), **a oeste da base** (centro em X -210, Z 0), nasce a cidade do povo do
+planeta (Veltari em Oa, Brakkari em Ysmault, Aelínos em Odym, Ghallos em Okaara, Skrell'Vath em Korugar, Ves'Kai
+em Nok, Zaëlith em Zamaron, Silentes em Ryut). É construída quando um jogador chega perto, nas cores do planeta:
+
+- disco de 117 blocos com 12 raios de luz no chão, anéis e avenidas para os quatro lados, mureta de vidro;
+- **Torre da Luz** no centro: agulha de vidro com nervuras e núcleo de luz, ~90 blocos, anéis flutuantes e uma coroa
+  larga a 60 blocos;
+- **8 torres-cálice**: hastes finas com raízes de apoio e um casulo de vidro no alto (38 a 56 blocos), cada uma
+  ligada à Torre da Luz por uma ponte aérea;
+- **4 portais** em arco nas avenidas, **16 casas-cúpula** com cama e luz, postes e 16 agulhas de luz na borda;
+- 12 nativos moram lá; se faltarem, o vigia repõe (mínimo 10).
+
+**Correções**
+- Moradores de posto fixo (Capitães, Anciões, Comandante...) que se afastam mais que alguns blocos do posto voltam
+  para ele: a Capitã Qiri Nox fica na ala dela, onde a missão "Diante do Conselho" aponta.
+- Fontes do Palácio e da cidade com borda de bloco inteiro (com laje a água vazava); o Palácio seca a água que
+  vazou. A cidade da Tropa ganhou uma faixa de 12 blocos em volta que segura a água de lagos e rios de fora (que
+  descia pela muralha) e seca o que já entrou. Mundos antigos são consertados sozinhos ao passar perto.

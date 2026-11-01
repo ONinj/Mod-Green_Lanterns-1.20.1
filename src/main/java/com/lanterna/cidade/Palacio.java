@@ -158,7 +158,8 @@ public final class Palacio {
                 double d = Math.sqrt(dx * dx + dz * dz);
                 if (d > 3.4) continue;
                 k.s(f.offset(dx, -1, dz), d > 2.4 ? k.p.faixa() : k.p.luz());
-                k.s(f.offset(dx, 0, dz), d > 2.4 ? lajeAlta(k.p.laje()) : b(Blocks.WATER));
+                // borda de bloco inteiro (com laje a água vazava pelo pátio)
+                k.s(f.offset(dx, 0, dz), d > 2.4 ? k.p.faixa() : b(Blocks.WATER));
             }
             for (int h = 0; h < 4; h++) k.s(f.above(h), h == 3 ? k.p.nucleo() : k.p.pilar());
         }
@@ -509,6 +510,26 @@ public final class Palacio {
                 for (int y = 0; y < q.getY() - t.getY(); y++) k.s(q.atY(t.getY() + y), k.p.parede());
                 for (int y = 1; y <= 3; y++) k.s(q.above(y), b(Blocks.AIR));
             }
+        }
+    }
+
+    /** Conserto: refaz as fontes do pátio com borda inteira e seca a água que vazou (Palácios antigos). */
+    public static void consertarFontes(ServerLevel level) {
+        Kit k = kit(level);
+        var m = new BlockPos.MutableBlockPos();
+        for (int dx = -R; dx <= R; dx++) for (int dz = -R; dz <= R + 60; dz++) for (int y = Y - 30; y <= Y + 6; y++) {
+            m.set(CENTRO.getX() + dx, y, CENTRO.getZ() + dz);
+            if (!level.getFluidState(m).isEmpty()) level.setBlock(m, b(Blocks.AIR), 2);
+        }
+        for (int x : new int[]{-22, 22}) {
+            BlockPos f = CENTRO.offset(x, 0, 30);
+            for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d > 3.4) continue;
+                k.s(f.offset(dx, -1, dz), d > 2.4 ? k.p.faixa() : k.p.luz());
+                k.s(f.offset(dx, 0, dz), d > 2.4 ? k.p.faixa() : b(Blocks.WATER));
+            }
+            for (int h = 0; h < 4; h++) k.s(f.above(h), h == 3 ? k.p.nucleo() : k.p.pilar());
         }
     }
 

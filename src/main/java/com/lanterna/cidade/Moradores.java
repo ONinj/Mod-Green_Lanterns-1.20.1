@@ -68,6 +68,14 @@ public final class Moradores {
                 if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} NPC(s) da base voltaram em {}", n, planet.planet);
             }
         }
+        if (data.siteBuilt(planet.planet + ":nativa") && perto(p, CidadeNativa.CENTRO, 120)) {
+            String chave = level.dimension().location() + "|nativa";
+            if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
+                ULTIMA.put(chave, level.getGameTime());
+                int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 10);
+                if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} nativo(s) voltaram à cidade de {}", n, planet.planet);
+            }
+        }
         if (data.siteBuilt(planet.planet + ":cidade2") && perto(p, Cidade.CENTRO, 110)) {
             conferir(level, planet.planet + ":cidade2", () -> Cidade.censo(level, planet));
         }
@@ -116,6 +124,24 @@ public final class Moradores {
             int max = esperados.get(en.getKey());
             for (int i = max; i < l.size(); i++) l.get(i).discard();
             existem.put(en.getKey(), Math.min(max, l.size()));
+        }
+        // Quem se afastou demais do posto (a Capitã que sai andando pelo Palácio) volta para o lugar dele
+        Map<String, List<Morador>> postos = new HashMap<>();
+        for (Morador m : lista) postos.computeIfAbsent(m.funcao(), k -> new ArrayList<>()).add(m);
+        for (var en : achados.entrySet()) {
+            List<Morador> ps = postos.get(en.getKey());
+            List<Entity> l = en.getValue();
+            for (int i = 0; i < Math.min(ps.size(), l.size()); i++) {
+                Entity e = l.get(i);
+                if (!e.isAlive()) continue;
+                Morador m = ps.get(i);
+                double max = m.raio() + 5;
+                if (e.distanceToSqr(m.pos().getX() + 0.5, m.pos().getY(), m.pos().getZ() + 0.5) > max * max) {
+                    e.teleportTo(m.pos().getX() + 0.5, m.pos().getY(), m.pos().getZ() + 0.5);
+                    e.setYRot(m.yaw());
+                    if (e instanceof net.minecraft.world.entity.PathfinderMob pm) pm.restrictTo(m.pos(), Math.max(1, m.raio()));
+                }
+            }
         }
         int voltaram = 0;
         for (Morador m : lista) {

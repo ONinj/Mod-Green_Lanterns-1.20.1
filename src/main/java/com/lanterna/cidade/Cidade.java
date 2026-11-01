@@ -65,7 +65,56 @@ public final class Cidade {
         for (int[] cs : casas) Obra.etapa(level, l -> casa(k, c.offset(cs[0], 0, cs[1]), cs[2] == 0 ? Direction.SOUTH : Direction.NORTH));
         Obra.etapa(level, l -> aneis(k, c));
         Obra.etapa(level, l -> moradores(l, c, planet));
+        for (int x0 = -R - 12; x0 <= R + 12; x0 += 16) { int f = x0; Obra.etapa(level, l -> selar(l, c, f, Math.min(R + 12, f + 15))); }
         Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: cidade completa da Tropa pronta em {}", planet.planet));
+    }
+
+    /**
+     * Fecha as bordas da cidade contra a água de fora (lagos e rios que ficavam mais altos que o terreno aplainado
+     * escorriam para dentro) e seca a água corrente que já entrou. Fontes e o poço de cura ficam.
+     */
+    static void selar(ServerLevel l, BlockPos c, int x0, int x1) {
+        BlockState parede = Paleta.of(PlanetLore.byDimension(l.dimension()) != null ? PlanetLore.byDimension(l.dimension()) : PlanetLore.OA).parede();
+        var m = new BlockPos.MutableBlockPos();
+        for (int dx = x0; dx <= x1; dx++) for (int dz = -R - 12; dz <= R + 12; dz++) {
+            int borda = Math.max(Math.abs(dx), Math.abs(dz));
+            for (int y = c.getY() - 10; y <= c.getY() + 60; y++) {
+                m.set(c.getX() + dx, y, c.getZ() + dz);
+                var f = l.getFluidState(m);
+                if (f.isEmpty()) continue;
+                if (borda >= R + 3) l.setBlock(m, parede, 2);            // muro escondido em volta
+                else if (!aguaDaCidade(dx, y - c.getY(), dz)) l.setBlock(m, b(Blocks.AIR), 2); // água que entrou de fora
+            }
+        }
+    }
+
+    /** As fontes da praça e o poço de cura da enfermaria (a única água que deve existir na cidade). */
+    private static boolean aguaDaCidade(int dx, int dy, int dz) {
+        if (dy == 0 && Math.abs(Math.abs(dx) - 9) <= 1 && Math.abs(Math.abs(dz) - 9) <= 1) return true;
+        return dy == -1 && dx >= 35 && dx <= 37 && dz >= 38 && dz <= 40;
+    }
+
+    /** Conserto de cidades antigas: bordas fechadas e fontes refeitas. */
+    public static void consertarAgua(ServerLevel level) {
+        BlockPos c = CENTRO.atY(Moradores.alturaCidade(level, CENTRO));
+        PlanetLore planet = PlanetLore.byDimension(level.dimension());
+        if (planet == null) return;
+        Kit k = new Kit(level, Paleta.of(planet));
+        for (int x0 = -R - 12; x0 <= R + 12; x0 += 16) { int f = x0; Obra.etapa(level, l -> selar(l, c, f, Math.min(R + 12, f + 15))); }
+        Obra.etapa(level, l -> fontes(k, c));
+    }
+
+    private static void fontes(Kit k, BlockPos c) {
+        for (int[] f : new int[][]{{9, 9}, {-9, 9}, {9, -9}, {-9, -9}}) {
+            BlockPos fc = c.offset(f[0], 0, f[1]);
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                boolean borda = Math.abs(dx) == 2 || Math.abs(dz) == 2;
+                k.s(fc.offset(dx, -1, dz), borda ? k.p.faixa() : k.p.luz());
+                k.s(fc.offset(dx, 0, dz), borda ? k.p.faixa() : b(Blocks.WATER));
+            }
+            k.s(fc.above(), k.p.pilar());
+            k.s(fc.above(2), k.p.destaque());
+        }
     }
 
     /** Lista dos moradores da cidade já construída (para o vigia de moradores). */
@@ -139,7 +188,8 @@ public final class Cidade {
             for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
                 boolean borda = Math.abs(dx) == 2 || Math.abs(dz) == 2;
                 k.s(fc.offset(dx, -1, dz), borda ? k.p.faixa() : k.p.luz());
-                k.s(fc.offset(dx, 0, dz), borda ? lajeBaixa(k.p.laje()) : b(Blocks.WATER));
+                // borda de bloco inteiro: laje deixava a água vazar
+                k.s(fc.offset(dx, 0, dz), borda ? k.p.faixa() : b(Blocks.WATER));
             }
             k.s(fc.above(), k.p.pilar());
             k.s(fc.above(2), k.p.destaque());
@@ -399,7 +449,11 @@ public final class Cidade {
             k.s(e.offset(dx, -2, dz + 1), k.p.luz());
             k.s(e.offset(dx, -1, dz + 1), b(Blocks.WATER));
         }
-        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) if (Math.abs(dx) == 2 || Math.abs(dz) == 2) k.s(e.offset(dx, -1, dz + 1), k.p.faixa());
+        for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+            if (Math.abs(dx) == 2 || Math.abs(dz) == 2) k.s(e.offset(dx, -1, dz + 1), k.p.faixa());
+            k.s(e.offset(dx, -3, dz + 1), k.p.parede());
+            if (Math.abs(dx) == 2 || Math.abs(dz) == 2) k.s(e.offset(dx, -2, dz + 1), k.p.parede());
+        }
         // laboratório
         for (int dx = 4; dx <= 9; dx++) k.s(e.offset(dx, 0, 8), (dx & 1) == 0 ? b(Blocks.BREWING_STAND) : lajeAlta(Blocks.SMOOTH_QUARTZ_SLAB));
         for (int dx = -9; dx <= -4; dx++) k.s(e.offset(dx, 0, 8), (dx & 1) == 0 ? b(Blocks.CAULDRON) : b(Blocks.BARREL));

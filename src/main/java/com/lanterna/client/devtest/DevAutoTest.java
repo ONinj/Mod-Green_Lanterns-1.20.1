@@ -2256,6 +2256,90 @@ public final class DevAutoTest {
         at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    private static void sceneAgua() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode spectator"); cmd("execute in lanterna:oa run tp @s 0 190 -440"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        Object[][] zonas = {{"palacio", 0, -470, 90, 140, 200}, {"cidade", 0, -150, 75, 30, 110}};
+        for (Object[] z : zonas) {
+            at(10, () -> cmd("execute in lanterna:oa run tp @s " + z[1] + " " + ((int) z[5] + 20) + " " + z[2]));
+            at(300, () -> server(sp -> {
+                var l = sp.serverLevel(); int cx = (int) z[1], cz = (int) z[2], r = (int) z[3];
+                java.util.Map<String, Integer> grupos = new java.util.TreeMap<>();
+                var m = new net.minecraft.core.BlockPos.MutableBlockPos();
+                for (int x = cx - r; x <= cx + r; x++) for (int zz = cz - r; zz <= cz + r; zz++) for (int y = (int) z[4]; y <= (int) z[5]; y++) {
+                    m.set(x, y, zz); var f = l.getFluidState(m);
+                    if (!f.isEmpty() && !f.isSource()) grupos.merge((x >> 3 << 3) + "," + (y >> 3 << 3) + "," + (zz >> 3 << 3), 1, Integer::sum);
+                }
+                glog(z[0] + ": agua corrente em " + grupos);
+                if (z[0].equals("palacio")) for (int y = 167; y <= 171; y++) { StringBuilder sb = new StringBuilder("y=" + y + ": ");
+                    for (int x = 16; x <= 28; x++) { var st = l.getBlockState(new net.minecraft.core.BlockPos(x, y, -440)); var f = st.getFluidState();
+                        String n = st.isAir() ? "." : !f.isEmpty() ? (f.isSource() ? "W" : "w") : st.getBlock().getDescriptionId().replace("block.minecraft.", "").replace("block.lanterna.", "");
+                        sb.append(n.length() > 6 ? n.substring(0, 6) : n).append(" "); } glog(sb.toString()); }
+                if (z[0].equals("cidade")) for (int y = 50; y <= 58; y++) { StringBuilder sb = new StringBuilder("y=" + y + ": ");
+                    for (int zz = -100; zz <= -88; zz++) { var st = l.getBlockState(new net.minecraft.core.BlockPos(10, y, zz)); var f = st.getFluidState();
+                        String n = st.isAir() ? "." : !f.isEmpty() ? (f.isSource() ? "W" : "w") : st.getBlock().getDescriptionId().replace("block.minecraft.", "").replace("block.lanterna.", "");
+                        sb.append(n.length() > 6 ? n.substring(0, 6) : n).append(" "); } glog(sb.toString()); }
+            }));
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneNativa() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamemode spectator"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false"); cmd("weather clear"); });
+        // palácio: fontes refeitas e a Capitã no lugar
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0 190 -440"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(100, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 3000);
+        at(700, () -> server(sp -> { for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(150)))
+                if (e.funcao().equals("capitao_comando")) glog("Qiri em " + e.blockPosition() + " (posto 34,170,-448)"); }));
+        // cidade: bordas fechadas
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0 120 -150"));
+        at(100, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 3000);
+        // cidade dos nativos (refaz)
+        at(5, () -> server(sp -> { var w = com.lanterna.lore.LoreWorldData.get(sp.server); w.resetSite("oa:nativa"); w.resetSite("oa:cidade2_agua"); }));
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 0 120 -150"));
+        at(100, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 3000);
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -210 160 -60"));
+        at(100, () -> {});
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 12000);
+        at(100, () -> server(sp -> {
+            var l = sp.serverLevel(); java.util.Map<String, Integer> g = new java.util.TreeMap<>();
+            var m = new net.minecraft.core.BlockPos.MutableBlockPos();
+            for (int[] z : new int[][]{{0, -470, 90, 150, 200}, {0, -150, 75, 30, 110}}) for (int x = z[0] - z[2]; x <= z[0] + z[2]; x++) for (int zz = z[1] - z[2]; zz <= z[1] + z[2]; zz++) for (int y = z[3]; y <= z[4]; y++) {
+                m.set(x, y, zz); var f = l.getFluidState(m); if (!f.isEmpty() && !f.isSource()) g.merge(z[1] == -470 ? "palacio" : "cidade", 1, Integer::sum); }
+            glog("agua corrente depois do conserto: " + g);
+            int h = com.lanterna.cidade.CidadeNativa.altura(l); int nat = 0;
+            for (var e : l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(-270, -64, -60, -150, 320, 60))) if (e.role().isEmpty()) nat++;
+            glog("cidade nativa: chao=" + h + " nativos=" + nat);
+        }));
+        at(700, () -> server(sp -> { int nat = 0;
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(-270, -64, -60, -150, 320, 60))) if (e.role().isEmpty()) nat++;
+            glog("nativos depois do vigia=" + nat); }));
+        Object[][] fotos = {{"nat_alto", -210.5, 90.0, -75.0, 0f, 30f}, {"nat_lado", -150.0, 70.0, 60.5, 135f, 22f}, {"nat_rua", -210.5, 0.0, 45.0, 180f, -12f},
+                {"nat_torre", -195.0, 0.0, 8.0, 120f, -40f}, {"nat_casulo", -210.5, 0.0, 0.0, 0f, 0f}, {"nat_casa", -210.5, 0.0, 0.0, 0f, 0f}};
+        for (Object[] f : fotos) {
+            at(10, () -> server(sp -> {
+                int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel());
+                double y = (double) f[2];
+                double x = (double) f[1], z = (double) f[3];
+                if (f[0].equals("nat_rua") || f[0].equals("nat_torre")) y += h + 3;
+                if (f[0].equals("nat_casulo")) { double a = Math.toRadians(22.5); x = -210 + Math.cos(a) * 34 - 2; z = Math.sin(a) * 34 + 0.5; y = h + 44 - 1; }
+                if (f[0].equals("nat_casa")) { double a = Math.toRadians(11.25 + 22.5 * 3); x = -210 + Math.cos(a) * 48 + 0.5; z = Math.sin(a) * 48 + 0.5; y = h + 1; }
+                sp.teleportTo(sp.serverLevel(), x, y, z, (float) f[4], (float) f[5]);
+            }));
+            at(60, () -> shot((String) f[0]));
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneV24() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -2425,6 +2509,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("v22")) sceneV22();
         else if (ENABLED && SCENE.equals("teto")) sceneTeto();
         else if (ENABLED && SCENE.equals("v24")) sceneV24();
+        else if (ENABLED && SCENE.equals("nativa")) sceneNativa();
+        else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
         else if (ENABLED && SCENE.equals("v23")) sceneV23();
