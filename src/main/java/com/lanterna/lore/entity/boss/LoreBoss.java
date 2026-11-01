@@ -417,7 +417,7 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
 
     private static String animName(String trigger) {
         return switch (trigger) {
-            case "stomp", "bite" -> "attack." + trigger;
+            case "stomp", "bite", "special" -> "attack." + trigger;
             default -> "misc." + trigger;
         };
     }

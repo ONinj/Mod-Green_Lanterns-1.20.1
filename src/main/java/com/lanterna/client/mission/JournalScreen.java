@@ -203,6 +203,7 @@ public class JournalScreen extends Screen {
         y += 14;
         int idx = 0;
         for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
+            if (t.arvore) continue;   // os da Árvore da Luz aparecem na tela da árvore
             boolean ok = lvl >= t.unlockLevel;
             Component line = Component.literal(ok ? "◆ " : "◇ ").append(t.displayName())
                     .append(Component.literal("  ")).append(Component.translatable("journal.lanterna.unlock", Affinity.levelName(t.unlockLevel)));

@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "10";
+    private static final String VERSION = "11";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -203,6 +203,15 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.visual.VisualPackets.Ficha.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.visual.VisualPackets.Ficha::encode).decoder(com.lanterna.visual.VisualPackets.Ficha::decode)
                 .consumerMainThread(com.lanterna.visual.VisualPackets.Ficha::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Estado.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.fonte.FontePackets.Estado::encode).decoder(com.lanterna.fonte.FontePackets.Estado::decode)
+                .consumerMainThread(com.lanterna.fonte.FontePackets.Estado::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::encode).decoder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::decode)
+                .consumerMainThread(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Aura.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.fonte.FontePackets.Aura::encode).decoder(com.lanterna.fonte.FontePackets.Aura::decode)
+                .consumerMainThread(com.lanterna.fonte.FontePackets.Aura::handle).add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

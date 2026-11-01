@@ -76,10 +76,10 @@ public final class EnergyShapes {
 
     private static void quad(VertexConsumer vc, Matrix4f m, float ax, float ay, float az, float bx, float by, float bz,
                              float cx, float cy, float cz, float dx, float dy, float dz, float r, float g, float b, float a) {
-        vc.vertex(m, ax, ay, az).color(r, g, b, a).endVertex();
-        vc.vertex(m, bx, by, bz).color(r, g, b, a).endVertex();
-        vc.vertex(m, cx, cy, cz).color(r, g, b, a).endVertex();
-        vc.vertex(m, dx, dy, dz).color(r, g, b, a).endVertex();
+        ve(vc, m, ax, ay, az, r, g, b, a);
+        ve(vc, m, bx, by, bz, r, g, b, a);
+        ve(vc, m, cx, cy, cz, r, g, b, a);
+        ve(vc, m, dx, dy, dz, r, g, b, a);
     }
 
     /** Tubo de seção quadrada entre dois pontos. */
@@ -157,15 +157,15 @@ public final class EnergyShapes {
             double a0 = Math.PI * 2 * i / seg, a1 = Math.PI * 2 * (i + 1) / seg;
             float c0 = (float) Math.cos(a0), s0 = (float) Math.sin(a0), c1 = (float) Math.cos(a1), s1 = (float) Math.sin(a1);
             // topo
-            vc.vertex(m, c0 * ri, altura, s0 * ri).color(r, g, b, alpha * 0.2f).endVertex();
-            vc.vertex(m, c0 * raio, altura, s0 * raio).color(r, g, b, alpha).endVertex();
-            vc.vertex(m, c1 * raio, altura, s1 * raio).color(r, g, b, alpha).endVertex();
-            vc.vertex(m, c1 * ri, altura, s1 * ri).color(r, g, b, alpha * 0.2f).endVertex();
+            ve(vc, m, c0 * ri, altura, s0 * ri, r, g, b, alpha * 0.2f);
+            ve(vc, m, c0 * raio, altura, s0 * raio, r, g, b, alpha);
+            ve(vc, m, c1 * raio, altura, s1 * raio, r, g, b, alpha);
+            ve(vc, m, c1 * ri, altura, s1 * ri, r, g, b, alpha * 0.2f);
             // parede de fora
-            vc.vertex(m, c0 * raio, 0, s0 * raio).color(r, g, b, alpha).endVertex();
-            vc.vertex(m, c0 * raio, altura, s0 * raio).color(r, g, b, alpha).endVertex();
-            vc.vertex(m, c1 * raio, altura, s1 * raio).color(r, g, b, alpha).endVertex();
-            vc.vertex(m, c1 * raio, 0, s1 * raio).color(r, g, b, alpha).endVertex();
+            ve(vc, m, c0 * raio, 0, s0 * raio, r, g, b, alpha);
+            ve(vc, m, c0 * raio, altura, s0 * raio, r, g, b, alpha);
+            ve(vc, m, c1 * raio, altura, s1 * raio, r, g, b, alpha);
+            ve(vc, m, c1 * raio, 0, s1 * raio, r, g, b, alpha);
         }
     }
 
@@ -176,10 +176,10 @@ public final class EnergyShapes {
         int seg = 32;
         for (int i = 0; i < seg; i++) {
             double a0 = Math.PI * 2 * i / seg, a1 = Math.PI * 2 * (i + 1) / seg;
-            vc.vertex(m, 0, 0.02f, 0).color(r, g, b, centro).endVertex();
-            vc.vertex(m, 0, 0.02f, 0).color(r, g, b, centro).endVertex();
-            vc.vertex(m, (float) Math.cos(a1) * raio, 0.02f, (float) Math.sin(a1) * raio).color(r, g, b, borda).endVertex();
-            vc.vertex(m, (float) Math.cos(a0) * raio, 0.02f, (float) Math.sin(a0) * raio).color(r, g, b, borda).endVertex();
+            ve(vc, m, 0, 0.02f, 0, r, g, b, centro);
+            ve(vc, m, 0, 0.02f, 0, r, g, b, centro);
+            ve(vc, m, (float) Math.cos(a1) * raio, 0.02f, (float) Math.sin(a1) * raio, r, g, b, borda);
+            ve(vc, m, (float) Math.cos(a0) * raio, 0.02f, (float) Math.sin(a0) * raio, r, g, b, borda);
         }
     }
 
@@ -194,22 +194,31 @@ public final class EnergyShapes {
         int seg = 20;
         for (int i = 0; i < seg; i++) {
             double a0 = Math.PI * 2 * i / seg, a1 = Math.PI * 2 * (i + 1) / seg;
-            glow.vertex(m, 0, 0, 0).color(1f, 1f, 1f, alpha).endVertex();
-            glow.vertex(m, 0, 0, 0).color(1f, 1f, 1f, alpha).endVertex();
-            glow.vertex(m, (float) Math.cos(a1) * tam, (float) Math.sin(a1) * tam, 0).color(r, g, b, 0).endVertex();
-            glow.vertex(m, (float) Math.cos(a0) * tam, (float) Math.sin(a0) * tam, 0).color(r, g, b, 0).endVertex();
+            ve(glow, m, 0, 0, 0, 1f, 1f, 1f, alpha);
+            ve(glow, m, 0, 0, 0, 1f, 1f, 1f, alpha);
+            ve(glow, m, (float) Math.cos(a1) * tam, (float) Math.sin(a1) * tam, 0, r, g, b, 0);
+            ve(glow, m, (float) Math.cos(a0) * tam, (float) Math.sin(a0) * tam, 0, r, g, b, 0);
         }
         for (int k = 0; k < raios; k++) {
             float a = tempo * 0.06f + k * Mth.TWO_PI / raios;
             float len = tam * (1.6f + 0.5f * Mth.sin(tempo * 0.4f + k));
             float wd = tam * 0.07f;
             float cx = Mth.cos(a), sx = Mth.sin(a);
-            glow.vertex(m, -sx * wd, cx * wd, 0).color(r, g, b, alpha * 0.8f).endVertex();
-            glow.vertex(m, cx * len, sx * len, 0).color(r, g, b, 0).endVertex();
-            glow.vertex(m, cx * len, sx * len, 0).color(r, g, b, 0).endVertex();
-            glow.vertex(m, sx * wd, -cx * wd, 0).color(r, g, b, alpha * 0.8f).endVertex();
+            ve(glow, m, -sx * wd, cx * wd, 0, r, g, b, alpha * 0.8f);
+            ve(glow, m, cx * len, sx * len, 0, r, g, b, 0);
+            ve(glow, m, cx * len, sx * len, 0, r, g, b, 0);
+            ve(glow, m, sx * wd, -cx * wd, 0, r, g, b, alpha * 0.8f);
         }
         pose.popPose();
+    }
+
+    /**
+     * Um vértice com textura de energia: a textura (favos e veios de luz) é mapeada pela posição local e corre com o
+     * tempo, então a superfície parece viva. A cor do vértice tinge a textura.
+     */
+    private static void ve(VertexConsumer vc, Matrix4f m, float x, float y, float z, float r, float g, float b, float a) {
+        float u = x * 0.55f + z * 0.32f + tempo * 0.011f, v = y * 0.55f - z * 0.27f + x * 0.12f - tempo * 0.017f;
+        vc.vertex(m, x, y, z).color(r, g, b, a).uv(u, v).endVertex();
     }
 
     private static Vec3 sp(double t, double p, float r) {
@@ -217,7 +226,7 @@ public final class EnergyShapes {
     }
 
     private static void vert(VertexConsumer vc, Matrix4f m, Vec3 p, float r, float g, float b, float a) {
-        vc.vertex(m, (float) p.x, (float) p.y, (float) p.z).color(r, g, b, a).endVertex();
+        ve(vc, m, (float) p.x, (float) p.y, (float) p.z, r, g, b, a);
     }
 
     /** Sai pulando um pouco além do tamanho e assenta (entrada dos construtos). */

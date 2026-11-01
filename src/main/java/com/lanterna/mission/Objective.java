@@ -47,7 +47,9 @@ public record Objective(Type type, String target, int count, @Nullable String pl
         /** Pousar num planeta que ainda não visitou. */
         DESCOBRIR,
         /** Chegar a um ponto de um planeta (anéis de corrida, teste de voo). planet + pos. */
-        PONTO
+        PONTO,
+        /** Etapa do Chamado da Fonte ("verde:prova", "verde:juramento"). */
+        FONTE
     }
 
     public static Objective of(Type type, String target, int count, @Nullable String planet, @Nullable BlockPos pos) {
@@ -55,7 +57,8 @@ public record Objective(Type type, String target, int count, @Nullable String pl
     }
 
     public Component label(int progress) {
-        String key = "objective.lanterna." + type.name().toLowerCase() + (type == Type.REP ? "." + target : "");
+        String key = "objective.lanterna." + type.name().toLowerCase() + (type == Type.REP ? "." + target
+                : type == Type.FONTE ? "." + target.replace(':', '.') : "");
         Component base = Component.translatable(key, MissionText.targetName(this), count);
         if (type == Type.LEVEL) return base;
         if (count > 1 || type == Type.REP || type == Type.COLLECT || type == Type.KILL || type == Type.DUMMY || type == Type.CONSTRUCT) {

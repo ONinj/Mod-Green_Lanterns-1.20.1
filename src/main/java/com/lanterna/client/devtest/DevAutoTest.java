@@ -2288,6 +2288,157 @@ public final class DevAutoTest {
 
 
 
+
+
+    private static void sceneArvore() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("weather clear"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -300 120 0.5"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(100, () -> cmd("time set 6000"));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        String[] tropas = System.getProperty("lanterna.planetas", "green,yellow,red,orange,blue,indigo,violet").split(",");
+        for (String tr : tropas) {
+            at(20, () -> { cmd("lanterna anel " + tr); });
+            at(20, () -> { cmd("lanterna fonte arvore tudo"); cmd("lanterna fonte selo todas"); cmd("lanterna cheio"); cmd("lanterna afinidade 100000"); });
+            at(30, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -300.5, h, 0.5, 90f, 10f); }));
+            // a roda com os construtos novos
+            at(40, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+            at(30, () -> shot("roda_" + tr));
+            at(5, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(new com.lanterna.client.fonte.ArvoreScreen()); });
+            at(30, () -> shot("arvore_" + tr));
+            at(5, () -> mc.setScreen(null));
+            for (var t : com.lanterna.construct.ConstructType.values()) {
+                if (!t.arvore || !t.corps.equals(tr)) continue;
+                at(10, () -> server(sp -> {
+                    var l = sp.serverLevel();
+                    for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, sp.getBoundingBox().inflate(40), x -> !(x instanceof net.minecraft.world.entity.player.Player))) e.discard();
+                    for (var e : l.getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(60))) e.discard();
+                    int h = com.lanterna.cidade.CidadeNativa.altura(l);
+                    for (var q : net.minecraft.core.BlockPos.betweenClosed(-318, h - 1, -10, -290, h + 8, 10))
+                        if (l.getBlockState(q).is(com.lanterna.construct.ConstructRegistry.CONSTRUCT_BLOCK.get())) l.setBlock(q, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                    sp.teleportTo(l, -300.5, h, 0.5, 90f, 9f);
+                    com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+                    for (int i = 0; i < 4; i++) {
+                        var z = net.minecraft.world.entity.EntityType.HUSK.create(l);
+                        z.moveTo(-305.5 - (i % 2) * 2, h, -1.5 + i * 1.3, 270f, 0);
+                        z.setNoAi(true);
+                        z.setPersistenceRequired();
+                        l.addFreshEntity(z);
+                    }
+                    var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                    if (r != null) com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge());
+                }));
+                at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> com.lanterna.construct.Constructs.cast(sp, t.id)); });
+                // depois de lançar, vira de lado: a câmera mostra o Lanterna e o alvo ao mesmo tempo
+                at(2, () -> { mc.player.setYRot(140f); mc.player.setXRot(18f); });
+                at(t.id.endsWith("meteoros") || t.id.endsWith("chuva") || t.id.endsWith("aurora") || t.id.endsWith("coracoes") || t.id.endsWith("lagrimas") ? 26 : 9, () -> shot("cons_" + t.id));
+                at(30, () -> server(sp -> {
+                    float perdido = 0; int n = 0;
+                    for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Husk.class, sp.getBoundingBox().inflate(30))) { perdido += e.getMaxHealth() - e.getHealth(); n++; }
+                    int cons = sp.serverLevel().getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(60)).size();
+                    glog(t.id + ": dano=" + Math.round(perdido) + " mortos=" + (4 - n) + " construtos=" + cons + " vida=" + Math.round(sp.getHealth()));
+                }));
+            }
+            at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneChefes() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
+            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); cmd("lanterna afinidade 100000"); });
+        // o evento da Bateria em Oa
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(20, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -387.5, h + 6, 2.5, 180f, 20f); }));
+        at(20, () -> { cmd("time set 6000"); cmd("lanterna fonte evento"); });
+        at(80, () -> shot("evento_onda"));
+        at(5, () -> server(sp -> glog("evento ativo=" + com.lanterna.fonte.BateriaEnfraquece.ativo() + " recarga=" + com.lanterna.fonte.BateriaEnfraquece.recarga(sp))));
+        for (int i = 0; i < 6; i++) at(60, () -> { cmd("kill @e[type=lanterna:lanterna_npc,distance=..80]"); });
+        at(60, () -> server(sp -> glog("evento depois ativo=" + com.lanterna.fonte.BateriaEnfraquece.ativo() + " recarga=" + com.lanterna.fonte.BateriaEnfraquece.recarga(sp) + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp))));
+        String[] tropas = System.getProperty("lanterna.planetas", "green,yellow,red,orange,blue,indigo,violet").split(",");
+        for (String tr : tropas) {
+            at(20, () -> cmd("lanterna anel " + tr));
+            at(20, () -> { cmd("lanterna fonte selo todas"); cmd("lanterna fonte arvore tudo"); cmd("lanterna fonte chefe"); });
+            at(20, () -> cmd("lanterna fonte ir"));
+            waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
+            at(60, () -> {});
+            waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+            at(40, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 112, -14.5, 180f, 35f)));
+            at(40, () -> shot("salas_" + tr));
+            at(10, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 101, com.lanterna.fonte.FonteMundo.ILHA.getZ() - 8 + 0.5, 0f, 10f)));
+            at(40, () -> server(sp -> {
+                var pos = com.lanterna.fonte.FonteMundo.ILHA.above();
+                var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
+                net.minecraftforge.common.ForgeHooks.onRightClickBlock(sp, net.minecraft.world.InteractionHand.MAIN_HAND, pos, hit);
+            }));
+            at(10, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 600 4 true"); cmd("effect give @s regeneration 600 4 true"); });
+            at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+            at(60, () -> shot("chefe_" + tr));
+            at(140, () -> server(sp -> {
+                var bs = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80));
+                for (var b : bs) { b.setHealth(b.getMaxHealth() * 0.45f); glog(tr + " chefe=" + b.bossId() + " vida=" + Math.round(b.getHealth()) + "/" + Math.round(b.getMaxHealth())); }
+                if (bs.isEmpty()) glog(tr + " chefe=NENHUM");
+            }));
+            at(100, () -> shot("chefe2_" + tr));
+            at(10, () -> server(sp -> {
+                for (var b : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80)))
+                    b.hurt(sp.damageSources().playerAttack(sp), 100000f);
+            }));
+            at(40, () -> server(sp -> glog(tr + " coracao=" + com.lanterna.lore.entity.boss.ChefeFonte.temCoracao(sp) + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp) + " vida=" + Math.round(sp.getHealth()))));
+            at(10, () -> { cmd("gamemode creative"); mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); cmd("kill @e[type=!player,distance=..120,type=!lanterna:alvo_treino]"); });
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    private static void sceneFonte() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
+            cmd("gamerule doDaylightCycle false"); cmd("weather clear"); cmd("gamemode creative"); cmd("lanterna fonte zerar"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(100, () -> cmd("time set 6000"));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(20, () -> server(sp -> {
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            glog("anel=" + (r != null && r.hasRing() ? r.corps() : "nenhum") + " tropa=" + com.lanterna.fonte.FonteChamado.tropaDoAnel(sp));
+            int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel());
+            sp.teleportTo(sp.serverLevel(), -387.5, h, 25.5, 0f, 0f);
+        }));
+        at(20, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 600 4 true"); cmd("lanterna fonte prova"); });
+        at(20, () -> server(sp -> glog("selo antes=" + com.lanterna.fonte.FonteDados.temSelo(sp, "verde") + " usar=" + com.lanterna.fonte.FonteChamado.usarBateria(sp, new net.minecraft.core.BlockPos(-388, 60, 38)))));
+        at(60, () -> shot("fonte_prova"));
+        for (int i = 0; i < 4; i++) {
+            at(80, () -> { cmd("kill @e[type=lanterna:eco_cinzento,distance=..60]"); cmd("kill @e[type=lanterna:lanterna_npc,distance=..60]"); });
+            at(60, () -> server(sp -> glog("prova ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "verde:prova"))));
+        }
+        at(20, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("missao 3 ativa=" + d.isActive("fonte_verde_3")); com.lanterna.fonte.FonteChamado.usarBateria(sp, new net.minecraft.core.BlockPos(-388, 60, 38)); }));
+        at(320, () -> server(sp -> glog("selo depois=" + com.lanterna.fonte.FonteDados.temSelo(sp, "verde") + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp))));
+        // atravessa o campo
+        at(20, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -387.5, h, 38.5, 0f, 0f); }));
+        at(120, () -> server(sp -> glog("dim=" + sp.level().dimension().location())));
+        at(20, () -> cmd("lanterna fonte banho 10"));
+        at(60, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            glog("sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp) + " carga=" + (r == null ? -1 : r.charge()) + "/" + (r == null ? -1 : r.maxCharge())); }));
+        at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(60, () -> shot("fonte_aura"));
+        at(20, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        at(30, () -> shot("fonte_hud"));
+        at(10, () -> cmd("lanterna fonte pressao 119"));
+        at(20, () -> server(sp -> com.lanterna.fonte.FonteDados.pressao(sp, com.lanterna.fonte.Fonte.PRESSAO_MAX - 30)));
+        at(80, () -> server(sp -> glog("depois da pressao: dim=" + sp.level().dimension().location() + " bloqueado=" + com.lanterna.fonte.FonteDados.bloqueado(sp)
+                + " sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp))));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneBateria() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -2594,6 +2745,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("nativa")) sceneNativa();
         else if (ENABLED && SCENE.equals("povos")) scenePovos();
         else if (ENABLED && SCENE.equals("bateria")) sceneBateria();
+        else if (ENABLED && SCENE.equals("fonte")) sceneFonte();
+        else if (ENABLED && SCENE.equals("arvore")) sceneArvore();
+        else if (ENABLED && SCENE.equals("chefes")) sceneChefes();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

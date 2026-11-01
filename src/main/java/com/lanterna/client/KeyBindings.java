@@ -66,6 +66,8 @@ public final class KeyBindings {
 
     public static final KeyMapping PERFIL = new KeyMapping(
             "key.lanterna.perfil", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
+    public static final KeyMapping ARVORE = new KeyMapping(
+            "key.lanterna.arvore", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, CATEGORY);
     public static final KeyMapping PORTAL = new KeyMapping(
             "key.lanterna.portal", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, CATEGORY);
     public static final KeyMapping TRAVAR_MIRA = new KeyMapping(

@@ -181,6 +181,7 @@ public final class MissionManager {
             case AFFINITY -> Affinity.level(data.affinity()) >= o.count() ? o.count() : Affinity.level(data.affinity());
             case LEVEL -> Math.min(o.count(), com.lanterna.tropa.Nivel.nivel(data.xp()));
             case EMOCAO -> Math.min(o.count(), data.emocao());
+            case FONTE -> { String[] k = o.target().split(":"); yield com.lanterna.fonte.FonteDados.chamado(player, o.target()) >= 1 ? 1 : 0; }
             case PONTO -> {
                 if (current >= 1) yield 1;
                 if (o.pos() == null || o.planet() == null) yield 0;
@@ -279,6 +280,7 @@ public final class MissionManager {
         if (m.line().equals("prova")) com.lanterna.tropa.Prova.concluir(player);
         com.lanterna.morte.Corrupcao.aoConcluir(player, data, m);
         com.lanterna.portal.PortalEstelar.aoConcluir(player, data, m);
+        com.lanterna.fonte.FonteChamado.aoConcluir(player, data, m);
         com.lanterna.cidade.CidadeMissoes.aoConcluir(player, data, m);
         String next = routeNext(player, data, m);
         if (next != null) start(player, next);

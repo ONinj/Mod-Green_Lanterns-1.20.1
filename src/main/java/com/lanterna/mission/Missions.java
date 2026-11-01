@@ -163,6 +163,25 @@ public final class Missions {
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 8)), 600, "portal_3");
         add("portal_3", "portal", verdeClaro, List.of(talk("guardiao:oa", "oa")), items(), 800, null);
 
+        // ---------------- O Chamado da Fonte (uma linha por Tropa com Bateria Central) ----------------
+        for (com.lanterna.baterias.Tropa t : com.lanterna.baterias.Tropa.values()) {
+            PlanetLore pl = null;
+            for (PlanetLore x : PlanetLore.values()) if (x.corps == t.corps() && x != PlanetLore.GENESE) pl = x;
+            if (pl == null) continue;
+            String p = pl.planet, c = t.nome;
+            BlockPos bat = com.lanterna.fonte.FonteChamado.PRACA;
+            add("fonte_" + c + "_1", "fonte", t.cor, List.of(
+                    Objective.of(Type.AFFINITY, "afinidade", com.lanterna.fonte.FonteChamado.AFINIDADE, null, null),
+                    Objective.of(Type.LEVEL, "nivel", com.lanterna.fonte.FonteChamado.NIVEL, null, null),
+                    Objective.of(Type.REP, pl.race, 6, p, PlanetLore.HUB),
+                    talk((pl == PlanetLore.OA ? "guardiao:" : "lider:") + p, p)),
+                    items(() -> new ItemStack(LoreItems.MERITO.get(), 4)), 400, "fonte_" + c + "_2");
+            add("fonte_" + c + "_2", "fonte", t.cor, List.of(Objective.of(Type.FONTE, c + ":prova", 1, p, bat)),
+                    items(() -> new ItemStack(LoreItems.MERITO.get(), 6)), 800, "fonte_" + c + "_3");
+            add("fonte_" + c + "_3", "fonte", t.cor, List.of(Objective.of(Type.FONTE, c + ":juramento", 1, p, bat)),
+                    items(), 1200, null);
+        }
+
         // ---------------- Patrulha (repetível, dos Veltari) ----------------
         add("patrulha", "patrulha", PlanetLore.OA.color(), List.of(Objective.of(Type.KILL, "lanterna:eco_cinzento", 8, null, null)),
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 3)), 200, null);

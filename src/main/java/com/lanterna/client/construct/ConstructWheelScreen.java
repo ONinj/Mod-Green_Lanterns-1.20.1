@@ -37,6 +37,18 @@ public class ConstructWheelScreen extends Screen {
         return LanternaMod.id("textures/gui/construct/" + t.id + ".png");
     }
 
+    /** Ícone de 64 px (desenhado em cinza claro) tingido com a cor dada; apagado se estiver bloqueado. */
+    public static void desenharIcone(GuiGraphics g, ConstructType t, int x, int y, int size, boolean locked, int cor) {
+        float r = ((cor >> 16) & 255) / 255f, gg = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
+        // clareia um pouco a cor para o ícone não ficar escuro demais
+        r = 0.35f + 0.65f * r; gg = 0.35f + 0.65f * gg; b = 0.35f + 0.65f * b;
+        if (locked) g.setColor(0.3f, 0.3f, 0.3f, 1f);
+        else g.setColor(r, gg, b, 1f);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        g.blit(icon(t), x, y, size, size, 0, 0, 64, 64, 64, 64);
+        g.setColor(1f, 1f, 1f, 1f);
+    }
+
     /** Só para o teste automático: mantém a roda aberta sem o Z apertado. */
     public static boolean pinned;
 
@@ -63,27 +75,42 @@ public class ConstructWheelScreen extends Screen {
         int color = ClientRingData.color;
         float k = Mth.clamp(open + pt * 0.25f, 0, 1);
         g.fillGradient(0, 0, width, height, 0x60000000, 0x90000000);
-        disc(g, cx, cy, (int) (OUTER * 1.18f * k), Hud.argb(0x0A0E12, 170));
-        ring(g, cx, cy, (int) (OUTER * 1.18f * k), Hud.argb(color, 160));
-        ring(g, cx, cy, (int) (INNER * k), Hud.argb(color, 90));
 
-        ConstructType[] all = ConstructType.daRoda(ClientRingData.corps).toArray(new ConstructType[0]);
-        double dx = mx - cx, dy = my - cy;
-        double dist = Math.sqrt(dx * dx + dy * dy);
+        // anel de dentro: construtos de qualquer anel; anel de fora: os da Tropa (os da Árvore da Luz só depois de liberados)
+        java.util.List<ConstructType> comuns = new java.util.ArrayList<>(), tropa = new java.util.ArrayList<>();
+        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
+            if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)) continue;
+            (t.corps == null ? comuns : tropa).add(t);
+        }
+        int r1 = (int) (OUTER * 0.62f * k), r2 = (int) (OUTER * 1.08f * k);
+        int borda = (int) ((tropa.isEmpty() ? r1 + 22 : r2 + 16) * 1f);
+        disc(g, cx, cy, borda, Hud.argb(0x0A0E12, 170));
+        ring(g, cx, cy, borda, Hud.argb(color, 160));
+        if (!tropa.isEmpty()) ring(g, cx, cy, (int) ((r1 + r2) / 2f), Hud.argb(color, 70));
+        ring(g, cx, cy, (int) (INNER * k), Hud.argb(color, 90));
+        java.util.List<int[]> pos = new java.util.ArrayList<>();
+        java.util.List<ConstructType> todos = new java.util.ArrayList<>();
+        for (int i = 0; i < comuns.size(); i++) {
+            double a = i * Math.PI * 2 / comuns.size() - Math.PI / 2;
+            pos.add(new int[]{cx + (int) (Math.cos(a) * r1), cy + (int) (Math.sin(a) * r1)});
+            todos.add(comuns.get(i));
+        }
+        for (int i = 0; i < tropa.size(); i++) {
+            double a = i * Math.PI * 2 / tropa.size() - Math.PI / 2 + (tropa.size() > 1 ? Math.PI / tropa.size() : 0);
+            pos.add(new int[]{cx + (int) (Math.cos(a) * r2), cy + (int) (Math.sin(a) * r2)});
+            todos.add(tropa.get(i));
+        }
         hovered = null;
-        if (dist > INNER * 0.6) {
-            double ang = Math.atan2(dy, dx) + Math.PI / 2;
-            if (ang < 0) ang += Math.PI * 2;
-            int idx = (int) Math.round(ang / (Math.PI * 2 / all.length)) % all.length;
-            hovered = all[idx];
+        double melhor = 18 * 18;
+        for (int i = 0; i < todos.size(); i++) {
+            double ddx = mx - pos.get(i)[0], ddy = my - pos.get(i)[1];
+            if (ddx * ddx + ddy * ddy < melhor) { melhor = ddx * ddx + ddy * ddy; hovered = todos.get(i); }
         }
         int lvl = ClientConstructs.level();
         ConstructType sel = ClientConstructs.selected();
-        for (int i = 0; i < all.length; i++) {
-            ConstructType t = all[i];
-            double a = i * Math.PI * 2 / all.length - Math.PI / 2;
-            int r = (int) (OUTER * 0.78f * k);
-            int ix = cx + (int) (Math.cos(a) * r), iy = cy + (int) (Math.sin(a) * r);
+        for (int i = 0; i < todos.size(); i++) {
+            ConstructType t = todos.get(i);
+            int ix = pos.get(i)[0], iy = pos.get(i)[1];
             boolean locked = lvl < t.unlockLevel;
             boolean hov = t == hovered;
             int size = hov ? 30 : 24;
@@ -91,14 +118,7 @@ public class ConstructWheelScreen extends Screen {
             g.fill(ix - size / 2 - 2, iy - size / 2 - 2, ix + size / 2 + 2, iy + size / 2 + 2, Hud.argb(frame, hov ? 230 : 120));
             g.fill(ix - size / 2, iy - size / 2, ix + size / 2, iy + size / 2, Hud.argb(0x101418, 235));
             if (t == sel) g.fill(ix - size / 2, iy + size / 2 - 2, ix + size / 2, iy + size / 2, Hud.argb(color, 255));
-            g.pose().pushPose();
-            g.pose().translate(ix - size / 2f + 2, iy - size / 2f + 2, 0);
-            float s = (size - 4) / 32f;
-            g.pose().scale(s, s, 1);
-            if (locked) g.setColor(0.35f, 0.35f, 0.35f, 1f);
-            g.blit(icon(t), 0, 0, 0, 0, 32, 32, 32, 32);
-            g.setColor(1f, 1f, 1f, 1f);
-            g.pose().popPose();
+            desenharIcone(g, t, ix - size / 2 + 1, iy - size / 2 + 1, size - 2, locked, t.corps != null ? color : t.category.color);
             // Número do preset (se este construto estiver num)
             for (int p = 0; p < 4; p++) {
                 if (t.id.equals(ClientConstructs.data().preset(p))) {
@@ -112,7 +132,7 @@ public class ConstructWheelScreen extends Screen {
         // Centro: o que o construto faz
         ConstructType info = hovered != null ? hovered : sel;
         Component name = Hud.caps(info.displayName());
-        g.drawString(font, name, cx - font.width(name) / 2, cy - 22, Hud.argb(info.category.color, 255), false);
+        g.drawString(font, name, cx - font.width(name) / 2, cy - 22, Hud.argb(info.corps != null ? color : info.category.color, 255), false);
         Component cat = Hud.body(info.category.label());
         g.drawString(font, cat, cx - font.width(cat) / 2, cy - 11, 0xFF9AA8B0, false);
         Component cost = Hud.body(Component.translatable(info.hold ? "construct.lanterna.cost_hold" : "construct.lanterna.cost",
@@ -124,7 +144,7 @@ public class ConstructWheelScreen extends Screen {
         }
 
         // Descrição e presets embaixo da roda
-        int by = cy + (int) (OUTER * 1.18f) + 8;
+        int by = cy + (int) (OUTER * 1.08f) + 22;
         int bw = 300;
         Hud.panel(g, cx - bw / 2, by, bw, 52, color, 0.95f);
         Hud.wrapped(g, Hud.body(info.description()), cx - bw / 2 + 8, by + 5, bw - 16, 0xFFE0E6EA, 10);

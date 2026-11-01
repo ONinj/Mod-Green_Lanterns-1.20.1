@@ -69,9 +69,15 @@ public class BateriaPortalBlock extends Block {
             BateriaTeleporte.voltar(p);
             return;
         }
+        if (com.lanterna.fonte.FonteDados.bloqueado(p)) {
+            p.displayClientMessage(Component.translatable("msg.lanterna.fonte.ainda_pesa"), true);
+            Vec3 fora = p.position().subtract(Vec3.atCenterOf(pos)).normalize().scale(1.2);
+            p.setDeltaMovement(fora.x, 0.4, fora.z); p.hurtMarked = true;
+            return;
+        }
         if (!AcessoBateria.podeEntrar(p, t)) {
             p.displayClientMessage(Component.translatable("msg.lanterna.bateria.nega"), true);
-            p.displayClientMessage(Component.translatable("msg.lanterna.bateria.anel", Component.translatable("corps.lanterna." + t.corps().id().getPath())), false);
+            p.displayClientMessage(Component.translatable("msg.lanterna.bateria.selo", Component.translatable("corps.lanterna." + t.corps().id().getPath())), false);
             Vec3 fora = p.position().subtract(Vec3.atCenterOf(pos)).normalize().scale(1.2);
             p.setDeltaMovement(fora.x, 0.4, fora.z); p.hurtMarked = true;
             return;

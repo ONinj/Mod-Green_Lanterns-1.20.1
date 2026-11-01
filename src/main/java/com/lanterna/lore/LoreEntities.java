@@ -69,6 +69,14 @@ public final class LoreEntities {
     public static final RegistryObject<EntityType<Bosses.Nyrielle>> NYRIELLE = boss("nyrielle", Bosses.Nyrielle::new, 2.2f, 3.6f, false);
     public static final RegistryObject<EntityType<Bosses.Devorador>> DEVORADOR_DE_ECOS = boss("devorador_de_ecos", Bosses.Devorador::new, 2.4f, 8.0f, true);
     public static final RegistryObject<EntityType<Bosses.Nulo>> NULO = boss("nulo", Bosses.Nulo::new, 0.8f, 2.1f, true);
+    // Corações das Emoções (chefes das Fontes)
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> COLOSSO_DE_JADE = boss("colosso_de_jade", com.lanterna.lore.entity.boss.ChefeFonte::new, 3.2f, 5.2f, false);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> MAE_DAS_SOMBRAS = boss("mae_das_sombras", com.lanterna.lore.entity.boss.ChefeFonte::new, 2.6f, 4.0f, false);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> SERPENTE_ESCARLATE = boss("serpente_escarlate", com.lanterna.lore.entity.boss.ChefeFonte::new, 3.0f, 3.4f, true);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> REI_FAMINTO = boss("rei_faminto", com.lanterna.lore.entity.boss.ChefeFonte::new, 3.4f, 4.6f, false);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> ARCANJO_DA_AURORA = boss("arcanjo_da_aurora", com.lanterna.lore.entity.boss.ChefeFonte::new, 2.4f, 4.2f, false);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> CERVO_SERENO = boss("cervo_sereno", com.lanterna.lore.entity.boss.ChefeFonte::new, 2.6f, 4.4f, false);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> RAINHA_DE_CRISTAL = boss("rainha_de_cristal", com.lanterna.lore.entity.boss.ChefeFonte::new, 2.2f, 4.0f, false);
 
     static {
         EGGS.add(ModItems.ITEMS.register("eco_cinzento_spawn_egg", () -> new ForgeSpawnEggItem(ECO_CINZENTO, 0x7A7A80, 0x404044, new Item.Properties())));
@@ -133,6 +141,13 @@ public final class LoreEntities {
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());
             event.put(NULO.get(), LoreBoss.attributes(800, 14, 0.30).build());
+            event.put(COLOSSO_DE_JADE.get(), LoreBoss.attributes(650, 18, 0.26).build());
+            event.put(MAE_DAS_SOMBRAS.get(), LoreBoss.attributes(560, 15, 0.28).build());
+            event.put(SERPENTE_ESCARLATE.get(), LoreBoss.attributes(620, 17, 0.3).build());
+            event.put(REI_FAMINTO.get(), LoreBoss.attributes(700, 16, 0.22).build());
+            event.put(ARCANJO_DA_AURORA.get(), LoreBoss.attributes(580, 15, 0.28).build());
+            event.put(CERVO_SERENO.get(), LoreBoss.attributes(600, 15, 0.3).build());
+            event.put(RAINHA_DE_CRISTAL.get(), LoreBoss.attributes(560, 16, 0.28).build());
         }
 
         @SubscribeEvent

@@ -100,7 +100,8 @@ public final class RingPowers {
         ItemStack battery = EquipmentHelper.battery(player);
         boolean upgraded = !battery.isEmpty() && battery.hasTag() && battery.getTag().getBoolean("Upgraded")
                 && com.lanterna.item.BatteryItems.corpsOf(battery).equals(def.id());
-        return upgraded ? def.maxCharge() * 3 / 2 : def.maxCharge();
+        int base = upgraded ? def.maxCharge() * 3 / 2 : def.maxCharge();
+        return Math.round(base * com.lanterna.construct.fonte.ArvoreDaLuz.carga(player));
     }
 
     // ===================== Anel visível para os outros =====================
@@ -122,6 +123,8 @@ public final class RingPowers {
     /** Muda a carga gravando no anel do slot. */
     public static void setCharge(ServerPlayer player, RingData data, int value) {
         // O anel da Vida (branco) não descarrega: fica sempre cheio
+        // a sobrecarga do Banho de Luz é gasta antes da carga normal
+        if (value < data.charge()) value += com.lanterna.fonte.Fonte.gastarSobrecarga(player, data.charge() - value);
         int wanted = data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) ? data.maxCharge() : value;
         wornRing(player).ifPresent(ring -> {
             int clamped = Math.max(0, Math.min(wanted, data.maxCharge()));

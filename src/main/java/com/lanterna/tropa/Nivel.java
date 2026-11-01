@@ -194,7 +194,7 @@ public final class Nivel {
 
     /** Atalho: carga com desconto do nível. */
     public static int custoComDesconto(Player p, int cost) {
-        return Math.max(1, Math.round(cost * (1f - desconto(p))));
+        return Math.max(1, Math.round(cost * (1f - desconto(p)) * com.lanterna.construct.fonte.ArvoreDaLuz.custo(p)));
     }
 
     @Nullable

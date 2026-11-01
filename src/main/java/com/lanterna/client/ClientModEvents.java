@@ -38,6 +38,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.POCKET_RECHARGE);
         event.register(KeyBindings.OPEN_LANTERN);
         event.register(KeyBindings.PERFIL);
+        event.register(KeyBindings.ARVORE);
         event.register(KeyBindings.TOGGLE_POWER);
         event.register(KeyBindings.STAR_MAP);
         event.register(KeyBindings.PORTAL);
@@ -139,6 +140,7 @@ public final class ClientModEvents {
         event.registerAboveAll("portal", com.lanterna.client.portal.PortalCliente.HUD);
         event.registerAboveAll("uniforme_transformacao", com.lanterna.client.uniform.UniformeBraco.HUD);
         event.registerAboveAll("ring_hud", RingHudOverlay.HUD);
+        event.registerAboveAll("fonte", com.lanterna.client.fonte.ClientFonte.HUD);
         event.registerAboveAll("mira_travada", com.lanterna.client.combat.MiraTravada.HUD);
         event.registerAboveAll("tecnicas", com.lanterna.client.cidade.ClientTecnicas.HUD);
         event.registerAboveAll("selection_cutscene", CutsceneOverlay.OVERLAY);

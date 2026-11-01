@@ -217,6 +217,7 @@ public final class TropaEvents {
             // ~1,2% da carga máxima a cada 2 s (dobra parado no chão, sem voar): enche em 2-3 min voando, ~1,5 min parado
             int ganho = Math.max(6, Math.round(ring.maxCharge() * 0.012f));
             if (!ring.flightEnabled() && p.onGround()) ganho *= 2;
+            ganho = Math.round(ganho * com.lanterna.construct.fonte.ArvoreDaLuz.regen(p) * com.lanterna.fonte.BateriaEnfraquece.recarga(p));
             RingPowers.setCharge(p, ring, Math.min(ring.maxCharge(), ring.charge() + ganho));
         }
     }

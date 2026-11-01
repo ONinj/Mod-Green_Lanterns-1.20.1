@@ -69,7 +69,10 @@ public final class RingHudOverlay {
         }
         Hud.bar(g, x + 44, y + 19, 86, 5, suave, low && blink ? 0xFF4040 : color, true);
         if (rastro > suave + 0.002f) g.fill(x + 44 + Math.round(86 * suave), y + 19, x + 44 + Math.round(86 * rastro), y + 24, 0x90FFFFFF);
-        Hud.textRight(g, Hud.bold(Component.literal(percent + "%")), 6 + W - 6, y + 17, low && blink ? 0xFFFF5050 : 0xFFFFFFFF);
+        com.lanterna.client.fonte.ClientFonte.barraSobrecarga(g, x + 44, y + 19, 86, max, color);
+        int extra = com.lanterna.client.fonte.ClientFonte.sobrecarga * 100 / max;
+        Hud.textRight(g, Hud.bold(Component.literal(extra > 0 ? (percent + extra) + "%" : percent + "%")), 6 + W - 6, y + 17,
+                extra > 0 ? Hud.argb(com.lanterna.client.construct.EnergyShapes.clarear(color, 0.6f), 255) : low && blink ? 0xFFFF5050 : 0xFFFFFFFF);
 
         // Afinidade
         int pts = ClientLoreData.DATA.affinity();

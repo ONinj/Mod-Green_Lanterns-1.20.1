@@ -36,13 +36,7 @@ public final class ConstructBarHud {
         g.fill(x, y, x + SLOT - 2, y + SLOT - 2, main ? Hud.argb(ClientRingData.color, 80) : 0x80000000);
         if (t == null) return;
         boolean locked = ClientConstructs.level() < t.unlockLevel;
-        g.pose().pushPose();
-        g.pose().translate(x + 1, y + 1, 0);
-        g.pose().scale(16 / 32f, 16 / 32f, 1);
-        if (locked) g.setColor(0.35f, 0.35f, 0.35f, 1f);
-        g.blit(ConstructWheelScreen.icon(t), 0, 0, 0, 0, 32, 32, 32, 32);
-        g.setColor(1f, 1f, 1f, 1f);
-        g.pose().popPose();
+        ConstructWheelScreen.desenharIcone(g, t, x, y, SLOT - 2, locked, t.corps != null ? ClientRingData.color : t.category.color);
         float cd = ClientConstructs.cooldown(t);
         if (cd > 0) {
             int h = (int) ((SLOT - 2) * cd);

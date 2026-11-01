@@ -25,6 +25,13 @@ public final class LoreRenderers {
         event.registerEntityRenderer(LoreEntities.NYRIELLE.get(), ctx -> new LoreRenderer<>(ctx, "nyrielle", 1.4f, true));
         event.registerEntityRenderer(LoreEntities.DEVORADOR_DE_ECOS.get(), ctx -> new LoreRenderer<>(ctx, "devorador_de_ecos", 2.0f, true));
         event.registerEntityRenderer(LoreEntities.NULO.get(), ctx -> new LoreRenderer<>(ctx, "nulo", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.COLOSSO_DE_JADE.get(), ctx -> new LoreRenderer<>(ctx, "colosso_de_jade", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.MAE_DAS_SOMBRAS.get(), ctx -> new LoreRenderer<>(ctx, "mae_das_sombras", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.SERPENTE_ESCARLATE.get(), ctx -> new LoreRenderer<>(ctx, "serpente_escarlate", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.REI_FAMINTO.get(), ctx -> new LoreRenderer<>(ctx, "rei_faminto", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.ARCANJO_DA_AURORA.get(), ctx -> new LoreRenderer<>(ctx, "arcanjo_da_aurora", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.CERVO_SERENO.get(), ctx -> new LoreRenderer<>(ctx, "cervo_sereno", 1.0f, true));
+        event.registerEntityRenderer(LoreEntities.RAINHA_DE_CRISTAL.get(), ctx -> new LoreRenderer<>(ctx, "rainha_de_cristal", 1.0f, true));
         event.registerEntityRenderer(ConstructRegistry.CONSTRUCT.get(), ConstructRenderer::new);
     }
 

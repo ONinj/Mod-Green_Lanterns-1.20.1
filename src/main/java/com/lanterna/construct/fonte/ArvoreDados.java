@@ -1,0 +1,165 @@
+package com.lanterna.construct.fonte;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/** GERADO por gen.py — nós da Árvore da Luz de cada Tropa (3 ramos: A ataque, P proteção, D domínio; 7 degraus). */
+public final class ArvoreDados {
+    /** tipo: 'c' construto (id do ConstructType) ou 'p' passiva. */
+    public record No(String id, char ramo, int tier, int custo, char tipo) {}
+
+    public static final Map<String, List<No>> ARVORES = new LinkedHashMap<>();
+
+    static {
+        ARVORES.put("green", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("g_canhao", 'A', 2, 5, 'c'),
+                new No("g_lanca", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("g_metralhadora", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("g_meteoros", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("g_cupula", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("g_catapulta", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("g_armadura", 'P', 6, 20, 'c'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("g_sentinela", 'D', 2, 5, 'c'),
+                new No("g_jato", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("g_grilhoes", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p')));
+        ARVORES.put("yellow", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("y_garras", 'A', 2, 5, 'c'),
+                new No("y_serpente", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("y_morcegos", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("y_foices", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("y_espinhos", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("y_mascara", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("y_aranha", 'D', 2, 5, 'c'),
+                new No("y_olho", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("y_forca", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p'),
+                new No("y_prisao", 'D', 7, 28, 'c')));
+        ARVORES.put("red", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("r_vomito", 'A', 2, 5, 'c'),
+                new No("r_punho", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("r_cometa", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("r_chuva", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("r_garras", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("r_berserker", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("r_couraca", 'P', 6, 20, 'c'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("r_erupcao", 'D', 2, 5, 'c'),
+                new No("r_corrente", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("r_cao", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p')));
+        ARVORES.put("orange", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("o_moedas", 'A', 2, 5, 'c'),
+                new No("o_garra", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("o_mina", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("o_vortice", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("o_ima", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("o_coroa", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("o_sanguessuga", 'D', 2, 5, 'c'),
+                new No("o_tentaculos", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("o_cofre", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p'),
+                new No("o_avatar", 'D', 7, 28, 'c')));
+        ARVORES.put("blue", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("b_raio", 'A', 2, 5, 'c'),
+                new No("b_estrela", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("b_aurora", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("b_cura", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("b_egide", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("b_renascer", 'P', 6, 20, 'c'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("b_asas", 'D', 2, 5, 'c'),
+                new No("b_anjo", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("b_santuario", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p'),
+                new No("b_purificar", 'D', 7, 28, 'c')));
+        ARVORES.put("indigo", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("i_olhar", 'A', 2, 5, 'c'),
+                new No("i_bastao", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("i_troca", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("i_lagrimas", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("i_toque", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("i_espelho", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("i_elo", 'D', 2, 5, 'c'),
+                new No("i_raizes", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("i_espirito", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p'),
+                new No("i_silencio", 'D', 7, 28, 'c')));
+        ARVORES.put("violet", List.of(
+                new No("dano1", 'A', 1, 3, 'p'),
+                new No("v_flecha", 'A', 2, 5, 'c'),
+                new No("v_lanca", 'A', 3, 8, 'c'),
+                new No("dano2", 'A', 4, 11, 'p'),
+                new No("v_laco", 'A', 5, 15, 'c'),
+                new No("recarga1", 'A', 6, 20, 'p'),
+                new No("v_paixao", 'A', 7, 28, 'c'),
+                new No("carga1", 'P', 1, 3, 'p'),
+                new No("v_ninho", 'P', 2, 5, 'c'),
+                new No("couraca1", 'P', 3, 8, 'p'),
+                new No("v_par", 'P', 4, 11, 'c'),
+                new No("carga2", 'P', 5, 15, 'p'),
+                new No("regen1", 'P', 7, 28, 'p'),
+                new No("custo1", 'D', 1, 3, 'p'),
+                new No("v_jardim", 'D', 2, 5, 'c'),
+                new No("v_abraco", 'D', 3, 8, 'c'),
+                new No("duracao1", 'D', 4, 11, 'p'),
+                new No("v_cavaleiro", 'D', 5, 15, 'c'),
+                new No("voo1", 'D', 6, 20, 'p'),
+                new No("v_coracoes", 'D', 7, 28, 'c')));
+    }
+
+    private ArvoreDados() {}
+}

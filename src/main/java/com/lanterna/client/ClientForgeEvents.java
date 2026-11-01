@@ -49,6 +49,9 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.ARVORE.consumeClick()) {
+            if (ClientRingData.hasRing) Minecraft.getInstance().setScreen(new com.lanterna.client.fonte.ArvoreScreen());
+        }
         while (KeyBindings.PERFIL.consumeClick()) {
             com.lanterna.client.visual.PerfilScreen.abrir(com.lanterna.client.visual.PerfilScreen.Aba.ESTATISTICAS);
         }

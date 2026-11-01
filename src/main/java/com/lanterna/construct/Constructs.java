@@ -80,7 +80,7 @@ public final class Constructs {
 
     public static float power(ServerPlayer player, RingData ring) {
         return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * com.lanterna.combate.Supremos.dano(ring.corps(), player)
-                * com.lanterna.tropa.Nivel.forca(player);
+                * com.lanterna.tropa.Nivel.forca(player) * (1f + com.lanterna.construct.fonte.ArvoreDaLuz.bonusDano(player));
     }
 
     public static int level(ServerPlayer player) {
@@ -104,6 +104,10 @@ public final class Constructs {
             return;
         }
         if (!type.disponivel(ring.corps())) return;
+        if (!com.lanterna.construct.fonte.ArvoreDaLuz.liberado(player, type)) {
+            player.displayClientMessage(Component.translatable("arvore.lanterna.bloqueado", type.displayName()), true);
+            return;
+        }
         // Pavor: o medo trava a vontade (o Amarelo é imune ao próprio medo)
         if (ModEfeitos.comPavor(player) && !ring.corps().getPath().equals("yellow")) {
             player.displayClientMessage(Component.translatable("message.lanterna.pavor_trava").withStyle(s -> s.withColor(0xFFD21E)), true);
@@ -148,7 +152,7 @@ public final class Constructs {
             boolean ok = perform(player, ring, type, lvl);
             if (!ok) return;
             if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, cost));
-            cds.put(type, now + type.cooldown);
+            cds.put(type, now + Math.round(type.cooldown * com.lanterna.construct.fonte.ArvoreDaLuz.recarga(player)));
         }
         LAST_USED.put(player.getUUID(), type);
         com.lanterna.network.ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
@@ -364,6 +368,8 @@ public final class Constructs {
                 level.playSound(null, player.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1f, 1.2f);
             }
             default -> {
+                // os 70 construtos da Árvore da Luz
+                if (type.arvore) return com.lanterna.construct.fonte.ConstrutosFonte.perform(player, type, pow, color);
                 return false;
             }
         }

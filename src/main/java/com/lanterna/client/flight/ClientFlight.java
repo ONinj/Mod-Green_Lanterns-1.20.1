@@ -197,6 +197,7 @@ public final class ClientFlight {
 
         // ---- Hiperpropulsão (espaço) ----
         double sup = com.lanterna.client.ClientRingData.hasRing ? com.lanterna.combate.Supremos.voo(com.lanterna.client.ClientRingData.corps) : 1.0;
+        if (com.lanterna.client.fonte.ClientFonte.tem("voo1")) sup *= 1.2;   // Árvore da Luz: Voo Veloz
         double maxBoost = (inSpace ? SPACE_BOOST : MAX_BOOST) * sup;
         double maxCruise = (inSpace ? SPACE_CRUISE : MAX_CRUISE) * sup;
         boolean wantHyper = boost && forward > 0 && hyperAllowed && auto == null || inSpace && boost && forward > 0 && hyperAllowed;

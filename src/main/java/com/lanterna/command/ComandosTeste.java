@@ -159,6 +159,12 @@ public final class ComandosTeste {
                             sync(p);
                             return ok(c, "Técnica(s) liberada(s): " + String.join(", ", l) + ". Abra com O.");
                         })))
+                // ---------- a Fonte (Baterias Centrais) ----------
+                .then(op("fonte").then(Commands.argument("acao", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"selo", "pressao", "banho", "essencia", "prova", "juramento", "arvore", "zerar", "evento", "chefe", "ir"}, b))
+                        .executes(c -> fonte(c, StringArgumentType.getString(c, "acao"), "", 0))
+                        .then(Commands.argument("valor", StringArgumentType.word())
+                                .executes(c -> fonte(c, StringArgumentType.getString(c, "acao"), StringArgumentType.getString(c, "valor"), 0)))))
                 .then(op("poder").then(Commands.argument("qual", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"portal", "autorecarga", "honra", "genese", "tudo"}, b))
                         .executes(c -> poder(c, StringArgumentType.getString(c, "qual")))))
@@ -495,4 +501,66 @@ public final class ComandosTeste {
     }
 
     private ComandosTeste() {}
+
+    /** /lanterna fonte selo <tropa|todas> | pressao <min> | banho <min> | essencia <n> | prova | juramento | zerar */
+    private static int fonte(com.mojang.brigadier.context.CommandContext<net.minecraft.commands.CommandSourceStack> c, String acao, String valor, int n0)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer p = eu(c);
+        int n = 0;
+        try { n = Integer.parseInt(valor); } catch (NumberFormatException ignored) {}
+        var t = com.lanterna.fonte.FonteChamado.tropaDoAnel(p);
+        switch (acao) {
+            case "selo" -> {
+                for (var x : com.lanterna.baterias.Tropa.values())
+                    if (valor.equals("todas") || valor.equals(x.nome) || (valor.isEmpty() && x == t)) com.lanterna.fonte.FonteDados.darSelo(p, x.nome);
+                return ok(c, "Selo da Fonte dado (" + (valor.isEmpty() ? (t == null ? "nenhuma" : t.nome) : valor) + ").");
+            }
+            case "pressao" -> { com.lanterna.fonte.FonteDados.pressao(p, n * 20 * 60); return ok(c, "Pressão da Fonte: " + n + " min."); }
+            case "banho" -> { com.lanterna.fonte.FonteDados.banho(p, n * 20 * 60); com.lanterna.fonte.FonteDados.banhoFeito(p, false); return ok(c, "Banho de Luz: " + n + " min nesta visita."); }
+            case "essencia" -> { com.lanterna.fonte.FonteDados.essencia(p, n); return ok(c, "Essência da Fonte: " + n + "."); }
+            case "arvore" -> {
+                String corps = com.lanterna.construct.fonte.ArvoreDaLuz.corps(p);
+                var arv = corps == null ? null : com.lanterna.construct.fonte.ArvoreDados.ARVORES.get(corps);
+                if (arv == null) return erro(c, "Este anel não tem Árvore da Luz.");
+                if (valor.equals("zerar")) {
+                    var set = com.lanterna.fonte.FonteDados.arvore(p);
+                    set.removeIf(x -> x.startsWith(corps + ":"));
+                    com.lanterna.fonte.FonteDados.zerarArvore(p);
+                    for (String x : set) com.lanterna.fonte.FonteDados.darNo(p, x);
+                    return ok(c, "Árvore da Luz de " + corps + " zerada.");
+                }
+                for (var no : arv) com.lanterna.fonte.FonteDados.darNo(p, corps + ":" + no.id());
+                return ok(c, "Árvore da Luz de " + corps + " completa (" + arv.size() + " nós). Use Z para ver os construtos.");
+            }
+            case "evento" -> {
+                return com.lanterna.fonte.BateriaEnfraquece.comecar(p.server, p) ? ok(c, "A Bateria Enfraquece: ataque pirata começou neste planeta.")
+                        : erro(c, "Fique num planeta com Bateria Central (e sem outro ataque em curso).");
+            }
+            case "chefe" -> {
+                com.lanterna.fonte.FonteMundo.DERROTA.clear();
+                return ok(c, "O Coração de cada Fonte pode despertar de novo.");
+            }
+            case "ir" -> {
+                var alvo = t == null ? null : p.server.getLevel(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, LanternaMod.id("fonte_" + t.nome)));
+                if (alvo == null) return erro(c, "Equipe o anel de uma Tropa com Bateria.");
+                int z = valor.equals("ilha") ? com.lanterna.fonte.FonteMundo.ILHA.getZ() - 6 : 5;
+                p.teleportTo(alvo, 0.5, 101, z + 0.5, 0, 0);
+                return ok(c, "Na Fonte " + t.nome + ".");
+            }
+            case "zerar" -> {
+                var tag = com.lanterna.fonte.FonteDados.tag(p);
+                for (String k : new java.util.ArrayList<>(tag.getAllKeys())) tag.remove(k);
+                return ok(c, "Dados da Fonte zerados.");
+            }
+            case "prova", "juramento" -> {
+                if (t == null) return erro(c, "Equipe o anel de uma Tropa com Bateria.");
+                LoreData d = dados(p);
+                for (int i = 1; i <= 3; i++) d.abandon("fonte_" + t.nome + "_" + i);
+                com.lanterna.mission.MissionManager.start(p, "fonte_" + t.nome + (acao.equals("prova") ? "_2" : "_3"));
+                sync(p);
+                return ok(c, "Missão " + (acao.equals("prova") ? "da provação" : "do juramento") + " de " + t.nome + " ativa: clique na Bateria Central.");
+            }
+            default -> { return erro(c, "Ação desconhecida."); }
+        }
+    }
 }

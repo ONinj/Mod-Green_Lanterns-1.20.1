@@ -39,8 +39,8 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
 
     @Override
     public void render(ConstructEntity e, float yaw, float pt, PoseStack pose, MultiBufferSource buffers, int light) {
-        VertexConsumer body = buffers.getBuffer(LanternaRenderTypes.ENERGY);
-        VertexConsumer glow = buffers.getBuffer(LanternaRenderTypes.GLOW);
+        VertexConsumer body = buffers.getBuffer(LanternaRenderTypes.ENERGIA);
+        VertexConsumer glow = buffers.getBuffer(LanternaRenderTypes.BRILHO);
         int color = e.color();
         int gc = EnergyShapes.brilho(color);
         float age = e.age() + pt;
@@ -189,6 +189,7 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
             case TENDRIL -> tendril(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt);
             case DEADHANDS -> deadHands(e, pose, body, glow, color, gc, age, alpha, origin, s);
             case DOOR -> door(e, pose, body, glow, color, gc, age, life);
+            case FORMA -> FormaRender.render(e, pose, body, glow, color, age, alpha, origin, owner, pt);
         }
     }
 

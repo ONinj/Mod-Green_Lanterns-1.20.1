@@ -33,7 +33,7 @@ import org.joml.Vector3f;
  * Pode pertencer a um jogador ou a um boss (o Vigia Partido copia os construtos do jogador).
  */
 public class ConstructEntity extends Entity {
-    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS, DOOR }
+    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS, DOOR, FORMA }
 
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
@@ -42,6 +42,10 @@ public class ConstructEntity extends Entity {
     private static final EntityDataAccessor<Vector3f> END = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.VECTOR3);
     private static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
+    /** Construto da Árvore da Luz (id do ConstructType) desenhado com a forma 3D dele. */
+    private static final EntityDataAccessor<String> FORMA = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.STRING);
+    /** Papel desta entidade no construto (0 corpo, 1 emissor invisível, 2 projétil filho). */
+    private static final EntityDataAccessor<Integer> PAPEL = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
 
     /** Dano (só no servidor). */
     float damage;
@@ -64,7 +68,22 @@ public class ConstructEntity extends Entity {
         entityData.define(END, new Vector3f());
         entityData.define(SCALE, 1f);
         entityData.define(TARGET, -1);
+        entityData.define(FORMA, "");
+        entityData.define(PAPEL, 0);
     }
+
+    public String forma() { return entityData.get(FORMA); }
+    public void setForma(String id) { entityData.set(FORMA, id); }
+    public int papel() { return entityData.get(PAPEL); }
+    public void setPapel(int p) { entityData.set(PAPEL, p); }
+    public float dano() { return damage; }
+    public void setDano(float d) { damage = d; }
+    public Vec3 velocidade() { return velocity; }
+    public void setVelocidade(Vec3 v) { velocity = v; setDeltaMovement(v); }
+    /** Quem este construto já acertou (para acertar cada um uma vez). */
+    public java.util.Set<Integer> acertados() { return atravessados; }
+    /** Contador livre do motor da Árvore da Luz. */
+    public int passo;
 
     // ===================== Criação =====================
 
@@ -191,6 +210,9 @@ public class ConstructEntity extends Entity {
             case STREAM -> {
                 if (owner != null) updateStream(owner);
             }
+            case FORMA -> {
+                if (level().isClientSide && papel() == 2) setPos(getX() + getDeltaMovement().x, getY() + getDeltaMovement().y, getZ() + getDeltaMovement().z);
+            }
             case CRYSTAL, TENDRIL -> {
                 Entity t = target();
                 if (t != null && kind() == Kind.CRYSTAL) setPos(t.getX(), t.getY(), t.getZ());
@@ -203,6 +225,11 @@ public class ConstructEntity extends Entity {
             return;
         }
 
+        if (kind() == Kind.FORMA) {
+            com.lanterna.construct.fonte.ConstrutosFonte.tick(this, owner);
+            if (!isRemoved() && tickCount >= life()) { com.lanterna.construct.fonte.ConstrutosFonte.fim(this, owner); discard(); }
+            return;
+        }
         if (owner == null || !owner.isAlive()) {
             if (kind() != Kind.FIST && kind() != Kind.BOLT && kind() != Kind.HAMMER && kind() != Kind.RAM && kind() != Kind.DEADHANDS && kind() != Kind.DOOR
                     && kind() != Kind.FEAR && kind() != Kind.NOVA) {

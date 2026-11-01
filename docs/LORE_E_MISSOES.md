@@ -617,3 +617,65 @@ usam bateria).
 - **Quem atravessa:** quem está usando o anel da Tropa daquela Bateria, quem tem a tag `bateria_<tropa>` (`/tag NOME add bateria_verde`) ou operadores. Os outros são empurrados para fora.
 - **Itens de construção (criativo):** `bateria_central_<tropa>`, um clique no chão e a Bateria inteira aparece. Também dá para usar `/place template lanterna:bateria_central_<tropa>`.
 - **Origem:** o pacote veio da branch `entrega/baterias-centrais`. Os modelos, ossos e animações são os do pacote, sem mudar nomes. Só o modid passou a ser `lanterna`, inclusive dentro das estruturas `.nbt`.
+
+## A Fonte, a Árvore da Luz e os Corações (0.27)
+
+### O Chamado da Fonte (missões `fonte_<tropa>_1..3`)
+- Começa sozinho quando o jogador tem afinidade **Unida** (nível 4) e nível 20 com o anel de uma Tropa que tem Bateria.
+- **1 · O Chamado:** vá até a Bateria Central do planeta da Tropa.
+- **2 · A Provação:** clique na Bateria. Cada Tropa testa a sua emoção na praça:
+
+| Tropa | Provação |
+|---|---|
+| Verde (Vontade) | aguentar 3 ondas sem sair de 16 blocos da Bateria |
+| Amarela (Medo) | caçar 10 sombras em 3 minutos |
+| Vermelha (Fúria) | vencer um campeão em duelo |
+| Laranja (Avareza) | entregar à Bateria o item mais valioso que você carrega |
+| Azul (Esperança) | proteger 3 Aelínos de um ataque pirata por 90 s (2 têm de sobreviver) |
+| Índigo (Compaixão) | curar um pirata ferido com comida, em vez de matá-lo |
+| Violeta (Amor) | trazer de volta o Zaëlith perdido na cidade |
+
+- **3 · O Juramento:** clique de novo na Bateria; o juramento da Tropa (texto original) aparece verso a verso. Recompensa: **Selo da Fonte** daquela Tropa e 10 de Essência.
+- Sem o selo (ou a tag `bateria_<tropa>`, ou ser operador), o portal da Bateria não deixa passar.
+
+### Dentro da Fonte
+- **Pressão:** dá para ficar **2 horas reais** lá dentro. Avisos em 50/75/90/97%. No limite, a Fonte expulsa o jogador (anel zerado, efeitos ruins) e o portal fica fechado para ele até a pressão baixar da metade (ela cai fora da Fonte).
+- **Banho de Luz:** 10 minutos lá dentro (uma vez por visita) enchem o anel e dão **+150% de carga** (anel a 250%), gasta antes da carga normal, e uma **aura** na cor da Tropa enquanto durar.
+- **Essência da Fonte:** +2 por minuto lá dentro; também vem das provações, do evento das Baterias e dos chefes. Paga os nós da Árvore da Luz.
+- **Salas** (construídas na primeira visita, em volta da plataforma):
+  - **Arquivo** (oeste): púlpito com o livro de memórias dos Lanternas antigos daquela Tropa (5 páginas, texto original).
+  - **Forja de Construtos** (leste): 4 alvos de treino para testar construtos.
+  - **Salão do Conselho** (norte): bancos em roda e o quadro de contratos.
+  - **Ilha do Coração** (sul, a ~140 blocos, no fim da ponte): o altar (farol) onde o chefe desperta.
+
+### Árvore da Luz (tecla P)
+- Três ramos por Tropa (**Ataque**, **Proteção**, **Domínio**), 7 degraus. Custos por degrau: 3, 5, 8, 11, 15, 20, 28 de Essência. Precisa do Selo da Fonte da Tropa e do degrau de baixo do mesmo ramo.
+- Cada Tropa tem **10 construtos novos** (70 no total) e passivas (dano +15% ×2, carga máx. +20% ×2, custo −10%, recarga −15%, duração +30%, regeneração do anel +50%, couraça, voo +20%).
+- Os construtos novos aparecem num anel externo da roda (Z) só depois de liberados. Bosses e NPCs usam o mesmo motor.
+- Todas as texturas de construto (corpo de energia, brilho, bloco) e os ícones da roda/HUD foram refeitos.
+
+### Os Corações das Emoções (chefes das Fontes)
+- Clique no altar da Ilha do Coração com **8 nós** da Árvore da Luz daquela Tropa. Depois de derrotado, o Coração leva **20 minutos** para despertar de novo.
+
+| Fonte | Chefe | Vida |
+|---|---|---|
+| Verde | Colosso de Jade | 650 |
+| Amarela | Mãe das Sombras (voa) | 560 |
+| Vermelha | Serpente Escarlate | 620 |
+| Laranja | Rei Faminto | 700 |
+| Azul | Arcanjo da Aurora (voa) | 580 |
+| Índigo | Cervo Sereno | 600 |
+| Violeta | Rainha de Cristal (voa) | 560 |
+
+- Cada um luta com os construtos da sua emoção e, na metade da vida, muda de fase: invoca aliados, acelera e troca de golpes.
+- **Primeira vitória:** 60 de Essência e o **Coração da Emoção**: +10% de dano e +20% de carga máxima com o anel daquela Tropa, para sempre. Vitórias seguintes: 15 de Essência.
+- Modelos 3D próprios (GeckoLib, 70–215 cubos), com textura, brilho e animações `misc.idle`, `move.walk`, `attack.strike`, `attack.special`, `misc.phase2`.
+
+### Evento de servidor: A Bateria Enfraquece
+- A cada ~2–3 horas reais, piratas atacam a Bateria Central de um planeta onde há jogadores. Todos no servidor recebem o aviso com as coordenadas.
+- 4 ondas (crescem com o número de jogadores; capitão pirata na última). Piratas a menos de 7 blocos da Bateria a drenam (barra no topo).
+- Enquanto dura: anéis daquela Tropa recarregam pela metade.
+- **Bateria resistiu:** recarga +50% por 30 min para aquela Tropa e 8–12 de Essência para quem defendeu. **Caiu:** recarga −50% por 30 min.
+
+### Comandos de teste (operador)
+`/lanterna fonte <selo|pressao|banho|essencia|prova|juramento|arvore [tudo|zerar]|evento|chefe|ir [ilha]|zerar> [valor]`
