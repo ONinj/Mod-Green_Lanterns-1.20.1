@@ -121,6 +121,32 @@ public final class ComandosTeste {
                     dados(p).setPortalCd(0);
                     return ok(c, "Carga cheia, poder ligado, recargas e espera da Porta Estelar zeradas.");
                 }))
+                // tudo no máximo para testes: nível, afinidade, técnicas, poderes, Fonte (selos, árvores, Essência, Corações) e carga 250%
+                .then(op("maximo").executes(c -> {
+                    ServerPlayer p = eu(c);
+                    RingData r0 = ModCapabilities.get(p).orElse(null);
+                    if (r0 == null || !r0.hasRing()) return erro(c, "Equipe um anel primeiro.");
+                    poder(c, "tudo");
+                    for (var t : com.lanterna.baterias.Tropa.values()) {
+                        com.lanterna.fonte.FonteDados.darSelo(p, t.nome);
+                        com.lanterna.fonte.FonteDados.tag(p).putBoolean("coracao:" + t.nome, true);
+                        for (int i = 1; i <= 3; i++) com.lanterna.fonte.FonteDados.chamado(p, t.nome + (i == 1 ? ":chamado" : i == 2 ? ":prova" : ":juramento"), 1);
+                    }
+                    for (var e : com.lanterna.construct.fonte.ArvoreDados.ARVORES.entrySet())
+                        for (var no : e.getValue()) com.lanterna.fonte.FonteDados.darNo(p, e.getKey() + ":" + no.id());
+                    com.lanterna.fonte.FonteDados.essencia(p, 9999);
+                    com.lanterna.fonte.FonteDados.pressao(p, 0);
+                    com.lanterna.fonte.FonteDados.bloqueado(p, false);
+                    RingData r = ModCapabilities.get(p).orElse(null);
+                    if (r != null) {
+                        if (!r.powerActive()) RingPowers.togglePower(p);
+                        RingPowers.setCharge(p, r, r.maxCharge());
+                        com.lanterna.fonte.FonteDados.sobrecarga(p, Math.round(r.maxCharge() * com.lanterna.fonte.Fonte.SOBRECARGA));
+                    }
+                    Constructs.zerarRecargas(p.getUUID());
+                    sync(p);
+                    return ok(c, "TUDO NO MÁXIMO: nível " + Nivel.MAX + ", afinidade máxima, todas as técnicas e poderes, Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência e anel a 250%.");
+                }))
                 .then(op("nivel").then(Commands.argument("n", IntegerArgumentType.integer(1, Nivel.MAX)).executes(c -> {
                     ServerPlayer p = eu(c);
                     int n = IntegerArgumentType.getInteger(c, "n");
@@ -473,6 +499,7 @@ public final class ComandosTeste {
                 {"/lanterna escolher <tropa>", "o anel escolhe você, com a animação"},
                 {"PODERES", ""},
                 {"/lanterna tecnica <id|todas>", "técnicas dos Capitães (olhar, bastiao, onda, salto, armadura, comando)"},
+                {"/lanterna maximo", "TUDO no máximo com o anel equipado: nível, afinidade, técnicas, poderes, Selos, Corações, Árvores da Luz, Essência e carga 250%"},
                 {"/lanterna poder <portal|autorecarga|honra|genese|tudo>", "Porta Estelar, autorrecarga da Prova, Guarda de Honra, Gênese, ou tudo"},
                 {"/lanterna morte <corromper|dominar|faminto|alimentar|limpar>", "linha da Morte e o Anel Preto"},
                 {"MISSÕES", ""},

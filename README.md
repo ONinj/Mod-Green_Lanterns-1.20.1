@@ -56,6 +56,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.30 ✅ (0.25) Cidade futurista dos nativos em cada planeta, NPCs que voltam ao posto, fontes e bordas da cidade sem vazar água
 1.31 ✅ (0.26) Megacidades dos povos (400 blocos, monumentos de até 210, ~150 casas, arquitetura própria em cada planeta) e as Baterias Centrais das 7 Tropas com portal para a dimensão de energia
 1.32 ✅ (0.27) A Fonte: Chamado da Fonte (provação + juramento), pressão de 2 h, Banho de Luz (+150% de carga e aura), Árvore da Luz com 70 construtos novos, construtos e ícones refeitos, 7 chefes (Corações das Emoções), salas da Fonte e o evento "A Bateria Enfraquece"
+1.33 ✅ (0.27.1) Corações das Emoções muito mais fortes (vida ~1300–1600, golpes de 40–60% da vida com aviso e recarga longa, golpe supremo na fase 2) e o comando /lanterna maximo
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

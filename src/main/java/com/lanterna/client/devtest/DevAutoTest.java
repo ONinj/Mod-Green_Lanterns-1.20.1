@@ -2397,6 +2397,46 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+    private static void sceneForca() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(20, () -> cmd("lanterna maximo"));
+        at(20, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("maximo: nivel_xp=" + (d == null ? -1 : d.xp()) + " afinidade=" + com.lanterna.construct.Affinity.points(com.lanterna.power.EquipmentHelper.ring(sp))
+                + " carga=" + (r == null ? -1 : r.charge()) + "/" + (r == null ? -1 : r.maxCharge()) + " sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp)
+                + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp) + " nos=" + com.lanterna.fonte.FonteDados.arvore(sp).size() + " coracao=" + com.lanterna.lore.entity.boss.ChefeFonte.temCoracao(sp)); }));
+        at(10, () -> cmd("lanterna fonte chefe"));
+        at(10, () -> cmd("lanterna fonte ir ilha"));
+        waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(40, () -> server(sp -> {
+            var pos = com.lanterna.fonte.FonteMundo.ILHA.above();
+            var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
+            net.minecraftforge.common.ForgeHooks.onRightClickBlock(sp, net.minecraft.world.InteractionHand.MAIN_HAND, pos, hit);
+        }));
+        // sem armadura, sem resistência: mede cada golpe e devolve a vida
+        at(10, () -> { cmd("gamemode survival"); cmd("effect clear @s"); cmd("clear @s"); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        float[] ultima = {-1};
+        int[] mortes = {0};
+        for (int i = 0; i < 160; i++) {
+            final int k = i;
+            if (i == 80) at(1, () -> server(sp -> { for (var b : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80))) b.setHealth(b.getMaxHealth() * 0.45f); glog("--- fase 2 ---"); }));
+            at(10, () -> server(sp -> {
+                if (sp.isDeadOrDying()) { mortes[0]++; glog("MORREU t=" + k); return; }
+                float h = sp.getHealth();
+                if (ultima[0] > 0 && h < ultima[0] - 0.5f) { var src = sp.getLastDamageSource(); glog("t=" + (k / 2) + "s golpe=" + Math.round((ultima[0] - h) * 10) / 10f + " de " + Math.round(sp.getMaxHealth()) + " por=" + (src == null ? "?" : src.getMsgId() + "/" + (src.getDirectEntity() == null ? "-" : src.getDirectEntity().getType().getDescriptionId()))); }
+                sp.setHealth(sp.getMaxHealth());
+                ultima[0] = sp.getMaxHealth();
+                var bs = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80));
+                if (!bs.isEmpty() && sp.distanceTo(bs.get(0)) > 10) sp.teleportTo(bs.get(0).getX() + 6, bs.get(0).getY(), bs.get(0).getZ());
+            }));
+            if (i == 40 || i == 120) at(1, () -> shot("forca_" + k));
+        }
+        at(10, () -> { glog("mortes=" + mortes[0]); for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneFonte() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -2748,6 +2788,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("fonte")) sceneFonte();
         else if (ENABLED && SCENE.equals("arvore")) sceneArvore();
         else if (ENABLED && SCENE.equals("chefes")) sceneChefes();
+        else if (ENABLED && SCENE.equals("forca")) sceneForca();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

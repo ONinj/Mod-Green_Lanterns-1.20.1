@@ -659,13 +659,19 @@ usam bateria).
 
 | Fonte | Chefe | Vida |
 |---|---|---|
-| Verde | Colosso de Jade | 650 |
-| Amarela | Mãe das Sombras (voa) | 560 |
-| Vermelha | Serpente Escarlate | 620 |
-| Laranja | Rei Faminto | 700 |
-| Azul | Arcanjo da Aurora (voa) | 580 |
-| Índigo | Cervo Sereno | 600 |
-| Violeta | Rainha de Cristal (voa) | 560 |
+| Verde | Colosso de Jade | 1500 |
+| Amarela | Mãe das Sombras (voa) | 1300 |
+| Vermelha | Serpente Escarlate | 1420 |
+| Laranja | Rei Faminto | 1600 |
+| Azul | Arcanjo da Aurora (voa) | 1330 |
+| Índigo | Cervo Sereno | 1380 |
+| Violeta | Rainha de Cristal (voa) | 1300 |
+
+**Força (0.27.1):** armadura 16 e resistência 8, imunes a empurrão. Os golpes são muito pesados, mas lentos e anunciados:
+- **Construto:** 22 de dano (28 na fase 2) antes da armadura, a cada 8,5 s (6,5 s na fase 2). O chefe para 1,5 s e concentra a luz, e um círculo marca o chão embaixo do alvo: dá para fugir.
+- **Corpo a corpo:** 34 de dano, a cada 3 s (2,25 s na fase 2).
+- **Golpe supremo (fase 2):** a cada 30 s, 3 s de aviso ("concentra toda a emoção! Saia de perto!"), depois solta os três construtos da fase 2 juntos.
+- **Nunca mata de um golpe:** ninguém perde mais de 60% da vida máxima para o chefe em 1 s; o que chega menos de 1,5 s depois de um golpe vale só um quarto; e quem está com mais da metade da vida fica com pelo menos 1 coração.
 
 - Cada um luta com os construtos da sua emoção e, na metade da vida, muda de fase: invoca aliados, acelera e troca de golpes.
 - **Primeira vitória:** 60 de Essência e o **Coração da Emoção**: +10% de dano e +20% de carga máxima com o anel daquela Tropa, para sempre. Vitórias seguintes: 15 de Essência.
@@ -679,3 +685,5 @@ usam bateria).
 
 ### Comandos de teste (operador)
 `/lanterna fonte <selo|pressao|banho|essencia|prova|juramento|arvore [tudo|zerar]|evento|chefe|ir [ilha]|zerar> [valor]`
+
+`/lanterna maximo` (com o anel equipado): nível máximo, afinidade máxima, todas as técnicas e poderes (Porta Estelar, autorrecarga, Guarda de Honra, Gênese, planetas visitados), Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência, pressão zerada e anel a 250% de carga.

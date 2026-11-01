@@ -9,6 +9,7 @@ import com.lanterna.lore.entity.boss.LoreBoss;
 import com.lanterna.registry.ModEntities;
 import com.lanterna.registry.ModItems;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -141,13 +142,13 @@ public final class LoreEntities {
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());
             event.put(NULO.get(), LoreBoss.attributes(800, 14, 0.30).build());
-            event.put(COLOSSO_DE_JADE.get(), LoreBoss.attributes(650, 18, 0.26).build());
-            event.put(MAE_DAS_SOMBRAS.get(), LoreBoss.attributes(560, 15, 0.28).build());
-            event.put(SERPENTE_ESCARLATE.get(), LoreBoss.attributes(620, 17, 0.3).build());
-            event.put(REI_FAMINTO.get(), LoreBoss.attributes(700, 16, 0.22).build());
-            event.put(ARCANJO_DA_AURORA.get(), LoreBoss.attributes(580, 15, 0.28).build());
-            event.put(CERVO_SERENO.get(), LoreBoss.attributes(600, 15, 0.3).build());
-            event.put(RAINHA_DE_CRISTAL.get(), LoreBoss.attributes(560, 16, 0.28).build());
+            event.put(COLOSSO_DE_JADE.get(), LoreBoss.attributes(1500, 34, 0.26).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(MAE_DAS_SOMBRAS.get(), LoreBoss.attributes(1300, 34, 0.28).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(SERPENTE_ESCARLATE.get(), LoreBoss.attributes(1420, 34, 0.3).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(REI_FAMINTO.get(), LoreBoss.attributes(1600, 34, 0.22).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(ARCANJO_DA_AURORA.get(), LoreBoss.attributes(1330, 34, 0.28).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(CERVO_SERENO.get(), LoreBoss.attributes(1380, 34, 0.3).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
+            event.put(RAINHA_DE_CRISTAL.get(), LoreBoss.attributes(1300, 34, 0.28).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
         }
 
         @SubscribeEvent
