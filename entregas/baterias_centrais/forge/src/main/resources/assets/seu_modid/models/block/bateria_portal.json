@@ -1,0 +1,7 @@
+{
+ "parent": "block/block",
+ "textures": {
+  "particle": "seu_modid:block/bateria_central_verde"
+ },
+ "elements": []
+}

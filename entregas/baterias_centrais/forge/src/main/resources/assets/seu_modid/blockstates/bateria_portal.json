@@ -1,0 +1,46 @@
+{
+ "variants": {
+  "retorno=false,tropa=verde": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=verde": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=amarelo": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=amarelo": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=vermelho": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=vermelho": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=laranja": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=laranja": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=azul": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=azul": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=indigo": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=indigo": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=false,tropa=violeta": {
+   "model": "seu_modid:block/bateria_portal"
+  },
+  "retorno=true,tropa=violeta": {
+   "model": "seu_modid:block/bateria_portal"
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "variants": {
+  "tropa=verde": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=amarelo": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=vermelho": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=laranja": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=azul": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=indigo": {
+   "model": "seu_modid:block/bateria_nucleo"
+  },
+  "tropa=violeta": {
+   "model": "seu_modid:block/bateria_nucleo"
+  }
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "item.seu_modid.bateria_central_verde": "Central Battery — Lantern of Will",
+ "item.seu_modid.bateria_central_amarelo": "Central Battery — Cage of Fear",
+ "item.seu_modid.bateria_central_vermelho": "Central Battery — Volcanic Heart of Rage",
+ "item.seu_modid.bateria_central_laranja": "Central Battery — Reliquary of Avarice",
+ "item.seu_modid.bateria_central_azul": "Central Battery — Beacon of Hope",
+ "item.seu_modid.bateria_central_indigo": "Central Battery — Totem of Compassion",
+ "item.seu_modid.bateria_central_violeta": "Central Battery — Crystal of Love",
+ "block.seu_modid.bateria_nucleo": "Central Battery Core",
+ "block.seu_modid.bateria_casca": "Central Battery Shell",
+ "block.seu_modid.bateria_portal": "Central Battery Field"
+}

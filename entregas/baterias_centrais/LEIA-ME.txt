@@ -1,0 +1,79 @@
+BATERIAS CENTRAIS DAS TROPAS — GeckoLib 4 / Forge 1.20.1
+=========================================================
+Uma Bateria Central gigante para a cidade de cada Tropa (7 Tropas; a da Morte e a da Vida não usam bateria). Cada uma é um modelo 3D enorme com corpo de verdade
+(dá para bater nela, subir nela, entrar), uma câmara na base e um campo de energia que funciona como o portal
+do Nether: o jogador fica dentro dele por 2 segundos e é levado para a dimensão de energia daquela Tropa.
+Só quem tiver permissão atravessa; os outros são empurrados para fora.
+Inspiradas nos quadrinhos, mas com formas e símbolos próprios.
+
+AS 7 BATERIAS
+  Tropa     nome                          tamanho (L x A x C, blocos)   cubos  dimensão
+  verde     Lanterna da Vontade           15 x 32 x 17                  164    seu_modid:fonte_verde
+  amarelo   Gaiola do Medo                15 x 28 x 17                  173    seu_modid:fonte_amarelo
+  vermelho  Coração Vulcânico da Fúria    16 x 31 x 17                  103    seu_modid:fonte_vermelho
+  laranja   Relicário da Avareza          16 x 32 x 17                  169    seu_modid:fonte_laranja
+  azul      Farol da Esperança            15 x 34 x 17                  193    seu_modid:fonte_azul
+  indigo    Totem da Compaixão            15 x 29 x 17                  161    seu_modid:fonte_indigo
+  violeta   Cristal do Amor               21 x 35 x 23                  106    seu_modid:fonte_violeta
+
+COMO CADA UMA É MONTADA NO MUNDO (3 blocos do mod + o modelo)
+  bateria_nucleo  [tropa=...]              1 bloco embaixo do piso, no centro da câmara. Ele DESENHA o modelo
+                                           gigante (GeckoLib) e anima (misc.idle; misc.ativo quando alguém entra).
+  bateria_casca                            blocos invisíveis e inquebráveis no formato do modelo = a hitbox.
+                                           Foram gerados automaticamente a partir da geometria (cada bloco do
+                                           mundo que o modelo ocupa em pelo menos 40%).
+  bateria_portal  [tropa=..., retorno=...] o campo de energia: 3 x 3 x 4 blocos no meio da câmara. Invisível
+                                           (o brilho vem do modelo) e solta partículas da cor da Tropa.
+  A câmara tem 5 x 5 x 6 blocos livres por dentro e a entrada tem 3 de largura x 4 de altura, virada para o
+  NORTE (-Z). As estruturas prontas estão em data/seu_modid/structures/bateria_central_<tropa>.nbt.
+  previas/bateria_central_<tropa>.png mostra o modelo e, à direita, a hitbox (cortada na frente para ver o portal).
+
+COLOCAR NO MUNDO
+  • Item bateria_central_<tropa> (criativo): clique no chão e a bateria inteira aparece; o núcleo fica no lugar
+    do bloco clicado (afundado no chão), a porta para o norte.
+  • Ou com comando: /place template seu_modid:bateria_central_verde X Y Z — X Y Z é o canto da estrutura;
+    o núcleo fica no canto + (origem):
+      verde      origem (7, 0, 9)   estrutura 15 x 32 x 17
+      amarelo    origem (7, 0, 9)   estrutura 15 x 28 x 17
+      vermelho   origem (8, 0, 9)   estrutura 16 x 31 x 17
+      laranja    origem (7, 0, 9)   estrutura 16 x 32 x 17
+      azul       origem (7, 0, 9)   estrutura 15 x 34 x 17
+      indigo     origem (7, 0, 9)   estrutura 15 x 29 x 17
+      violeta    origem (9, 0, 10)   estrutura 21 x 35 x 23
+  • Para a cidade gerar com a bateria, use a mesma estrutura num jigsaw/estrutura do seu worldgen.
+
+O PORTAL
+  • Fique 2 segundos no campo (a tela distorce como no Nether) -> vai para seu_modid:fonte_<tropa>.
+  • Quem pode: AcessoBateria.podeEntrar(): por padrão quem tem a tag bateria_<tropa> (/tag NOME add bateria_verde)
+    ou é operador. Troque essa regra pelo que quiser (nível do anel, missão, Guarda de Honra...).
+  • Quem não pode: recebe "A Bateria Central não reconhece você." e é empurrado para fora.
+  • Na primeira visita é criada a plataforma de chegada (structures/chegada_<tropa>.nbt, 13 x 13, com os blocos
+    do vanilla na cor da Tropa) em 0, 100, 0. O círculo de 3 x 3 no meio dela é o portal de volta (retorno=true),
+    que devolve o jogador para onde ele entrou, 3,5 blocos para trás, virado para fora.
+  • Dimensões: data/seu_modid/dimension/fonte_<tropa>.json (vazio, sem céu, noite fixa, efeitos do End) e
+    dimension_type/fonte.json. É só o "palco": o que vai existir lá dentro você decide depois.
+
+MODELO (assets/seu_modid/)
+  geo/block/bateria_central_<tropa>.geo.json · textures/block/bateria_central_<tropa>.png (1024x1024) + _glowmask
+  animations/block/bateria_central_<tropa>.animation.json
+  Ossos: root · estrutura (base/câmara) · lanterna (corpo temático) · nucleo (vidro) ─ nucleo_brilho (pulsa)
+         campo ─ campo_brilho (o portal) · anel_1/anel_2 (partes que giram/flutuam; nem todas têm o anel_2)
+  Animações: misc.idle (anéis girando devagar, núcleo pulsando) e misc.ativo (tudo mais rápido e mais forte).
+  A origem do modelo é o centro do bloco do núcleo; 16 unidades = 1 bloco.
+
+CÓDIGO (forge/src/main/java/seu/pacote/baterias/) — troque o pacote e o MODID
+  Tropa.java                   as 7 Tropas com bateria e a cor de cada uma
+  ModBaterias.java             registra os 3 blocos, o BlockEntity e os 7 itens de construção
+  BateriaNucleoBlock/BlockEntity  desenha e anima o modelo (área de desenho ampliada para não sumir)
+  BateriaCascaBlock            colisão invisível
+  BateriaPortalBlock           o campo: tempo dentro, permissão, ida e volta, partículas
+  BateriaTeleporte             leva para a plataforma de chegada (e cria ela) e traz de volta
+  AcessoBateria                regra de quem pode entrar
+  BateriaCentralItem           coloca a estrutura inteira com um clique
+  client/BateriaNucleoRenderer renderizador GeckoLib + brilho.
+  Registro: ModBaterias.register(modEventBus); no cliente:
+    BlockEntityRenderers.register(ModBaterias.NUCLEO_BE.get(), BateriaNucleoRenderer::new);
+  O código não foi compilado dentro do projeto do mod; teste ao integrar.
+
+BLOCKBENCH: blockbench/bateria_central_<tropa>.bbmodel (formato Bedrock, com a textura). Importe a animação pelo
+  Animate > Import. Se mudar a forma, rode o gerador de novo para refazer a hitbox (gerador/build_bat.py).

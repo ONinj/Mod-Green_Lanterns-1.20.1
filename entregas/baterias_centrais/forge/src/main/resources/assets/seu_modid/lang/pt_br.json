@@ -1,0 +1,12 @@
+{
+ "item.seu_modid.bateria_central_verde": "Bateria Central — Lanterna da Vontade",
+ "item.seu_modid.bateria_central_amarelo": "Bateria Central — Gaiola do Medo",
+ "item.seu_modid.bateria_central_vermelho": "Bateria Central — Coração Vulcânico da Fúria",
+ "item.seu_modid.bateria_central_laranja": "Bateria Central — Relicário da Avareza",
+ "item.seu_modid.bateria_central_azul": "Bateria Central — Farol da Esperança",
+ "item.seu_modid.bateria_central_indigo": "Bateria Central — Totem da Compaixão",
+ "item.seu_modid.bateria_central_violeta": "Bateria Central — Cristal do Amor",
+ "block.seu_modid.bateria_nucleo": "Núcleo da Bateria Central",
+ "block.seu_modid.bateria_casca": "Casca da Bateria Central",
+ "block.seu_modid.bateria_portal": "Campo da Bateria Central"
+}
