@@ -48,6 +48,7 @@ public class LanternaMod {
         com.lanterna.armor.ModTrajes.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
+        com.lanterna.baterias.ModBaterias.register(modBus); // Baterias Centrais das 7 Tropas
         ModMenus.MENUS.register(modBus);
         ModParticles.PARTICLES.register(modBus);
         com.lanterna.construct.ModEfeitos.init(modBus);

@@ -567,3 +567,53 @@ em Nok, Zaëlith em Zamaron, Silentes em Ryut). É construída quando um jogador
 - Fontes do Palácio e da cidade com borda de bloco inteiro (com laje a água vazava); o Palácio seca a água que
   vazou. A cidade da Tropa ganhou uma faixa de 12 blocos em volta que segura a água de lagos e rios de fora (que
   descia pela muralha) e seca o que já entrou. Mundos antigos são consertados sozinhos ao passar perto.
+
+# 0.26 — As megacidades dos povos
+
+Cada planeta das Tropas ganhou uma cidade gigante do seu povo, a oeste da base (centro em **-480, 0**). Todas têm o
+mesmo tamanho, mas cada uma tem arquitetura e cultura próprias.
+
+- **Tamanho:** disco de 400 blocos de diâmetro, com muralha e 8 portões.
+- **Centro:** praça de 80 blocos com o monumento do povo, de 125 a 210 blocos de altura.
+- **Ruas:** 8 avenidas largas e 3 anéis de ruas.
+- **Construções:** 8 marcos de 40 a 100 blocos, cerca de 40 prédios médios (salões, mercados, quartéis, pavilhões) e cerca de 150 casas em 4 bairros.
+- **Moradores:** 40 nativos, e o vigia repõe quem faltar (mínimo 30).
+
+| Planeta | Povo | Cidade | Monumento | Marcos, prédios e casas |
+|---|---|---|---|---|
+| Oa | Veltari | Cidade de Luz | Torre da Luz (≈210) com 3 coroas e raízes de apoio | torres-cálice com casulos de vidro ligados à Torre por pontes, torres de vidro, casas-cúpula |
+| Korugar | Skrell'Vath | A Colmeia do Medo | Colmeia negra (≈205) com janelas âmbar, andares do ninho e espinhos em espiral | agulhas de espinhos, torres hexagonais, casulos meio enterrados, portões em presa |
+| Ysmault | Brakkari | A Fortaleza de Gorrak | Coliseu de 110 blocos (arena, 14 fileiras, trono do campeão) e 4 torres de chifres de 110 | torres de vigia com chifres, quartéis, casas-bunker, muralha de 20 com ameias, veios de magma |
+| Odym | Aelínos | A Cidade das Marés | Farol de Pérola (≈195) com fitas de onda em hélice sobre uma concha gigante | sobre a água, em palafitas: jardins de coral, torres de conchas, casas-concha com passarelas |
+| Okaara | Ghallos | O Mercado dos Cofres | Zigurate do Tesouro de 12 degraus, cofre de ouro e obelisco dourado (≈155), com salão do tesouro | torres-cofre de cúpula dourada, mercados cobertos com bancas, casas com terraço, barracas nas avenidas |
+| Nok | Ves'Kai | O Santuário das Raízes | Árvore-Mãe (≈150), com copa de 130 blocos sobre a praça, raízes e lágrimas de luz | templos de 6 degraus, casas longas e cabanas sobre estacas com telhado roxo, jardins |
+| Zamaron | Zaëlith | O Jardim de Cristal | Coração de Cristal de 100 x 100 entre duas agulhas gêmeas de 150, ligadas por um arco de luz | pares de agulhas com pontes, pavilhões octogonais, casas em pares, canteiros de flores |
+| Ryut | Silentes | A Necrópole Silenciosa | Obelisco do Silêncio (170) dentro do Colosso: costelas e espinha de osso de 170 blocos, com o crânio na entrada norte | grupos de obeliscos com fogo das almas, mausoléus grandes e pequenos com bigornas, lápides |
+
+**Como a cidade é construída**
+
+- O mundo da área é carregado em segundo plano (lotes de 48 chunks), e a obra é feita em pedaços de até ~15 ms por tick. A cidade aparece em cerca de 1 minuto.
+- No fim, a obra drena a água que escorreu dos lagos para o chão aplainado.
+- Mundos que já tinham a cidade pequena da 0.25 (em -210, 0) na primeira visita: ela é desmontada, os nativos se mudam para a cidade nova e a megacidade é construída (site `megacidade`).
+
+## Baterias Centrais (0.26)
+
+Cada Tropa tem a sua **Bateria Central** gigante na megacidade do planeta, numa praça própria a sudeste do centro
+(no lugar de um dos marcos, entre duas avenidas), com a câmara virada para o norte. Ryut não tem (Morte e Vida não
+usam bateria).
+
+| Planeta | Bateria | Tamanho (L x A x C) |
+|---|---|---|
+| Oa | Lanterna da Vontade (verde) | 15 x 32 x 17 |
+| Korugar | Gaiola do Medo (amarela) | 15 x 28 x 17 |
+| Ysmault | Coração Vulcânico da Fúria (vermelha) | 16 x 31 x 17 |
+| Okaara | Relicário da Avareza (laranja) | 16 x 32 x 17 |
+| Odym | Farol da Esperança (azul) | 15 x 34 x 17 |
+| Nok | Totem da Compaixão (índigo) | 15 x 29 x 17 |
+| Zamaron | Cristal do Amor (violeta) | 21 x 35 x 23 |
+
+- **Corpo:** o modelo é desenhado pelo núcleo (GeckoLib, animações `misc.idle` e `misc.ativo`). Os blocos invisíveis da casca dão o corpo, então dá para bater, subir e entrar.
+- **Portal:** fique 2 s no campo de energia da câmara para ir à dimensão de energia da Tropa (`lanterna:fonte_<tropa>`). Lá, a plataforma de chegada tem no centro o círculo de volta.
+- **Quem atravessa:** quem está usando o anel da Tropa daquela Bateria, quem tem a tag `bateria_<tropa>` (`/tag NOME add bateria_verde`) ou operadores. Os outros são empurrados para fora.
+- **Itens de construção (criativo):** `bateria_central_<tropa>`, um clique no chão e a Bateria inteira aparece. Também dá para usar `/place template lanterna:bateria_central_<tropa>`.
+- **Origem:** o pacote veio da branch `entrega/baterias-centrais`. Os modelos, ossos e animações são os do pacote, sem mudar nomes. Só o modid passou a ser `lanterna`, inclusive dentro das estruturas `.nbt`.

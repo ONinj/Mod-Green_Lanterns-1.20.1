@@ -1,0 +1,46 @@
+{
+ "variants": {
+  "retorno=false,tropa=verde": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=verde": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=amarelo": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=amarelo": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=vermelho": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=vermelho": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=laranja": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=laranja": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=azul": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=azul": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=indigo": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=indigo": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=false,tropa=violeta": {
+   "model": "lanterna:block/bateria_portal"
+  },
+  "retorno=true,tropa=violeta": {
+   "model": "lanterna:block/bateria_portal"
+  }
+ }
+}

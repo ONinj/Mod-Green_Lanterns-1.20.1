@@ -1,0 +1,25 @@
+{
+ "variants": {
+  "tropa=verde": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=amarelo": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=vermelho": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=laranja": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=azul": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=indigo": {
+   "model": "lanterna:block/bateria_nucleo"
+  },
+  "tropa=violeta": {
+   "model": "lanterna:block/bateria_nucleo"
+  }
+ }
+}

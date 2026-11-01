@@ -65,7 +65,10 @@ public final class PlanetSites {
             if (!com.lanterna.cidade.Obra.ocupada() && data.siteBuilt(planet.planet + ":cidade2"))
                 tryBuild(level, data, planet, "cidade2_agua", com.lanterna.cidade.Cidade.CENTRO, player, 160);
             if (!com.lanterna.cidade.Obra.ocupada() && planet != PlanetLore.GENESE)
-                tryBuild(level, data, planet, "nativa", com.lanterna.cidade.CidadeNativa.CENTRO, player, 220);
+                tryBuild(level, data, planet, "nativa", com.lanterna.cidade.CidadeNativa.CENTRO, player, 1000);
+            // mundos com a cidade pequena da 0.25: vira a megacidade do povo
+            if (!com.lanterna.cidade.Obra.ocupada() && planet != PlanetLore.GENESE && data.siteBuilt(planet.planet + ":nativa"))
+                tryBuild(level, data, planet, "megacidade", com.lanterna.cidade.CidadeNativa.CENTRO, player, 1000);
         }
     }
 
@@ -88,6 +91,9 @@ public final class PlanetSites {
                 com.lanterna.cidade.Cidade.consertarAgua(level);
             } else if (kind.equals("nativa")) {
                 com.lanterna.cidade.CidadeNativa.construir(level, planet);
+                data.markSite(planet.planet + ":megacidade"); // já nasce grande, com a arquitetura do povo
+            } else if (kind.equals("megacidade")) {
+                com.lanterna.cidade.CidadeNativa.refazer(level, planet);
             } else if (kind.equals("palacio_degraus")) {
                 com.lanterna.cidade.Palacio.consertarTronos(level);
             } else if (kind.equals("cidade2")) {

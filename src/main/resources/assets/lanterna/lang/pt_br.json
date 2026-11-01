@@ -1677,5 +1677,19 @@
   "hud.lanterna.mi_blocos": "%s mi blocos",
   "perfil.lanterna.nivel_max": "%s (máx.)",
   "perfil.lanterna.vida_val": "%s / %s  (+%s pelo nível)",
-  "perfil.lanterna.tecnicas_val": "%s / %s  ·  %s espaços"
+  "perfil.lanterna.tecnicas_val": "%s / %s  ·  %s espaços",
+  "item.lanterna.bateria_central_verde": "Bateria Central — Lanterna da Vontade",
+  "item.lanterna.bateria_central_amarelo": "Bateria Central — Gaiola do Medo",
+  "item.lanterna.bateria_central_vermelho": "Bateria Central — Coração Vulcânico da Fúria",
+  "item.lanterna.bateria_central_laranja": "Bateria Central — Relicário da Avareza",
+  "item.lanterna.bateria_central_azul": "Bateria Central — Farol da Esperança",
+  "item.lanterna.bateria_central_indigo": "Bateria Central — Totem da Compaixão",
+  "item.lanterna.bateria_central_violeta": "Bateria Central — Cristal do Amor",
+  "block.lanterna.bateria_nucleo": "Núcleo da Bateria Central",
+  "block.lanterna.bateria_casca": "Casca da Bateria Central",
+  "block.lanterna.bateria_portal": "Campo da Bateria Central",
+  "msg.lanterna.bateria.nega": "A Bateria Central não reconhece você.",
+  "msg.lanterna.bateria.sem_dim": "A fonte de energia desta Bateria não foi encontrada.",
+  "msg.lanterna.bateria.criativo": "Só no modo criativo.",
+  "msg.lanterna.bateria.anel": "Só um Lanterna da Tropa %s atravessa este campo."
 }

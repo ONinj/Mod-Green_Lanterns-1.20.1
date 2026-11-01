@@ -68,11 +68,11 @@ public final class Moradores {
                 if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} NPC(s) da base voltaram em {}", n, planet.planet);
             }
         }
-        if (data.siteBuilt(planet.planet + ":nativa") && perto(p, CidadeNativa.CENTRO, 120)) {
+        if (data.siteBuilt(planet.planet + ":nativa") && data.siteBuilt(planet.planet + ":megacidade") && !Obra.ocupada() && perto(p, CidadeNativa.CENTRO, 240)) {
             String chave = level.dimension().location() + "|nativa";
             if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
                 ULTIMA.put(chave, level.getGameTime());
-                int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 10);
+                int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 30);
                 if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} nativo(s) voltaram à cidade de {}", n, planet.planet);
             }
         }

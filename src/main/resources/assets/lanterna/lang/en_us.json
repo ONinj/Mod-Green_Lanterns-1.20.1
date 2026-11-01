@@ -1677,5 +1677,19 @@
   "hud.lanterna.mi_blocos": "%sM blocks",
   "perfil.lanterna.nivel_max": "%s (max)",
   "perfil.lanterna.vida_val": "%s / %s  (+%s from level)",
-  "perfil.lanterna.tecnicas_val": "%s / %s  ·  %s slots"
+  "perfil.lanterna.tecnicas_val": "%s / %s  ·  %s slots",
+  "item.lanterna.bateria_central_verde": "Central Battery — Lantern of Will",
+  "item.lanterna.bateria_central_amarelo": "Central Battery — Cage of Fear",
+  "item.lanterna.bateria_central_vermelho": "Central Battery — Volcanic Heart of Rage",
+  "item.lanterna.bateria_central_laranja": "Central Battery — Reliquary of Avarice",
+  "item.lanterna.bateria_central_azul": "Central Battery — Beacon of Hope",
+  "item.lanterna.bateria_central_indigo": "Central Battery — Totem of Compassion",
+  "item.lanterna.bateria_central_violeta": "Central Battery — Crystal of Love",
+  "block.lanterna.bateria_nucleo": "Central Battery Core",
+  "block.lanterna.bateria_casca": "Central Battery Shell",
+  "block.lanterna.bateria_portal": "Central Battery Field",
+  "msg.lanterna.bateria.nega": "The Central Battery does not recognize you.",
+  "msg.lanterna.bateria.sem_dim": "This Battery's energy source was not found.",
+  "msg.lanterna.bateria.criativo": "Creative mode only.",
+  "msg.lanterna.bateria.anel": "Only a Lantern of the %s Corps can cross this field."
 }

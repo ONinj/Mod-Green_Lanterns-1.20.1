@@ -54,6 +54,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.28 ✅ (0.23) Hiperpropulsão nos planetas (70 blocos/s), NPCs de missão que voltam se sumirem, uniforme sem a segunda camada da skin por cima, ícones novos dos uniformes, inglês completo e polimento de animações
 1.29 ✅ (0.24) Manga do uniforme em primeira pessoa com a transformação, laser saindo da mão certa, correção dos NPCs repetidos e das faces brilhando nos trajes
 1.30 ✅ (0.25) Cidade futurista dos nativos em cada planeta, NPCs que voltam ao posto, fontes e bordas da cidade sem vazar água
+1.31 ✅ (0.26) Megacidades dos povos (400 blocos, monumentos de até 210, ~150 casas, arquitetura própria em cada planeta) e as Baterias Centrais das 7 Tropas com portal para a dimensão de energia
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
