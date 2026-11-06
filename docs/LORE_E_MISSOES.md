@@ -793,3 +793,24 @@ O juramento do Chamado da Fonte (etapa 3) também passou a ser falado.
 - Quem está sentado na nave (piloto, passageiros, Lanternas NPC) inclina junto com ela nas curvas e ao subir/descer:
   o assento se move com o casco e o corpo gira junto.
 - Em primeira pessoa, a visão do piloto inclina de lado nas curvas (um pouco menos que o casco, para não enjoar).
+
+
+## 0.31 — Favores dos Ves'Kai e o Cajado da Compaixão
+
+### Lágrimas Índigo mais fáceis
+- A Gratidão Ves'Kai virou **Moeda de Gratidão**. Ganha de duas formas:
+  - curando um Ves'Kai ferido (como antes);
+  - fazendo **favores**: cada Ves'Kai (morador comum, não ferido) pede um favor por dia. Fale com ele e aceite.
+    Até 3 favores ao mesmo tempo. Ao concluir, paga 2 ou 3 moedas.
+- Favores possíveis: frutos brilhantes (12), bagas doces (16), velas (6), lã branca (8), fragmentos de ametista (8),
+  garrafas de mel (3), pães (8), derrotar Ecos Cinzentos (6), derrotar zumbis (8).
+- Trocas com os Ves'Kai (Shift + clique direito):
+  1 moeda → 1 Lágrima Índigo · 4 moedas → 5 Lágrimas · 6 ametistas → 1 Lágrima ·
+  10 frutos brilhantes + 1 moeda → 2 Lágrimas · 1 maçã dourada → 2 moedas (e as trocas antigas).
+
+### Cajado da Compaixão
+- No slot de bateria: fica **preso nas costas**, na diagonal (antes ficava reto na mão esquerda).
+- Segurando o cajado: fica **em pé na frente do corpo, segurado com as duas mãos**, balançando de leve ao andar.
+- Recarga Índigo (R): sem portal. O cajado se forma na mão do lado oposto ao anel, a mão do anel sobe e **encosta o
+  anel no cristal do topo**, a luz gira em volta e entra no anel, e o cajado volta para as costas.
+  Em primeira pessoa o cajado sobe pela esquerda e a mão vai até o cristal.

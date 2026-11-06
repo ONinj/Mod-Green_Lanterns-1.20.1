@@ -21,7 +21,8 @@
     "ClientLevelMixin",
     "MouseHandlerMixin",
     "PlayerRendererMixin",
-    "CameraMixin"
+    "CameraMixin",
+    "ItemInHandLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

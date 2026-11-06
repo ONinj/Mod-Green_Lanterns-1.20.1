@@ -61,6 +61,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.35 ✅ (0.29) Naves: sem dano de queda ao pousar, todos os poderes do anel ferem naves (tripulação protegida pelo casco), sair da nave depois de renascer no beliche leva até a nave, Chave da Nave fica na morte e chama a nave com reentrada na atmosfera, sons próprios das naves
 1.36 ✅ (0.30) Juramento falado na Bateria Central como primeira missão do anel (microfone, palavra por palavra, PT/EN), comunicador do anel com ligações em grupo e holograma (1ª e 3ª pessoa), voz via Simple Voice Chat, câmera em terceira pessoa por cima do ombro
 1.37 ✅ (0.30.1) Tripulação acompanha a inclinação da nave (assento, corpo e visão em primeira pessoa inclinam nas curvas e subidas)
+1.38 ✅ (0.31) Favores dos Ves'Kai com Moedas de Gratidão e Lágrimas Índigo mais fáceis de trocar, Cajado da Compaixão nas costas e segurado com as duas mãos, recarga Índigo encostando o anel no cajado (1ª e 3ª pessoa)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

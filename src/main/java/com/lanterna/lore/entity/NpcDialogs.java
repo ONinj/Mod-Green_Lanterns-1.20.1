@@ -76,6 +76,13 @@ public final class NpcDialogs {
             }
             case VES_KAI -> {
                 if (npc.hasFlag(RaceEntity.WOUNDED)) lines.add("dialog.lanterna.ves_kai.wounded");
+                else {
+                    String favor = FavoresVesKai.oferta(player, npc, data);
+                    if (favor != null) {
+                        lines.add("dialog.lanterna.ves_kai.favor");
+                        options.add("accept:" + favor);
+                    } else lines.add("dialog.lanterna.ves_kai.moedas");
+                }
             }
             case SKRELL_VATH -> {
                 if (RaceEntity.rep(player, "skrell_vath") < 1) lines.add("dialog.lanterna.skrell_vath.no_respect");

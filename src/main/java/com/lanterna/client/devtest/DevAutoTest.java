@@ -2876,6 +2876,125 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+
+    private static void sceneInclina2() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.world.entity.decoration.ArmorStand[] cam = {null};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        String[] tipos = {"NAVE_LANCEIRA", "NAVE_PATRULHA"};
+        for (String tp : tipos) {
+            at(40, () -> server(sp -> {
+                var l = sp.serverLevel();
+                sp.stopRiding();
+                for (var n : l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200))) n.discard();
+                var n = com.lanterna.naves.NaveEntity.create(l, com.lanterna.naves.NaveTipo.valueOf(tp), "green");
+                n.moveTo(60.5, 150, 60.5, 0, 0);
+                n.setDono(sp.getUUID());
+                l.addFreshEntity(n);
+                sp.teleportTo(l, 60.5, 151, 60.5, 0, 0);
+                sp.startRiding(n, true);
+            }));
+            at(30, () -> { mc.player.setXRot(0); mc.options.keyUp.setDown(true); mc.options.keyJump.setDown(true); });
+            at(30, () -> {
+                var n = mc.player.getVehicle();
+                mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+            });
+            at(12, () -> {});
+            at(1, () -> { var n = (com.lanterna.naves.NaveEntity) mc.player.getVehicle(); glog(tp + " subindo pitch=" + n.visPitch(1)); shot("inclina_sobe_" + tp.toLowerCase()); });
+            at(1, () -> com.lanterna.naves.client.NaveRenderer.OCULTA = true);
+            at(6, () -> shot("inclina_sobe_oculta_" + tp.toLowerCase()));
+            at(1, () -> com.lanterna.naves.client.NaveRenderer.OCULTA = false);
+            at(1, () -> { mc.options.keyJump.setDown(false); com.lanterna.client.KeyBindings.NAVE_DESCER.setDown(true); });
+            at(40, () -> {});
+            at(1, () -> { var n = (com.lanterna.naves.NaveEntity) mc.player.getVehicle(); glog(tp + " descendo pitch=" + n.visPitch(1)); shot("inclina_desce_" + tp.toLowerCase()); });
+            at(1, () -> { com.lanterna.client.KeyBindings.NAVE_DESCER.setDown(false); mc.options.keyUp.setDown(false);  });
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+
+    private static void sceneCajado() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel indigo"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -6; x <= 6; x++) for (int z = -6; z <= 6; z++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState());
+            com.lanterna.power.EquipmentHelper.take(sp, com.lanterna.capability.RingData.BATTERY_SLOT);
+            com.lanterna.power.EquipmentHelper.equip(sp, com.lanterna.capability.RingData.BATTERY_SLOT, new net.minecraft.world.item.ItemStack(com.lanterna.registry.ModItems.COMPASSION_STAFF.get()));
+            sp.getInventory().clearContent();
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+            glog("bateria=" + com.lanterna.power.EquipmentHelper.battery(sp));
+        }));
+        at(20, () -> { com.lanterna.client.camera.CameraLanterna.ligada = false; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(30, () -> shot("cajado_costas"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(20, () -> shot("cajado_costas_frente"));
+        // segurando
+        at(5, () -> server(sp -> { sp.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(com.lanterna.registry.ModItems.COMPASSION_STAFF.get())); sp.getInventory().selected = 0; }));
+        at(5, () -> mc.player.getInventory().selected = 0);
+        at(25, () -> shot("cajado_mao_frente"));
+        at(5, () -> { mc.player.setYRot(mc.player.getYRot() + 70); });
+        at(20, () -> shot("cajado_mao_lado"));
+        at(5, () -> { mc.player.setYRot(mc.player.getYRot() - 70); server(sp -> sp.getInventory().clearContent()); });
+        // recarga em terceira pessoa
+        for (String modo : new String[]{"first", "front"}) {
+            at(20, () -> { mc.options.hideGui = modo.equals("front"); mc.options.setCameraType(modo.equals("front") ? net.minecraft.client.CameraType.THIRD_PERSON_FRONT : net.minecraft.client.CameraType.FIRST_PERSON);
+                server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { d.setLastPocketRecharge(-100000L); d.setCharge(d.maxCharge() / 4); })); });
+            at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.PocketRechargePacket()));
+            at(8, () -> shot("cajado_recarga_" + modo + "_a"));
+            at(22, () -> shot("cajado_recarga_" + modo + "_b"));
+            at(14, () -> shot("cajado_recarga_" + modo + "_c"));
+            at(50, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> glog(modo + " carga=" + d.charge() + "/" + d.maxCharge()))));
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+
+    private static void sceneFavores() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); cmd("gamemode creative"); cmd("lanterna anel indigo"); });
+        at(10, () -> cmd("execute in lanterna:nok run tp @s 0 120 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
+        at(200, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var vs = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(400), r -> r.race() == com.lanterna.lore.entity.Race.VES_KAI);
+            glog("ves_kai perto=" + vs.size());
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            int ofertas = 0;
+            for (var v : vs) {
+                String id = com.lanterna.lore.entity.FavoresVesKai.oferta(sp, v, d);
+                if (id == null) continue;
+                ofertas++;
+                var m = com.lanterna.mission.Missions.get(id);
+                glog("favor " + id + " titulo=" + m.title().getString() + " | " + m.description().getString());
+                com.lanterna.mission.MissionManager.start(sp, id);
+            }
+            glog("ofertas=" + ofertas + " ativos=" + d.active().keySet());
+            int antes = sp.getInventory().countItem(com.lanterna.lore.LoreItems.GRATIDAO.get());
+            for (String id : new java.util.ArrayList<>(d.active().keySet())) {
+                if (!id.startsWith("vk_")) continue;
+                var o = com.lanterna.mission.Missions.get(id).objectives().get(0);
+                if (o.type() == com.lanterna.mission.Objective.Type.COLLECT)
+                    sp.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(o.target())), o.count()));
+            }
+            glog("moedas antes=" + antes);
+        }));
+        at(60, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("depois: ativos=" + d.active().keySet() + " moedas=" + sp.getInventory().countItem(com.lanterna.lore.LoreItems.GRATIDAO.get()));
+            var o = com.lanterna.lore.entity.RaceTrades.class;
+        }));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneNaves2() {
         Minecraft mc = Minecraft.getInstance();
         java.util.UUID[] minha = {null};
@@ -3342,6 +3461,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
+        else if (ENABLED && SCENE.equals("inclina2")) sceneInclina2();
+        else if (ENABLED && SCENE.equals("cajado")) sceneCajado();
+        else if (ENABLED && SCENE.equals("favores")) sceneFavores();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

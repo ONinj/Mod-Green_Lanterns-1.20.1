@@ -73,6 +73,12 @@ public final class ClientRecharge {
         }
     }
 
+    /** Recarga da Tropa Índigo: em vez do portal, o anel é encostado no Cajado da Compaixão (client/cajado/Cajado). */
+    public static boolean indigo(Entity entity) {
+        Anim a = ACTIVE.get(entity.getId());
+        return a != null && a.corps().endsWith(":indigo");
+    }
+
     /** Ticks desde o início (com fração), ou -1 se esse jogador não está recarregando. */
     public static float time(Entity entity, float partialTick) {
         Anim a = ACTIVE.get(entity.getId());
@@ -150,7 +156,8 @@ public final class ClientRecharge {
                 it.remove();
                 continue;
             }
-            particles(player, anim, (int) t);
+            if (anim.corps().endsWith(":indigo")) com.lanterna.client.cajado.Cajado.particulas(player, anim.color(), (int) t);
+            else particles(player, anim, (int) t);
         }
     }
 
@@ -217,6 +224,7 @@ public final class ClientRecharge {
             if (!(e instanceof Player player) || player.isInvisible()) continue;
 
             Anim anim = entry.getValue();
+            if (anim.corps().endsWith(":indigo")) continue;
             float t = (mc.level.getGameTime() - anim.start()) + partialTick;
             if (t < 0 || t > RechargeTimeline.TOTAL) continue;
 
@@ -281,7 +289,7 @@ public final class ClientRecharge {
 
     /** Chamado no fim da animação do modelo: o braço do anel desce e vai até a bateria. */
     public static void applyArm(HumanoidModel<?> model, LivingEntity entity, float partialTick) {
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player player) || indigo(player)) return;
         float t = time(player, partialTick);
         float k = reach(t);
         if (k <= 0f) return;

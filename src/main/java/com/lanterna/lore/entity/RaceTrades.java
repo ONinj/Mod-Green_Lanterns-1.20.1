@@ -70,7 +70,12 @@ public final class RaceTrades {
             }
             case VES_KAI -> {
                 Item g = LoreItems.GRATIDAO.get();
-                t(o, new ItemStack(g, 2), ItemStack.EMPTY, new ItemStack(LoreItems.LAGRIMA_INDIGO.get()));
+                t(o, new ItemStack(g, 1), ItemStack.EMPTY, new ItemStack(LoreItems.LAGRIMA_INDIGO.get()));
+                t(o, new ItemStack(g, 4), ItemStack.EMPTY, new ItemStack(LoreItems.LAGRIMA_INDIGO.get(), 5));
+                // itens que eles buscam (troca direta)
+                t(o, new ItemStack(Items.AMETHYST_SHARD, 6), ItemStack.EMPTY, new ItemStack(LoreItems.LAGRIMA_INDIGO.get()));
+                t(o, new ItemStack(Items.GLOW_BERRIES, 10), new ItemStack(g, 1), new ItemStack(LoreItems.LAGRIMA_INDIGO.get(), 2));
+                t(o, new ItemStack(Items.GOLDEN_APPLE, 1), ItemStack.EMPTY, new ItemStack(g, 2));
                 t(o, new ItemStack(g, 1), ItemStack.EMPTY, new ItemStack(LoreItems.ERVA_TALEUN.get(), 4));
                 t(o, new ItemStack(g, 3), ItemStack.EMPTY, new ItemStack(Items.GOLDEN_APPLE));
                 t(o, new ItemStack(g, 6), ItemStack.EMPTY, new ItemStack(LoreItems.COLAR_PROTECAO.get()));

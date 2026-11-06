@@ -240,6 +240,7 @@ public final class Missions {
         Mission m = ALL.get(id);
         if (m == null && id.startsWith("ct_")) return com.lanterna.tropa.Contratos.mission(id);
         if (m == null && com.lanterna.cidade.CidadeMissoes.eDaCidade(id)) return com.lanterna.cidade.CidadeMissoes.mission(id);
+        if (m == null && com.lanterna.lore.entity.FavoresVesKai.eFavor(id)) return com.lanterna.lore.entity.FavoresVesKai.mission(id);
         return m;
     }
 

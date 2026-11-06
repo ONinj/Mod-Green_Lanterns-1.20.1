@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Cajado da Compaixão no slot de bateria: aparece na MÃO ESQUERDA do personagem,
- * sem ele precisar segurar (se a mão esquerda já estiver segurando algo, não aparece).
+ * Cajado da Compaixão no personagem: nas costas (slot de bateria), em pé nas duas mãos (segurando)
+ * ou na mão durante a recarga. Ver client/cajado/Cajado.
  */
 public class StaffLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private ItemStack staff;
@@ -28,19 +28,6 @@ public class StaffLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Ab
     public void render(PoseStack poseStack, MultiBufferSource buffer, int light, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks,
                        float netHeadYaw, float headPitch) {
-        if (player.isInvisible() || !ClientVisibleRings.of(player.getId()).staff()) return;
-        ItemStack leftHand = player.getMainArm() == HumanoidArm.LEFT ? player.getMainHandItem() : player.getOffhandItem();
-        if (!leftHand.isEmpty()) return;
-        if (staff == null) staff = new ItemStack(ModItems.COMPASSION_STAFF.get());
-
-        poseStack.pushPose();
-        // Igual ao item na mão (ItemInHandLayer), na mão esquerda
-        getParentModel().translateToHand(HumanoidArm.LEFT, poseStack);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-        poseStack.translate(-1.0F / 16.0F, 0.125F, -0.625F);
-        Minecraft.getInstance().getEntityRenderDispatcher().getItemInHandRenderer().renderItem(player, staff,
-                ItemDisplayContext.THIRD_PERSON_LEFT_HAND, true, poseStack, buffer, light);
-        poseStack.popPose();
+        com.lanterna.client.cajado.Cajado.desenhar(getParentModel(), poseStack, buffer, light, player, partialTick);
     }
 }
