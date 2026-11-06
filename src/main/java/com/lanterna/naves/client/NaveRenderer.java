@@ -19,6 +19,15 @@ public class NaveRenderer<T extends Entity & GeoAnimatable & TemNave> extends Ge
         this.shadowRadius = 2.5f;
     }
 
+    /** Só para testes: esconde o casco para ver a tripulação. */
+    public static boolean OCULTA;
+
+    @Override
+    public void render(T e, float yaw, float pt, PoseStack pose, MultiBufferSource buf, int light) {
+        if (OCULTA) return;
+        super.render(e, yaw, pt, pose, buf, light);
+    }
+
     @Override
     public void preRender(PoseStack pose, T e, BakedGeoModel model, MultiBufferSource buf, VertexConsumer vc, boolean isReRender,
                           float partialTick, int light, int overlay, float r, float g, float b, float a) {

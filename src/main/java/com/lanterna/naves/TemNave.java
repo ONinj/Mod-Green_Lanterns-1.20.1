@@ -25,4 +25,19 @@ public interface TemNave {
         Vec3 esquerda = new Vec3(Math.cos(yaw), 0, Math.sin(yaw));
         return posNave.add(frente.scale(-pz / 16.0)).add(esquerda.scale(px / 16.0)).add(0, py / 16.0, 0);
     }
+
+    /**
+     * Assento com a nave inclinada (as mesmas contas do NaveRenderer: gira em X pelo nariz e em Z pelo lado,
+     * em volta do meio da altura do casco), para quem está sentado acompanhar a inclinação.
+     */
+    static Vec3 posicaoAssento(Vec3 posNave, float yawGraus, double px, double py, double pz, float pitch, float roll, double meio) {
+        if (Math.abs(pitch) < 0.01f && Math.abs(roll) < 0.01f) return posicaoAssento(posNave, yawGraus, px, py, pz);
+        // coordenadas do modelo (antes do giro de 180 - yaw do renderer)
+        org.joml.Vector3f v = new org.joml.Vector3f((float) (-px / 16.0), (float) (py / 16.0 - meio), (float) (pz / 16.0));
+        v.rotateZ((float) Math.toRadians(roll));
+        v.rotateX((float) Math.toRadians(pitch));
+        v.add(0, (float) meio, 0);
+        v.rotateY((float) Math.toRadians(180 - yawGraus));
+        return posNave.add(v.x, v.y, v.z);
+    }
 }

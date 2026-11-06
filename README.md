@@ -60,6 +60,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.34 ✅ (0.28) Combate contra Lanternas NPC refeito (IA que mira e para para atirar, caixa de acerto no voo, compensação de atraso no laser e nos construtos), megacidades com bairro novo (~70 casas a mais) e mais moradores, Ecos Cinzentos só na floresta (raros nos QGs, nunca nas cidades; em Odym só nas ilhas)
 1.35 ✅ (0.29) Naves: sem dano de queda ao pousar, todos os poderes do anel ferem naves (tripulação protegida pelo casco), sair da nave depois de renascer no beliche leva até a nave, Chave da Nave fica na morte e chama a nave com reentrada na atmosfera, sons próprios das naves
 1.36 ✅ (0.30) Juramento falado na Bateria Central como primeira missão do anel (microfone, palavra por palavra, PT/EN), comunicador do anel com ligações em grupo e holograma (1ª e 3ª pessoa), voz via Simple Voice Chat, câmera em terceira pessoa por cima do ombro
+1.37 ✅ (0.30.1) Tripulação acompanha a inclinação da nave (assento, corpo e visão em primeira pessoa inclinam nas curvas e subidas)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

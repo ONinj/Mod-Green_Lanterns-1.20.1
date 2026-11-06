@@ -489,7 +489,9 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
         double[][] seats = tipo().assentos;
         if (i < 0 || i >= seats.length) return;
         double[] s = seats[i];
-        Vec3 p = TemNave.posicaoAssento(position(), getYRot(), s[0], s[1], s[2]);
+        Vec3 p = level().isClientSide
+                ? TemNave.posicaoAssento(position(), getYRot(), s[0], s[1], s[2], visPitch(1f), visRoll(1f), getBbHeight() * 0.5)
+                : TemNave.posicaoAssento(position(), getYRot(), s[0], s[1], s[2]);
         move.accept(passenger, p.x, p.y + passenger.getMyRidingOffset(), p.z);
         if (passenger instanceof LanternaEntity npc) {
             npc.setYRot(getYRot());

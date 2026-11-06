@@ -2834,6 +2834,48 @@ public final class DevAutoTest {
         }
     }
 
+
+    private static void sceneInclina() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (var n : l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(120))) n.discard();
+            int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 60, 60);
+            var n = com.lanterna.naves.NaveEntity.create(l, com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green");
+            n.moveTo(60.5, h + 40, 60.5, 0, 0);
+            n.setDono(sp.getUUID());
+            l.addFreshEntity(n);
+            sp.teleportTo(l, 60.5, h + 41, 60.5, 0, 0);
+            sp.startRiding(n, true);
+        }));
+        at(40, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.options.keyUp.setDown(true); });
+        // curva longa para a direita
+        for (int i = 0; i < 50; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> { var n = (com.lanterna.naves.NaveEntity) mc.player.getVehicle();
+            glog("roll=" + n.visRoll(1) + " pitch=" + n.visPitch(1) + " nave=" + n.position() + " jogador=" + mc.player.position()); shot("inclina_tras"); });
+        at(1, () -> mc.getEntityRenderDispatcher().setRenderHitBoxes(true));
+        at(1, () -> { com.lanterna.naves.client.NaveRenderer.OCULTA = true; });
+        for (int i = 0; i < 20; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> { glog("roll sem casco=" + ((com.lanterna.naves.NaveEntity) mc.player.getVehicle()).visRoll(1)); shot("inclina_tras_sem_casco"); });
+        for (int i = 0; i < 20; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> { com.lanterna.naves.client.NaveRenderer.OCULTA = false; mc.getEntityRenderDispatcher().setRenderHitBoxes(false); });
+        for (int i = 0; i < 10; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        for (int i = 0; i < 6; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> shot("inclina_frente"));
+        for (int i = 0; i < 6; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        for (int i = 0; i < 6; i++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 5f); });
+        at(1, () -> { var n = (com.lanterna.naves.NaveEntity) mc.player.getVehicle(); glog("roll 1p=" + n.visRoll(1)); shot("inclina_primeira"); });
+        at(1, () -> mc.options.keyUp.setDown(false));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneNaves2() {
         Minecraft mc = Minecraft.getInstance();
         java.util.UUID[] minha = {null};
@@ -3299,6 +3341,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("densa")) sceneDensa();
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
+        else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

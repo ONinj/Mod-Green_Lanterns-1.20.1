@@ -788,3 +788,8 @@ O juramento do Chamado da Fonte (etapa 3) também passou a ser falado.
 - Mira própria em terceira pessoa, mostrando onde o olhar do personagem realmente acerta (fica vermelha sobre alvos).
 - F6 liga/desliga, F7 troca o ombro, Alt + roda do mouse ajusta a distância. Lembra a escolha (config/lanterna-camera.txt).
 - Pilotando naves continua a câmera própria das naves.
+
+### 0.30.1 — Inclinação da nave
+- Quem está sentado na nave (piloto, passageiros, Lanternas NPC) inclina junto com ela nas curvas e ao subir/descer:
+  o assento se move com o casco e o corpo gira junto.
+- Em primeira pessoa, a visão do piloto inclina de lado nas curvas (um pouco menos que o casco, para não enjoar).
