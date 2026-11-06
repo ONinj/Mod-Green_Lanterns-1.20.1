@@ -163,6 +163,17 @@ public final class Missions {
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 8)), 600, "portal_3");
         add("portal_3", "portal", verdeClaro, List.of(talk("guardiao:oa", "oa")), items(), 800, null);
 
+        // ---------------- O Juramento do anel (primeira missão de quem foi escolhido) ----------------
+        // O recém-escolhido vai à Bateria Central da sua Tropa e recita o juramento em voz alta; depois fala com o líder.
+        for (com.lanterna.baterias.Tropa t : com.lanterna.baterias.Tropa.values()) {
+            PlanetLore pl = null;
+            for (PlanetLore x : PlanetLore.values()) if (x.corps == t.corps() && x != PlanetLore.GENESE) pl = x;
+            if (pl == null) continue;
+            String c = pl.corps.id().getPath();
+            add("juramento_" + c, "inicio", t.cor, List.of(Objective.of(Type.FONTE, t.nome + ":anel", 1, pl.planet, com.lanterna.fonte.FonteChamado.PRACA)),
+                    items(() -> new ItemStack(LoreItems.MERITO.get(), 2)), 150, "inicio_" + c + "_2");
+        }
+
         // ---------------- O Chamado da Fonte (uma linha por Tropa com Bateria Central) ----------------
         for (com.lanterna.baterias.Tropa t : com.lanterna.baterias.Tropa.values()) {
             PlanetLore pl = null;
@@ -239,6 +250,8 @@ public final class Missions {
     /** Primeira missão da linha de início da Tropa. */
     @Nullable
     public static String startOf(net.minecraft.resources.ResourceLocation corps) {
+        String jura = "juramento_" + corps.getPath();
+        if (ALL.containsKey(jura)) return jura;
         String id = "inicio_" + corps.getPath() + "_1";
         return ALL.containsKey(id) ? id : null;
     }

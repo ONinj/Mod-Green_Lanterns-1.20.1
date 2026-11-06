@@ -77,13 +77,19 @@ public final class FonteChamado {
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d == null) return false;
         if (ProvaFonte.ativa(p)) { ProvaFonte.usarBateria(p); return true; }
+        // o juramento do anel (primeira missão de quem acabou de ser escolhido)
+        if (d.isActive(com.lanterna.juramento.Juramento.missao(t))) {
+            if (tropaDoAnel(p) != t) { p.displayClientMessage(Component.translatable("fonte.lanterna.anel_errado"), true); return true; }
+            com.lanterna.juramento.Juramento.abrir(p, com.lanterna.juramento.Juramento.ANEL, t, pos);
+            return true;
+        }
         if (d.isActive("fonte_" + t.nome + "_2")) {
             if (tropaDoAnel(p) != t) { p.displayClientMessage(Component.translatable("fonte.lanterna.anel_errado"), true); return true; }
             ProvaFonte.comecar(p, t, pos);
             return true;
         }
         if (d.isActive("fonte_" + t.nome + "_3")) {
-            juramento(p, t);
+            com.lanterna.juramento.Juramento.abrir(p, com.lanterna.juramento.Juramento.FONTE, t, pos);
             return true;
         }
         if (FonteDados.temSelo(p, t.nome)) p.displayClientMessage(Component.translatable("fonte.lanterna.reconhece").withStyle(s -> s.withColor(t.cor)), true);

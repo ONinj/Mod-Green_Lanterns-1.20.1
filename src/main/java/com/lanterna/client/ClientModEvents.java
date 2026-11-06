@@ -39,6 +39,9 @@ public final class ClientModEvents {
         event.register(KeyBindings.OPEN_LANTERN);
         event.register(KeyBindings.PERFIL);
         event.register(KeyBindings.ARVORE);
+        event.register(KeyBindings.COMUNICADOR);
+        event.register(KeyBindings.CAMERA);
+        event.register(KeyBindings.OMBRO);
         event.register(KeyBindings.TOGGLE_POWER);
         event.register(KeyBindings.STAR_MAP);
         event.register(KeyBindings.PORTAL);
@@ -150,6 +153,8 @@ public final class ClientModEvents {
         event.registerAboveAll("mission_hud", com.lanterna.client.mission.MissionHud.HUD);
         event.registerAboveAll("construct_bar", com.lanterna.client.construct.ConstructBarHud.HUD);
         event.registerAboveAll("xp_ganho", com.lanterna.client.tropa.TropaHud.HUD);
+        event.registerAboveAll("ligacao", com.lanterna.client.voz.LigacaoHud.HUD);
+        event.registerAboveAll("mira_camera", com.lanterna.client.camera.CameraLanterna.MIRA);
     }
 
     /** Pinta a pedra do anel (camada 1) e o núcleo da bateria (tint 0) na cor da Tropa. */

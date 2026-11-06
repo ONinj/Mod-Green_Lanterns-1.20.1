@@ -35,6 +35,7 @@ public final class ClientForgeEvents {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
+        com.lanterna.client.voz.ClientLigacao.tick();
 
         while (KeyBindings.TOGGLE_FLIGHT.consumeClick()) {
             if (ClientRingData.hasRing) {
@@ -49,6 +50,9 @@ public final class ClientForgeEvents {
         while (KeyBindings.OPEN_LANTERN.consumeClick()) {
             ModNetwork.sendToServer(new OpenLanternMenuPacket());
         }
+        while (KeyBindings.COMUNICADOR.consumeClick()) com.lanterna.client.voz.ClientLigacao.tecla();
+        while (KeyBindings.CAMERA.consumeClick()) com.lanterna.client.camera.CameraLanterna.alternar();
+        while (KeyBindings.OMBRO.consumeClick()) com.lanterna.client.camera.CameraLanterna.trocarOmbro();
         while (KeyBindings.ARVORE.consumeClick()) {
             if (ClientRingData.hasRing) Minecraft.getInstance().setScreen(new com.lanterna.client.fonte.ArvoreScreen());
         }

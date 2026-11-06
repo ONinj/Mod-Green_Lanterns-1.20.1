@@ -66,6 +66,13 @@ public final class KeyBindings {
 
     public static final KeyMapping PERFIL = new KeyMapping(
             "key.lanterna.perfil", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
+    public static final KeyMapping COMUNICADOR = new KeyMapping(
+            "key.lanterna.comunicador", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F4, CATEGORY);
+    public static final KeyMapping CAMERA = new KeyMapping(
+            "key.lanterna.camera", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F6, CATEGORY);
+    public static final KeyMapping OMBRO = new KeyMapping(
+            "key.lanterna.ombro", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F7, CATEGORY);
+
     public static final KeyMapping ARVORE = new KeyMapping(
             "key.lanterna.arvore", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, CATEGORY);
     public static final KeyMapping PORTAL = new KeyMapping(

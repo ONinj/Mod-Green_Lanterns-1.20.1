@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "11";
+    private static final String VERSION = "12";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -212,6 +212,18 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Aura.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.fonte.FontePackets.Aura::encode).decoder(com.lanterna.fonte.FontePackets.Aura::decode)
                 .consumerMainThread(com.lanterna.fonte.FontePackets.Aura::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.juramento.Juramento.Abrir.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.juramento.Juramento.Abrir::encode).decoder(com.lanterna.juramento.Juramento.Abrir::decode)
+                .consumerMainThread(com.lanterna.juramento.Juramento.Abrir::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.juramento.Juramento.Feito.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.juramento.Juramento.Feito::encode).decoder(com.lanterna.juramento.Juramento.Feito::decode)
+                .consumerMainThread(com.lanterna.juramento.Juramento.Feito::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.voz.Ligacoes.Acao.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.voz.Ligacoes.Acao::encode).decoder(com.lanterna.voz.Ligacoes.Acao::decode)
+                .consumerMainThread(com.lanterna.voz.Ligacoes.Acao::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.voz.Ligacoes.Estado.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.voz.Ligacoes.Estado::encode).decoder(com.lanterna.voz.Ligacoes.Estado::decode)
+                .consumerMainThread(com.lanterna.voz.Ligacoes.Estado::handle).add();
     }
 
     public static void sendTo(ServerPlayer player, Object message) {

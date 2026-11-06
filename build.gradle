@@ -62,12 +62,15 @@ mixin {
 repositories {
     // GeckoLib (modelos animados dos alienígenas)
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    // Simple Voice Chat (só a API, para compilar; o mod em si o jogador instala)
+    maven { url = 'https://maven.maxhenkel.de/repository/public' }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
+    compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.5.0'
 }
 
 tasks.named('jar', Jar).configure {

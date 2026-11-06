@@ -757,3 +757,34 @@ Missões, contratos e chefes que criam Ecos de propósito continuam funcionando 
 | Porta | abrir e fechar a porta |
 | Tiro | disparos das naves |
 | Chamado | ao usar a chave |
+
+
+## 0.30 — O Juramento, o Comunicador e a Câmera do Lanterna
+
+### Juramento falado (primeira missão)
+Quando um anel escolhe alguém (Verde, Amarelo, Vermelho, Laranja, Azul, Índigo, Violeta), a primeira missão agora é
+**O Juramento**: ir até a Bateria Central da Tropa (praça das Baterias, em Oa) e clicar nela com o anel.
+Abre a tela do juramento, com 4 versos originais de cada Tropa. O jogador **recita em voz alta**:
+cada palavra só acende enquanto o microfone capta voz por tempo suficiente para dizê-la (palavras longas pedem mais).
+O jogo não reconhece a fala, só detecta que há voz. Texto em português ou inglês, conforme o idioma do jogo.
+- Com Simple Voice Chat: usa o microfone do SVC (no modo push-to-talk, segure a tecla de falar).
+- Sem SVC: usa o microfone do sistema direto. Sem microfone nenhum: segurar ESPAÇO enquanto fala.
+- Concluído: coluna de luz na Bateria, aviso para o servidor, +400 de afinidade e a linha segue para o líder da Tropa.
+- Anéis Preto e Branco não têm Bateria Central: a linha deles começa como antes.
+O juramento do Chamado da Fonte (etapa 3) também passou a ser falado.
+
+### Comunicador do anel (F4)
+- F4 abre o comunicador: lista de Lanternas online, Ligar / Adicionar (até 4 na ligação), Desligar.
+- Chamada chegando: aviso no meio da tela e toque; F4 atende, Shift+F4 recusa (30 s para atender).
+- Painel da ligação no canto: rostos, quem está falando (anel verde e barrinhas), duração.
+- **Holograma**: cada pessoa na ligação aparece como uma figura de luz na cor do anel (linhas de varredura, disco de
+  projeção, nome). Em primeira pessoa flutua à frente-esquerda da visão; em terceira pessoa é projetada pelo anel ao lado
+  do personagem. Gesticula quando a pessoa fala.
+- Voz: com o mod **Simple Voice Chat** instalado (servidor e jogadores), a ligação vira um grupo de voz privado, valendo
+  a qualquer distância e em qualquer dimensão. Sem SVC, a ligação funciona (painel e holograma), mas sem áudio.
+
+### Câmera do Lanterna (terceira pessoa melhorada)
+- Câmera por cima do ombro, suavizada, que se afasta ao voar rápido e se encolhe ao bater em parede.
+- Mira própria em terceira pessoa, mostrando onde o olhar do personagem realmente acerta (fica vermelha sobre alvos).
+- F6 liga/desliga, F7 troca o ombro, Alt + roda do mouse ajusta a distância. Lembra a escolha (config/lanterna-camera.txt).
+- Pilotando naves continua a câmera própria das naves.

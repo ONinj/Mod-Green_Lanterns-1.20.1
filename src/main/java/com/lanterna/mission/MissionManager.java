@@ -53,8 +53,8 @@ public final class MissionManager {
         String first = Missions.startOf(corps);
         if (first == null) return;
         // Quem já começou a lore não recomeça (ex.: trocou de anel)
-        boolean begun = data.active().keySet().stream().anyMatch(k -> k.startsWith("inicio_") || k.startsWith("main_"))
-                || data.completed().stream().anyMatch(k -> k.startsWith("inicio_"));
+        boolean begun = data.active().keySet().stream().anyMatch(k -> k.startsWith("inicio_") || k.startsWith("main_") || k.startsWith("juramento_"))
+                || data.completed().stream().anyMatch(k -> k.startsWith("inicio_") || k.startsWith("juramento_"));
         if (!begun) start(player, first);
     }
 

@@ -2757,6 +2757,83 @@ public final class DevAutoTest {
     }
 
     /** Naves: queda ao pousar, dano dos anéis nas naves de Tropa, sair depois de renascer, chave que chama a nave. */
+
+    private static void sceneV30() {
+        Minecraft mc = Minecraft.getInstance();
+        String miss = com.lanterna.juramento.Juramento.missao(com.lanterna.baterias.Tropa.VERDE);
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(100, () -> cmd("time set 6000"));
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        // ---- 1. juramento falado ----
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("missao juramento ativa=" + d.isActive(miss) + " ativas=" + d.active().keySet());
+            if (!d.isActive(miss)) com.lanterna.mission.MissionManager.start(sp, miss);
+            glog("depois de iniciar: ativa=" + d.isActive(miss) + " anel ok=" + com.lanterna.fonte.FonteChamado.tropaDoAnel(sp));
+            int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel());
+            sp.teleportTo(sp.serverLevel(), -387.5, h, 28.5, 0f, 10f);
+        }));
+        at(30, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 900 4 true"); });
+        at(20, () -> server(sp -> glog("usar bateria=" + com.lanterna.fonte.FonteChamado.usarBateria(sp, new net.minecraft.core.BlockPos(-388, 60, 38)))));
+        at(30, () -> glog("tela juramento aberta=" + (mc.screen instanceof com.lanterna.client.juramento.JuramentoScreen)));
+        at(5, () -> shot("v30_juramento_inicio"));
+        at(5, () -> com.lanterna.client.juramento.JuramentoScreen.autoFalar = true);
+        at(120, () -> shot("v30_juramento_meio"));
+        waitFor(() -> !(mc.screen instanceof com.lanterna.client.juramento.JuramentoScreen), 4000);
+        at(20, () -> { com.lanterna.client.juramento.JuramentoScreen.autoFalar = false; server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("juramento: chamado verde:anel=" + com.lanterna.fonte.FonteDados.chamado(sp, "verde:anel") + " missao ainda ativa=" + d.isActive(miss) + " ativas=" + d.active().keySet());
+        }); });
+        // ---- 1b. sem falar nada não passa ----
+        at(20, () -> server(sp -> { com.lanterna.fonte.FonteDados.chamado(sp, "verde:anel", 0); com.lanterna.juramento.Juramento.abrir(sp, com.lanterna.juramento.Juramento.ANEL, com.lanterna.baterias.Tropa.VERDE, new net.minecraft.core.BlockPos(-388, 60, 38)); }));
+        at(200, () -> glog("silencio: tela ainda aberta=" + (mc.screen instanceof com.lanterna.client.juramento.JuramentoScreen)));
+        at(5, () -> mc.setScreen(null));
+        at(20, () -> server(sp -> { glog("silencio: chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "verde:anel")); com.lanterna.fonte.FonteDados.chamado(sp, "verde:anel", 1); }));
+        // ---- 2. câmera por cima do ombro ----
+        at(10, () -> { com.lanterna.client.camera.CameraLanterna.ligada = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+            server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -387.5, h, 22.5, 0f, -5f); }); });
+        at(40, () -> { glog("camera aplicada=" + com.lanterna.client.camera.CameraLanterna.aplicada + " pos=" + mc.gameRenderer.getMainCamera().getPosition() + " player=" + mc.player.getEyePosition()); shot("v30_camera_ombro"); });
+        at(10, () -> com.lanterna.client.camera.CameraLanterna.trocarOmbro());
+        at(30, () -> shot("v30_camera_ombro_esq"));
+        at(10, () -> { com.lanterna.client.camera.CameraLanterna.trocarOmbro(); com.lanterna.client.camera.CameraLanterna.ligada = false; });
+        at(20, () -> shot("v30_camera_vanilla"));
+        at(10, () -> com.lanterna.client.camera.CameraLanterna.ligada = true);
+        // ---- 3. ligação + holograma ----
+        at(10, () -> {
+            java.util.UUID fake = java.util.UUID.fromString("853c80ef-3c37-49fd-aa49-938b674adae6");
+            ClientLigacaoTeste.estado(3, mc.player.getUUID(), mc.player.getGameProfile().getName(), fake, "Kilowog_");
+        });
+        at(40, () -> shot("v30_ligacao_terceira"));
+        at(10, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        at(30, () -> shot("v30_ligacao_primeira"));
+        at(10, () -> ClientLigacaoTeste.estado(2, java.util.UUID.fromString("853c80ef-3c37-49fd-aa49-938b674adae6"), "Kilowog_", null, null));
+        at(30, () -> shot("v30_ligacao_recebendo"));
+        at(10, () -> { ClientLigacaoTeste.estado(0, null, null, null, null); mc.setScreen(new com.lanterna.client.voz.ComunicadorScreen()); });
+        at(20, () -> shot("v30_comunicador"));
+        at(5, () -> mc.setScreen(null));
+        at(10, () -> server(sp -> glog("svc presente=" + com.lanterna.voz.Ligacoes.svc() + " voicechat carregado=" + net.minecraftforge.fml.ModList.get().isLoaded("voicechat"))));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    /** Monta um estado de ligação falso no cliente (o teste só tem um jogador). */
+    private static final class ClientLigacaoTeste {
+        static void estado(int modo, java.util.UUID a, String na, java.util.UUID b, String nb) {
+            var C = com.lanterna.client.voz.ClientLigacao.class;
+            com.lanterna.client.voz.ClientLigacao.modo = modo;
+            com.lanterna.client.voz.ClientLigacao.segundos = 74;
+            com.lanterna.client.voz.ClientLigacao.recebidoEm = System.currentTimeMillis();
+            var l = new java.util.ArrayList<com.lanterna.client.voz.ClientLigacao.Pessoa>();
+            if (a != null) l.add(new com.lanterna.client.voz.ClientLigacao.Pessoa(a, na, false));
+            if (b != null) l.add(new com.lanterna.client.voz.ClientLigacao.Pessoa(b, nb, true));
+            com.lanterna.client.voz.ClientLigacao.membros = l;
+            com.lanterna.client.voz.ClientLigacao.tocando = java.util.List.of();
+        }
+    }
+
     private static void sceneNaves2() {
         Minecraft mc = Minecraft.getInstance();
         java.util.UUID[] minha = {null};
@@ -3221,6 +3298,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("combate")) sceneCombate();
         else if (ENABLED && SCENE.equals("densa")) sceneDensa();
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
+        else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
