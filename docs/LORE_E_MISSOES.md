@@ -814,3 +814,10 @@ O juramento do Chamado da Fonte (etapa 3) também passou a ser falado.
 - Recarga Índigo (R): sem portal. O cajado se forma na mão do lado oposto ao anel, a mão do anel sobe e **encosta o
   anel no cristal do topo**, a luz gira em volta e entra no anel, e o cajado volta para as costas.
   Em primeira pessoa o cajado sobe pela esquerda e a mão vai até o cristal.
+
+### 0.31.1 — Juramentos das Tropas
+Cada Tropa tem um juramento de 4 versos, escrito para o mod (texto original, inspirado na intenção dos juramentos
+dos quadrinhos, sem copiar as frases): Verde (vontade), Amarelo (medo), Vermelho (fúria), Laranja (ganância),
+Azul (esperança), Índigo (compaixão), Violeta (amor), Preto (morte) e Branco (vida).
+- Aparece no chat, na cor da Tropa, toda vez que o anel é recarregado (bateria, R, cajado).
+- É o mesmo texto que se recita em voz alta na Bateria Central (primeira missão do anel).
