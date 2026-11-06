@@ -72,7 +72,7 @@ public final class Moradores {
             String chave = level.dimension().location() + "|nativa";
             if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
                 ULTIMA.put(chave, level.getGameTime());
-                int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 30);
+                int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 75);
                 if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} nativo(s) voltaram à cidade de {}", n, planet.planet);
             }
         }

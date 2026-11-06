@@ -100,17 +100,29 @@ public final class CidadeNativa {
                 .map(Map.Entry::getKey).orElse(64);
     }
 
+    /**
+     * Repõe os nativos da cidade. Só conta e só cria nas casas que estão carregadas agora (a cidade tem 400 blocos e
+     * quem está longe não é visto: contar a cidade inteira fazia nascer gente a mais a cada visita). A meta é
+     * proporcional às casas carregadas; quem sobra além de 30% da meta vai embora.
+     */
     public static int nativos(ServerLevel l, BlockPos c, PlanetLore planet, int quantos) {
         Race race = Race.ofPlanet(planet.planet);
         if (race == null) return 0;
+        CidadesPovos.lembrar(l, planet, c);
+        List<BlockPos> casas = new java.util.ArrayList<>(CidadesPovos.casas(c));
+        casas.addAll(CidadesPovos.casasExtras(c));
+        List<BlockPos> carregadas = new java.util.ArrayList<>();
+        for (BlockPos h : casas) if (l.isPositionEntityTicking(h)) carregadas.add(h);
+        if (carregadas.isEmpty()) return 0;
+        int meta = (int) Math.ceil(quantos * (double) carregadas.size() / casas.size());
         AABB area = new AABB(c.getX() - R, l.getMinBuildHeight(), c.getZ() - R, c.getX() + R, l.getMaxBuildHeight(), c.getZ() + R);
-        int tem = l.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.race() == race && e.role().isEmpty()).size();
-        List<BlockPos> casas = CidadesPovos.casas(c);
+        List<RaceEntity> tem = l.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.race() == race && e.role().isEmpty());
+        int teto = (int) Math.ceil(meta * 1.3) + 2;
+        for (int i = teto; i < tem.size(); i++) tem.get(i).discard();
         int n = 0;
-        for (int i = 0; tem + n < quantos && i < quantos * 2; i++) {
-            BlockPos casa = casas.get((i * 7) % casas.size());
+        for (int i = 0; tem.size() + n < meta && i < meta * 2; i++) {
+            BlockPos casa = carregadas.get((i * 7) % carregadas.size());
             BlockPos at = casa.offset(i % 2 == 0 ? 1 : -1, planet == PlanetLore.NOK ? 3 : 0, i % 3 == 0 ? 1 : -1);
-            l.getChunkAt(at); // carrega a casa (o jogador pode estar do outro lado da cidade)
             if (com.lanterna.lore.world.PlanetSites.nativo(l, race, at) != null) n++;
         }
         return n;

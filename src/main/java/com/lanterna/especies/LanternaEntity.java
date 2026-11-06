@@ -204,12 +204,14 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (ESPECIE.equals(key)) refreshDimensions();
+        if (ESPECIE.equals(key) || VOANDO.equals(key)) refreshDimensions();
     }
 
     @Override
     public EntityDimensions getDimensions(Pose pose) {
         Especie.Corpo c = especie().corpo;
+        // voando o corpo fica deitado na direção do voo: a caixa de acerto acompanha (mais larga)
+        if (voando()) return EntityDimensions.scalable(Math.max(c.width * 1.9f, 1.15f), Math.max(c.height * 0.85f, 1.2f));
         return EntityDimensions.scalable(c.width, c.height);
     }
 
@@ -503,24 +505,23 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
             else pirata(t, dist);
         }
 
+        // estado do combate aéreo
+        private int fase;          // ticks restantes da manobra atual
+        private int manobra;       // 0 pairar mirando, 1 deslizar de lado, 2 investida, 3 esquiva
+        private Vec3 rumo = Vec3.ZERO;
+        private int carga;         // >0: concentrando o laser (fica parado, o anel brilha)
+
+        /**
+         * Combate do Lanterna NPC, pensado para ser lido e respondido pelo jogador:
+         *  - fica a uma distância de tiro (9 a 13 blocos), um pouco acima do alvo, de frente para ele;
+         *  - troca de manobra a cada 1 a 3 s: pairar mirando, deslizar de lado, investir (e socar se chegar perto);
+         *  - antes do laser para e concentra a luz por meio segundo (dá para ver e desviar, e dá para acertar ele);
+         *  - quando apanha, às vezes dá uma esquiva curta;
+         *  - sem linha de visão, sobe e contorna até enxergar.
+         */
         private void lanterna(LivingEntity t, double dist) {
-            boolean voar = dist > 4 || !t.onGround() || emEspaco();
-            if (voar) {
-                setVoando(true);
-                getNavigation().stop();
-                if (random.nextInt(80) == 0) strafe = -strafe;
-                Vec3 away = position().subtract(t.position());
-                away = new Vec3(away.x, 0, away.z);
-                if (away.lengthSqr() < 0.01) away = new Vec3(1, 0, 0);
-                away = away.normalize();
-                Vec3 side = new Vec3(-away.z, 0, away.x).scale(strafe * 3);
-                Vec3 want = t.position().add(away.scale(8)).add(side).add(0, 3, 0);
-                Vec3 v = want.subtract(position());
-                double speed = Math.min(0.45, v.length() * 0.08);
-                setDeltaMovement(getDeltaMovement().scale(0.7).add(v.normalize().scale(speed)));
-                setYRot((float) Math.toDegrees(Math.atan2(-(t.getX() - getX()), t.getZ() - getZ())));
-                yBodyRot = getYRot();
-            } else {
+            boolean voar = dist > 4.5 || !t.onGround() || emEspaco();
+            if (!voar) {
                 setVoando(false);
                 getNavigation().moveTo(t, 1.2);
                 if (dist < 2.6 && cooldown <= 0) {
@@ -529,18 +530,81 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
                 }
                 return;
             }
-            if (cooldown <= 0 && hasLineOfSight(t)) {
-                // Laser do anel
-                aimAt(t);
-                float dmg = isOficial() ? 2.4f : 1.5f;
-                ConstructEntity.spawnBeam(LanternaEntity.this, corEnergia(), dmg, 24);
-                triggerAnim("acao", "attack.beam");
-                cooldown = 50 + random.nextInt(30);
-            } else if (hammerCooldown <= 0 && (isOficial() || random.nextInt(3) == 0)) {
+            setVoando(true);
+            getNavigation().stop();
+            boolean ve = hasLineOfSight(t);
+            double ideal = isOficial() ? 12 : 10;
+            Vec3 alvo = t.position().add(0, t.getBbHeight() * 0.5, 0);
+            Vec3 plano = new Vec3(getX() - t.getX(), 0, getZ() - t.getZ());
+            if (plano.lengthSqr() < 0.01) plano = new Vec3(1, 0, 0);
+            Vec3 fora = plano.normalize();
+            Vec3 lado = new Vec3(-fora.z, 0, fora.x);
+            // esquiva quando apanha
+            if (hurtTime == 9 && manobra != 3 && random.nextInt(3) == 0) {
+                manobra = 3; fase = 7; carga = 0;
+                rumo = lado.scale(random.nextBoolean() ? 1 : -1).add(0, 0.25, 0).normalize();
+            }
+            if (--fase <= 0 && carga <= 0) {
+                int r = random.nextInt(10);
+                if (dist > ideal + 6) { manobra = 2; fase = 25; }
+                else if (r < 5) { manobra = 0; fase = 25 + random.nextInt(25); }
+                else if (r < 8) { manobra = 1; fase = 20 + random.nextInt(25); strafe = random.nextBoolean() ? 1 : -1; }
+                else { manobra = 2; fase = 18; }
+            }
+            Vec3 quer;
+            double vmax;
+            if (carga > 0) { quer = position(); vmax = 0; }
+            else switch (manobra) {
+                case 1 -> { quer = t.position().add(fora.scale(ideal)).add(lado.scale(strafe * 5)).add(0, 2.5, 0); vmax = 0.26; }
+                case 2 -> { quer = t.position().add(fora.scale(2.5)).add(0, 1.2, 0); vmax = 0.42; }
+                case 3 -> { quer = position().add(rumo.scale(4)); vmax = 0.55; }
+                default -> { quer = t.position().add(fora.scale(ideal)).add(0, 2.5 + Math.sin(tickCount * 0.08) * 0.6, 0); vmax = 0.18; }
+            }
+            if (!ve && carga <= 0) { quer = quer.add(0, 4, 0); vmax = Math.max(vmax, 0.3); }
+            // não afunda no chão nem sobe demais
+            int chao = level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(quer.x), (int) Math.floor(quer.z));
+            if (!emEspaco() && quer.y < chao + 1.5) quer = new Vec3(quer.x, chao + 1.5, quer.z);
+            Vec3 v = quer.subtract(position());
+            double len = v.length();
+            Vec3 alvoVel = len < 0.4 ? Vec3.ZERO : v.scale(Math.min(vmax, len * 0.12) / len);
+            // aceleração suave: muda de rumo em ~5 ticks em vez de rodar sem parar
+            setDeltaMovement(getDeltaMovement().scale(0.75).add(alvoVel.scale(0.5)).scale(0.8));
+            olharPara(alvo);
+            if (manobra == 2 && dist < 3.2 && cooldown <= 0) {
+                doHurtTarget(t);
+                cooldown = 25;
+                manobra = 1; fase = 20; strafe = random.nextBoolean() ? 1 : -1;
+            }
+            // laser: concentra 10 ticks parado, depois atira
+            if (carga > 0) {
+                if (--carga == 0 && ve) {
+                    aimAt(t);
+                    float dmg = isOficial() ? 2.4f : 1.5f;
+                    ConstructEntity.spawnBeam(LanternaEntity.this, corEnergia(), dmg, 24);
+                    triggerAnim("acao", "attack.beam");
+                    cooldown = 55 + random.nextInt(35);
+                    manobra = 0; fase = 24;
+                } else if (tickCount % 2 == 0) {
+                    int c = corEnergia();
+                    ((ServerLevel) level()).sendParticles(new net.minecraft.core.particles.DustParticleOptions(
+                            new org.joml.Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 1.2f),
+                            getX(), getY() + getBbHeight() * 0.6, getZ(), 3, 0.3, 0.3, 0.3, 0);
+                }
+            } else if (cooldown <= 0 && ve && dist < 30 && manobra != 3) {
+                carga = 10;
+                level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.BEACON_POWER_SELECT, net.minecraft.sounds.SoundSource.HOSTILE, 0.6f, 1.8f);
+            } else if (hammerCooldown <= 0 && ve && (isOficial() || random.nextInt(3) == 0)) {
                 ConstructEntity.spawnHammer(LanternaEntity.this, t.position(), corEnergia(), isOficial() ? 10f : 7f, 1.0f);
                 triggerAnim("acao", "cast.construct");
                 hammerCooldown = 220 + random.nextInt(120);
             }
+        }
+
+        private void olharPara(Vec3 p) {
+            float yaw = (float) Math.toDegrees(Math.atan2(-(p.x - getX()), p.z - getZ()));
+            setYRot(yaw);
+            yBodyRot = yaw;
+            setYHeadRot(yaw);
         }
 
         private void pirata(LivingEntity t, double dist) {

@@ -2437,6 +2437,325 @@ public final class DevAutoTest {
         at(10, () -> { glog("mortes=" + mortes[0]); for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+    private static final int LENTO = Integer.getInteger("lanterna.lento", 8);
+    private static boolean gravando;
+
+    private static void relogio(int fator) {
+        com.lanterna.Lento.FATOR = fator;
+        try {
+            var f = Minecraft.class.getDeclaredField("timer"); f.setAccessible(true);
+            Object timer = f.get(Minecraft.getInstance());
+            var ms = timer.getClass().getDeclaredField("msPerTick"); ms.setAccessible(true);
+            ms.setFloat(timer, 50f * fator);
+        } catch (Exception e) { LanternaMod.LOGGER.error("lento", e); }
+    }
+
+    /** Começa um take: câmera lenta ligada (o vídeo depois é acelerado de volta). */
+    private static void take(String nome) {
+        if (gravando) corteAgora();
+        relogio(LENTO);
+        gravando = true;
+        LanternaMod.LOGGER.info("TAKE {} {} fps={}", nome, System.currentTimeMillis(), Minecraft.getInstance().getFps());
+    }
+
+    private static void corteAgora() {
+        LanternaMod.LOGGER.info("CORTE {}", System.currentTimeMillis());
+        gravando = false;
+        relogio(1);
+    }
+
+    private static void corte() { at(1, () -> { if (gravando) corteAgora(); }); }
+
+    /** Caminho de câmera suave: o jogador (a câmera) vai de a até b em "ticks", com aceleração e freio. a/b = {x, y, z, yaw, pitch}. */
+    private static void trajeto(int ticks, java.util.function.Supplier<double[]> fa, java.util.function.Supplier<double[]> fb) {
+        Minecraft mc = Minecraft.getInstance();
+        for (int k = 0; k <= ticks; k++) {
+            final double t0 = (double) k / ticks, t = t0 * t0 * (3 - 2 * t0);
+            at(1, () -> {
+                double[] a = fa.get(), b = fb.get();
+                var p = mc.player;
+                p.getAbilities().flying = true;
+                p.setDeltaMovement(0, 0, 0);
+                p.setPos(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t);
+                p.setYRot((float) (a[3] + (b[3] - a[3]) * t));
+                p.setXRot((float) (a[4] + (b[4] - a[4]) * t));
+                p.setYHeadRot(p.getYRot());
+                p.yBodyRot = p.getYRot();
+            });
+        }
+    }
+
+    private static double[] v(double x, double y, double z, double yaw, double pitch) { return new double[]{x, y, z, yaw, pitch}; }
+
+    /** Cenas para o trailer: cada "TAKE" marca no log o início de um trecho bom para o vídeo (em câmera lenta). */
+    private static void sceneTrailer() {
+        Minecraft mc = Minecraft.getInstance();
+        Runnable voar = () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); }));
+        Runnable parar = () -> { mc.options.keyUp.setDown(false); mc.options.keySprint.setDown(false); mc.options.keyJump.setDown(false); };
+        Runnable tempo = () -> { cmd("execute in minecraft:overworld run weather clear 1000000"); cmd("time set 1000"); };
+        int[] H = {60};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(12);
+            mc.options.hideGui = true; mc.options.bobView().set(false);
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doWeatherCycle false"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
+            cmd("lanterna anel green"); cmd("execute in minecraft:overworld run weather clear 1000000"); });
+        at(20, () -> { cmd("lanterna maximo"); cmd("effect give @s resistance 99999 4 true"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -480 200 -150 0 20"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(10, tempo);
+        at(5, () -> server(sp -> H[0] = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel())));
+        // pré-carrega o caminho do voo
+        at(5, () -> cmd("tp @s -480 170 -330 0 25"));
+        at(200, () -> {});
+        // ---- 1. voo sobre a megacidade de Oa ----
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); voar.run(); take("voo_cidade"); });
+        at(1, () -> {});
+        trajeto(220, () -> v(-480.5, H[0] + 110, -330.5, 0, 22), () -> v(-470.5, H[0] + 45, -90.5, 12, 14));
+        corte();
+        // ---- 2. a Bateria Central (vista de baixo, recuando) ----
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); cmd("tp @s -388 " + (H[0] + 4) + " 14 0 -14"); });
+        at(60, () -> take("bateria"));
+        at(1, () -> {});
+        trajeto(150, () -> v(-387.5, H[0] + 4, 16.5, 0, -16), () -> v(-396.5, H[0] + 12, 0.5, -12, -12));
+        corte();
+        // ---- 3. construtos novos contra piratas ----
+        String[] cons = {"g_canhao", "g_meteoros", "r_chuva", "b_aurora", "v_jardim", "o_vortice", "y_morcegos", "i_raizes"};
+        String[] anel = {"green", "green", "red", "blue", "violet", "orange", "yellow", "indigo"};
+        for (int i = 0; i < cons.length; i++) {
+            final String id = cons[i], an = anel[i];
+            at(10, () -> cmd("lanterna anel " + an));
+            at(10, () -> server(sp -> {
+                var l = sp.serverLevel();
+                for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, sp.getBoundingBox().inflate(50), x -> !(x instanceof net.minecraft.world.entity.player.Player))) e.discard();
+                for (var e : l.getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(60))) e.discard();
+                int h = H[0];
+                for (var q : net.minecraft.core.BlockPos.betweenClosed(-325, h - 1, -12, -290, h + 10, 12))
+                    if (l.getBlockState(q).is(com.lanterna.construct.ConstructRegistry.CONSTRUCT_BLOCK.get())) l.setBlock(q, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+                sp.teleportTo(l, -300.5, h, 0.5, 90f, 10f);
+                com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+                for (int j = 0; j < 5; j++) {
+                    var z = com.lanterna.especies.LanternaEntity.pirata(l, j == 0);
+                    z.moveTo(-311.5 - (j % 2) * 2.5, h, -3.5 + j * 1.8, 270f, 0);
+                    z.setNoAi(true);
+                    var hp = z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                    if (hp != null) hp.setBaseValue(400);
+                    z.setHealth(400);
+                    l.addFreshEntity(z);
+                }
+                var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                if (r != null) { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge()); }
+            }));
+            at(15, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.player.setYRot(90f); mc.player.setXRot(10f); });
+            at(2, () -> { take("cons_" + id); server(sp -> com.lanterna.construct.Constructs.cast(sp, id)); });
+            at(3, () -> { mc.player.setYRot(130f); mc.player.setXRot(16f); });
+            at(id.endsWith("meteoros") || id.endsWith("chuva") || id.endsWith("aurora") ? 70 : 50, () -> {});
+            corte();
+        }
+        // ---- 4. a roda e a Árvore da Luz ----
+        at(5, () -> cmd("lanterna anel green"));
+        at(15, () -> { take("roda"); com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+        at(50, () -> { take("arvore"); com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(new com.lanterna.client.fonte.ArvoreScreen()); });
+        at(50, () -> mc.setScreen(null));
+        corte();
+        // ---- 5. a Fonte: aura e voo até a Ilha do Coração ----
+        at(5, () -> cmd("lanterna fonte ir"));
+        waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); voar.run(); });
+        at(5, () -> {});
+        trajeto(1, () -> v(0.5, 102, 6.5, 180, 8), () -> v(0.5, 102, 6.5, 180, 8));
+        at(20, () -> take("fonte_aura"));
+        at(1, () -> {});
+        trajeto(80, () -> v(0.5, 102, 6.5, 180, 8), () -> v(0.5, 104.5, 6.5, 215, 4));
+        corte();
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); take("fonte_voo"); });
+        at(1, () -> {});
+        trajeto(160, () -> v(0.5, 118, -45.5, 0, 24), () -> v(0.5, 110, 95.5, 0, 10));
+        corte();
+        // ---- 6. os chefes ----
+        String[] tr = {"green", "red", "violet", "orange"};
+        for (String t : tr) {
+            at(5, () -> { cmd("lanterna anel " + t); cmd("lanterna fonte chefe"); });
+            at(10, () -> cmd("lanterna fonte ir ilha"));
+            waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
+            waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+            at(40, () -> server(sp -> {
+                for (var b : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(120))) b.discard();
+                var pos = com.lanterna.fonte.FonteMundo.ILHA.above();
+                var hit = new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
+                net.minecraftforge.common.ForgeHooks.onRightClickBlock(sp, net.minecraft.world.InteractionHand.MAIN_HAND, pos, hit);
+                var il = com.lanterna.fonte.FonteMundo.ILHA;
+                sp.teleportTo(sp.serverLevel(), il.getX() - 7.5, il.getY() + 1, il.getZ() - 2.5, -35f, -6f);
+            }));
+            at(10, () -> { cmd("gamemode survival"); mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+            at(30, () -> take("chefe_" + t));
+            // o Lanterna ataca com construtos enquanto o chefe responde (câmera olhando para o chefe)
+            for (int k = 0; k < 6; k++) {
+                final int kk = k;
+                at(20, () -> server(sp -> {
+                    var bs = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80));
+                    if (bs.isEmpty()) return;
+                    var b = bs.get(0);
+                    var d = b.position().add(0, b.getBbHeight() * 0.5, 0).subtract(sp.getEyePosition());
+                    float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
+                    float pitch = (float) -Math.toDegrees(Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)));
+                    sp.teleportTo(sp.serverLevel(), sp.getX(), sp.getY(), sp.getZ(), yaw, pitch);
+                    if (kk % 2 == 0) {
+                        com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+                        for (var ct : com.lanterna.construct.ConstructType.values()) if (ct.arvore && ct.corps.equals(t) && (ct.id.endsWith("canhao") || ct.id.endsWith("lanca") || ct.id.endsWith("vomito") || ct.id.endsWith("punho") || ct.id.endsWith("moedas") || ct.id.endsWith("flecha"))) {
+                            com.lanterna.construct.Constructs.cast(sp, ct.id);
+                            break;
+                        }
+                    }
+                    b.setHealth(Math.max(1, b.getHealth() - b.getMaxHealth() * 0.09f));
+                }));
+            }
+            at(1, () -> { take("chefe_morre_" + t); server(sp -> { for (var b : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefeFonte.class, sp.getBoundingBox().inflate(80))) b.hurt(sp.damageSources().playerAttack(sp), 100000f); }); });
+            at(50, () -> cmd("gamemode creative"));
+            corte();
+        }
+        // ---- 7. viagem no espaço ----
+        at(10, () -> { cmd("lanterna anel green"); cmd("execute in lanterna:space run tp @s 300 -200 300 90 0"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("space") && mc.screen == null, 600);
+        at(80, () -> { com.lanterna.client.flight.Autopilot.clear(); voar.run(); });
+        at(10, () -> { mc.player.setXRot(0); mc.player.setYRot(90); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.options.keyUp.setDown(true); mc.options.keySprint.setDown(true); });
+        at(60, () -> take("espaco"));
+        for (int k = 0; k < 60; k++) at(3, () -> mc.player.setYRot(mc.player.getYRot() + (float) Math.sin(mc.player.tickCount * 0.03) * 0.8f));
+        at(1, parar);
+        corte();
+        // ---- 8. evento: piratas atacam a Bateria ----
+        at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(20, tempo);
+        at(20, () -> { cmd("gamemode creative"); cmd("lanterna fonte evento"); });
+        at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); take("evento"); });
+        at(1, () -> {});
+        trajeto(140, () -> v(-372.5, H[0] + 10, 6.5, 50, 22), () -> v(-404.5, H[0] + 12, 6.5, -45, 26));
+        corte();
+        // ---- 9. final: a câmera sobe e revela a megacidade ----
+        at(5, () -> { cmd("tp @s -440 " + (H[0] + 40) + " 120 180 20"); });
+        at(100, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); take("final"); });
+        at(1, () -> {});
+        trajeto(180, () -> v(-440.5, H[0] + 40, 130.5, 165, 15), () -> v(-470.5, H[0] + 150, 260.5, 180, 32));
+        corte();
+        at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    private static float k0() { return 0f; }
+
+    /** Combate contra um Lanterna NPC inimigo: o jogador mira no que vê (posição do cliente) e segura o laser. */
+    private static void sceneCombate() {
+        Minecraft mc = Minecraft.getInstance();
+        int[] npcId = {-1};
+        int[] cont = {0, 0};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); });
+        at(20, () -> { cmd("lanterna maximo"); });
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 40 140 60"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        at(60, () -> server(sp -> {
+            int h = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 40, 60);
+            sp.teleportTo(sp.serverLevel(), 40.5, h, 60.5, 0, 0);
+        }));
+        at(10, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 9999 4 true"); cmd("effect give @s regeneration 9999 4 true"); });
+        String[] fases = {"sem_comp", "com_comp"};
+        for (String fase : fases) {
+            at(10, () -> server(sp -> {
+                com.lanterna.combate.Mira.desligada = fase.equals("sem_comp");
+                for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(80))) e.discard();
+                var e = new com.lanterna.especies.LanternaEntity(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(), sp.serverLevel());
+                e.setup(com.lanterna.especies.Especie.paraTropa(com.lanterna.corps.BuiltinCorps.YELLOW, sp.getRandom()), 1, com.lanterna.especies.Especie.Papel.LANTERNA,
+                        com.lanterna.corps.BuiltinCorps.YELLOW, "roupa_tropa_yellow", false, false);
+                e.moveTo(sp.getX() + 10, sp.getY() + 3, sp.getZ() + 2, 0, 0);
+                var hp = e.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+                hp.setBaseValue(100000); e.setHealth(100000);
+                sp.serverLevel().addFreshEntity(e);
+                e.setTarget(sp);
+                npcId[0] = e.getId(); cont[0] = 0; cont[1] = 0;
+            }));
+            at(60, () -> {});
+            // 12 s segurando o laser, mirando onde o cliente mostra o NPC
+            at(1, () -> construct("laser", true));
+            for (int k = 0; k < 240; k++) {
+                at(1, () -> {
+                    Entity n = mc.level.getEntity(npcId[0]);
+                    if (n != null) mc.player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.getPosition(mc.getFrameTime()).add(0, n.getBbHeight() * 0.5, 0));
+                    server(sp -> {
+                        Entity sn = sp.serverLevel().getEntity(npcId[0]);
+                        if (sn instanceof net.minecraft.world.entity.LivingEntity le) { cont[1]++; if (le.hurtTime == 10) cont[0]++; if (cont[1] % 40 == 0) glog(fase + " t=" + cont[1] + " dist=" + Math.round(le.distanceTo(sp)) + " vel=" + Math.round(le.getDeltaMovement().length() * 200) / 10.0 + " vida=" + Math.round(le.getHealth())); } else if (cont[1] >= 0) { glog(fase + " NPC sumiu"); cont[1] = -1000; }
+                        com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge()));
+                    });
+                });
+                if (k == 120) at(0, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); shot("combate_" + fase); });
+                if (k == 125) at(0, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+            }
+            at(1, () -> construct("laser", false));
+            at(5, () -> server(sp -> {
+                Entity sn = sp.serverLevel().getEntity(npcId[0]);
+                glog(fase + ": acertos " + cont[0] + " de " + (cont[1] / 4) + " pulsos do laser (" + Math.round(400.0 * cont[0] / Math.max(1, cont[1])) + "%)"
+                        + (sn != null ? " dist=" + Math.round(sn.distanceTo(sp)) : ""));
+            }));
+        }
+        // regras de nascimento dos Ecos
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            java.util.function.BiFunction<Integer, Integer, String> t = (x, z) -> {
+                int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                int ok = 0;
+                for (int i = 0; i < 200; i++) if (com.lanterna.lore.world.ZonasDeNascimento.ecoPodeNascer(l, new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.entity.MobSpawnType.NATURAL, l.random)) ok++;
+                return ok + "/200 chao=" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(l.getBlockState(new net.minecraft.core.BlockPos(x, y - 1, z)).getBlock()).getPath();
+            };
+            glog("eco megacidade(-480,30): " + t.apply(-480, 30));
+            glog("eco megacidade(-400,-120): " + t.apply(-400, -120));
+            glog("eco cidadeTropa(10,-150): " + t.apply(10, -150));
+            glog("eco base(5,5): " + t.apply(5, 5));
+            glog("eco campo(40,60): " + t.apply(40, 60));
+            glog("eco campo(200,200): " + t.apply(200, 200));
+            glog("eco campo(-150,250): " + t.apply(-150, 250));
+        }));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
+    /** Bairro novo das megacidades e moradores a mais. */
+    private static void sceneDensa() {
+        Minecraft mc = Minecraft.getInstance();
+        String[] pls = System.getProperty("lanterna.planetas", "oa").split(",");
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(16); mc.options.hideGui = true;
+            cmd("gamemode creative"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamerule doDaylightCycle false"); cmd("time set 1000"); });
+        for (String pl : pls) {
+            at(5, () -> server(sp -> { if (System.getProperty("lanterna.refazer") != null) com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(pl + ":megacidade_densa"); }));
+            at(10, () -> cmd("execute in lanterna:" + pl + " run tp @s -480 260 -60 0 60"));
+            waitFor(() -> mc.level.dimension().location().getPath().equals(pl) && mc.screen == null, 900);
+            at(200, () -> {});
+            waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+            at(100, () -> {});
+            waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+            at(60, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var c = com.lanterna.cidade.CidadeNativa.CENTRO;
+                int n = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(c).inflate(210, 400, 210)).size();
+                glog(pl + " nativos=" + n + " densa=" + com.lanterna.lore.LoreWorldData.get(sp.server).siteBuilt(pl + ":megacidade_densa"));
+                sp.teleportTo(l, -480.5, com.lanterna.cidade.CidadeNativa.altura(l) + 150, -40.5, 0f, 70f);
+            }));
+            at(80, () -> shot("densa_cima_" + pl));
+            at(5, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -480.5 + 86, h + 14, 30.5, 120f, 25f); }));
+            at(80, () -> shot("densa_rua_" + pl));
+            at(5, () -> cmd("execute in lanterna:" + pl + " run tp @s 0 140 -150 0 60"));
+            at(200, () -> server(sp -> {
+                int n = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, new net.minecraft.world.phys.AABB(com.lanterna.cidade.Cidade.CENTRO).inflate(80, 300, 80)).size();
+                glog(pl + " npcs cidade da Tropa=" + n);
+            }));
+            at(700, () -> server(sp -> {
+                int n = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, new net.minecraft.world.phys.AABB(com.lanterna.cidade.Cidade.CENTRO).inflate(80, 300, 80)).size();
+                glog(pl + " npcs cidade da Tropa (depois do censo)=" + n);
+            }));
+        }
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneFonte() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -2789,6 +3108,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("arvore")) sceneArvore();
         else if (ENABLED && SCENE.equals("chefes")) sceneChefes();
         else if (ENABLED && SCENE.equals("forca")) sceneForca();
+        else if (ENABLED && SCENE.equals("trailer")) sceneTrailer();
+        else if (ENABLED && SCENE.equals("combate")) sceneCombate();
+        else if (ENABLED && SCENE.equals("densa")) sceneDensa();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

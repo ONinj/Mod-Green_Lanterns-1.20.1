@@ -578,9 +578,9 @@ public final class Constructs {
         if (block.getType() != HitResult.Type.MISS) far = block.getLocation();
         LivingEntity best = null;
         double bestD = Double.MAX_VALUE;
-        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, new AABB(eye, far).inflate(1.5),
+        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, new AABB(eye, far).inflate(2.5),
                 e -> e != player && e.isAlive() && !e.isSpectator())) {
-            var clip = e.getBoundingBox().inflate(0.5).clip(eye, far);
+            var clip = com.lanterna.combate.Mira.clip(e, eye, far, 0.5);
             if (clip.isPresent() && clip.get().distanceToSqr(eye) < bestD) {
                 bestD = clip.get().distanceToSqr(eye);
                 best = e;

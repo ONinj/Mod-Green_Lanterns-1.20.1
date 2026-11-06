@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import com.lanterna.lore.LoreWorldData;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -47,7 +48,7 @@ public final class CidadesPovos {
     public static final int R = 200;
     static final int PRACA = 40;
     static final int[] ANEIS = {70, 130, 176};
-    public static final int NATIVOS = 40;
+    public static final int NATIVOS = 90;
 
     // ===================== Traçado =====================
 
@@ -65,6 +66,102 @@ public final class CidadesPovos {
             }
         }
         return out;
+    }
+
+    /** Casas a mais por cidade no adensamento (0.28). */
+    public static final int CASAS_NOVAS = 70;
+
+    /** Onde o adensamento pôs casas (os nativos também moram nelas). Guardado por cidade. */
+    private static final java.util.Map<String, List<BlockPos>> EXTRAS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static List<BlockPos> casasExtras(BlockPos c) {
+        return EXTRAS.getOrDefault(c.getX() + "," + c.getZ(), List.of());
+    }
+
+    /** Ocupação do lote: quantas amostras sólidas acima do chão num raio de 7 (postes e flores contam pouco). */
+    static int ocupacao(ServerLevel l, BlockPos p) {
+        int ocupados = 0;
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int dx = -7; dx <= 7; dx += 2) for (int dz = -7; dz <= 7; dz += 2) {
+            if (dx * dx + dz * dz > 50) continue;
+            for (int y = 1; y <= 10; y += 1) if (!l.getBlockState(m.set(p.getX() + dx, p.getY() + y, p.getZ() + dz)).canBeReplaced()) ocupados++;
+        }
+        return ocupados;
+    }
+
+    static void limparLote(ServerLevel l, BlockPos p) {
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int dx = -7; dx <= 7; dx++) for (int dz = -7; dz <= 7; dz++) {
+            if (dx * dx + dz * dz > 52) continue;
+            for (int y = 1; y <= 14; y++) {
+                m.set(p.getX() + dx, p.getY() + y, p.getZ() + dz);
+                if (!l.getBlockState(m).isAir()) l.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+    }
+
+    /**
+     * Adensamento: procura, no chão dos bairros, lotes vazios (sem prédio, marco ou monumento; postes e enfeites
+     * pequenos saem) e põe até CASAS_NOVAS casas, a pelo menos 16 blocos umas das outras. Serve para cidades novas e
+     * para as que já existiam (uma vez por mundo). A busca é feita um pedaço do mundo por etapa.
+     */
+    public static void adensar(ServerLevel level, PlanetLore planet, BlockPos c) {
+        Kit k = new Kit(level, Paleta.of(planet));
+        Estilo e = estilo(planet);
+        List<BlockPos> candidatos = java.util.Collections.synchronizedList(new ArrayList<>());
+        int cx0 = (c.getX() - R) >> 4, cx1 = (c.getX() + R) >> 4, cz0 = (c.getZ() - R) >> 4, cz1 = (c.getZ() + R) >> 4;
+        List<net.minecraft.world.level.ChunkPos> lote = new ArrayList<>();
+        List<Consumer<ServerLevel>> etapas = new ArrayList<>();
+        for (int cx = cx0; cx <= cx1; cx++) for (int cz = cz0; cz <= cz1; cz++) {
+            int fx = cx, fz = cz;
+            int mx = Math.max(Math.abs((fx << 4) + 8 - c.getX()) - 12, 0), mz = Math.max(Math.abs((fz << 4) + 8 - c.getZ()) - 12, 0);
+            if (mx * mx + mz * mz > R * R) continue;
+            lote.add(new net.minecraft.world.level.ChunkPos(fx, fz));
+            etapas.add(l -> {
+                for (int x = (fx << 4) + 2; x < (fx << 4) + 16; x += 4) for (int z = (fz << 4) + 2; z < (fz << 4) + 16; z += 4) {
+                    int dx = x - c.getX(), dz = z - c.getZ();
+                    double d = dist(dx, dz);
+                    if (d < PRACA + 12 || d > R - 14 || tipo(dx, dz) != 0 || distAvenida(dx, dz) < 11) continue;
+                    boolean longeDosAneis = true;
+                    for (int r : ANEIS) if (Math.abs(d - r) < 10) longeDosAneis = false;
+                    if (!longeDosAneis) continue;
+                    BlockPos p = new BlockPos(x, c.getY(), z);
+                    if (ocupacao(l, p) <= 6) candidatos.add(p);
+                }
+            });
+            if (lote.size() == 48) { Obra.carregar(level, new ArrayList<>(lote)); for (var et : etapas) Obra.etapa(level, et); lote.clear(); etapas.clear(); }
+        }
+        if (!lote.isEmpty()) { Obra.carregar(level, new ArrayList<>(lote)); for (var et : etapas) Obra.etapa(level, et); }
+        String chave = c.getX() + "," + c.getZ();
+        Obra.etapa(level, l -> {
+            // escolhe os lotes: espalhados pela cidade, longe das casas que já existem e uns dos outros
+            List<BlockPos> todos = new ArrayList<>(candidatos);
+            todos.sort(java.util.Comparator.comparingLong(p -> net.minecraft.util.Mth.getSeed(p.getX(), 0, p.getZ())));
+            List<BlockPos> casas = new ArrayList<>(casas(c));
+            List<BlockPos> novas = new ArrayList<>();
+            for (BlockPos p : todos) {
+                if (novas.size() >= CASAS_NOVAS) break;
+                boolean ok = true;
+                for (BlockPos q : casas) if (q.distSqr(p) < 16 * 16) { ok = false; break; }
+                if (!ok) continue;
+                for (BlockPos q : novas) if (q.distSqr(p) < 16 * 16) { ok = false; break; }
+                if (ok) novas.add(p);
+            }
+            EXTRAS.put(chave, novas);
+            LoreWorldData.get(l.getServer()).guardarCasas(planet.planet, novas);
+            int f = 200;
+            for (BlockPos p : novas) {
+                int i = f++;
+                Obra.etapa(l, l2 -> { if (ocupacao(l2, p) <= 6) { limparLote(l2, p); e.casa(k, p, paraOCentro(c, p), i); } });
+            }
+            Obra.etapa(l, l2 -> LanternaMod.LOGGER.info("Lanterna: bairro novo em {}: {} casas (de {} lotes livres)", planet.planet, novas.size(), todos.size()));
+        });
+    }
+
+    /** Recupera as casas novas guardadas no mundo (depois de reiniciar o servidor). */
+    public static void lembrar(ServerLevel level, PlanetLore planet, BlockPos c) {
+        String chave = c.getX() + "," + c.getZ();
+        if (!EXTRAS.containsKey(chave)) EXTRAS.put(chave, LoreWorldData.get(level.getServer()).casas(planet.planet));
     }
 
     static List<BlockPos> predios(BlockPos c) {
@@ -218,6 +315,7 @@ public final class CidadesPovos {
             if (mx * mx + mz * mz > (R + 2) * (R + 2)) continue;
             Obra.etapa(level, l -> drenar(l, e, c, fx, fz));
         }
+        adensar(level, planet, c);
         Obra.etapa(level, l -> CidadeNativa.nativos(l, c, planet, NATIVOS));
         Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: cidade do povo de {} pronta", planet.planet));
     }

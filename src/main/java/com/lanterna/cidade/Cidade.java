@@ -573,7 +573,11 @@ public final class Cidade {
         // cidadãos e guardas
         CidadeNpcs.npc(l, c.offset(-34, 0, 42), "cidadao_1", corps, false, 0, 12);
         CidadeNpcs.npc(l, c.offset(-6, 0, 10), "cidadao_2", corps, false, 0, 16);
-        for (int[] g : new int[][]{{0, R - 4}, {0, -R + 4}, {R - 4, 0}, {-R + 4, 0}, {10, 0}, {-10, 0}}) {
+        // mais gente andando pelas ruas (0.28)
+        int[][] ruas = {{0, -22}, {0, 26}, {22, 2}, {-22, -2}, {-30, 22}, {30, -22}, {16, 32}, {-16, -26}, {8, -44}, {-8, 44}, {44, 6}, {-44, -6}};
+        for (int i = 0; i < ruas.length; i++)
+            CidadeNpcs.npc(l, c.offset(ruas[i][0], 0, ruas[i][1]), "cidadao_" + (3 + i), corps, false, i * 30, 14);
+        for (int[] g : new int[][]{{0, R - 4}, {0, -R + 4}, {R - 4, 0}, {-R + 4, 0}, {10, 0}, {-10, 0}, {R - 10, R - 10}, {-R + 10, R - 10}, {R - 10, -R + 10}, {-R + 10, -R + 10}}) {
             CidadeNpcs.npc(l, c.offset(g[0], 0, g[1]), "guarda", corps, false, 0, 10);
         }
         // presos (não fazem nada, não morrem)

@@ -69,6 +69,9 @@ public final class PlanetSites {
             // mundos com a cidade pequena da 0.25: vira a megacidade do povo
             if (!com.lanterna.cidade.Obra.ocupada() && planet != PlanetLore.GENESE && data.siteBuilt(planet.planet + ":nativa"))
                 tryBuild(level, data, planet, "megacidade", com.lanterna.cidade.CidadeNativa.CENTRO, player, 1000);
+            // cidades da 0.26/0.27: ganham o bairro novo e mais moradores
+            if (!com.lanterna.cidade.Obra.ocupada() && planet != PlanetLore.GENESE && data.siteBuilt(planet.planet + ":megacidade"))
+                tryBuild(level, data, planet, "megacidade_densa", com.lanterna.cidade.CidadeNativa.CENTRO, player, 300);
         }
     }
 
@@ -92,8 +95,13 @@ public final class PlanetSites {
             } else if (kind.equals("nativa")) {
                 com.lanterna.cidade.CidadeNativa.construir(level, planet);
                 data.markSite(planet.planet + ":megacidade"); // já nasce grande, com a arquitetura do povo
+                data.markSite(planet.planet + ":megacidade_densa"); // e com o bairro novo
             } else if (kind.equals("megacidade")) {
                 com.lanterna.cidade.CidadeNativa.refazer(level, planet);
+                data.markSite(planet.planet + ":megacidade_densa");
+            } else if (kind.equals("megacidade_densa")) {
+                com.lanterna.cidade.CidadesPovos.adensar(level, planet, com.lanterna.cidade.CidadeNativa.CENTRO.atY(com.lanterna.cidade.CidadeNativa.altura(level)));
+                com.lanterna.cidade.Obra.etapa(level, l -> com.lanterna.cidade.CidadeNativa.nativos(l, com.lanterna.cidade.CidadeNativa.CENTRO.atY(com.lanterna.cidade.CidadeNativa.altura(l)), planet, com.lanterna.cidade.CidadesPovos.NATIVOS));
             } else if (kind.equals("palacio_degraus")) {
                 com.lanterna.cidade.Palacio.consertarTronos(level);
             } else if (kind.equals("cidade2")) {

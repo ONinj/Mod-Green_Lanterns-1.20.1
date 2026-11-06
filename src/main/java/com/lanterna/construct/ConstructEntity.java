@@ -521,11 +521,11 @@ public class ConstructEntity extends Entity {
 
     @Nullable
     private LivingEntity firstEntityOnLine(LivingEntity owner, Vec3 from, Vec3 to) {
-        AABB box = new AABB(from, to).inflate(1.0);
+        AABB box = new AABB(from, to).inflate(2.5);
         LivingEntity best = null;
         double bestD = Double.MAX_VALUE;
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, box, e -> e != owner && e.isAlive() && !e.isSpectator())) {
-            var clip = e.getBoundingBox().inflate(0.3).clip(from, to);
+            var clip = com.lanterna.combate.Mira.clip(e, from, to, 0.3);
             if (clip.isPresent()) {
                 double d = clip.get().distanceToSqr(from);
                 if (d < bestD) {
@@ -571,8 +571,8 @@ public class ConstructEntity extends Entity {
         Vec3 naveHit = naveNaLinha(owner, from, stop, size * 0.6, 0);
         if (naveHit != null) {
             LivingEntity antes = null;
-            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, naveHit).inflate(size + 0.5), x -> inimigo(owner, x))) {
-                if (e.getBoundingBox().inflate(size).clip(from, naveHit).isPresent()) { antes = e; break; }
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, naveHit).inflate(size + 2.5), x -> inimigo(owner, x))) {
+                if (com.lanterna.combate.Mira.clip(e, from, naveHit, size).isPresent()) { antes = e; break; }
             }
             if (antes == null) {
                 naveNaLinha(owner, from, stop, size * 0.6, damage * (kind() == Kind.RAM ? 1.5f : 1f));
@@ -585,8 +585,8 @@ public class ConstructEntity extends Entity {
         }
         if (kind() == Kind.RAM) {
             ServerLevel sl0 = (ServerLevel) level();
-            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 0.5), x -> inimigo(owner, x))) {
-                if (atravessados.contains(e.getId()) || e.getBoundingBox().inflate(size).clip(from, stop).isEmpty()) continue;
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 2.5), x -> inimigo(owner, x))) {
+                if (atravessados.contains(e.getId()) || com.lanterna.combate.Mira.clip(e, from, stop, size).isEmpty()) continue;
                 atravessados.add(e.getId());
                 com.lanterna.combate.Equilibrio.ferirComPoder(e, source(owner), damage);
                 Vec3 push = velocity.normalize().scale(2.6);
@@ -608,9 +608,9 @@ public class ConstructEntity extends Entity {
         }
         LivingEntity hit = null;
         double best = Double.MAX_VALUE;
-        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 0.5),
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 2.5),
                 e -> e != owner && e.isAlive() && !e.isSpectator())) {
-            var clip = e.getBoundingBox().inflate(size).clip(from, stop);
+            var clip = com.lanterna.combate.Mira.clip(e, from, stop, size);
             if (clip.isPresent() && clip.get().distanceToSqr(from) < best) {
                 best = clip.get().distanceToSqr(from);
                 hit = e;

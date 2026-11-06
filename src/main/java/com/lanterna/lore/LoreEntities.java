@@ -163,6 +163,7 @@ public final class LoreEntities {
             }
             event.register(ECO_CINZENTO.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     (type, level, reason, pos, random) -> Monster.checkAnyLightMonsterSpawnRules(type, level, reason, pos, random)
+                            && com.lanterna.lore.world.ZonasDeNascimento.ecoPodeNascer(level, pos, reason, random)
                             && (level.getLevel() == null || LoreCreatures.Eco.allowSpawn(level.getLevel(), random))
                             && level.getEntitiesOfClass(LoreCreatures.Eco.class, new net.minecraft.world.phys.AABB(pos).inflate(48)).size() < 3,
                     SpawnPlacementRegisterEvent.Operation.REPLACE);

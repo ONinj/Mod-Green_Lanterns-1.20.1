@@ -687,3 +687,39 @@ usam bateria).
 `/lanterna fonte <selo|pressao|banho|essencia|prova|juramento|arvore [tudo|zerar]|evento|chefe|ir [ilha]|zerar> [valor]`
 
 `/lanterna maximo` (com o anel equipado): nível máximo, afinidade máxima, todas as técnicas e poderes (Porta Estelar, autorrecarga, Guarda de Honra, Gênese, planetas visitados), Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência, pressão zerada e anel a 250% de carga.
+
+# 0.28 — Combate contra os Lanternas NPC, cidades mais cheias e onde nascem os Ecos
+
+## Combate contra os Lanternas NPC
+- **IA nova** (`LanternaEntity.CombateGoal`): o Lanterna NPC fica a 10–13 blocos, um pouco acima do alvo e de frente
+  para ele, e troca de manobra a cada 1–3 s: pairar mirando, deslizar de lado ou investir (e socar se chegar perto).
+  Antes do laser ele **para e concentra a luz por meio segundo** (som e brilho na cor da Tropa): dá para ver, desviar e
+  acertar. Quando apanha, às vezes dá uma esquiva curta. Sem linha de visão, sobe e contorna. Não fica mais rodando em
+  círculos a 9 blocos/s.
+- **Caixa de acerto no voo**: voando, o corpo fica deitado; a caixa fica mais larga (≈1,15 a 1,9x) para bater com o
+  que se vê.
+- **Compensação de atraso** (`combate/Mira`): a tela mostra os outros alguns ticks atrás de onde estão no servidor.
+  O laser do punho, os projéteis (punho, rajada, aríete) e os construtos da Árvore da Luz agora contam também onde o
+  alvo estava nos últimos 4 ticks, e a caixa cresce um pouco com a velocidade dele (no máximo +1,1 bloco; contra
+  jogadores, no máximo +0,35).
+- Medido no teste automático (jogador mirando onde o cliente mostra o NPC, laser seguro por 12 s): ~85% dos pulsos
+  acertavam sem a compensação e ~100% com ela; o NPC (1024 de vida) cai em ~10 s com tudo no máximo.
+
+## Cidades mais cheias
+- **Bairro novo nas megacidades**: a cidade procura sozinha lotes vazios nos bairros (sem prédio, marco ou monumento;
+  postes e enfeites pequenos saem) e constrói até **70 casas a mais**, no estilo do povo, a 16 blocos umas das outras.
+  Cidades que já existiam ganham o bairro novo na primeira visita (site `megacidade_densa`).
+- **Mais moradores**: 90 nativos por megacidade (antes 40); o vigia repõe até 75. A conta agora é feita só nas casas
+  carregadas (antes contava a cidade inteira e criava gente a mais a cada visita; os que sobram vão embora).
+- **Cidade da Tropa**: 12 cidadãos a mais andando pelas ruas e 4 guardas a mais nos cantos.
+
+## Onde nascem os Ecos Cinzentos (`lore/world/ZonasDeNascimento`)
+| Lugar | Nasce? |
+|---|---|
+| Megacidade do povo e Palácio dos Guardiões | nunca |
+| QGs (cidade da Tropa, base e arena do planeta) | raramente (8% da chance normal) |
+| Oa | só perto de árvores (floresta) |
+| Odym (planeta de água) | só nas ilhas (areia, grama, terra) |
+| Outros planetas (sem árvores) | em chão natural, fora das construções |
+
+Missões, contratos e chefes que criam Ecos de propósito continuam funcionando em qualquer lugar.

@@ -146,7 +146,7 @@ public final class ConstrutosFonte {
             case RAIO -> {
                 Vec3 fim = olho.add(dir.scale(d.alcance()));
                 for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(olho, fim).inflate(1.2), x -> ConstructEntity.inimigo(dono, x)))
-                    if (x.getBoundingBox().inflate(0.5).clip(olho, fim).isPresent()) acertar(dono, d, x, dano, cor, dir);
+                    if (com.lanterna.combate.Mira.clip(x, olho, fim, 0.5).isPresent()) acertar(dono, d, x, dano, cor, dir);
                 ConstructEntity e = corpo(dono, d, cor, pow, 12, 0);
                 e.setPos(olho.x, olho.y, olho.z);
                 e.setEnd(fim);
@@ -266,7 +266,7 @@ public final class ConstrutosFonte {
         Vec3 fim = bloco.getType() == HitResult.Type.MISS ? para : bloco.getLocation();
         double tam = 0.45 * e.scale();
         for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(de, fim).inflate(tam + 0.5), x -> ConstructEntity.inimigo(dono, x))) {
-            if (e.acertados().contains(x.getId()) || x.getBoundingBox().inflate(tam).clip(de, fim).isEmpty()) continue;
+            if (e.acertados().contains(x.getId()) || com.lanterna.combate.Mira.clip(x, de, fim, tam).isEmpty()) continue;
             e.acertados().add(x.getId());
             acertar(dono, d, x, e.dano(), e.color(), v);
             if (!d.tem("perfura")) { impacto(e, dono, d, l, x.position().add(0, x.getBbHeight() * 0.5, 0)); return; }
@@ -358,7 +358,7 @@ public final class ConstrutosFonte {
         BlockHitResult b = l.clip(new ClipContext(eye, far, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
         Vec3 fim = b.getType() == HitResult.Type.MISS ? far : b.getLocation();
         for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(eye, fim).inflate(1.2), x -> ConstructEntity.inimigo(p, x)))
-            if (x.getBoundingBox().inflate(0.4).clip(eye, fim).isPresent()) acertar(p, d, x, d.dano() * pow, cor, look);
+            if (com.lanterna.combate.Mira.clip(x, eye, fim, 0.4).isPresent()) acertar(p, d, x, d.dano() * pow, cor, look);
         ConstructEntity e = corpo(p, d, cor, pow, 12, 0);
         e.setPos(eye.x, eye.y - 0.3, eye.z);
         e.setEnd(fim);

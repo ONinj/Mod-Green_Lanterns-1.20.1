@@ -57,7 +57,7 @@ public final class CidadeNpcs {
             return null;
         }
         LanternaEntity e = new LanternaEntity(EspeciesEntities.LANTERNA_NPC.get(), level);
-        boolean civil = CIVIS.contains(funcao);
+        boolean civil = CIVIS.contains(funcao) || funcao.startsWith("cidadao");
         Especie esp = civil ? Especie.paraPapel(Especie.Papel.MERCADOR, level.random) : Especie.paraTropa(corps, level.random);
         String roupa = civil ? (funcao.startsWith("cidadao") ? null : "roupa_mercador") : "roupa_tropa_" + corps.id().getPath();
         e.setup(esp, 1 + level.random.nextInt(3), civil ? Especie.Papel.MERCADOR : Especie.Papel.LANTERNA, civil ? null : corps,
