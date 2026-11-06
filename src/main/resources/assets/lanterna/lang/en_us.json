@@ -2084,5 +2084,21 @@
   "arquivo.lanterna.violeta.3": "Ysel crossed three galaxies to fetch someone who did not want to be fetched. She came back alone, and wiser.",
   "arquivo.lanterna.violeta.4": "To love is to let the other choose. Violet light only obeys those who understand that.",
   "arquivo.lanterna.violeta.5": "The Crystal Queen guards the Heart. She loves so much she would trap the whole world in a jewel. Break free of her.",
-  "chefe.lanterna.supremo": "%s gathers all of its emotion! Get away!"
+  "chefe.lanterna.supremo": "%s gathers all of its emotion! Get away!",
+  "subtitles.lanterna.nave.motor": "Ship engine",
+  "subtitles.lanterna.nave.turbo": "Ship boosts",
+  "subtitles.lanterna.nave.decolar": "Ship takes off",
+  "subtitles.lanterna.nave.pousar": "Ship lands",
+  "subtitles.lanterna.nave.reentrada": "Ship enters the atmosphere",
+  "subtitles.lanterna.nave.porta": "Ship door",
+  "subtitles.lanterna.nave.tiro": "Ship fires",
+  "subtitles.lanterna.nave.chamado": "Key calls the ship",
+  "item.lanterna.chave_nave.chamar": "Right-click: calls the ship to you, on any planet. Stays with you when you die.",
+  "nave.lanterna.chamar.ok": "Calling the ship...",
+  "nave.lanterna.chamar.chegando": "The ship is entering the atmosphere!",
+  "nave.lanterna.chamar.perdida": "The key can't find the ship (it was destroyed or never left the hangar).",
+  "nave.lanterna.chamar.perto": "The ship is already nearby.",
+  "nave.lanterna.chamar.dentro": "You are inside a ship.",
+  "nave.lanterna.chamar.vindo": "The ship is already on its way.",
+  "nave.lanterna.chamar.ocupada": "Another player is flying the ship."
 }

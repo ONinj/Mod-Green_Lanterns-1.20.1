@@ -122,6 +122,18 @@ public final class TropaItems {
             return s.hasTag() && s.getTag().hasUUID("Nave") ? s.getTag().getUUID("Nave") : null;
         }
 
+        /** Clique direito: chama a nave para perto, de onde ela estiver (com espera entre chamadas). */
+        @Override
+        public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+            ItemStack stack = player.getItemInHand(hand);
+            if (ship(stack) == null) return InteractionResultHolder.pass(stack);
+            if (!level.isClientSide && player instanceof net.minecraft.server.level.ServerPlayer sp
+                    && com.lanterna.naves.ChamadoNave.chamar(sp, stack)) {
+                player.getCooldowns().addCooldown(this, com.lanterna.naves.ChamadoNave.ESPERA);
+            }
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        }
+
         @Override
         public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tip, TooltipFlag flag) {
             if (stack.hasTag() && stack.getTag().contains("Tipo")) {
@@ -130,6 +142,7 @@ public final class TropaItems {
                 tip.add(Component.translatable("item.lanterna.chave_nave.blank").withStyle(ChatFormatting.DARK_GRAY));
             }
             tip.add(Component.translatable("item.lanterna.chave_nave.desc").withStyle(ChatFormatting.DARK_GRAY));
+            if (ship(stack) != null) tip.add(Component.translatable("item.lanterna.chave_nave.chamar").withStyle(ChatFormatting.AQUA));
         }
     }
 

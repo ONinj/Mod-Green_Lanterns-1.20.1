@@ -2756,6 +2756,115 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+    /** Naves: queda ao pousar, dano dos anéis nas naves de Tropa, sair depois de renascer, chave que chama a nave. */
+    private static void sceneNaves2() {
+        Minecraft mc = Minecraft.getInstance();
+        java.util.UUID[] minha = {null};
+        int[] alvoId = {-1};
+        float[] hp0 = {0};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule keepInventory false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); });
+        at(20, () -> cmd("lanterna maximo"));
+        at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
+        // ---- 1. pousar descendo devagar de ~50 blocos ----
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (var n : l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(120))) n.discard();
+            int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 60, 60);
+            var n = com.lanterna.naves.NaveEntity.create(l, com.lanterna.naves.NaveTipo.NAVE_LANCEIRA, "green");
+            n.moveTo(60.5, h + 50, 60.5, 0, 0);
+            n.setDono(sp.getUUID());
+            l.addFreshEntity(n);
+            minha[0] = n.getUUID();
+            sp.getInventory().add(com.lanterna.tropa.TropaItems.ChaveNave.forShip(n.getUUID(), "nave_lanceira", "green"));
+            sp.teleportTo(l, 60.5, h + 51, 60.5, 0, 0);
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.removeAllEffects();
+            sp.setHealth(sp.getMaxHealth());
+            sp.startRiding(n, true);
+            hp0[0] = sp.getHealth();
+        }));
+        at(20, () -> com.lanterna.client.KeyBindings.NAVE_DESCER.setDown(true));
+        at(400, () -> com.lanterna.client.KeyBindings.NAVE_DESCER.setDown(false));
+        at(40, () -> server(sp -> glog("queda: vida antes=" + hp0[0] + " depois=" + sp.getHealth() + " montado=" + (sp.getVehicle() != null) + " y=" + Math.round(sp.getY())
+                + " ultimo dano=" + (sp.getLastDamageSource() == null ? "nenhum" : sp.getLastDamageSource().getMsgId()) + " comida=" + sp.getFoodData().getFoodLevel())));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); shot("nave_pousada"); });
+        at(10, () -> { server(sp -> sp.stopRiding()); mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        // ---- 2. nave de Tropa contra os poderes do anel ----
+        String[] poderes = {"laser", "martelo", "g_canhao", "g_meteoros"};
+        for (String pd : poderes) {
+            at(10, () -> server(sp -> {
+                var l = sp.serverLevel();
+                for (var n : l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(60), x -> !x.getUUID().equals(minha[0]))) n.discard();
+                var n = com.lanterna.naves.NaveEntity.create(l, com.lanterna.naves.NaveTipo.NAVE_PATRULHA, "yellow");
+                sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                sp.getAbilities().flying = true; sp.onUpdateAbilities();
+                sp.teleportTo(l, 60.5, 110, 20.5, 0, 0);
+                n.moveTo(60.5, 108, 38.5, 0, 0);
+                n.setIa("patrulha");
+                l.addFreshEntity(n);
+                alvoId[0] = n.getId();
+                hp0[0] = n.hp();
+                sp.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.position().add(0, 1.5, 0));
+                com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+            }));
+            at(10, () -> { if (pd.equals("laser")) construct("laser", true); else server(sp -> { var n = sp.serverLevel().getEntity(alvoId[0]); if (n != null) sp.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.position().add(0, 1.5, 0)); com.lanterna.construct.Constructs.cast(sp, pd); }); });
+            for (int k = 0; k < 70; k++) at(1, () -> { var n = mc.level.getEntity(alvoId[0]); if (n != null) mc.player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, n.getPosition(mc.getFrameTime()).add(0, 1.5, 0)); });
+            at(1, () -> { if (pd.equals("laser")) construct("laser", false); });
+            at(5, () -> server(sp -> {
+                var e = sp.serverLevel().getEntity(alvoId[0]);
+                glog("nave de Tropa x " + pd + ": vida " + hp0[0] + " -> " + (e instanceof com.lanterna.naves.NaveEntity n ? n.hp() : "destruída"));
+            }));
+        }
+        // ---- 3. morrer com a chave, renascer dentro da nave e sair ----
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            if (!(l.getEntity(minha[0]) instanceof com.lanterna.naves.NaveEntity n)) { glog("minha nave sumiu"); return; }
+            com.lanterna.naves.NaveInterior.entrar(sp, n);
+        }));
+        at(60, () -> server(sp -> {
+            sp.setRespawnPosition(sp.level().dimension(), sp.blockPosition(), sp.getYRot(), true, false);
+            glog("dentro da nave: " + sp.level().dimension().location() + " chaves=" + sp.getInventory().countItem(com.lanterna.tropa.TropaItems.CHAVE_NAVE.get()));
+            sp.kill();
+        }));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(80, () -> server(sp -> {
+            glog("renasceu em: " + sp.level().dimension().location() + " chaves=" + sp.getInventory().countItem(com.lanterna.tropa.TropaItems.CHAVE_NAVE.get()));
+            com.lanterna.naves.NaveInterior.sair(sp, minha[0]);
+        }));
+        at(60, () -> server(sp -> {
+            var n = sp.serverLevel().getEntity(minha[0]);
+            glog("saiu em: " + sp.level().dimension().location() + " perto da nave=" + (n != null ? Math.round(n.distanceTo(sp)) + " blocos" : "NAO"));
+        }));
+        // ---- 4. a chave chama a nave para outro planeta ----
+        at(10, () -> cmd("execute in lanterna:korugar run tp @s 30 150 30"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("korugar") && mc.screen == null, 900);
+        at(80, () -> server(sp -> {
+            int h = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 30, 30);
+            for (var old : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, new net.minecraft.world.phys.AABB(30, 0, 30, 31, 300, 31).inflate(150))) old.discard();
+            sp.teleportTo(sp.serverLevel(), 30.5, h, 30.5, 0, -10);
+            sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            net.minecraft.world.item.ItemStack chave = net.minecraft.world.item.ItemStack.EMPTY;
+            for (net.minecraft.world.item.ItemStack st : sp.getInventory().items) if (st.getItem() instanceof com.lanterna.tropa.TropaItems.ChaveNave) chave = st;
+            glog("chamar: " + com.lanterna.naves.ChamadoNave.chamar(sp, chave));
+        }));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = true; mc.player.setYRot(70); mc.player.setXRot(-25); });
+        at(15, () -> shot("chamado_1"));
+        at(20, () -> shot("chamado_2"));
+        at(20, () -> { shot("chamado_3"); });
+        at(20, () -> { shot("chamado_4"); mc.player.setXRot(-10); });
+        at(30, () -> { shot("chamado_5"); mc.player.setXRot(5); });
+        at(80, () -> shot("chamado_6"));
+        at(40, () -> { mc.options.hideGui = false; });
+        at(10, () -> server(sp -> {
+            var n = sp.serverLevel().getEntity(minha[0]);
+            glog("nave chamada: " + (n != null ? "em " + sp.level().dimension().location() + " a " + Math.round(n.distanceTo(sp)) + " blocos, pousada=" + ((com.lanterna.naves.NaveEntity) n).pousada() + " chegando=" + ((com.lanterna.naves.NaveEntity) n).chegando() + " y=" + Math.round(n.getY()) + " chao=" + sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, n.getBlockX(), n.getBlockZ()) : "NAO chegou"));
+        }));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneFonte() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -3111,6 +3220,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("trailer")) sceneTrailer();
         else if (ENABLED && SCENE.equals("combate")) sceneCombate();
         else if (ENABLED && SCENE.equals("densa")) sceneDensa();
+        else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

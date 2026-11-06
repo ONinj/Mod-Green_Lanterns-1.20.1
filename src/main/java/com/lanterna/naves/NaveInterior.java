@@ -221,7 +221,7 @@ public final class NaveInterior {
             player.displayClientMessage(Component.translatable("nave.lanterna.auto.em_viagem", falta), true);
             return;
         }
-        sair(player);
+        sair(player, sala.id);
     }
 
     // ===================== Piloto automático pelo holomapa =====================
@@ -411,27 +411,62 @@ public final class NaveInterior {
     }
 
     public static void sair(ServerPlayer player) {
+        sair(player, null);
+    }
+
+    /**
+     * Sai da sala para fora da nave, onde a nave estiver agora. A posição vem da própria nave (ela avisa onde está),
+     * então funciona mesmo depois de renascer no beliche (antes o jogador caía no spawn da Terra, sem a nave).
+     */
+    public static void sair(ServerPlayer player, @Nullable UUID naveDaSala) {
         CompoundTag back = player.getPersistentData().getCompound(RETURN);
         MinecraftServer server = player.server;
-        ResourceKey<Level> dimKey = back.contains("Dim")
-                ? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(back.getString("Dim"))) : Level.OVERWORLD;
+        UUID naveId = naveDaSala != null ? naveDaSala : back.hasUUID("Nave") ? back.getUUID("Nave") : null;
+        Posicao pos = naveId != null ? posicao(server, naveId) : null;
+        ResourceKey<Level> dimKey;
+        Vec3 out;
+        if (pos != null) {
+            dimKey = pos.chave();
+            out = new Vec3(pos.x(), pos.y(), pos.z());
+        } else {
+            dimKey = back.contains("Dim") ? ResourceKey.create(Registries.DIMENSION, new ResourceLocation(back.getString("Dim"))) : Level.OVERWORLD;
+            out = back.contains("X") ? new Vec3(back.getDouble("X"), back.getDouble("Y"), back.getDouble("Z")) : null;
+        }
         ServerLevel level = server.getLevel(dimKey);
         if (level == null) level = server.overworld();
-        Vec3 out = new Vec3(back.getDouble("X"), back.getDouble("Y"), back.getDouble("Z"));
-        if (back.hasUUID("Nave") && level.getEntity(back.getUUID("Nave")) instanceof NaveEntity nave) {
+        if (out != null) level.getChunk(((int) Math.floor(out.x)) >> 4, ((int) Math.floor(out.z)) >> 4);
+        if (naveId != null && level.getEntity(naveId) instanceof NaveEntity nave) {
             out = nave.getDismountLocationForPassenger(player);
             nave.abrirPorta(true);
-        } else if (!back.contains("X")) {
+        } else if (out == null) {
             BlockPos s = level.getSharedSpawnPos();
             out = new Vec3(s.getX(), s.getY() + 1, s.getZ());
+        } else if (pos != null) {
+            // a nave ainda está carregando: sai do lado dela, em chão firme
+            int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(out.x + 4), (int) Math.floor(out.z));
+            out = new Vec3(out.x + 4, Math.max(y, out.y) + 0.2, out.z);
+        }
+        if (naveId != null) {
+            back.putUUID("Nave", naveId);
+            back.putString("Dim", level.dimension().location().toString());
+            back.putDouble("X", out.x); back.putDouble("Y", out.y); back.putDouble("Z", out.z);
+            player.getPersistentData().put(RETURN, back);
         }
         player.teleportTo(level, out.x, out.y, out.z, player.getYRot(), 0);
         player.fallDistance = 0;
     }
 
+    /** A volta da sala sobrevive à morte (o jogador renasce no beliche e ainda sabe sair). */
+    @SubscribeEvent
+    public static void onClone(net.minecraftforge.event.entity.player.PlayerEvent.Clone e) {
+        CompoundTag back = e.getOriginal().getPersistentData().getCompound(RETURN);
+        if (!back.isEmpty()) e.getEntity().getPersistentData().put(RETURN, back.copy());
+    }
+
     // ===================== Dados salvos =====================
 
     static final class Sala {
+        @Nullable UUID id;
         int indice;
         BlockPos origem = BlockPos.ZERO, porta = BlockPos.ZERO, dentro = BlockPos.ZERO, tamanho = BlockPos.ZERO;
         float olhar;
@@ -494,8 +529,34 @@ public final class NaveInterior {
         }
     }
 
+    /** Onde cada nave de jogador está (atualizado pela própria nave): a porta da sala e a chave usam isto. */
+    public record Posicao(String dim, double x, double y, double z) {
+        public ResourceKey<Level> chave() { return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dim)); }
+    }
+
+    public static void lembrarPosicao(NaveEntity n) {
+        if (!(n.level() instanceof ServerLevel sl) || n.dono() == null || n.tipo().destrocos()) return;
+        Dados d = Dados.get(sl.getServer());
+        Posicao velha = d.posicoes.get(n.getUUID());
+        String dim = sl.dimension().location().toString();
+        if (velha != null && velha.dim().equals(dim) && n.position().distanceToSqr(velha.x(), velha.y(), velha.z()) < 4) return;
+        d.posicoes.put(n.getUUID(), new Posicao(dim, n.getX(), n.getY(), n.getZ()));
+        d.setDirty();
+    }
+
+    public static void esquecerPosicao(MinecraftServer server, UUID nave) {
+        Dados d = Dados.get(server);
+        if (d.posicoes.remove(nave) != null) d.setDirty();
+    }
+
+    @Nullable
+    public static Posicao posicao(MinecraftServer server, UUID nave) {
+        return Dados.get(server).posicoes.get(nave);
+    }
+
     static final class Dados extends SavedData {
         private final Map<UUID, Sala> salas = new HashMap<>();
+        private final Map<UUID, Posicao> posicoes = new HashMap<>();
         private final int[] next = new int[10];
 
         static Dados get(MinecraftServer server) {
@@ -506,6 +567,7 @@ public final class NaveInterior {
             return salas.computeIfAbsent(nave.getUUID(), id -> {
                 int r = region(nave.getPintura(), nave.tipo());
                 Sala s = new Sala();
+                s.id = id;
                 s.indice = next[r]++;
                 s.origem = new BlockPos(s.indice * SLOT, Y, r * REGION);
                 setDirty();
@@ -535,7 +597,12 @@ public final class NaveInterior {
         static Dados load(CompoundTag tag) {
             Dados d = new Dados();
             CompoundTag m = tag.getCompound("Salas");
-            for (String k : m.getAllKeys()) d.salas.put(UUID.fromString(k), Sala.load(m.getCompound(k)));
+            for (String k : m.getAllKeys()) { Sala s = Sala.load(m.getCompound(k)); s.id = UUID.fromString(k); d.salas.put(s.id, s); }
+            CompoundTag ps = tag.getCompound("Posicoes");
+            for (String k : ps.getAllKeys()) {
+                CompoundTag q = ps.getCompound(k);
+                d.posicoes.put(UUID.fromString(k), new Posicao(q.getString("Dim"), q.getDouble("X"), q.getDouble("Y"), q.getDouble("Z")));
+            }
             int[] n = tag.getIntArray("Next");
             System.arraycopy(n, 0, d.next, 0, Math.min(n.length, d.next.length));
             return d;
@@ -547,6 +614,13 @@ public final class NaveInterior {
             salas.forEach((k, v) -> m.put(k.toString(), v.save()));
             tag.put("Salas", m);
             tag.putIntArray("Next", next);
+            CompoundTag ps = new CompoundTag();
+            posicoes.forEach((k, v) -> {
+                CompoundTag q = new CompoundTag();
+                q.putString("Dim", v.dim()); q.putDouble("X", v.x()); q.putDouble("Y", v.y()); q.putDouble("Z", v.z());
+                ps.put(k.toString(), q);
+            });
+            tag.put("Posicoes", ps);
             return tag;
         }
     }

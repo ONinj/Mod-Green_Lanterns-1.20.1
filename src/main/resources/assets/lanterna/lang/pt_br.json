@@ -2084,5 +2084,21 @@
   "arquivo.lanterna.violeta.3": "Ysel atravessou três galáxias para buscar alguém que não queria ser buscado. Voltou sozinha, e mais sábia.",
   "arquivo.lanterna.violeta.4": "Amar é deixar o outro escolher. A luz violeta só obedece a quem entende isso.",
   "arquivo.lanterna.violeta.5": "A Rainha de Cristal guarda o Coração. Ela ama tanto que prenderia o mundo inteiro numa joia. Liberte-se dela.",
-  "chefe.lanterna.supremo": "%s concentra toda a emoção! Saia de perto!"
+  "chefe.lanterna.supremo": "%s concentra toda a emoção! Saia de perto!",
+  "subtitles.lanterna.nave.motor": "Motor de nave",
+  "subtitles.lanterna.nave.turbo": "Nave acelera",
+  "subtitles.lanterna.nave.decolar": "Nave decola",
+  "subtitles.lanterna.nave.pousar": "Nave pousa",
+  "subtitles.lanterna.nave.reentrada": "Nave entra na atmosfera",
+  "subtitles.lanterna.nave.porta": "Porta da nave",
+  "subtitles.lanterna.nave.tiro": "Disparo de nave",
+  "subtitles.lanterna.nave.chamado": "Chave chama a nave",
+  "item.lanterna.chave_nave.chamar": "Clique direito: chama a nave até você, em qualquer planeta. Fica com você quando morre.",
+  "nave.lanterna.chamar.ok": "Chamando a nave...",
+  "nave.lanterna.chamar.chegando": "A nave está entrando na atmosfera!",
+  "nave.lanterna.chamar.perdida": "A chave não encontra a nave (ela foi destruída ou nunca saiu do hangar).",
+  "nave.lanterna.chamar.perto": "A nave já está aqui perto.",
+  "nave.lanterna.chamar.dentro": "Você está dentro de uma nave.",
+  "nave.lanterna.chamar.vindo": "A nave já está a caminho.",
+  "nave.lanterna.chamar.ocupada": "Outro jogador está pilotando a nave."
 }

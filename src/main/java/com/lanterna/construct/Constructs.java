@@ -270,6 +270,7 @@ public final class Constructs {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
                     if (e instanceof net.minecraft.world.entity.player.Player) e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0));
                 }
+                ConstructEntity.ferirNaves(player, level, player.getBoundingBox().inflate(r, 4, r), 6f * pow);
                 level.playSound(null, player.blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 1.2f, 1.3f);
             }
             case ESPERANCA -> {
@@ -351,6 +352,7 @@ public final class Constructs {
                 ConstructEntity nova = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 30, 0, (float) r);
                 nova.setPos(player.getX(), player.getY() + 1, player.getZ());
                 level.addFreshEntity(nova);
+                ConstructEntity.ferirNaves(player, level, player.getBoundingBox().inflate(r), 10f * pow);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(r), x -> x.distanceTo(player) <= r)) {
                     if (!ConstructEntity.inimigo(player, e)) {
                         e.heal(12);

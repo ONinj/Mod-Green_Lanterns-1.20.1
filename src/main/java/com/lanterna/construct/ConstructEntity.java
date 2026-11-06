@@ -367,6 +367,11 @@ public class ConstructEntity extends Entity {
     }
 
     /** Pode ferir este? (não acerta o dono, aliados da mesma guilda/Tropa nem bichos do dono) */
+    /** Quem está sentado dentro de uma nave fica protegido pelo casco: o tiro acerta a nave. */
+    public static boolean naTripulacao(Entity e) {
+        return e.getVehicle() instanceof com.lanterna.naves.NaveEntity;
+    }
+
     public static boolean inimigo(@Nullable LivingEntity owner, LivingEntity e) {
         if (e == owner || !e.isAlive() || e.isSpectator()) return false;
         if (e instanceof net.minecraft.world.entity.decoration.ArmorStand) return false;
@@ -476,6 +481,44 @@ public class ConstructEntity extends Entity {
         return bestP;
     }
 
+    // ---- Naves contra qualquer poder do anel (construtos da Árvore da Luz, ondas, explosões) ----
+
+    private static DamageSource fonteContraNave(net.minecraft.world.level.Level l, @Nullable LivingEntity owner) {
+        if (owner instanceof Player p) return l.damageSources().playerAttack(p);
+        if (owner != null) return l.damageSources().mobAttack(owner);
+        return l.damageSources().magic();
+    }
+
+    /** Fere (uma vez cada) as naves que encostam na área. Serve para todos os construtos. */
+    public static void ferirNaves(@Nullable LivingEntity owner, net.minecraft.world.level.Level l, AABB box, float dmg) {
+        if (l.isClientSide || dmg <= 0) return;
+        java.util.Set<com.lanterna.naves.NaveEntity> feridas = new java.util.HashSet<>();
+        for (Entity e : l.getEntities((Entity) null, box, x -> naveDe(x) != null)) {
+            var n = naveDe(e);
+            if (naveAlvo(owner, n) && feridas.add(n)) n.hurt(fonteContraNave(l, owner), dmg * CONTRA_NAVE);
+        }
+    }
+
+    /** Primeira nave cortada pela linha (fere se dmg > 0); devolve o ponto atingido ou null. */
+    @Nullable
+    public static Vec3 naveNaLinha(@Nullable LivingEntity owner, net.minecraft.world.level.Level l, Vec3 from, Vec3 to, double inflate, float dmg) {
+        Entity best = null;
+        Vec3 bestP = null;
+        double bd = Double.MAX_VALUE;
+        for (Entity e : l.getEntities((Entity) null, new AABB(from, to).inflate(inflate + 1), x -> naveDe(x) != null)) {
+            if (!naveAlvo(owner, naveDe(e))) continue;
+            var clip = e.getBoundingBox().inflate(inflate).clip(from, to);
+            if (clip.isEmpty()) continue;
+            double d = clip.get().distanceToSqr(from);
+            if (d < bd) { bd = d; best = e; bestP = clip.get(); }
+        }
+        if (best != null && dmg > 0 && !l.isClientSide) {
+            naveDe(best).hurt(fonteContraNave(l, owner), dmg * CONTRA_NAVE);
+            ((ServerLevel) l).sendParticles(ParticleTypes.LAVA, bestP.x, bestP.y, bestP.z, 2, 0.3, 0.3, 0.3, 0);
+        }
+        return bestP;
+    }
+
     /** Fere (uma vez cada) as naves que encostam na área. */
     void navesNaArea(@Nullable LivingEntity owner, AABB box, float dmg) {
         if (level().isClientSide || dmg <= 0) return;
@@ -524,7 +567,7 @@ public class ConstructEntity extends Entity {
         AABB box = new AABB(from, to).inflate(2.5);
         LivingEntity best = null;
         double bestD = Double.MAX_VALUE;
-        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, box, e -> e != owner && e.isAlive() && !e.isSpectator())) {
+        for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, box, e -> e != owner && e.isAlive() && !e.isSpectator() && !naTripulacao(e))) {
             var clip = com.lanterna.combate.Mira.clip(e, from, to, 0.3);
             if (clip.isPresent()) {
                 double d = clip.get().distanceToSqr(from);
@@ -609,7 +652,7 @@ public class ConstructEntity extends Entity {
         LivingEntity hit = null;
         double best = Double.MAX_VALUE;
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, new AABB(from, stop).inflate(size + 2.5),
-                e -> e != owner && e.isAlive() && !e.isSpectator())) {
+                e -> e != owner && e.isAlive() && !e.isSpectator() && !naTripulacao(e))) {
             var clip = com.lanterna.combate.Mira.clip(e, from, stop, size);
             if (clip.isPresent() && clip.get().distanceToSqr(from) < best) {
                 best = clip.get().distanceToSqr(from);

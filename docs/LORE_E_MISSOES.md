@@ -723,3 +723,37 @@ usam bateria).
 | Outros planetas (sem árvores) | em chão natural, fora das construções |
 
 Missões, contratos e chefes que criam Ecos de propósito continuam funcionando em qualquer lugar.
+
+# 0.29 — Naves: pouso, dano, chave que chama e sons
+
+## Correções
+- **Dano de queda ao pousar**: o jogo somava a "altura de queda" da nave enquanto ela descia (mesmo devagar) e, ao
+  tocar o chão, aplicava o dano em quem estava sentado. A nave agora não sofre nem repassa dano de queda.
+- **Naves das Tropas e os anéis**: os Lanternas NPC sentados dentro da nave "seguravam" o laser e os tiros (o feixe
+  parava neles e a nave nunca levava dano). Agora quem está dentro fica protegido pelo casco e o tiro acerta a nave.
+  Além do laser, punho, rajada, aríete, martelo, lâminas e napalm, agora também ferem naves: os 70 construtos da Árvore
+  da Luz (projéteis, raios, explosões, áreas, armadilhas), a Onda do Pavor e a Explosão da Vida.
+- **Sair da nave depois de renascer**: renascendo no beliche e saindo pela porta, o jogador caía no spawn da Terra sem
+  a nave. Cada nave de jogador agora avisa onde está (a cada 2 s), e a porta da sala leva para o lado dela, no
+  planeta/dimensão onde ela estiver (se o lugar ainda está carregando, sai ao lado, em chão firme). A volta também
+  sobrevive à morte.
+
+## Chave da Nave (o chip de acesso)
+- **Não cai quando o jogador morre**: volta para o inventário ao renascer (com ou sem `keepInventory`).
+- **Chamar a nave**: com a chave na mão, clique direito. A nave sai de onde estiver (qualquer planeta, a Terra ou o
+  espaço), entra pelo céu atrás de você **em reentrada** (fogo, brasas e fumaça, som de rugido), faz uma curva,
+  freia e pousa a ~12 blocos à sua direita, já com a porta aberta. No espaço ela chega na mesma altura.
+- Espera de 45 s entre chamadas. Não chama se outro jogador estiver pilotando, se você estiver dentro de uma nave,
+  ou se ela já estiver perto (menos de 40 blocos).
+- Naves de mundos antigos passam a ser encontradas depois que forem carregadas uma vez (a nave avisa onde está).
+
+## Sons próprios das naves (feitos para o mod)
+| Som | Quando |
+|---|---|
+| Motor | sempre que a nave voa por perto (mais alto e mais agudo com a velocidade e no turbo; naves grandes mais graves) |
+| Turbo | ao ligar o turbo |
+| Decolar / Pousar | ao sair do chão e ao pousar |
+| Reentrada | quando a chave chama a nave |
+| Porta | abrir e fechar a porta |
+| Tiro | disparos das naves |
+| Chamado | ao usar a chave |

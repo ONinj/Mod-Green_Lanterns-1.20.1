@@ -147,6 +147,7 @@ public final class ConstrutosFonte {
                 Vec3 fim = olho.add(dir.scale(d.alcance()));
                 for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(olho, fim).inflate(1.2), x -> ConstructEntity.inimigo(dono, x)))
                     if (com.lanterna.combate.Mira.clip(x, olho, fim, 0.5).isPresent()) acertar(dono, d, x, dano, cor, dir);
+                ConstructEntity.naveNaLinha(dono, l, olho, fim, 0.5, dano);
                 ConstructEntity e = corpo(dono, d, cor, pow, 12, 0);
                 e.setPos(olho.x, olho.y, olho.z);
                 e.setEnd(fim);
@@ -265,12 +266,15 @@ public final class ConstrutosFonte {
         BlockHitResult bloco = l.clip(new ClipContext(de, para, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, e));
         Vec3 fim = bloco.getType() == HitResult.Type.MISS ? para : bloco.getLocation();
         double tam = 0.45 * e.scale();
-        for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(de, fim).inflate(tam + 0.5), x -> ConstructEntity.inimigo(dono, x))) {
+        for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(de, fim).inflate(tam + 0.5), x -> ConstructEntity.inimigo(dono, x) && !ConstructEntity.naTripulacao(x))) {
             if (e.acertados().contains(x.getId()) || com.lanterna.combate.Mira.clip(x, de, fim, tam).isEmpty()) continue;
             e.acertados().add(x.getId());
             acertar(dono, d, x, e.dano(), e.color(), v);
             if (!d.tem("perfura")) { impacto(e, dono, d, l, x.position().add(0, x.getBbHeight() * 0.5, 0)); return; }
         }
+        // bateu numa nave: fere o casco e explode ali (impacto fere de novo as naves da área; aqui só para)
+        Vec3 nave = ConstructEntity.naveNaLinha(dono, l, de, fim, tam, 0);
+        if (nave != null) { impacto(e, dono, d, l, nave); return; }
         if (bloco.getType() != HitResult.Type.MISS) { impacto(e, dono, d, l, fim); return; }
         e.setPos(para.x, para.y, para.z);
         e.setDeltaMovement(v);
@@ -288,6 +292,7 @@ public final class ConstrutosFonte {
             }
             if (d.tem("explode")) l.playSound(null, em.x, em.y, em.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.7f, 1.4f);
         }
+        ConstructEntity.ferirNaves(dono, l, new AABB(em, em).inflate(Math.max(1.2, raio)), e.dano());
         l.sendParticles(pó(e.color(), 1.6f), em.x, em.y, em.z, 18, 0.3, 0.3, 0.3, 0.08);
         e.discard();
     }
@@ -359,6 +364,7 @@ public final class ConstrutosFonte {
         Vec3 fim = b.getType() == HitResult.Type.MISS ? far : b.getLocation();
         for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(eye, fim).inflate(1.2), x -> ConstructEntity.inimigo(p, x)))
             if (com.lanterna.combate.Mira.clip(x, eye, fim, 0.4).isPresent()) acertar(p, d, x, d.dano() * pow, cor, look);
+        ConstructEntity.naveNaLinha(p, l, eye, fim, 0.4, d.dano() * pow);
         ConstructEntity e = corpo(p, d, cor, pow, 12, 0);
         e.setPos(eye.x, eye.y - 0.3, eye.z);
         e.setEnd(fim);
@@ -406,7 +412,10 @@ public final class ConstrutosFonte {
                 if (d.tem("puxa")) { Vec3 n = c.subtract(x.position()); if (n.lengthSqr() > 0.3) { n = n.normalize(); x.push(n.x * 0.35, 0.05, n.z * 0.35); x.hurtMarked = true; } }
             } else if (d.tem("cura_aliado")) curar(x, d.cura());
         }
-        if (e.age() % 20 == 0) l.sendParticles(pó(e.color(), 1.3f), c.x, c.y + 0.2, c.z, 20, r * 0.5, 0.2, r * 0.5, 0.02);
+        if (e.age() % 20 == 0) {
+            l.sendParticles(pó(e.color(), 1.3f), c.x, c.y + 0.2, c.z, 20, r * 0.5, 0.2, r * 0.5, 0.02);
+            ConstructEntity.ferirNaves(dono, l, new AABB(c, c).inflate(r, 3, r), e.dano());
+        }
     }
 
     private static void armadilha(ConstructEntity e, @Nullable LivingEntity dono, Def d, ServerLevel l) {
@@ -417,6 +426,7 @@ public final class ConstrutosFonte {
         if (pisou == null) return;
         for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(d.raio(), 2.5, d.raio()), x -> ConstructEntity.inimigo(dono, x)))
             acertar(dono, d, x, e.dano(), e.color(), x.position().subtract(c));
+        ConstructEntity.ferirNaves(dono, l, new AABB(c, c).inflate(d.raio(), 2.5, d.raio()), e.dano());
         if (d.tem("explode")) l.sendParticles(ParticleTypes.EXPLOSION, c.x, c.y + 0.5, c.z, 3, 0.8, 0.3, 0.8, 0);
         l.sendParticles(pó(e.color(), 1.8f), c.x, c.y + 0.5, c.z, 50, d.raio() * 0.4, 0.4, d.raio() * 0.4, 0.1);
         l.playSound(null, c.x, c.y, c.z, d.tem("explode") ? SoundEvents.GENERIC_EXPLODE : SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 1f, 1.1f);

@@ -58,6 +58,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.32 ✅ (0.27) A Fonte: Chamado da Fonte (provação + juramento), pressão de 2 h, Banho de Luz (+150% de carga e aura), Árvore da Luz com 70 construtos novos, construtos e ícones refeitos, 7 chefes (Corações das Emoções), salas da Fonte e o evento "A Bateria Enfraquece"
 1.33 ✅ (0.27.1) Corações das Emoções muito mais fortes (vida ~1300–1600, golpes de 40–60% da vida com aviso e recarga longa, golpe supremo na fase 2) e o comando /lanterna maximo
 1.34 ✅ (0.28) Combate contra Lanternas NPC refeito (IA que mira e para para atirar, caixa de acerto no voo, compensação de atraso no laser e nos construtos), megacidades com bairro novo (~70 casas a mais) e mais moradores, Ecos Cinzentos só na floresta (raros nos QGs, nunca nas cidades; em Odym só nas ilhas)
+1.35 ✅ (0.29) Naves: sem dano de queda ao pousar, todos os poderes do anel ferem naves (tripulação protegida pelo casco), sair da nave depois de renascer no beliche leva até a nave, Chave da Nave fica na morte e chama a nave com reentrada na atmosfera, sons próprios das naves
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

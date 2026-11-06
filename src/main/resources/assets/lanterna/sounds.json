@@ -1,0 +1,74 @@
+{
+  "nave.motor": {
+    "subtitle": "subtitles.lanterna.nave.motor",
+    "sounds": [
+      {
+        "name": "lanterna:nave/motor",
+        "stream": true
+      }
+    ]
+  },
+  "nave.turbo": {
+    "subtitle": "subtitles.lanterna.nave.turbo",
+    "sounds": [
+      {
+        "name": "lanterna:nave/turbo",
+        "stream": false
+      }
+    ]
+  },
+  "nave.decolar": {
+    "subtitle": "subtitles.lanterna.nave.decolar",
+    "sounds": [
+      {
+        "name": "lanterna:nave/decolar",
+        "stream": false
+      }
+    ]
+  },
+  "nave.pousar": {
+    "subtitle": "subtitles.lanterna.nave.pousar",
+    "sounds": [
+      {
+        "name": "lanterna:nave/pousar",
+        "stream": false
+      }
+    ]
+  },
+  "nave.reentrada": {
+    "subtitle": "subtitles.lanterna.nave.reentrada",
+    "sounds": [
+      {
+        "name": "lanterna:nave/reentrada",
+        "stream": true
+      }
+    ]
+  },
+  "nave.porta": {
+    "subtitle": "subtitles.lanterna.nave.porta",
+    "sounds": [
+      {
+        "name": "lanterna:nave/porta",
+        "stream": false
+      }
+    ]
+  },
+  "nave.tiro": {
+    "subtitle": "subtitles.lanterna.nave.tiro",
+    "sounds": [
+      {
+        "name": "lanterna:nave/tiro",
+        "stream": false
+      }
+    ]
+  },
+  "nave.chamado": {
+    "subtitle": "subtitles.lanterna.nave.chamado",
+    "sounds": [
+      {
+        "name": "lanterna:nave/chamado",
+        "stream": false
+      }
+    ]
+  }
+}

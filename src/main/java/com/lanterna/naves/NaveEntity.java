@@ -83,6 +83,10 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     private final NavePart[] parts = new NavePart[8];
     private boolean portaAberta;
     private int fireCooldown;
+    /** Chamado pela chave: ponto de pouso e de onde veio (a nave desce sozinha, entrando na atmosfera). */
+    @Nullable private Vec3 pouso, partida;
+    private int chamadaTicks, chamadaTotal;
+    private boolean somTurbo;
     private int lerpSteps;
     private double lerpX, lerpY, lerpZ, lerpYRot;
     private boolean lootTaken;
@@ -262,6 +266,79 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
         return false;
     }
 
+    // ===================== Chamada pela chave =====================
+
+    /** Começa a descida: a nave aparece em "de" e pousa em "em" (chamada pela chave do dono). */
+    public void chamar(Vec3 de, Vec3 em) {
+        partida = de;
+        pouso = em;
+        chamadaTicks = 0;
+        Vec3 d = em.subtract(de);
+        chamadaTotal = (int) Math.max(120, Math.min(220, d.length() * 1.2));
+        setYRot((float) Math.toDegrees(Math.atan2(-d.x, d.z)));
+        moveTo(de.x, de.y, de.z, getYRot(), 0);
+        noPhysics = true;
+        level().playSound(null, em.x, em.y, em.z, com.lanterna.registry.ModSounds.NAVE_REENTRADA.get(), SoundSource.NEUTRAL, 6f, 1f);
+    }
+
+    public boolean chegando() { return pouso != null; }
+
+    /**
+     * Reentrada: desce em curva (rápido no alto, freando perto do chão), envolta em fogo e fumaça enquanto está alta,
+     * e pousa no ponto marcado.
+     */
+    private void chegadaTick(NaveTipo t) {
+        chamadaTicks++;
+        double f = Math.min(1, chamadaTicks / (double) chamadaTotal);
+        double e = 1 - Math.pow(1 - f, 3); // freia no fim
+        Vec3 alvo = partida.lerp(pouso, e);
+        // a curva: chega por cima, não em linha reta
+        double arco = Math.sin(f * Math.PI) * 6;
+        Vec3 p = new Vec3(alvo.x, alvo.y + arco, alvo.z);
+        Vec3 v = p.subtract(position());
+        setDeltaMovement(v);
+        setPos(p.x, p.y, p.z);
+        noPhysics = f < 0.85;
+        ServerLevel sl = (ServerLevel) level();
+        double alto = getY() - pouso.y;
+        if (alto > 12) {
+            double w = t.width * 0.6;
+            sl.sendParticles(ParticleTypes.FLAME, getX(), getY() + t.height * 0.3, getZ(), 12, w, t.height * 0.4, w, 0.05);
+            sl.sendParticles(ParticleTypes.LAVA, getX(), getY(), getZ(), 2, w, 0.4, w, 0);
+            sl.sendParticles(ParticleTypes.LARGE_SMOKE, getX() - v.x * 4, getY() - v.y * 4, getZ() - v.z * 4, 8, w, 0.5, w, 0.02);
+        } else if (chamadaTicks % 2 == 0) {
+            sl.sendParticles(ParticleTypes.CLOUD, getX(), pouso.y + 0.2, getZ(), 6, t.width * 0.6, 0.05, t.width * 0.6, 0.06);
+        }
+        if (f >= 1) {
+            setPos(pouso.x, pouso.y, pouso.z);
+            setDeltaMovement(Vec3.ZERO);
+            noPhysics = false;
+            pouso = null;
+            partida = null;
+            sl.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 2, t.width * 0.4, 0.1, t.width * 0.4, 0);
+            sl.playSound(null, blockPosition(), com.lanterna.registry.ModSounds.NAVE_POUSAR.get(), SoundSource.NEUTRAL, 2f, 0.9f);
+            abrirPorta(true);
+            NaveInterior.lembrarPosicao(this);
+        }
+    }
+
+    // ===================== Queda =====================
+
+    /**
+     * A nave não sofre (nem repassa) dano de queda. O vanilla acumula a "altura de queda" de qualquer veículo que desce
+     * sem tocar o chão e, ao pousar, aplica o dano em quem está sentado: descendo devagar de 60 blocos dava dano de
+     * 60 blocos no jogador.
+     */
+    @Override
+    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+        return false;
+    }
+
+    @Override
+    protected void checkFallDamage(double dy, boolean onGround, net.minecraft.world.level.block.state.BlockState state, net.minecraft.core.BlockPos pos) {
+        fallDistance = 0;
+    }
+
     // ===================== Tick =====================
 
     @Override
@@ -272,7 +349,9 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
         if (fireCooldown > 0) fireCooldown--;
 
         noPhysics = espaco && !t.destrocos();
-        if (isControlledByLocalInstance()) {
+        if (!level().isClientSide && pouso != null) {
+            chegadaTick(t);
+        } else if (isControlledByLocalInstance()) {
             lerpSteps = 0;
             syncPacketPositionCodec(getX(), getY(), getZ());
             if (getControllingPassenger() instanceof Player) pilot(t, espaco);
@@ -287,6 +366,8 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             setPos(nx, ny, nz);
         }
         updateParts();
+        fallDistance = 0;
+        for (Entity e : getPassengers()) e.fallDistance = 0;
 
         if (!level().isClientSide) {
             entityData.set(POUSADA, onGround() || t.destrocos());
@@ -297,6 +378,7 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             }
             aiTimer++;
             NaveViagem.check(this);
+            if (tickCount % 40 == 0 && pouso == null) NaveInterior.lembrarPosicao(this);
             if (tickCount % 20 == 0 && !t.destrocos() && hp() < t.maxHp * 0.3f) {
                 ((ServerLevel) level()).sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + t.height, getZ(), 3, t.width / 3, 0.3, t.width / 3, 0.01);
             }
@@ -503,7 +585,7 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
         if (portaAberta == open || tipo().porta == null) return;
         portaAberta = open;
         triggerAnim("porta", open ? "misc.door_open" : "misc.door_close");
-        level().playSound(null, blockPosition(), open ? SoundEvents.PISTON_EXTEND : SoundEvents.PISTON_CONTRACT, SoundSource.NEUTRAL, 0.8f, 0.7f);
+        level().playSound(null, blockPosition(), com.lanterna.registry.ModSounds.NAVE_PORTA.get(), SoundSource.NEUTRAL, 0.9f, open ? 1.0f : 0.85f);
     }
 
     public void togglePorta() {
@@ -552,6 +634,7 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             TiroPlasma.shoot(level(), shooter != null ? shooter : this, from, dir, 3.0f, dmg, color, t == NaveTipo.NAVE_PIRATA_CAPITANIA);
         }
         triggerAnim("tiro", "attack.fire");
+        level().playSound(null, getX(), getY(), getZ(), com.lanterna.registry.ModSounds.NAVE_TIRO.get(), SoundSource.NEUTRAL, 1.2f, 0.9f + random.nextFloat() * 0.2f);
     }
 
     private int shooterColor() {
@@ -589,6 +672,7 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     public void destruir(@Nullable Entity killer, boolean wreck) {
         NaveTipo t = tipo();
         ServerLevel sl = (ServerLevel) level();
+        NaveInterior.esquecerPosicao(sl.getServer(), getUUID());
         ejectPassengers();
         sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY() + t.height / 2, getZ(), 1, 0, 0, 0, 0);
         sl.playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.NEUTRAL, 3f, 0.8f);
@@ -627,8 +711,15 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
 
     private void tickAnimacao() {
         if (pousada()) { animChao++; animAr = 0; } else { animAr++; animChao = 0; }
-        if (animNoAr && animChao > 4) { animNoAr = false; animTroca = tickCount < 10 ? -100 : tickCount; }
-        else if (!animNoAr && animAr > 4) { animNoAr = true; animTroca = tickCount < 10 ? -100 : tickCount; }
+        if (animNoAr && animChao > 4) {
+            animNoAr = false; animTroca = tickCount < 10 ? -100 : tickCount;
+            if (animTroca > 0) level().playLocalSound(getX(), getY(), getZ(), com.lanterna.registry.ModSounds.NAVE_POUSAR.get(), SoundSource.NEUTRAL, 1.2f, 1f, false);
+        } else if (!animNoAr && animAr > 4) {
+            animNoAr = true; animTroca = tickCount < 10 ? -100 : tickCount;
+            if (animTroca > 0) level().playLocalSound(getX(), getY(), getZ(), com.lanterna.registry.ModSounds.NAVE_DECOLAR.get(), SoundSource.NEUTRAL, 1.2f, 1f, false);
+        }
+        if (turbo() && !somTurbo) level().playLocalSound(getX(), getY(), getZ(), com.lanterna.registry.ModSounds.NAVE_TURBO.get(), SoundSource.NEUTRAL, 1.3f, 1f, false);
+        somTurbo = turbo();
     }
 
     @Override
