@@ -30,7 +30,8 @@ public final class ClientConstructs {
     public static void tick() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        if (mc.screen == null && KeyBindings.CONSTRUCT_WHEEL.isDown() && ClientRingData.hasRing) {
+        while (KeyBindings.OFICINA.consumeClick()) if (mc.screen == null) mc.setScreen(new com.lanterna.client.oficina.OficinaScreen());
+        if (mc.screen == null && KeyBindings.CONSTRUCT_WHEEL.isDown() && ClientRingData.hasRing && !net.minecraft.client.gui.screens.Screen.hasAltDown()) {
             mc.setScreen(new ConstructWheelScreen());
         }
         // Soltou a tecla de um construto contínuo
@@ -46,7 +47,11 @@ public final class ClientConstructs {
         }
         while (KeyBindings.CONSTRUCT_USE.consumeClick()) use(selected(), KeyBindings.CONSTRUCT_USE);
         for (int i = 0; i < KeyBindings.PRESETS.length; i++) {
-            while (KeyBindings.PRESETS[i].consumeClick()) use(ConstructType.byId(ClientLoreData.DATA.preset(i)), KeyBindings.PRESETS[i]);
+            while (KeyBindings.PRESETS[i].consumeClick()) {
+                String id = ClientLoreData.DATA.preset(i);
+                if (com.lanterna.construct.oficina.MeusConstrutos.eMeu(id)) com.lanterna.client.oficina.OficinaCliente.usar(id);
+                else use(ConstructType.byId(id), KeyBindings.PRESETS[i]);
+            }
         }
     }
 

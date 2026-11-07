@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "13";
+    private static final String VERSION = "14";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -212,6 +212,15 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Aura.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.fonte.FontePackets.Aura::encode).decoder(com.lanterna.fonte.FontePackets.Aura::decode)
                 .consumerMainThread(com.lanterna.fonte.FontePackets.Aura::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.construct.oficina.MeusConstrutos.Salvar.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.construct.oficina.MeusConstrutos.Salvar::encode).decoder(com.lanterna.construct.oficina.MeusConstrutos.Salvar::decode)
+                .consumerMainThread(com.lanterna.construct.oficina.MeusConstrutos.Salvar::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.construct.oficina.MeusConstrutos.Golpe.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.construct.oficina.MeusConstrutos.Golpe::encode).decoder(com.lanterna.construct.oficina.MeusConstrutos.Golpe::decode)
+                .consumerMainThread(com.lanterna.construct.oficina.MeusConstrutos.Golpe::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.construct.oficina.MeusConstrutos.Lista.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.construct.oficina.MeusConstrutos.Lista::encode).decoder(com.lanterna.construct.oficina.MeusConstrutos.Lista::decode)
+                .consumerMainThread(com.lanterna.construct.oficina.MeusConstrutos.Lista::handle).add();
         CHANNEL.messageBuilder(com.lanterna.terra.TerraSite.Sync.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.terra.TerraSite.Sync::encode).decoder(com.lanterna.terra.TerraSite.Sync::decode)
                 .consumerMainThread(com.lanterna.terra.TerraSite.Sync::handle).add();

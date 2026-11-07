@@ -23,7 +23,8 @@ public record ConstructSelectPacket(int preset, String construct) {
     public static void handle(ConstructSelectPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
-            if (player == null || com.lanterna.construct.ConstructType.byId(msg.construct) == null) return;
+            if (player == null || (com.lanterna.construct.ConstructType.byId(msg.construct) == null
+                    && !com.lanterna.construct.oficina.MeusConstrutos.eMeu(msg.construct))) return;
             LoreData data = MissionManager.data(player);
             if (data == null) return;
             if (msg.preset < 0) data.setSelected(msg.construct);

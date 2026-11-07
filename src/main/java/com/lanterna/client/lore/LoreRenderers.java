@@ -34,6 +34,7 @@ public final class LoreRenderers {
         event.registerEntityRenderer(LoreEntities.CERVO_SERENO.get(), ctx -> new LoreRenderer<>(ctx, "cervo_sereno", 1.0f, true));
         event.registerEntityRenderer(LoreEntities.RAINHA_DE_CRISTAL.get(), ctx -> new LoreRenderer<>(ctx, "rainha_de_cristal", 1.0f, true));
         event.registerEntityRenderer(ConstructRegistry.CONSTRUCT.get(), ConstructRenderer::new);
+        event.registerEntityRenderer(com.lanterna.construct.oficina.OficinaRegistro.CONSTRUTO.get(), com.lanterna.client.oficina.ConstrutoProprioRenderer::new);
     }
 
     private LoreRenderers() {}

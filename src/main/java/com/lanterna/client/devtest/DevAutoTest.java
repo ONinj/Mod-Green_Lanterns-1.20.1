@@ -3082,6 +3082,60 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+
+    private static void sceneOficina() {
+        Minecraft mc = Minecraft.getInstance();
+        String[] mods = {"espada", "escudo", "flecha", "martelo", "carro", "muralha"};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -20; x <= 20; x++) for (int z = -20; z <= 30; z++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState());
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            for (var z : l.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class, sp.getBoundingBox().inflate(60))) z.discard();
+        }));
+        for (int i = 0; i < mods.length; i++) {
+            int s = i;
+            at(2, () -> { var p = com.lanterna.construct.oficina.Modelos.TODOS.get(mods[s]).get(); p.nome = mods[s];
+                com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.construct.oficina.MeusConstrutos.Salvar(s, p)); });
+        }
+        // editor
+        at(20, () -> { var t = new com.lanterna.client.oficina.OficinaScreen(); mc.setScreen(t); });
+        at(20, () -> shot("oficina_editor_espada"));
+        at(2, () -> { if (mc.screen instanceof com.lanterna.client.oficina.OficinaScreen o) o.carregar(com.lanterna.construct.oficina.Modelos.TODOS.get("carro").get()); });
+        at(10, () -> shot("oficina_editor_carro"));
+        at(2, () -> { if (mc.screen instanceof com.lanterna.client.oficina.OficinaScreen o) { o.carregar(com.lanterna.construct.oficina.Modelos.TODOS.get("martelo").get()); o.testar(true); } });
+        at(12, () -> shot("oficina_editor_teste"));
+        at(2, () -> mc.setScreen(null));
+        at(10, () -> glog("meus=" + java.util.Arrays.stream(com.lanterna.client.oficina.OficinaCliente.MEUS).map(p -> p == null ? "-" : p.nome + "/" + p.comp + "/" + p.quantos()).toList()));
+        // no mundo
+        at(5, () -> { com.lanterna.client.camera.CameraLanterna.ligada = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.hideGui = true; });
+        at(5, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 0)));
+        at(14, () -> shot("oficina_arma"));
+        at(2, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.construct.oficina.MeusConstrutos.Golpe()));
+        at(3, () -> shot("oficina_arma_golpe"));
+        at(10, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 0)));
+        at(15, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 1)));
+        at(14, () -> shot("oficina_escudo"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> { com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 1); }); });
+        at(10, () -> { mc.player.setXRot(2); server(sp -> { sp.setXRot(2); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 2); }); });
+        at(3, () -> shot("oficina_flecha"));
+        at(20, () -> { mc.player.setXRot(8); server(sp -> { sp.setXRot(8); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 3); }); });
+        at(22, () -> shot("oficina_martelo_alto"));
+        at(7, () -> shot("oficina_martelo_queda"));
+        at(30, () -> { mc.player.setXRot(10); server(sp -> { sp.setXRot(10); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 5); }); });
+        at(20, () -> shot("oficina_muralha"));
+        at(20, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 4)));
+        at(5, () -> mc.options.keyUp.setDown(true));
+        at(20, () -> { mc.options.keyUp.setDown(false); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(5, () -> shot("oficina_carro"));
+        at(5, () -> glog("montado=" + (mc.player.getVehicle() != null ? mc.player.getVehicle().getClass().getSimpleName() : "nao") + " pos=" + mc.player.position()));
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneNaves2() {
         Minecraft mc = Minecraft.getInstance();
         java.util.UUID[] minha = {null};
@@ -3552,6 +3606,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cajado")) sceneCajado();
         else if (ENABLED && SCENE.equals("favores")) sceneFavores();
         else if (ENABLED && SCENE.equals("terra")) sceneTerra();
+        else if (ENABLED && SCENE.equals("oficina")) sceneOficina();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

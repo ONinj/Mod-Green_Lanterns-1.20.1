@@ -96,6 +96,10 @@ public final class Constructs {
     // ===================== Usar =====================
 
     public static void cast(ServerPlayer player, String id) {
+        if (com.lanterna.construct.oficina.MeusConstrutos.eMeu(id)) {
+            com.lanterna.construct.oficina.MeusConstrutos.lancar(player, com.lanterna.construct.oficina.MeusConstrutos.slot(id));
+            return;
+        }
         ConstructType type = ConstructType.byId(id);
         RingData ring = ModCapabilities.get(player).orElse(null);
         if (type == null || ring == null || !ring.hasRing()) return;

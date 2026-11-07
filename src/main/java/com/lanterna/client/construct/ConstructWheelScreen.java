@@ -150,8 +150,10 @@ public class ConstructWheelScreen extends Screen {
         Hud.wrapped(g, Hud.body(info.description()), cx - bw / 2 + 8, by + 5, bw - 16, 0xFFE0E6EA, 10);
         StringBuilder presets = new StringBuilder();
         for (int p = 0; p < 4; p++) {
-            ConstructType t = ConstructType.byId(ClientConstructs.data().preset(p));
-            presets.append("Alt+").append(p + 1).append(": ").append(t != null ? t.displayName().getString() : "-").append("   ");
+            String pid = ClientConstructs.data().preset(p);
+            ConstructType t = ConstructType.byId(pid);
+            presets.append("Alt+").append(p + 1).append(": ").append(t != null ? t.displayName().getString()
+                    : com.lanterna.construct.oficina.MeusConstrutos.eMeu(pid) ? com.lanterna.client.oficina.OficinaCliente.nomePreset(pid).getString() : "-").append("   ");
         }
         g.drawString(font, Hud.body(Component.literal(presets.toString().trim())), cx - bw / 2 + 8, by + 30, 0xFFFFD35A, false);
         g.drawString(font, Hud.body(Component.translatable("construct.lanterna.wheel_help")), cx - bw / 2 + 8, by + 40, 0xFF7A8A94, false);

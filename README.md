@@ -64,6 +64,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.38 ✅ (0.31) Favores dos Ves'Kai com Moedas de Gratidão e Lágrimas Índigo mais fáceis de trocar, Cajado da Compaixão nas costas e segurado com as duas mãos, recarga Índigo encostando o anel no cajado (1ª e 3ª pessoa)
 1.39 ✅ (0.31.1) Juramentos novos das 9 Tropas (originais, inspirados no espírito dos quadrinhos), em PT/EN: aparecem no chat a cada recarga e são os mesmos recitados na Bateria Central
 1.40 ✅ (0.32) História na Terra (Vila Aurora, Base Vigília, Dra. Lívia, estrelas cadentes, cratera do anel), Ritual da Bateria em 3 etapas, receita da Bateria Cinzelada mais difícil, escudo de força sem tremer, animações das criaturas revistas (passos no ritmo do andar, ciclos mais naturais, golpes suavizados)
+1.41 ✅ (0.33) Oficina de Construtos (Alt+Z): desenhe construtos em 3D cubinho por cubinho, escolha o comportamento (arma, escudo, disparo, queda do céu, veículo, estrutura) com animações prontas, 8 espaços e presets Alt+1..4
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

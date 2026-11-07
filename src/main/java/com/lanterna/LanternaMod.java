@@ -32,6 +32,7 @@ public class LanternaMod {
         com.lanterna.lore.LoreItems.init();
         com.lanterna.lore.LoreEntities.init();
         com.lanterna.construct.ConstructRegistry.init();
+        com.lanterna.construct.oficina.OficinaRegistro.init();
         com.lanterna.especies.EspeciesEntities.init();
         com.lanterna.tropa.TropaEntities.init();
         com.lanterna.tropa.TropaItems.init();

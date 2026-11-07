@@ -861,3 +861,30 @@ Fora da missão, estrelas cadentes ainda caem de vez em quando à noite (fragmen
 - Criaturas, povos e chefes: a animação de andar acompanha a velocidade real (pés não patinam), ciclos de andar com
   balanço do corpo, giro do tronco e cabeça estabilizada; respiração no parado; golpes e especiais com curvas
   suaves (Catmull-Rom) no lugar de movimentos lineares. Lanternas NPC com ações suavizadas.
+
+
+## 0.33 — Oficina de Construtos
+
+**Alt+Z** abre a Oficina: uma tela para desenhar o próprio construto em 3D, cubinho por cubinho (grade 16x16x16,
+até 900 cubinhos), na cor do anel. Guarda em 8 espaços e põe num preset (Alt+1..4), igual aos construtos normais.
+
+Tela:
+- Vista 3D no meio: botão esquerdo usa a ferramenta (arrastar continua), botão direito arrastando gira, roda dá zoom.
+  Chão em grade e uma seta mostrando a FRENTE do desenho.
+- Ferramentas: Lápis (B), Borracha (E), Pintar (P), Caixa (C, dois cliques nos cantos). Espelho (M) desenha dos dois
+  lados ao mesmo tempo. 4 tons (1-4): cor do anel, clara, escura e quase branca. Camada do ar (PgUp/PgDn) para pôr
+  cubinhos soltos no alto. Desfazer/Refazer (Ctrl+Z/Ctrl+Y), Salvar (Ctrl+S).
+- Modelos para começar: Espada, Machado, Escudo, Flecha, Martelo, Carro, Muralha.
+- Tamanho de 0,5x a 2x. Testar (Espaço) mostra a animação ali mesmo.
+
+Comportamentos (cada um com as animações prontas: montar a partir da base com clarão, desmontar de fora para dentro):
+- **Arma** (20 s): fica na mão; clique esquerdo golpeia em arco (prepara, varre com rastro de luz, volta). Alcance e
+  dano crescem com o tamanho. O braço acompanha.
+- **Escudo** (14 s): flutua na frente seguindo o olhar; segura flechas e corta 70% do dano que vem da frente.
+- **Disparo**: voa para a mira girando no próprio eixo e estoura no impacto.
+- **Queda do céu**: aparece no alto em cima da mira, com um anel de aviso no chão, cai de ponta-cabeça e achata no
+  impacto (dano grande em área).
+- **Veículo** (60 s): você monta; W/S anda, olhe para virar; flutua, inclina nas curvas e atropela.
+- **Estrutura** (15 s): sobe do chão onde você mira; segura flechas e empurra inimigos.
+Usar de novo a arma, o escudo ou o veículo desfaz. Custo de carga = base do comportamento + 1 a cada 30 cubinhos.
+O desenho é sincronizado: todo mundo por perto vê o mesmo construto.
