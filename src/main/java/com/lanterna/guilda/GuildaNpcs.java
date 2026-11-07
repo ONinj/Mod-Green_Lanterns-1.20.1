@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Minerador: junta Essência de Poder sozinho (tempo real) e forja Anéis de Recruta (que nenhum jogador consegue usar).
+ * Forjador (antigo Minerador): forja Anéis de Recruta com a Essência de Poder que as Mineradoras Planetárias extraem,
+ * e as melhorias dele aceleram as mineradoras do planeta.
  * General: recebe os anéis e treina tropas — de defesa (ficam neste planeta) ou de ataque (vão com a guilda nas invasões).
  */
 public final class GuildaNpcs {
@@ -52,11 +53,10 @@ public final class GuildaNpcs {
         Component titulo;
         if (!general) {
             titulo = Component.translatable("cidade.lanterna.npc.guilda_minerador");
-            long passo = c.passoMinerador(LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L);
-            linhas.add(Component.translatable("guilda.lanterna.min.nivel", c.minerador, c.qtdMinerador(), Invasao.tempo(passo)).withStyle(ChatFormatting.GOLD));
-            linhas.add(Component.translatable("guilda.lanterna.min.guardada", c.essencia, c.depositoMinerador()));
-            linhas.add(c.essencia >= c.depositoMinerador() ? Component.translatable("guilda.lanterna.min.cheio")
-                    : Component.translatable("guilda.lanterna.min.proxima", Invasao.tempo(Math.max(0, c.ultimaEssencia + passo - agora))));
+            int ciclo = (int) Math.max(1, LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60 * Conquista.MIN_TEMPO[Math.max(0, Math.min(3, c.minerador - 1))]);
+            linhas.add(Component.translatable("guilda.lanterna.min.nivel", c.minerador, c.qtdMinerador(), Invasao.tempo(ciclo * 1000L)).withStyle(ChatFormatting.GOLD));
+            linhas.add(Component.translatable("guilda.lanterna.min.mineradora").withStyle(ChatFormatting.LIGHT_PURPLE));
+            if (c.essencia > 0) linhas.add(Component.translatable("guilda.lanterna.min.guardada", c.essencia, c.essencia));
             int bolso = conta(p, GuildaItems.ESSENCIA.get().getDefaultInstance());
             linhas.add(Component.translatable("guilda.lanterna.min.custo", custo, bolso));
             Melhoria prox = melhoria(c.minerador);

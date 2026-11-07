@@ -3083,6 +3083,84 @@ public final class DevAutoTest {
     }
 
 
+    private static void sceneEnergia() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.core.BlockPos MIN = new net.minecraft.core.BlockPos(0, 200, 10), CONV = MIN.east(), GER = new net.minecraft.core.BlockPos(-7, 200, 3), REF = GER.east();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -24; x <= 24; x++) for (int z = -20; z <= 34; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), (x + z) % 7 == 0 ? net.minecraft.world.level.block.Blocks.COARSE_DIRT.defaultBlockState() : net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 214; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            for (var z : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(80))) z.discard();
+            var E = com.lanterna.energia.EnergiaRegistro.class;
+            l.setBlockAndUpdate(MIN, com.lanterna.energia.EnergiaRegistro.MINERADORA.get().defaultBlockState().setValue(com.lanterna.energia.MaquinaBlock.FACING, net.minecraft.core.Direction.NORTH));
+            l.setBlockAndUpdate(CONV, com.lanterna.energia.EnergiaRegistro.CONVERSOR.get().defaultBlockState().setValue(com.lanterna.energia.MaquinaBlock.FACING, net.minecraft.core.Direction.NORTH));
+            l.setBlockAndUpdate(GER, com.lanterna.energia.EnergiaRegistro.GERADOR.get().defaultBlockState().setValue(com.lanterna.energia.GeradorEmocionalBlock.EMOCAO, com.lanterna.baterias.Tropa.VERMELHO));
+            l.setBlockAndUpdate(REF, com.lanterna.energia.EnergiaRegistro.REFINARIA.get().defaultBlockState());
+            if (l.getBlockEntity(MIN) instanceof com.lanterna.energia.MineradoraBE m) m.instalar("", l.getGameTime());
+            if (l.getBlockEntity(CONV) instanceof com.lanterna.energia.ConversorBE c)
+                c.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER).ifPresent(h -> h.insertItem(0, new net.minecraft.world.item.ItemStack(com.lanterna.energia.EnergiaRegistro.NUCLEO.get(), 8), false));
+            if (l.getBlockEntity(REF) instanceof com.lanterna.energia.RefinariaBE r)
+                r.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER).ifPresent(h -> h.insertItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.REDSTONE, 16), false));
+            sp.teleportTo(l, -3.5, 203.0, -3.5, -20, 12);
+        }));
+        at(2, () -> mc.options.hideGui = true);
+        at(26, () -> shot("energia_montando"));
+        at(100, () -> server(sp -> {
+            var l = sp.serverLevel();
+            if (l.getBlockEntity(MIN) instanceof com.lanterna.energia.MineradoraBE m) glog("mineradora estado=" + m.estado + " energia=" + m.energia() + " progresso=" + m.progresso + " ciclo=" + m.ciclo());
+            if (l.getBlockEntity(CONV) instanceof com.lanterna.energia.ConversorBE c) glog("conversor energia=" + c.energia());
+        }));
+        at(30, () -> shot("energia_mineradora"));
+        at(37, () -> shot("energia_mineradora2"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), -6.5, 204.5, 0.5, -122, 18)));
+        at(20, () -> shot("energia_lateral"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 7.5, 202.5, 4.5, 40, 10)));
+        at(20, () -> shot("energia_braco"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), -8.5, 201.6, -1.5, -15, 25)));
+        // gerador de raiva: criaturas morrendo perto
+        at(5, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int i = 0; i < 4; i++) {
+                var z = net.minecraft.world.entity.EntityType.PIG.create(l);
+                z.moveTo(GER.getX() + 2.5, 200, GER.getZ() + 0.5 + i, 0, 0);
+                l.addFreshEntity(z);
+                z.kill();
+            }
+        }));
+        at(45, () -> server(sp -> {
+            var l = sp.serverLevel();
+            if (l.getBlockEntity(GER) instanceof com.lanterna.energia.GeradorEmocionalBE g) glog("gerador raiva mb=" + g.quantidade() + " ritmo=" + g.ritmo);
+            if (l.getBlockEntity(REF) instanceof com.lanterna.energia.RefinariaBE r) { glog("refinaria recebeu=" + r.quantidade()); r.encher(2000); }
+        }));
+        at(15, () -> shot("energia_gerador"));
+        at(340, () -> server(sp -> {
+            var l = sp.serverLevel();
+            if (l.getBlockEntity(REF) instanceof com.lanterna.energia.RefinariaBE r)
+                r.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER).ifPresent(h -> glog("refinaria cristais=" + h.getStackInSlot(1).getCount() + " mb=" + r.quantidade()));
+            if (l.getBlockEntity(MIN) instanceof com.lanterna.energia.MineradoraBE m) { glog("antes offline essencias=" + m.essencias() + " energia=" + m.energia()); m.fingirAusencia(3_600_000L); }
+        }));
+        at(5, () -> server(sp -> {
+            var l = sp.serverLevel();
+            if (l.getBlockEntity(MIN) instanceof com.lanterna.energia.MineradoraBE m) glog("depois de 1h offline essencias=" + m.essencias() + " energia=" + m.energia());
+        }));
+        // ataque (à noite, para os zumbis não queimarem)
+        at(5, () -> { cmd("time set 18000"); server(sp -> com.lanterna.energia.MineradoraAtaques.ataque(sp.serverLevel(), MIN)); });
+        at(400, () -> server(sp -> {
+            var l = sp.serverLevel();
+            long n = l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(MIN).inflate(30), e -> e.getPersistentData().contains(com.lanterna.energia.MineradoraAtaques.TAG)).size();
+            if (l.getBlockEntity(MIN) instanceof com.lanterna.energia.MineradoraBE m) glog("ataque: atacantes=" + n + " integridade=" + m.integridade + " estado=" + m.estado);
+            sp.teleportTo(l, -4.5, 203.5, -5.5, -16, 14);
+        }));
+        at(20, () -> shot("energia_ataque"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneOficina() {
         Minecraft mc = Minecraft.getInstance();
         String[] mods = {"espada", "escudo", "flecha", "martelo", "carro", "muralha"};
@@ -3614,6 +3692,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("favores")) sceneFavores();
         else if (ENABLED && SCENE.equals("terra")) sceneTerra();
         else if (ENABLED && SCENE.equals("oficina")) sceneOficina();
+        else if (ENABLED && SCENE.equals("energia")) sceneEnergia();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

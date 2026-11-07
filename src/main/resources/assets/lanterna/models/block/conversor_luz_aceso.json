@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "lanterna:block/energia/conversor_frente_aceso",
+    "side": "lanterna:block/energia/conversor_lado_aceso",
+    "top": "lanterna:block/energia/conversor_topo"
+  }
+}

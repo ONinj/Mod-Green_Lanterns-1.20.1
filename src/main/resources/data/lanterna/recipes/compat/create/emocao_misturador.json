@@ -1,0 +1,25 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "fluidTag": "lanterna:emocao_bruta",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "item": "lanterna:cristal_emocional",
+      "count": 3
+    }
+  ],
+  "heatRequirement": "heated"
+}

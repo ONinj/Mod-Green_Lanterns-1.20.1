@@ -900,3 +900,37 @@ O desenho é sincronizado: todo mundo por perto vê o mesmo construto.
   atrás do disparo; rastro de velocidade, quique e onda de choque na queda do céu; propulsores no veículo;
   ao desmontar uma faixa apaga a peça e ela estilhaça em faíscas.
 - Modelos prontos refeitos com formas arredondadas (espada, machado, escudo, flecha, martelo, carro, muralha).
+
+## 0.35 — Energia da Emoção, Mineradora Planetária e integrações
+A Essência de Poder agora vem de uma operação de mineração nos planetas conquistados (o NPC Minerador virou o
+**Forjador da Guilda**: ele forja os Anéis de Recruta e as melhorias dele aceleram as mineradoras do planeta).
+
+**Cadeia própria (sem nenhum outro mod)**
+1. **Gerador Emocional**: produz Emoção Bruta (fluido) com a emoção do lugar. Começa na emoção da Tropa do anel de
+   quem colocou; agachar + mão vazia troca.
+   - Vontade (verde): jogadores quebrando/colocando blocos por perto + um pouco sempre.
+   - Medo (amarelo): monstros vivos por perto (até 8).
+   - Raiva (vermelho): criaturas morrendo por perto (mais vida, mais emoção).
+   - Avareza (laranja): consome ouro, esmeralda, diamante e bloco de ouro.
+   - Esperança (azul): pouco, sem parar.
+   - Compaixão (índigo): queima Lágrimas Índigo.
+   - Amor (violeta): jogadores juntos por perto e animais nascendo.
+2. **Refinaria Emocional** (encostada no gerador): 1000 mB + 1 redstone = 1 Cristal Emocional (8 s).
+3. **Conversor de Luz**: Cristal = 60 mil FE, Núcleo = 300 mil FE; empurra FE para tudo encostado.
+4. **Mineradora Planetária**: só num planeta da sua guilda. Gasta 100 FE/tick; a cada leva (3 min de trabalho no
+   nível 1, mais rápido nos níveis do Forjador) dá Essência de Poder, e 40% das vezes um minério do tipo do planeta.
+   Monta uma torre de perfuração e um braço escavadeira animados. Com o planeta descarregado, recupera o trabalho
+   quando ele carrega de novo (até 24 h, limitado pela energia guardada — 4 milhões de FE).
+   - Ataques: com um jogador por perto, o barulho atrai criaturas (em média a cada 25 min). Encostadas na máquina
+     elas tiram 1% a cada 2 s; com 0% ela para. Conserto: barra de ferro (+10%).
+   - Se o planeta for tomado por outra guilda, a mineradora passa a trabalhar para a nova dona.
+
+**Integrações (todas opcionais)**
+- **Mekanism** (10x energia): Câmara de Reação Pressurizada (1000 mB + redstone + hidrogênio) → Cristal Bruto;
+  Purificação (oxigênio) → Cristal Puro; Enriquecimento → 2 Núcleos (300 mil FE cada). Rocha Estelar no
+  enriquecimento → 3 fragmentos. Cabos do Mekanism (e de qualquer mod de FE) ligam direto na mineradora; o
+  Entangloporter leva a energia da base até o planeta.
+- **Create**: misturador aquecido (1000 mB + redstone → 3 cristais) e moedor (Rocha Estelar → 2-3 fragmentos).
+- **JEI**: receitas da refinaria e do conversor e páginas de explicação de cada máquina.
+- **Curios**: o anel pode ir no espaço "ring" e a bateria no "belt" (o espaço próprio do mod continua valendo).
+- Configuração em `energia`: multiplicador do gerador, FE/tick da mineradora, horas offline, ataques e intervalo.

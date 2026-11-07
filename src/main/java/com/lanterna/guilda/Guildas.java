@@ -119,24 +119,15 @@ public final class Guildas extends SavedData {
         }
     }
 
-    /** Minerador junta essência; general solta as tropas treinadas. */
+    /** General solta as tropas treinadas (a essência vem das Mineradoras Planetárias). */
     boolean produzir(long agora) {
         boolean mudou = false;
-        long base = LanternaConfig.GUILDA_MIN_ESSENCIA.get() * 60_000L;
         for (Conquista c : conquistas.values()) {
             if (c.daTropa) {
                 if (TropasNpc.recompor(c, agora)) mudou = true;
                 continue;
             }
-            long passo = c.passoMinerador(base);
-            int max = c.depositoMinerador();
-            if (c.ultimaEssencia == 0) c.ultimaEssencia = agora;
-            while (c.essencia < max && agora - c.ultimaEssencia >= passo) {
-                c.essencia = Math.min(max, c.essencia + c.qtdMinerador());
-                c.ultimaEssencia += passo;
-                mudou = true;
-            }
-            if (c.essencia >= max) c.ultimaEssencia = agora;
+            // a essência agora vem das Mineradoras Planetárias (energia/MineradoraBE); o Forjador só forja
             Guilda g = guildas.get(c.guilda);
             while (!c.fila.isEmpty() && agora >= c.proximaTropa && g != null) {
                 boolean defesa = c.fila.poll();

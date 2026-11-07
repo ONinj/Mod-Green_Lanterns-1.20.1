@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "aceso=false,facing=north": {
+      "model": "lanterna:block/gerador_emocional"
+    },
+    "aceso=true,facing=north": {
+      "model": "lanterna:block/gerador_emocional_aceso"
+    },
+    "aceso=false,facing=east": {
+      "model": "lanterna:block/gerador_emocional",
+      "y": 90
+    },
+    "aceso=true,facing=east": {
+      "model": "lanterna:block/gerador_emocional_aceso",
+      "y": 90
+    },
+    "aceso=false,facing=south": {
+      "model": "lanterna:block/gerador_emocional",
+      "y": 180
+    },
+    "aceso=true,facing=south": {
+      "model": "lanterna:block/gerador_emocional_aceso",
+      "y": 180
+    },
+    "aceso=false,facing=west": {
+      "model": "lanterna:block/gerador_emocional",
+      "y": 270
+    },
+    "aceso=true,facing=west": {
+      "model": "lanterna:block/gerador_emocional_aceso",
+      "y": 270
+    }
+  }
+}

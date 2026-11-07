@@ -68,6 +68,14 @@ public final class ModCreativeTabs {
                         for (var i : com.lanterna.tropa.TropaItems.ALL) output.accept(i.get());
                         output.accept(com.lanterna.guilda.GuildaItems.BANDEIRA_ITEM.get());
                         output.accept(com.lanterna.guilda.GuildaItems.ESSENCIA.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.GERADOR_ITEM.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.REFINARIA_ITEM.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.CONVERSOR_ITEM.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.MINERADORA_ITEM.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.CRISTAL.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.CRISTAL_BRUTO.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.CRISTAL_PURO.get());
+                        output.accept(com.lanterna.energia.EnergiaRegistro.NUCLEO.get());
                         output.accept(com.lanterna.guilda.GuildaItems.ANEL_RECRUTA.get());
                         output.accept(com.lanterna.especies.EspeciesEntities.OVO.get());
                     })

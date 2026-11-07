@@ -1,0 +1,25 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "lanterna:rocha_estelar"
+    }
+  ],
+  "results": [
+    {
+      "item": "lanterna:fragmento_estelar",
+      "count": 2
+    },
+    {
+      "item": "lanterna:fragmento_estelar",
+      "chance": 0.5
+    }
+  ],
+  "processingTime": 250
+}

@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FNF",
+    "BPB",
+    "DID"
+  ],
+  "key": {
+    "F": {
+      "item": "lanterna:fragmento_estelar"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "B": {
+      "item": "minecraft:iron_block"
+    },
+    "P": {
+      "item": "minecraft:diamond_pickaxe"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "I": {
+      "item": "minecraft:piston"
+    }
+  },
+  "result": {
+    "item": "lanterna:mineradora_planetaria"
+  }
+}

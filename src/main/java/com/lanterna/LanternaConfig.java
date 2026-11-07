@@ -34,6 +34,11 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.IntValue GUILDA_MAX_DEFESA;
     public static final ForgeConfigSpec.IntValue GUILDA_MAX_ATAQUE;
     public static final ForgeConfigSpec.IntValue GUILDA_MIN_ESSENCIA;
+    public static final ForgeConfigSpec.DoubleValue ENERGIA_GERADOR_MULT;
+    public static final ForgeConfigSpec.IntValue ENERGIA_MINERADORA_FE;
+    public static final ForgeConfigSpec.IntValue ENERGIA_OFFLINE_HORAS;
+    public static final ForgeConfigSpec.BooleanValue ENERGIA_ATAQUES;
+    public static final ForgeConfigSpec.IntValue ENERGIA_ATAQUE_MINUTOS;
     public static final ForgeConfigSpec.IntValue GUILDA_ESSENCIA_ANEL;
     public static final ForgeConfigSpec.IntValue GUILDA_SEG_TREINO;
     public static final ForgeConfigSpec.DoubleValue GUILDA_ESCUDO_CONQUISTA;
@@ -137,12 +142,20 @@ public final class LanternaConfig {
                 .define("pvp_mesma_guilda", false);
         b.pop();
 
+        b.comment("Energia da Emoção e Mineradora Planetária").push("energia");
+        ENERGIA_GERADOR_MULT = b.comment("Multiplica a Emoção Bruta que os Geradores Emocionais produzem").defineInRange("gerador_multiplicador", 1.0, 0.05, 100.0);
+        ENERGIA_MINERADORA_FE = b.comment("FE por tick que a Mineradora Planetária gasta enquanto trabalha").defineInRange("mineradora_fe_por_tick", 100, 0, 1_000_000);
+        ENERGIA_OFFLINE_HORAS = b.comment("Máximo de horas que a mineradora 'recupera' quando o planeta volta a carregar (trabalho com o chunk descarregado, limitado pela energia guardada)").defineInRange("mineradora_horas_offline", 24, 0, 720);
+        ENERGIA_ATAQUES = b.comment("Mineradoras trabalhando atraem ataques de criaturas do planeta").define("mineradora_ataques", true);
+        ENERGIA_ATAQUE_MINUTOS = b.comment("Minutos (em média) entre ataques a uma mineradora trabalhando com um jogador por perto").defineInRange("mineradora_minutos_ataque", 25, 2, 1440);
+        b.pop();
+
         b.comment("Guildas e conquista de planetas").push("guildas");
         GUILDA_MAX_PLANETAS = b.comment("Quantos planetas uma guilda pode ter ao mesmo tempo").defineInRange("max_planetas", 3, 1, 50);
         GUILDA_MAX_MEMBROS = b.comment("Máximo de jogadores numa guilda").defineInRange("max_membros", 20, 1, 500);
         GUILDA_MAX_DEFESA = b.comment("Máximo de tropas de defesa em cada planeta").defineInRange("max_defesa", 20, 1, 200);
         GUILDA_MAX_ATAQUE = b.comment("Máximo de tropas de ataque guardadas pela guilda").defineInRange("max_ataque", 30, 1, 300);
-        GUILDA_MIN_ESSENCIA = b.comment("Minutos (tempo real) para o minerador juntar 1 Essência de Poder").defineInRange("minutos_por_essencia", 3, 1, 1440);
+        GUILDA_MIN_ESSENCIA = b.comment("Minutos de trabalho (com energia) para a Mineradora Planetária extrair uma leva de Essência de Poder").defineInRange("minutos_por_essencia", 3, 1, 1440);
         GUILDA_ESSENCIA_ANEL = b.comment("Essências para forjar 1 Anel de Recruta").defineInRange("essencias_por_anel", 8, 1, 640);
         GUILDA_SEG_TREINO = b.comment("Segundos (tempo real) para o general treinar 1 tropa").defineInRange("segundos_treino", 60, 1, 86400);
         GUILDA_ESCUDO_CONQUISTA = b.comment("Horas de escudo (sem invasões) depois de fincar a bandeira").defineInRange("escudo_horas_conquista", 2.0, 0.0, 720.0);

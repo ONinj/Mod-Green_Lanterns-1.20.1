@@ -113,6 +113,8 @@ public final class ClientModEvents {
         event.registerEntityRenderer(com.lanterna.naves.NaveEntities.ASSENTO.get(), net.minecraft.client.renderer.entity.NoopRenderer::new);
         event.registerBlockEntityRenderer(com.lanterna.guilda.GuildaItems.BANDEIRA_BE.get(), com.lanterna.client.guilda.BandeiraRenderer::new);
         event.registerBlockEntityRenderer(com.lanterna.baterias.ModBaterias.NUCLEO_BE.get(), com.lanterna.baterias.client.BateriaNucleoRenderer::new);
+        event.registerBlockEntityRenderer(com.lanterna.energia.EnergiaRegistro.MINERADORA_BE.get(), com.lanterna.client.energia.MineradoraRenderer::new);
+        event.registerBlockEntityRenderer(com.lanterna.energia.EnergiaRegistro.GERADOR_BE.get(), com.lanterna.client.energia.GeradorRenderer::new);
     }
 
     @SubscribeEvent

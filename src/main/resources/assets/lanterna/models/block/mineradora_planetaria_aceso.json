@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "lanterna:block/energia/mineradora_frente_aceso",
+    "side": "lanterna:block/energia/mineradora_lado",
+    "top": "lanterna:block/energia/mineradora_topo"
+  }
+}

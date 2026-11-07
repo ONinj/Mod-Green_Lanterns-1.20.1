@@ -1,0 +1,18 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "lanterna:cristal_emocional_puro"
+    }
+  },
+  "output": {
+    "item": "lanterna:nucleo_emocional",
+    "count": 2
+  }
+}

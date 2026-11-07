@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "lanterna:block/energia/refinaria_frente_aceso",
+    "side": "lanterna:block/energia/refinaria_lado",
+    "top": "lanterna:block/energia/refinaria_topo"
+  }
+}

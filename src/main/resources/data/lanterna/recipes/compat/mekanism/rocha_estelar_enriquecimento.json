@@ -1,0 +1,18 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "lanterna:rocha_estelar"
+    }
+  },
+  "output": {
+    "item": "lanterna:fragmento_estelar",
+    "count": 3
+  }
+}

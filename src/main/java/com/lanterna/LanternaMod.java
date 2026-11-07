@@ -38,6 +38,7 @@ public class LanternaMod {
         com.lanterna.tropa.TropaItems.init();
         com.lanterna.naves.bloco.NaveBlocks.init();
         com.lanterna.guilda.GuildaItems.init();
+        com.lanterna.energia.EnergiaRegistro.init(modBus);
         com.lanterna.naves.NaveEntities.init();
 
         ModBlocks.BLOCKS.register(modBus);

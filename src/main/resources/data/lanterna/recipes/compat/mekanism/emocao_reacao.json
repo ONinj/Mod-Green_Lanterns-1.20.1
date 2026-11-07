@@ -1,0 +1,30 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "type": "mekanism:reaction",
+  "duration": 100,
+  "fluidInput": {
+    "amount": 1000,
+    "tag": "lanterna:emocao_bruta"
+  },
+  "gasInput": {
+    "amount": 200,
+    "gas": "mekanism:hydrogen"
+  },
+  "itemInput": {
+    "ingredient": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "itemOutput": {
+    "item": "lanterna:cristal_emocional_bruto"
+  },
+  "gasOutput": {
+    "amount": 100,
+    "gas": "mekanism:oxygen"
+  }
+}

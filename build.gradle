@@ -64,6 +64,8 @@ repositories {
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     // Simple Voice Chat (só a API, para compilar; o mod em si o jogador instala)
     maven { url = 'https://maven.maxhenkel.de/repository/public' }
+    // JEI (só a API, para compilar a integração opcional)
+    maven { url = 'https://maven.blamejared.com/' }
 }
 
 dependencies {
@@ -71,6 +73,8 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
     compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.5.0'
+    compileOnly fg.deobf('mezz.jei:jei-1.20.1-forge-api:15.74.0.234')
+    compileOnly fg.deobf('mezz.jei:jei-1.20.1-common-api:15.74.0.234')
 }
 
 tasks.named('jar', Jar).configure {

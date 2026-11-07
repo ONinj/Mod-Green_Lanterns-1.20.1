@@ -1,0 +1,21 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "mekanism"
+    }
+  ],
+  "type": "mekanism:purifying",
+  "chemicalInput": {
+    "amount": 1,
+    "gas": "mekanism:oxygen"
+  },
+  "itemInput": {
+    "ingredient": {
+      "item": "lanterna:cristal_emocional_bruto"
+    }
+  },
+  "output": {
+    "item": "lanterna:cristal_emocional_puro"
+  }
+}
