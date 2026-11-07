@@ -7,7 +7,11 @@ public final class ClientCutscene {
     private static int ticksLeft;
     private static int total;
 
-    public static void start(String corpsId, int rgb, int duration) {
+    /** Cerimônia de um jogador: a cena no mundo vai para todos por perto; a câmera e a tela só para o escolhido. */
+    public static void start(String corpsId, int rgb, int duration, int entity) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        com.lanterna.client.escolha.Cerimonias.comecar(entity, corpsId, rgb, duration);
+        if (mc.player == null || mc.player.getId() != entity) return;
         corps = corpsId;
         color = rgb;
         total = Math.max(1, duration);

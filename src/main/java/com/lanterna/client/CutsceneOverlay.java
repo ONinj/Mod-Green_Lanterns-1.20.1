@@ -31,7 +31,8 @@ public final class CutsceneOverlay {
 
         // Medo e morte: o mundo escurece por inteiro, e a cor só aparece em lampejos
         if (dark) {
-            int black = (int) Mth.clamp(60 + 150 * p, 0, 215);
+            // o escuro agora vem da névoa no mundo (a cena 3D precisa aparecer); aqui só um véu leve
+            int black = (int) Mth.clamp(30 + 50 * p, 0, 80);
             g.fill(0, 0, width, height, black << 24);
             float flicker = style.equals("yellow")
                     ? (Mth.sin(time * 1.7f) > 0.75f ? 1f : 0f)
@@ -44,13 +45,13 @@ public final class CutsceneOverlay {
 
         // Vida: tudo vai clareando até ficar branco
         if (style.equals("white")) {
-            int glow = (int) Mth.clamp(p * p * 170, 0, 170);
+            int glow = (int) Mth.clamp(p * p * 80, 0, 80);
             g.fill(0, 0, width, height, (glow << 24) | 0xFFFFFF);
         }
 
         // Vinheta nas bordas (no medo e na morte ela é bem fraca, para o escuro dominar)
         float edgeScale = dark ? 0.35f : 1f;
-        int edgeAlpha = (int) (Mth.clamp((40 + 120 * p) + pulse * 50, 0, 220) * edgeScale);
+        int edgeAlpha = (int) (Mth.clamp((25 + 70 * p) + pulse * 35, 0, 140) * edgeScale);
         int edge = (edgeAlpha << 24) | rgb;
         int clear = rgb; // alpha 0
         int band = Math.max(20, (int) (height * (0.18f + 0.22f * p)));
@@ -62,14 +63,13 @@ public final class CutsceneOverlay {
         fillHorizontalGradient(g, width - side, 0, width, height, clear, edge); // direita
 
         // Tinta suave na tela inteira, cresce com o progresso
-        int washAlpha = (int) (Mth.clamp(p * 50 + pulse * 15, 0, 90) * edgeScale);
+        int washAlpha = (int) (Mth.clamp(p * 18 + pulse * 8, 0, 30) * edgeScale);
         g.fill(0, 0, width, height, (washAlpha << 24) | rgb);
 
-        // Clarão final (últimos 8 ticks)
-        int left = ClientCutscene.ticksLeft();
-        if (left <= 8) {
-            float f = 1f - (left - partialTick) / 8f;
-            int flashAlpha = (int) Mth.clamp(220 * Mth.sin((float) Math.PI * Mth.clamp(f, 0, 1)), 0, 230);
+        // Clarão quando o anel encaixa no dedo (mesmo momento da cena no mundo)
+        float f = (p - 0.915f) / 0.045f;
+        if (f > 0 && f < 1) {
+            int flashAlpha = (int) Mth.clamp(170 * Mth.sin((float) Math.PI * f), 0, 180);
             int flashColor = blend(rgb, 0xFFFFFF, 0.55f);
             g.fill(0, 0, width, height, (flashAlpha << 24) | flashColor);
         }

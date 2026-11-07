@@ -67,6 +67,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.41 ✅ (0.33) Oficina de Construtos (Alt+Z): desenhe construtos em 3D cubinho por cubinho, escolha o comportamento (arma, escudo, disparo, queda do céu, veículo, estrutura) com animações prontas, 8 espaços e presets Alt+1..4
 1.42 ✅ (0.34) Oficina: grade 32³ com cubinhos menores, superfície lisa (ou modo quadrado), luz de verdade nos construtos (sombra, borda acesa, reflexo, halo), pincel 1-3, modelos refeitos e animações novas (fio de luz ao montar, faixa de montagem, cópias no golpe e no disparo, rastro e onda de choque na queda, propulsores no veículo, estilhaço ao desmontar)
 1.43 ✅ (0.35) Energia da Emoção (Gerador Emocional das 7 emoções, Refinaria, Conversor de Luz), Mineradora Planetária animada nos planetas conquistados (produção offline e ataques), Forjador da guilda; integrações opcionais com Mekanism (10x), Create, JEI e Curios
+1.44 ✅ (0.36) Cerimônias de escolha do anel refeitas: cenas 3D por Tropa ligadas ao ritual (cometa, poço de plasma, olhos e raios, aurora, cristais, feixe, moedas, sombras, fusão dos sete), modelo 3D do anel, câmera de cinema, névoa do ritual, visíveis para quem está perto
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

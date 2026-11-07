@@ -934,3 +934,22 @@ A Essência de Poder agora vem de uma operação de mineração nos planetas con
 - **JEI**: receitas da refinaria e do conversor e páginas de explicação de cada máquina.
 - **Curios**: o anel pode ir no espaço "ring" e a bateria no "belt" (o espaço próprio do mod continua valendo).
 - Configuração em `energia`: multiplicador do gerador, FE/tick da mineradora, horas offline, ataques e intervalo.
+
+## 0.36 — Cerimônias de escolha do anel
+A entrega do anel virou uma cena de cinema desenhada no mundo (todo mundo por perto vê), com o modelo 3D do anel de
+cada Tropa, câmera que dá a volta e termina no close da mão erguida, névoa e cor do céu do ritual e tremor:
+- **Verde** (dormir a noite toda): o anel risca o céu como um cometa com rastro, dá duas voltas em você, um círculo de
+  luz se desenha no chão e uma coluna verde sobe.
+- **Vermelho** (matar muitos): o chão racha, um poço de plasma ferve, seis colunas de fogo pulsam com o coração e o
+  anel sobe do poço.
+- **Amarelo** (encarar o Warden): o mundo apaga, olhos amarelos abrem e piscam no escuro, raios caem cada vez mais
+  perto e um raio traz o anel.
+- **Azul** (curar o aldeão zumbi): aurora no céu, ondas calmas no chão e o anel desce devagar como uma estrela.
+- **Violeta** (filhotes com o bicho domado): cristais crescem em volta, pétalas caem em espiral e um botão de cristal
+  se abre com o anel dentro.
+- **Índigo** (salvar o Golem): um feixe desce do céu, ondas como na água, lágrimas sobem e o anel desce no feixe.
+- **Laranja** (o tesouro sobre o ouro): um redemoinho de moedas gira cada vez mais rápido e se funde no anel.
+- **Negro** (morrer sob o Wither): tentáculos de sombra saem da terra, almas giram e se juntam no anel.
+- **Branco** (fusão): os sete anéis orbitam e se fundem num anel branco; flores de luz se abrem no chão.
+Todas terminam com o anel parando na frente do peito e encaixando no dedo da mão erguida: clarão, onda no chão e a luz
+subindo pelo corpo. A cerimônia dura pelo menos 10 s (configurável para mais).

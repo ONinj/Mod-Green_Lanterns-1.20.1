@@ -24,6 +24,10 @@ public abstract class CameraMixin {
     @Shadow @Final private Vector3f left;
     @Shadow @Final private Vector3f up;
     @Shadow protected abstract void setPosition(Vec3 pos);
+    @Shadow protected abstract void setRotation(float yRot, float xRot);
+    @Shadow private boolean detached;
+    @Shadow public abstract float getXRot();
+    @Shadow public abstract float getYRot();
 
     @Inject(method = "setup", at = @At("HEAD"))
     private void lanterna$grab(BlockGetter level, Entity entity, boolean detached, boolean mirror, float partialTick, CallbackInfo ci) {
@@ -41,6 +45,15 @@ public abstract class CameraMixin {
     /** Terceira pessoa melhorada (por cima do ombro). */
     @Inject(method = "setup", at = @At("TAIL"))
     private void lanterna$ombro(BlockGetter level, Entity entity, boolean detached, boolean mirror, float partialTick, CallbackInfo ci) {
+        // cerimônia de escolha do anel: câmera de cinema
+        double[] cine = com.lanterna.client.escolha.Cerimonias.camera(entity, partialTick, position, getYRot(), getXRot());
+        if (cine != null) {
+            this.detached = true;
+            setRotation((float) cine[3], (float) cine[4]);
+            setPosition(new Vec3(cine[0], cine[1], cine[2]));
+            com.lanterna.client.camera.CameraLanterna.aplicada = false;
+            return;
+        }
         boolean ativa = com.lanterna.client.camera.CameraLanterna.ativa(entity, detached, mirror);
         com.lanterna.client.camera.CameraLanterna.aplicada = ativa;
         if (!ativa) return;

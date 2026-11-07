@@ -65,11 +65,14 @@ public final class SelectionManager {
         if (data == null || data.hasRing() || data.isSelectionPending()) return false;
 
         CorpsDefinition def = CorpsManager.get(corpsId);
-        int duration = LanternaConfig.SELECTION_ANIMATION_TICKS.get();
+        // a cena tem roteiro (chegada do anel, ritual, encaixe no dedo): pelo menos 10 s
+        int duration = Math.max(200, LanternaConfig.SELECTION_ANIMATION_TICKS.get());
         data.startPending(def.id(), duration);
 
         // Efeito de tela no cliente
-        ModNetwork.sendTo(player, new SelectionCutscenePacket(def.id().toString(), def.color(), duration));
+        SelectionCutscenePacket cena = new SelectionCutscenePacket(def.id().toString(), def.color(), duration, player.getId());
+        ModNetwork.sendTo(player, cena);
+        ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> player), cena);
 
         // Título grande no meio da tela
         String base = "selection." + def.id().getNamespace() + "." + def.id().getPath();
@@ -93,7 +96,6 @@ public final class SelectionManager {
                 sound(player, SoundEvents.WITHER_SPAWN, 0.4f, 1.6f);
             }
             case "yellow" -> {
-                player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, duration + 20, 0, false, false));
                 player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3, false, false));
                 sound(player, SoundEvents.WARDEN_EMERGE, 1.0f, 1.3f);
                 sound(player, SoundEvents.SCULK_SHRIEKER_SHRIEK, 1.0f, 0.7f);
@@ -118,7 +120,6 @@ public final class SelectionManager {
                 sound(player, SoundEvents.VILLAGER_TRADE, 1.0f, 0.7f);
             }
             case "black" -> {
-                player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false));
                 player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 3, false, false));
                 sound(player, SoundEvents.SOUL_ESCAPE, 2.0f, 0.5f);
                 sound(player, SoundEvents.WITHER_AMBIENT, 0.8f, 0.5f);
@@ -151,257 +152,68 @@ public final class SelectionManager {
         int total = Math.max(1, data.pendingTotal());
         float progress = 1.0f - (float) left / total;   // 0 -> 1
 
-        switch (def.id().getPath()) {
-            case "green" -> animateGreen(player, def, progress, left);
-            case "red" -> animateRed(player, def, progress, left);
-            case "yellow" -> animateYellow(player, def, progress, left);
-            case "blue" -> animateBlue(player, def, progress, left);
-            case "violet" -> animateViolet(player, def, progress, left);
-            case "indigo" -> animateIndigo(player, def, progress, left);
-            case "orange" -> animateOrange(player, def, progress, left);
-            case "black" -> animateBlack(player, def, progress, left);
-            case "white" -> animateWhite(player, def, progress, left);
-            default -> animateDefault(player, def, progress, left);
-        }
+        // a cena em si é desenhada no cliente (client/escolha); aqui só os sons do roteiro
+        sons(player, def.id().getPath(), progress, left, total);
 
         if (left <= 0) {
             deliver(player, data, def);
         }
     }
 
-    // ============================== Animações ==============================
+    // ============================== Sons do roteiro ==============================
 
-    /** Verde: cometa vindo do céu, depois espiral fechando até a mão. */
-    private static void animateGreen(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        Vec3 hand = player.position().add(0, 1.2, 0);
-
-        if (progress < 0.6f) {
-            float q = progress / 0.6f;
-            float eased = q * q;
-            double angle = (player.getUUID().getLeastSignificantBits() & 0xFFFF) / 65535.0 * Math.PI * 2;
-            Vec3 start = hand.add(Math.cos(angle) * 18, 24, Math.sin(angle) * 18);
-            Vec3 pos = start.lerp(hand.add(0, 1.0, 0), eased);
-            float pq = Math.max(0, q - 0.03f);
-            Vec3 prev = start.lerp(hand.add(0, 1.0, 0), pq * pq);
-
-            for (int i = 0; i < 6; i++) {
-                Vec3 p = prev.lerp(pos, i / 5.0);
-                level.sendParticles(new DustParticleOptions(rgb, 2.0f), p.x, p.y, p.z, 2, 0.05, 0.05, 0.05, 0);
+    private static void sons(ServerPlayer p, String corps, float t, int left, int total) {
+        int passado = total - left;
+        // o anel chega perto e encaixa: igual para todas
+        if (passado == (int) (total * 0.86f)) sound(p, SoundEvents.AMETHYST_BLOCK_RESONATE, 1.6f, 1.4f);
+        if (passado == (int) (total * 0.93f)) sound(p, SoundEvents.BEACON_POWER_SELECT, 1.5f, 1.6f);
+        switch (corps) {
+            case "green" -> {
+                if (passado == 2) sound(p, SoundEvents.FIREWORK_ROCKET_LAUNCH, 2f, 0.5f);
+                if (t < 0.5f && passado % 12 == 0) sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 2f, 0.8f + t * 1.4f);
+                if (passado == (int) (total * 0.5f)) sound(p, SoundEvents.TRIDENT_RIPTIDE_3, 1.4f, 1.2f);
+                if (passado == (int) (total * 0.72f)) sound(p, SoundEvents.BEACON_ACTIVATE, 2f, 0.9f);
             }
-            level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 1, 0.02, 0.02, 0.02, 0.01);
-            if (left % 20 == 0) {
-                level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 2.0f, 1.5f);
+            case "red" -> {
+                int batida = Math.max(10, (int) (26 - t * 16));
+                if (passado % batida == 0) sound(p, SoundEvents.WARDEN_HEARTBEAT, 2.5f, 0.55f);
+                if (passado == 6) sound(p, SoundEvents.GENERIC_EXPLODE, 0.7f, 0.5f);
+                if (passado == (int) (total * 0.25f)) sound(p, SoundEvents.LAVA_AMBIENT, 2f, 0.6f);
+                if (passado == (int) (total * 0.55f)) sound(p, SoundEvents.BLAZE_SHOOT, 1.5f, 0.5f);
             }
-        } else {
-            float q = (progress - 0.6f) / 0.4f;
-            spiral(level, player, rgb, Mth.lerp(q, 1.8, 0.15), Mth.lerp(q, 2.2, 1.2), left * 0.55, 3, 1.4f);
-            if (left % 6 == 0) {
-                level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.2, player.getZ(), 2, 0.3, 0.1, 0.3, 0.01);
+            case "yellow" -> {
+                if (passado % 22 == 7) sound(p, SoundEvents.LIGHTNING_BOLT_THUNDER, 0.7f, 1.4f + t * 0.4f);
+                if (passado % 35 == 0) sound(p, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.5f, 0.8f);
+                if (passado == (int) (total * 0.62f)) sound(p, SoundEvents.LIGHTNING_BOLT_IMPACT, 1.4f, 1.6f);
             }
-        }
-    }
-
-    /** Vermelho: colunas de sangue subindo do chão e se fechando. */
-    private static void animateRed(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        Vector3f dark = new Vector3f(0.35f, 0.0f, 0.0f);
-
-        double radius = Mth.lerp(progress, 4.0, 0.4);
-        double rise = (left * 0.12) % 2.4;
-        for (int i = 0; i < 8; i++) {
-            double a = i * (Math.PI * 2 / 8) + progress * Math.PI;
-            double x = player.getX() + Math.cos(a) * radius;
-            double z = player.getZ() + Math.sin(a) * radius;
-            level.sendParticles(new DustParticleOptions(rgb, 1.6f), x, player.getY() + rise, z, 1, 0, 0, 0, 0);
-            level.sendParticles(new DustParticleOptions(dark, 1.2f), x, player.getY() + 0.1, z, 1, 0.1, 0, 0.1, 0);
-        }
-        level.sendParticles(ParticleTypes.FALLING_LAVA, player.getX(), player.getY() + 3.0, player.getZ(), 2, 2.5, 0.5, 2.5, 0);
-        if (left % 25 == 0) sound(player, SoundEvents.WARDEN_HEARTBEAT, 2.0f, 0.5f);
-    }
-
-    /** Amarelo: raios amarelos em zigue-zague saem da escuridão e convergem em você. */
-    private static void animateYellow(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        Vec3 center = player.position().add(0, 1.0, 0);
-
-        // Almas de sculk subindo devagar em volta (o "escuro vivo")
-        level.sendParticles(ParticleTypes.SCULK_SOUL, center.x, player.getY() + 0.2, center.z, 1, 3.0, 0.1, 3.0, 0.01);
-
-        // Raios: de longe até você, mais curtos conforme o anel chega
-        if (left % 4 == 0) {
-            var rnd = player.getRandom();
-            double a = rnd.nextDouble() * Math.PI * 2;
-            double dist = Mth.lerp(progress, 10.0, 1.5);
-            Vec3 from = center.add(Math.cos(a) * dist, rnd.nextDouble() * 3 - 1, Math.sin(a) * dist);
-            Vec3 cur = from;
-            int steps = 8;
-            for (int i = 1; i <= steps; i++) {
-                Vec3 next = from.lerp(center, (double) i / steps)
-                        .add((rnd.nextDouble() - 0.5) * 0.6, (rnd.nextDouble() - 0.5) * 0.6, (rnd.nextDouble() - 0.5) * 0.6);
-                for (int j = 0; j < 3; j++) {
-                    Vec3 p = cur.lerp(next, j / 3.0);
-                    level.sendParticles(new DustParticleOptions(rgb, 1.3f), p.x, p.y, p.z, 1, 0, 0, 0, 0);
-                }
-                cur = next;
+            case "blue" -> {
+                if (passado % 30 == 0) sound(p, SoundEvents.BELL_RESONATE, 1.2f, 1.2f + t * 0.6f);
+                if (passado == (int) (total * 0.4f)) sound(p, SoundEvents.BEACON_AMBIENT, 2f, 1.5f);
             }
-            if (left % 16 == 0) sound(player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.5f, 1.4f);
-        }
-
-        // "Olhos" amarelos piscando no escuro em volta
-        if (left % 10 == 0) {
-            var rnd = player.getRandom();
-            double a = rnd.nextDouble() * Math.PI * 2;
-            double x = center.x + Math.cos(a) * 5, z = center.z + Math.sin(a) * 5;
-            double y = player.getY() + 1.6;
-            double px = -Math.sin(a) * 0.15, pz = Math.cos(a) * 0.15;
-            level.sendParticles(new DustParticleOptions(rgb, 1.0f), x + px, y, z + pz, 2, 0, 0, 0, 0);
-            level.sendParticles(new DustParticleOptions(rgb, 1.0f), x - px, y, z - pz, 2, 0, 0, 0, 0);
-        }
-    }
-
-    /** Azul: aurora subindo do chão, como um amanhecer, com sinos. */
-    private static void animateBlue(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        Vector3f pale = new Vector3f(0.7f, 0.85f, 1.0f);
-
-        // Cortina de luz em um círculo grande, subindo em ondas
-        double radius = 3.5;
-        for (int i = 0; i < 6; i++) {
-            double a = (left * 0.05) + i * (Math.PI * 2 / 6);
-            double x = player.getX() + Math.cos(a) * radius;
-            double z = player.getZ() + Math.sin(a) * radius;
-            double h = (left * 0.08 + i) % 4.0;
-            level.sendParticles(new DustParticleOptions(i % 2 == 0 ? rgb : pale, 1.5f), x, player.getY() + h, z, 1, 0.05, 0.05, 0.05, 0);
-        }
-        // Gotas de luz subindo (chuva ao contrário)
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 0.1, player.getZ(), 1, 2.5, 0, 2.5, 0.03);
-        if (progress > 0.6f) {
-            float q = (progress - 0.6f) / 0.4f;
-            spiral(level, player, rgb, Mth.lerp(q, 2.0, 0.2), 1.2, left * 0.5, 2, 1.3f);
-        }
-        if (left % 30 == 0) sound(player, SoundEvents.BELL_RESONATE, 1.0f, 1.5f);
-    }
-
-    /** Violeta: pétalas e corações caindo em espiral. */
-    private static void animateViolet(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        Vector3f pink = new Vector3f(1.0f, 0.6f, 0.85f);
-
-        level.sendParticles(ParticleTypes.CHERRY_LEAVES, player.getX(), player.getY() + 4.0, player.getZ(), 2, 2.5, 0.3, 2.5, 0);
-        double radius = Mth.lerp(progress, 2.6, 0.3);
-        double height = Mth.lerp(progress, 3.0, 1.2);
-        for (int arm = 0; arm < 2; arm++) {
-            double a = left * 0.35 + arm * Math.PI;
-            level.sendParticles(new DustParticleOptions(arm == 0 ? rgb : pink, 1.4f),
-                    player.getX() + Math.cos(a) * radius, player.getY() + height, player.getZ() + Math.sin(a) * radius, 1, 0, 0, 0, 0);
-        }
-        if (left % 8 == 0) {
-            level.sendParticles(ParticleTypes.HEART, player.getX(), player.getY() + 2.2, player.getZ(), 1, 0.8, 0.3, 0.8, 0);
-        }
-        if (left % 24 == 0) sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.5f, 1.6f);
-    }
-
-    /** Índigo: feixe de luz descendo do céu, ondas índigo se espalhando pelo chão. */
-    private static void animateIndigo(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-
-        // Feixe: desce do céu até a cabeça
-        double top = player.getY() + Mth.lerp(Math.min(1f, progress * 2), 20.0, 2.0);
-        for (double y = top; y < player.getY() + 22; y += 1.2) {
-            level.sendParticles(ParticleTypes.END_ROD, player.getX(), y, player.getZ(), 1, 0.05, 0.2, 0.05, 0);
-        }
-        // Ondas no chão, uma a cada segundo
-        double ring = ((left % 20) / 20.0) * 4.5;
-        for (int i = 0; i < 16; i++) {
-            double a = i * (Math.PI * 2 / 16);
-            level.sendParticles(new DustParticleOptions(rgb, 1.2f),
-                    player.getX() + Math.cos(a) * (4.6 - ring), player.getY() + 0.1, player.getZ() + Math.sin(a) * (4.6 - ring), 1, 0, 0, 0, 0);
-        }
-        if (left % 20 == 0) sound(player, SoundEvents.CONDUIT_AMBIENT, 1.5f, 1.2f);
-    }
-
-    /** Laranja: chuva de ouro girando cada vez mais rápido. */
-    private static void animateOrange(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        ItemParticleOption gold = new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.GOLD_NUGGET));
-        ItemParticleOption ingot = new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.GOLD_INGOT));
-
-        double speed = Mth.lerp(progress, 0.15, 0.9);
-        double radius = Mth.lerp(progress, 3.0, 0.6);
-        for (int i = 0; i < 4; i++) {
-            double a = left * speed + i * (Math.PI / 2);
-            double h = 0.3 + ((left * 0.05 + i * 0.5) % 2.2);
-            level.sendParticles(i % 2 == 0 ? gold : ingot,
-                    player.getX() + Math.cos(a) * radius, player.getY() + h, player.getZ() + Math.sin(a) * radius, 1, 0, 0, 0, 0);
-            level.sendParticles(new DustParticleOptions(rgb, 1.3f),
-                    player.getX() + Math.cos(a) * radius, player.getY() + h, player.getZ() + Math.sin(a) * radius, 1, 0, 0, 0, 0);
-        }
-        level.sendParticles(gold, player.getX(), player.getY() + 4.0, player.getZ(), 2, 2.0, 0.2, 2.0, 0.05);
-        if (left % 6 == 0) sound(player, SoundEvents.ITEM_PICKUP, 0.6f, 0.5f + progress);
-    }
-
-    /** Negro: almas saindo da terra e girando até virar um anel negro. */
-    private static void animateBlack(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f dark = new Vector3f(0.08f, 0.08f, 0.1f);
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-
-        level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 0.1, player.getZ(), 2, 3.0, 0, 3.0, 0.02);
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 0.1, player.getZ(), 1, 2.0, 0, 2.0, 0.01);
-        double radius = Mth.lerp(progress, 3.0, 0.3);
-        for (int arm = 0; arm < 4; arm++) {
-            double a = -left * 0.3 + arm * (Math.PI / 2);
-            double h = Mth.lerp(progress, 0.2, 1.2);
-            level.sendParticles(new DustParticleOptions(arm % 2 == 0 ? dark : rgb, 1.8f),
-                    player.getX() + Math.cos(a) * radius, player.getY() + h, player.getZ() + Math.sin(a) * radius, 1, 0, 0, 0, 0);
-        }
-        if (left % 20 == 0) sound(player, SoundEvents.SOUL_ESCAPE, 2.0f, 0.4f);
-    }
-
-    /** Branco: coluna de luz branca e um clarão de vida. */
-    private static void animateWhite(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        ServerLevel level = player.serverLevel();
-        Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-
-        // Coluna de luz até o céu, ficando mais larga
-        double width = Mth.lerp(progress, 0.2, 1.2);
-        for (double y = 0; y < 24; y += 1.0) {
-            level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + y, player.getZ(), 1, width * 0.3, 0.3, width * 0.3, 0);
-        }
-        // Raios saindo do corpo para fora
-        for (int i = 0; i < 6; i++) {
-            double a = left * 0.2 + i * (Math.PI / 3);
-            double r = ((left * 0.15) % 4.0);
-            level.sendParticles(new DustParticleOptions(rgb, 1.6f),
-                    player.getX() + Math.cos(a) * r, player.getY() + 1.0, player.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-        }
-        if (left % 5 == 0) {
-            level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.6, 0.8, 0.6, 0.3);
-        }
-        if (left % 25 == 0) sound(player, SoundEvents.AMETHYST_BLOCK_RESONATE, 2.0f, 1.8f);
-    }
-
-    /** Padrão para Tropas novas criadas por datapack. */
-    private static void animateDefault(ServerPlayer player, CorpsDefinition def, float progress, int left) {
-        spiral(player.serverLevel(), player, PowerBatteryBlock.rgb(def.color()),
-                Mth.lerp(progress, 2.5, 0.2), 0.2 + progress * 1.2, left * 0.4, 2, 1.3f);
-    }
-
-    private static void spiral(ServerLevel level, ServerPlayer player, Vector3f rgb, double radius, double height,
-                               double angle, int arms, float size) {
-        for (int arm = 0; arm < arms; arm++) {
-            double a = angle + arm * (Math.PI * 2 / arms);
-            level.sendParticles(new DustParticleOptions(rgb, size),
-                    player.getX() + Math.cos(a) * radius, player.getY() + height, player.getZ() + Math.sin(a) * radius,
-                    1, 0, 0, 0, 0);
+            case "violet" -> {
+                if (passado % 14 == 0) sound(p, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.4f, 0.8f + t);
+                if (passado == (int) (total * 0.6f)) sound(p, SoundEvents.AMETHYST_BLOCK_BREAK, 2f, 0.7f);
+            }
+            case "indigo" -> {
+                if (passado == 4) sound(p, SoundEvents.CONDUIT_ACTIVATE, 2f, 0.8f);
+                if (passado % 20 == 0) sound(p, SoundEvents.CONDUIT_AMBIENT_SHORT, 1.5f, 1.2f);
+            }
+            case "orange" -> {
+                if (passado % 4 == 0) sound(p, SoundEvents.CHAIN_STEP, 0.5f, 1.2f + t);
+                if (passado % 9 == 0) sound(p, SoundEvents.ITEM_PICKUP, 0.6f, 0.5f + t);
+                if (passado == (int) (total * 0.62f)) sound(p, SoundEvents.ANVIL_LAND, 1f, 0.6f);
+            }
+            case "black" -> {
+                if (passado % 20 == 0) sound(p, SoundEvents.SOUL_ESCAPE, 2f, 0.4f);
+                if (passado % 40 == 10) sound(p, SoundEvents.SCULK_SHRIEKER_SHRIEK, 0.6f, 0.5f);
+            }
+            case "white" -> {
+                if (passado % 16 == 0) sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1.6f, 1.0f + t);
+                if (passado == (int) (total * 0.65f)) sound(p, SoundEvents.TOTEM_USE, 1f, 1.2f);
+            }
+            default -> {
+                if (passado % 20 == 0) sound(p, SoundEvents.BEACON_AMBIENT, 1.5f, 1.2f);
+            }
         }
     }
 
@@ -429,9 +241,6 @@ public final class SelectionManager {
 
         ServerLevel level = player.serverLevel();
         Vector3f rgb = PowerBatteryBlock.rgb(def.color());
-        level.sendParticles(new DustParticleOptions(rgb, 2.5f), player.getX(), player.getY() + 1.0, player.getZ(),
-                120, 0.8, 1.0, 0.8, 0.15);
-        level.sendParticles(ParticleTypes.FLASH, player.getX(), player.getY() + 1.2, player.getZ(), 1, 0, 0, 0, 0);
         sound(player, SoundEvents.BEACON_POWER_SELECT, 2.0f, 1.0f);
         sound(player, SoundEvents.TOTEM_USE, 0.6f, 1.4f);
 

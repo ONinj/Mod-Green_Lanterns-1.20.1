@@ -3083,6 +3083,43 @@ public final class DevAutoTest {
     }
 
 
+    private static void sceneEscolha() {
+        Minecraft mc = Minecraft.getInstance();
+        String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -30; x <= 30; x++) for (int z = -30; z <= 30; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), (x * 7 + z * 13) % 11 == 0 ? net.minecraft.world.level.block.Blocks.MOSS_BLOCK.defaultBlockState() : net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            for (var z : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(80))) z.discard();
+            com.lanterna.power.RingPowers.removeRing(sp);
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        for (String tropa : only.split(",")) {
+            at(10, () -> server(sp -> {
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { d.clearPending(); });
+                com.lanterna.power.RingPowers.removeRing(sp);
+                sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0);
+                sp.removeAllEffects();
+                boolean ok = com.lanterna.selection.SelectionManager.startSelection(sp, new net.minecraft.resources.ResourceLocation("lanterna", tropa));
+                glog("escolha " + tropa + " ok=" + ok);
+            }));
+            at(50, () -> { glog(tropa + " shot1 yaw=" + mc.player.getYRot() + " body=" + mc.player.yBodyRot + " head=" + mc.player.yHeadRot + " cam=" + mc.gameRenderer.getMainCamera().getYRot()); shot("escolha_" + tropa + "_1"); });
+            at(60, () -> { glog(tropa + " shot2 yaw=" + mc.player.getYRot() + " body=" + mc.player.yBodyRot + " head=" + mc.player.yHeadRot + " cam=" + mc.gameRenderer.getMainCamera().getYRot()); shot("escolha_" + tropa + "_2"); });
+            at(46, () -> { glog(tropa + " shot3 yaw=" + mc.player.getYRot() + " body=" + mc.player.yBodyRot + " head=" + mc.player.yHeadRot + " cam=" + mc.gameRenderer.getMainCamera().getYRot()); shot("escolha_" + tropa + "_3"); });
+            at(22, () -> { glog(tropa + " shot4 yaw=" + mc.player.getYRot() + " body=" + mc.player.yBodyRot + " head=" + mc.player.yHeadRot + " cam=" + mc.gameRenderer.getMainCamera().getYRot()); shot("escolha_" + tropa + "_4"); });
+            at(14, () -> { glog(tropa + " shot5 yaw=" + mc.player.getYRot() + " body=" + mc.player.yBodyRot + " head=" + mc.player.yHeadRot + " cam=" + mc.gameRenderer.getMainCamera().getYRot()); shot("escolha_" + tropa + "_5"); });
+            at(2, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> d.clearPending())));
+            at(20, () -> {});
+        }
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEnergia() {
         Minecraft mc = Minecraft.getInstance();
         net.minecraft.core.BlockPos MIN = new net.minecraft.core.BlockPos(0, 200, 10), CONV = MIN.east(), GER = new net.minecraft.core.BlockPos(-7, 200, 3), REF = GER.east();
@@ -3693,6 +3730,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("terra")) sceneTerra();
         else if (ENABLED && SCENE.equals("oficina")) sceneOficina();
         else if (ENABLED && SCENE.equals("energia")) sceneEnergia();
+        else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

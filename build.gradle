@@ -35,6 +35,7 @@ minecraft {
             workingDirectory project.file('run')
             property 'lanterna.autotest', 'true'
             property 'lanterna.autotest.scene', project.findProperty('scene') ?: 'full'
+            property 'lanterna.tropas', project.findProperty('tropas') ?: 'green,red,yellow,blue,violet,indigo,orange,black,white'
             property 'lanterna.planetas', project.findProperty('planetas') ?: 'oa,korugar,ysmault,odym,okaara,nok,zamaron,ryut'
             if (project.findProperty('refazer')) property 'lanterna.refazer', 'true'
             args '--quickPlaySingleplayer', 'test', '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
