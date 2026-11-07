@@ -136,7 +136,7 @@ public final class LoreCreatures {
 
         @Override
         public void registerControllers(AnimatableManager.ControllerRegistrar c) {
-            c.add(new AnimationController<>(this, "move", 4, s -> s.setAndContinue(s.isMoving() ? WALK : IDLE)));
+            c.add(new AnimationController<>(this, "move", 4, s -> Passos.andar(s, WALK, IDLE, s.isMoving())));
             c.add(new AnimationController<>(this, "attack", 0, s -> PlayState.STOP).triggerableAnim("strike", STRIKE));
         }
 
@@ -228,7 +228,7 @@ public final class LoreCreatures {
 
         @Override
         public void registerControllers(AnimatableManager.ControllerRegistrar c) {
-            c.add(new AnimationController<>(this, "move", 4, s -> s.setAndContinue(s.isMoving() ? WALK : IDLE)));
+            c.add(new AnimationController<>(this, "move", 4, s -> Passos.andar(s, WALK, IDLE, s.isMoving())));
         }
 
         @Override

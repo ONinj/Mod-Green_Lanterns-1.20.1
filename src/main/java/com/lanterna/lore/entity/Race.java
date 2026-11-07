@@ -17,7 +17,9 @@ public enum Race {
     ZAELITH("zaelith", "zamaron", 0.8f, 2.1f, 30, 0.27, 5, true),
     SILENTE("silente", "ryut", 0.6f, 2.1f, 26, 0.21, 5, false),
     COLETOR("coletor", "ryut", 0.6f, 2.7f, 60, 0.20, 6, false),
-    GUARDIAO("guardiao", "oa", 0.7f, 2.3f, 200, 0.0, 0, false);
+    GUARDIAO("guardiao", "oa", 0.7f, 2.3f, 200, 0.0, 0, false),
+    /** Humanos da Terra (Vila Aurora e Base Vigília). Usam o modelo de jogador, não um modelo GeckoLib. */
+    TERRANO("terrano", "earth", 0.6f, 1.8f, 24, 0.3, 3, false);
 
     public final String id;
     public final String planet;
@@ -44,7 +46,7 @@ public enum Race {
     }
 
     public boolean trades() {
-        return this != SILENTE && this != GUARDIAO;
+        return this != SILENTE && this != GUARDIAO && this != TERRANO;
     }
 
     @Nullable
@@ -56,7 +58,7 @@ public enum Race {
     /** A raça que mora no planeta (nas vilas, os aldeões viram ela). */
     @Nullable
     public static Race ofPlanet(String planet) {
-        for (Race r : values()) if (r.planet.equals(planet) && r != COLETOR && r != GUARDIAO) return r;
+        for (Race r : values()) if (r.planet.equals(planet) && r != COLETOR && r != GUARDIAO && r != TERRANO) return r;
         return null;
     }
 }

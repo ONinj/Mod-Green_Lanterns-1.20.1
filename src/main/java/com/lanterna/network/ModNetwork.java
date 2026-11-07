@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "12";
+    private static final String VERSION = "13";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -212,6 +212,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Aura.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.fonte.FontePackets.Aura::encode).decoder(com.lanterna.fonte.FontePackets.Aura::decode)
                 .consumerMainThread(com.lanterna.fonte.FontePackets.Aura::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.terra.TerraSite.Sync.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.terra.TerraSite.Sync::encode).decoder(com.lanterna.terra.TerraSite.Sync::decode)
+                .consumerMainThread(com.lanterna.terra.TerraSite.Sync::handle).add();
         CHANNEL.messageBuilder(com.lanterna.juramento.Juramento.Abrir.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.juramento.Juramento.Abrir::encode).decoder(com.lanterna.juramento.Juramento.Abrir::decode)
                 .consumerMainThread(com.lanterna.juramento.Juramento.Abrir::handle).add();

@@ -39,7 +39,7 @@ public final class LoreEntities {
     static {
         int[][] colors = {
                 {0x2A2224, 0xFF4A20}, {0xB07A40, 0xFFC040}, {0x15151A, 0xFFE01A}, {0x6E7E74, 0x40FF70}, {0x8EC8FF, 0x2A7BFF},
-                {0x2A2050, 0x7B6BFF}, {0xF0B0FF, 0xC23BFF}, {0xD8D0C0, 0x303038}, {0x18181C, 0x6A50C0}, {0xE8F0E8, 0x2BFF4A}};
+                {0x2A2050, 0x7B6BFF}, {0xF0B0FF, 0xC23BFF}, {0xD8D0C0, 0x303038}, {0x18181C, 0x6A50C0}, {0xE8F0E8, 0x2BFF4A}, {0xD6AA8C, 0x3C5A8C}};
         for (Race r : Race.values()) {
             RegistryObject<EntityType<RaceEntity>> type = ModEntities.ENTITIES.register(r.id,
                     () -> EntityType.Builder.<RaceEntity>of(RaceEntity::new, MobCategory.CREATURE)

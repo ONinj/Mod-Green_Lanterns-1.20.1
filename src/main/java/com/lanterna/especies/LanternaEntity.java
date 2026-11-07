@@ -750,8 +750,15 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "movimento", 4, state -> {
             if (isDeadOrDying()) return PlayState.STOP;
-            if (voando()) return state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > 0.004 ? FLY : HOVER);
-            if (state.isMoving()) return state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > 0.03 ? RUN : WALK);
+            if (voando()) {
+                state.getController().setAnimationSpeed(1.0);
+                return state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > 0.004 ? FLY : HOVER);
+            }
+            if (state.isMoving()) {
+                state.getController().setAnimationSpeed(com.lanterna.lore.entity.Passos.ritmo(state.getLimbSwingAmount()) * 0.85);
+                return state.setAndContinue(getDeltaMovement().horizontalDistanceSqr() > 0.03 ? RUN : WALK);
+            }
+            state.getController().setAnimationSpeed(1.0);
             return state.setAndContinue(IDLE);
         }));
         AnimationController<LanternaEntity> acao = new AnimationController<>(this, "acao", 0, state -> PlayState.STOP);

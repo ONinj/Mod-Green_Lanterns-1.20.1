@@ -38,6 +38,8 @@ public final class ModCreativeTabs {
                         output.accept(com.lanterna.item.DormantRingItem.create());
                         for (var b : com.lanterna.baterias.ModBaterias.ITENS.values()) output.accept(b.get());
                         output.accept(ModItems.CHISELED_BATTERY.get());
+                        output.accept(ModItems.FRAGMENTO_ESTELAR.get());
+                        output.accept(ModItems.ROCHA_ESTELAR.get());
                         output.accept(ModItems.ALIEN_ALLOY.get());
                         output.accept(ModItems.ALIEN_SPAWN_EGG.get());
                     })

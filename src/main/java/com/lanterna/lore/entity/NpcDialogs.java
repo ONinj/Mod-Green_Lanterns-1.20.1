@@ -74,6 +74,7 @@ public final class NpcDialogs {
                 else lines.add("dialog.lanterna.zaelith.favorite|item:" + ForgeRegistries.ITEMS.getKey(npc.favorite()));
                 if (npc.affection(player) < 2) lines.add("dialog.lanterna.zaelith.no_affection");
             }
+            case TERRANO -> com.lanterna.terra.TerraHistoria.dialogo(player, npc, data, lines, options);
             case VES_KAI -> {
                 if (npc.hasFlag(RaceEntity.WOUNDED)) lines.add("dialog.lanterna.ves_kai.wounded");
                 else {

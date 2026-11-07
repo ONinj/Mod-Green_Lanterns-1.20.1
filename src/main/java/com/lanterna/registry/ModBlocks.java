@@ -28,8 +28,18 @@ public final class ModBlocks {
                     .mapColor(MapColor.STONE)
                     .strength(2.0f, 6.0f)
                     .sound(SoundType.STONE)
-                    .lightLevel(state -> 3)
+                    .lightLevel(state -> switch (state.getValue(com.lanterna.block.ChiseledBatteryBlock.CARGA)) {
+                        case 1 -> 7; case 2 -> 10; case 3 -> 14; default -> 3; })
                     .noOcclusion()));
+
+    /** Rocha Estelar: o que sobra de uma estrela cadente que caiu na Terra. Dá Fragmentos Estelares. */
+    public static final RegistryObject<Block> ROCHA_ESTELAR = BLOCKS.register("rocha_estelar",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(4.0f, 8.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.ANCIENT_DEBRIS)
+                    .lightLevel(state -> 9)));
 
     private ModBlocks() {}
 }

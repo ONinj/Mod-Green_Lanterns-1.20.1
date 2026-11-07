@@ -225,7 +225,7 @@ public class AlienEntity extends AbstractVillager implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 5,
-                state -> state.setAndContinue(state.isMoving() ? WALK : IDLE)));
+                state -> com.lanterna.lore.entity.Passos.andar(state, WALK, IDLE, state.isMoving())));
     }
 
     @Override

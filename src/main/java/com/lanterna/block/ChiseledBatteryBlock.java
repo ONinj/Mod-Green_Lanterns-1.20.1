@@ -20,22 +20,27 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Bateria Cinzelada: uma bateria de pedra sem cor, feita na bancada. Guarda uma única descarga de
- * energia pura. Clique nela com o Anel Apagado: ela se parte, o anel desperta e escolhe sozinho
- * uma das Tropas para o portador.
+ * Bateria Cinzelada: uma bateria de pedra sem cor, feita na bancada com Fragmentos Estelares. Nasce vazia (carga 0)
+ * e só se enche com o Ritual da Bateria (terra/RitualBateria): de noite, sob o céu, sobre um bloco de ametista,
+ * com quatro velas acesas nos cantos. Carregada (carga 3), clique nela com o Anel Apagado: ela se parte, o anel
+ * desperta e escolhe sozinho uma das Tropas para o portador.
  */
 public class ChiseledBatteryBlock extends HorizontalDirectionalBlock {
+
+    /** 0 vazia, 1 e 2 durante o ritual, 3 carregada. */
+    public static final net.minecraft.world.level.block.state.properties.IntegerProperty CARGA =
+            net.minecraft.world.level.block.state.properties.IntegerProperty.create("carga", 0, 3);
 
     private static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 15, 13);
 
     public ChiseledBatteryBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, net.minecraft.core.Direction.NORTH));
+        registerDefaultState(stateDefinition.any().setValue(FACING, net.minecraft.core.Direction.NORTH).setValue(CARGA, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, CARGA);
     }
 
     @Override
@@ -52,12 +57,23 @@ public class ChiseledBatteryBlock extends HorizontalDirectionalBlock {
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getItemInHand(hand);
+        int carga = state.getValue(CARGA);
+        if (held.is(com.lanterna.registry.ModItems.FRAGMENTO_ESTELAR.get()) && carga == 0) {
+            if (level.isClientSide) return InteractionResult.SUCCESS;
+            com.lanterna.terra.RitualBateria.iniciar((ServerPlayer) player, pos, held);
+            return InteractionResult.CONSUME;
+        }
         if (!(held.getItem() instanceof DormantRingItem)) {
             if (!level.isClientSide && hand == InteractionHand.MAIN_HAND)
-                player.displayClientMessage(Component.translatable("message.lanterna.chiseled_battery_hint"), true);
+                player.displayClientMessage(Component.translatable(carga == 3 ? "message.lanterna.chiseled_battery_hint"
+                        : carga == 0 ? "message.lanterna.bateria_vazia" : "message.lanterna.bateria_ritual"), true);
             return InteractionResult.PASS;
         }
         if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (carga < 3) {
+            player.displayClientMessage(Component.translatable(carga == 0 ? "message.lanterna.bateria_vazia" : "message.lanterna.bateria_ritual"), true);
+            return InteractionResult.CONSUME;
+        }
         DormantRingItem.awaken((ServerPlayer) player, held, pos);
         return InteractionResult.CONSUME;
     }

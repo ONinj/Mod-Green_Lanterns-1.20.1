@@ -1,18 +1,63 @@
 {
   "variants": {
-    "facing=north": {
+    "carga=0,facing=north": {
       "model": "lanterna:block/battery/bateria_cinzelada"
     },
-    "facing=east": {
+    "carga=0,facing=east": {
       "model": "lanterna:block/battery/bateria_cinzelada",
       "y": 90
     },
-    "facing=south": {
+    "carga=0,facing=south": {
       "model": "lanterna:block/battery/bateria_cinzelada",
       "y": 180
     },
-    "facing=west": {
+    "carga=0,facing=west": {
       "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 270
+    },
+    "carga=1,facing=north": {
+      "model": "lanterna:block/battery/bateria_cinzelada"
+    },
+    "carga=1,facing=east": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 90
+    },
+    "carga=1,facing=south": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 180
+    },
+    "carga=1,facing=west": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 270
+    },
+    "carga=2,facing=north": {
+      "model": "lanterna:block/battery/bateria_cinzelada"
+    },
+    "carga=2,facing=east": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 90
+    },
+    "carga=2,facing=south": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 180
+    },
+    "carga=2,facing=west": {
+      "model": "lanterna:block/battery/bateria_cinzelada",
+      "y": 270
+    },
+    "carga=3,facing=north": {
+      "model": "lanterna:block/battery/bateria_cinzelada_carregada"
+    },
+    "carga=3,facing=east": {
+      "model": "lanterna:block/battery/bateria_cinzelada_carregada",
+      "y": 90
+    },
+    "carga=3,facing=south": {
+      "model": "lanterna:block/battery/bateria_cinzelada_carregada",
+      "y": 180
+    },
+    "carga=3,facing=west": {
+      "model": "lanterna:block/battery/bateria_cinzelada_carregada",
       "y": 270
     }
   }

@@ -11,7 +11,8 @@ public final class LoreRenderers {
 
     public static void register(EntityRenderersEvent.RegisterRenderers event) {
         for (Race r : Race.values()) {
-            event.registerEntityRenderer(LoreEntities.typeOf(r), ctx -> new LoreRenderer<>(ctx, r.id, 1.0f, r.translucent));
+            if (r == Race.TERRANO) event.registerEntityRenderer(LoreEntities.typeOf(r), TerranoRenderer::new);
+            else event.registerEntityRenderer(LoreEntities.typeOf(r), ctx -> new LoreRenderer<>(ctx, r.id, 1.0f, r.translucent));
         }
         event.registerEntityRenderer(LoreEntities.ECO_CINZENTO.get(), ctx -> new LoreRenderer<>(ctx, "eco_cinzento", 1.0f, true));
         event.registerEntityRenderer(LoreEntities.BROTO.get(), ctx -> new LoreRenderer<>(ctx, "broto", 1.0f, false));

@@ -2995,6 +2995,93 @@ public final class DevAutoTest {
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
 
+
+    private static volatile boolean FLAG_T;
+
+    private static void sceneTerra() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("time set 6000"); });
+        at(20, () -> server(sp -> glog("centro=" + com.lanterna.terra.TerraSite.centro + " pronta=" + com.lanterna.terra.TerraSite.pronta(sp.server))));
+        at(10, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; sp.teleportTo(sp.server.overworld(), c.getX() - 26.5, c.getY() + 18, c.getZ() + 0.5, -90, 20); }));
+        waitFor(() -> mc.level.dimension().equals(net.minecraft.world.level.Level.OVERWORLD), 600);
+        waitFor(() -> { server(sp -> FLAG_T = com.lanterna.terra.TerraSite.pronta(sp.server)); return FLAG_T; }, 20000);
+        at(200, () -> { mc.options.hideGui = true; shot("terra_vila"); });
+        at(5, () -> server(sp -> {
+            var c = com.lanterna.terra.TerraSite.centro;
+            var l = sp.serverLevel();
+            var npcs = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(c).inflate(60));
+            StringBuilder b = new StringBuilder();
+            for (var n : npcs) b.append(n.role()).append("/").append(n.getCustomName() == null ? "?" : n.getCustomName().getString()).append(" ");
+            glog("npcs=" + npcs.size() + " " + b);
+            sp.teleportTo(l, c.getX() + 8.5, c.getY() + 1, c.getZ() + 3.5, -100, 0);
+        }));
+        at(40, () -> shot("terra_observatorio"));
+        // missões
+        at(5, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            for (String k : new java.util.ArrayList<>(d.active().keySet())) if (k.startsWith("terra_")) d.active().remove(k);
+            d.completed().removeIf(k -> k.startsWith("terra_"));
+            for (String f : new String[]{"terra:anel", "terra:ritual", "terra:despertou"}) com.lanterna.fonte.FonteDados.chamado(sp, f, 0);
+            com.lanterna.mission.MissionManager.start(sp, "terra_1");
+            var rui = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(80), e -> e.role().equals("seguranca"));
+            if (!rui.isEmpty()) com.lanterna.lore.entity.NpcDialogs.open(sp, rui.get(0));
+        }));
+        at(30, () -> { mc.options.hideGui = false; shot("terra_dialogo_rui"); });
+        at(5, () -> { mc.setScreen(null); server(sp -> glog("apos rui ativos=" + com.lanterna.mission.MissionManager.data(sp).active().keySet())); });
+        at(5, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; sp.teleportTo(sp.serverLevel(), c.getX() + 20.5, c.getY() - 14, c.getZ() + 9.5, 120, 10); }));
+        at(40, () -> { mc.options.hideGui = true; shot("terra_base"); });
+        at(5, () -> server(sp -> {
+            var liv = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(40), e -> e.role().equals("cientista"));
+            glog("livia perto=" + liv.size());
+            if (!liv.isEmpty()) com.lanterna.lore.entity.NpcDialogs.open(sp, liv.get(0));
+        }));
+        at(30, () -> { mc.options.hideGui = false; shot("terra_dialogo_livia"); });
+        at(5, () -> { mc.setScreen(null); server(sp -> glog("apos livia ativos=" + com.lanterna.mission.MissionManager.data(sp).active().keySet())); });
+        // meteoro
+        at(5, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; sp.teleportTo(sp.serverLevel(), c.getX() - 60.5, c.getY() + 30, c.getZ() + 0.5, -90, 15); }));
+        at(5, () -> cmd("time set 18000"));
+        at(60, () -> server(sp -> glog("meteoro lancado=" + com.lanterna.terra.Meteoros.lancar(sp))));
+        at(30, () -> { mc.options.hideGui = true; shot("terra_meteoro_caindo"); });
+        at(40, () -> server(sp -> {
+            int n = 0; net.minecraft.core.BlockPos achou = null;
+            for (var b : net.minecraft.core.BlockPos.betweenClosed(sp.blockPosition().offset(-100, -60, -100), sp.blockPosition().offset(100, 20, 100)))
+                if (sp.serverLevel().getBlockState(b).is(com.lanterna.registry.ModBlocks.ROCHA_ESTELAR.get())) { n++; achou = b.immutable(); }
+            glog("rochas=" + n + " em " + achou + " contaminados=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(120), m -> m.getPersistentData().getBoolean("lanterna_contaminado")).size());
+            if (achou != null) sp.teleportTo(sp.serverLevel(), achou.getX() + 6.5, achou.getY() + 4, achou.getZ() + 6.5, 135, 30);
+        }));
+        at(40, () -> shot("terra_cratera"));
+        // ritual no altar de ensaio
+        at(5, () -> server(sp -> {
+            var c = com.lanterna.terra.TerraSite.centro;
+            var l = sp.serverLevel();
+            for (var m : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150), m -> m.getPersistentData().getBoolean("lanterna_contaminado"))) m.discard();
+            var a = c.offset(22, 0, -11);
+            l.setBlockAndUpdate(a, com.lanterna.registry.ModBlocks.CHISELED_BATTERY.get().defaultBlockState());
+            sp.teleportTo(l, a.getX() + 0.5, a.getY(), a.getZ() + 2.5, 180, 20);
+            cmd("gamemode survival"); cmd("effect give @s resistance 600 4 true"); cmd("effect give @s regeneration 600 3 true");
+        }));
+        at(20, () -> server(sp -> {
+            var a = com.lanterna.terra.TerraSite.centro.offset(22, 0, -11);
+            var frag = new net.minecraft.world.item.ItemStack(com.lanterna.registry.ModItems.FRAGMENTO_ESTELAR.get(), 2);
+            com.lanterna.terra.RitualBateria.iniciar(sp, a, frag);
+            glog("ritual em andamento=" + com.lanterna.terra.RitualBateria.emAndamento(a) + " frag=" + frag.getCount());
+        }));
+        at(200, () -> { mc.options.hideGui = false; shot("terra_ritual"); });
+        at(1, () -> FLAG_T = false);
+        waitFor(() -> false, 1050);
+        at(1, () -> server(sp -> glog("ritual 1050 ticks: carga=" + sp.serverLevel().getBlockState(com.lanterna.terra.TerraSite.centro.offset(22, 0, -11)).getValue(com.lanterna.block.ChiseledBatteryBlock.CARGA)
+                + " andamento=" + com.lanterna.terra.RitualBateria.emAndamento(com.lanterna.terra.TerraSite.centro.offset(22, 0, -11)))));
+        waitFor(() -> false, 200);
+        at(5, () -> mc.options.keyShift.setDown(true));
+        at(130, () -> { mc.options.keyShift.setDown(false); shot("terra_ritual_fim"); server(sp -> {
+            var a = com.lanterna.terra.TerraSite.centro.offset(22, 0, -11);
+            glog("ritual fim: carga=" + sp.serverLevel().getBlockState(a).getValue(com.lanterna.block.ChiseledBatteryBlock.CARGA) + " flag=" + com.lanterna.fonte.FonteDados.chamado(sp, "terra:ritual") + " vivo=" + sp.isAlive());
+        }); });
+        at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
+    }
+
     private static void sceneNaves2() {
         Minecraft mc = Minecraft.getInstance();
         java.util.UUID[] minha = {null};
@@ -3464,6 +3551,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("inclina2")) sceneInclina2();
         else if (ENABLED && SCENE.equals("cajado")) sceneCajado();
         else if (ENABLED && SCENE.equals("favores")) sceneFavores();
+        else if (ENABLED && SCENE.equals("terra")) sceneTerra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

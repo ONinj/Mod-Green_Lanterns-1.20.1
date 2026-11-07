@@ -69,6 +69,7 @@ public class DormantRingItem extends Item {
         BuiltinCorps corps = random(player.getRandom());
         if (!SelectionManager.startSelection(player, corps.id(), "dormant")) return false;
         ring.shrink(1);
+        com.lanterna.fonte.FonteDados.chamado(player, "terra:despertou", 1);
 
         // A bateria se parte e a energia pura corre até o anel
         var state = level.getBlockState(batteryPos);

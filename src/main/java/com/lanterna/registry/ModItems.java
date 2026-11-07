@@ -25,6 +25,16 @@ public final class ModItems {
             () -> new com.lanterna.item.CompassionStaffItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 
     /** Anel Apagado: achado na cratera do Anel Caído; acende com a bateria da sua Tropa. */
+    public static final RegistryObject<Item> ROCHA_ESTELAR = ITEMS.register("rocha_estelar",
+            () -> new net.minecraft.world.item.BlockItem(ModBlocks.ROCHA_ESTELAR.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final RegistryObject<Item> FRAGMENTO_ESTELAR = ITEMS.register("fragmento_estelar",
+            () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON)) {
+                @Override
+                public void appendHoverText(net.minecraft.world.item.ItemStack s, @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level l,
+                                            java.util.List<net.minecraft.network.chat.Component> t, net.minecraft.world.item.TooltipFlag f) {
+                    t.add(net.minecraft.network.chat.Component.translatable("tooltip.lanterna.fragmento_estelar").withStyle(net.minecraft.ChatFormatting.GRAY));
+                }
+            });
     public static final RegistryObject<Item> DORMANT_RING = ITEMS.register("anel_apagado",
             () -> new com.lanterna.item.DormantRingItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));
 

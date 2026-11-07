@@ -51,6 +51,14 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
         float grow = EnergyShapes.entrada(age, 5f);
         Vec3 origin = new Vec3(Mth.lerp(pt, e.xo, e.getX()), Mth.lerp(pt, e.yo, e.getY()), Mth.lerp(pt, e.zo, e.getZ()));
         LivingEntity owner = e.owner();
+        // escudo e lâminas que acompanham o dono: desenha colado na posição suavizada do dono (a posição da entidade
+        // vem do servidor com atraso e dava "pulinhos" enquanto o jogador andava)
+        boolean colado = owner != null && (e.kind() == ConstructEntity.Kind.BLADE || (e.kind() == ConstructEntity.Kind.SHIELD && e.scale() < 2.5f));
+        if (colado) {
+            Vec3 dono = owner.getPosition(pt);
+            pose.pushPose();
+            pose.translate(dono.x - origin.x, dono.y - origin.y, dono.z - origin.z);
+        }
         switch (e.kind()) {
             case BEAM -> beam(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt);
             case HAMMER -> hammer(e, pose, body, glow, color, gc, age, alpha, s);
@@ -191,6 +199,7 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
             case DOOR -> door(e, pose, body, glow, color, gc, age, life);
             case FORMA -> FormaRender.render(e, pose, body, glow, color, age, alpha, origin, owner, pt);
         }
+        if (colado) pose.popPose();
     }
 
     // ===================== Laser do punho =====================

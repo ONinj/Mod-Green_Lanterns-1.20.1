@@ -408,7 +408,10 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "move", 5, state -> state.setAndContinue(moveAnim(state.isMoving()))));
+        controllers.add(new AnimationController<>(this, "move", 5, state -> {
+            state.getController().setAnimationSpeed(state.isMoving() ? com.lanterna.lore.entity.Passos.ritmo(state.getLimbSwingAmount()) : 1.0);
+            return state.setAndContinue(moveAnim(state.isMoving()));
+        }));
         AnimationController<LoreBoss> attack = new AnimationController<>(this, "attack", 0, state -> PlayState.STOP);
         attack.triggerableAnim("strike", RawAnimation.begin().thenPlay("attack.strike"));
         for (String a : extraAnims()) attack.triggerableAnim(a, RawAnimation.begin().thenPlay(animName(a)));

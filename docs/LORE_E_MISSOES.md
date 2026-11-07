@@ -821,3 +821,43 @@ dos quadrinhos, sem copiar as frases): Verde (vontade), Amarelo (medo), Vermelho
 Azul (esperança), Índigo (compaixão), Violeta (amor), Preto (morte) e Branco (vida).
 - Aparece no chat, na cor da Tropa, toda vez que o anel é recarregado (bateria, R, cajado).
 - É o mesmo texto que se recita em voz alta na Bateria Central (primeira missão do anel).
+
+
+## 0.32 — A Terra: Vila Aurora e a Base Vigília
+
+### O começo da história (antes do anel)
+Uma vila pequena, a Vila Aurora, é construída uma vez por mundo a uns 300 blocos do ponto de nascimento, em terreno
+firme. Tem praça com fonte, seis casas, moradores, e um observatório branco com cúpula na ponta leste. Embaixo do
+observatório (alçapão no centro da torre) fica a Base Vigília, laboratório escondido da Dra. Lívia Andrade, que rastreia
+o que cai do céu. No terraço ao lado do observatório há um altar de ensaio do Ritual da Bateria.
+
+Personagens (humanos, modelo de jogador com skins próprias): Dra. Lívia Andrade (cientista), Téo Brandão (assistente),
+Sgt. Rui Tavares (segurança) e cinco moradores. Se morrerem, voltam ao posto quando alguém passa pela vila.
+
+Linha "terra" (jogador novo, sem anel, recebe a primeira sozinha; os moradores também oferecem):
+1. **Luzes sobre Aurora**: falar com o Sgt. Rui na porta do observatório.
+2. **A Base Vigília**: descer pelo alçapão e falar com a Dra. Lívia (ganha picareta de ferro e escudo).
+3. **Estrelas Cadentes**: de noite, estrelas caem perto do jogador (uma por minuto, mais ou menos) abrindo crateras
+   com uma Rocha Estelar (picareta de ferro; dá 1 a 2 Fragmentos Estelares) e trazendo Contaminados (zumbis
+   brilhando, mais fortes). Juntar 3 fragmentos (ela devolve 4 e um bloco de ametista).
+4. **O Sinal**: a Dra. Lívia dá um mapa da cratera do anel caído; pegar o Anel Apagado.
+5. **O Ritual da Bateria**: fazer a Bateria Cinzelada e carregá-la no ritual.
+6. **O Anel Escolhe**: encostar o Anel Apagado na bateria carregada. O anel escolhe a Tropa e começa a linha dela
+   (juramento na Bateria Central).
+Fora da missão, estrelas cadentes ainda caem de vez em quando à noite (fragmentos nunca acabam).
+
+### Bateria Cinzelada (mais difícil)
+- Receita: 2 Fragmentos Estelares, 1 bloco de ametista, 2 obsidianas, 1 lanterna, 2 pedras cinzeladas e 1 lingote de ouro.
+- Ela nasce vazia. **Ritual da Bateria**, em 3 etapas:
+  1. Altar: de noite, a céu aberto, a bateria sobre um bloco de ametista, com 4 velas acesas nos cantos (2 blocos na
+     diagonal, mesma altura). Clique nela com um Fragmento Estelar.
+  2. Carga (1 minuto): coluna de luz do céu e 3 ondas de Contaminados. Ficar a até 24 blocos.
+  3. Vontade: agachar do lado dela (até 3 blocos) por 5 segundos.
+  Falha (amanhecer, morrer, se afastar, quebrar) apaga as velas e perde o fragmento. Pronta, ela brilha dourada.
+- Só a bateria carregada acorda o Anel Apagado.
+
+### Animações
+- Escudo de força: desenhado colado na posição suave do dono (não dá mais "pulinhos" ao andar).
+- Criaturas, povos e chefes: a animação de andar acompanha a velocidade real (pés não patinam), ciclos de andar com
+  balanço do corpo, giro do tronco e cabeça estabilizada; respiração no parado; golpes e especiais com curvas
+  suaves (Catmull-Rom) no lugar de movimentos lineares. Lanternas NPC com ações suavizadas.

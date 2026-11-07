@@ -716,7 +716,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             case AELINOS -> SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM;
             case VES_KAI -> SoundEvents.SOUL_ESCAPE;
             case ZAELITH -> SoundEvents.AMETHYST_BLOCK_CHIME;
-            case SILENTE, COLETOR -> null;
+            case SILENTE, COLETOR, TERRANO -> null;
         };
     }
 
@@ -727,6 +727,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             case SKRELL_VATH -> SoundEvents.SPIDER_HURT;
             case ZAELITH, AELINOS -> SoundEvents.AMETHYST_BLOCK_HIT;
             case SILENTE, COLETOR -> SoundEvents.SKELETON_HURT;
+            case TERRANO -> SoundEvents.PLAYER_HURT;
             default -> SoundEvents.WANDERING_TRADER_HURT;
         };
     }
@@ -821,7 +822,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 4,
-                state -> state.setAndContinue(state.isMoving() && !hasFlag(KNEEL) ? WALK : IDLE)));
+                state -> Passos.andar(state, WALK, IDLE, state.isMoving() && !hasFlag(KNEEL))));
         controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
                 .triggerableAnim("strike", STRIKE));
     }
