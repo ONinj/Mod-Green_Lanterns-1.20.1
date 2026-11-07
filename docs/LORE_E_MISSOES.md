@@ -886,5 +886,17 @@ Comportamentos (cada um com as animações prontas: montar a partir da base com 
   impacto (dano grande em área).
 - **Veículo** (60 s): você monta; W/S anda, olhe para virar; flutua, inclina nas curvas e atropela.
 - **Estrutura** (15 s): sobe do chão onde você mira; segura flechas e empurra inimigos.
-Usar de novo a arma, o escudo ou o veículo desfaz. Custo de carga = base do comportamento + 1 a cada 30 cubinhos.
+Usar de novo a arma, o escudo ou o veículo desfaz. Custo de carga = base do comportamento + 1 a cada 120 cubinhos.
 O desenho é sincronizado: todo mundo por perto vê o mesmo construto.
+
+## 0.34 — Oficina: forma lisa e animações novas
+- A grade agora é 32×32×32 (cubinhos com metade do tamanho, até 4000). Desenhos antigos são ampliados sozinhos.
+- **Liso** (padrão, tecla L): a peça vira uma superfície contínua por cima dos cubinhos, sem degraus. Desligado,
+  volta ao estilo de blocos com contorno.
+- **Pincel** 1, 2 ou 3 cubinhos de lado (teclas [ e ]).
+- Os construtos ganharam luz: sombra pela direção da face, borda acesa contra o olhar, reflexo e halo; a cor do
+  anel fica viva (antes saíam esbranquiçados).
+- Animações: fio de luz da mão até a peça e faixa de luz subindo enquanto monta; cópias de luz no golpe da arma e
+  atrás do disparo; rastro de velocidade, quique e onda de choque na queda do céu; propulsores no veículo;
+  ao desmontar uma faixa apaga a peça e ela estilhaça em faíscas.
+- Modelos prontos refeitos com formas arredondadas (espada, machado, escudo, flecha, martelo, carro, muralha).

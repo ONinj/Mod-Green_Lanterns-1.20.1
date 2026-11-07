@@ -3109,6 +3109,8 @@ public final class DevAutoTest {
         at(10, () -> shot("oficina_editor_carro"));
         at(2, () -> { if (mc.screen instanceof com.lanterna.client.oficina.OficinaScreen o) { o.carregar(com.lanterna.construct.oficina.Modelos.TODOS.get("martelo").get()); o.testar(true); } });
         at(12, () -> shot("oficina_editor_teste"));
+        at(2, () -> { if (mc.screen instanceof com.lanterna.client.oficina.OficinaScreen o) { o.testar(false); var p = com.lanterna.construct.oficina.Modelos.TODOS.get("espada").get(); p.liso = false; o.carregar(p); } });
+        at(10, () -> shot("oficina_editor_quadrado"));
         at(2, () -> mc.setScreen(null));
         at(10, () -> glog("meus=" + java.util.Arrays.stream(com.lanterna.client.oficina.OficinaCliente.MEUS).map(p -> p == null ? "-" : p.nome + "/" + p.comp + "/" + p.quantos()).toList()));
         // no mundo
@@ -3117,15 +3119,20 @@ public final class DevAutoTest {
         at(14, () -> shot("oficina_arma"));
         at(2, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.construct.oficina.MeusConstrutos.Golpe()));
         at(3, () -> shot("oficina_arma_golpe"));
-        at(10, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 0)));
+        at(14, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(4, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.construct.oficina.MeusConstrutos.Golpe()));
+        at(3, () -> shot("oficina_arma_golpe_costas"));
+        at(14, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 0)); });
         at(15, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 1)));
-        at(14, () -> shot("oficina_escudo"));
+        at(4, () -> shot("oficina_escudo_montando"));
+        at(10, () -> shot("oficina_escudo"));
         at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> { com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 1); }); });
         at(10, () -> { mc.player.setXRot(2); server(sp -> { sp.setXRot(2); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 2); }); });
         at(3, () -> shot("oficina_flecha"));
         at(20, () -> { mc.player.setXRot(8); server(sp -> { sp.setXRot(8); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 3); }); });
         at(22, () -> shot("oficina_martelo_alto"));
         at(7, () -> shot("oficina_martelo_queda"));
+        at(3, () -> shot("oficina_martelo_onda"));
         at(30, () -> { mc.player.setXRot(10); server(sp -> { sp.setXRot(10); com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 5); }); });
         at(20, () -> shot("oficina_muralha"));
         at(20, () -> server(sp -> com.lanterna.construct.oficina.MeusConstrutos.lancar(sp, 4)));

@@ -7,21 +7,25 @@ import net.minecraft.util.Mth;
 import java.util.Arrays;
 
 /**
- * Um construto desenhado pelo jogador: cubinhos numa grade de 16x16x16 (x, y, z de 0 a 15; o "chão" do desenho é
- * y = 0 e o meio é x = z = 7,5), cada um com um tom (0 = cor do anel, 1 = mais claro, 2 = mais escuro, 3 = branco).
+ * Um construto desenhado pelo jogador: cubinhos numa grade de 32x32x32 (x, y, z de 0 a 31; o "chão" do desenho é
+ * y = 0 e o meio é x = z = 15,5), cada um com um tom (0 = cor do anel, 1 = mais claro, 2 = mais escuro, 3 = branco).
+ * Liso (o normal): no mundo a forma vira uma superfície lisa de luz sólida; desligado, fica em cubinhos.
  *
  * A frente do desenho é -Z (o lado que fica virado para o alvo/para onde se olha). Numa arma, a mão segura o
  * desenho na parte de baixo (y = 0, no meio).
  */
 public final class Projeto {
-    public static final int N = 16;
-    public static final int MAX = 900;
+    public static final int N = 32;
+    public static final int MEIO = N / 2;
+    public static final int MAX = 4000;
     public static final int SLOTS = 8;
 
     public String nome = "";
     public Comportamento comp = Comportamento.ARMA;
     /** Escala (0,5 a 2). */
     public float escala = 1f;
+    /** Superfície lisa (true) ou cubinhos (false). */
+    public boolean liso = true;
     /** x,y,z,tom por cubinho. */
     private byte[] cel = new byte[N * N * N];
     private int quantos;
@@ -33,6 +37,7 @@ public final class Projeto {
         p.nome = nome;
         p.comp = comp;
         p.escala = escala;
+        p.liso = liso;
         p.cel = cel.clone();
         p.quantos = quantos;
         return p;
@@ -93,16 +98,16 @@ public final class Projeto {
 
     /** Tamanho de um cubinho no mundo. */
     public float bloco() {
-        return comp.tamanhoBloco * Mth.clamp(escala, 0.5f, 2f);
+        return comp.tamanhoBloco * 0.5f * Mth.clamp(escala, 0.5f, 2f);
     }
 
     public int custo() {
-        return comp.custoBase + quantos / 30;
+        return comp.custoBase + quantos / 120;
     }
 
     /** Assinatura simples (para o cache da malha). */
     public int assinatura() {
-        return Arrays.hashCode(cel) * 31 + comp.ordinal();
+        return (Arrays.hashCode(cel) * 31 + comp.ordinal()) * 2 + (liso ? 1 : 0);
     }
 
     // ===================== Gravar =====================
@@ -130,6 +135,8 @@ public final class Projeto {
         t.putInt("comp", comp.ordinal());
         t.putFloat("escala", escala);
         t.putByteArray("cubos", compactar());
+        t.putInt("n", N);
+        t.putBoolean("quadrado", !liso);
         return t;
     }
 
@@ -139,14 +146,25 @@ public final class Projeto {
         if (p.nome.length() > 24) p.nome = p.nome.substring(0, 24);
         p.comp = Comportamento.of(t.getInt("comp"));
         p.escala = t.contains("escala") ? Mth.clamp(t.getFloat("escala"), 0.5f, 2f) : 1f;
-        p.descompactar(t.getByteArray("cubos"));
+        p.liso = !t.getBoolean("quadrado");
+        if (t.getInt("n") == 16 || !t.contains("n")) p.ampliarDe16(t.getByteArray("cubos"));
+        else p.descompactar(t.getByteArray("cubos"));
         return p;
+    }
+
+    /** Desenhos da versão de 16x16x16: cada cubinho vira 2x2x2. */
+    private void ampliarDe16(byte[] b) {
+        limpar();
+        for (int i = 0; i + 3 < b.length; i += 4)
+            for (int dx = 0; dx < 2; dx++) for (int dy = 0; dy < 2; dy++) for (int dz = 0; dz < 2; dz++)
+                set(b[i] * 2 + dx, b[i + 1] * 2 + dy, b[i + 2] * 2 + dz, Mth.clamp(b[i + 3], 1, 4));
     }
 
     public void escrever(FriendlyByteBuf b) {
         b.writeUtf(nome, 32);
         b.writeVarInt(comp.ordinal());
         b.writeFloat(escala);
+        b.writeBoolean(liso);
         b.writeByteArray(compactar());
     }
 
@@ -155,6 +173,7 @@ public final class Projeto {
         p.nome = b.readUtf(32);
         p.comp = Comportamento.of(b.readVarInt());
         p.escala = Mth.clamp(b.readFloat(), 0.5f, 2f);
+        p.liso = b.readBoolean();
         p.descompactar(b.readByteArray(MAX * 4 + 16));
         return p;
     }

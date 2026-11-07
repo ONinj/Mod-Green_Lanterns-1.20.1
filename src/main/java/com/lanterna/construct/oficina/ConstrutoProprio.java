@@ -122,7 +122,8 @@ public class ConstrutoProprio extends Entity {
         int[] b = projeto.limites();
         float k = projeto.bloco();
         if (b == null) return new float[]{-0.25f, 0, -0.25f, 0.25f, 0.5f, 0.25f};
-        return new float[]{(b[0] - 8f) * k, b[1] * k, (b[2] - 8f) * k, (b[3] - 7f) * k, (b[4] + 1) * k, (b[5] - 7f) * k};
+        int m = Projeto.MEIO;
+        return new float[]{(b[0] - m) * k, b[1] * k, (b[2] - m) * k, (b[3] + 1 - m) * k, (b[4] + 1) * k, (b[5] + 1 - m) * k};
     }
 
     @Override
@@ -160,11 +161,30 @@ public class ConstrutoProprio extends Entity {
                 ejectPassengers();
                 level().playSound(null, blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 0.8f, 1.4f);
             }
-        } else if (idade < MONTAR && idade % 2 == 0) {
-            float[] c = caixaLocal();
-            level().addParticle(GlowOrbOptions.of(cor(), 0.08f), getX(), getY() + (c[4] + c[1]) / 2, getZ(), 0, 0.02, 0);
+        } else {
+            if (idade < MONTAR && idade % 2 == 0) {
+                float[] c = caixaLocal();
+                level().addParticle(GlowOrbOptions.of(cor(), 0.08f), getX(), getY() + (c[4] + c[1]) / 2, getZ(), 0, 0.02, 0);
+            }
+            if (comp() == Comportamento.QUEDA && pousou < 0 && getY() <= alvoY() + 0.01) pousou = idade;
+            // desmontar: estilhaça em faíscas que se espalham e sobem
+            if (!estilhacou && idade >= vida()) {
+                estilhacou = true;
+                float[] c = caixaLocal();
+                int n = Mth.clamp((int) ((c[3] - c[0]) * (c[4] - c[1]) * (c[5] - c[2]) * 30), 10, 40);
+                for (int i = 0; i < n; i++) {
+                    double x = Mth.lerp(random.nextDouble(), c[0], c[3]), y = Mth.lerp(random.nextDouble(), c[1], c[4]), z = Mth.lerp(random.nextDouble(), c[2], c[5]);
+                    double cx = (c[0] + c[3]) / 2, cy = (c[1] + c[4]) / 2, cz = (c[2] + c[5]) / 2;
+                    level().addParticle(GlowOrbOptions.of(cor(), 0.05f + random.nextFloat() * 0.06f), getX() + x, getY() + y, getZ() + z,
+                            (x - cx) * 0.12, (y - cy) * 0.1 + 0.03, (z - cz) * 0.12);
+                }
+            }
         }
     }
+
+    /** Só no cliente: quando a queda bateu no chão (para a onda de choque) e se já estilhaçou. */
+    public float pousou = -1;
+    private boolean estilhacou;
 
     /** Termina já (desmonta). */
     public void acabar() {

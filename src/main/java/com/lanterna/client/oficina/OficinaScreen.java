@@ -50,6 +50,7 @@ public class OficinaScreen extends Screen {
     private int tom;
     private boolean espelho = true;
     private int camada;
+    private int pincel = 1;
     private float yaw = -35, pitch = 24, zoom = 0;
     private final Deque<Projeto> desfazer = new ArrayDeque<>(), refazer = new ArrayDeque<>();
     private int[] caixaInicio;
@@ -90,7 +91,7 @@ public class OficinaScreen extends Screen {
         vx1 = dir - 8;
         vy0 = 22;
         vy1 = height - 4;
-        if (zoom <= 0) zoom = Math.max(4, Math.min((vx1 - vx0), (vy1 - vy0)) / 30f);
+        if (zoom <= 0) zoom = Math.max(4, Math.min((vx1 - vx0), (vy1 - vy0)) / 58f);
         int bw = (larguraEsq - 4) / 2;
         int y = 24;
         yFerr = y; y += 10;
@@ -113,9 +114,13 @@ public class OficinaScreen extends Screen {
         addRenderableWidget(new Botao(esq, y, bw, h, Component.translatable("oficina.lanterna.camada_menos"), () -> false, () -> camada = Math.max(0, camada - 1)));
         addRenderableWidget(new Botao(esq + bw + 4, y, bw, h, Component.translatable("oficina.lanterna.camada_mais"), () -> false, () -> camada = Math.min(Projeto.N - 1, camada + 1)));
         y += p;
-        addRenderableWidget(new Botao(esq, y, larguraEsq, h, Component.translatable("oficina.lanterna.limpar"), () -> false, () -> {
+        addRenderableWidget(new Botao(esq, y, bw, h, Component.translatable("oficina.lanterna.limpar"), () -> false, () -> {
             guardar();
             proj.limpar();
+        }));
+        addRenderableWidget(new Botao(esq + bw + 4, y, bw, h, Component.translatable("oficina.lanterna.liso"), () -> proj.liso, () -> {
+            guardar();
+            proj.liso = !proj.liso;
         }));
         y += p + 4;
         yModelos = y; y += 10;
@@ -268,7 +273,7 @@ public class OficinaScreen extends Screen {
     private Matrix4f modelo() {
         float cx = (vx0 + vx1) / 2f, cy = (vy0 + vy1) / 2f + 10;
         return new Matrix4f().translate(cx, cy, 400).scale(zoom, -zoom, zoom)
-                .rotateX((float) Math.toRadians(pitch)).rotateY((float) Math.toRadians(yaw)).translate(-8, -6, -8);
+                .rotateX((float) Math.toRadians(pitch)).rotateY((float) Math.toRadians(yaw)).translate(-Projeto.MEIO, -12, -Projeto.MEIO);
     }
 
     private record Alvo(int x, int y, int z, int nx, int ny, int nz, boolean cheio) {
@@ -304,7 +309,7 @@ public class OficinaScreen extends Screen {
             int nx = 0, ny = 0, nz = 0;
             // normal de entrada: pela face da grade
             float e0 = Math.min(Math.min(Math.abs(px), Math.abs(px - Projeto.N)), 99);
-            for (int passo = 0; passo < 64; passo++) {
+            for (int passo = 0; passo < 128; passo++) {
                 if (Projeto.dentro(x, y, z) && proj.tem(x, y, z)) return new Alvo(x, y, z, nx, ny, nz, true);
                 // cruza a camada de trabalho antes de achar cubo: coloca nela
                 if (tx < ty && tx < tz) { x += sx; tx += tdx; nx = -sx; ny = 0; nz = 0; }
@@ -347,9 +352,20 @@ public class OficinaScreen extends Screen {
         }
     }
 
+    /** Faixa do pincel em volta do ponto (1, 2 ou 3 cubinhos de lado). */
+    private int pincelDe() {
+        return -(pincel - 1) / 2;
+    }
+
     private void por(int x, int y, int z, int v) {
-        proj.set(x, y, z, v);
-        if (espelho) proj.set(Projeto.N - 1 - x, y, z, v);
+        int lo = pincelDe();
+        for (int dx = lo; dx < lo + pincel; dx++) for (int dy = lo; dy < lo + pincel; dy++) for (int dz = lo; dz < lo + pincel; dz++) {
+            int px = x + dx, py = y + dy, pz = z + dz;
+            if (!Projeto.dentro(px, py, pz)) continue;
+            if (v != 0 && !proj.tem(px, py, pz) && proj.quantos() >= Projeto.MAX) return;
+            proj.set(px, py, pz, v);
+            if (espelho) proj.set(Projeto.N - 1 - px, py, pz, v);
+        }
     }
 
     // ===================== Entrada =====================
@@ -413,7 +429,7 @@ public class OficinaScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mx, double my, double d) {
         if (mx >= vx0 && mx <= vx1 && my >= vy0 && my <= vy1) {
-            zoom = Mth.clamp(zoom * (d > 0 ? 1.12f : 1 / 1.12f), 2.5f, 40f);
+            zoom = Mth.clamp(zoom * (d > 0 ? 1.12f : 1 / 1.12f), 1.2f, 24f);
             return true;
         }
         return super.mouseScrolled(mx, my, d);
@@ -435,6 +451,9 @@ public class OficinaScreen extends Screen {
         if (key == GLFW.GLFW_KEY_E) { ferramenta = Ferramenta.BORRACHA; return true; }
         if (key == GLFW.GLFW_KEY_P) { ferramenta = Ferramenta.PINTAR; return true; }
         if (key == GLFW.GLFW_KEY_C) { ferramenta = Ferramenta.CAIXA; caixaInicio = null; return true; }
+        if (key == GLFW.GLFW_KEY_LEFT_BRACKET) { pincel = Math.max(1, pincel - 1); return true; }
+        if (key == GLFW.GLFW_KEY_RIGHT_BRACKET) { pincel = Math.min(3, pincel + 1); return true; }
+        if (key == GLFW.GLFW_KEY_L) { guardar(); proj.liso = !proj.liso; return true; }
         if (key == GLFW.GLFW_KEY_SPACE) { alternarTeste(); return true; }
         if (key == GLFW.GLFW_KEY_PAGE_UP || key == GLFW.GLFW_KEY_UP) { camada = Math.min(Projeto.N - 1, camada + 1); return true; }
         if (key == GLFW.GLFW_KEY_PAGE_DOWN || key == GLFW.GLFW_KEY_DOWN) { camada = Math.max(0, camada - 1); return true; }
@@ -470,7 +489,7 @@ public class OficinaScreen extends Screen {
             g.fill(x, y, x + 24, y + 14, 0xFF000000 | Malha.corTom(cor, t));
             Hud.textCenter(g, Hud.body(Component.literal(String.valueOf(t + 1))), x + 12, y + 3, t == 3 ? 0xFF202020 : 0xFFFFFFFF);
         }
-        g.drawString(font, Hud.body(Component.translatable("oficina.lanterna.camada", camada)), esq, yTons + 30, 0xFFB8C4CC, false);
+        g.drawString(font, Hud.body(Component.translatable("oficina.lanterna.camada_pincel", camada, pincel)), esq, yTons + 30, 0xFFB8C4CC, false);
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.nome")), dir, yNome, 0xFF9AA8B0, false);
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.comportamento")), dir, yComp, 0xFF9AA8B0, false);
         Hud.wrapped(g, Hud.body(proj.comp.descricao()), dir, yDesc, 152, 0xFFB8C4CC, 9);
@@ -520,27 +539,8 @@ public class OficinaScreen extends Screen {
         chao(bb, base, 0, 0x55FFFFFF);
         if (camada > 0 && !testando) chao(bb, base, camada, Hud.argb(cor, 70));
         seta(bb, base, cor);
-        // os cubinhos
-        Malha malha = Malha.de(proj);
-        for (Malha.Face f : malha.faces) {
-            if (f.ordem() > mostra) continue;
-            int c = Malha.corTom(cor, f.tom());
-            float sombra = f.d() == 3 ? 1f : f.d() == 2 ? 0.55f : (f.d() == 4 || f.d() == 5) ? 0.82f : 0.7f;
-            int cc = 0xFF000000 | ((int) (((c >> 16) & 255) * sombra) << 16) | ((int) (((c >> 8) & 255) * sombra) << 8) | (int) ((c & 255) * sombra);
-            float[][] q = Malha.cantos(f.x(), f.y(), f.z(), f.d());
-            quad(bb, m, q, cc);
-            // linhas de cada cubinho (fracas) e das bordas da forma (fortes)
-            for (int i = 0; i < 4; i++) {
-                boolean bordaForma = (f.bordas() & (1 << i)) != 0;
-                float w = bordaForma ? 0.1f : 0.04f;
-                int lc = bordaForma ? Hud.argb(com.lanterna.client.construct.EnergyShapes.clarear(cor, 0.6f), 255) : 0x40000000;
-                float[] p0 = q[i], p1 = q[(i + 1) % 4];
-                float[] mid = {(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2, (q[0][2] + q[2][2]) / 2};
-                float[] a0 = lerp(p0, mid, w * 2), a1 = lerp(p1, mid, w * 2);
-                float[] n = {Malha.DIR[f.d()][0] * 0.002f, Malha.DIR[f.d()][1] * 0.002f, Malha.DIR[f.d()][2] * 0.002f};
-                quad(bb, m, new float[][]{add(p0, n), add(p1, n), add(a1, n), add(a0, n)}, lc);
-            }
-        }
+        // a peça (lisa ou em cubinhos)
+        Malha.de(proj).desenharGui(bb, m, cor, mostra, true);
         // o cubinho fantasma debaixo do mouse
         if (!testando) {
             Alvo a = mirar(mx, my);
@@ -549,8 +549,9 @@ public class OficinaScreen extends Screen {
                         : (a.cheio() ? a.fora() : new int[]{a.x(), a.y(), a.z()});
                 if (c != null && Projeto.dentro(c[0], c[1], c[2])) {
                     int gc = ferramenta == Ferramenta.BORRACHA ? 0x90FF4040 : ferramenta == Ferramenta.PINTAR ? 0x90FFFF60 : 0x70FFFFFF;
-                    cubo(bb, base, c[0], c[1], c[2], c[0] + 1, c[1] + 1, c[2] + 1, gc, 0.03f);
-                    if (espelho && ferramenta != Ferramenta.CAIXA) cubo(bb, base, Projeto.N - 1 - c[0], c[1], c[2], Projeto.N - c[0], c[1] + 1, c[2] + 1, 0x40FFFFFF, 0.03f);
+                    int lo = ferramenta == Ferramenta.CAIXA ? 0 : pincelDe(), tam = ferramenta == Ferramenta.CAIXA ? 1 : pincel;
+                    cubo(bb, base, c[0] + lo, c[1] + lo, c[2] + lo, c[0] + lo + tam, c[1] + lo + tam, c[2] + lo + tam, gc, 0.03f);
+                    if (espelho && ferramenta != Ferramenta.CAIXA) cubo(bb, base, Projeto.N - c[0] - lo - tam, c[1] + lo, c[2] + lo, Projeto.N - c[0] - lo, c[1] + lo + tam, c[2] + lo + tam, 0x40FFFFFF, 0.03f);
                     if (ferramenta == Ferramenta.CAIXA && caixaInicio != null) {
                         cubo(bb, base, Math.min(c[0], caixaInicio[0]), Math.min(c[1], caixaInicio[1]), Math.min(c[2], caixaInicio[2]),
                                 Math.max(c[0], caixaInicio[0]) + 1, Math.max(c[1], caixaInicio[1]) + 1, Math.max(c[2], caixaInicio[2]) + 1, 0x40FFFFFF, 0.03f);
@@ -562,7 +563,7 @@ public class OficinaScreen extends Screen {
         RenderSystem.enableCull();
         RenderSystem.disableDepthTest();
         // rótulos (frente, mão, ...)
-        rotulo(g, base, 8, 0, -2.4f, Component.translatable("oficina.lanterna.frente"), cor);
+        rotulo(g, base, Projeto.MEIO, 0, -5f, Component.translatable("oficina.lanterna.frente"), cor);
         String dica = switch (proj.comp) {
             case ARMA -> "oficina.lanterna.dica.arma";
             case QUEDA -> "oficina.lanterna.dica.queda";
@@ -570,7 +571,7 @@ public class OficinaScreen extends Screen {
             case PROJETIL -> "oficina.lanterna.dica.projetil";
             default -> null;
         };
-        if (proj.comp == Comportamento.ARMA) rotulo(g, base, 8, -0.8f, 8, Component.translatable("oficina.lanterna.mao"), 0xFFFFFF);
+        if (proj.comp == Comportamento.ARMA) rotulo(g, base, Projeto.MEIO, -1.6f, Projeto.MEIO, Component.translatable("oficina.lanterna.mao"), 0xFFFFFF);
         if (dica != null) Hud.wrapped(g, Hud.body(Component.translatable(dica)), vx0 + 6, vy0 + 6, vx1 - vx0 - 12, 0xFF9AA8B0, 9);
         Hud.wrapped(g, Hud.body(Component.translatable("oficina.lanterna.atalhos")), vx0 + 6, vy1 - 30, vx1 - vx0 - 12, 0xFF6A747C, 9);
         if (testando) Hud.textCenter(g, Hud.bold(Component.translatable("oficina.lanterna.testando")), (vx0 + vx1) / 2, vy1 - 42, Hud.argb(cor, 255));
@@ -579,8 +580,9 @@ public class OficinaScreen extends Screen {
 
     /** Animação do teste, no espaço do desenho (unidades de cubinho). */
     private void animar(Matrix4f m, float t) {
+        final float C = Projeto.MEIO;
         int[] b = proj.limites();
-        float h = b == null ? 8 : b[4] + 1;
+        float h = b == null ? 16 : b[4] + 1;
         switch (proj.comp) {
             case ARMA -> {
                 float g = (t - 14) % 18;
@@ -588,23 +590,23 @@ public class OficinaScreen extends Screen {
                 if (t > 14 && g < 1.5f) { arco = Mth.lerp(g / 1.5f, 0, -80); deita = -50; }
                 else if (t > 14 && g < 4.5f) { float k = (g - 1.5f) / 3f; arco = Mth.lerp(k, -80, 72); deita = Mth.lerp(k, -50, -88); }
                 else if (t > 14 && g < 11) { float k = (g - 4.5f) / 6.5f; arco = Mth.lerp(k, 72, 0); deita = Mth.lerp(k, -88, -35); }
-                m.translate(8, 0, 8).rotateY((float) Math.toRadians(arco)).rotateX((float) Math.toRadians(deita)).translate(-8, 0, -8);
+                m.translate(C, 0, C).rotateY((float) Math.toRadians(arco)).rotateX((float) Math.toRadians(deita)).translate(-C, 0, -C);
             }
             case ESCUDO -> {
                 float p = 1 + 0.03f * Mth.sin(t * 0.25f);
-                m.translate(8, h / 2, 8).scale(p).translate(-8, -h / 2, -8);
+                m.translate(C, h / 2, C).scale(p).translate(-C, -h / 2, -C);
             }
-            case PROJETIL -> m.translate(8, h / 2, 8).rotateZ(t * 0.4f).translate(-8, -h / 2, -8).translate(0, 0, -((t * 0.8f) % 20) + 6);
+            case PROJETIL -> m.translate(C, h / 2, C).rotateZ(t * 0.4f).translate(-C, -h / 2, -C).translate(0, 0, -((t * 0.8f) % 40) + 12);
             case QUEDA -> {
                 float cai = Mth.clamp((t - 10) / 12f, 0, 1);
-                float y = (1 - cai * cai) * 24;
-                m.translate(0, y, 0).translate(8, h, 8).rotateX((float) Math.PI).translate(-8, 0, -8);
+                float y = (1 - cai * cai) * 48;
+                m.translate(0, y, 0).translate(C, h, C).rotateX((float) Math.PI).translate(-C, 0, -C);
                 if (cai >= 1) {
                     float sq = 1 - 0.15f * Mth.clamp(1 - (t - 22) / 6f, 0, 1);
-                    m.translate(8, 0, 8).scale(1 / sq, sq, 1 / sq).translate(-8, 0, -8);
+                    m.translate(C, 0, C).scale(1 / sq, sq, 1 / sq).translate(-C, 0, -C);
                 }
             }
-            case VEICULO -> m.translate(8, 0, 8).rotateZ((float) Math.toRadians(Mth.sin(t * 0.15f) * 6)).translate(-8, Mth.sin(t * 0.3f) * 0.2f, -8);
+            case VEICULO -> m.translate(C, 0, C).rotateZ((float) Math.toRadians(Mth.sin(t * 0.15f) * 6)).translate(-C, Mth.sin(t * 0.3f) * 0.4f, -C);
             case ESTRUTURA -> {
                 float s = Mth.clamp(t / 12f, 0, 1);
                 m.translate(0, -(1 - s * s * (3 - 2 * s)) * h, 0);
@@ -636,9 +638,10 @@ public class OficinaScreen extends Screen {
     }
 
     private static void chao(BufferBuilder bb, Matrix4f m, int y, int argb) {
-        float w = 0.04f;
-        for (int i = 0; i <= Projeto.N; i++) {
-            int c = (i == 8) ? (argb | 0x30000000) : argb;
+        float w = 0.07f;
+        for (int i = 0; i <= Projeto.N; i += 2) {
+            if (i % 8 != 0 && y > 0) continue;
+            int c = i == Projeto.MEIO ? (argb | 0x60000000) : i % 8 == 0 ? argb : ((argb >>> 25) << 24) | (argb & 0xFFFFFF);
             quad(bb, m, new float[][]{{i - w, y, 0}, {i + w, y, 0}, {i + w, y, Projeto.N}, {i - w, y, Projeto.N}}, c);
             quad(bb, m, new float[][]{{0, y, i - w}, {Projeto.N, y, i - w}, {Projeto.N, y, i + w}, {0, y, i + w}}, c);
         }
@@ -647,8 +650,9 @@ public class OficinaScreen extends Screen {
     /** Seta no chão apontando para a frente do desenho (-Z). */
     private static void seta(BufferBuilder bb, Matrix4f m, int cor) {
         int c = Hud.argb(cor, 200);
-        quad(bb, m, new float[][]{{7.4f, 0.01f, -0.3f}, {8.6f, 0.01f, -0.3f}, {8.6f, 0.01f, -1.6f}, {7.4f, 0.01f, -1.6f}}, c);
-        quad(bb, m, new float[][]{{6.5f, 0.01f, -1.6f}, {9.5f, 0.01f, -1.6f}, {8.05f, 0.01f, -3.0f}, {7.95f, 0.01f, -3.0f}}, c);
+        float k = Projeto.MEIO;
+        quad(bb, m, new float[][]{{k - 1.2f, 0.01f, -0.6f}, {k + 1.2f, 0.01f, -0.6f}, {k + 1.2f, 0.01f, -3.2f}, {k - 1.2f, 0.01f, -3.2f}}, c);
+        quad(bb, m, new float[][]{{k - 3f, 0.01f, -3.2f}, {k + 3f, 0.01f, -3.2f}, {k + 0.1f, 0.01f, -6f}, {k - 0.1f, 0.01f, -6f}}, c);
     }
 
     private void rotulo(GuiGraphics g, Matrix4f m, float x, float y, float z, Component c, int cor) {

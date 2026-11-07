@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/** Modelos prontos para começar a desenhar (o jogador pode mudar tudo). */
+/** Modelos prontos para começar a desenhar (o jogador pode mudar tudo). Grade de 32, meio em 15,5. */
 public final class Modelos {
     public static final Map<String, Supplier<Projeto>> TODOS = new LinkedHashMap<>();
 
@@ -18,48 +18,93 @@ public final class Modelos {
         TODOS.put("muralha", Modelos::muralha);
     }
 
+    private static final float M = 15.5f;
+
     private static void caixa(Projeto p, int x0, int y0, int z0, int x1, int y1, int z1, int tom) {
         for (int x = x0; x <= x1; x++) for (int y = y0; y <= y1; y++) for (int z = z0; z <= z1; z++) p.set(x, y, z, tom);
+    }
+
+    /** Cilindro em pé (eixo Y) centrado em (cx, cz). */
+    private static void cilindroY(Projeto p, float cx, float cz, float r, int y0, int y1, int tom) {
+        for (int x = 0; x < Projeto.N; x++) for (int z = 0; z < Projeto.N; z++) {
+            if ((x - cx) * (x - cx) + (z - cz) * (z - cz) > r * r) continue;
+            for (int y = y0; y <= y1; y++) p.set(x, y, z, tom);
+        }
+    }
+
+    /** Cilindro deitado no eixo X centrado em (cy, cz). */
+    private static void cilindroX(Projeto p, float cy, float cz, float r, int x0, int x1, int tom) {
+        for (int y = 0; y < Projeto.N; y++) for (int z = 0; z < Projeto.N; z++) {
+            if ((y - cy) * (y - cy) + (z - cz) * (z - cz) > r * r) continue;
+            for (int x = x0; x <= x1; x++) p.set(x, y, z, tom);
+        }
+    }
+
+    private static void elipsoide(Projeto p, float cx, float cy, float cz, float rx, float ry, float rz, int tom) {
+        for (int x = 0; x < Projeto.N; x++) for (int y = 0; y < Projeto.N; y++) for (int z = 0; z < Projeto.N; z++) {
+            float a = (x - cx) / rx, b = (y - cy) / ry, c = (z - cz) / rz;
+            if (a * a + b * b + c * c <= 1) p.set(x, y, z, tom);
+        }
     }
 
     static Projeto espada() {
         Projeto p = new Projeto();
         p.comp = Comportamento.ARMA;
-        caixa(p, 7, 0, 7, 8, 3, 8, 3);       // cabo
-        caixa(p, 7, 0, 7, 8, 0, 8, 4);       // pomo
-        caixa(p, 4, 4, 7, 11, 4, 8, 1);      // guarda
-        caixa(p, 3, 4, 7, 3, 5, 8, 2);
-        caixa(p, 12, 4, 7, 12, 5, 8, 2);
-        caixa(p, 6, 5, 7, 9, 13, 8, 1);      // lâmina
-        caixa(p, 7, 5, 7, 8, 13, 8, 4);      // fio do meio
-        caixa(p, 7, 14, 7, 8, 14, 8, 1);     // ponta
-        caixa(p, 7, 15, 7, 7, 15, 8, 4);
+        cilindroY(p, M, M, 1.6f, 0, 8, 2);                    // cabo
+        for (int y = 2; y <= 7; y += 2) cilindroY(p, M, M, 1.9f, y, y, 1);   // tiras do cabo
+        elipsoide(p, M, 0.5f, M, 2.4f, 1.6f, 2.4f, 3);         // pomo
+        // guarda, com as pontas curvando para cima
+        for (int x = 6; x <= 25; x++) {
+            float d = Math.abs(x - M);
+            int sobe = d > 7 ? (int) ((d - 7) * 0.8f) : 0;
+            caixa(p, x, 9 + sobe, 14, x, 10 + sobe, 17, d < 2 ? 3 : 1);
+        }
+        // lâmina: losango na seção, afinando até a ponta
+        for (int y = 11; y <= 31; y++) {
+            float meia = y < 25 ? 3.6f : 3.6f * (31.5f - y) / 6.5f;
+            for (int x = 0; x < Projeto.N; x++) for (int z = 0; z < Projeto.N; z++) {
+                float dx = Math.abs(x - M), dz = Math.abs(z - M);
+                if (dx / Math.max(0.6f, meia) + dz / 1.6f > 1) continue;
+                p.set(x, y, z, dx < 0.6f ? 3 : 1);
+            }
+        }
         return p;
     }
 
     static Projeto machado() {
         Projeto p = new Projeto();
         p.comp = Comportamento.ARMA;
-        caixa(p, 7, 0, 7, 8, 13, 8, 3);
-        for (int y = 8; y <= 14; y++) {
-            int larg = 4 - Math.abs(y - 11);
-            caixa(p, 9, y, 7, 10 + larg + 1, y, 8, y == 8 || y == 14 ? 2 : 1);
+        cilindroY(p, M, M, 1.5f, 0, 27, 2);
+        elipsoide(p, M, 28, M, 2, 2, 2, 3);
+        for (int x = 0; x < Projeto.N; x++) for (int y = 14; y < 31; y++) for (int z = 12; z <= 19; z++) {
+            // lâmina em meia-lua do lado +X, afinando para o fio
+            float ex = (x - 16f) / 13f, ey = (y - 22f) / 8.5f;
+            float ix = (x - 13f) / 9f, iy = (y - 22f) / 5f;
+            boolean fora = ex * ex + ey * ey <= 1, dentro = ix * ix + iy * iy <= 1;
+            if (!fora || (dentro && x > 20) || x < 16) continue;
+            float esp = 3.5f - (x - 16) * 0.22f;
+            if (Math.abs(z - M) > Math.max(0.7f, esp)) continue;
+            p.set(x, y, z, x > 26 ? 3 : 1);
         }
-        caixa(p, 14, 9, 7, 14, 13, 8, 4);
-        caixa(p, 5, 10, 7, 6, 12, 8, 2);
+        // contrapeso do outro lado
+        for (int x = 8; x <= 14; x++) {
+            float r = 2.6f - (14 - x) * 0.25f;
+            for (int y = 0; y < Projeto.N; y++) for (int z = 0; z < Projeto.N; z++)
+                if ((y - 22) * (y - 22) + (z - M) * (z - M) <= r * r) p.set(x, y, z, 2);
+        }
         return p;
     }
 
     static Projeto escudo() {
         Projeto p = new Projeto();
         p.comp = Comportamento.ESCUDO;
-        for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) {
-            double d = Math.hypot(x - 7.5, y - 7.5);
-            if (d > 7.6) continue;
-            int tom = d > 6.4 ? 2 : d < 1.6 ? 4 : (Math.abs(x - 7.5) < 1 || Math.abs(y - 7.5) < 1) ? 2 : 1;
-            p.set(x, y, 7, tom);
-            if (d < 5.5) p.set(x, y, 8, 1);
-            if (d < 2.6) p.set(x, y, 6, 4);
+        for (int x = 0; x < Projeto.N; x++) for (int y = 0; y < Projeto.N; y++) {
+            float d = (float) Math.hypot(x - M, y - M);
+            if (d > 15) continue;
+            float bojo = 3.2f * (1 - (d / 15f) * (d / 15f));
+            int z0 = Math.round(15 - bojo);
+            int tom = d > 13.2f ? 2 : (d > 6 && d < 7.6f) ? 3 : d < 3.5f ? 3 : 1;
+            for (int z = z0; z <= 16; z++) p.set(x, y, z, tom);
         }
         return p;
     }
@@ -67,14 +112,21 @@ public final class Modelos {
     static Projeto flecha() {
         Projeto p = new Projeto();
         p.comp = Comportamento.PROJETIL;
-        caixa(p, 7, 7, 4, 8, 8, 15, 1);
-        for (int z = 0; z <= 3; z++) {
-            int r = z / 2;
-            caixa(p, 7 - r, 7 - r, z, 8 + r, 8 + r, z, z == 0 ? 4 : 1);
+        for (int z = 9; z <= 31; z++) for (int x = 0; x < Projeto.N; x++) for (int y = 0; y < Projeto.N; y++)
+            if ((x - M) * (x - M) + (y - M) * (y - M) <= 1.3f * 1.3f) p.set(x, y, z, 1);
+        // ponta: pirâmide afiada na frente (-Z)
+        for (int z = 0; z <= 9; z++) {
+            float r = 4.2f * z / 9f;
+            for (int x = 0; x < Projeto.N; x++) for (int y = 0; y < Projeto.N; y++)
+                if (Math.abs(x - M) + Math.abs(y - M) <= r) p.set(x, y, z, z < 3 ? 3 : 1);
         }
-        for (int z = 12; z <= 15; z++) {
-            p.set(5, 7, z, 2); p.set(10, 7, z, 2); p.set(7, 5, z, 2); p.set(7, 10, z, 2);
-            p.set(6, 7, z, 2); p.set(9, 7, z, 2); p.set(7, 6, z, 2); p.set(7, 9, z, 2);
+        // penas
+        for (int z = 23; z <= 31; z++) {
+            float alt = 1.5f + (z - 23) * 0.55f;
+            for (int k = 1; k <= Math.round(alt); k++) {
+                p.set(Math.round(M + 1 + k), 15, z, 2); p.set(Math.round(M - 1 - k), 15, z, 2);
+                p.set(15, Math.round(M + 1 + k), z, 2); p.set(15, Math.round(M - 1 - k), z, 2);
+            }
         }
         return p;
     }
@@ -82,38 +134,50 @@ public final class Modelos {
     static Projeto martelo() {
         Projeto p = new Projeto();
         p.comp = Comportamento.QUEDA;
-        caixa(p, 7, 0, 7, 8, 8, 8, 2);
-        caixa(p, 2, 9, 4, 13, 14, 11, 1);
-        caixa(p, 1, 10, 5, 1, 13, 10, 2);
-        caixa(p, 14, 10, 5, 14, 13, 10, 2);
-        caixa(p, 3, 15, 5, 12, 15, 10, 1);
-        caixa(p, 6, 11, 3, 9, 12, 3, 4);
-        caixa(p, 6, 11, 12, 9, 12, 12, 4);
+        cilindroY(p, M, M, 2f, 0, 18, 2);
+        for (int y = 3; y <= 15; y += 4) cilindroY(p, M, M, 2.4f, y, y + 1, 1);
+        // cabeça com cantos chanfrados
+        for (int x = 5; x <= 26; x++) for (int y = 19; y <= 30; y++) for (int z = 9; z <= 22; z++) {
+            int bx = Math.min(x - 5, 26 - x), by = Math.min(y - 19, 30 - y), bz = Math.min(z - 9, 22 - z);
+            if (bx + by < 2 || bx + bz < 2 || by + bz < 2) continue;
+            int tom = (x <= 6 || x >= 25) ? 3 : (y == 24 || y == 25) ? 2 : 1;
+            p.set(x, y, z, tom);
+        }
         return p;
     }
 
     static Projeto carro() {
         Projeto p = new Projeto();
         p.comp = Comportamento.VEICULO;
-        caixa(p, 2, 2, 1, 13, 4, 14, 1);       // chassi (frente em -Z)
-        caixa(p, 3, 5, 5, 12, 6, 11, 2);       // cabine
-        caixa(p, 4, 5, 4, 11, 6, 4, 4);        // para-brisa
-        caixa(p, 1, 3, 0, 14, 3, 0, 4);        // farol / para-choque
-        for (int[] r : new int[][]{{1, 2}, {1, 11}, {13, 2}, {13, 11}}) caixa(p, r[0], 0, r[1], r[0] + 1, 2, r[1] + 2, 3);
-        caixa(p, 3, 5, 12, 12, 7, 14, 1);      // aerofólio
-        caixa(p, 3, 8, 13, 12, 8, 14, 2);
+        // casco aerodinâmico (frente em -Z, mais baixa)
+        for (int z = 2; z <= 29; z++) {
+            float t = (z - 2) / 27f;
+            float meia = 8.5f + 1.5f * (float) Math.sin(t * Math.PI);
+            float alt = 2.5f + 4f * (float) Math.sin(Math.min(1, t * 1.4f) * Math.PI / 2);
+            for (int x = 0; x < Projeto.N; x++) for (int y = 3; y < Projeto.N; y++) {
+                float a = (x - M) / meia, b = (y - 3f) / alt;
+                if (a * a + b * b > 1 || y < 3) continue;
+                p.set(x, y, z, Math.abs(x - M) > meia - 1.2f ? 2 : 1);
+            }
+        }
+        elipsoide(p, M, 8.5f, 18, 6.5f, 4f, 7, 3);           // cabine (bolha)
+        for (int[] r : new int[][]{{6, 7}, {6, 24}, {22, 7}, {22, 24}}) cilindroX(p, 3.5f, r[1], 3.4f, r[0], r[0] + 3, 2); // rodas
+        caixa(p, 9, 5, 1, 11, 6, 2, 3);                        // faróis
+        caixa(p, 20, 5, 1, 22, 6, 2, 3);
         return p;
     }
 
     static Projeto muralha() {
         Projeto p = new Projeto();
         p.comp = Comportamento.ESTRUTURA;
-        for (int x = 0; x < 16; x++) for (int y = 0; y < 12; y++) {
-            int tom = ((x + (y / 2) % 2 * 2) % 4 == 0 || y % 2 == 0 && x % 4 == 2) ? 2 : 1;
-            p.set(x, y, 7, tom);
-            p.set(x, y, 8, tom);
+        for (int x = 0; x < Projeto.N; x++) for (int y = 0; y <= 21; y++) for (int z = 14; z <= 17; z++) {
+            boolean junta = y % 4 == 0 || (x + (y / 4 % 2) * 4) % 8 == 0;
+            boolean seteira = (x % 10 == 5 || x % 10 == 6) && y >= 11 && y <= 16;
+            if (seteira && z >= 15 && z <= 16) continue;
+            p.set(x, y, z, junta ? 2 : 1);
         }
-        for (int x = 0; x < 16; x += 3) caixa(p, x, 12, 7, Math.min(15, x + 1), 13, 8, 1);
+        for (int x = 0; x < Projeto.N; x += 7) caixa(p, x, 22, 13, Math.min(31, x + 3), 25, 18, 1);
+        for (int x = 2; x < Projeto.N; x += 14) caixa(p, x, 0, 12, x + 2, 18, 19, 2); // contrafortes
         return p;
     }
 

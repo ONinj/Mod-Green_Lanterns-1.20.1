@@ -65,6 +65,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.39 ✅ (0.31.1) Juramentos novos das 9 Tropas (originais, inspirados no espírito dos quadrinhos), em PT/EN: aparecem no chat a cada recarga e são os mesmos recitados na Bateria Central
 1.40 ✅ (0.32) História na Terra (Vila Aurora, Base Vigília, Dra. Lívia, estrelas cadentes, cratera do anel), Ritual da Bateria em 3 etapas, receita da Bateria Cinzelada mais difícil, escudo de força sem tremer, animações das criaturas revistas (passos no ritmo do andar, ciclos mais naturais, golpes suavizados)
 1.41 ✅ (0.33) Oficina de Construtos (Alt+Z): desenhe construtos em 3D cubinho por cubinho, escolha o comportamento (arma, escudo, disparo, queda do céu, veículo, estrutura) com animações prontas, 8 espaços e presets Alt+1..4
+1.42 ✅ (0.34) Oficina: grade 32³ com cubinhos menores, superfície lisa (ou modo quadrado), luz de verdade nos construtos (sombra, borda acesa, reflexo, halo), pincel 1-3, modelos refeitos e animações novas (fio de luz ao montar, faixa de montagem, cópias no golpe e no disparo, rastro e onda de choque na queda, propulsores no veículo, estilhaço ao desmontar)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
