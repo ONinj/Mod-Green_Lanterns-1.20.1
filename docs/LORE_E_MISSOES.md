@@ -953,3 +953,19 @@ cada Tropa, câmera que dá a volta e termina no close da mão erguida, névoa e
 - **Branco** (fusão): os sete anéis orbitam e se fundem num anel branco; flores de luz se abrem no chão.
 Todas terminam com o anel parando na frente do peito e encaixando no dedo da mão erguida: clarão, onda no chão e a luz
 subindo pelo corpo. A cerimônia dura pelo menos 10 s (configurável para mais).
+
+## 0.37 — Jade Viva, Chamado do Mogo e aura de energia
+**Mogo** (planeta vivo, Lanterna Verde; o planeta, a história e a Segunda Chance vêm na próxima etapa).
+- **Jade Viva**: clique com ela em cima da bateria verde no inventário (até 3).
+  I: +25% de carga · II: +50% e a bateria recarrega o anel aos poucos · III (Selo do Mogo): +75% e o Chamado.
+- **Chamado do Mogo** (bateria com o Selo na mão, botão direito mirando em alguém até 96 blocos):
+  uma jaula de barras de luz prende o alvo (nem pérola do Ender tira), o Mogo surge no céu com a faixa de jade acesa,
+  carrega e dispara um raio gigante. Mata na hora (jogadores incluídos) e abre um poço no terreno (não passa da
+  bedrock). Gasta metade da carga do anel; recarga de 1 hora (tempo real). Quem chama vê com câmera de cinema; todos
+  por perto veem o planeta, o raio e sentem o tremor.
+- O Mogo **se recusa** contra os chefes (os guardiões corrompidos): "Eu não ergo a minha luz contra quem um dia a
+  carregou ao meu lado." — sem gastar carga nem tempo.
+- Comandos (operador): `/lanterna mogo resetar` (zera o tempo do Chamado), `/lanterna mogo jade` (3 Jades),
+  `/lanterna mogo selo` (põe o Selo na bateria verde da mão).
+- **Aura de energia**: com o anel ligado, uma armadura de energia translúcida na cor da Tropa envolve o corpo (três
+  cascas suaves que vão sumindo para fora), junto com o contorno.

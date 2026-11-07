@@ -43,6 +43,31 @@ public final class LanternaCommand {
                         .executes(LanternaCommand::rituals))
 
                 // Daqui para baixo: só operador (cheats)
+                .then(Commands.literal("mogo")
+                        .requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("resetar").executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            com.lanterna.mogo.ChamadoMogo.resetar(p);
+                            c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("mogo.lanterna.cmd.resetado"), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("jade").executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            p.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.mogo.JadeViva.ITEM.get(), 3));
+                            return 1;
+                        }))
+                        .then(Commands.literal("selo").executes(c -> {
+                            net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
+                            net.minecraft.world.item.ItemStack s = p.getMainHandItem();
+                            if (!com.lanterna.mogo.JadeViva.aceita(s)) {
+                                c.getSource().sendFailure(net.minecraft.network.chat.Component.translatable("mogo.lanterna.cmd.sem_bateria"));
+                                return 0;
+                            }
+                            com.lanterna.mogo.JadeViva.definir(s, com.lanterna.mogo.JadeViva.MAX);
+                            c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("mogo.lanterna.jade.subiu.3"), false);
+                            return 1;
+                        })))
+
                 .then(Commands.literal("escolher")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("tropa", ResourceLocationArgument.id())

@@ -76,6 +76,7 @@ public final class ModCreativeTabs {
                         output.accept(com.lanterna.energia.EnergiaRegistro.CRISTAL_BRUTO.get());
                         output.accept(com.lanterna.energia.EnergiaRegistro.CRISTAL_PURO.get());
                         output.accept(com.lanterna.energia.EnergiaRegistro.NUCLEO.get());
+                        output.accept(com.lanterna.mogo.JadeViva.ITEM.get());
                         output.accept(com.lanterna.guilda.GuildaItems.ANEL_RECRUTA.get());
                         output.accept(com.lanterna.especies.EspeciesEntities.OVO.get());
                     })

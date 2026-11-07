@@ -16,42 +16,47 @@ import java.util.List;
  * Coordenadas: origem nos pés do escolhido, eixos do mundo; {@link #cam} é a câmera nesse mesmo espaço.
  * Cada função pede o buffer na hora (pedir outro tipo fecha o anterior, então ninguém guarda o VertexConsumer).
  */
-final class Geo {
-    static MultiBufferSource buf;
-    static PoseStack ps;
-    static Vector3f cam = new Vector3f();
-    static float tempo;
+public final class Geo {
+    public static MultiBufferSource buf;
+    public static PoseStack ps;
+    public static Vector3f cam = new Vector3f();
+    public static float tempo;
 
-    static VertexConsumer luz() {
+    public static float suaveX(float t) {
+        t = Mth.clamp(t, 0, 1);
+        return t * t * (3 - 2 * t);
+    }
+
+    public static VertexConsumer luz() {
         return buf.getBuffer(LanternaRenderTypes.BRILHO);
     }
 
-    static VertexConsumer corpo() {
+    public static VertexConsumer corpo() {
         return buf.getBuffer(LanternaRenderTypes.ENERGIA);
     }
 
-    static float r(int c) { return ((c >> 16) & 255) / 255f; }
-    static float g(int c) { return ((c >> 8) & 255) / 255f; }
-    static float b(int c) { return (c & 255) / 255f; }
+    public static float r(int c) { return ((c >> 16) & 255) / 255f; }
+    public static float g(int c) { return ((c >> 8) & 255) / 255f; }
+    public static float b(int c) { return (c & 255) / 255f; }
 
-    static int mistura(int a, int b, float t) {
+    public static int mistura(int a, int b, float t) {
         t = Mth.clamp(t, 0, 1);
         int r = (int) Mth.lerp(t, (a >> 16) & 255, (b >> 16) & 255), g = (int) Mth.lerp(t, (a >> 8) & 255, (b >> 8) & 255), bl = (int) Mth.lerp(t, a & 255, b & 255);
         return (r << 16) | (g << 8) | bl;
     }
 
-    static void v(VertexConsumer vc, Matrix4f m, float x, float y, float z, int c, float a, float u, float w) {
+    public static void v(VertexConsumer vc, Matrix4f m, float x, float y, float z, int c, float a, float u, float w) {
         vc.vertex(m, x, y, z).color(r(c), g(c), b(c), Mth.clamp(a, 0, 1)).uv(u, w).endVertex();
     }
 
-    static void v(VertexConsumer vc, Matrix4f m, float x, float y, float z, float cr, float cg, float cb, float a, float u, float w) {
+    public static void v(VertexConsumer vc, Matrix4f m, float x, float y, float z, float cr, float cg, float cb, float a, float u, float w) {
         vc.vertex(m, x, y, z).color(Mth.clamp(cr, 0, 1), Mth.clamp(cg, 0, 1), Mth.clamp(cb, 0, 1), Mth.clamp(a, 0, 1)).uv(u, w).endVertex();
     }
 
     // ---------------- brilhos virados para a câmera (só no espaço base, sem rotação extra) ----------------
 
     /** Brilho redondo: centro forte, borda some. */
-    static void bola(float x, float y, float z, float raio, int c, float a) {
+    public static void bola(float x, float y, float z, float raio, int c, float a) {
         if (a <= 0.005f || raio <= 0) return;
         Vector3f p = new Vector3f(x, y, z), d = new Vector3f(cam).sub(p);
         if (d.lengthSquared() < 1e-4f) return;
@@ -76,7 +81,7 @@ final class Geo {
     }
 
     /** Brilho em cruz (estrela): duas faixas finas e longas. */
-    static void estrela(float x, float y, float z, float tam, int c, float a, float giro) {
+    public static void estrela(float x, float y, float z, float tam, int c, float a, float giro) {
         Vector3f p = new Vector3f(x, y, z), d = new Vector3f(cam).sub(p).normalize();
         Vector3f dir = new Vector3f(d).cross(0, 1, 0);
         if (dir.lengthSquared() < 1e-4f) dir.set(1, 0, 0);
@@ -91,12 +96,12 @@ final class Geo {
     }
 
     /** Fita virada para a câmera passando pelos pontos (miolo claro, bordas somem). */
-    static void fita(List<Vector3f> pts, float[] largura, int c, float[] alfa) {
+    public static void fita(List<Vector3f> pts, float[] largura, int c, float[] alfa) {
         fita(pts, largura, c, alfa, true);
     }
 
     /** aditivo=false: fita escura/opaca (tentáculos de sombra), sem miolo claro. */
-    static void fita(List<Vector3f> pts, float[] largura, int c, float[] alfa, boolean aditivo) {
+    public static void fita(List<Vector3f> pts, float[] largura, int c, float[] alfa, boolean aditivo) {
         if (pts.size() < 2) return;
         VertexConsumer vc = aditivo ? luz() : corpo();
         Matrix4f m = ps.last().pose();
@@ -126,7 +131,7 @@ final class Geo {
     }
 
     /** Linha deitada no chão (rachadura, raio do símbolo). */
-    static void linhaChao(float x0, float z0, float x1, float z1, float larg, float y, int c, float a) {
+    public static void linhaChao(float x0, float z0, float x1, float z1, float larg, float y, int c, float a) {
         float dx = x1 - x0, dz = z1 - z0, l = Mth.sqrt(dx * dx + dz * dz);
         if (l < 1e-4f) return;
         float nx = -dz / l * larg / 2, nz = dx / l * larg / 2;
@@ -142,7 +147,7 @@ final class Geo {
     }
 
     /** Raio em zigue-zague de a até b (com galhos), semente fixa para não tremer a cada quadro. */
-    static void raio(Vector3f a, Vector3f b, long semente, float desvio, int c, float alfa, float espessura) {
+    public static void raio(Vector3f a, Vector3f b, long semente, float desvio, int c, float alfa, float espessura) {
         java.util.Random rnd = new java.util.Random(semente);
         int n = 14;
         java.util.List<Vector3f> pts = new java.util.ArrayList<>();
@@ -175,7 +180,7 @@ final class Geo {
     // ---------------- formas no pose atual ----------------
 
     /** Anel (toro) deitado no plano XZ. corpo + brilho em volta. */
-    static void toro(float R, float rr, int c, float a, boolean brilho) {
+    public static void toro(float R, float rr, int c, float a, boolean brilho) {
         int su = 36, sv = 10;
         Matrix4f m = ps.last().pose();
         VertexConsumer vc = corpo();
@@ -209,7 +214,7 @@ final class Geo {
     }
 
     /** O anel de poder: toro com uma joia em cima, girando; com halo. */
-    static void anel(float x, float y, float z, float tam, int c, float a, float giro, float incl) {
+    public static void anel(float x, float y, float z, float tam, int c, float a, float giro, float incl) {
         ps.pushPose();
         ps.translate(x, y, z);
         ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(giro));
@@ -230,7 +235,7 @@ final class Geo {
      * O anel de verdade: o mesmo modelo 3D do item (o de cada Tropa), girando, com halo de luz em volta.
      * O modelo fica de pé (furo para a frente); incl inclina, giro roda em volta do eixo vertical.
      */
-    static void anelModelo(String corps, float x, float y, float z, float tam, int c, float a, float giro, float incl) {
+    public static void anelModelo(String corps, float x, float y, float z, float tam, int c, float a, float giro, float incl) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         if (a <= 0.02f || mc.level == null) return;
         net.minecraft.world.item.ItemStack st = ANEIS.computeIfAbsent(corps, k ->
@@ -266,7 +271,7 @@ final class Geo {
     }
 
     /** Tubo vertical aberto (coluna de luz, chama, feixe), alfa de baixo para cima, com ondulação. */
-    static void tubo(float raio, float y0, float y1, int c, float aBaixo, float aCima, float onda, boolean aditivo) {
+    public static void tubo(float raio, float y0, float y1, int c, float aBaixo, float aCima, float onda, boolean aditivo) {
         int seg = 28, an = 10;
         VertexConsumer vc = aditivo ? luz() : corpo();
         Matrix4f m = ps.last().pose();
@@ -288,7 +293,7 @@ final class Geo {
     }
 
     /** Anel deitado (onda no chão, círculo de luz). */
-    static void anelChao(float r0, float r1, float y, int c, float aDentro, float aFora, boolean aditivo) {
+    public static void anelChao(float r0, float r1, float y, int c, float aDentro, float aFora, boolean aditivo) {
         if (r1 <= 0) return;
         int seg = 48;
         VertexConsumer vc = aditivo ? luz() : corpo();
@@ -303,13 +308,13 @@ final class Geo {
     }
 
     /** Onda que abre: faixa brilhante com rastro para dentro. */
-    static void onda(float raio, float largura, float y, int c, float a) {
+    public static void onda(float raio, float largura, float y, int c, float a) {
         anelChao(Math.max(0, raio - largura), raio, y, c, 0, a, true);
         anelChao(raio, raio + largura * 0.25f, y, c, a, 0, true);
     }
 
     /** Cristal: prisma de n lados com ponta, ao longo de +Y (alt), raio r. corpo translúcido sombreado por face. */
-    static void cristal(float alt, float r, int c, float a, int n, boolean duasPontas) {
+    public static void cristal(float alt, float r, int c, float a, int n, boolean duasPontas) {
         Matrix4f m = ps.last().pose();
         VertexConsumer vc = corpo();
         float corpoAlt = alt * 0.68f, base = duasPontas ? -alt * 0.32f : 0;
@@ -342,7 +347,7 @@ final class Geo {
     }
 
     /** Moeda: disco curto em pé (eixo Z), com bordas. */
-    static void moeda(float raio, float esp, int c, float a) {
+    public static void moeda(float raio, float esp, int c, float a) {
         Matrix4f m = ps.last().pose();
         VertexConsumer vc = corpo();
         int seg = 14;
@@ -363,7 +368,7 @@ final class Geo {
     }
 
     /** Olho na escuridão, virado para a câmera: amêndoa brilhante com pupila em fenda. abertura 0..1. */
-    static void olho(float x, float y, float z, float larg, float abertura, int c, float a) {
+    public static void olho(float x, float y, float z, float larg, float abertura, int c, float a) {
         if (abertura <= 0.02f || a <= 0.01f) return;
         Vector3f p = new Vector3f(x, y, z), d = new Vector3f(cam).sub(p).normalize();
         Vector3f dir = new Vector3f(d).cross(0, 1, 0).normalize();
@@ -400,7 +405,7 @@ final class Geo {
     }
 
     /** Pétala: lâmina curva (2 quads) ao longo de +Y, no pose atual. */
-    static void petala(float comp, float larg, int c, float a) {
+    public static void petala(float comp, float larg, int c, float a) {
         Matrix4f m = ps.last().pose();
         VertexConsumer vc = corpo();
         float[] ys = {0, comp * 0.35f, comp * 0.75f, comp};

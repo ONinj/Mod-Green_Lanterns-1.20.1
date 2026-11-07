@@ -68,5 +68,30 @@ public class PowerBatteryItem extends BlockItem {
         tooltip.add(Component.translatable(CorpsDefinition.fullNameKey(getCorps(stack)))
                 .withStyle(s -> s.withColor(color)));
         tooltip.add(Component.translatable("tooltip.lanterna.battery_use").withStyle(ChatFormatting.DARK_GRAY));
+        int jade = com.lanterna.mogo.JadeViva.nivel(stack);
+        if (jade > 0) tooltip.add(Component.translatable("mogo.lanterna.jade.nivel." + jade).withStyle(ChatFormatting.GREEN));
+    }
+
+    /** Bateria verde com o Selo do Mogo (Jade III): botão direito num alvo chama o Mogo. */
+    @Override
+    public net.minecraft.world.InteractionResultHolder<ItemStack> use(Level level, net.minecraft.world.entity.player.Player p, net.minecraft.world.InteractionHand hand) {
+        ItemStack s = p.getItemInHand(hand);
+        if (com.lanterna.mogo.JadeViva.nivel(s) >= com.lanterna.mogo.JadeViva.MAX && com.lanterna.mogo.JadeViva.aceita(s)) {
+            if (p instanceof net.minecraft.server.level.ServerPlayer sp) com.lanterna.mogo.ChamadoMogo.usar(sp, s);
+            return net.minecraft.world.InteractionResultHolder.sidedSuccess(s, level.isClientSide);
+        }
+        return super.use(level, p, hand);
+    }
+
+    /** Com o Selo, mirar num bloco também chama (o alvo é quem estiver na mira); agachado coloca a bateria. */
+    @Override
+    public net.minecraft.world.InteractionResult useOn(net.minecraft.world.item.context.UseOnContext c) {
+        ItemStack s = c.getItemInHand();
+        if (c.getPlayer() != null && !c.getPlayer().isShiftKeyDown()
+                && com.lanterna.mogo.JadeViva.nivel(s) >= com.lanterna.mogo.JadeViva.MAX && com.lanterna.mogo.JadeViva.aceita(s)) {
+            if (c.getPlayer() instanceof net.minecraft.server.level.ServerPlayer sp) com.lanterna.mogo.ChamadoMogo.usar(sp, s);
+            return net.minecraft.world.InteractionResult.sidedSuccess(c.getLevel().isClientSide);
+        }
+        return super.useOn(c);
     }
 }

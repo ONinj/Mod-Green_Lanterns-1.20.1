@@ -3083,6 +3083,73 @@ public final class DevAutoTest {
     }
 
 
+    private static void sceneMogo() {
+        Minecraft mc = Minecraft.getInstance();
+        int[] alvoId = {-1};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(12); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000");
+            cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -40; x <= 40; x++) for (int z = -40; z <= 40; z++) {
+                for (int y = 190; y < 200; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), y == 199 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState() : net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+                for (int y = 200; y < 214; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            for (var z : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(80))) z.discard();
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        // aura de fumaça (de frente)
+        at(30, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(30, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0)));
+        at(30, () -> shot("mogo_aura_dia"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 30, 0)));
+        at(6, () -> shot("mogo_aura_lado"));
+        at(2, () -> cmd("time set 18000"));
+        at(30, () -> shot("mogo_aura_noite"));
+        at(2, () -> { cmd("time set 6000"); mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        // a bateria com o Selo e o alvo
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var bat = com.lanterna.item.PowerBatteryItem.create(com.lanterna.corps.BuiltinCorps.GREEN.id(), com.lanterna.corps.BuiltinCorps.GREEN.color());
+            com.lanterna.mogo.JadeViva.definir(bat, 3);
+            sp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, bat);
+            var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
+            z.moveTo(0.5, 200, 22.5, 180, 0);
+            z.setNoAi(true);
+            z.setPersistenceRequired();
+            l.addFreshEntity(z);
+            alvoId[0] = z.getId();
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 1);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> com.lanterna.power.RingPowers.setCharge(sp, d, d.maxCharge()));
+            glog("bateria jade=" + com.lanterna.mogo.JadeViva.nivel(sp.getMainHandItem()) + " carga=" + com.lanterna.capability.ModCapabilities.get(sp).map(d -> d.charge() + "/" + d.maxCharge()).orElse("?"));
+        }));
+        at(10, () -> server(sp -> {
+            sp.getPersistentData().remove(com.lanterna.mogo.ChamadoMogo.TAG_ULTIMO);
+            boolean ok = com.lanterna.mogo.ChamadoMogo.usar(sp, sp.getMainHandItem());
+            glog("chamado usar=" + ok + " restante=" + com.lanterna.mogo.ChamadoMogo.restante(sp) + " carga=" + com.lanterna.capability.ModCapabilities.get(sp).map(d -> d.charge() + "/" + d.maxCharge()).orElse("?"));
+        }));
+        at(4, () -> shot("mogo_jaula"));
+        at(26, () -> shot("mogo_chega"));
+        at(30, () -> shot("mogo_carga"));
+        at(22, () -> shot("mogo_raio"));
+        at(4, () -> shot("mogo_impacto"));
+        at(10, () -> shot("mogo_raio2"));
+        at(30, () -> server(sp -> {
+            var e = sp.serverLevel().getEntity(alvoId[0]);
+            glog("alvo vivo=" + (e != null && e.isAlive()) + " bloco no poco=" + sp.serverLevel().getBlockState(new net.minecraft.core.BlockPos(0, 195, 22)));
+            boolean ok = com.lanterna.mogo.ChamadoMogo.usar(sp, sp.getMainHandItem());
+            glog("segundo uso restante=" + com.lanterna.mogo.ChamadoMogo.restante(sp));
+        }));
+        at(5, () -> cmd("lanterna mogo resetar"));
+        at(5, () -> server(sp -> glog("depois do reset restante=" + com.lanterna.mogo.ChamadoMogo.restante(sp))));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 8.5, 203, 12.5, 150, 35)));
+        at(20, () -> shot("mogo_cratera"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -3731,6 +3798,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("oficina")) sceneOficina();
         else if (ENABLED && SCENE.equals("energia")) sceneEnergia();
         else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
+        else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

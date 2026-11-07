@@ -101,6 +101,9 @@ public final class RingPowers {
         boolean upgraded = !battery.isEmpty() && battery.hasTag() && battery.getTag().getBoolean("Upgraded")
                 && com.lanterna.item.BatteryItems.corpsOf(battery).equals(def.id());
         int base = upgraded ? def.maxCharge() * 3 / 2 : def.maxCharge();
+        // Jade Viva do Mogo (só na bateria verde): +25% por nível
+        if (!battery.isEmpty() && com.lanterna.mogo.JadeViva.aceita(battery) && com.lanterna.item.BatteryItems.corpsOf(battery).equals(def.id()))
+            base = Math.round(base * com.lanterna.mogo.JadeViva.bonusCarga(com.lanterna.mogo.JadeViva.nivel(battery)));
         return Math.round(base * com.lanterna.construct.fonte.ArvoreDaLuz.carga(player));
     }
 

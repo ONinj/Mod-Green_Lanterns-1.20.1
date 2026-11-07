@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "14";
+    private static final String VERSION = "15";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -30,6 +30,11 @@ public final class ModNetwork {
                 .encoder(SelectionCutscenePacket::encode)
                 .decoder(SelectionCutscenePacket::decode)
                 .consumerMainThread(SelectionCutscenePacket::handle)
+                .add();
+        CHANNEL.messageBuilder(com.lanterna.mogo.ChamadoPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.mogo.ChamadoPacket::encode)
+                .decoder(com.lanterna.mogo.ChamadoPacket::decode)
+                .consumerMainThread(com.lanterna.mogo.ChamadoPacket::handle)
                 .add();
 
         CHANNEL.messageBuilder(ToggleFlightPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
