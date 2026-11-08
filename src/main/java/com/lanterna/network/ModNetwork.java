@@ -55,6 +55,12 @@ public final class ModNetwork {
                 .consumerMainThread(com.lanterna.mogo.MogoRastro.Pacote::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.lanterna.morte.Frenesi.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.morte.Frenesi.Pacote::encode)
+                .decoder(com.lanterna.morte.Frenesi.Pacote::decode)
+                .consumerMainThread(com.lanterna.morte.Frenesi.Pacote::handle)
+                .add();
+
         CHANNEL.messageBuilder(ToggleFlightPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ToggleFlightPacket::encode)
                 .decoder(ToggleFlightPacket::decode)

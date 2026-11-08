@@ -1450,7 +1450,7 @@
   "mission.lanterna.morte_ceifa.desc": "The Black Lantern's duty: bring death to another ring bearer. Whoever you defeat may have their ring corrupted. Go days without reaping and your ring weakens.",
   "alvo.lanterna.qualquer": "Creatures",
   "alvo.lanterna.jogador_anel": "Ring bearer (player)",
-  "morte.lanterna.fome": "Your ring is hungry. Without bringing death to another ring bearer, its power fades.",
+  "morte.lanterna.fome": "The Black Ring hungers. Reap a ring-bearer before it takes control.",
   "morte.lanterna.ceifou": "You reaped %s. Death is satisfied... for now.",
   "morte.lanterna.corrompido_1": "☠ Your ring came back from death... different.",
   "morte.lanterna.corrompido_2": "It is cold, heavy, and it whispers. Seek the Silent of Ryut.",
@@ -2585,5 +2585,11 @@
   "mogo.lanterna.rastro.ok": "The ring found Mogo: %s blocks",
   "mogo.lanterna.rastro.longe": "Mogo is now at %s, %s, %s in space. Go up to see him.",
   "mogo.lanterna.rastro.aqui": "You are standing on him.",
-  "mogo.lanterna.rastro.dica": "the planet moves: follow the mark"
+  "mogo.lanterna.rastro.dica": "the planet moves: follow the mark",
+  "morte.lanterna.frenesi.titulo": "STARVING",
+  "morte.lanterna.frenesi.sub": "The ring took control. It wants death.",
+  "morte.lanterna.frenesi.hud": "THE RING HUNGERS",
+  "morte.lanterna.frenesi.conta": "Feeding: %s/%s",
+  "morte.lanterna.frenesi.saciado": "SATED",
+  "morte.lanterna.frenesi.volta": "Control returns to you. For now."
 }

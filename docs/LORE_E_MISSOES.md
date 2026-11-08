@@ -1082,3 +1082,15 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Defesa do Mogo**: a Tropa da **Morte** ele sempre ataca quando chega perto (feixe de luz enorme, dano igual ao laser
   de um Lanterna oficial, nunca mata). As outras Tropas inimigas não pousam, mas ele só revida se atirarem nele
   (fica bravo por 20 s). Os Verdes ele não ataca.
+
+## 0.39.3 — Mogo vivo, Índigo e a Fome do Anel Preto
+- **Textura do Mogo**: planeta vivo — continentes de floresta e campo, montanhas, mares, rios, nuvens e polos de gelo —
+  com a faixa de jade e o quadrado com o símbolo do anel verde.
+- **Recarga do Índigo em primeira pessoa**: o braço não é mais jogado para trás; ele sobe até o cristal do cajado na base
+  do braço normal, e o anel aparece na ponta da mão.
+- **A Fome do Anel Preto**: o Lanterna Negro que passa os dias da configuração (padrão 3) sem ceifar um portador de anel
+  não enfraquece mais — ele fica **faminto**. O anel toma o controle: o jogador não mexe mais o boneco (teclado e mouse
+  travados, tela escura com a borda vermelha) e é levado para um planeta de Tropa ao acaso (Oa, Korugar, Ysmault, Odym,
+  Zamaron, Nok ou Okaara — nunca a Gênese nem Ryut). Ele voa sozinho até qualquer ser vivo (criaturas, NPCs, aliados ou
+  não; jogadores não) e mata até se saciar: **25 a 30 mortes**. Sem ninguém por perto por 15 s, o anel o leva para outro
+  planeta. Saciado, o controle volta e a fome some por mais uns dias. Comando de teste: `/lanterna frenesi [parar]`.

@@ -52,7 +52,7 @@ public final class Supremos {
     /** Multiplicador de dano dos poderes (o Preto faminto perde força). */
     public static float dano(ResourceLocation corps, @Nullable Player p) {
         if (branco(corps)) return 1.7f;
-        if (preto(corps)) return p != null && faminto(p) ? 0.9f : 1.6f;
+        if (preto(corps)) return 1.6f; // faminto não enfraquece: entra em frenesi (morte/Frenesi)
         return 1f;
     }
 

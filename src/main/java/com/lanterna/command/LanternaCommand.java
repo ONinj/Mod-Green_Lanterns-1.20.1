@@ -81,6 +81,9 @@ public final class LanternaCommand {
                             return 1;
                         }))))
 
+                .then(Commands.literal("frenesi").requires(source -> source.hasPermission(2))
+                        .executes(c -> { com.lanterna.morte.Frenesi.comecar(c.getSource().getPlayerOrException()); return 1; })
+                        .then(Commands.literal("parar").executes(c -> { com.lanterna.morte.Frenesi.acabar(c.getSource().getPlayerOrException(), true); return 1; })))
                 .then(Commands.literal("laranja").requires(source -> source.hasPermission(2))
                         .executes(c -> laranja(c, null))
                         .then(Commands.literal("unico").executes(c -> laranja(c, true)))

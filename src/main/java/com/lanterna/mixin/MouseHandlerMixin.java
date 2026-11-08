@@ -13,6 +13,6 @@ public abstract class MouseHandlerMixin {
 
     @Redirect(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
     private void lanterna$autopilotSteers(LocalPlayer player, double yaw, double pitch) {
-        if (!Autopilot.active()) player.turn(yaw, pitch);
+        if (!Autopilot.active() && !com.lanterna.client.morte.ClienteFrenesi.ativo()) player.turn(yaw, pitch);
     }
 }

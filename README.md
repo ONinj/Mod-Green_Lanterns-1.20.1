@@ -80,6 +80,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.47 ✅ (0.39.0) Uniforme do anel vira troca de skin: roupa pintada pixel por pixel no corpo, sem espessura; cabelo/chapéu da skin por cima da máscara
 1.47.1 ✅ (0.39.1) Traje na skin: ajuste da máscara volta a funcionar, relevo na segunda camada e peças 3D (asas, auréola, espinhos) de volta
 1.47.2 ✅ (0.39.2) Waypoints no chão certo; Mogo com o símbolo do anel, andando pelo espaço, Rastro do Mogo e defesa contra a Morte
+1.47.3 ✅ (0.39.3) Mogo como planeta vivo; recarga do Índigo em 1ª pessoa corrigida; Fome do Anel Preto vira frenesi
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

@@ -1450,7 +1450,7 @@
   "mission.lanterna.morte_ceifa.desc": "O dever do Lanterna Negro: levar a morte a outro portador de anel. Quem você derrota tem chance de ter o anel corrompido. Sem ceifar por dias, o seu anel enfraquece.",
   "alvo.lanterna.qualquer": "Criaturas",
   "alvo.lanterna.jogador_anel": "Portador de anel (jogador)",
-  "morte.lanterna.fome": "O seu anel tem fome. Sem levar a morte a outro portador de anel, o poder dele se apaga.",
+  "morte.lanterna.fome": "O Anel Preto tem fome. Ceife um portador de anel antes que ele tome o controle.",
   "morte.lanterna.ceifou": "Você ceifou %s. A Morte está satisfeita... por enquanto.",
   "morte.lanterna.corrompido_1": "☠ O seu anel voltou da morte... diferente.",
   "morte.lanterna.corrompido_2": "Ele está frio, pesado, e sussurra. Procure os Silentes de Ryut.",
@@ -2585,5 +2585,11 @@
   "mogo.lanterna.rastro.ok": "O anel achou o Mogo: %s blocos",
   "mogo.lanterna.rastro.longe": "O Mogo está agora em %s, %s, %s do espaço. Suba para vê-lo.",
   "mogo.lanterna.rastro.aqui": "Você está em cima dele.",
-  "mogo.lanterna.rastro.dica": "o planeta anda: siga a marca"
+  "mogo.lanterna.rastro.dica": "o planeta anda: siga a marca",
+  "morte.lanterna.frenesi.titulo": "FAMINTO",
+  "morte.lanterna.frenesi.sub": "O anel tomou o controle. Ele quer morte.",
+  "morte.lanterna.frenesi.hud": "O ANEL TEM FOME",
+  "morte.lanterna.frenesi.conta": "Saciando: %s/%s",
+  "morte.lanterna.frenesi.saciado": "SACIADO",
+  "morte.lanterna.frenesi.volta": "O controle volta para você. Por enquanto."
 }

@@ -3761,6 +3761,46 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void sceneFrenesi() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lanterna anel black"); cmd("difficulty normal"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
+        // o Mogo novo de perto (no espaço)
+        at(40, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(m.radius() + 260, 60, 0);
+            sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), pos.x, pos.y, pos.z, 90, 8);
+        }));
+        at(5, () -> cmd("gamemode creative"));
+        at(50, () -> shot("fr_mogo"));
+        at(5, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(0, 60, m.radius() + 260);
+            sp.teleportTo(sp.serverLevel(), pos.x, pos.y, pos.z, 180, 8);
+        }));
+        at(40, () -> shot("fr_mogo2"));
+        at(5, () -> cmd("gamemode survival"));
+        // o frenesi
+        at(10, () -> cmd("lanterna frenesi"));
+        at(60, () -> server(sp -> glog("frenesi: dim=" + sp.level().dimension().location() + " ativo=" + com.lanterna.morte.Frenesi.ativo(sp))));
+        at(5, () -> shot("fr_1"));
+        // garante gente para caçar perto
+        at(5, () -> server(sp -> { for (int i = 0; i < 6; i++) { var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel()); z.moveTo(sp.getX() + 6 + i * 2, sp.getY(), sp.getZ() + 4, 0, 0); sp.serverLevel().addFreshEntity(z); } }));
+        at(80, () -> shot("fr_2"));
+        at(200, () -> shot("fr_3"));
+        at(200, () -> server(sp -> glog("frenesi depois de 25s: ativo=" + com.lanterna.morte.Frenesi.ativo(sp) + " vivo=" + sp.isAlive() + " pos=" + sp.blockPosition())));
+        at(400, () -> server(sp -> glog("frenesi depois de 45s: ativo=" + com.lanterna.morte.Frenesi.ativo(sp) + " pos=" + sp.blockPosition())));
+        at(5, () -> shot("fr_4"));
+        at(1200, () -> server(sp -> glog("frenesi depois de 105s: ativo=" + com.lanterna.morte.Frenesi.ativo(sp) + " dim=" + sp.level().dimension().location() + " pos=" + sp.blockPosition())));
+        at(5, () -> shot("fr_5"));
+        at(5, () -> cmd("lanterna frenesi parar"));
+        at(20, () -> glog("cliente solto=" + !com.lanterna.client.morte.ClienteFrenesi.ativo()));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4420,6 +4460,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("pelebraco")) scenePeleBraco();
         else if (ENABLED && SCENE.equals("pele2")) scenePele2();
         else if (ENABLED && SCENE.equals("mogo2")) sceneMogo2();
+        else if (ENABLED && SCENE.equals("frenesi")) sceneFrenesi();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

@@ -270,15 +270,15 @@ public final class Cajado {
             mc.getEntityRenderDispatcher().getItemInHandRenderer().renderItem(p, modelo(), ItemDisplayContext.NONE, false, ps, buf, luz);
             ps.popPose();
         }
-        // braço do anel: entra pela direita e sobe até o cristal
+        // braço do anel: na mesma base do braço normal do Minecraft (sem girar em volta de um ponto longe, que jogava o
+        // braço para trás); ele só desliza para o meio e para cima, vira um pouco para dentro e encosta o anel no cristal
         if (al > 0.01f || ap > 0) {
             ps.pushPose();
             float f = lado;
             float baixo = 1 - Math.max(al, 0.25f * ap);
-            ps.translate(f * 0.64f - f * 0.98f * al, -0.6f + 0.5f * al - baixo * 0.5f, -0.72f - 0.3f * al);
-            ps.mulPose(Axis.YP.rotationDegrees(f * 45.0F));
-            ps.mulPose(Axis.ZP.rotationDegrees(f * 32f * al));
-            ps.mulPose(Axis.XP.rotationDegrees(-22f * al));
+            ps.translate(f * (0.64f - 0.78f * al), -0.6f + 0.5f * al - baixo * 0.35f, -0.72f - 0.18f * al);
+            ps.mulPose(Axis.YP.rotationDegrees(f * (45.0F - 18f * al)));
+            ps.mulPose(Axis.ZP.rotationDegrees(f * -14f * al));
             ps.translate(f * -1.0F, 3.6F, 3.5F);
             ps.mulPose(Axis.ZP.rotationDegrees(f * 120.0F));
             ps.mulPose(Axis.XP.rotationDegrees(200.0F));
@@ -287,6 +287,8 @@ public final class Cajado {
             PlayerRenderer r = (PlayerRenderer) mc.getEntityRenderDispatcher().getRenderer(p);
             if (direita) r.renderRightHand(ps, buf, luz, p);
             else r.renderLeftHand(ps, buf, luz, p);
+            // o anel no dedo (a parte que encosta no cristal)
+            com.lanterna.client.RingHandLayer.noBraco(ps, buf, p, direita ? r.getModel().rightArm : r.getModel().leftArm, direita);
             ps.popPose();
         }
     }

@@ -32,6 +32,22 @@ public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         super(parent);
     }
 
+    /** O anel no dedo, num braço já posicionado (também usado em primeira pessoa). */
+    public static void noBraco(PoseStack poseStack, MultiBufferSource buffer, AbstractClientPlayer player, ModelPart arm, boolean right) {
+        ItemStack ring = ClientVisibleRings.get(player.getId());
+        if (ring.isEmpty()) ring = com.lanterna.power.EquipmentHelper.ring(player);
+        if (ring.isEmpty()) return;
+        poseStack.pushPose();
+        arm.translateAndRotate(poseStack);
+        // em primeira pessoa (com a virada do braço do Minecraft) a ponta da mão fica no começo do braço (y = -2)
+        float centerX = right ? -1f / 16f : 1f / 16f;
+        poseStack.translate(centerX, -2.3f / 16f, 0);
+        poseStack.scale(SCALE * 1.5f, SCALE * 1.5f, SCALE * 1.5f);
+        Minecraft.getInstance().getItemRenderer().renderStatic(ring, ItemDisplayContext.FIXED,
+                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, poseStack, buffer, player.level(), 0);
+        poseStack.popPose();
+    }
+
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int light, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks,
