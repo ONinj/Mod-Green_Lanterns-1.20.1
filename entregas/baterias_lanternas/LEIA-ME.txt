@@ -1,0 +1,35 @@
+BATERIAS NO FORMATO DE LANTERNA (centrais gigantes + de mão)
+=============================================================
+Este branch já está com os arquivos NO LUGAR CERTO do mod (src/main/...). É só fazer merge na main e compilar.
+(O código não foi compilado aqui: confira o build.)
+
+O QUE MUDOU NO MOD
+  Baterias Centrais (7 Tropas, sem Morte e Vida)
+    assets/lanterna/geo/block/bateria_central_<tropa>.geo.json           modelo novo
+    assets/lanterna/animations/block/bateria_central_<tropa>.animation.json   mesmos ossos/animações (misc.idle, misc.ativo)
+    assets/lanterna/textures/block/bateria_central_<tropa>.png + _glowmask.png
+    assets/lanterna/textures/item/bateria_central_<tropa>.png           ícone novo
+    data/lanterna/structures/bateria_central_<tropa>.nbt                 hitbox nova (casca invisível + portal + núcleo)
+    BateriaCentralItem.origem()  origens novas da estrutura (verde/amarelo/vermelho/índigo/violeta 8,0,9 · laranja 9,0,9 · azul 14,0,9)
+    BateriaNucleoBlockEntity.getRenderBoundingBox()  um pouco maior (inflate 16) por causa das asas da Esperança
+    A câmara do portal continua igual: 5 x 5 x 6 blocos por dentro, porta de 3 x 4 na frente (norte), campo 3 x 3 x 4.
+  Baterias de mão (bloco power_battery / item)
+    assets/lanterna/models/block/battery/bateria_<...>.json + textures/block/battery/bateria_<...>.png   (mesmos nomes)
+    NOVO: bateria_morte_preto.json/.png — a Morte agora também é uma lanterna (negra, com ossos e caveirinhas nas laterais).
+          blockstates/power_battery.json e models/item/power_battery.json apontam para ela.
+          Para voltar à caveira, troque "bateria_morte_preto" por "caveira_morte_preto" nesses 2 arquivos (o modelo da caveira não foi apagado).
+    Os modelos usam "render_type": "minecraft:translucent" (vidro do globo) e "forge_data" de luz nas partes acesas.
+    O cajado da Compaixão não mudou.
+
+FORMATO (igual em todas)
+  pé largo · pescoço · BOCA LARGA embaixo · globo redondo de vidro com o núcleo aceso e a gaiola de costelas ·
+  BOCA LARGA em cima · pescoço · tampa em cúpula com respiros · HASTE · remate · ALÇA em arco por cima.
+  O símbolo de cada Tropa (o mesmo 16x16 do anel) fica em relevo e aceso na frente e atrás do globo.
+  Toque de cada Tropa: Vontade (clássica, remate em esfera) · Medo (8 lados, pontas afiadas nas bocas, espinho no topo,
+  alça angular) · Fúria (chifres e sangue escorrendo, coroa) · Avareza (globo mais gordo, gemas, cúpula de cebola) ·
+  Esperança (asas nas bocas, estrela) · Compaixão (amarrações e amuletos, remate de cajado) · Amor (pétalas de cristal,
+  coração) · Morte (lanterna negra com ossos e caveiras).
+
+PRÉVIAS: previas/ (galeria.png = centrais, galeria_mao.png = de mão, e uma folha por bateria com a hitbox).
+BLOCKBENCH: blockbench/*.bbmodel (centrais). As de mão abrem direto no Blockbench (Java Block/Item).
+GERADOR: gerador/ (centrais_dc.py, mao.py e os scripts de build).

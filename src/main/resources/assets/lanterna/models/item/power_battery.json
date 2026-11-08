@@ -41,7 +41,7 @@
    "predicate": {
     "lanterna:corps": 8
    },
-   "model": "lanterna:block/battery/caveira_morte_preto"
+   "model": "lanterna:block/battery/bateria_morte_preto"
   }
  ]
 }

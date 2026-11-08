@@ -19,7 +19,7 @@
    "model": "lanterna:block/battery/bateria_amor_violeta"
   },
   "corps=black": {
-   "model": "lanterna:block/battery/caveira_morte_preto"
+   "model": "lanterna:block/battery/bateria_morte_preto"
   }
  }
 }
