@@ -2570,5 +2570,12 @@
   "traje.lanterna.violeta_energia": "Love Energy",
   "traje.lanterna.preto_energia": "Death Energy",
   "traje.lanterna.branco_energia": "Life Energy",
-  "perfil.lanterna.traje_desc.energia": "energy suit"
+  "perfil.lanterna.traje_desc.energia": "energy suit",
+  "perfil.lanterna.aura": "Aura",
+  "perfil.lanterna.iluminar": "Light",
+  "perfil.lanterna.ligado": "on",
+  "perfil.lanterna.desligado": "off",
+  "perfil.lanterna.aura_desc": "glow around the body",
+  "perfil.lanterna.iluminar_desc": "torch light in your Corps color",
+  "perfil.lanterna.iluminar_precisa": "turn the aura on first"
 }

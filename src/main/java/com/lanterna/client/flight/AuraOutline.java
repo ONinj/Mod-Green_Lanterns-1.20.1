@@ -33,6 +33,8 @@ public final class AuraOutline {
 
     private static boolean isActive(Player player) {
         Minecraft mc = Minecraft.getInstance();
+        // o jogador pode desligar a aura na Personalização
+        if (!com.lanterna.client.visual.ClientVisual.of(player.getId()).aura()) return false;
         if (player == mc.player) return ClientRingData.hasRing && ClientRingData.active;
         return ClientVisibleRings.of(player.getId()).active();
     }

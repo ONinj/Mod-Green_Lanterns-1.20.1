@@ -1027,3 +1027,11 @@ cerca de 1,8 s. Ao desligar, o líquido recua de volta para a mão. Saiu a nuvem
 - **Trajes de energia** (`traje_<tropa>_energia`): um por Tropa, base escura colada com os músculos em placas na cor da
   Tropa e fibras de energia acesas; emblema grande no peito e máscara dominó. Viram a terceira opção de traje na
   Personalização (Padrão, A, B, **Energia**, Sem uniforme) e também existem como itens vestíveis (36 peças novas).
+
+## 0.38.5 — Aura que ilumina
+Na Personalização (aba Visual) há duas opções novas, salvas no jogador e vistas por todos:
+- **Aura: ligada/desligada** — o halo em volta do corpo quando o anel está ligado.
+- **Iluminar** (só com a aura ligada) — o jogador carrega uma luz de tocha (nível 14) que anda com ele, e o chão e as
+  paredes que essa luz alcança ganham a cor da Tropa: vermelho para a Fúria, verde para a Vontade, azul, violeta,
+  amarelo, laranja, índigo, branco e preto. Paredes no meio cortam a luz, como uma tocha. De dia a cor aparece pouco; no
+  escuro, toma conta. A luz é de verdade (afasta monstros) e some ao desligar, sair, morrer ou trocar de mundo.

@@ -3480,6 +3480,48 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void sceneLuzAura() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 18000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel red"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -16; x <= 16; x++) for (int z = -16; z <= 16; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), (x + z) % 7 == 0 ? net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState() : net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            // uma parede e uma coluna para ver a luz nas paredes
+            for (int x = -6; x <= 6; x++) for (int y = 200; y < 204; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, 5), net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState());
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(30, () -> shot("luz_0_semluz"));
+        at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0, com.lanterna.visual.Visual.ILUMINAR); mc.setScreen(null); });
+        at(30, () -> server(sp -> glog("luz ativa=" + com.lanterna.power.LuzAura.ativa(sp) + " bloco=" + sp.serverLevel().getBlockState(net.minecraft.core.BlockPos.containing(sp.getEyePosition())) + " luzCliente=" + mc.level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, mc.player.blockPosition().offset(3, 0, 0)))));
+        at(5, () -> shot("luz_1_vermelha"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(15, () -> shot("luz_2_frente"));
+        for (String t : new String[]{"green", "blue", "violet", "yellow"}) {
+            at(5, () -> cmd("lanterna anel " + t));
+            at(5, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+            at(30, () -> shot("luz_3_" + t));
+        }
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 4.5, 200, 0.5, 0, 0)));
+        at(30, () -> server(sp -> glog("andou: bloco cabeca=" + sp.serverLevel().getBlockState(net.minecraft.core.BlockPos.containing(sp.getEyePosition())).getBlock() + " antigo=" + sp.serverLevel().getBlockState(new net.minecraft.core.BlockPos(0, 201, 0)).getBlock())));
+        // desliga a aura: some a luz e o halo
+        at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0, com.lanterna.visual.Visual.SEM_AURA); mc.setScreen(null); });
+        at(30, () -> server(sp -> glog("sem aura: luz=" + com.lanterna.power.LuzAura.ativa(sp) + " cabeca=" + sp.serverLevel().getBlockState(net.minecraft.core.BlockPos.containing(sp.getEyePosition())).getBlock() + " halo=" + com.lanterna.client.flight.AuraOutline.shouldOutline(mc.player))));
+        at(5, () -> shot("luz_4_semaura"));
+        at(5, () -> { mc.options.hideGui = false; mc.setScreen(new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL)); });
+        at(20, () -> shot("luz_5_tela"));
+        at(5, () -> { mc.setScreen(null); var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0, 0); mc.setScreen(null); });
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4134,6 +4176,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();
         else if (ENABLED && SCENE.equals("fluxo")) sceneFluxo();
         else if (ENABLED && SCENE.equals("trajes3")) sceneTrajes3();
+        else if (ENABLED && SCENE.equals("luzaura")) sceneLuzAura();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

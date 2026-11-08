@@ -60,6 +60,19 @@ public final class LanternaRenderTypes extends RenderType {
                     .setOutputState(TRANSLUCENT_TARGET)
                     .createCompositeState(false));
 
+    /** Luz colorida da aura no chão e nas paredes: cor por vértice, somada (sem textura), por cima dos blocos. */
+    public static final RenderType LUZ = create("lanterna_luz_aura", DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS, 65536, false, true,
+            CompositeState.builder()
+                    .setShaderState(POSITION_COLOR_SHADER)
+                    .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                    .setCullState(NO_CULL)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setOutputState(TRANSLUCENT_TARGET)
+                    .createCompositeState(false));
+
     private LanternaRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int size,
                                 boolean crumbling, boolean sort, Runnable setup, Runnable clear) {
         super(name, format, mode, size, crumbling, sort, setup, clear);

@@ -2570,5 +2570,12 @@
   "traje.lanterna.violeta_energia": "Energia do Amor",
   "traje.lanterna.preto_energia": "Energia da Morte",
   "traje.lanterna.branco_energia": "Energia da Vida",
-  "perfil.lanterna.traje_desc.energia": "traje de energia"
+  "perfil.lanterna.traje_desc.energia": "traje de energia",
+  "perfil.lanterna.aura": "Aura",
+  "perfil.lanterna.iluminar": "Iluminar",
+  "perfil.lanterna.ligado": "ligada",
+  "perfil.lanterna.desligado": "desligada",
+  "perfil.lanterna.aura_desc": "brilho em volta do corpo",
+  "perfil.lanterna.iluminar_desc": "luz de tocha na cor da Tropa",
+  "perfil.lanterna.iluminar_precisa": "ligue a aura primeiro"
 }

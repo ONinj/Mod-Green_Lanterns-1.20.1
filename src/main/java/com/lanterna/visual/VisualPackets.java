@@ -14,25 +14,25 @@ import java.util.function.Supplier;
 public final class VisualPackets {
 
     /** Cliente -> servidor: "quero este visual". */
-    public record Pedido(String traje, int mascara) {
-        public static void encode(Pedido m, FriendlyByteBuf b) { b.writeUtf(m.traje, 16); b.writeVarInt(m.mascara); }
-        public static Pedido decode(FriendlyByteBuf b) { return new Pedido(b.readUtf(16), b.readVarInt()); }
+    public record Pedido(String traje, int mascara, int flags) {
+        public static void encode(Pedido m, FriendlyByteBuf b) { b.writeUtf(m.traje, 16); b.writeVarInt(m.mascara); b.writeVarInt(m.flags); }
+        public static Pedido decode(FriendlyByteBuf b) { return new Pedido(b.readUtf(16), b.readVarInt(), b.readVarInt()); }
         public static void handle(Pedido m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
                 var p = ctx.get().getSender();
-                if (p != null) Visual.definir(p, m.traje, m.mascara);
+                if (p != null) Visual.definir(p, m.traje, m.mascara, m.flags);
             });
             ctx.get().setPacketHandled(true);
         }
     }
 
     /** Servidor -> clientes: o visual de um jogador. */
-    public record Sync(int entity, String traje, int mascara) {
-        public static void encode(Sync m, FriendlyByteBuf b) { b.writeVarInt(m.entity); b.writeUtf(m.traje, 16); b.writeVarInt(m.mascara); }
-        public static Sync decode(FriendlyByteBuf b) { return new Sync(b.readVarInt(), b.readUtf(16), b.readVarInt()); }
+    public record Sync(int entity, String traje, int mascara, int flags) {
+        public static void encode(Sync m, FriendlyByteBuf b) { b.writeVarInt(m.entity); b.writeUtf(m.traje, 16); b.writeVarInt(m.mascara); b.writeVarInt(m.flags); }
+        public static Sync decode(FriendlyByteBuf b) { return new Sync(b.readVarInt(), b.readUtf(16), b.readVarInt(), b.readVarInt()); }
         public static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                    com.lanterna.client.visual.ClientVisual.set(m.entity, m.traje, m.mascara)));
+                    com.lanterna.client.visual.ClientVisual.set(m.entity, m.traje, m.mascara, m.flags)));
             ctx.get().setPacketHandled(true);
         }
     }

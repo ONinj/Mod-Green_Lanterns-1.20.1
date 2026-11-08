@@ -175,7 +175,7 @@ public class PerfilScreen extends Screen {
 
     private ClientVisual.Look meu() {
         var p = Minecraft.getInstance().player;
-        return p == null ? new ClientVisual.Look("padrao", 0) : ClientVisual.of(p.getId());
+        return p == null ? new ClientVisual.Look("padrao", 0, 0) : ClientVisual.of(p.getId());
     }
 
     private Component nomeTraje(String t) {
@@ -195,28 +195,43 @@ public class PerfilScreen extends Screen {
         // cartões: padrão, traje A, traje B, traje de energia, nenhum
         ClientVisual.Look look = meu();
         int cw = (w - 6) / 2, ch = 22;
-        for (int i = 0; i < Visual.TRAJES.size(); i++) {
-            String t = Visual.TRAJES.get(i);
+        for (int i = 0; i < cartoes(); i++) {
             int bx = x + (i % 2) * (cw + 6), by = y + (i / 2) * (ch + 4);
+            if (i >= Visual.TRAJES.size()) {
+                // opções da aura: ligar/desligar a aura e iluminar em volta (só com a aura ligada)
+                boolean luz = i == Visual.TRAJES.size() + 1;
+                boolean on = luz ? look.iluminar() : look.aura();
+                boolean pode = !luz || look.aura();
+                boolean hov2 = pode && mx >= bx && mx < bx + cw && my >= by && my < by + ch;
+                g.fill(bx, by, bx + cw, by + ch, on ? Hud.argb(c, 70) : hov2 ? 0x40FFFFFF : 0x50000000);
+                g.fill(bx, by, bx + 2, by + ch, on ? Hud.argb(c, 255) : 0x40FFFFFF);
+                Component nome = Component.translatable(luz ? "perfil.lanterna.iluminar" : "perfil.lanterna.aura")
+                        .append(": ").append(Component.translatable(on ? "perfil.lanterna.ligado" : "perfil.lanterna.desligado"));
+                g.drawString(font, Hud.bold(nome), bx + 7, by + 3, !pode ? 0xFF6A747C : on ? 0xFFFFFFFF : 0xFFD8E0E4, false);
+                g.drawString(font, Hud.body(Component.translatable(luz ? (pode ? "perfil.lanterna.iluminar_desc" : "perfil.lanterna.iluminar_precisa") : "perfil.lanterna.aura_desc")),
+                        bx + 7, by + 12, 0xFF8A98A4, false);
+                continue;
+            }
+            String t = Visual.TRAJES.get(i);
             boolean sel = look.traje().equals(t), hov = mx >= bx && mx < bx + cw && my >= by && my < by + ch;
             g.fill(bx, by, bx + cw, by + ch, sel ? Hud.argb(c, 70) : hov ? 0x40FFFFFF : 0x50000000);
             g.fill(bx, by, bx + 2, by + ch, sel ? Hud.argb(c, 255) : 0x40FFFFFF);
             g.drawString(font, Hud.bold(nomeTraje(t)), bx + 7, by + 3, sel ? 0xFFFFFFFF : 0xFFD8E0E4, false);
             g.drawString(font, Hud.body(Component.translatable("perfil.lanterna.traje_desc." + (t.length() == 1 ? "segunda_pele" : t))), bx + 7, by + 12, 0xFF8A98A4, false);
         }
-        y += ((Visual.TRAJES.size() + 1) / 2) * (ch + 4) + 8;
+        y += linhas() * (ch + 4) + 6;
 
         // Máscara
         g.drawString(font, Hud.caps(Component.translatable("perfil.lanterna.mascara")), x, y, Hud.argb(c, 255), false);
         y += 12;
-        int boxX = x, boxY = y, box = 92;
+        int boxX = x, boxY = y, box = 74;
         // rosto ampliado
         g.fill(boxX, boxY, boxX + box, boxY + box, 0x70000000);
         g.fill(boxX, boxY, boxX + box, boxY + 1, Hud.argb(c, 160));
         var mc = Minecraft.getInstance();
         if (mc.player != null) {
             g.enableScissor(boxX, boxY, boxX + box, boxY + box);
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, boxX + box / 2, boxY + 395, 230, 0f, 0f, mc.player);
+            InventoryScreen.renderEntityInInventoryFollowsMouse(g, boxX + box / 2, boxY + 318, 185, 0f, 0f, mc.player);
             g.disableScissor();
         }
         int rx = boxX + box + 10;
@@ -224,7 +239,7 @@ public class PerfilScreen extends Screen {
         Component val = Hud.title(String.format(java.util.Locale.ROOT, "%+.2f px", px).replace('.', ','));
         g.drawString(font, val, rx, boxY + 4, 0xFFFFFFFF, false);
         Hud.wrapped(g, Hud.body(Component.translatable("perfil.lanterna.mascara_dica")), rx, boxY + 18, w - box - 10, 0xFF8A98A4, 10);
-        botoes(g, rx, boxY + 62, mx, my);
+        botoes(g, rx, boxY + 54, mx, my);
     }
 
     private static final String[] BOTOES = {"▲", "▼", "perfil.lanterna.zerar"};
@@ -260,14 +275,22 @@ public class PerfilScreen extends Screen {
             int x = left() + 128, y = top() + 22, w = W - 138;
             int cw = (w - 6) / 2, ch = 22;
             ClientVisual.Look look = meu();
-            for (int i = 0; i < Visual.TRAJES.size(); i++) {
+            for (int i = 0; i < cartoes(); i++) {
                 int bx = x + (i % 2) * (cw + 6), by = y + (i / 2) * (ch + 4);
                 if (mx >= bx && mx < bx + cw && my >= by && my < by + ch) {
-                    escolher(Visual.TRAJES.get(i), look.mascara());
+                    if (i == Visual.TRAJES.size()) {
+                        // liga/desliga a aura (desligar a aura também apaga a luz)
+                        int fl = look.flags() ^ Visual.SEM_AURA;
+                        if ((fl & Visual.SEM_AURA) != 0) fl &= ~Visual.ILUMINAR;
+                        escolher(look.traje(), look.mascara(), fl);
+                    } else if (i == Visual.TRAJES.size() + 1) {
+                        if (!look.aura()) return true;
+                        escolher(look.traje(), look.mascara(), look.flags() ^ Visual.ILUMINAR);
+                    } else escolher(Visual.TRAJES.get(i), look.mascara());
                     return true;
                 }
             }
-            int by = y + ((Visual.TRAJES.size() + 1) / 2) * (ch + 4) + 8 + 12 + 62, rx = x + 92 + 10;
+            int by = y + linhas() * (ch + 4) + 6 + 12 + 54, rx = x + 74 + 10;
             if (my >= by && my < by + 18) {
                 if (mx >= rx && mx < rx + 26) { escolher(look.traje(), Math.min(Visual.MASCARA_MAX, look.mascara() + 1)); return true; }
                 if (mx >= rx + 30 && mx < rx + 56) { escolher(look.traje(), Math.max(-Visual.MASCARA_MAX, look.mascara() - 1)); return true; }
@@ -285,11 +308,24 @@ public class PerfilScreen extends Screen {
 
     /** Aplica na hora (para ver no boneco) e salva no servidor. */
     public void escolher(String traje, int mascara) {
+        escolher(traje, mascara, meu().flags());
+    }
+
+    public void escolher(String traje, int mascara, int flags) {
         var p = Minecraft.getInstance().player;
         if (p == null) return;
-        ClientVisual.set(p.getId(), traje, mascara);
-        ModNetwork.sendToServer(new VisualPackets.Pedido(traje, mascara));
+        ClientVisual.set(p.getId(), traje, mascara, flags);
+        ModNetwork.sendToServer(new VisualPackets.Pedido(traje, mascara, flags));
         clique();
+    }
+
+    /** Quantos cartões há na grade do visual: os trajes + as duas opções da aura. */
+    private static int cartoes() {
+        return Visual.TRAJES.size() + 2;
+    }
+
+    private static int linhas() {
+        return (cartoes() + 1) / 2;
     }
 
     private void clique() {

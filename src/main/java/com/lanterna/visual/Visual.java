@@ -55,20 +55,42 @@ public final class Visual {
         return Math.max(-MASCARA_MAX, Math.min(MASCARA_MAX, tag(p).getInt("mascara")));
     }
 
+    /** Bits das opções da aura: 1 = aura desligada, 2 = iluminar ligado. */
+    public static final int SEM_AURA = 1, ILUMINAR = 2;
+
+    public static int flags(Player p) {
+        return tag(p).getInt("flags") & 3;
+    }
+
+    /** A aura em volta do corpo está ligada (padrão: sim)? */
+    public static boolean aura(Player p) {
+        return (flags(p) & SEM_AURA) == 0;
+    }
+
+    /** A aura ilumina o chão em volta (precisa da aura ligada)? */
+    public static boolean iluminar(Player p) {
+        return aura(p) && (flags(p) & ILUMINAR) != 0;
+    }
+
     public static void definir(ServerPlayer p, String traje, int mascara) {
+        definir(p, traje, mascara, flags(p));
+    }
+
+    public static void definir(ServerPlayer p, String traje, int mascara, int flags) {
         if (!TRAJES.contains(traje)) traje = "padrao";
         mascara = Math.max(-MASCARA_MAX, Math.min(MASCARA_MAX, mascara));
         CompoundTag persist = p.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
         CompoundTag t = new CompoundTag();
         t.putString("traje", traje);
         t.putInt("mascara", mascara);
+        t.putInt("flags", flags & 3);
         persist.put(TAG, t);
         p.getPersistentData().put(Player.PERSISTED_NBT_TAG, persist);
         enviar(p);
     }
 
     private static VisualPackets.Sync sync(ServerPlayer p) {
-        return new VisualPackets.Sync(p.getId(), traje(p), mascara(p));
+        return new VisualPackets.Sync(p.getId(), traje(p), mascara(p), flags(p));
     }
 
     public static void enviar(ServerPlayer p) {
