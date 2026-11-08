@@ -91,6 +91,7 @@ public final class UniformTransition {
 
     public static void clear() {
         UniformDissolve.clear();
+        PeleTraje.limpar();
         UniformDissolve3D.clear();
         NOW.clear();
         OLD.clear();

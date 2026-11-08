@@ -3589,6 +3589,70 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void scenePele() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
+        float[] giro = {0};
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.client.event.RenderPlayerEvent.Pre ev) -> {
+            var pl = ev.getEntity();
+            pl.yBodyRot = pl.yBodyRotO = pl.getYRot() + giro[0];
+            pl.yHeadRot = pl.yHeadRotO = pl.getYRot() + giro[0];
+        });
+        String[][] casos = {{"green", "energia"}, {"blue", "a"}};
+        for (String[] c : casos) {
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + c[0]);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
+            at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(c[1], 0); mc.setScreen(null); });
+            for (int modo = 0; modo < 2; modo++) {
+                int mm = modo;
+                at(5, () -> com.lanterna.client.uniform.PeleTraje.desligado = mm == 0);
+                for (int ang : new int[]{0, 90, 180, 270}) {
+                    at(5, () -> giro[0] = ang);
+                    at(25, () -> shot("pele_" + c[0] + "_" + c[1] + "_" + (mm == 0 ? "3d" : "skin") + "_" + ang));
+                }
+            }
+        }
+        at(5, () -> { com.lanterna.client.uniform.PeleTraje.desligado = false; giro[0] = 0; });
+        // transformação na skin
+        at(5, () -> { server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0)); var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("a", 0); mc.setScreen(null); });
+        at(10, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(60, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        for (int i = 0; i < 12; i++) { int k = i; at(3, () -> shot("pele_fluxo_" + String.format("%02d", k))); }
+        // primeira pessoa
+        at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.player.getInventory().selected = 8; });
+        at(20, () -> shot("pele_braco"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
+
+    private static void scenePeleBraco() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel blue"); cmd("execute in minecraft:overworld run tp @s 0 200 0 0 20"); });
+        at(40, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("a", 0); mc.setScreen(null);
+            mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.player.getInventory().selected = 8; mc.player.getInventory().setItem(8, net.minecraft.world.item.ItemStack.EMPTY); });
+        at(40, () -> shot("pele_braco"));
+        at(5, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> com.lanterna.power.RingPowers.togglePower(sp))));
+        at(40, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> com.lanterna.power.RingPowers.togglePower(sp))));
+        at(12, () -> shot("pele_braco_flui"));
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4244,6 +4308,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("fluxo")) sceneFluxo();
         else if (ENABLED && SCENE.equals("trajes3")) sceneTrajes3();
         else if (ENABLED && SCENE.equals("luzaura")) sceneLuzAura();
+        else if (ENABLED && SCENE.equals("pele")) scenePele();
+        else if (ENABLED && SCENE.equals("pelebraco")) scenePeleBraco();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

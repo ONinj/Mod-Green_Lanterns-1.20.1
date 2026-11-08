@@ -44,6 +44,8 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         String tropa = com.lanterna.armor.ModArmorItems.tropaOf(com.lanterna.LanternaMod.id(corpsId));
         String traje = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
         if ("nenhum".equals(traje)) return; // escolheu ficar sem uniforme
+        // a roupa pintada na própria skin (troca de pixels, sem espessura)
+        if (PeleTraje.corpo(poseStack, buffer, light, player, getParentModel(), p)) return;
         if (!UniformTextures.hasCustom(corpsId) && UniformDissolve3D.exists(tropa)) {
             render3D(poseStack, light, player, tropa, p, getParentModel(), SLOTS, null);
             return;

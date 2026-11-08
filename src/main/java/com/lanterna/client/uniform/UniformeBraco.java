@@ -41,6 +41,21 @@ public final class UniformeBraco {
             return it == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(it);
         });
         if (!(peca.getItem() instanceof com.lanterna.armor.UniformeTropaItem item)) return;
+        boolean direito0 = event.getArm() == HumanoidArm.RIGHT;
+        if (PeleTraje.arquivo(player) != null) {
+            // roupa na própria skin: a mão normal e, por cima, o mesmo braço com a pele do traje
+            event.setCanceled(true);
+            dentro = true;
+            try {
+                if (direito0) renderer.renderRightHand(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), player);
+                else renderer.renderLeftHand(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), player);
+            } finally {
+                dentro = false;
+            }
+            PeleTraje.braco(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), player,
+                    direito0 ? renderer.getModel().rightArm : renderer.getModel().leftArm, p);
+            return;
+        }
 
         // o braço normal primeiro (isso também posiciona o modelo), depois a manga do uniforme por cima
         event.setCanceled(true);

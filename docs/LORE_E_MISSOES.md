@@ -1043,3 +1043,17 @@ Na Personalização (aba Visual) há duas opções novas, salvas no jogador e vi
   `textures/item/ring/`. O `power_ring.json` e as texturas `espectro_*` continuam.
 - **Máscaras dos trajes por cima da segunda camada da skin** (entrega `mascara-segunda-camada`): o cabelo/chapéu da skin
   continua aparecendo; só Ossuário (preto A), Sentinela (verde B) e Saqueador (laranja B) escondem a camada da cabeça.
+
+## 0.39.0 — O uniforme vira a skin
+O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais uma armadura 3D por cima do corpo: ele é
+**pintado pixel por pixel na própria skin do jogador**, no mesmo modelo, sem espessura nenhuma.
+- Cada uniforme/traje 3D foi "achatado" para o layout de skin em alta resolução (4x) pelo script
+  `tools/achatar_trajes.py` (texturas em `textures/skin_traje/`, versões para braço largo e fino). Se um traje 3D
+  mudar, rode o script de novo.
+- Só a camada de baixo da skin é trocada. A **segunda camada da cabeça (cabelo, chapéu, barba...) fica sempre por
+  cima**, então a máscara do mod fica por baixo dela, como se fosse da própria skin. A jaqueta, as mangas e a calça da
+  segunda camada somem enquanto o uniforme está vestido.
+- As partes que brilham (lentes, emblema, fibras de energia) continuam acesas no escuro.
+- A transformação continua escorrendo como líquido a partir da mão do anel, agora pixel por pixel na skin, com a
+  beirada acesa na cor da Tropa (shader `traje_pele`). Em primeira pessoa o braço segue igual.
+- As peças de traje vestidas como armadura de verdade (itens) continuam 3D.

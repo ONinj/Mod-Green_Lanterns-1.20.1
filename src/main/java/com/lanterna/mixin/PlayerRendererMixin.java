@@ -22,7 +22,9 @@ public abstract class PlayerRendererMixin {
     private void lanterna$escondeSegundaCamada(AbstractClientPlayer player, CallbackInfo ci) {
         if (player.isSpectator()) return;
         float p = UniformTransition.progress(player, 1f);
-        if (p < 0.35f) return;
+        if (p <= 0f) return;
+        boolean pele = com.lanterna.client.uniform.PeleTraje.arquivo(player) != null;
+        if (!pele && p < 0.35f) return;
         if ("nenhum".equals(com.lanterna.client.visual.ClientVisual.of(player.getId()).traje())) return;
         PlayerModel<AbstractClientPlayer> m = ((PlayerRenderer) (Object) this).getModel();
         String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
@@ -30,7 +32,9 @@ public abstract class PlayerRendererMixin {
             // Trajes "segunda pele": a máscara fica POR CIMA da segunda camada da skin (cabeça inflada 0,62 > 0,5),
             // então a camada (cabelo, chapéu, barba...) continua aparecendo, como se a máscara fosse da própria skin.
             // Só os que cobrem o rosto/cabeça (caveira, capuzes) escondem a segunda camada da cabeça.
-            if (!com.lanterna.visual.Visual.eSegundaPele(var) || cobreRosto(player, var)) m.hat.visible = false;
+            // Roupa pintada na skin: a segunda camada da cabeça (cabelo, chapéu, máscara da skin) fica SEMPRE, por cima
+            // da máscara do mod.
+            if (!pele && (!com.lanterna.visual.Visual.eSegundaPele(var) || cobreRosto(player, var))) m.hat.visible = false;
         }
         if (player.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
             m.jacket.visible = false;

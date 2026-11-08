@@ -77,6 +77,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.46.4 ✅ (0.38.4) Trajes: máscaras refeitas e 9 trajes de energia (um por Tropa)
 1.46.5 ✅ (0.38.5) Aura: opção de ligar/desligar e "Iluminar" (luz de tocha na cor da Tropa)
 1.46.6 ✅ (0.38.6) Baterias em forma de lanterna, anéis HD e máscaras por cima da segunda camada da skin
+1.47 ✅ (0.39.0) Uniforme do anel vira troca de skin: roupa pintada pixel por pixel no corpo, sem espessura; cabelo/chapéu da skin por cima da máscara
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
