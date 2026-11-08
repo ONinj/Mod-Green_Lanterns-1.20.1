@@ -1035,3 +1035,11 @@ Na Personalização (aba Visual) há duas opções novas, salvas no jogador e vi
   paredes que essa luz alcança ganham a cor da Tropa: vermelho para a Fúria, verde para a Vontade, azul, violeta,
   amarelo, laranja, índigo, branco e preto. Paredes no meio cortam a luz, como uma tocha. De dia a cor aparece pouco; no
   escuro, toma conta. A luz é de verdade (afasta monstros) e some ao desligar, sair, morrer ou trocar de mundo.
+
+## 0.38.6 — Baterias-lanterna, anéis HD e máscaras
+- **Baterias Centrais** (7 Tropas) e **baterias de mão** no formato de lanterna (entrega `baterias-lanternas`); a da Morte
+  agora é uma lanterna negra (`bateria_morte_preto`).
+- **Anéis em alta definição** (entrega `aneis-hd`): mesmos símbolos, aro redondo, sinete detalhado; texturas novas em
+  `textures/item/ring/`. O `power_ring.json` e as texturas `espectro_*` continuam.
+- **Máscaras dos trajes por cima da segunda camada da skin** (entrega `mascara-segunda-camada`): o cabelo/chapéu da skin
+  continua aparecendo; só Ossuário (preto A), Sentinela (verde B) e Saqueador (laranja B) escondem a camada da cabeça.

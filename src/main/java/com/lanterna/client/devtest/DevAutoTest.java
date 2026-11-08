@@ -3522,6 +3522,73 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void sceneIntegra() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true; mc.options.renderDistance().set(10);
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -40; x <= 40; x++) for (int z = -30; z <= 60; z++) {
+                l.setBlock(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState(), 2);
+                for (int y = 200; y < 240; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            for (var n : l.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(80), e -> !(e instanceof net.minecraft.world.entity.player.Player))) n.discard();
+            // baterias de mão: uma de cada forma
+            int i = 0;
+            for (var sh : com.lanterna.block.BatteryShape.values()) {
+                l.setBlock(new net.minecraft.core.BlockPos(-6 + i * 2, 200, -6), com.lanterna.registry.ModBlocks.POWER_BATTERY.get().defaultBlockState().setValue(com.lanterna.block.PowerBatteryBlock.CORPS, sh), 3);
+                i++;
+            }
+            // anéis em molduras numa parede
+            for (int x = -6; x <= 4; x++) for (int y = 200; y < 203; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, -12), net.minecraft.world.level.block.Blocks.BLACK_CONCRETE.defaultBlockState(), 2);
+            int k = 0;
+            for (var c : com.lanterna.corps.BuiltinCorps.values()) {
+                var fr = new net.minecraft.world.entity.decoration.ItemFrame(l, new net.minecraft.core.BlockPos(-5 + k, 201, -11), net.minecraft.core.Direction.SOUTH);
+                fr.setItem(com.lanterna.item.PowerRingItem.create(c.id(), c.color(), 100), false);
+                fr.setInvisible(true);
+                l.addFreshEntity(fr);
+                k++;
+            }
+            // 3 Baterias Centrais
+            int[][] onde = {{-28, 30}, {0, 30}, {28, 30}};
+            var ts = new com.lanterna.baterias.Tropa[]{com.lanterna.baterias.Tropa.VERDE, com.lanterna.baterias.Tropa.AZUL, com.lanterna.baterias.Tropa.LARANJA};
+            for (int j = 0; j < 3; j++) {
+                var t = ts[j];
+                int[] o = com.lanterna.baterias.BateriaCentralItem.origem(t);
+                var nucleo = new net.minecraft.core.BlockPos(onde[j][0], 200, onde[j][1]);
+                var canto = nucleo.offset(-o[0], -o[1], -o[2]);
+                boolean ok = l.getStructureManager().get(new net.minecraft.resources.ResourceLocation("lanterna", "bateria_central_" + t.nome)).map(st -> {
+                    st.placeInWorld(l, canto, canto, new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings(), l.random, 2); return true; }).orElse(false);
+                glog("central " + t.nome + " ok=" + ok + " no nucleo=" + l.getBlockState(nucleo).getBlock());
+            }
+            sp.teleportTo(l, -0.5, 201.5, -3.5, 180, 25);
+        }));
+        at(60, () -> shot("int_aneis"));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 202, 0, 180, 30)));
+        at(30, () -> shot("int_bat_mao"));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 215, 0, 0, 12)));
+        at(80, () -> shot("int_centrais"));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 12.5, 212, 12, 40, 15)));
+        at(60, () -> shot("int_central_azul"));
+        // máscara por cima da segunda camada, com o ajuste de altura
+        at(5, () -> { cmd("lanterna anel green"); server(sp -> { sp.teleportTo(sp.serverLevel(), 0.5, 200, -2.5, 0, 0);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }); });
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(30); });
+        String[][] casos = {{"green", "a"}, {"green", "b"}, {"red", "a"}, {"yellow", "energia"}, {"black", "a"}, {"orange", "b"}};
+        for (String[] cs : casos) {
+            at(5, () -> cmd("lanterna anel " + cs[0]));
+            at(5, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+            for (int m : new int[]{0, -4, 4}) {
+                at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(cs[1], m); mc.setScreen(null); look(0, -5); });
+                at(40, () -> shot("int_masc_" + cs[0] + "_" + cs[1] + "_" + (m < 0 ? "m" : "p") + Math.abs(m)));
+            }
+        }
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4177,6 +4244,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("fluxo")) sceneFluxo();
         else if (ENABLED && SCENE.equals("trajes3")) sceneTrajes3();
         else if (ENABLED && SCENE.equals("luzaura")) sceneLuzAura();
+        else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
