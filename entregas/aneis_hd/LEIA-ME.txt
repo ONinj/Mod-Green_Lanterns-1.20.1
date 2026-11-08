@@ -1,0 +1,51 @@
+ANÉIS DAS TROPAS EM ALTA DEFINIÇÃO (modelo de item Java, Forge 1.20.1)
+=====================================================================
+Os 9 anéis refeitos a partir dos modelos que estão hoje no mod (assets/lanterna/models/item/ring/).
+Os SÍMBOLOS são exatamente os mesmos: foram lidos pixel a pixel das texturas espectro_<cor>.png (o quadrado 16x16
+da placa) e cada pixel virou um microcubo de 0,25 px em relevo sobre a face do sinete.
+
+O QUE MUDOU
+  • Aro redondo de verdade: 16 segmentos (antes eram 8 cubos grandes), mais fino (0,7 px de espessura),
+    mais estreito embaixo e alargando até o sinete, com chanfro nas duas bordas, parte de dentro polida,
+    friso de energia aceso no meio e duas linhas gravadas.
+  • Ombros em 3 degraus subindo até o sinete, com uma voluta e uma luz de cada lado.
+  • Sinete: galeria embaixo, corpo com cantos chanfrados, degrau polido, moldura em volta da face com 4 rebites,
+    face rebaixada e o símbolo em relevo (aceso no escuro; quando o símbolo é escuro, quem acende é a face).
+  • Os detalhes de cada Tropa que já existiam foram refeitos com muito mais peças:
+      Vontade   frisos de energia nos ombros
+      Medo      lâminas laterais em 4 estágios com fio aceso + pontas na frente e atrás
+      Fúria     garras de 3 dedos de cada lado do aro, com veia acesa
+      Morte     as mesmas garras, em grafite
+      Esperança / Compaixão   asas de 5 penas de cada lado, com raque acesa
+      Amor      4 cristais acesos (base, corpo e ponta) em engastes com garras
+      Avareza   4 gemas lapidadas (pavilhão, cintura, coroa e mesa) presas por 4 garras
+      Vida      auréola quadrada flutuante com hastes, estrelas nos cantos e raios
+  • Menor: o anel inteiro ficou uns 20% menor (aro de 5,7 px em vez de 7), e as escalas de mão foram reduzidas
+    um pouco (terceira pessoa 0,40, primeira pessoa 0,45). Ajuste no Blockbench (aba Display) se quiser.
+  • 146 a 191 elementos por anel (antes 22 a 26).
+
+ARQUIVOS (substituem os do mod)
+  assets/lanterna/models/item/ring/anel_<nome>.json     mesmos nomes de antes; o power_ring.json não muda
+  assets/lanterna/textures/item/ring/anel_<nome>.png    textura nova de cada anel (64x64, amostras de metal,
+                                                        metal escuro, polido, energia, face, símbolo, acento)
+  As texturas antigas espectro_<cor>.png não são mais usadas pelos anéis, mas NÃO apague se outra coisa do mod usa.
+
+BRILHO
+  As peças acesas (símbolo ou face, friso, cristais, gemas, auréola, fios) têm "forge_data": {"block_light": 15,
+  "sky_light": 15}, o mesmo jeito que já foi usado nos blasters.
+
+ORIENTAÇÃO
+  Igual à do modelo antigo: dedo no eixo Z, sinete para cima (+Y), centro em (8, 8, 8). A linha de cima do símbolo
+  fica no lado norte, como a textura ficava na placa antiga. Se o anel é desenhado na mão por um renderizador
+  próprio, ele continua funcionando igual.
+
+BLOCKBENCH
+  Abra o .json direto (File > Open Model, formato Java Block/Item). Os elementos estão em grupos:
+  aro, friso, ombros, sinete, simbolo, detalhes.
+
+PRÉVIAS
+  previas/galeria_aneis.png e previas/anel_<nome>.png (3/4, de cima, de lado e de frente).
+  São renderizações minhas; no jogo a luz muda um pouco. O código do mod não foi compilado com estes modelos: teste.
+
+GERADOR
+  gerador/anel.py (modelo), simbolos.py (lê os símbolos das texturas originais), prev.py, build.py.
