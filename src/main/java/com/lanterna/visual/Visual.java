@@ -31,7 +31,7 @@ import java.util.Locale;
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class Visual {
-    public static final List<String> TRAJES = List.of("padrao", "a", "b", "nenhum");
+    public static final List<String> TRAJES = List.of("padrao", "a", "b", "energia", "nenhum");
     /** Máscara: de -2 a +2 pixels, em passos de 1/4 de pixel. */
     public static final int MASCARA_MAX = 8;
     private static final String TAG = "lanterna_visual";
@@ -39,6 +39,11 @@ public final class Visual {
     private static CompoundTag tag(Player p) {
         CompoundTag persist = p.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
         return persist.getCompound(TAG);
+    }
+
+    /** É um dos trajes "segunda pele" (A, B ou de energia)? */
+    public static boolean eSegundaPele(String t) {
+        return "a".equals(t) || "b".equals(t) || "energia".equals(t);
     }
 
     public static String traje(Player p) {

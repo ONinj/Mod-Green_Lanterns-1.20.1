@@ -3452,6 +3452,34 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void sceneTrajes3() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
+        for (String t : new String[]{"green", "yellow", "red", "orange", "blue", "indigo", "violet", "black", "white"}) {
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+                sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0); }));
+            for (String v : new String[]{"a", "b", "energia"}) {
+                at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null); });
+                at(45, () -> shot("t3_" + t + "_" + v));
+            }
+        }
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4105,6 +4133,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();
         else if (ENABLED && SCENE.equals("fluxo")) sceneFluxo();
+        else if (ENABLED && SCENE.equals("trajes3")) sceneTrajes3();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

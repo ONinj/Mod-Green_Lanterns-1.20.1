@@ -102,7 +102,7 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         // Traje escolhido na Personalização: o padrão da Tropa ou um dos trajes "segunda pele" (a, b)
         String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
-        boolean traje = var.equals("a") || var.equals("b");
+        boolean traje = com.lanterna.visual.Visual.eSegundaPele(var);
         ResourceLocation[] stage = p < 1f && !traje ? UniformDissolve3D.stage(tropa, p) : null;
         boolean formando = p < 1f;
         org.joml.Matrix4f layerPose = new org.joml.Matrix4f(poseStack.last().pose());

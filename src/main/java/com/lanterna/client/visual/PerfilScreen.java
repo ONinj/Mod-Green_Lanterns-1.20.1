@@ -180,7 +180,7 @@ public class PerfilScreen extends Screen {
 
     private Component nomeTraje(String t) {
         String tr = tropa();
-        if (t.equals("a") || t.equals("b")) return tr == null ? Component.literal(t.toUpperCase()) : Component.translatable("traje.lanterna." + tr + "_" + t);
+        if (com.lanterna.visual.Visual.eSegundaPele(t)) return tr == null ? Component.literal(t.toUpperCase()) : Component.translatable("traje.lanterna." + tr + "_" + t);
         return Component.translatable("perfil.lanterna.traje." + t);
     }
 
@@ -192,7 +192,7 @@ public class PerfilScreen extends Screen {
             Hud.wrapped(g, Hud.body(Component.translatable("perfil.lanterna.visual_sem_anel")), x, y, w, 0xFF9AA8B4, 10);
             return;
         }
-        // 4 cartões: padrão, traje A, traje B, nenhum
+        // cartões: padrão, traje A, traje B, traje de energia, nenhum
         ClientVisual.Look look = meu();
         int cw = (w - 6) / 2, ch = 22;
         for (int i = 0; i < Visual.TRAJES.size(); i++) {
@@ -204,7 +204,7 @@ public class PerfilScreen extends Screen {
             g.drawString(font, Hud.bold(nomeTraje(t)), bx + 7, by + 3, sel ? 0xFFFFFFFF : 0xFFD8E0E4, false);
             g.drawString(font, Hud.body(Component.translatable("perfil.lanterna.traje_desc." + (t.length() == 1 ? "segunda_pele" : t))), bx + 7, by + 12, 0xFF8A98A4, false);
         }
-        y += 2 * (ch + 4) + 8;
+        y += ((Visual.TRAJES.size() + 1) / 2) * (ch + 4) + 8;
 
         // Máscara
         g.drawString(font, Hud.caps(Component.translatable("perfil.lanterna.mascara")), x, y, Hud.argb(c, 255), false);
@@ -267,7 +267,7 @@ public class PerfilScreen extends Screen {
                     return true;
                 }
             }
-            int by = y + 2 * (ch + 4) + 8 + 12 + 62, rx = x + 92 + 10;
+            int by = y + ((Visual.TRAJES.size() + 1) / 2) * (ch + 4) + 8 + 12 + 62, rx = x + 92 + 10;
             if (my >= by && my < by + 18) {
                 if (mx >= rx && mx < rx + 26) { escolher(look.traje(), Math.min(Visual.MASCARA_MAX, look.mascara() + 1)); return true; }
                 if (mx >= rx + 30 && mx < rx + 56) { escolher(look.traje(), Math.max(-Visual.MASCARA_MAX, look.mascara() - 1)); return true; }

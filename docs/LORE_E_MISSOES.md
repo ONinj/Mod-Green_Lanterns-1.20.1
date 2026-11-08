@@ -1020,3 +1020,10 @@ da mão do anel. Sobe pelo braço, chega no ombro, se espalha pelo peito e daí 
 outro braço e pelas pernas. A frente é irregular (avança em línguas) e a beirada brilha na cor da Tropa; faíscas
 pequenas acompanham a frente. A camada rente à skin vai pixel por pixel e as peças 3D seguem a mesma frente. Leva
 cerca de 1,8 s. Ao desligar, o líquido recua de volta para a mão. Saiu a nuvem de pó verde ao ligar.
+
+## 0.38.4 — Máscaras novas e trajes de energia
+- As máscaras dos trajes "segunda pele" foram refeitas (meia-máscara esculpida, olhos amendoados acesos; formas
+  clássica, angular para Medo/Fúria e de baile para Amor). A meia-caveira do Ossuário ficou igual.
+- **Trajes de energia** (`traje_<tropa>_energia`): um por Tropa, base escura colada com os músculos em placas na cor da
+  Tropa e fibras de energia acesas; emblema grande no peito e máscara dominó. Viram a terceira opção de traje na
+  Personalização (Padrão, A, B, **Energia**, Sem uniforme) e também existem como itens vestíveis (36 peças novas).

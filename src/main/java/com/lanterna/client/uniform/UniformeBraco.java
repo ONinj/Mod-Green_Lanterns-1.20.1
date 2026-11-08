@@ -35,7 +35,7 @@ public final class UniformeBraco {
         String tropa = com.lanterna.armor.ModArmorItems.tropaOf(LanternaMod.id(corpsId));
         if (tropa == null || UniformTextures.hasCustom(corpsId) || !UniformDissolve3D.exists(tropa)) return;
         if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player) instanceof PlayerRenderer renderer)) return;
-        boolean traje = var.equals("a") || var.equals("b");
+        boolean traje = com.lanterna.visual.Visual.eSegundaPele(var);
         net.minecraft.world.item.ItemStack peca = PECAS.computeIfAbsent(tropa + "|" + var, k -> {
             var it = traje ? com.lanterna.armor.ModTrajes.peca(tropa, var, EquipmentSlot.CHEST) : com.lanterna.armor.ModArmorItems.pieceFor(tropa, EquipmentSlot.CHEST);
             return it == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(it);
