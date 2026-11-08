@@ -70,8 +70,8 @@ public class ArvoreScreen extends Screen {
             Hud.wrapped(g, Hud.body(Component.translatable("arvore.lanterna.sem_arvore")), left + 10, top + 40, W - 20, 0xFFE0E6EA, 10);
             return;
         }
-        if (!selo) g.drawString(font, Hud.body(Component.translatable("arvore.lanterna.sem_selo")), left + 10, top + 22, 0xFFFF8080, false);
-        else g.drawString(font, Hud.body(Component.translatable("arvore.lanterna.ajuda")), left + 10, top + 22, 0xFF9AA8B0, false);
+        if (!selo) Hud.textFit(g, Hud.body(Component.translatable("arvore.lanterna.sem_selo")), left + 10, top + 22, W - 20, 0xFFFF8080, false);
+        else Hud.textFit(g, Hud.body(Component.translatable("arvore.lanterna.ajuda")), left + 10, top + 22, W - 20, 0xFF9AA8B0, false);
         String[] ramos = {"A", "P", "D"};
         for (int i = 0; i < 3; i++) {
             Component nome = Hud.caps(Component.translatable("arvore.lanterna.ramo." + ramos[i]));
@@ -113,29 +113,31 @@ public class ArvoreScreen extends Screen {
         }
         // detalhe do nó embaixo
         if (hovered != null) {
-            // ficha do nó ao lado do mouse (sem sair da tela)
-            int pw = 220;
-            int bx = Math.min(mx + 14, width - pw - 4), by = Math.min(my + 6, height - 52);
-            if (bx < mx && mx + 14 + pw > width) bx = mx - pw - 14;
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 400);
-            Hud.panel(g, bx, by, pw, 48, cor, 0.98f);
-            int left0 = left; left = bx; int W0 = pw;
+            // ficha do nó ao lado do mouse (sem sair da tela; a altura acompanha o texto)
+            int pw = Math.min(220, width - 8);
             Component nome = hovered.tipo() == 'c' ? Component.translatable("construct.lanterna." + hovered.id()) : Component.translatable("arvore.lanterna.passiva." + hovered.id());
             Component desc = hovered.tipo() == 'c' ? Component.translatable("construct.lanterna." + hovered.id() + ".desc") : Component.translatable("arvore.lanterna.passiva." + hovered.id() + ".desc");
-            g.drawString(font, Hud.bold(nome), left + 8, by + 5, Hud.argb(cor, 255), false);
-            final int W = W0;
-            Component estado = ClientFonte.tem(hovered.id()) ? Component.translatable("arvore.lanterna.tem")
-                    : Component.translatable("arvore.lanterna.custa", hovered.custo());
-            Hud.textRight(g, Hud.body(estado), left + W - 8, by + 5, 0xFFFFE6A0);
+            Component estado = Hud.body(ClientFonte.tem(hovered.id()) ? Component.translatable("arvore.lanterna.tem")
+                    : Component.translatable("arvore.lanterna.custa", hovered.custo()));
+            Component custo = null;
             if (hovered.tipo() == 'c') {
                 ConstructType ct = ConstructType.byId(hovered.id());
-                if (ct != null) {
-                    Component custo = Component.translatable("construct.lanterna.cost", ct.cost, String.format(java.util.Locale.ROOT, "%.1f", ct.cooldown / 20f));
-                    g.drawString(font, Hud.body(custo), left + 8, by + 34, 0xFF9AA8B0, false);
-                }
+                if (ct != null) custo = Hud.body(Component.translatable("construct.lanterna.cost", ct.cost, String.format(java.util.Locale.ROOT, "%.1f", ct.cooldown / 20f)));
             }
-            Hud.wrapped(g, Hud.body(desc), left + 8, by + 16, W - 16, 0xFFE0E6EA, 9);
+            int linhas = Hud.lines(Hud.body(desc), pw - 16);
+            int ph = 18 + linhas * 9 + (custo != null ? 11 : 0) + 4;
+            int bx = mx + 14 + pw <= width - 4 ? mx + 14 : mx - pw - 14;
+            bx = Mth.clamp(bx, 4, Math.max(4, width - pw - 4));
+            int by = Mth.clamp(my + 6, 4, Math.max(4, height - ph - 4));
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 400);
+            Hud.panel(g, bx, by, pw, ph, cor, 0.98f);
+            int ew = font.width(estado);
+            Hud.textFit(g, Hud.bold(nome), bx + 8, by + 5, pw - 24 - ew, Hud.argb(cor, 255), false);
+            Hud.textRight(g, estado, bx + pw - 8, by + 5, 0xFFFFE6A0);
+            int hy = by + 16 + Hud.wrapped(g, Hud.body(desc), bx + 8, by + 16, pw - 16, 0xFFE0E6EA, 9);
+            if (custo != null) Hud.textFit(g, custo, bx + 8, hy + 2, pw - 16, 0xFF9AA8B0, false);
+            int left0 = left;
             g.pose().popPose();
             left = left0;
         }

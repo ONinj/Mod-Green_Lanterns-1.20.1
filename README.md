@@ -81,6 +81,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.47.1 ✅ (0.39.1) Traje na skin: ajuste da máscara volta a funcionar, relevo na segunda camada e peças 3D (asas, auréola, espinhos) de volta
 1.47.2 ✅ (0.39.2) Waypoints no chão certo; Mogo com o símbolo do anel, andando pelo espaço, Rastro do Mogo e defesa contra a Morte
 1.47.3 ✅ (0.39.3) Mogo como planeta vivo; recarga do Índigo em 1ª pessoa corrigida; Fome do Anel Preto vira frenesi
+1.47.4 ✅ (0.39.4) Textos que saíam da tela com interface grande: mensagens longas da barra de ação, título e subtítulo vão para o chat; Bateria Cinzelada explica o ritual no chat em passos; HUD do anel, missões, roda de construtos, diário, perfil, oficina, árvore, comunicador e outros cabem em 427x240
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

@@ -103,6 +103,23 @@ public final class Hud {
         g.drawString(font(), c, cx - font().width(c) / 2, y, color, true);
     }
 
+    /** O texto cortado com "…" para caber na largura (mantém o estilo do começo). */
+    public static Component fit(Component c, int width) {
+        if (font().width(c) <= width) return c;
+        String s = font().plainSubstrByWidth(c.getString(), Math.max(0, width - font().width("…")));
+        return Component.literal(s + "…").withStyle(c.getStyle());
+    }
+
+    /** Desenha o texto cortado com "…" se passar da largura. */
+    public static void textFit(GuiGraphics g, Component c, int x, int y, int width, int color, boolean shadow) {
+        g.drawString(font(), fit(c, width), x, y, color, shadow);
+    }
+
+    /** Quantas linhas o texto ocupa nessa largura. */
+    public static int lines(Component c, int width) {
+        return font().split(c, width).size();
+    }
+
     /** Quebra o texto em linhas e desenha; devolve a altura usada. */
     public static int wrapped(GuiGraphics g, Component c, int x, int y, int width, int color, int lineHeight) {
         List<FormattedCharSequence> lines = font().split(c, width);

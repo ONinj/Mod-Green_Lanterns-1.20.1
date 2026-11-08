@@ -47,7 +47,8 @@ public class ComunicadorScreen extends Screen {
         int cor = LigacaoHud.cor(), x = x0(), y = y0(), pw = pw(), ph = ph();
         Hud.panel(g, x, y, pw, ph, cor, 0.96f);
         g.drawString(font, Hud.title(title.copy()), x + 10, y + 8, Hud.argb(cor, 255), false);
-        Hud.textRight(g, Hud.body(Component.translatable(ClientLigacao.voz || Ligacoes.svc() ? "ligacao.lanterna.voz_svc" : "ligacao.lanterna.sem_voz")), x + pw - 10, y + 9, 0xFF8A949C);
+        int livre = pw - 30 - font.width(Hud.title(title.copy()));
+        Hud.textRight(g, Hud.fit(Hud.body(Component.translatable(ClientLigacao.voz || Ligacoes.svc() ? "ligacao.lanterna.voz_svc" : "ligacao.lanterna.sem_voz")), livre), x + pw - 10, y + 9, 0xFF8A949C);
         int ly = y + 26;
         if (ClientLigacao.modo != 0) {
             // ligação atual
@@ -74,7 +75,7 @@ public class ComunicadorScreen extends Screen {
             PlayerInfo pi = online.get(i);
             UUID id = pi.getProfile().getId();
             LigacaoHud.rosto(g, id, x + 12, ly, 12, false, cor);
-            g.drawString(font, Hud.body(Component.literal(pi.getProfile().getName())), x + 30, ly + 2, 0xFFE0E6EA, false);
+            Hud.textFit(g, Hud.body(Component.literal(pi.getProfile().getName())), x + 30, ly + 2, pw - 120, 0xFFE0E6EA, false);
             if (!naLigacao(id) && ClientLigacao.modo != 2)
                 botao(g, x + pw - 80, ly - 1, 70, Component.translatable(ClientLigacao.modo == 0 ? "ligacao.lanterna.ligar" : "ligacao.lanterna.adicionar"), cor, mx, my);
             ly += 18;

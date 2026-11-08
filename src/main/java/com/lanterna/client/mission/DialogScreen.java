@@ -122,10 +122,10 @@ public class DialogScreen extends Screen {
         }
         // Nome
         Component name = e != null ? e.getDisplayName() : title;
-        g.drawString(font, Hud.caps(name), left + 112, top + 9, Hud.argb(color, 255), false);
+        Hud.textFit(g, Hud.caps(name), left + 112, top + 9, W - 120, Hud.argb(color, 255), false);
         Component sub = Component.translatable("race.lanterna." + msg.race())
                 .append(Component.literal(" · ")).append(Component.translatable("planet.lanterna." + msg.planet()));
-        g.drawString(font, Hud.body(sub), left + 112, top + 20, 0xFF8A98A4, false);
+        Hud.textFit(g, Hud.body(sub), left + 112, top + 20, W - 120, 0xFF8A98A4, false);
         // Falas (letra por letra)
         int budget = (int) ((ticks + pt) * 2.2f);
         int y = top + 34;

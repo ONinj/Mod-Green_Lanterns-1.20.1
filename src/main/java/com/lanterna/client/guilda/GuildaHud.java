@@ -51,20 +51,20 @@ public final class GuildaHud {
         int cor = dona.cor();
         Hud.panel(g, x, y, W, h, cor, 0.92f);
         g.blit(ClientGuildas.simbolo(dona.id()), x + 8, y + 8, 0, 0, 30, 30, 30, 30);
-        g.drawString(font, Hud.caps(Component.translatable("guilda.lanterna.hud.conquistado")), x + 44, y + 7, Hud.argb(cor, 255), false);
-        g.drawString(font, Hud.bold(alvo.displayName()), x + 44, y + 19, 0xFFFFFFFF, false);
-        g.drawString(font, Hud.body(Component.translatable("guilda.lanterna.hud.guilda", dona.nome())), x + 44, y + 30, 0xFFD8E0E4, false);
+        Hud.textFit(g, Hud.caps(Component.translatable("guilda.lanterna.hud.conquistado")), x + 44, y + 7, W - 50, Hud.argb(cor, 255), false);
+        Hud.textFit(g, Hud.bold(alvo.displayName()), x + 44, y + 19, W - 50, 0xFFFFFFFF, false);
+        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.guilda", dona.nome())), x + 44, y + 30, W - 50, 0xFFD8E0E4, false);
         int ly = y + 44;
         g.fill(x + 8, ly, x + W - 8, ly + 1, 0x30FFFFFF);
         ly += 5;
-        g.drawString(font, Hud.body(Component.translatable("guilda.lanterna.hud.dono", dona.dono())), x + 10, ly, 0xFFD8E0E4, false);
+        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.dono", dona.dono())), x + 10, ly, W - 16, 0xFFD8E0E4, false);
         ly += 11;
-        g.drawString(font, Hud.body(Component.translatable("guilda.lanterna.hud.defesa", dado.defesa())), x + 10, ly, 0xFFFF9A80, false);
+        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.defesa", dado.defesa())), x + 10, ly, W - 16, 0xFFFF9A80, false);
         ly += 11;
         Component atk = minhaDona ? Component.translatable("guilda.lanterna.hud.sua")
                 : minha == null ? Component.translatable("guilda.lanterna.hud.sem_guilda")
                 : Component.translatable("guilda.lanterna.hud.ataque", minha.ataque());
-        g.drawString(font, Hud.body(atk), x + 10, ly, minhaDona ? 0xFF9FE0A0 : 0xFF9AC8FF, false);
+        Hud.textFit(g, Hud.body(atk), x + 10, ly, W - 16, minhaDona ? 0xFF9FE0A0 : 0xFF9AC8FF, false);
         ly += 13;
         long escudo = ClientGuildas.escudoRestante(dado);
         Component st;
@@ -79,7 +79,7 @@ public final class GuildaHud {
             st = Component.translatable(minhaDona ? "guilda.lanterna.hud.vulneravel_seu" : "guilda.lanterna.hud.vulneravel");
             sc = 0xFFFFC040;
         }
-        Hud.textCenter(g, Hud.bold(st), x + W / 2, ly, sc);
+        Hud.textCenter(g, Hud.fit(Hud.bold(st), W - 12), x + W / 2, ly, sc);
     };
 
     private GuildaHud() {}

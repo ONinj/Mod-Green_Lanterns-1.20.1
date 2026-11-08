@@ -111,7 +111,7 @@ public class PortalScreen extends Screen {
             g.fill(l + 8, y, l + W - 8, y + ROW - 2, sel ? Hud.argb(cor, 90) : hov ? 0x40FFFFFF : 0x30000000);
             int c = 0xFF000000 | corDe(id);
             g.fill(l + 14, y + 4, l + 22, y + 12, c);
-            g.drawString(font, Hud.bold(nome(id)), l + 28, y + 4, sel ? 0xFFFFFFFF : 0xFFD8E0E4, false);
+            Hud.textFit(g, Hud.bold(nome(id)), l + 28, y + 4, W - 50 - font.width(Hud.body(Component.translatable(SpaceBodies.byId(id) != null && SpaceBodies.byId(id).procedural() != null ? "portal.lanterna.tipo.gerado" : id.equals("earth") ? "portal.lanterna.tipo.casa" : "portal.lanterna.tipo.tropa"))), sel ? 0xFFFFFFFF : 0xFFD8E0E4, false);
             SpaceBodies.Body b = SpaceBodies.byId(id);
             Component tipo = Component.translatable(b != null && b.procedural() != null ? "portal.lanterna.tipo.gerado"
                     : id.equals("earth") ? "portal.lanterna.tipo.casa" : "portal.lanterna.tipo.tropa");

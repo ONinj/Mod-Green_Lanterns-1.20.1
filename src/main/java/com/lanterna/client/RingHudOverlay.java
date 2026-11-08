@@ -37,13 +37,24 @@ public final class RingHudOverlay {
         var font = Hud.font();
         int color = ClientRingData.color;
         int x = 6, y = 6;
-        Hud.panel(g, x, y, W, 76, color, 0.92f);
+        // Voo e bateria de bolso
+        Component status;
+        if (ClientRingData.pocketStatus == 0) status = Component.translatable("hud.lanterna.pocket_ready");
+        else if (ClientRingData.pocketStatus > 0) status = Component.translatable("hud.lanterna.pocket_cooldown", ClientRingData.pocketStatus);
+        else status = Component.empty();
+        Component flight = ClientRingData.active && ClientRingData.flight ? Component.translatable("hud.lanterna.flight_on") : Component.empty();
+        Component line = flight.getString().isEmpty() ? status
+                : status.getString().isEmpty() ? flight : flight.copy().append(Component.literal("  ·  ")).append(status);
+        java.util.List<net.minecraft.util.FormattedCharSequence> linhas = font.split(Hud.body(line), W - 16);
+        int extraH = Math.max(0, linhas.size() - 1) * 10;
+        Hud.panel(g, x, y, W, 76 + extraH, color, 0.92f);
         x += 8;
 
         // Nome da Tropa
         Component name = Hud.caps(Component.translatable(CorpsDefinition.fullNameKey(ClientRingData.corps)));
         if (font.width(name) > W - 16) name = Hud.caps(Component.translatable(CorpsDefinition.nameKey(ClientRingData.corps)));
-        g.drawString(font, name, x, y + 5, Hud.argb(color, 255), false);
+        int offW = ClientRingData.active ? 0 : font.width(Hud.body(Component.translatable("hud.lanterna.power_off"))) + 6;
+        Hud.textFit(g, name, x, y + 5, W - 16 - offW, Hud.argb(color, 255), false);
         if (!ClientRingData.active) {
             Component off = Hud.body(Component.translatable("hud.lanterna.power_off"));
             Hud.textRight(g, off, 6 + W - 6, y + 5, 0xFF7A8890);
@@ -81,7 +92,7 @@ public final class RingHudOverlay {
         StringBuilder pips = new StringBuilder();
         for (int i = 1; i <= Affinity.MAX_LEVEL; i++) pips.append(i <= lvl ? "◆" : "◇");
         g.drawString(font, Component.literal(pips.toString()), x + 44, y + 28, Hud.argb(color, 255), false);
-        Component lname = Hud.body(Affinity.levelName(lvl));
+        Component lname = Hud.fit(Hud.body(Affinity.levelName(lvl)), W - 14 - 44 - font.width(pips.toString()) - 4);
         Hud.textRight(g, lname, 6 + W - 6, y + 28, 0xFFD8DEE4);
         g.fill(x + 44, y + 37, x + 44 + (int) (48 * Affinity.progress(pts)), y + 38, Hud.argb(color, 200));
 
@@ -89,24 +100,20 @@ public final class RingHudOverlay {
         int xp = ClientLoreData.DATA.xp();
         int nivel = com.lanterna.tropa.Nivel.nivel(xp);
         g.drawString(font, Hud.body(Component.translatable("hud.lanterna.nivel", nivel)), x, y + 40, 0xFFFFD870, false);
-        Hud.bar(g, x + 44, y + 42, 50, 4, com.lanterna.tropa.Nivel.progresso(xp), 0xFFD040, false);
-        Hud.textRight(g, Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel))), 6 + W - 6, y + 40, 0xFFD8DEE4);
+        int postoW = Math.min(font.width(Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel)))), W - 14 - 44 - 24);
+        Hud.bar(g, x + 44, y + 42, Math.max(20, Math.min(50, W - 14 - 44 - postoW - 6)), 4, com.lanterna.tropa.Nivel.progresso(xp), 0xFFD040, false);
+        // o posto vai à direita da barra de nível; se o nome for longo a barra encolhe
+        Component posto = Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel)));
+        posto = Hud.fit(posto, W - 14 - 44 - 24);
+        Hud.textRight(g, posto, 6 + W - 6, y + 40, 0xFFD8DEE4);
 
         // Planeta da Tropa e distância
-        g.drawString(font, home(mc), x, y + 52, 0xFFE0E6EA, false);
+        Hud.textFit(g, home(mc), x, y + 52, W - 16, 0xFFE0E6EA, false);
 
-        // Voo e bateria de bolso
-        Component status;
-        if (ClientRingData.pocketStatus == 0) status = Component.translatable("hud.lanterna.pocket_ready");
-        else if (ClientRingData.pocketStatus > 0) status = Component.translatable("hud.lanterna.pocket_cooldown", ClientRingData.pocketStatus);
-        else status = Component.empty();
-        Component flight = ClientRingData.active && ClientRingData.flight ? Component.translatable("hud.lanterna.flight_on") : Component.empty();
-        Component line = flight.getString().isEmpty() ? status
-                : status.getString().isEmpty() ? flight : flight.copy().append(Component.literal("  ·  ")).append(status);
-        g.drawString(font, Hud.body(line), x, y + 64, low && blink ? 0xFFFF5050 : 0xFFB8C4CC, false);
+        for (int i = 0; i < linhas.size(); i++) g.drawString(font, linhas.get(i), x, y + 64 + i * 10, low && blink ? 0xFFFF5050 : 0xFFB8C4CC, false);
         if (low) {
             Component warn = Hud.bold(Component.translatable("hud.lanterna.low_charge"));
-            g.drawString(font, warn, 6, y + 80, blink ? 0xFFFF4040 : 0xFF902020, true);
+            g.drawString(font, warn, 6, y + 80 + extraH, blink ? 0xFFFF4040 : 0xFF902020, true);
         }
     };
 

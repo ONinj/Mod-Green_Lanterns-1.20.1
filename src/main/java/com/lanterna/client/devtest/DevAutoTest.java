@@ -3801,6 +3801,55 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+    /** Textos que estouram a tela: HUDs e menus em interface grande (escala 4 em 1920x1080 e escala 3 em 1280x720). */
+    private static void sceneTextos() {
+        Minecraft mc = Minecraft.getInstance();
+        int[][] cfgs = {{1920, 1080, 4}, {1280, 720, 3}};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.renderDistance().set(6); mc.options.hideGui = false;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
+        at(40, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            var ms = com.lanterna.mission.Missions.all();
+            String id = System.getProperty("lanterna.missao", ms.iterator().next().id());
+            com.lanterna.mission.MissionManager.start(sp, id);
+            glog("missoes=" + ms.stream().map(com.lanterna.mission.Mission::id).toList());
+        }));
+        for (int[] c : cfgs) {
+            String tag = c[0] + "x" + c[1] + "_s" + c[2];
+            at(20, () -> { mc.setScreen(null); mc.getWindow().setWindowed(c[0], c[1]); });
+            at(10, () -> { mc.options.guiScale().set(c[2]); mc.resizeDisplay(); glog(tag + " gui=" + mc.getWindow().getGuiScaledWidth() + "x" + mc.getWindow().getGuiScaledHeight()); });
+            at(10, () -> { mc.gui.getChat().clearMessages(false); server(sp -> {
+                com.lanterna.terra.RitualBateria.explicar(sp, 0);
+                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("Mensagem longa de teste na barra de ação que não cabe na tela com interface grande de jeito nenhum mesmo"), true);
+                sp.displayClientMessage(net.minecraft.network.chat.Component.literal("Curta na barra"), true);
+            }); });
+            at(20, () -> shot("tx_hud_" + tag));
+            at(5, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+            at(15, () -> shot("tx_roda_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.mission.JournalScreen()));
+            at(15, () -> shot("tx_diario_" + tag));
+            at(5, () -> mc.setScreen(com.lanterna.client.mission.JournalScreen.ringTab()));
+            at(15, () -> shot("tx_diarioanel_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.ESTATISTICAS)));
+            at(15, () -> shot("tx_perfil_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL)));
+            at(15, () -> shot("tx_visual_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.fonte.ArvoreScreen()));
+            at(15, () -> shot("tx_arvore_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
+            at(15, () -> shot("tx_mapa_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.voz.ComunicadorScreen()));
+            at(15, () -> shot("tx_comunicador_" + tag));
+            at(5, () -> mc.setScreen(new com.lanterna.client.oficina.OficinaScreen()));
+            at(15, () -> shot("tx_oficina_" + tag));
+            at(5, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(null); });
+        }
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4461,6 +4510,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("pele2")) scenePele2();
         else if (ENABLED && SCENE.equals("mogo2")) sceneMogo2();
         else if (ENABLED && SCENE.equals("frenesi")) sceneFrenesi();
+        else if (ENABLED && SCENE.equals("textos")) sceneTextos();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

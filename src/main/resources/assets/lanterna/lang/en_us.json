@@ -2591,5 +2591,15 @@
   "morte.lanterna.frenesi.hud": "THE RING HUNGERS",
   "morte.lanterna.frenesi.conta": "Feeding: %s/%s",
   "morte.lanterna.frenesi.saciado": "SATED",
-  "morte.lanterna.frenesi.volta": "Control returns to you. For now."
+  "morte.lanterna.frenesi.volta": "Control returns to you. For now.",
+  "message.lanterna.bateria.vazia.titulo": "Chiseled Battery: empty",
+  "message.lanterna.bateria.vazia.intro": "To fill it, perform the Battery Ritual:",
+  "message.lanterna.bateria.vazia.passo1": "Place the battery on top of an amethyst block, under open sky.",
+  "message.lanterna.bateria.vazia.passo2": "Light 4 candles at the corners: 2 blocks diagonally, at the battery's height.",
+  "message.lanterna.bateria.vazia.passo3": "Wait for nightfall.",
+  "message.lanterna.bateria.vazia.passo4": "Click the battery with a Star Fragment and protect it for 1 minute.",
+  "message.lanterna.bateria.andamento.titulo": "Chiseled Battery: ritual in progress",
+  "message.lanterna.bateria.andamento.texto": "Stay close and protect it until the charge reaches 100%%.",
+  "message.lanterna.bateria.cheia.titulo": "Chiseled Battery: full of pure energy",
+  "message.lanterna.bateria.cheia.texto": "Touch a Dormant Ring to it to awaken it."
 }

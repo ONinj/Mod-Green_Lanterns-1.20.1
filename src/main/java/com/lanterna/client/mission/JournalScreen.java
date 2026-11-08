@@ -26,7 +26,11 @@ import java.util.List;
  * e a afinidade com o anel (com os construtos liberados em cada nível).
  */
 public class JournalScreen extends Screen {
-    private static final int W = 400, H = 240;
+    private static final int W = 400;
+    /** Altura: encolhe em telas baixas para as abas (em cima do painel) não saírem da tela. */
+    private int H = 240;
+
+    private int topo() { return Math.max(23, (height - H + 22) / 2); }
     private enum Tab { MISSIONS, PEOPLE, RING }
 
     private Tab tab = Tab.MISSIONS;
@@ -47,6 +51,7 @@ public class JournalScreen extends Screen {
 
     @Override
     protected void init() {
+        H = Math.min(240, Math.max(150, height - 26));
         list.clear();
         for (String id : ClientLoreData.DATA.active().keySet()) {
             Mission m = Missions.get(id);
@@ -62,7 +67,7 @@ public class JournalScreen extends Screen {
             Mission t = ClientLoreData.tracked();
             selected = t != null ? t.id() : (list.isEmpty() ? null : list.get(0).id());
         }
-        int left = (width - W) / 2, top = (height - H) / 2;
+        int left = (width - W) / 2, top = topo();
         int tx = left + 4;
         for (Tab t : Tab.values()) {
             Component label = Component.translatable("journal.lanterna.tab." + t.name().toLowerCase());
@@ -111,7 +116,7 @@ public class JournalScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
         renderBackground(g);
-        int left = (width - W) / 2, top = (height - H) / 2;
+        int left = (width - W) / 2, top = topo();
         int color = ClientRingData.hasRing ? ClientRingData.color : 0x8AA0B0;
         Hud.panel(g, left, top, W, H, color, 1f);
         switch (tab) {
@@ -132,8 +137,7 @@ public class JournalScreen extends Screen {
             boolean active = ClientLoreData.DATA.isActive(m.id());
             boolean sel = m.id().equals(selected);
             if (sel) g.fill(left + 4, y - 2, left + 134, y + 10, Hud.argb(m.color(), 60));
-            String t = font.plainSubstrByWidth(m.title().getString(), 118);
-            g.drawString(font, Hud.body(Component.literal((active ? "◆ " : "✔ ") + t)), left + 8, y,
+            Hud.textFit(g, Hud.body(Component.literal((active ? "◆ " : "✔ ") + m.title().getString())), left + 8, y, 124,
                     active ? Hud.argb(m.color(), 255) : 0xFF5E6A70, false);
             y += 12;
         }
@@ -145,6 +149,9 @@ public class JournalScreen extends Screen {
         }
         int x = left + 144, w = W - 152;
         y = top + 8;
+        // o texto não passa por cima dos botões de baixo nem sai do painel
+        boolean botoes = ClientLoreData.DATA.isActive(m.id());
+        g.enableScissor(x - 2, top + 4, left + W - 4, top + H - (botoes ? 30 : 4));
         g.drawString(font, Hud.caps(Component.translatable("hud.lanterna.mission." + m.line())), x, y, Hud.argb(m.color(), 255), false);
         y += 13;
         y += Hud.wrapped(g, Hud.bold(m.title()), x, y, w, 0xFFFFFFFF, 10) + 4;
@@ -157,6 +164,7 @@ public class JournalScreen extends Screen {
             g.drawString(font, Component.literal(done ? "✔" : "•"), x, y, done ? 0xFF7CFF8A : Hud.argb(m.color(), 255), true);
             y += Hud.wrapped(g, Hud.body(o.label(p)), x + 10, y, w - 10, done ? 0xFF6A7A6E : 0xFFE0E6EA, 10) + 1;
         }
+        g.disableScissor();
     }
 
     private void people(GuiGraphics g, int left, int top) {
@@ -168,12 +176,12 @@ public class JournalScreen extends Screen {
             Race race = Race.ofPlanet(p.planet);
             String key = race == null ? p.race : race.repKey();
             int rep = ClientLoreData.DATA.rep(key);
-            g.drawString(font, Hud.bold(Component.translatable("race.lanterna." + p.race)), left + 10, y, Hud.argb(p.color(), 255), true);
-            g.drawString(font, Hud.body(p.planetName()), left + 100, y, 0xFF8A98A4, false);
+            g.drawString(font, Hud.fit(Hud.bold(Component.translatable("race.lanterna." + p.race)), 86), left + 10, y, Hud.argb(p.color(), 255), true);
+            Hud.textFit(g, Hud.body(p.planetName()), left + 100, y, 56, 0xFF8A98A4, false);
             int need = Missions.repNeeded(p.race);
             Hud.bar(g, left + 160, y + 2, 90, 5, Math.min(1f, Math.max(0, rep) / (float) Math.max(need, 5)), p.color(), false);
             g.drawString(font, Hud.body(Component.literal(String.valueOf(rep))), left + 256, y, rep < 0 ? 0xFFFF6060 : 0xFFE0E6EA, false);
-            g.drawString(font, Hud.body(Component.translatable("journal.lanterna.how." + p.race)), left + 276, y, 0xFF7A8890, false);
+            Hud.textFit(g, Hud.body(Component.translatable("journal.lanterna.how." + p.race)), left + 276, y, W - 282, 0xFF7A8890, false);
             y += 22;
         }
     }
@@ -197,10 +205,9 @@ public class JournalScreen extends Screen {
         y += 12;
         y += Hud.wrapped(g, Hud.body(Component.translatable("journal.lanterna.affinity_help")), left + 10, y, W - 20, 0xFF9AA8B0, 10) + 4;
         // Bônus passivos deste nível
-        g.drawString(font, Hud.body(Component.translatable("journal.lanterna.passives",
+        y += Hud.wrapped(g, Hud.body(Component.translatable("journal.lanterna.passives",
                 Affinity.foodSeconds(lvl), Affinity.regenSeconds(lvl), String.format("%.1f", Affinity.punchBonus(lvl)),
-                String.format("%.1f", Affinity.power(pts)))), left + 10, y, Hud.argb(ClientRingData.color, 255), false);
-        y += 14;
+                String.format("%.1f", Affinity.power(pts)))), left + 10, y, W - 20, Hud.argb(ClientRingData.color, 255), 10) + 4;
         int idx = 0;
         for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
             if (t.arvore) continue;   // os da Árvore da Luz aparecem na tela da árvore
@@ -208,7 +215,7 @@ public class JournalScreen extends Screen {
             Component line = Component.literal(ok ? "◆ " : "◇ ").append(t.displayName())
                     .append(Component.literal("  ")).append(Component.translatable("journal.lanterna.unlock", Affinity.levelName(t.unlockLevel)));
             int col = (idx % 2) * 190;
-            g.drawString(font, Hud.body(line), left + 10 + col, y, ok ? Hud.argb(t.corps != null ? ClientRingData.color : t.category.color, 255) : 0xFF5E6A70, false);
+            Hud.textFit(g, Hud.body(line), left + 10 + col, y, 186, ok ? Hud.argb(t.corps != null ? ClientRingData.color : t.category.color, 255) : 0xFF5E6A70, false);
             if (idx % 2 == 1) y += 11;
             idx++;
         }
@@ -216,7 +223,7 @@ public class JournalScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        int left = (width - W) / 2, top = (height - H) / 2;
+        int left = (width - W) / 2, top = topo();
         if (tab == Tab.MISSIONS && mx >= left + 4 && mx <= left + 134 && my >= top + 20) {
             int idx = (int) ((my - top - 20) / 12) + scroll;
             if (idx >= 0 && idx < list.size()) {

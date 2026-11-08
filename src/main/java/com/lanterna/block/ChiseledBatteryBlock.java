@@ -65,13 +65,12 @@ public class ChiseledBatteryBlock extends HorizontalDirectionalBlock {
         }
         if (!(held.getItem() instanceof DormantRingItem)) {
             if (!level.isClientSide && hand == InteractionHand.MAIN_HAND)
-                player.displayClientMessage(Component.translatable(carga == 3 ? "message.lanterna.chiseled_battery_hint"
-                        : carga == 0 ? "message.lanterna.bateria_vazia" : "message.lanterna.bateria_ritual"), true);
+                com.lanterna.terra.RitualBateria.explicar((ServerPlayer) player, carga);
             return InteractionResult.PASS;
         }
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (carga < 3) {
-            player.displayClientMessage(Component.translatable(carga == 0 ? "message.lanterna.bateria_vazia" : "message.lanterna.bateria_ritual"), true);
+            com.lanterna.terra.RitualBateria.explicar((ServerPlayer) player, carga);
             return InteractionResult.CONSUME;
         }
         DormantRingItem.awaken((ServerPlayer) player, held, pos);

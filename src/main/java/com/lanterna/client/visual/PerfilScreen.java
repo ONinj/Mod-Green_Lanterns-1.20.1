@@ -24,7 +24,9 @@ import java.util.List;
  * Tudo vem do servidor (a ficha) e o visual escolhido é salvo no servidor e visto pelos outros jogadores.
  */
 public class PerfilScreen extends Screen {
-    private static final int W = 372, H = 232;
+    private static final int W = 372;
+    /** Altura do painel: encolhe em telas baixas (interface grande) para as abas e o fundo caberem. */
+    private int H = 232;
     private static VisualPackets.Ficha ficha;
     private static PerfilScreen aberta;
 
@@ -47,11 +49,12 @@ public class PerfilScreen extends Screen {
     }
 
     private int left() { return (width - W) / 2; }
-    private int top() { return (height - H) / 2 + 8; }
+    private int top() { return Math.max(19, (height - H) / 2 + 8); }
     private int cor() { return ClientRingData.hasRing ? ClientRingData.color : 0x8FA3B0; }
 
     @Override
     protected void init() {
+        H = Math.min(232, Math.max(160, height - 22));
         aberta = this;
         ModNetwork.sendToServer(new VisualPackets.FichaPedido());
     }

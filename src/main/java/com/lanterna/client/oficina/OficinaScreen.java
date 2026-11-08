@@ -80,21 +80,26 @@ public class OficinaScreen extends Screen {
     // ===================== Montagem da tela =====================
 
     // posições dos rótulos (calculadas no init)
+    private boolean compacto;
+    private Component infoNoPe;
     private int yFerr, yModelos, yTons, yNome, yComp, yDesc, yEscala, yEspacos, yPreset, yInfo;
 
     @Override
     protected void init() {
         clearWidgets();
         int esq = 6, larguraEsq = 120, dir = width - 158, larguraDir = 152;
-        int h = 14, p = 16; // altura do botão e passo
+        // em tela baixa (interface grande) tudo fica mais junto para caber sem sair por baixo
+        compacto = height < 290;
+        int h = compacto ? 12 : 14, p = compacto ? 14 : 16; // altura do botão e passo
+        int rot = compacto ? 9 : 10; // altura de um rótulo
         vx0 = esq + larguraEsq + 8;
         vx1 = dir - 8;
         vy0 = 22;
         vy1 = height - 4;
         if (zoom <= 0) zoom = Math.max(4, Math.min((vx1 - vx0), (vy1 - vy0)) / 58f);
         int bw = (larguraEsq - 4) / 2;
-        int y = 24;
-        yFerr = y; y += 10;
+        int y = compacto ? 23 : 24;
+        yFerr = y; y += rot;
         Ferramenta[] fs = Ferramenta.values();
         for (int i = 0; i < fs.length; i++) {
             Ferramenta f = fs[i];
@@ -122,8 +127,8 @@ public class OficinaScreen extends Screen {
             guardar();
             proj.liso = !proj.liso;
         }));
-        y += p + 4;
-        yModelos = y; y += 10;
+        y += p + (compacto ? 2 : 4);
+        yModelos = y; y += rot;
         int i = 0;
         for (var e : Modelos.TODOS.entrySet()) {
             addRenderableWidget(new Botao(esq + (i % 2) * (bw + 4), y + (i / 2) * p, bw, h,
@@ -139,16 +144,16 @@ public class OficinaScreen extends Screen {
         y += ((Modelos.TODOS.size() + 1) / 2) * p + 4;
         yTons = y;
         // lado direito
-        int ry = 24;
-        yNome = ry; ry += 10;
+        int ry = compacto ? 23 : 24;
+        yNome = ry; ry += rot;
         nome = new EditBox(font, dir, ry, larguraDir, h, Component.translatable("oficina.lanterna.nome"));
         nome.setMaxLength(24);
         nome.setValue(proj.nome);
         nome.setHint(Component.translatable("oficina.lanterna.nome_dica"));
         nome.setResponder(s -> proj.nome = s);
         addRenderableWidget(nome);
-        ry += p + 4;
-        yComp = ry; ry += 10;
+        ry += p + (compacto ? 2 : 4);
+        yComp = ry; ry += rot;
         Comportamento[] cs = Comportamento.values();
         int cw = (larguraDir - 4) / 2;
         for (int k = 0; k < cs.length; k++) {
@@ -156,15 +161,16 @@ public class OficinaScreen extends Screen {
             addRenderableWidget(new Botao(dir + (k % 2) * (cw + 4), ry + (k / 2) * p, cw, h, c.nome(), () -> proj.comp == c, () -> {
                 guardar();
                 proj.comp = c;
+                refazerLayout = true;
             }));
         }
         ry += 3 * p + 2;
-        yDesc = ry; ry += 30;
+        yDesc = ry; ry += Math.max(18, Hud.lines(Hud.body(proj.comp.descricao()), 152) * 9 + 3);
         yEscala = ry;
         addRenderableWidget(new Botao(dir, ry, 20, h, Component.literal("-"), () -> false, () -> proj.escala = Math.max(0.5f, Math.round((proj.escala - 0.25f) * 4) / 4f)));
         addRenderableWidget(new Botao(dir + larguraDir - 20, ry, 20, h, Component.literal("+"), () -> false, () -> proj.escala = Math.min(2f, Math.round((proj.escala + 0.25f) * 4) / 4f)));
-        ry += p + 4;
-        yEspacos = ry; ry += 10;
+        ry += p + (compacto ? 2 : 4);
+        yEspacos = ry; ry += rot;
         int sw = (larguraDir - 12) / 4;
         for (int k = 0; k < Projeto.SLOTS; k++) {
             int s = k;
@@ -177,8 +183,8 @@ public class OficinaScreen extends Screen {
         }
         ry += 2 * p + 2;
         addRenderableWidget(new Botao(dir, ry, larguraDir, h + 2, Component.translatable("oficina.lanterna.salvar"), () -> false, this::salvar));
-        ry += p + 6;
-        yPreset = ry; ry += 10;
+        ry += p + (compacto ? 2 : 6);
+        yPreset = ry; ry += rot;
         int pw = (larguraDir - 12) / 4;
         for (int k = 0; k < 4; k++) {
             int q = k;
@@ -189,10 +195,20 @@ public class OficinaScreen extends Screen {
         yInfo = ry;
     }
 
+    /** A descrição do comportamento muda de tamanho: refaz a posição dos botões abaixo dela. */
+    private boolean refazerLayout;
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (refazerLayout) { refazerLayout = false; rebuildWidgets(); }
+    }
+
     /** Para o teste automático: abre já com este desenho. */
     public void carregar(Projeto p) {
         proj = p.copia();
         if (nome != null) nome.setValue(p.nome);
+        refazerLayout = true;
     }
 
     public void testar(boolean t) {
@@ -475,7 +491,11 @@ public class OficinaScreen extends Screen {
         int cor = cor();
         Hud.panel(g, 2, 2, width - 4, 16, cor, 1f);
         g.drawString(font, Hud.title(title.copy()), 8, 6, Hud.argb(cor, 255), false);
-        Hud.textRight(g, Hud.body(Component.translatable("oficina.lanterna.atalhos_curto")), width - 8, 6, 0xFF8A949C);
+        int livre = width - 24 - font.width(Hud.title(title.copy())) - 16;
+        if (livre > 40) {
+            Component at = Hud.fit(Hud.body(Component.translatable("oficina.lanterna.atalhos_curto")), livre);
+            Hud.textRight(g, at, width - 8, 6, 0xFF8A949C);
+        }
         Hud.panel(g, 2, 20, 128, height - 22, cor, 1f);
         Hud.panel(g, width - 162, 20, 160, height - 22, cor, 1f);
         g.fill(vx0 - 2, vy0 - 2, vx1 + 2, vy1, 0xFF0C1014);
@@ -489,7 +509,7 @@ public class OficinaScreen extends Screen {
             g.fill(x, y, x + 24, y + 14, 0xFF000000 | Malha.corTom(cor, t));
             Hud.textCenter(g, Hud.body(Component.literal(String.valueOf(t + 1))), x + 12, y + 3, t == 3 ? 0xFF202020 : 0xFFFFFFFF);
         }
-        g.drawString(font, Hud.body(Component.translatable("oficina.lanterna.camada_pincel", camada, pincel)), esq, yTons + 30, 0xFFB8C4CC, false);
+        g.drawString(font, Hud.body(Component.translatable("oficina.lanterna.camada_pincel", camada, pincel)), esq, yTons + 28, 0xFFB8C4CC, false);
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.nome")), dir, yNome, 0xFF9AA8B0, false);
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.comportamento")), dir, yComp, 0xFF9AA8B0, false);
         Hud.wrapped(g, Hud.body(proj.comp.descricao()), dir, yDesc, 152, 0xFFB8C4CC, 9);
@@ -497,7 +517,10 @@ public class OficinaScreen extends Screen {
         Projeto s = OficinaCliente.MEUS[slot];
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.espaco", slot + 1, s == null ? Component.translatable("oficina.lanterna.livre") : Component.literal(s.nome))), dir, yEspacos, 0xFF9AA8B0, false);
         g.drawString(font, Hud.caps(Component.translatable("oficina.lanterna.preset")), dir, yPreset, 0xFF9AA8B0, false);
-        Hud.wrapped(g, Hud.body(Component.translatable("oficina.lanterna.info", proj.quantos(), Projeto.MAX, proj.custo(), proj.comp.recarga / 20)), dir, yInfo, 152, 0xFF8A949C, 9);
+        Component info = Hud.body(Component.translatable("oficina.lanterna.info", proj.quantos(), Projeto.MAX, proj.custo(), proj.comp.recarga / 20));
+        // se não cabe embaixo da coluna da direita, vai para o pé da área de desenho
+        if (yInfo + Hud.lines(info, 152) * 9 <= height - 4) Hud.wrapped(g, info, dir, yInfo, 152, 0xFF8A949C, 9);
+        else infoNoPe = info;
 
         // vista 3D
         g.enableScissor(vx0, vy0, vx1, vy1);
@@ -573,7 +596,14 @@ public class OficinaScreen extends Screen {
         };
         if (proj.comp == Comportamento.ARMA) rotulo(g, base, Projeto.MEIO, -1.6f, Projeto.MEIO, Component.translatable("oficina.lanterna.mao"), 0xFFFFFF);
         if (dica != null) Hud.wrapped(g, Hud.body(Component.translatable(dica)), vx0 + 6, vy0 + 6, vx1 - vx0 - 12, 0xFF9AA8B0, 9);
-        Hud.wrapped(g, Hud.body(Component.translatable("oficina.lanterna.atalhos")), vx0 + 6, vy1 - 30, vx1 - vx0 - 12, 0xFF6A747C, 9);
+        Component atalhos = Hud.body(Component.translatable("oficina.lanterna.atalhos"));
+        int largura = vx1 - vx0 - 12;
+        int pe = vy1 - 3 - Hud.lines(atalhos, largura) * 9;
+        Hud.wrapped(g, atalhos, vx0 + 6, pe, largura, 0xFF6A747C, 9);
+        if (infoNoPe != null) {
+            Hud.wrapped(g, infoNoPe, vx0 + 6, pe - 2 - Hud.lines(infoNoPe, largura) * 9, largura, 0xFF8A949C, 9);
+            infoNoPe = null;
+        }
         if (testando) Hud.textCenter(g, Hud.bold(Component.translatable("oficina.lanterna.testando")), (vx0 + vx1) / 2, vy1 - 42, Hud.argb(cor, 255));
         else if (ferramenta == Ferramenta.CAIXA) Hud.textCenter(g, Hud.body(Component.translatable(caixaInicio == null ? "oficina.lanterna.caixa1" : "oficina.lanterna.caixa2")), (vx0 + vx1) / 2, vy1 - 42, 0xFFB8C4CC);
     }

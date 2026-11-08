@@ -76,18 +76,25 @@ public final class MissionHud {
         for (int i = 0; i < m.objectives().size(); i++) {
             if (ClientLoreData.DATA.progress(m.id(), i) < m.objectives().get(i).count()) { atual = i; break; }
         }
+        // o objetivo atual e a dica de para onde ir quebram em linhas (os outros são cortados com "…")
+        int lw = WIDTH - 24;
+        List<FormattedCharSequence> atualLinhas = atual >= 0
+                ? font.split(Hud.body(m.objectives().get(atual).label(ClientLoreData.DATA.progress(m.id(), atual))), lw) : List.of();
+        List<FormattedCharSequence> dica = target != null ? font.split(Hud.body(target.hint()), WIDTH - 32) : List.of();
+        if (dica.size() > 3) dica = dica.subList(0, 3);
         int objH = 0;
         for (int i = 0; i < m.objectives().size(); i++) {
             Objective o = m.objectives().get(i);
-            objH += 11 + (i == atual && o.count() > 1 ? 5 : 0);
+            objH += (i == atual ? 1 + 10 * Math.max(1, atualLinhas.size()) : 11) + (i == atual && o.count() > 1 ? 5 : 0);
         }
-        int h = 18 + title.size() * 10 + 4 + objH + (target != null ? 28 : 0) + 4;
+        int h = 18 + title.size() * 10 + 4 + objH + (target != null ? 18 + 10 * Math.max(1, dica.size()) : 0) + 4;
         Hud.panel(g, x, y, WIDTH, h, c, 0.95f);
         // faixa do topo
         g.fillGradient(x + 2, y + 1, x + WIDTH - 1, y + 13, Hud.argb(c, 90), Hud.argb(c, 10));
         Component kind = Component.translatable("hud.lanterna.mission." + m.line());
-        g.drawString(font, Hud.caps(kind), x + 8, y + 3, Hud.argb(Hud.mix(c, 0xFFFFFF, 0.35f), 255), false);
-        Hud.textRight(g, Hud.body(Component.translatable("hud.lanterna.mission.diario")), x + WIDTH - 6, y + 3, 0xFF8A98A4);
+        Component diario = Hud.body(Component.translatable("hud.lanterna.mission.diario"));
+        Hud.textFit(g, Hud.caps(kind), x + 8, y + 3, WIDTH - 20 - font.width(diario), Hud.argb(Hud.mix(c, 0xFFFFFF, 0.35f), 255), false);
+        Hud.textRight(g, diario, x + WIDTH - 6, y + 3, 0xFF8A98A4);
         int ty = y + 17;
         for (FormattedCharSequence line : title) {
             g.drawString(font, line, x + 8, ty, 0xFFFFFFFF, true);
@@ -99,10 +106,7 @@ public final class MissionHud {
             int p = ClientLoreData.DATA.progress(m.id(), i);
             boolean done = p >= o.count();
             boolean now = i == atual;
-            int lw = WIDTH - 24;
-            Component label = Hud.body(o.label(p));
-            String str = label.getString();
-            Component shown = font.width(label) > lw ? Hud.body(font.plainSubstrByWidth(str, lw - 6) + "…") : label;
+            Component shown = Hud.fit(Hud.body(o.label(p)), lw);
             if (done) {
                 long quando = feitos.computeIfAbsent(i, q -> System.currentTimeMillis());
                 float brilho = 1f - Math.min(1f, (System.currentTimeMillis() - quando) / 900f);
@@ -111,10 +115,12 @@ public final class MissionHud {
                 g.drawString(font, shown.copy().withStyle(net.minecraft.ChatFormatting.STRIKETHROUGH), x + 18, ty, 0xFF5E6E66, false);
             } else if (now) {
                 float pulse = 0.6f + 0.4f * Mth.sin((System.currentTimeMillis() % 100000) / 220f);
-                g.fill(x + 5, ty - 2, x + WIDTH - 5, ty + 9 + (o.count() > 1 ? 5 : 0), Hud.argb(c, 28));
+                int nl = Math.max(1, atualLinhas.size());
+                g.fill(x + 5, ty - 2, x + WIDTH - 5, ty + 9 + 10 * (nl - 1) + (o.count() > 1 ? 5 : 0), Hud.argb(c, 28));
                 g.drawString(font, Component.literal("▶"), x + 8, ty, Hud.argb(c, (int) (255 * pulse)), true);
-                g.drawString(font, shown, x + 18, ty, 0xFFFFFFFF, true);
-                if (o.count() > 1) Hud.bar(g, x + 18, ty + 10, WIDTH - 30, 2, Math.min(p, o.count()) / (float) o.count(), c, false);
+                for (int l = 0; l < atualLinhas.size(); l++) g.drawString(font, atualLinhas.get(l), x + 18, ty + l * 10, 0xFFFFFFFF, true);
+                ty += 10 * (nl - 1) + 1;
+                if (o.count() > 1) Hud.bar(g, x + 18, ty + 9, WIDTH - 30, 2, Math.min(p, o.count()) / (float) o.count(), c, false);
             } else {
                 g.drawString(font, Component.literal("○"), x + 8, ty, 0xFF5A6670, false);
                 g.drawString(font, shown, x + 18, ty, 0xFF8A98A4, false);
@@ -141,11 +147,7 @@ public final class MissionHud {
             g.pose().popPose();
             Component dist = Hud.bold(Component.literal(Hud.distance(target.distance())));
             g.drawString(font, dist, x + 25, ty, 0xFFFFFFFF, true);
-            Component hint = Hud.body(target.hint());
-            String hs = hint.getString();
-            int hw = WIDTH - 32;
-            Component hintShown = font.width(hint) > hw ? Hud.body(font.plainSubstrByWidth(hs, hw - 6) + "…") : hint;
-            g.drawString(font, hintShown, x + 25, ty + 10, 0xFFB8C4CC, true);
+            for (int l = 0; l < dica.size(); l++) g.drawString(font, dica.get(l), x + 25, ty + 10 + l * 10, 0xFFB8C4CC, true);
         }
     }
 
@@ -217,10 +219,11 @@ public final class MissionHud {
         if (alpha < 8) return;
         int color = toastMission.color();
         Component head = Hud.caps(Component.translatable(toastDone ? "hud.lanterna.mission.completed" : "hud.lanterna.mission.new"));
-        Component title = Hud.bold(toastMission.title());
         var font = Hud.font();
-        int w = Math.max(font.width(head), font.width(title) * 3 / 2) + 40;
-        int x = width / 2 - w / 2, y = 34;
+        // o título aparece 1,5x maior: corta para caber na tela
+        Component title = Hud.fit(Hud.bold(toastMission.title()), (width - 60) * 2 / 3);
+        int w = Math.min(width - 8, Math.max(font.width(head), font.width(title) * 3 / 2) + 40);
+        int x = width / 2 - w / 2, y = 40;
         Hud.panel(g, x, y, w, 36, color, a);
         g.drawString(font, head, width / 2 - font.width(head) / 2, y + 5, Hud.argb(color, alpha), false);
         g.pose().pushPose();

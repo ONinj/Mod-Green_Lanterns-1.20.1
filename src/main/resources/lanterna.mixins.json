@@ -22,7 +22,8 @@
     "MouseHandlerMixin",
     "PlayerRendererMixin",
     "CameraMixin",
-    "ItemInHandLayerMixin"
+    "ItemInHandLayerMixin",
+    "GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1

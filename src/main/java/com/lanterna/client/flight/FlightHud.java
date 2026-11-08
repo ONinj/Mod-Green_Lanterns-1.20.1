@@ -41,8 +41,9 @@ public final class FlightHud {
                     Autopilot.target().name(),
                     Component.translatable("autopilot.lanterna.phase." + phase),
                     formatDistance(Autopilot.remaining(mc.player)));
+            line = com.lanterna.client.hud.Hud.fit(line, width - 16);
             int w = font.width(line);
-            Component cancel = Component.translatable("autopilot.lanterna.cancel_hint");
+            Component cancel = com.lanterna.client.hud.Hud.fit(Component.translatable("autopilot.lanterna.cancel_hint"), width - 16);
             int w2 = font.width(cancel);
             y -= 12;
             g.fill(width / 2 - Math.max(w, w2) / 2 - 4, y - 3, width / 2 + Math.max(w, w2) / 2 + 4, y + 20, 0x88000000);

@@ -54,6 +54,12 @@ public final class ClientTecnicas {
         if (d.tecnicas().isEmpty()) return;
         int n = d.honra() ? 3 : 2;
         int x = w / 2 - 91 - 8 - n * 26, y = h - 24;
+        // a barra de construtos ocupa o mesmo lugar: as técnicas ficam à esquerda dela, ou em cima se não couber
+        int barra = com.lanterna.client.construct.ConstructBarHud.esquerda(w);
+        if (barra >= 0) {
+            x = barra - 4 - n * 26;
+            if (x < 4) { x = barra; y = h - 2 - com.lanterna.client.construct.ConstructBarHud.altura() - 4 - 22; }
+        }
         String[] teclas = {KeyBindings.TECNICA[0].getTranslatedKeyMessage().getString(), KeyBindings.TECNICA[1].getTranslatedKeyMessage().getString(),
                 KeyBindings.TECNICA[2].getTranslatedKeyMessage().getString()};
         int cor = 0xFF000000 | ClientRingData.color;

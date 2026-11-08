@@ -71,6 +71,33 @@ public final class RitualBateria {
     /** Para o teste automático: aceita o altar sem a noite. */
     public static boolean ignorarNoite;
 
+    private static final Map<UUID, Long> AVISADO = new HashMap<>();
+
+    /**
+     * Explica a bateria no chat (e não no meio da tela, onde o texto longo saía da tela): o que fazer com ela agora.
+     * Nunca repete a mesma explicação para o mesmo jogador em menos de 4 segundos.
+     */
+    public static void explicar(ServerPlayer p, int carga) {
+        String chave = carga == 3 ? "cheia" : carga == 0 ? "vazia" : "andamento";
+        long agora = p.serverLevel().getGameTime();
+        Long antes = AVISADO.get(p.getUUID());
+        if (antes != null && agora - antes < 80 && antes >= 0) return;
+        AVISADO.put(p.getUUID(), agora);
+        int ouro = 0xFFE6A0, texto = 0xD8DEE4, cinza = 0x9AA8B0;
+        p.sendSystemMessage(Component.literal("\u2726 ").withStyle(s -> s.withColor(ouro))
+                .append(Component.translatable("message.lanterna.bateria." + chave + ".titulo").withStyle(s -> s.withColor(ouro).withBold(true))));
+        if (carga == 0) {
+            p.sendSystemMessage(Component.literal("  ").append(Component.translatable("message.lanterna.bateria.vazia.intro")).withStyle(s -> s.withColor(cinza)));
+            for (int i = 1; i <= 4; i++) {
+                int n = i;
+                p.sendSystemMessage(Component.literal("  " + n + ". ").withStyle(s -> s.withColor(ouro))
+                        .append(Component.translatable("message.lanterna.bateria.vazia.passo" + n).withStyle(s -> s.withColor(texto))));
+            }
+        } else {
+            p.sendSystemMessage(Component.literal("  ").append(Component.translatable("message.lanterna.bateria." + chave + ".texto")).withStyle(s -> s.withColor(texto)));
+        }
+    }
+
     public static boolean emAndamento(BlockPos pos) {
         return ATIVOS.containsKey(pos);
     }

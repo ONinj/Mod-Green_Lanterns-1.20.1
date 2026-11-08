@@ -168,7 +168,7 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
             case 1 -> Component.translatable("gui.lanterna.battery_wait", ClientRingData.pocketStatus);
             default -> Component.translatable("gui.lanterna.empty");
         };
-        g.drawString(font, Hud.body(batteryInfo), textX, LanternMenu.BATTERY_Y + 10, ClientRingData.pocketStatus == 0 ? Hud.argb(c, 255) : 0xFF8A98A4, false);
+        g.drawString(font, Hud.fit(Hud.body(batteryInfo), imageWidth - textX - 6), textX, LanternMenu.BATTERY_Y + 10, ClientRingData.pocketStatus == 0 ? Hud.argb(c, 255) : 0xFF8A98A4, false);
         g.drawString(font, Hud.caps(playerInventoryTitle), 8, 72, 0xFF8A98A4, false);
     }
 

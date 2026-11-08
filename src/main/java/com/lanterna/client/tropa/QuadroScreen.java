@@ -67,7 +67,7 @@ public class QuadroScreen extends Screen {
             int y = top + 28 + i * ROW;
             int st = data.estado().get(i);
             g.fill(left + 6, y, left + W - 6, y + ROW - 3, 0x40000000);
-            g.drawString(font, Hud.bold(m.title()), left + 12, y + 4, st == 2 ? 0xFF6A7880 : 0xFFFFFFFF, false);
+            Hud.textFit(g, Hud.bold(m.title()), left + 12, y + 4, W - 110, st == 2 ? 0xFF6A7880 : 0xFFFFFFFF, false);
             Hud.wrapped(g, Hud.body(m.description()), left + 12, y + 16, W - 110, 0xFF9AA8B0, 9);
             Component tag;
             if (st == 2) tag = Component.translatable("contrato.lanterna.feito");
@@ -75,7 +75,7 @@ public class QuadroScreen extends Screen {
                 Component n = Component.Serializer.fromJson(data.notasJson().get(i));
                 tag = n == null ? Component.empty() : n;
             } else tag = Component.translatable("contrato.lanterna.recomendado", Contratos.recomendado(id));
-            Hud.textRight(g, Hud.body(tag), left + W - 10, y + 27, st == 2 ? 0xFF60D070 : st == 3 ? 0xFFE07060 : 0xFFB8A060);
+            Hud.textRight(g, Hud.fit(Hud.body(tag), 92), left + W - 10, y + 27, st == 2 ? 0xFF60D070 : st == 3 ? 0xFFE07060 : 0xFFB8A060);
         }
         super.render(g, mx, my, pt);
     }

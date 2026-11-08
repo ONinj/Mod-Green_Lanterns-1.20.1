@@ -2000,7 +2000,7 @@
   "arvore.lanterna.essencia": "✦ %s Essência da Fonte",
   "arvore.lanterna.sem_arvore": "Este anel não tem Árvore da Luz: só as Tropas com Bateria Central têm uma.",
   "arvore.lanterna.sem_selo": "A árvore só cresce com o Selo da Fonte da sua Tropa.",
-  "arvore.lanterna.ajuda": "Clique num nó aceso para gastar Essência. Ganhe Essência dentro da Fonte.",
+  "arvore.lanterna.ajuda": "Clique num nó aceso para gastar Essência (ganhe-a na Fonte).",
   "arvore.lanterna.ramo.A": "Ataque",
   "arvore.lanterna.ramo.P": "Proteção",
   "arvore.lanterna.ramo.D": "Domínio",
@@ -2591,5 +2591,15 @@
   "morte.lanterna.frenesi.hud": "O ANEL TEM FOME",
   "morte.lanterna.frenesi.conta": "Saciando: %s/%s",
   "morte.lanterna.frenesi.saciado": "SACIADO",
-  "morte.lanterna.frenesi.volta": "O controle volta para você. Por enquanto."
+  "morte.lanterna.frenesi.volta": "O controle volta para você. Por enquanto.",
+  "message.lanterna.bateria.vazia.titulo": "Bateria Cinzelada: vazia",
+  "message.lanterna.bateria.vazia.intro": "Para enchê-la, faça o Ritual da Bateria:",
+  "message.lanterna.bateria.vazia.passo1": "Coloque a bateria em cima de um bloco de ametista, a céu aberto.",
+  "message.lanterna.bateria.vazia.passo2": "Acenda 4 velas nos cantos: 2 blocos na diagonal, na mesma altura da bateria.",
+  "message.lanterna.bateria.vazia.passo3": "Espere a noite chegar.",
+  "message.lanterna.bateria.vazia.passo4": "Clique na bateria com um Fragmento Estelar e proteja-a por 1 minuto.",
+  "message.lanterna.bateria.andamento.titulo": "Bateria Cinzelada: ritual em andamento",
+  "message.lanterna.bateria.andamento.texto": "Fique perto dela e proteja-a até a carga chegar a 100%%.",
+  "message.lanterna.bateria.cheia.titulo": "Bateria Cinzelada: cheia de energia pura",
+  "message.lanterna.bateria.cheia.texto": "Encoste nela um Anel Apagado para despertá-lo."
 }

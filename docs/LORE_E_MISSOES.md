@@ -1094,3 +1094,10 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
   Zamaron, Nok ou Okaara — nunca a Gênese nem Ryut). Ele voa sozinho até qualquer ser vivo (criaturas, NPCs, aliados ou
   não; jogadores não) e mata até se saciar: **25 a 30 mortes**. Sem ninguém por perto por 15 s, o anel o leva para outro
   planeta. Saciado, o controle volta e a fome some por mais uns dias. Comando de teste: `/lanterna frenesi [parar]`.
+
+## 0.39.4 — Textos que cabem na tela
+
+- **Bateria Cinzelada:** clicar nela explica no chat, com título e passos numerados (vazia: o Ritual da Bateria; em andamento; cheia). Não repete em menos de 4 s.
+- **Mensagens no meio da tela:** a barra de ação, o título e o subtítulo não quebram linha no Minecraft. Quando não cabem na largura da tela, vão inteiros para o chat (sem repetir em 6 s); título e subtítulo aparecem cortados com "…".
+- **HUDs e menus em interface grande** (testado em 427x240 e 480x270): HUD do anel (posto, afinidade, status em várias linhas), painel de missão (objetivo atual e dica quebram em linhas), aviso de missão nova, roda de construtos (a ficha vai para o lado ou a roda encolhe), diário (altura se ajusta, abas visíveis), perfil, oficina (modo compacto), árvore da luz (ficha do nó dentro da tela), mapa estelar, comunicador, ligação, guilda, quadro de contratos, portal e diálogo.
+- As técnicas (Y, U, I) não ficam mais por cima da barra de construtos.

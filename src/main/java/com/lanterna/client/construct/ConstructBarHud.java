@@ -32,6 +32,17 @@ public final class ConstructBarHud {
         }
     };
 
+    /** Borda esquerda do painel da barra (para outros HUDs não ficarem por cima), ou -1 se ela não aparece. */
+    public static int esquerda(int width) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.options.hideGui || !ClientRingData.hasRing || !ClientRingData.active || mc.player.isSpectator()) return -1;
+        int x = width / 2 - 91 - 8 - SLOT * 5 - 10;
+        return x < 4 ? -1 : x - 4;
+    }
+
+    /** Altura do painel da barra. */
+    public static int altura() { return SLOT + 8; }
+
     private static void slot(GuiGraphics g, int x, int y, ConstructType t, Component key, boolean main) {
         g.fill(x, y, x + SLOT - 2, y + SLOT - 2, main ? Hud.argb(ClientRingData.color, 80) : 0x80000000);
         if (t == null) return;

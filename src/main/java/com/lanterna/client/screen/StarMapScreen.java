@@ -77,7 +77,7 @@ public class StarMapScreen extends Screen {
 
         search = new net.minecraft.client.gui.components.EditBox(font, listX + 1, mapY + 1, LIST_W - 2, 14,
                 Component.translatable("starmap.lanterna.search"));
-        search.setHint(Component.translatable("starmap.lanterna.search").withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
+        search.setHint(com.lanterna.client.hud.Hud.fit(Component.translatable("starmap.lanterna.search"), LIST_W - 12).copy().withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
         search.setMaxLength(40);
         search.setValue(query);
         search.setResponder(this::filtrar);

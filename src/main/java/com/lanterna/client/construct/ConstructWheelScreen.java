@@ -71,9 +71,33 @@ public class ConstructWheelScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
-        int cx = width / 2, cy = height / 2;
         int color = ClientRingData.color;
-        float k = Mth.clamp(open + pt * 0.25f, 0, 1);
+        ConstructType sel0 = ClientConstructs.selected();
+        // Cabe em qualquer tamanho de interface: a ficha (descrição e presets) fica embaixo da roda; se não couber
+        // embaixo, vai para o lado; se nem assim couber, a roda encolhe.
+        int borda0 = (int) (OUTER * 1.08f) + 16;
+        int pw = Math.min(300, width - 16);
+        int ph = ficha(null, 0, 0, pw, sel0, color);
+        int cx = width / 2, cy = height / 2, fx, fy;
+        float esc;
+        if (height >= 2 * borda0 + ph + 20) {
+            esc = 1f;
+            cy = (height - ph - 8) / 2;
+            fx = cx - pw / 2; fy = cy + borda0 + 6;
+        } else if (width >= 2 * borda0 * 0.8f + 180 + 24) {
+            esc = Math.min(1f, (height - 8) / (2f * borda0));
+            pw = Math.min(260, (int) (width - 2 * borda0 * esc - 24));
+            ph = ficha(null, 0, 0, pw, sel0, color);
+            int dw = (int) (2 * borda0 * esc);
+            int x0 = (width - dw - 12 - pw) / 2;
+            cx = x0 + dw / 2; cy = height / 2;
+            fx = x0 + dw + 12; fy = Mth.clamp(cy - ph / 2, 4, Math.max(4, height - ph - 4));
+        } else {
+            esc = Mth.clamp((height - ph - 20) / (2f * borda0), 0.55f, 1f);
+            cy = (int) (borda0 * esc) + 6;
+            fx = cx - pw / 2; fy = Math.min(height - ph - 4, cy + (int) (borda0 * esc) + 6);
+        }
+        float k = Mth.clamp(open + pt * 0.25f, 0, 1) * esc;
         g.fillGradient(0, 0, width, height, 0x60000000, 0x90000000);
 
         // anel de dentro: construtos de qualquer anel; anel de fora: os da Tropa (os da Árvore da Luz só depois de liberados)
@@ -131,33 +155,52 @@ public class ConstructWheelScreen extends Screen {
 
         // Centro: o que o construto faz
         ConstructType info = hovered != null ? hovered : sel;
-        Component name = Hud.caps(info.displayName());
+        int miolo = Math.max(60, (int) (INNER * 2 * k) + 40);
+        Component name = Hud.fit(Hud.caps(info.displayName()), miolo);
         g.drawString(font, name, cx - font.width(name) / 2, cy - 22, Hud.argb(info.corps != null ? color : info.category.color, 255), false);
-        Component cat = Hud.body(info.category.label());
+        Component cat = Hud.fit(Hud.body(info.category.label()), miolo);
         g.drawString(font, cat, cx - font.width(cat) / 2, cy - 11, 0xFF9AA8B0, false);
-        Component cost = Hud.body(Component.translatable(info.hold ? "construct.lanterna.cost_hold" : "construct.lanterna.cost",
-                info.cost, String.format(java.util.Locale.ROOT, "%.1f", info.cooldown / 20f)));
+        Component cost = Hud.fit(Hud.body(Component.translatable(info.hold ? "construct.lanterna.cost_hold" : "construct.lanterna.cost",
+                info.cost, String.format(java.util.Locale.ROOT, "%.1f", info.cooldown / 20f))), miolo + 40);
         g.drawString(font, cost, cx - font.width(cost) / 2, cy + 1, 0xFFD8DEE4, false);
         if (lvl < info.unlockLevel) {
-            Component lock = Hud.body(Component.translatable("construct.lanterna.locked", Affinity.levelName(info.unlockLevel)));
+            Component lock = Hud.fit(Hud.body(Component.translatable("construct.lanterna.locked", Affinity.levelName(info.unlockLevel))), miolo + 40);
             g.drawString(font, lock, cx - font.width(lock) / 2, cy + 12, 0xFFFF7070, false);
         }
 
-        // Descrição e presets embaixo da roda
-        int by = cy + (int) (OUTER * 1.08f) + 22;
-        int bw = 300;
-        Hud.panel(g, cx - bw / 2, by, bw, 52, color, 0.95f);
-        Hud.wrapped(g, Hud.body(info.description()), cx - bw / 2 + 8, by + 5, bw - 16, 0xFFE0E6EA, 10);
-        StringBuilder presets = new StringBuilder();
+        // Descrição e presets
+        ficha(g, fx, fy, pw, info, color);
+        super.render(g, mx, my, pt);
+    }
+
+    /**
+     * A ficha embaixo (ou ao lado) da roda: descrição, os 4 presets e a ajuda, tudo quebrado na largura dada.
+     * Com g nulo só mede; devolve a altura.
+     */
+    private int ficha(GuiGraphics g, int x, int y, int w, ConstructType info, int color) {
+        int tw = w - 16;
+        java.util.List<net.minecraft.util.FormattedCharSequence> desc = info == null ? java.util.List.of() : font.split(Hud.body(info.description()), tw);
+        java.util.List<net.minecraft.util.FormattedCharSequence> ajuda = font.split(Hud.body(Component.translatable("construct.lanterna.wheel_help")), tw);
+        boolean duas = tw >= 200; // presets em 2 colunas se houver espaço
+        int linhasPreset = duas ? 2 : 4;
+        int h = 6 + desc.size() * 10 + 4 + linhasPreset * 10 + 2 + ajuda.size() * 9 + 4;
+        if (g == null) return h;
+        Hud.panel(g, x, y, w, h, color, 0.95f);
+        int ty = y + 6;
+        for (var l : desc) { g.drawString(font, l, x + 8, ty, 0xFFE0E6EA, true); ty += 10; }
+        ty += 4;
+        int cw = duas ? tw / 2 : tw;
         for (int p = 0; p < 4; p++) {
             String pid = ClientConstructs.data().preset(p);
             ConstructType t = ConstructType.byId(pid);
-            presets.append("Alt+").append(p + 1).append(": ").append(t != null ? t.displayName().getString()
-                    : com.lanterna.construct.oficina.MeusConstrutos.eMeu(pid) ? com.lanterna.client.oficina.OficinaCliente.nomePreset(pid).getString() : "-").append("   ");
+            String nome = t != null ? t.displayName().getString()
+                    : com.lanterna.construct.oficina.MeusConstrutos.eMeu(pid) ? com.lanterna.client.oficina.OficinaCliente.nomePreset(pid).getString() : "-";
+            int px = x + 8 + (duas ? (p % 2) * cw : 0), py = ty + (duas ? p / 2 : p) * 10;
+            Hud.textFit(g, Hud.body(Component.literal("Alt+" + (p + 1) + ": " + nome)), px, py, cw - 6, 0xFFFFD35A, false);
         }
-        g.drawString(font, Hud.body(Component.literal(presets.toString().trim())), cx - bw / 2 + 8, by + 30, 0xFFFFD35A, false);
-        g.drawString(font, Hud.body(Component.translatable("construct.lanterna.wheel_help")), cx - bw / 2 + 8, by + 40, 0xFF7A8A94, false);
-        super.render(g, mx, my, pt);
+        ty += linhasPreset * 10 + 2;
+        for (var l : ajuda) { g.drawString(font, l, x + 8, ty, 0xFF7A8A94, false); ty += 9; }
+        return h;
     }
 
     @Override
