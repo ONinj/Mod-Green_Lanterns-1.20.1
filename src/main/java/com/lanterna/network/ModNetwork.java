@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "15";
+    private static final String VERSION = "16";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -35,6 +35,24 @@ public final class ModNetwork {
                 .encoder(com.lanterna.mogo.ChamadoPacket::encode)
                 .decoder(com.lanterna.mogo.ChamadoPacket::decode)
                 .consumerMainThread(com.lanterna.mogo.ChamadoPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.lanterna.mogo.MogoOrbita.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.mogo.MogoOrbita.Pacote::encode)
+                .decoder(com.lanterna.mogo.MogoOrbita.Pacote::decode)
+                .consumerMainThread(com.lanterna.mogo.MogoOrbita.Pacote::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.lanterna.mogo.MogoDefesa.Raio.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.mogo.MogoDefesa.Raio::encode)
+                .decoder(com.lanterna.mogo.MogoDefesa.Raio::decode)
+                .consumerMainThread(com.lanterna.mogo.MogoDefesa.Raio::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.lanterna.mogo.MogoRastro.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.mogo.MogoRastro.Pacote::encode)
+                .decoder(com.lanterna.mogo.MogoRastro.Pacote::decode)
+                .consumerMainThread(com.lanterna.mogo.MogoRastro.Pacote::handle)
                 .add();
 
         CHANNEL.messageBuilder(ToggleFlightPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

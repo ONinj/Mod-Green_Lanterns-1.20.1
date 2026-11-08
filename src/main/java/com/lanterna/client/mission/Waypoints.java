@@ -84,7 +84,7 @@ public final class Waypoints {
             if (player.level().dimension().equals(SpaceBodies.SPACE)) {
                 return new Target(at, at.distanceTo(player.position()), Component.translatable("waypoint.lanterna.setor", nome), o.label(0), color, "space");
             }
-            Vec3 up = new Vec3(player.getX(), SpaceTravel.EXIT_HEIGHT, player.getZ());
+            Vec3 up = paraCima(player);
             double total = Destinations.spacePosition(player).distanceTo(at) + Math.max(0, SpaceTravel.EXIT_HEIGHT - player.getY());
             return new Target(up, total, Component.translatable("waypoint.lanterna.go_space", nome), o.label(0), color, "space");
         }
@@ -107,8 +107,7 @@ public final class Waypoints {
             }
             BlockPos p = o.pos();
             // Pontos com altura definida (Palácio, salas, hangar) ficam na altura deles; só a base (y = 0) usa o chão
-            int y = p.getY() != 0 ? p.getY() : player.level().hasChunk(p.getX() >> 4, p.getZ() >> 4)
-                    ? player.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ()) : (int) player.getY();
+            int y = p.getY() != 0 ? p.getY() : chao(player, p);
             Vec3 at = new Vec3(p.getX() + 0.5, y + 1.5, p.getZ() + 0.5);
             String place = p.equals(PlanetLore.HUB) ? "waypoint.lanterna.hub" : p.equals(PlanetLore.arena(PlanetLore.byPlanet(o.planet())))
                     ? "waypoint.lanterna.arena" : "waypoint.lanterna.local";
@@ -120,10 +119,44 @@ public final class Waypoints {
             return new Target(c, dist, Component.translatable("waypoint.lanterna.fly_to", planetName), label, color, o.planet());
         }
         // Em outro mundo: primeiro subir até o espaço
-        Vec3 up = new Vec3(player.getX(), SpaceTravel.EXIT_HEIGHT, player.getZ());
+        Vec3 up = paraCima(player);
         Vec3 space = Destinations.spacePosition(player);
         double total = Math.max(0, space.distanceTo(body.center()) - body.radius()) + Math.max(0, SpaceTravel.EXIT_HEIGHT - player.getY());
         return new Target(up, total, Component.translatable("waypoint.lanterna.go_space", planetName), label, color, o.planet());
+    }
+
+    /**
+     * "Suba para o espaço": o ponto fica no alto, um pouco à frente de onde o jogador olha (bem em cima da cabeça a
+     * projeção na tela fica instável e a seta apontava para baixo).
+     */
+    private static Vec3 paraCima(LocalPlayer player) {
+        Vec3 olhar = player.getLookAngle().multiply(1, 0, 1);
+        if (olhar.lengthSqr() < 1e-4) olhar = new Vec3(0, 0, 1);
+        olhar = olhar.normalize().scale(Math.max(20, (SpaceTravel.EXIT_HEIGHT - player.getY()) * 0.35));
+        return new Vec3(player.getX() + olhar.x, SpaceTravel.EXIT_HEIGHT, player.getZ() + olhar.z);
+    }
+
+    /** Altura do chão já vista em cada ponto de missão (fica certa mesmo depois que o lugar sai da memória). */
+    private static final java.util.Map<String, Integer> CHAO = new java.util.HashMap<>();
+
+    /**
+     * O chão no ponto da missão. O cliente só recebe do servidor o mapa de altura MOTION_BLOCKING (o
+     * MOTION_BLOCKING_NO_LEAVES fica vazio no cliente e devolvia o fundo do mundo, embaixo da bedrock).
+     * Longe demais (ainda não carregado): a última altura vista, ou a altura do jogador para só apontar a direção.
+     */
+    private static int chao(LocalPlayer player, BlockPos p) {
+        var level = player.level();
+        String k = level.dimension().location() + "|" + p.getX() + "|" + p.getZ();
+        if (level.hasChunk(p.getX() >> 4, p.getZ() >> 4)) {
+            int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING, p.getX(), p.getZ());
+            if (h > level.getMinBuildHeight() + 1) {
+                CHAO.put(k, h);
+                return h;
+            }
+        }
+        Integer visto = CHAO.get(k);
+        if (visto != null) return visto;
+        return (int) Math.max(level.getSeaLevel(), player.getY());
     }
 
     /** NPC (falar) ou criatura (derrotar) do objetivo, já carregado perto do jogador. */

@@ -1067,3 +1067,18 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Peças 3D**: o que sai do corpo mais do que uma skin consegue mostrar (asas da Fênix, auréola da Gênese, espinhos,
   chifres, cristais, moedas, tiras de pano...) continua 3D por cima da skin, e entra na transformação junto com o
   líquido.
+
+## 0.39.2 — Waypoints e o Mogo que anda
+- **Waypoints**: o marcador de missão ia para o fundo do mundo (embaixo da bedrock) porque o cliente lia um mapa de
+  altura que o servidor não manda. Agora usa o chão de verdade (e guarda a altura já vista); vale para a Terra e para
+  todos os planetas das Tropas. O "suba para o espaço" aponta para o alto à sua frente (a seta apontava para baixo).
+- **Textura do Mogo**: planeta verde com a faixa de jade no equador e o quadrado com o símbolo do anel verde (o mesmo
+  desenho do anel do jogo), dos dois lados.
+- **O Mogo anda**: dá uma volta lenta pelo espaço (~30 min por volta). Toda vez que alguém entra no espaço vindo da Terra
+  ou de outro planeta (e não há mais ninguém lá), ele aparece num lugar diferente. Quem sai do próprio Mogo o encontra
+  onde estava.
+- **Rastro do Mogo** (construto do anel Verde, nível 2): no espaço, marca o Mogo na tela por 30 s com a distância e
+  solta um rastro de luz na direção dele; fora do espaço, diz em que ponto do espaço ele está.
+- **Defesa do Mogo**: a Tropa da **Morte** ele sempre ataca quando chega perto (feixe de luz enorme, dano igual ao laser
+  de um Lanterna oficial, nunca mata). As outras Tropas inimigas não pousam, mas ele só revida se atirarem nele
+  (fica bravo por 20 s). Os Verdes ele não ataca.

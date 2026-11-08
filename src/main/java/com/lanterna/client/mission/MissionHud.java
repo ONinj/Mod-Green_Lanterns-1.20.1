@@ -40,6 +40,9 @@ public final class MissionHud {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.options.hideGui || mc.level == null) return;
         drawToast(g, width, mc.level.getGameTime() + pt);
+        // o Rastro do Mogo (poder do anel verde): marca onde o planeta está agora
+        Waypoints.Target mogo = com.lanterna.client.mogo.ClienteRastroMogo.alvo(mc);
+        if (mogo != null) drawMarker(g, mogo, width, height);
         Mission m = ClientLoreData.tracked();
         if (m == null) return;
         Waypoints.Target target = Waypoints.current();

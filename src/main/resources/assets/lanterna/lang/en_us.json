@@ -2577,5 +2577,13 @@
   "perfil.lanterna.desligado": "off",
   "perfil.lanterna.aura_desc": "glow around the body",
   "perfil.lanterna.iluminar_desc": "torch light in your Corps color",
-  "perfil.lanterna.iluminar_precisa": "turn the aura on first"
+  "perfil.lanterna.iluminar_precisa": "turn the aura on first",
+  "mogo.lanterna.voz.morte": "Death. Not here.",
+  "mogo.lanterna.voz.revida": "You fired at me. I answer.",
+  "construct.lanterna.rastro_mogo": "Mogo's Trail",
+  "construct.lanterna.rastro_mogo.desc": "Green ring only. Mogo moves through space: the ring finds where he is now and marks the planet on screen for 30 seconds.",
+  "mogo.lanterna.rastro.ok": "The ring found Mogo: %s blocks",
+  "mogo.lanterna.rastro.longe": "Mogo is now at %s, %s, %s in space. Go up to see him.",
+  "mogo.lanterna.rastro.aqui": "You are standing on him.",
+  "mogo.lanterna.rastro.dica": "the planet moves: follow the mark"
 }

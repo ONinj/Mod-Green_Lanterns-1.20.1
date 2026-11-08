@@ -351,6 +351,7 @@ public final class Constructs {
                 level.addFreshEntity(hands);
                 level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 1.2f, 0.6f);
             }
+            case RASTRO_MOGO -> com.lanterna.mogo.MogoRastro.usar(player, color);
             case VIDA -> {
                 double r = 12;
                 ConstructEntity nova = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 30, 0, (float) r);

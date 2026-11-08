@@ -37,6 +37,8 @@ public enum ConstructType {
     AVAREZA("avareza", Category.CONTROL, 100, false, 1, 160, "orange"),
     CEIFA("ceifa", Category.ATTACK, 120, false, 1, 180, "black"),
     VIDA("vida", Category.DEFENSE, 150, false, 1, 300, "white"),
+    /** Rastro do Mogo: mostra onde o planeta-Lanterna está agora (ele anda pelo espaço). */
+    RASTRO_MOGO("rastro_mogo", Category.UTILITY, 40, false, 2, 400, "green"),
 
     // ---- ARVORE-INICIO (gerado) ----
     G_CANHAO("g_canhao", Category.ATTACK, 90, false, 0, 70, "green", true),

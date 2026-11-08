@@ -36,6 +36,8 @@ public final class ClientForgeEvents {
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         com.lanterna.client.voz.ClientLigacao.tick();
+        var mcRelogio = net.minecraft.client.Minecraft.getInstance();
+        if (mcRelogio.level != null) com.lanterna.mogo.MogoOrbita.tempoCliente = mcRelogio.level.getGameTime();
 
         while (KeyBindings.TOGGLE_FLIGHT.consumeClick()) {
             if (ClientRingData.hasRing) {

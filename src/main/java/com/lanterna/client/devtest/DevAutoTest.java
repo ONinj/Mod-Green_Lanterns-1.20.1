@@ -3695,6 +3695,72 @@ public final class DevAutoTest {
         at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0); mc.setScreen(null); });
     }
 
+
+    private static void sceneMogo2() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        // 1) waypoint no mundo: altura do chão que o marcador usa x a altura real
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 100 120 100"));
+        at(80, () -> server(sp -> {
+            var l = sp.serverLevel();
+            int real = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, 110, 110);
+            int cli = mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, 110, 110);
+            int cliAntigo = mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 110, 110);
+            glog("waypoint: chao real=" + real + " cliente(novo)=" + cli + " cliente(antigo)=" + cliAntigo);
+        }));
+        at(5, () -> server(sp -> { com.lanterna.mission.MissionManager.start(sp, "terra_1"); }));
+        at(40, () -> { var t = com.lanterna.client.mission.Waypoints.current(); glog("waypoint terra_1=" + (t == null ? "nulo" : t.pos())); });
+        at(5, () -> shot("m2_waypoint"));
+        // 2) o Mogo muda de lugar ao entrar no espaço e anda
+        at(5, () -> server(sp -> glog("mogo antes=" + com.lanterna.space.SpaceBodies.byId("mogo").center())));
+        at(5, () -> server(sp -> { var sp2 = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE); sp.teleportTo(sp2, 0, 0, 0, 0, 0); }));
+        at(20, () -> server(sp -> glog("mogo depois de entrar=" + com.lanterna.space.SpaceBodies.byId("mogo").center() + " cliente=" + com.lanterna.mogo.MogoOrbita.agora())));
+        at(100, () -> server(sp -> glog("mogo 5s depois=" + com.lanterna.space.SpaceBodies.byId("mogo").center())));
+        // olhar o Mogo de perto
+        at(5, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(m.radius() + 220, 40, 0);
+            sp.teleportTo(sp.serverLevel(), pos.x, pos.y, pos.z, 90, 5);
+        }));
+        at(40, () -> shot("m2_mogo"));
+        // 3) Rastro do Mogo (de longe)
+        at(5, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(m.radius() + 1400, 100, 600);
+            sp.teleportTo(sp.serverLevel(), pos.x, pos.y, pos.z, 0, 0);
+        }));
+        at(20, () -> server(sp -> com.lanterna.mogo.MogoRastro.usar(sp, 0x3CFF7A)));
+        at(20, () -> shot("m2_rastro"));
+        // 4) Morte: o Mogo atira sempre (sem matar)
+        at(5, () -> { cmd("gamemode survival"); cmd("lanterna anel black"); });
+        at(5, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(m.radius() + 90, 30, 0);
+            sp.teleportTo(sp.serverLevel(), pos.x, pos.y, pos.z, 90, 0);
+            sp.setHealth(20);
+        }));
+        at(32, () -> shot("m2_morte_raio"));
+        at(120, () -> server(sp -> glog("morte: vida=" + sp.getHealth() + " vivo=" + sp.isAlive())));
+        // 5) amarelo: não atira; só se for atacado
+        at(5, () -> { cmd("lanterna anel yellow"); server(sp -> sp.setHealth(20)); });
+        at(100, () -> server(sp -> glog("amarelo sem atirar: vida=" + sp.getHealth())));
+        at(5, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var pos = c.add(m.radius() + 25, 0, 0);
+            sp.teleportTo(sp.serverLevel(), pos.x, pos.y, pos.z, 90, 0);
+        }));
+        at(10, () -> server(sp -> {
+            var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
+            var dir = c.subtract(sp.getEyePosition()).normalize();
+            com.lanterna.construct.ConstructEntity.spawnProjectile(sp, com.lanterna.construct.ConstructEntity.Kind.BOLT, dir, 2.2, 0xFFD040, 4f, 1f);
+        }));
+        at(80, () -> server(sp -> glog("amarelo depois de atirar: vida=" + sp.getHealth())));
+        at(5, () -> { cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4353,6 +4419,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("pele")) scenePele();
         else if (ENABLED && SCENE.equals("pelebraco")) scenePeleBraco();
         else if (ENABLED && SCENE.equals("pele2")) scenePele2();
+        else if (ENABLED && SCENE.equals("mogo2")) sceneMogo2();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

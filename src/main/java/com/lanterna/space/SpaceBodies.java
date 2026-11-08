@@ -34,6 +34,12 @@ public final class SpaceBodies {
             this(id, center, radius, atmosphere, landable, dimension, breathable, null);
         }
 
+        /** O Mogo anda pelo espaço (MogoOrbita); os outros corpos ficam parados. */
+        @Override
+        public Vec3 center() {
+            return "mogo".equals(id) ? com.lanterna.mogo.MogoOrbita.agora() : center;
+        }
+
         public ResourceLocation texture() {
             if (procedural != null) return LanternaMod.id("dynamic/planet/" + id);
             return LanternaMod.id("textures/space/" + id + ".png");
