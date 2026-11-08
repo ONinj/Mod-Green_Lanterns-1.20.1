@@ -84,3 +84,9 @@ OBSERVAÇÕES
   • Se quiser os trajes no lugar dos uniformes antigos, basta trocar o nome do arquivo que o UniformeModel usa.
   • gerador/ tem os scripts: designs.py descreve cada traje (cores, painéis, acessórios); motivos.py tem as peças
     reaproveitáveis (ombreira, braçadeira, emblema 3D, capuz...); traje.py é o motor (pintura + relevo).
+
+MÁSCARAS (atualização)
+  Todas as máscaras foram refeitas como meia-máscara esculpida: contorno que acompanha a testa, a ponte do nariz e
+  as maçãs do rosto, sombreado, luz na borda de cima, arco da sobrancelha, vinco nas têmporas e abas que contornam
+  a cabeça. Os olhos são amendoados, recuados num aro escuro e acesos. Três formas: clássica, angular (Medo/Fúria)
+  e de baile (Amor). A meia-caveira do Ossuário ficou como estava. Prévia: previas/mascaras.png.

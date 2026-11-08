@@ -119,16 +119,66 @@ def bota(T, col, sola, rz=0.1, cano=None, biqueira=None, lado="rl"):
             T.draw(p, "front", "rect", 0.3, 2.8, 3.7, 4.3, col=biqueira, rz=0.22, tag=13, rz_mode="max")
             T.draw(p, "back", "rect", 0.6, 3.0, 3.4, 4.3, col=biqueira, rz=0.1, tag=13, rz_mode="max")
 
-def mascara(T, col, lente=None, lente_glow=True, rz=0.0, b0=2.6, b1=4.9, abas=True):
-    """domino/meia-máscara: só a faixa dos olhos é opaca; o resto da cabeça fica transparente"""
+# ---------------------------------------------------------------- máscara esculpida (dominó realista)
+# metade direita do rosto (a de 0 a 4); a outra metade é o espelho. Pontos de cima (testa) e de baixo (maçãs do rosto).
+MASC = {
+    "classico": dict(top=[(0, 2.5), (1.0, 2.3), (2.2, 2.25), (3.2, 2.45), (4, 2.85)],
+                     bot=[(4, 4.55), (3.45, 4.75), (2.7, 5.25), (1.5, 5.35), (0.5, 5.05), (0, 4.8)]),
+    "angular":  dict(top=[(0, 2.0), (1.4, 2.35), (2.9, 2.8), (3.6, 3.05), (4, 2.9)],
+                     bot=[(4, 4.5), (3.4, 4.7), (2.4, 5.3), (1.0, 5.25), (0, 5.5)]),
+    "baile":    dict(top=[(0, 1.1), (0.7, 1.5), (1.7, 2.3), (3.0, 2.4), (4, 2.8)],
+                     bot=[(4, 4.55), (3.4, 4.75), (2.6, 5.2), (1.4, 5.25), (0.4, 4.7), (0, 4.3)]),
+}
+OLHO = {
+    "classico": [(1.0, 3.95), (1.5, 3.6), (2.4, 3.55), (3.05, 3.8), (3.1, 4.1), (2.45, 4.35), (1.5, 4.3)],
+    "angular":  [(0.9, 3.6), (2.2, 3.75), (3.1, 4.05), (3.0, 4.35), (2.0, 4.4), (1.2, 4.25)],
+}
+def _esp(pts): return [(8 - a, b) for a, b in pts]
+
+def mascara_forma(T, col, estilo="classico", b0=None, b1=None, rz=0.1, borda=None, abas=True, grad=0.18, pat=None):
+    """desenha só a máscara esculpida (não limpa a cabeça): contorno anatômico, sombreado, vinco e brilho"""
+    M = MASC[estilo]
+    dt = 0 if b0 is None else b0 - min(b for a, b in M["top"])
+    db = 0 if b1 is None else b1 - max(b for a, b in M["bot"])
+    top = [(a, b + dt) for a, b in M["top"]]; bot = [(a, b + db) for a, b in M["bot"]]
+    cont = top + _esp(list(reversed(top)))[1:] + _esp(list(reversed(bot))) + bot[1:]
+    T.draw("head", "front", "poly", cont, col=col, alpha=255, rz=rz, grad=grad, pat=pat)
+    T.draw("head", "front", "line", cont + [cont[0]], 0.25, col=dk(col, 0.45), alpha=255)            # chanfro da borda
+    for lado in (top, _esp(top)): T.draw("head", "front", "line", lado, 0.25, col=lt(col, 0.28), alpha=255)  # luz na borda de cima
+    if borda:
+        for lado in (top, _esp(top)): T.draw("head", "front", "line", lado, 0.25, col=borda, alpha=255)
+    for sg in (0, 1):                                  # arco da sobrancelha, vinco da têmpora e sombra da maçã do rosto
+        f = (lambda p: p) if sg == 0 else _esp
+        T.draw("head", "front", "line", f([(1.1, 2.95 + dt * 0.5), (2.0, 2.8 + dt * 0.5), (3.0, 2.95 + dt * 0.5)]), 0.25, col=lt(col, 0.16), alpha=255)
+        T.draw("head", "front", "line", f([(0.1, 3.5), (0.75, 3.85)]), 0.25, col=dk(col, 0.3), alpha=255)
+        T.draw("head", "front", "line", f([(1.4, 4.85 + db * 0.5), (2.6, 4.85 + db * 0.5)]), 0.25, col=dk(col, 0.22), alpha=255)
+        T.draw("head", "front", "rect", *(lambda r: r if sg == 0 else (8 - r[2], r[1], 8 - r[0], r[3]))((1.6, 2.55 + dt * 0.5, 2.3, 2.8 + dt * 0.5)), col=lt(col, 0.42), alpha=255)
+    T.draw("head", "front", "rect", 3.75, 3.1, 4.25, 4.3, col=lt(col, 0.2), alpha=255)                 # ponte do nariz
+    for a0 in (3.5, 4.25): T.draw("head", "front", "rect", a0, 3.3, a0 + 0.25, 4.5, col=dk(col, 0.18), alpha=255)
+    if abas:   # a máscara contorna as têmporas e some nas laterais
+        t0, t1 = top[0][1], bot[-1][1]
+        for f in ("right", "left"):
+            T.draw("head", f, "poly", [(0, t0), (2.8, t0 + 0.7), (3.2, (t0 + t1) / 2), (2.8, t1 - 0.6), (0, t1)], col=dk(col, 0.08), alpha=255, rz=rz, grad=grad)
+            T.draw("head", f, "line", [(0, t0), (2.8, t0 + 0.7), (3.2, (t0 + t1) / 2), (2.8, t1 - 0.6), (0, t1)], 0.25, col=dk(col, 0.45), alpha=255)
+            T.draw("head", f, "line", [(0, t0 + 0.1), (2.8, t0 + 0.8)], 0.25, col=lt(col, 0.2), alpha=255)
+
+def lentes(T, col, b0=3.5, b1=4.5, glow=True, forma="reta", olhos="rl", aro=None, rz=0.0):
+    """olhos amendoados recuados na máscara: aro escuro (fundo), lente acesa com borda suave"""
+    pts = OLHO["angular" if forma == "angular" else "classico"]
+    dy = (b0 + b1) / 2 - 3.95
+    pts = [(a, b + dy) for a, b in pts]
+    for lado in olhos:
+        pp = pts if lado == "r" else _esp(pts)
+        T.draw("head", "front", "line", pp + [pp[0]], 0.75, col=aro if aro else "#050506", alpha=255, rz=rz)
+        T.draw("head", "front", "poly", pp, col=col, glow=glow, alpha=255, rz=rz)
+        T.draw("head", "front", "line", pp + [pp[0]], 0.25, col=mix(col, (40, 40, 48), 0.3) if not glow else mix(col, (255, 255, 255), 0.0), glow=glow, alpha=255, rz=rz)
+
+def mascara(T, col, lente=None, lente_glow=True, rz=0.0, b0=None, b1=None, abas=True, estilo="classico", borda=None, forma=None, pat=None):
+    """meia-máscara esculpida: só a máscara é opaca; o resto da cabeça fica transparente"""
     for f in ("front", "back", "right", "left", "top", "bottom"): T.draw("head", f, "all", alpha=0)
-    T.draw("head", "front", "poly", [(0.0, b0), (8.0, b0), (8.0, b1 - 0.3), (5.2, b1), (4.4, b1 - 0.6), (3.6, b1 - 0.6), (2.8, b1), (0.0, b1 - 0.3)],
-           col=col, alpha=255, rz=rz)
-    if abas:
-        for f in ("right", "left"): T.draw("head", f, "poly", [(0, b0), (3.0, b0 + 0.3), (3.0, b1 - 0.6), (0, b1 - 0.3)], col=col, alpha=255, rz=rz)
+    mascara_forma(T, col, estilo, b0, b1, rz=rz, borda=borda, abas=abas, pat=pat)
     if lente:
-        for a0 in (1.0, 5.0):
-            T.draw("head", "front", "rect", a0, 3.5, a0 + 2.0, 4.5, col=lente, glow=lente_glow, alpha=255, rz=rz)
+        lentes(T, lente, glow=lente_glow, forma=forma or ("angular" if estilo == "angular" else "reta"), aro=dk(col, 0.6))
 
 def emblema3d(T, grid, col, fundo=None, a_c=4.0, b_c=2.9, cel=0.5, rz_fundo=0.22, rz=0.38, glow=True, aro=None):
     """emblema da Tropa em relevo no peito (grade 9x9 dos anéis; 1 célula = cel unidades)"""
@@ -250,13 +300,6 @@ def capuz(T, col, borda=None, rosto=(1.0, 1.6, 7.0, 8.0), grad=0.15, rz_borda=0.
         T.draw("head", "front", "rect", a0 - 0.5, b0 - 0.5, a1 + 0.5, b0, col=borda, rz=rz_borda, alpha=255)
         T.draw("head", "front", "rect", a0 - 0.5, b0, a0, b1, col=borda, rz=rz_borda, alpha=255)
         T.draw("head", "front", "rect", a1, b0, a1 + 0.5, b1, col=borda, rz=rz_borda, alpha=255)
-
-def lentes(T, col, b0=3.5, b1=4.5, glow=True, forma="reta"):
-    for a0 in (1.0, 5.0):
-        if forma == "reta": T.draw("head", "front", "rect", a0, b0, a0 + 2.0, b1, col=col, glow=glow, alpha=255)
-        else:   # angular (olhos puxados)
-            pts = [(a0, b0 + 0.2), (a0 + 2.0, b0 - 0.2), (a0 + 2.0, b1), (a0, b1)] if a0 < 4 else [(a0, b0 - 0.2), (a0 + 2.0, b0 + 0.2), (a0 + 2.0, b1), (a0, b1)]
-            T.draw("head", "front", "poly", pts, col=col, glow=glow, alpha=255)
 
 # ======================================================================== acessórios 3D
 def espinho(T, bone, base, eixo, L, w, mat, passos=3, rot=None):

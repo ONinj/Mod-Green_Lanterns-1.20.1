@@ -87,8 +87,7 @@ def verde_b():
     for s in "rl": T.draw(s + "boot", "front", "rect", 1.0, 1.4, 3.0, 1.9, col=P["glow"], glow=True)
     # meia-cogula verde com lentes brancas
     capuz(T, P["g"], borda=P["g2"], rosto=(0.8, 2.4, 7.2, 8.0))
-    T.draw("head", "front", "poly", [(0.0, 2.4), (8.0, 2.4), (8.0, 4.9), (5.2, 5.2), (4.4, 4.6), (3.6, 4.6), (2.8, 5.2), (0.0, 4.9)], col=P["g"], alpha=255)
-    T.draw("head", "front", "line", [(0, 4.95), (2.8, 5.2), (3.6, 4.6), (4.4, 4.6), (5.2, 5.2), (8, 4.95)], 0.4, col=P["g2"], alpha=255)
+    mascara_forma(T, P["g"], "classico", abas=False)
     lentes(T, "#F0FFF4", forma="angular")
     return T
 
@@ -136,10 +135,7 @@ def amarelo_a():
     joelheira(T, P["y"], rz=0.22, borda=P["esc"])
     bota(T, P["esc"], "#050505", cano=P["y2"], biqueira=P["y"])
     # máscara angular com sobrancelha pontuda
-    mascara(T, P["esc"], lente=None)
-    T.draw("head", "front", "poly", [(0.0, 2.0), (3.4, 3.0), (4.0, 2.6), (4.6, 3.0), (8.0, 2.0), (8.0, 4.8), (5.0, 5.2), (4.0, 4.6), (3.0, 5.2), (0.0, 4.8)], col=P["esc"], alpha=255)
-    T.draw("head", "front", "line", [(0.0, 2.0), (3.4, 3.0), (4.0, 2.6), (4.6, 3.0), (8.0, 2.0)], 0.4, col=P["y"], alpha=255, rz=0.1)
-    lentes(T, P["glow"], forma="angular")
+    mascara(T, P["esc"], lente=P["glow"], estilo="angular", b0=2.0, borda=P["y"])
     return T
 
 @design("amarelo", "b", "Arauto do Terror", "fibra", "osso")
@@ -181,9 +177,8 @@ def amarelo_b():
     joelheira(T, P["esc"], rz=0.22, borda=P["osso"])
     bota(T, P["esc"], "#050505", cano=P["y2"], biqueira=P["osso"])
     # máscara de caveira preta só na parte de cima do rosto
-    mascara(T, P["esc"], lente=None, b0=1.8, b1=5.4)
+    mascara(T, P["esc"], estilo="angular", b0=1.8, b1=5.4)
     lentes(T, P["glow"], b0=3.3, b1=4.6, forma="angular")
-    T.draw("head", "front", "rect", 3.6, 4.2, 4.4, 5.0, col="#000000", alpha=255)
     return T
 
 # ======================================================================== VERMELHO — Fúria
@@ -231,10 +226,8 @@ def vermelho_a():
     for s in "rl":
         for f in ("front", "outer"): T.draw(s + "boot", f, "line", [(0.6, 0.8), (1.6, 2.0), (1.2, 3.4), (2.6, 4.0)], 0.5, col=P["lava"], glow=True)
     # máscara com sobrancelha franzida
-    mascara(T, P["r2"], lente=None, b0=2.4)
-    T.draw("head", "front", "poly", [(0.4, 2.4), (3.6, 3.4), (3.6, 3.9), (0.4, 3.0)], col=P["esc"], alpha=255, rz=0.1)
-    T.draw("head", "front", "poly", [(7.6, 2.4), (4.4, 3.4), (4.4, 3.9), (7.6, 3.0)], col=P["esc"], alpha=255, rz=0.1)
-    for a0 in (1.0, 5.0): T.draw("head", "front", "rect", a0, 3.9, a0 + 2.0, 4.6, col=P["lava"], glow=True, alpha=255)
+    mascara(T, P["r2"], lente=P["lava"], estilo="angular")
+    T.sym("head", "front", "line", [(0.6, 3.1), (3.4, 3.7)], 0.5, col=P["esc"], alpha=255)   # sobrancelha de fúria
     return T
 
 @design("vermelho", "b", "Sangue Fervente", "couro", "placa")
@@ -271,8 +264,7 @@ def vermelho_b():
     joelheira(T, P["r2"], rz=0.22, borda=P["r"])
     bota(T, P["esc"], "#050202", cano=P["r2"], biqueira=P["r2"])
     # máscara com chifres curtos
-    mascara(T, P["r2"], lente=None)
-    lentes(T, P["glow"], forma="angular")
+    mascara(T, P["r2"], lente=P["glow"], estilo="angular")
     for sg in (-1, 1):
         espinho(T, "armorHead", (sg * 3.0, 32.3, -2.6), "+y", 1.8, 0.8, "chifre", passos=4, rot=(-25, 0, sg * -20))
     T.draw("head", "top", "rect", 0.8, 0.6, 2.2, 2.0, col=P["r2"], alpha=255) if False else None
@@ -325,8 +317,8 @@ def laranja_a():
     joelheira(T, P["ouro2"], rz=0.22, borda=P["ouro"])
     bota(T, P["esc"], "#140A02", cano=P["ouro"], biqueira=P["ouro2"])
     # máscara com monóculo
-    mascara(T, P["o2"], lente=None)
-    T.draw("head", "front", "rect", 1.0, 3.5, 3.0, 4.5, col="#FFE6A0", glow=True, alpha=255)
+    mascara(T, P["o2"])
+    lentes(T, "#FFE6A0", olhos="r")
     T.draw("head", "front", "ellipse", 4.6, 2.9, 7.4, 5.1, col=P["ouro"], alpha=255, rz=0.22)
     T.draw("head", "front", "ellipse", 5.0, 3.3, 7.0, 4.7, col=P["glow"], glow=True, alpha=255, rz=0.22)
     T.box("armorHead", (3.0, 26.6, -4.5), (3.2, 28.6, -4.4), "ouro")
@@ -587,8 +579,7 @@ def violeta_a():
     joelheira(T, P["v2"], rz=0.22, borda=P["rosa"])
     bota(T, P["v2"], "#1A0322", cano=P["prata"], biqueira=P["v"])
     # máscara de baile com gema e tiara de cristais
-    mascara(T, P["v2"], lente=None)
-    T.draw("head", "front", "poly", [(0.0, 2.6), (8.0, 2.6), (8.6, 1.8), (8.0, 4.9), (5.2, 5.0), (4.0, 4.4), (2.8, 5.0), (0.0, 4.9), (-0.6, 1.8)], col=P["v2"], alpha=255)
+    mascara(T, P["v2"], estilo="baile")
     lentes(T, "#FFE8FA", b0=3.5, b1=4.4, forma="angular")
     T.draw("head", "front", "poly", [(4.0, 2.6), (4.5, 3.2), (4.0, 3.8), (3.5, 3.2)], col=P["cr"], glow=True, alpha=255, rz=0.22)
     for (x, h, r) in ((-1.4, 1.4, 14), (0.0, 2.0, 0), (1.4, 1.4, -14)):
@@ -737,10 +728,7 @@ def preto_b():
     joelheira(T, P["pano2"], rz=0.1)
     bota(T, P["esc"], "#000000", cano=P["pano2"], biqueira=P["pano2"])
     # rosto livre: só uma sombra escura em volta dos olhos, com as pupilas brilhando
-    cabeca_vazia(T)
-    T.draw("head", "front", "poly", [(0.0, 2.6), (8.0, 2.6), (8.0, 4.6), (5.2, 5.0), (4.4, 4.5), (3.6, 4.5), (2.8, 5.0), (0.0, 4.6)], col=P["sombra"], alpha=255)
-    for f in ("right", "left"): T.draw("head", f, "poly", [(0, 2.6), (2.2, 2.9), (2.2, 4.3), (0, 4.6)], col=P["sombra"], alpha=255)
-    for a0 in (1.6, 5.2): T.draw("head", "front", "rect", a0, 3.5, a0 + 1.2, 4.2, col=P["glow"], glow=True, alpha=255)
+    mascara(T, P["sombra"], lente=P["glow"])
     return T
 
 # ======================================================================== BRANCO — Vida

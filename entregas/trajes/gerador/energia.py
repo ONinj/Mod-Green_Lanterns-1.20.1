@@ -153,8 +153,7 @@ def criar(tropa):
             T.draw(s + "arm", "outer", "line", [(0.8, 0.6), (2.0, 1.6), (3.2, 0.6)], 0.25, col=gl, glow=True)
 
     # ------------------------------------------------------------- máscara dominó
-    mascara(T, c, lente=P["lente"], rz=0.0)
-    T.draw("head", "front", "line", [(0.2, 2.65), (7.8, 2.65)], 0.25, col=gl, glow=True)
+    mascara(T, c, lente=P["lente"])
     return T
 
 for _t in PAL:
