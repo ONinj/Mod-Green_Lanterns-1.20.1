@@ -16,9 +16,9 @@ import java.util.Map;
  * As peças 3D aparecem cubinho por cubinho (veja {@link RingUniformRenderer}).
  */
 public final class UniformDissolve3D {
-    public static final int STAGES = 48;
+    public static final int STAGES = 64;
     private static final float SCATTER = 0.16f;
-    private static final float BAND = 0.07f;
+    private static final float BAND = 0.09f;
 
     private record Pair(ResourceLocation reveal, ResourceLocation band) {}
 
@@ -59,11 +59,8 @@ public final class UniformDissolve3D {
                 int lx = x / unit, ly = y / unit;
                 int color = src.getPixelRGBA(x, y);
                 if (lx >= 64 || ly >= 64) { reveal.setPixelRGBA(x, y, 0); band.setPixelRGBA(x, y, 0); continue; }
-                float height = UniformDissolve.heightOf(lx, ly);
-                int hash = (lx * 73856093) ^ (ly * 19349663) ^ 0x5bd1e995;
-                hash ^= hash >>> 13; hash *= 0x5bd1e995; hash ^= hash >>> 15;
-                float noise = (hash & 0xFFFF) / 65535f;
-                float th = height < 0 ? 0f : height * (1f - SCATTER) + noise * SCATTER;
+                float fl = FluxoUniforme.pele(lx, ly);
+                float th = fl < 0 ? 0f : fl;
                 boolean shown = th <= p;
                 reveal.setPixelRGBA(x, y, shown ? color : 0);
                 boolean fresh = shown && th > p - BAND && ((color >>> 24) & 0xFF) > 0;

@@ -249,10 +249,7 @@ public final class RingPowers {
                 .withStyle(s -> s.withColor(def.color())), true);
         player.level().playSound(null, player.blockPosition(),
                 enable ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8f, 1.4f);
-        if (enable) {
-            player.serverLevel().sendParticles(new DustParticleOptions(PowerBatteryBlock.rgb(def.color()), 1.2f),
-                    player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.9, 0.4, 0.02);
-        }
+        // (sem nuvem de pó: o uniforme escorrendo pelo corpo já mostra a transformação)
         sync(player, data);
         syncVisibleRing(player, data, false);
     }

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Uniforme surgindo PIXEL POR PIXEL, dos pés até a cabeça.
+ * Uniforme escorrendo pelo corpo como líquido, a partir da mão do anel (FluxoUniforme).
  *
  * Cada pixel da textura do uniforme sabe em que altura do corpo ele fica (pé = 0, topo da cabeça = 1).
  * Com o progresso p da transformação, aparecem os pixels abaixo da "frente" de energia, que sobe
@@ -20,11 +20,11 @@ import java.util.Map;
  * As etapas são texturas prontas (geradas uma vez por Tropa), então não pesa no FPS.
  */
 public final class UniformDissolve {
-    public static final int STAGES = 48;
+    public static final int STAGES = 64;
     /** Quanto o sorteio por pixel espalha a borda (0 = linha reta). */
     private static final float SCATTER = 0.16f;
     /** Espessura da faixa brilhante. */
-    private static final float BAND = 0.07f;
+    private static final float BAND = 0.09f;
 
     /** Partes do corpo na textura 64x64: (u, v, largura, altura, profundidade, altura do topo em pixels). */
     private static final int[][] BOXES = {
@@ -70,12 +70,9 @@ public final class UniformDissolve {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int sx = x * 64 / width, sy = y * 64 / height;
-                    float h = heightOf(sx, sy);
-                    // Sorteio fixo por pixel (sempre o mesmo, para a animação não "piscar")
-                    int hash = (sx * 73856093) ^ (sy * 19349663) ^ 0x5bd1e995;
-                    hash ^= hash >>> 13; hash *= 0x5bd1e995; hash ^= hash >>> 15;
-                    float noise = (hash & 0xFFFF) / 65535f;
-                    t[y * width + x] = h < 0 ? 0f : h * (1f - SCATTER) + noise * SCATTER;
+                    // o uniforme escorre pelo corpo a partir da mão do anel (veja FluxoUniforme)
+                    float h = FluxoUniforme.pele(sx, sy);
+                    t[y * width + x] = h < 0 ? 0f : h;
                 }
             }
             return t;

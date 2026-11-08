@@ -21,15 +21,16 @@ import java.util.Map;
 
 /**
  * O uniforme 3D vestido pelo anel, com a transformação:
- *  - camada de base (rente à skin): aparece pixel por pixel, dos pés à cabeça;
- *  - peças 3D (cubinhos): aparecem uma a uma, também subindo, e brilham na cor da Tropa ao se formar.
+ *  - o uniforme escorre pelo corpo como líquido, a partir da mão do anel (FluxoUniforme): a camada de base
+ *    (rente à skin) pixel por pixel e as peças 3D (cubinhos) acompanhando a mesma frente;
+ *  - a beirada da frente brilha na cor da Tropa.
  * Formado por completo, desenha igual ao uniforme normal (com as partes luminosas da _glowmask).
  */
 public class RingUniformRenderer extends UniformeRenderer {
     public enum Mode { NORMAL, BASE, DETAIL, BAND }
 
     private static final float SCATTER = 0.2f;
-    private static final float BAND = 0.08f;
+    private static final float BAND = 0.09f;
 
     private Mode mode = Mode.NORMAL;
     /** Trajes "segunda pele" não têm camada de base em layout de skin: tudo aparece cubinho por cubinho. */
@@ -133,28 +134,40 @@ public class RingUniformRenderer extends UniformeRenderer {
         return true;
     }
 
-    /** Em que altura do corpo (0 = pés, 1 = topo da cabeça) o cubo está, com um pouco de sorteio. */
+    /** Quando o líquido chega neste cubo: pelo osso (parte do corpo) e pelo centro do cubo, igual à camada de base. */
+    private final Map<GeoCube, Float> fluxo = new IdentityHashMap<>();
+
     private float threshold(PoseStack poseStack, GeoCube cube) {
-        float sx = 0, sy = 0, sz = 0;
-        int n = 0;
-        for (GeoQuad quad : cube.quads()) {
-            if (quad == null) continue;
-            for (GeoVertex v : quad.vertices()) {
-                sx += v.position().x(); sy += v.position().y(); sz += v.position().z();
-                n++;
-            }
+        Float t = fluxo.get(cube);
+        if (t != null) return t;
+        // monta o mapa inteiro de uma vez a partir do modelo (posição de descanso)
+        try {
+            var modelo = getGeoModel().getBakedModel(getGeoModel().getModelResource(this.animatable));
+            for (var osso : modelo.topLevelBones()) mapear(osso);
+        } catch (Exception ignored) {
         }
-        if (n == 0) return 0f;
-        Vector4f c = new Vector4f(sx / n, sy / n, sz / n, 1f);
-        poseStack.last().pose().transform(c);
-        toModel.transform(c);
-        // No espaço do modelo do jogador o Y aponta para baixo: pés em 1,5 e topo da cabeça em -0,5
-        float height = Math.max(0f, Math.min(1f, (1.5f - c.y()) / 2f));
-        float rnd = noise.computeIfAbsent(cube, k -> {
-            int h = System.identityHashCode(k) * 0x9E3779B1;
-            h ^= h >>> 15;
-            return (h & 0xFFFF) / 65535f;
-        });
-        return height * (1f - SCATTER) + rnd * SCATTER;
+        t = fluxo.get(cube);
+        if (t == null) { t = 0.5f; fluxo.put(cube, t); }
+        return t;
+    }
+
+    private void mapear(software.bernie.geckolib.cache.object.GeoBone osso) {
+        int parte = FluxoUniforme.parteDoOsso(osso.getName());
+        for (GeoCube cube : osso.getCubes()) {
+            float sx = 0, sy = 0, sz = 0;
+            int n = 0;
+            for (GeoQuad quad : cube.quads()) {
+                if (quad == null) continue;
+                for (GeoVertex v : quad.vertices()) {
+                    sx += v.position().x(); sy += v.position().y(); sz += v.position().z();
+                    n++;
+                }
+            }
+            if (n == 0) continue;
+            // o GeckoLib espelha o X do Blockbench e guarda em blocos
+            float x = -sx / n * 16f, y = sy / n * 16f, z = sz / n * 16f;
+            fluxo.put(cube, FluxoUniforme.tempo(parte, x, y, z, System.identityHashCode(cube) & 7));
+        }
+        for (var filho : osso.getChildBones()) mapear(filho);
     }
 }

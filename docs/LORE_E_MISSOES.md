@@ -1013,3 +1013,10 @@ Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lante
 A aura do anel ligado agora é um único halo de luz macio em volta da silhueta inteira do personagem, na cor da Tropa:
 forte e claro colado na borda, sumindo para fora, com uma leve ondulação viva. Saiu a aura por partes do corpo.
 (O efeito Brilho do Minecraft, de flechas espectrais, também passa a aparecer com esse halo macio.)
+
+## 0.38.3 — O uniforme escorre
+Ao ligar o anel, o uniforme não sobe mais em faixa dos pés à cabeça: ele **escorre pelo corpo como líquido**, a partir
+da mão do anel. Sobe pelo braço, chega no ombro, se espalha pelo peito e daí sobe o pescoço até a cabeça, desce pelo
+outro braço e pelas pernas. A frente é irregular (avança em línguas) e a beirada brilha na cor da Tropa; faíscas
+pequenas acompanham a frente. A camada rente à skin vai pixel por pixel e as peças 3D seguem a mesma frente. Leva
+cerca de 1,8 s. Ao desligar, o líquido recua de volta para a mão. Saiu a nuvem de pó verde ao ligar.

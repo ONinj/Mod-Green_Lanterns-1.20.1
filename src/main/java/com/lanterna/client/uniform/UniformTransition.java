@@ -18,8 +18,8 @@ import java.util.Map;
  * Desligar: ele se desfaz da cabeça para os pés.
  */
 public final class UniformTransition {
-    /** Velocidade da transformação por tick (1 / 0.045 ≈ 22 ticks ≈ 1,1 s). */
-    private static final float SPEED = 0.045f;
+    /** Velocidade da transformação por tick (1 / 0.028 ≈ 36 ticks ≈ 1,8 s). */
+    private static final float SPEED = 0.028f;
 
     private static final Map<Integer, Float> NOW = new HashMap<>();
     private static final Map<Integer, Float> OLD = new HashMap<>();
@@ -66,13 +66,21 @@ public final class UniformTransition {
         var mc = net.minecraft.client.Minecraft.getInstance();
         if (player == mc.player && mc.options.getCameraType().isFirstPerson()) return;
         var rnd = player.getRandom();
-        double height = p * 1.95;
-        for (int i = 0; i < 6; i++) {
-            double angle = rnd.nextDouble() * Math.PI * 2;
-            double radius = 0.32 + rnd.nextDouble() * 0.08;
-            player.level().addParticle(GlowOrbOptions.of(color, 0.05f + rnd.nextFloat() * 0.06f),
-                    player.getX() + Math.cos(angle) * radius, player.getY() + height + (rnd.nextDouble() - 0.5) * 0.1,
-                    player.getZ() + Math.sin(angle) * radius, 0, 0.004, 0);
+        // faíscas onde o líquido está chegando agora (na beirada da frente)
+        var pts = FluxoUniforme.pontos();
+        double yaw = Math.toRadians(player.yBodyRot);
+        // direita e frente do jogador no mundo
+        double rx = -Math.cos(yaw), rz = -Math.sin(yaw), fx = -Math.sin(yaw), fz = Math.cos(yaw);
+        int feitos = 0;
+        for (int tent = 0; tent < 60 && feitos < 5; tent++) {
+            float[] q = pts.get(rnd.nextInt(pts.size()));
+            if (Math.abs(q[3] - p) > 0.035f) continue;
+            // modelo (Blockbench): +x é a esquerda do jogador, -z é a frente
+            double esq = q[0] / 16.0 * 1.06, frente = -q[2] / 16.0 * 1.06, ly = q[1] / 16.0;
+            double wx = -esq * rx + frente * fx, wz = -esq * rz + frente * fz;
+            player.level().addParticle(GlowOrbOptions.of(color, 0.04f + rnd.nextFloat() * 0.05f),
+                    player.getX() + wx, player.getY() + ly * 0.9375 * (player.isCrouching() ? 0.85 : 1), player.getZ() + wz, 0, 0.003, 0);
+            feitos++;
         }
     }
 

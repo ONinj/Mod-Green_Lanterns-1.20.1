@@ -73,6 +73,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.46 ✅ (0.38.0) O planeta Mogo: as 6 missões (cinturão, corrida, ponte, prova, cerco, núcleo) e a Segunda Chance
 1.46.1 ✅ (0.38.1) Naves: saída ao lado da nave, colocar sem prender o jogador, hitbox justa; Ecos nas ilhas de Odym; /lanterna laranja
 1.46.2 ✅ (0.38.2) Aura: halo contínuo e macio em volta da silhueta inteira (sem peças por parte do corpo)
+1.46.3 ✅ (0.38.3) Transformação: o uniforme escorre pelo corpo como líquido a partir da mão do anel
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
