@@ -20,13 +20,13 @@ public class BateriaCentralItem extends Item {
     /** posição do núcleo dentro da estrutura (x, y, z) — veja o LEIA-ME */
     public static int[] origem(Tropa t) {
         return switch (t) {
-            case VERDE -> new int[]{7, 0, 9};
-            case AMARELO -> new int[]{7, 0, 9};
+            case VERDE -> new int[]{8, 0, 9};
+            case AMARELO -> new int[]{8, 0, 9};
             case VERMELHO -> new int[]{8, 0, 9};
-            case LARANJA -> new int[]{7, 0, 9};
-            case AZUL -> new int[]{7, 0, 9};
-            case INDIGO -> new int[]{7, 0, 9};
-            case VIOLETA -> new int[]{9, 0, 10};
+            case LARANJA -> new int[]{9, 0, 9};
+            case AZUL -> new int[]{14, 0, 9};
+            case INDIGO -> new int[]{8, 0, 9};
+            case VIOLETA -> new int[]{8, 0, 9};
         };
     }
 

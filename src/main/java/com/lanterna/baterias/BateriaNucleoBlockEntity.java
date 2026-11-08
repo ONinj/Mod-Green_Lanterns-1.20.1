@@ -34,5 +34,5 @@ public class BateriaNucleoBlockEntity extends BlockEntity implements GeoBlockEnt
     @Override public AnimatableInstanceCache getAnimatableInstanceCache() { return cache; }
 
     /** o modelo é enorme: sem isso ele some quando o bloco do núcleo sai da tela */
-    @Override public AABB getRenderBoundingBox() { return new AABB(worldPosition).inflate(12, 0, 12).expandTowards(0, 40, 0); }
+    @Override public AABB getRenderBoundingBox() { return new AABB(worldPosition).inflate(16, 0, 16).expandTowards(0, 40, 0); }
 }

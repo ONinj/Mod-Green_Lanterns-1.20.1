@@ -17,18 +17,6 @@
       0
      ]
     },
-    "anel_2": {
-     "rotation": [
-      0,
-      "-query.anim_time * 30",
-      0
-     ],
-     "position": [
-      0,
-      "math.cos(query.anim_time * 45) * 3",
-      0
-     ]
-    },
     "nucleo_brilho": {
      "scale": [
       "1 + math.sin(query.anim_time * 90) * 0.04",
@@ -58,13 +46,6 @@
      "position": [
       0,
       "math.sin(query.anim_time * 180) * 6",
-      0
-     ]
-    },
-    "anel_2": {
-     "rotation": [
-      0,
-      "-query.anim_time * 140",
       0
      ]
     },
