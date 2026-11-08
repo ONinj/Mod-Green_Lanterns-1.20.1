@@ -1057,3 +1057,13 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - A transformação continua escorrendo como líquido a partir da mão do anel, agora pixel por pixel na skin, com a
   beirada acesa na cor da Tropa (shader `traje_pele`). Em primeira pessoa o braço segue igual.
 - As peças de traje vestidas como armadura de verdade (itens) continuam 3D.
+
+## 0.39.1 — Relevo e peças 3D de volta
+- **Altura da máscara** (Personalização) volta a funcionar com o traje na skin: a pintura da cabeça desliza para cima
+  ou para baixo em passos de 1/4 de pixel (até 2 px).
+- **Relevo na segunda camada**: o que no traje 3D era saliente (placas, ombreiras, frisos, a máscara) vai também para a
+  segunda camada da skin, um pouco acima do corpo, como a jaqueta de uma skin. Na cabeça, essa camada fica entre a
+  cabeça e o cabelo/chapéu do jogador, então o cabelo continua por cima.
+- **Peças 3D**: o que sai do corpo mais do que uma skin consegue mostrar (asas da Fênix, auréola da Gênese, espinhos,
+  chifres, cristais, moedas, tiras de pano...) continua 3D por cima da skin, e entra na transformação junto com o
+  líquido.

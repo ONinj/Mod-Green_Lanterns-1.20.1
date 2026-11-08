@@ -45,7 +45,12 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         String traje = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
         if ("nenhum".equals(traje)) return; // escolheu ficar sem uniforme
         // a roupa pintada na própria skin (troca de pixels, sem espessura)
-        if (PeleTraje.corpo(poseStack, buffer, light, player, getParentModel(), p)) return;
+        if (PeleTraje.corpo(poseStack, buffer, light, player, getParentModel(), p)) {
+            // e as peças 3D que saem do corpo (asas, auréola, espinhos...) continuam 3D por cima
+            String tropa3 = com.lanterna.armor.ModArmorItems.tropaOf(com.lanterna.LanternaMod.id(UniformTransition.corpsOf(player)));
+            if (tropa3 != null) acessorios(poseStack, light, player, tropa3, p, getParentModel());
+            return;
+        }
         if (!UniformTextures.hasCustom(corpsId) && UniformDissolve3D.exists(tropa)) {
             render3D(poseStack, light, player, tropa, p, getParentModel(), SLOTS, null);
             return;
@@ -136,6 +141,29 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
             }
         }
         renderer3D.setSoBraco(null);
+        renderer3D.reset();
+    }
+
+    /** Só as peças 3D do uniforme/traje (o corpo já foi pintado na skin pela PeleTraje). */
+    public static void acessorios(PoseStack poseStack, int light, AbstractClientPlayer player, String tropa, float p,
+                                  net.minecraft.client.model.HumanoidModel<?> base) {
+        if (renderer3D == null) renderer3D = new RingUniformRenderer();
+        int color = ClientVisibleRings.of(player.getId()).color();
+        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
+        String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
+        boolean traje = com.lanterna.visual.Visual.eSegundaPele(var);
+        org.joml.Matrix4f layerPose = new org.joml.Matrix4f(poseStack.last().pose());
+        for (var slot : SLOTS) {
+            if (!player.getItemBySlot(slot).isEmpty()) continue;
+            net.minecraft.world.item.ItemStack piece = PIECES.computeIfAbsent(tropa + "|" + var + "|" + slot, k -> {
+                var item = traje ? com.lanterna.armor.ModTrajes.peca(tropa, var, slot) : com.lanterna.armor.ModArmorItems.pieceFor(tropa, slot);
+                return item == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(item);
+            });
+            if (piece.isEmpty()) continue;
+            renderer3D.prepForRender(player, piece, slot, base);
+            renderer3D.setup(RingUniformRenderer.Mode.ACESSORIO, p, color, null, layerPose);
+            renderer3D.renderToBuffer(poseStack, null, light, overlay, 1f, 1f, 1f, 1f);
+        }
         renderer3D.reset();
     }
 

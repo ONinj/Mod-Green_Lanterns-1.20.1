@@ -53,7 +53,8 @@ public final class UniformeBraco {
                 dentro = false;
             }
             PeleTraje.braco(event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), player,
-                    direito0 ? renderer.getModel().rightArm : renderer.getModel().leftArm, p);
+                    direito0 ? renderer.getModel().rightArm : renderer.getModel().leftArm,
+                    direito0 ? renderer.getModel().rightSleeve : renderer.getModel().leftSleeve, p);
             return;
         }
 

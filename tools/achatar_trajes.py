@@ -23,6 +23,11 @@ PARTES = {
     'rightLeg': ((-3.9, 12, -2), (4, 12, 4), (0, 16)),
     'leftLeg': ((-0.1, 12, -2), (4, 12, 4), (16, 48)),
 }
+# UV da segunda camada de cada parte (onde vai o relevo)
+SEGUNDA = {'head': (32, 0), 'body': (16, 32), 'rightArm': (40, 32), 'leftArm': (48, 48), 'rightLeg': (0, 32), 'leftLeg': (0, 48)}
+RELEVO = 0.45      # faces mais para fora que isto também vão para a segunda camada (relevo de verdade)
+SOBRA = 1.3        # cubos que saem mais que isto do corpo (ou girados) são peças 3D: não entram na skin
+
 OSSOS = {'armorHead': 'head', 'armorBody': 'body', 'armorRightArm': 'rightArm', 'armorLeftArm': 'leftArm',
          'armorRightLeg': 'rightLeg', 'armorRightBoot': 'rightLeg', 'armorLeftLeg': 'leftLeg', 'armorLeftBoot': 'leftLeg'}
 
@@ -68,6 +73,10 @@ def cubos_do_modelo(geo):
             if 'rotation' in c and any(abs(r) > 0.01 for r in c['rotation']): continue
             ox, oy, oz = c['origin']; sx, sy, sz = c['size']; inf = c.get('inflate', 0)
             caixa = (ox - inf, 24 - (oy + sy) - inf, oz - inf, ox + sx + inf, 24 - oy + inf, oz + sz + inf)
+            (px0, py0, pz0), (pw, ph, pd), _ = PARTES[parte]
+            if (px0 - caixa[0] > SOBRA or caixa[3] - (px0 + pw) > SOBRA or py0 - caixa[1] > SOBRA or caixa[4] - (py0 + ph) > SOBRA
+                    or pz0 - caixa[2] > SOBRA or caixa[5] - (pz0 + pd) > SOBRA):
+                continue  # peça 3D (asa, auréola, espinho...): continua 3D no jogo
             uv = c.get('uv')
             faces = {}
             if isinstance(uv, list):
@@ -106,24 +115,26 @@ def achatar(arquivo, slim):
             ru, rv, rw, rh = rect_skin(face, u0, v0, ws, h, d)
             cand = sorted([(fora(face, caixa, cx), cx, fs[face]) for cx, fs in meus if face in fs], key=lambda c: -c[0])
             cand = [c for c in cand if -0.05 <= c[0] <= MAX_FORA]
+            su, sv = SEGUNDA[parte]
+            r2u, r2v, _, _ = rect_skin(face, su, sv, ws, h, d)
             for j in range(int(rh * ESCALA)):
                 for i in range(int(rw * ESCALA)):
                     s, t = (i + 0.5) / (rw * ESCALA), (j + 0.5) / (rh * ESCALA)
                     p = ponto(face, *caixa, s, t)
-                    for off, cx, (fu, fv, fw, fh) in cand:
-                        s2, t2 = st(face, *cx, p)
-                        if not (-1e-4 <= s2 <= 1 + 1e-4 and -1e-4 <= t2 <= 1 + 1e-4): continue
-                        tx = int((fu + min(max(s2, 0), 0.9999) * fw) * kx) if fw >= 0 else int((fu + fw + (1 - min(max(s2, 0), 0.9999)) * -fw) * kx)
-                        ty = int((fv + min(max(t2, 0), 0.9999) * fh) * ky) if fh >= 0 else int((fv + fh + (1 - min(max(t2, 0), 0.9999)) * -fh) * ky)
-                        if fw < 0: tx = int((fu + min(max(s2, 0), 0.9999) * fw) * kx)
-                        if fh < 0: ty = int((fv + min(max(t2, 0), 0.9999) * fh) * ky)
-                        tx = min(max(tx, 0), tex.width - 1); ty = min(max(ty, 0), tex.height - 1)
-                        c = tp[tx, ty]
-                        if c[3] < 24: continue
-                        X, Y = int(ru * ESCALA) + i, int(rv * ESCALA) + j
-                        po[X, Y] = (c[0], c[1], c[2], 255)
-                        if gp: pg[X, Y] = gp[tx, ty]
-                        break
+                    for camada, lista in ((0, cand), (1, [c for c in cand if c[0] > RELEVO])):
+                        for off, cx, (fu, fv, fw, fh) in lista:
+                            s2, t2 = st(face, *cx, p)
+                            if not (-1e-4 <= s2 <= 1 + 1e-4 and -1e-4 <= t2 <= 1 + 1e-4): continue
+                            s2 = min(max(s2, 0), 0.9999); t2 = min(max(t2, 0), 0.9999)
+                            tx = int((fu + s2 * fw) * kx); ty = int((fv + t2 * fh) * ky)
+                            tx = min(max(tx, 0), tex.width - 1); ty = min(max(ty, 0), tex.height - 1)
+                            c = tp[tx, ty]
+                            if c[3] < 24: continue
+                            if camada == 0: X, Y = int(ru * ESCALA) + i, int(rv * ESCALA) + j
+                            else: X, Y = int(r2u * ESCALA) + i, int(r2v * ESCALA) + j
+                            po[X, Y] = (c[0], c[1], c[2], 255)
+                            if gp: pg[X, Y] = gp[tx, ty]
+                            break
     return out, outg
 
 if __name__ == '__main__':

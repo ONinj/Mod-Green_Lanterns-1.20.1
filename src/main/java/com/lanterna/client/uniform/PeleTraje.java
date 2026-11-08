@@ -110,13 +110,15 @@ public final class PeleTraje {
     }
 
     @Nullable
-    private static Pele pele(String arq, boolean slim) {
-        String k = arq + "_" + (slim ? "slim" : "wide");
+    private static Pele pele(String arq, boolean slim, int mascara) {
+        String k0 = arq + "_" + (slim ? "slim" : "wide");
+        String k = k0 + (mascara == 0 ? "" : "_m" + (mascara + 100));
         if (PELES.containsKey(k)) return PELES.get(k);
         Pele pl = null;
-        try (InputStream in = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k + ".png"))) {
+        try (InputStream in = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + ".png"))) {
             NativeImage img = NativeImage.read(in);
             int esc = img.getWidth() / 64;
+            if (mascara != 0) subirMascara(img, esc, mascara);
             // alfa = quando o líquido chega no pixel (1..255); 0 = sem traje (mostra a skin)
             for (int y = 0; y < img.getHeight(); y++) for (int x = 0; x < img.getWidth(); x++) {
                 int c = img.getPixelRGBA(x, y);
@@ -127,13 +129,40 @@ public final class PeleTraje {
             }
             ResourceLocation tex = LanternaMod.id("dynamic/pele_" + k);
             Minecraft.getInstance().getTextureManager().register(tex, new DynamicTexture(img));
-            ResourceLocation brilho = existe(k + "_glow") ? LanternaMod.id("textures/skin_traje/" + k + "_glow.png") : null;
+            ResourceLocation brilho = null;
+            if (existe(k0 + "_glow")) {
+                if (mascara == 0) brilho = LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png");
+                else try (InputStream gin = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png"))) {
+                    NativeImage gl = NativeImage.read(gin);
+                    subirMascara(gl, esc, mascara);
+                    brilho = LanternaMod.id("dynamic/pele_" + k + "_glow");
+                    Minecraft.getInstance().getTextureManager().register(brilho, new DynamicTexture(gl));
+                }
+            }
             pl = new Pele(tex, brilho);
         } catch (Exception e) {
             LanternaMod.LOGGER.warn("Lanterna: não deu para carregar a skin do traje {}: {}", k, e.toString());
         }
         PELES.put(k, pl);
         return pl;
+    }
+
+    /**
+     * Ajuste de altura da máscara (Personalização): desliza a pintura da cabeça (laterais, frente e costas, das duas
+     * camadas) para cima ou para baixo, em passos de 1/4 de pixel.
+     */
+    private static void subirMascara(NativeImage img, int esc, int mascara) {
+        int passo = Math.round(mascara * esc / 4f);
+        if (passo == 0) return;
+        int y0 = 8 * esc, y1 = 16 * esc;
+        for (int x = 0; x < 64 * esc; x++) {
+            int[] col = new int[y1 - y0];
+            for (int y = y0; y < y1; y++) col[y - y0] = img.getPixelRGBA(x, y);
+            for (int y = y0; y < y1; y++) {
+                int src = y + passo - y0; // subir (passo > 0): o pixel de baixo vem para cima
+                img.setPixelRGBA(x, y, src >= 0 && src < col.length ? col[src] : 0);
+            }
+        }
     }
 
     public static void limpar() {
@@ -149,11 +178,12 @@ public final class PeleTraje {
     public static boolean corpo(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, PlayerModel<AbstractClientPlayer> m, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player));
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara());
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
         int ov = LivingEntityRenderer.getOverlayCoords(player, 0f);
+        float pp = Math.max(0.0005f, p);
         // só as partes de baixo (a segunda camada da skin fica como está); onde há armadura de verdade, não pinta
         ModelPart[] partes = {m.head, m.body, m.rightArm, m.leftArm, m.rightLeg, m.leftLeg};
         boolean[] cobre = {
@@ -166,7 +196,21 @@ public final class PeleTraje {
         var vc = buf.getBuffer(tipo(pl.tex));
         for (int i = 0; i < partes.length; i++) {
             if (!cobre[i] || !partes[i].visible) continue;
-            partes[i].render(ps, vc, luz, ov, r, g, b, Math.max(0.0005f, p));
+            partes[i].render(ps, vc, luz, ov, r, g, b, pp);
+        }
+        // segunda camada do traje: o relevo (placas, frisos, ombreiras, a máscara) um pouco acima do corpo, como a
+        // jaqueta de uma skin. Na cabeça fica entre a cabeça e o cabelo/chapéu da skin do jogador.
+        ModelPart[] relevo = {m.hat, m.jacket, m.rightSleeve, m.leftSleeve, m.rightPants, m.leftPants};
+        for (int i = 0; i < relevo.length; i++) {
+            if (!cobre[i] || !partes[i].visible) continue; // mesma ordem das partes de baixo
+            ModelPart q = relevo[i];
+            boolean vis = q.visible;
+            float sx = q.xScale, sy = q.yScale, sz = q.zScale;
+            q.visible = true;
+            if (i == 0) { q.xScale = q.zScale = 0.965f; q.yScale = 0.97f; }
+            q.render(ps, vc, luz, ov, r, g, b, pp);
+            q.visible = vis;
+            q.xScale = sx; q.yScale = sy; q.zScale = sz;
         }
         // o que brilha no escuro (lentes, emblema, fibras de energia), depois de formado
         if (p >= 1f && pl.brilho != null) {
@@ -175,21 +219,41 @@ public final class PeleTraje {
                 if (!cobre[i] || !partes[i].visible) continue;
                 partes[i].render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             }
+            for (int i = 0; i < relevo.length; i++) {
+                if (!cobre[i] || !partes[i].visible) continue;
+                ModelPart q = relevo[i];
+                boolean vis = q.visible;
+                float sx = q.xScale, sy = q.yScale, sz = q.zScale;
+                q.visible = true;
+                if (i == 0) { q.xScale = q.zScale = 0.965f; q.yScale = 0.97f; }
+                q.render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+                q.visible = vis;
+                q.xScale = sx; q.yScale = sy; q.zScale = sz;
+            }
         }
         return true;
     }
 
     /** Só um braço (primeira pessoa), já posicionado pelo desenho da mão normal. */
-    public static boolean braco(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, ModelPart braco, float p) {
+    public static boolean braco(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, ModelPart braco, ModelPart manga, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player));
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara());
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
-        braco.render(ps, buf.getBuffer(tipo(pl.tex)), luz, OverlayTexture.NO_OVERLAY,
-                ((cor >> 16) & 255) / 255f, ((cor >> 8) & 255) / 255f, (cor & 255) / 255f, Math.max(0.0005f, p));
-        if (p >= 1f && pl.brilho != null)
-            braco.render(ps, buf.getBuffer(RenderType.eyes(pl.brilho)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+        float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f, pp = Math.max(0.0005f, p);
+        var vc = buf.getBuffer(tipo(pl.tex));
+        braco.render(ps, vc, luz, OverlayTexture.NO_OVERLAY, r, g, b, pp);
+        boolean vis = manga.visible;
+        manga.visible = true;
+        manga.copyFrom(braco);
+        manga.render(ps, vc, luz, OverlayTexture.NO_OVERLAY, r, g, b, pp);
+        if (p >= 1f && pl.brilho != null) {
+            var eyes = buf.getBuffer(RenderType.eyes(pl.brilho));
+            braco.render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+            manga.render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+        }
+        manga.visible = vis;
         return true;
     }
 

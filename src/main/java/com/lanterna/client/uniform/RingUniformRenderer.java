@@ -27,7 +27,7 @@ import java.util.Map;
  * Formado por completo, desenha igual ao uniforme normal (com as partes luminosas da _glowmask).
  */
 public class RingUniformRenderer extends UniformeRenderer {
-    public enum Mode { NORMAL, BASE, DETAIL, BAND }
+    public enum Mode { NORMAL, BASE, DETAIL, BAND, ACESSORIO }
 
     private static final float SCATTER = 0.2f;
     private static final float BAND = 0.09f;
@@ -94,7 +94,7 @@ public class RingUniformRenderer extends UniformeRenderer {
 
     @Override
     public List<GeoRenderLayer<UniformeTropaItem>> getRenderLayers() {
-        return mode == Mode.NORMAL ? super.getRenderLayers() : List.of();
+        return mode == Mode.NORMAL || mode == Mode.ACESSORIO && progress >= 1f ? super.getRenderLayers() : List.of();
     }
 
     @Override
@@ -108,6 +108,16 @@ public class RingUniformRenderer extends UniformeRenderer {
         switch (mode) {
             case BASE -> { if (base) super.renderCube(poseStack, cube, buffer, light, overlay, red, green, blue, alpha); }
             case BAND -> { if (base) super.renderCube(poseStack, cube, buffer, LightTexture.FULL_BRIGHT, overlay, cr, cg, cb, alpha); }
+            case ACESSORIO -> {
+                // só as peças 3D que saem do corpo (asas, auréola, espinhos...); o resto já está pintado na skin
+                threshold(poseStack, cube);
+                if (!acessorios.getOrDefault(cube, false)) return;
+                float t = threshold(poseStack, cube);
+                if (t > progress) return;
+                if (progress < 1f && progress - t < BAND)
+                    super.renderCube(poseStack, cube, buffer, LightTexture.FULL_BRIGHT, overlay, cr, cg, cb, alpha);
+                else super.renderCube(poseStack, cube, buffer, light, overlay, red, green, blue, alpha);
+            }
             case DETAIL -> {
                 if (base) return;
                 float t = threshold(poseStack, cube);
@@ -151,9 +161,37 @@ public class RingUniformRenderer extends UniformeRenderer {
         return t;
     }
 
+    /** Cubos que saem do corpo mais que a skin consegue mostrar (ou girados): continuam 3D. */
+    private final Map<GeoCube, Boolean> acessorios = new IdentityHashMap<>();
+    /** Caixa de cada parte no Blockbench (x0, y0, z0, x1, y1, z1), igual ao tools/achatar_trajes.py. */
+    private static final float[][] CAIXA = {
+            {-4, 24, -4, 4, 32, 4}, {-4, 12, -2, 4, 24, 2}, {-8, 12, -2, -4, 24, 2}, {4, 12, -2, 8, 24, 2},
+            {-3.9f, 0, -2, 0.1f, 12, 2}, {-0.1f, 0, -2, 3.9f, 12, 2}};
+    private static final float SOBRA = 1.3f;
+
+    private static boolean acessorio(int parte, GeoCube cube) {
+        var rot = cube.rotation();
+        if (Math.abs(rot.x) > 1e-3 || Math.abs(rot.y) > 1e-3 || Math.abs(rot.z) > 1e-3) return true;
+        float x0 = 1e9f, y0 = 1e9f, z0 = 1e9f, x1 = -1e9f, y1 = -1e9f, z1 = -1e9f;
+        for (GeoQuad quad : cube.quads()) {
+            if (quad == null) continue;
+            for (GeoVertex v : quad.vertices()) {
+                float x = -v.position().x() * 16f, y = v.position().y() * 16f, z = v.position().z() * 16f;
+                x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); z0 = Math.min(z0, z); z1 = Math.max(z1, z);
+            }
+        }
+        float[] c = CAIXA[parte];
+        return c[0] - x0 > SOBRA || x1 - c[3] > SOBRA || c[1] - y0 > SOBRA || y1 - c[4] > SOBRA || c[2] - z0 > SOBRA || z1 - c[5] > SOBRA;
+    }
+
     private void mapear(software.bernie.geckolib.cache.object.GeoBone osso) {
         int parte = FluxoUniforme.parteDoOsso(osso.getName());
+        int caixa = switch (parte) {
+            case FluxoUniforme.CABECA -> 0; case FluxoUniforme.BRACO_D -> 2; case FluxoUniforme.BRACO_E -> 3;
+            case FluxoUniforme.PERNA_D -> 4; case FluxoUniforme.PERNA_E -> 5; default -> 1;
+        };
         for (GeoCube cube : osso.getCubes()) {
+            acessorios.put(cube, acessorio(caixa, cube));
             float sx = 0, sy = 0, sz = 0;
             int n = 0;
             for (GeoQuad quad : cube.quads()) {
