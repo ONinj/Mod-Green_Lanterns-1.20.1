@@ -1,0 +1,86 @@
+TRAJES "SEGUNDA PELE" DAS TROPAS — GeckoLib 4 / Forge 1.20.1
+=============================================================
+27 trajes: 2 variações ("a" e "b") + 1 traje de ENERGIA para cada uma das 9 Tropas. São um conjunto NOVO, separado dos uniformes 3D que já estão
+no mod (uniforme_<cor>): não substituem nada, ganham itens próprios (traje_<tropa>_<variante>_<peça>).
+
+COMO FORAM FEITOS
+  • Colados no corpo: a camada de base fica a só 0,22–0,24 px da skin (as botas 0,36).
+  • Textura em alta definição: 256x256, 4 pixels por pixel da skin (HD 4x). Dá para ver trama do tecido,
+    costuras com pontos, sombreado de músculos por baixo do traje (peitoral, abdômen, deltoide, coxa, panturrilha),
+    chanfros, brilho de metal e desgaste nas bordas das placas.
+  • Profundidade de verdade: tudo o que é painel, placa, emblema, osso, frisos etc. foi pintado junto com um mapa de
+    relevo, e o gerador transformou esse mapa em cubos finos (0,1 / 0,22 / 0,38 / 0,6 px de altura) que usam a
+    própria pintura. Então a borda pintada e a borda 3D coincidem, sem precisar de armadura grossa.
+  • Peças 3D por cima onde faz sentido (cristais, espinhos, asas, tiras de pano, moedas, auréola, chifres...).
+  • O emblema de cada Tropa (os mesmos desenhos dos anéis) aparece no peito em relevo e brilhando.
+  • Rosto e cabelo do jogador continuam à mostra, menos nos que têm capuz ou máscara inteira (Sentinela, Saqueador,
+    Ossuário).
+
+OS 18 TRAJES "SEGUNDA PELE"
+  arquivo             nome                Tropa       cubos  destaques
+  traje_verde_a       Patrulheiro         Vontade     220    grafite com o peito verde em V, faixas de energia nos braços, pernas e flancos, máscara com lentes brancas
+  traje_verde_b       Sentinela           Vontade     228    verde com laterais escuras, couraça em 3 placas, emissor de energia nas costas, meia-cogula
+  traje_amarelo_a     Espectro            Medo        265    preto com quitina amarela (costelas de inseto), espinhos nos ombros e nas costas, lâminas no antebraço, garras
+  traje_amarelo_b     Arauto do Terror    Medo        214    amarelo rachado de preto, gola alta em leque atrás da cabeça, chifres de osso nos ombros, máscara negra
+  traje_vermelho_a    Berserker           Fúria       296    fibra muscular com veias de magma brilhando, ombro esquerdo de rocha com lava, antebraço enfaixado
+  traje_vermelho_b    Sangue Fervente     Fúria       250    preto com chamas vermelhas em relevo, energia escorrendo do emblema, cravos nos punhos, chifres curtos
+  traje_laranja_a     Tesoureiro          Avareza     197    colete escuro com arabescos de ouro, gola alta com gema, moedas no cinto, franja dourada, monóculo
+  traje_laranja_b     Saqueador           Avareza     211    capuz, cota de moedas, bandoleira com bolsinhas, saco de pilhagem nas costas, óculos de visão
+  traje_azul_a        Aurora              Esperança   241    branco com raios azuis saindo do emblema (amanhecer), asas em relevo nas costas, asinhas nas botas
+  traje_azul_b        Estrela-Guia        Esperança   170    azul-noite com constelações que brilham, barbatanas de prata nas costas, tiara com estrela
+  traje_indigo_a      Peregrino           Compaixão   142    ataduras de pano cru, tatuagens luminosas, tabardo de pano pendurado, contas no pescoço, pés enfaixados
+  traje_indigo_b      Xamã                Compaixão   159    pintura tribal luminosa em faixas, colar de dentes, franja de penas nos ombros, máscara com penas
+  traje_violeta_a     Safira              Amor        208    acolchoado em losangos, corpete em forma de coração, cristais nos ombros, máscara de baile e tiara
+  traje_violeta_b     Coração Estelar     Amor        182    corpete com amarração cruzada, rabo de casaca, ombreiras de cristal, linhas rosa luminosas
+  traje_preto_a       Ossuário            Morte       339    esqueleto em relevo (costelas, coluna, ossos dos membros), MEIA-caveira só nos olhos com os dentinhos (boca e queixo livres)
+  traje_preto_b       Ceifador            Morte       158    capuz CAÍDO em 3D em volta do pescoço (pendurado nas costas), costelas e coluna de luz, mortalha em tiras, rosto livre
+  traje_branco_a      Gênese              Vida        260    branco e ouro, raios de sol em relevo, louros nos ombros, auréola flutuante
+  traje_branco_b      Fênix               Vida        195    as cores de todas as Tropas em linhas de luz, asas de penas nas costas, coroa de luz
+
+OS 9 TRAJES DE ENERGIA (traje_<tropa>_energia) — estilo "roupa feita de energia" de filme, design próprio
+  • Base escura bem colada, músculos (peitoral, abdômen, oblíquos, trapézio, escápulas, dorsais, deltoide, bíceps,
+    tríceps, antebraço, quadríceps, joelho, canela, posterior, panturrilha) como placas na cor da Tropa, separados por sulcos.
+  • Cada músculo tem fibras de energia acesas por dentro (glowmask) e um brilho que vaza para o tecido em volta.
+  • Linha alba, coluna, laterais e parte de dentro dos membros com veias de luz; luvas e botas mais escuras com
+    anel de luz; emblema grande brilhando no peito; máscara dominó na cor da Tropa com olhos brancos acesos.
+  • Toque de cada Tropa: Fúria (veias em zigue-zague), Medo (divisas nos antebraços), Esperança (raios nas costas),
+    Amor (curvas), Compaixão (pontos tribais), Avareza (filetes nas coxas), Morte (costelas de luz fria), Vida (filigrana dourada).
+  • Morte = cinza-chumbo com luz branca fria; Vida = branco com luz dourada. ~250-260 cubos cada.
+
+ARQUIVOS (forge/src/main/resources/assets/seu_modid/)
+  geo/item/armor/traje_<tropa>_<variante>.geo.json          modelo (ossos de armadura do GeckoLib)
+  textures/item/armor/traje_<tropa>_<variante>.png          textura 256x256
+  textures/item/armor/traje_<tropa>_<variante>_glowmask.png o que brilha no escuro
+  animations/item/armor/traje_<tropa>_<variante>.animation.json  (vazio, pronto para animar)
+  models/item + textures/item   ícones das 108 peças (renderizados a partir do próprio modelo)
+  lang/pt_br.json, en_us.json   nomes dos 108 itens (junte com os arquivos de idioma que já existem)
+  <tropa> = verde, amarelo, vermelho, laranja, azul, indigo, violeta, preto, branco · <variante> = a, b, energia
+
+OSSOS (padrão de armadura do GeckoLib — não renomeie)
+  armorHead (máscara), armorBody + armorRightArm + armorLeftArm (peito), armorRightLeg + armorLeftLeg (calça),
+  armorRightBoot + armorLeftBoot (botas). Pivôs iguais aos do jogador (0,24,0 · ±5,22,0 · ±1,9,12,0).
+
+CÓDIGO (forge/src/main/java/seu/pacote/trajes/) — troque o pacote e o MODID
+  TrajeTropaItem.java      item de armadura GeckoLib (sabe a Tropa e a variação)
+  TrajeMaterial.java       proteção/durabilidade por Tropa (Branco e Preto mais fortes; ajuste à vontade)
+  ModTrajes.java           registra as 108 peças em laço; mapa TODOS para pôr na aba criativa
+  client/TrajeModel.java   escolhe modelo/textura pelo nome traje_<tropa>_<variante>
+  client/TrajeRenderer.java renderizador + camada de brilho
+  Na classe principal: ModTrajes.register(modEventBus);
+  Aba criativa: ModTrajes.TODOS.values().forEach(r -> output.accept(r.get()));
+  (precisa do GeckoLib 4.8.4, que o mod já usa)
+
+EDITAR NO BLOCKBENCH
+  blockbench/ tem o .geo.json e o .png de cada traje. Com o plugin GeckoLib: File > Open Model > o .geo.json,
+  aplique a textura, e em GeckoLib Model Settings deixe o tipo "Armor". Para exportar: Export GeckoLib Model.
+  A textura é organizada por faces (cada face do corpo é um retângulo); pintar direto no Blockbench funciona bem.
+
+PRÉVIAS
+  previas/galeria.png (os 18 a/b), previas/galeria_energia.png (os 9 de energia) e previas/trajes_<tropa>.png (as 3 versões, 3 ângulos cada).
+  São renderizações minhas num boneco com skin genérica; no jogo a luz muda um pouco.
+
+OBSERVAÇÕES
+  • O código não foi compilado dentro do projeto do mod; teste ao integrar.
+  • Se quiser os trajes no lugar dos uniformes antigos, basta trocar o nome do arquivo que o UniformeModel usa.
+  • gerador/ tem os scripts: designs.py descreve cada traje (cores, painéis, acessórios); motivos.py tem as peças
+    reaproveitáveis (ombreira, braçadeira, emblema 3D, capuz...); traje.py é o motor (pintura + relevo).
