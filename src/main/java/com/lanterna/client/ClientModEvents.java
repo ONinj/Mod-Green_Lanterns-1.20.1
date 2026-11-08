@@ -92,7 +92,7 @@ public final class ClientModEvents {
                         new PlayerModel<>(event.getEntityModels().bakeLayer(UniformModels.SLIM), true)));
                 renderer.addLayer(new RingHandLayer(renderer));
                 renderer.addLayer(new StaffLayer(renderer));
-                renderer.addLayer(new com.lanterna.client.aura.AuraEnergiaLayer(renderer));
+                // aura agora é o halo contínuo (shaders/post/entity_outline.json)
             }
         }
     }

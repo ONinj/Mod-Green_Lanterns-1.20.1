@@ -3096,10 +3096,16 @@ public final class DevAutoTest {
                 for (int y = 200; y < 206; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
             }
             com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            for (var n : l.getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(60), e -> !(e instanceof net.minecraft.world.entity.player.Player))) n.discard();
+            for (int x = -30; x <= 30; x++) for (int z = -30; z <= 30; z++) for (int y = 200; y < 230; y++)
+                if (!l.getBlockState(new net.minecraft.core.BlockPos(x, y, z)).isAir()) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
             sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
         }));
         at(20, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
         at(20, () -> shot("aura_1"));
+        at(2, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 180, 10)); });
+        at(10, () -> shot("aura_costas"));
+        at(2, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
         at(4, () -> shot("aura_2"));
         at(4, () -> shot("aura_3"));
         at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 40, 0)));

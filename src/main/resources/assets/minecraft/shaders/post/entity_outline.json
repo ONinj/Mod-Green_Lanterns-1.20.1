@@ -1,0 +1,17 @@
+{
+    "targets": [ "swap", "final", "mask" ],
+    "passes": [
+        { "name": "blit", "intarget": "final", "outtarget": "mask" },
+        { "name": "lanterna:aura_borrao", "intarget": "final", "outtarget": "swap",
+          "uniforms": [ { "name": "BlurDir", "values": [ 1.0, 0.0 ] }, { "name": "Radius", "values": [ 13.0 ] } ] },
+        { "name": "lanterna:aura_borrao", "intarget": "swap", "outtarget": "final",
+          "uniforms": [ { "name": "BlurDir", "values": [ 0.0, 1.0 ] }, { "name": "Radius", "values": [ 13.0 ] } ] },
+        { "name": "lanterna:aura_borrao", "intarget": "final", "outtarget": "swap",
+          "uniforms": [ { "name": "BlurDir", "values": [ 1.0, 0.0 ] }, { "name": "Radius", "values": [ 13.0 ] } ] },
+        { "name": "lanterna:aura_borrao", "intarget": "swap", "outtarget": "final",
+          "uniforms": [ { "name": "BlurDir", "values": [ 0.0, 1.0 ] }, { "name": "Radius", "values": [ 13.0 ] } ] },
+        { "name": "lanterna:aura_brilho", "intarget": "final", "outtarget": "swap",
+          "auxtargets": [ { "name": "MaskSampler", "id": "mask" } ] },
+        { "name": "blit", "intarget": "swap", "outtarget": "final" }
+    ]
+}

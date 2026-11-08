@@ -1008,3 +1008,8 @@ Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lante
   quem está lá (no máximo 3 por perto).
 - **Anel da Avareza**: `/lanterna laranja` mostra o modo; `/lanterna laranja unico` (padrão: um só Lanterna Laranja
   por mundo), `/lanterna laranja varios` (qualquer um pode fazer o ritual), `/lanterna laranja liberar` (tira o dono).
+
+## 0.38.2 — Aura contínua
+A aura do anel ligado agora é um único halo de luz macio em volta da silhueta inteira do personagem, na cor da Tropa:
+forte e claro colado na borda, sumindo para fora, com uma leve ondulação viva. Saiu a aura por partes do corpo.
+(O efeito Brilho do Minecraft, de flechas espectrais, também passa a aparecer com esse halo macio.)
