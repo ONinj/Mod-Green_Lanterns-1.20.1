@@ -2521,5 +2521,8 @@
   "objective.lanterna.fonte.mogo.nucleo": "Defeat the Wound",
   "commands.lanterna.mogo.segunda": "Second Chance recharged.",
   "mogo.lanterna.ponte.sem_voo": "Mogo holds your flight here.",
-  "mogo.lanterna.montando": "Mogo is shifting to receive you..."
+  "mogo.lanterna.montando": "Mogo is shifting to receive you...",
+  "command.lanterna.laranja.unico": "Ring of Avarice: only ONE Orange Lantern per world (current owner: %s). Use /lanterna laranja varios to open it to everyone.",
+  "command.lanterna.laranja.varios": "Ring of Avarice: any player can become an Orange Lantern (first owner: %s). Use /lanterna laranja unico to go back to one.",
+  "command.lanterna.laranja.liberado": "The Ring of Avarice has no owner now: the next one to do the ritual gets it."
 }

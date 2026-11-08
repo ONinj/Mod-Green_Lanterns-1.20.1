@@ -71,6 +71,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.45 ✅ (0.37) Jade Viva (3 níveis na bateria verde), Chamado do Mogo (jaula, planeta no céu, raio que mata e abre poço, 1 h de recarga, recusa contra os guardiões corrompidos, comando para zerar) e aura de energia translúcida na cor da Tropa
 1.45.1 ✅ (0.37.1) Aura refeita: energia líquida arredondada e animada em volta do corpo
 1.46 ✅ (0.38.0) O planeta Mogo: as 6 missões (cinturão, corrida, ponte, prova, cerco, núcleo) e a Segunda Chance
+1.46.1 ✅ (0.38.1) Naves: saída ao lado da nave, colocar sem prender o jogador, hitbox justa; Ecos nas ilhas de Odym; /lanterna laranja
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

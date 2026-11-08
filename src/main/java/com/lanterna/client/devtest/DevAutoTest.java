@@ -3294,6 +3294,134 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static void sceneNaves3() {
+        Minecraft mc = Minecraft.getInstance();
+        int[] nave = {-1};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000");
+            cmd("gamemode survival"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -40; x <= 40; x++) for (int z = -40; z <= 40; z++) {
+                for (int y = 190; y < 200; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), y == 199 ? net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState() : net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+                for (int y = 200; y < 224; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            // um degrau para testar terreno irregular
+            for (int x = 2; x <= 6; x++) for (int z = 4; z <= 8; z++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 200, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        for (String tipo : new String[]{"NAVE_LANCEIRA", "NAVE_PATRULHA", "NAVE_PIRATA"}) for (float yaw : new float[]{0f, 45f}) {
+            at(20, () -> server(sp -> {
+                var l = sp.serverLevel();
+                for (var n : l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(80))) n.discard();
+                sp.teleportTo(l, 0.5, 200, 0.5, yaw, 30);
+                var t = com.lanterna.naves.NaveTipo.valueOf(tipo);
+                var stack = com.lanterna.naves.NaveItem.of(t, "green");
+                sp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+                var hit = new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(0.5, 200, 2.5), net.minecraft.core.Direction.UP, new net.minecraft.core.BlockPos(0, 199, 2), false);
+                var r = stack.useOn(new net.minecraft.world.item.context.UseOnContext(sp, net.minecraft.world.InteractionHand.MAIN_HAND, hit));
+                var ns = l.getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(80));
+                if (ns.isEmpty()) { glog(tipo + " yaw" + yaw + " colocar=" + r + " (nenhuma)"); return; }
+                var n = ns.get(0);
+                nave[0] = n.getId();
+                glog(tipo + " yaw" + yaw + " colocar=" + r + " nave=" + String.format("%.1f %.1f %.1f", n.getX(), n.getY(), n.getZ()) + " jogadorPreso=" + n.bateNaNave(sp.getBoundingBox()));
+            }));
+            at(10, () -> { mc.getEntityRenderDispatcher().setRenderHitBoxes(true); mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+            at(10, () -> server(sp -> {
+                var n = (com.lanterna.naves.NaveEntity) sp.serverLevel().getEntity(nave[0]);
+                double a = Math.toRadians(yaw + 150);
+                double r = n.alcance() + 9;
+                tpm2(sp, n.getX() - Math.sin(a) * r, n.getY() + 6, n.getZ() + Math.cos(a) * r, n);
+            }));
+            at(15, () -> shot("n3_" + tipo.toLowerCase() + "_" + (int) yaw));
+            // entrar e sair no chão
+            at(5, () -> server(sp -> {
+                var n = sp.serverLevel().getEntity(nave[0]);
+                sp.startRiding(n, true);
+            }));
+            at(10, () -> server(sp -> {
+                var n = (com.lanterna.naves.NaveEntity) sp.serverLevel().getEntity(nave[0]);
+                sp.stopRiding();
+                glog(tipo + " yaw" + yaw + " saiu chao em " + String.format("%.1f %.1f %.1f", sp.getX(), sp.getY(), sp.getZ()) + " naveY=" + String.format("%.1f", n.getY())
+                        + " preso=" + n.bateNaNave(sp.getBoundingBox()) + " blocos=" + !sp.serverLevel().noCollision(sp));
+            }));
+            // entrar, subir 6 blocos (pairando) e sair
+            at(5, () -> server(sp -> {
+                var n = sp.serverLevel().getEntity(nave[0]);
+                sp.startRiding(n, true);
+            }));
+            at(10, () -> server(sp -> {
+                var n = (com.lanterna.naves.NaveEntity) sp.serverLevel().getEntity(nave[0]);
+                n.setPos(n.getX(), n.getY() + 8, n.getZ());
+                double ny = n.getY();
+                sp.stopRiding();
+                glog(tipo + " yaw" + yaw + " saiu no ar em " + String.format("%.1f %.1f %.1f", sp.getX(), sp.getY(), sp.getZ()) + " naveY=" + String.format("%.1f", ny)
+                        + " embaixo=" + (sp.getY() < ny - 0.5 && Math.abs(sp.getX() - n.getX()) < n.alcance() && Math.abs(sp.getZ() - n.getZ()) < n.alcance()) + " preso=" + n.bateNaNave(sp.getBoundingBox()));
+            }));
+        }
+        // Odym: acha uma ilha pelo gerador (sem gerar o mapa todo) e testa os Ecos subindo do mar
+        int[] ilhaXZ = {0, 0, 0};
+        at(20, () -> server(sp -> {
+            var odym = sp.server.getLevel(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("odym")));
+            var gen = odym.getChunkSource().getGenerator();
+            var rs = odym.getChunkSource().randomState();
+            int mar = gen.getSeaLevel();
+            outer:
+            for (int r = 200; r < 3000; r += 40) for (int k = 0; k < 64; k++) {
+                double a = k * Math.PI * 2 / 64;
+                int x = (int) (Math.cos(a) * r), z = (int) (Math.sin(a) * r);
+                int h = gen.getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, odym, rs);
+                if (h > mar + 4) { ilhaXZ[0] = x; ilhaXZ[1] = z; ilhaXZ[2] = h; break outer; }
+            }
+            glog("odym mar=" + mar + " ilha em " + ilhaXZ[0] + "," + ilhaXZ[1] + " h=" + ilhaXZ[2]);
+            int sub = 0, ok = 0, agua = 0;
+            for (int i = 0; i < 3000; i++) {
+                int x = ilhaXZ[0] + odym.random.nextInt(161) - 80, z = ilhaXZ[1] + odym.random.nextInt(161) - 80;
+                odym.getChunk(x >> 4, z >> 4);
+                var p = new net.minecraft.core.BlockPos(x, odym.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x, z), z);
+                boolean w = !odym.getFluidState(p).isEmpty();
+                boolean pode = com.lanterna.lore.world.ZonasDeNascimento.ecoPodeNascer(odym, p, net.minecraft.world.entity.MobSpawnType.NATURAL, odym.random);
+                if (w) agua++;
+                if (pode && w) sub++;
+                if (pode && !w) ok++;
+            }
+            glog("odym perto da ilha: agua=" + agua + " podeNaAgua=" + sub + " podeNaIlha=" + ok);
+            sp.teleportTo(odym, ilhaXZ[0] + 0.5, ilhaXZ[2] + 2, ilhaXZ[1] + 0.5, 0, 20);
+        }));
+        at(60, () -> { cmd("gamemode survival"); cmd("difficulty normal"); });
+        at(20, () -> server(sp -> {
+            int total = 0;
+            for (int i = 0; i < 40; i++) total += com.lanterna.lore.world.EcosOdym.tentar(sp);
+            var ecos = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.LoreCreatures.Eco.class, sp.getBoundingBox().inflate(60));
+            StringBuilder sb = new StringBuilder();
+            for (var e : ecos) sb.append(String.format(" [%.0f %.0f %.0f agua=%s chao=%s]", e.getX(), e.getY(), e.getZ(), e.isInWater(),
+                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(sp.serverLevel().getBlockState(e.blockPosition().below()).getBlock()).getPath()));
+            glog("ecos odym nasceram=" + total + " perto=" + ecos.size() + sb);
+            if (!ecos.isEmpty()) { var e = ecos.get(0); tpm3(sp, e); }
+        }));
+        at(30, () -> shot("n3_odym_eco"));
+        at(5, () -> cmd("gamemode creative"));
+        at(5, () -> { cmd("lanterna laranja"); cmd("lanterna laranja varios"); });
+        at(5, () -> server(sp -> glog("laranja unico=" + com.lanterna.selection.OrangeClaim.get(sp.server).unico() + " taken=" + com.lanterna.selection.OrangeClaim.get(sp.server).isTaken())));
+        at(5, () -> cmd("lanterna laranja unico"));
+        at(5, () -> server(sp -> glog("laranja unico=" + com.lanterna.selection.OrangeClaim.get(sp.server).unico())));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
+    private static void tpm3(net.minecraft.server.level.ServerPlayer sp, net.minecraft.world.entity.Entity alvo) {
+        sp.teleportTo(sp.serverLevel(), alvo.getX() + 6, alvo.getY() + 3, alvo.getZ() + 6, 135, 20);
+    }
+
+    private static void tpm2(net.minecraft.server.level.ServerPlayer sp, double x, double y, double z, net.minecraft.world.entity.Entity alvo) {
+        double dx = alvo.getX() - x, dy = alvo.getY() + 1 - y, dz = alvo.getZ() - z;
+        float yaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90);
+        float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+        sp.teleportTo(sp.serverLevel(), x, y, z, yaw, pitch);
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -3945,6 +4073,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
+        else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

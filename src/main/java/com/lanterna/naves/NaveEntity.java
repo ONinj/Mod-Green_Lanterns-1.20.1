@@ -80,7 +80,9 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
     private static final RawAnimation TAKEOFF = RawAnimation.begin().then("misc.takeoff", Animation.LoopType.PLAY_ONCE).thenLoop("move.fly");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
-    private final NavePart[] parts = new NavePart[8];
+    private final NavePart[] parts = new NavePart[MAX_PARTES];
+    /** Caixas de colisão: cada peça do modelo é dividida em pedaços menores quando a nave está girada. */
+    public static final int MAX_PARTES = 64;
     private boolean portaAberta;
     private int fireCooldown;
     /** Chamado pela chave: ponto de pouso e de onde veio (a nave desce sozinha, entrando na atmosfera). */
@@ -205,44 +207,86 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
         return parts;
     }
 
-    private void updateParts() {
-        NaveTipo t = tipo();
-        double yaw = Math.toRadians(getYRot());
+    /** As caixas da nave no mundo (uma por peça girada; em ângulo, cada peça vira uma grade de caixas menores). */
+    public static List<AABB> caixas(NaveTipo t, double px, double py, double pz, float yawGraus, boolean dividir) {
+        List<AABB> out = new java.util.ArrayList<>();
+        double yaw = Math.toRadians(yawGraus);
         double cos = Math.cos(yaw), sin = Math.sin(yaw);
+        float yawMod = Math.abs(Mth.wrapDegrees(yawGraus)) % 90f;
+        boolean alinhada = Math.min(yawMod, 90f - yawMod) < 4f;
+        for (double[] c : t.colisao) {
+            double x0 = c[0] / 16, z0 = c[2] / 16, w = c[3] / 16, d = c[5] / 16;
+            double y0 = py + c[1] / 16, y1 = y0 + c[4] / 16;
+            // pedaços quase quadrados (a caixa alinhada de um quadrado girado cresce pouco); no máximo 8 por peça
+            int nx = 1, nz = 1;
+            if (dividir && !alinhada) {
+                double lado = Math.max(1.25, Math.sqrt(w * d / 8.0));
+                nx = Math.max(1, (int) Math.round(w / lado));
+                nz = Math.max(1, (int) Math.round(d / lado));
+                while (nx * nz > 8) { if (nx >= nz) nx--; else nz--; }
+            }
+            for (int i = 0; i < nx; i++) for (int k = 0; k < nz; k++) {
+                double a0 = x0 + w * i / nx, a1 = x0 + w * (i + 1) / nx, b0 = z0 + d * k / nz, b1 = z0 + d * (k + 1) / nz;
+                double minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
+                for (double[] q : new double[][]{{a0, b0}, {a1, b0}, {a0, b1}, {a1, b1}}) {
+                    // modelo: +x = esquerda, -z = frente  ->  mundo
+                    double lx = q[0], fz = -q[1];
+                    double wx = -sin * fz + cos * lx, wz = cos * fz + sin * lx;
+                    minX = Math.min(minX, wx); maxX = Math.max(maxX, wx);
+                    minZ = Math.min(minZ, wz); maxZ = Math.max(maxZ, wz);
+                }
+                if (!alinhada && nx * nz > 1) {
+                    // tira a sobra dos cantos: encolhe o pedaço girado até a área ficar perto da real
+                    double ex = maxX - minX, ez = maxZ - minZ, real = (a1 - a0) * (b1 - b0);
+                    double k2 = Math.sqrt(Math.max(0.5, real / (ex * ez)));
+                    double cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2;
+                    double hx = ex * Math.max(0.72, k2) / 2, hz = ez * Math.max(0.72, k2) / 2;
+                    minX = cx - hx; maxX = cx + hx; minZ = cz - hz; maxZ = cz + hz;
+                }
+                out.add(new AABB(px + minX, y0, pz + minZ, px + maxX, Math.max(y1, y0 + 0.3), pz + maxZ));
+            }
+        }
+        return out;
+    }
+
+    private void updateParts() {
+        List<AABB> cx = caixas(tipo(), getX(), getY(), getZ(), getYRot(), true);
         for (int i = 0; i < parts.length; i++) {
             NavePart p = parts[i];
-            if (i >= t.colisao.length) {
+            if (i >= cx.size()) {
                 p.resize(0.1f, 0.1f);
                 p.setPos(getX(), getY(), getZ());
-                continue;
+            } else {
+                AABB b = cx.get(i);
+                p.resize(Math.max(0.3, b.getXsize()), Math.max(0.3, b.getZsize()), (float) Math.max(0.3, b.getYsize()));
+                p.setPos((b.minX + b.maxX) / 2, b.minY, (b.minZ + b.maxZ) / 2);
             }
-            double[] c = t.colisao[i];
-            // Caixa em blocos; gira os 4 cantos pelo yaw e pega a caixa alinhada que os contém
-            double x0 = c[0] / 16, z0 = c[2] / 16, x1 = (c[0] + c[3]) / 16, z1 = (c[2] + c[5]) / 16;
-            double minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
-            for (double[] corner : new double[][]{{x0, z0}, {x1, z0}, {x0, z1}, {x1, z1}}) {
-                // modelo: +x = esquerda, -z = frente  ->  mundo
-                double lx = corner[0], fz = -corner[1];
-                double wx = -sin * fz + cos * lx;
-                double wz = cos * fz + sin * lx;
-                minX = Math.min(minX, wx); maxX = Math.max(maxX, wx);
-                minZ = Math.min(minZ, wz); maxZ = Math.max(maxZ, wz);
-            }
-            float h = (float) (c[4] / 16);
-            double ex = maxX - minX, ez = maxZ - minZ;
-            // Nave virada na diagonal: a caixa alinhada que contém a peça girada fica enorme; limita para não criar "paredes invisíveis"
-            float yawMod = Math.abs(Mth.wrapDegrees(getYRot())) % 90f;
-            boolean diagonal = Math.min(yawMod, 90f - yawMod) > 15f;
-            if (diagonal) {
-                double lim = Math.min(ex, ez) + 1.5;
-                ex = Math.min(ex, lim);
-                ez = Math.min(ez, lim);
-            }
-            p.resize(Math.max(0.3, ex), Math.max(0.3, ez), Math.max(0.3f, h));
-            p.setPos(getX() + (minX + maxX) / 2, getY() + c[1] / 16, getZ() + (minZ + maxZ) / 2);
             p.xo = p.getX(); p.yo = p.getY(); p.zo = p.getZ();
             p.xOld = p.getX(); p.yOld = p.getY(); p.zOld = p.getZ();
         }
+    }
+
+    /** Se uma caixa (de um jogador, por exemplo) bate em alguma parte da nave. */
+    public boolean bateNaNave(AABB box) {
+        for (NavePart p : parts) if (p.canBeCollidedWith() && p.getBoundingBox().intersects(box)) return true;
+        return false;
+    }
+
+    /** Até onde a nave vai a partir do centro (para achar um lugar livre do lado de fora). */
+    public double alcance() {
+        double r = tipo().width / 2;
+        for (NavePart p : parts) if (p.isPickable()) {
+            AABB b = p.getBoundingBox();
+            r = Math.max(r, Math.max(Math.max(Math.abs(b.minX - getX()), Math.abs(b.maxX - getX())), Math.max(Math.abs(b.minZ - getZ()), Math.abs(b.maxZ - getZ()))));
+        }
+        return r;
+    }
+
+    /** Topo da nave (a parte mais alta). */
+    public double topo() {
+        double y = getY() + tipo().height;
+        for (NavePart p : parts) if (p.isPickable()) y = Math.max(y, p.getBoundingBox().maxY);
+        return y;
     }
 
     @Override
@@ -502,9 +546,45 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
-        NaveTipo t = tipo();
-        Vec3 side = Vec3.directionFromRotation(0, getYRot() + 90).scale(t.width / 2 + 1.2);
-        return position().add(side).add(0, 0.5, 0);
+        Vec3 v = lugarLivreFora(passenger.getDimensions(net.minecraft.world.entity.Pose.STANDING), true);
+        return v != null ? v : super.getDismountLocationForPassenger(passenger);
+    }
+
+    /**
+     * Um lugar do lado de fora da nave para alguém do tamanho dado: primeiro do lado da porta (esquerda), depois a
+     * direita, atrás e na frente; no chão se tiver chão perto, senão no ar ao lado. Último recurso: em cima da nave.
+     */
+    @org.jetbrains.annotations.Nullable
+    public Vec3 lugarLivreFora(EntityDimensions dim, boolean emCimaSeNada) {
+        updateParts();
+        double alc = alcance();
+        double[] porta = tipo().porta;
+        float lado = porta != null && porta[0] < 0 ? -90 : 90;
+        float[] dirs = {lado, -lado, 180, 0, lado + 45, -lado - 45, lado + 135, -lado - 135};
+        Vec3 noAr = null;
+        for (float dir : dirs) {
+            Vec3 d = Vec3.directionFromRotation(0, getYRot() + dir);
+            for (double dist = 1.0; dist <= alc + 3.0; dist += 0.5) {
+                double x = getX() + d.x * dist, z = getZ() + d.z * dist;
+                // procura chão de cima da nave até alguns blocos abaixo dela
+                for (double y0 = Math.floor(getY() + 2); y0 >= getY() - 6; y0 -= 1) {
+                    net.minecraft.core.BlockPos bp = net.minecraft.core.BlockPos.containing(x, y0, z);
+                    double h = level().getBlockFloorHeight(bp);
+                    if (!net.minecraft.world.entity.vehicle.DismountHelper.isBlockFloorValid(h)) continue;
+                    Vec3 p = new Vec3(x, bp.getY() + h, z);
+                    AABB box = dim.makeBoundingBox(p);
+                    if (level().noCollision(box) && !bateNaNave(box.inflate(0.05))) return p;
+                }
+                if (noAr == null) {
+                    Vec3 p = new Vec3(x, getY() + 0.1, z);
+                    AABB box = dim.makeBoundingBox(p);
+                    if (level().noCollision(box) && !bateNaNave(box.inflate(0.1))) noAr = p;
+                }
+            }
+        }
+        if (noAr != null) return noAr;
+        if (!emCimaSeNada) return null;
+        return new Vec3(getX(), topo() + 0.05, getZ());
     }
 
     @Override

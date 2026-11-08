@@ -995,3 +995,16 @@ não tem anel podem visitar. No pouso há uma clareira com o Coração de Jade; 
 **Segunda Chance** (Vínculo + anel verde): ao morrer, uma vez por dia (tempo real), o Mogo aparece no céu, segura você
 num feixe calmo e te puxa até o pouso dele. Não vale contra o próprio raio do Mogo.
 Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lanterna mogo segunda` (recarrega).
+
+## 0.38.1 — Naves, Ecos em Odym e o Anel da Avareza
+- **Sair da nave**: o jogador sai do lado da porta (ou do outro lado, atrás, na frente), sempre fora das caixas da
+  nave e em chão firme se houver; com a nave no ar, sai ao lado dela na mesma altura. Vale também para a porta da sala.
+- **Colocar a nave**: ela aparece à frente de quem colocou, virada para onde ele olha, sem nenhuma parte pegando no
+  jogador ou no terreno (anda para a frente e, se preciso, sobe um pouco).
+- **Hitbox das naves**: com a nave girada, cada peça vira uma grade de caixas menores que seguem o formato (antes
+  eram caixas enormes ou cortadas na diagonal).
+- **Ecos Cinzentos em Odym**: só nas ilhas (areia do planeta, a céu aberto, acima do mar, longe da beira, fora das
+  cidades), nunca na água. Como Odym é quase todo mar, de tempos em tempos um Eco sobe do mar numa ilha perto de
+  quem está lá (no máximo 3 por perto).
+- **Anel da Avareza**: `/lanterna laranja` mostra o modo; `/lanterna laranja unico` (padrão: um só Lanterna Laranja
+  por mundo), `/lanterna laranja varios` (qualquer um pode fazer o ritual), `/lanterna laranja liberar` (tira o dono).

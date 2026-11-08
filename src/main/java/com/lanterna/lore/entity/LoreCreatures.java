@@ -149,7 +149,10 @@ public final class LoreCreatures {
         public static boolean allowSpawn(ServerLevel level, net.minecraft.util.RandomSource random) {
             // Raros no começo e um pouco mais comuns a cada boss derrotado; nunca mais que 3 por perto
             int bosses = LoreWorldData.get(level.getServer()).bossesDefeated();
-            if (random.nextFloat() >= Math.min(0.35f, 0.06f + 0.03f * bosses)) return false;
+            float chance = Math.min(0.35f, 0.06f + 0.03f * bosses);
+            // Odym é quase todo mar: as poucas ilhas recebem mais tentativas que vingam
+            if (com.lanterna.lore.PlanetLore.byDimension(level.dimension()) == com.lanterna.lore.PlanetLore.ODYM) chance = Math.min(0.6f, chance * 3);
+            if (random.nextFloat() >= chance) return false;
             return true;
         }
     }

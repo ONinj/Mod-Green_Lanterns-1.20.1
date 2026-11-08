@@ -81,6 +81,17 @@ public final class LanternaCommand {
                             return 1;
                         }))))
 
+                .then(Commands.literal("laranja").requires(source -> source.hasPermission(2))
+                        .executes(c -> laranja(c, null))
+                        .then(Commands.literal("unico").executes(c -> laranja(c, true)))
+                        .then(Commands.literal("varios").executes(c -> laranja(c, false)))
+                        .then(Commands.literal("liberar").executes(c -> {
+                            OrangeClaim claim = OrangeClaim.get(c.getSource().getServer());
+                            claim.release();
+                            c.getSource().sendSuccess(() -> Component.translatable("command.lanterna.laranja.liberado"), true);
+                            return 1;
+                        })))
+
                 .then(Commands.literal("escolher")
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.argument("tropa", ResourceLocationArgument.id())
@@ -243,6 +254,21 @@ public final class LanternaCommand {
             com.lanterna.mission.MissionManager.sync(player, lore);
         });
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.reset"), false);
+        return 1;
+    }
+
+    /** /lanterna laranja [unico|varios]: um só Lanterna Laranja por mundo, ou quantos quiserem. */
+    private static int laranja(CommandContext<CommandSourceStack> ctx, @org.jetbrains.annotations.Nullable Boolean unico) {
+        OrangeClaim claim = OrangeClaim.get(ctx.getSource().getServer());
+        if (unico != null) claim.setUnico(unico);
+        String dono = "-";
+        if (claim.owner() != null) {
+            var p = ctx.getSource().getServer().getPlayerList().getPlayer(claim.owner());
+            dono = p != null ? p.getGameProfile().getName()
+                    : ctx.getSource().getServer().getProfileCache().get(claim.owner()).map(com.mojang.authlib.GameProfile::getName).orElse(claim.owner().toString().substring(0, 8));
+        }
+        String d = dono;
+        ctx.getSource().sendSuccess(() -> Component.translatable(claim.unico() ? "command.lanterna.laranja.unico" : "command.lanterna.laranja.varios", d), unico != null);
         return 1;
     }
 

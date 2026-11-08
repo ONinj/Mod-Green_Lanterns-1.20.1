@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
  *  - raramente nos QGs (a cidade da Tropa, a base e a arena do planeta);
  *  - fora disso, só em chão natural (nada de piso de construção) e:
  *      Oa (o planeta com floresta): só perto de árvores;
- *      Odym (o planeta de água): só nas ilhas (areia, grama, terra);
+ *      Odym (o planeta de água): só em cima das ilhas, a céu aberto, acima do mar e longe da beira d'água;
  *      planetas sem árvores: em qualquer chão natural.
  *
  * Missões, contratos e chefes que criam Ecos de propósito não passam por aqui.
@@ -30,6 +30,8 @@ public final class ZonasDeNascimento {
 
     public static boolean ecoPodeNascer(ServerLevelAccessor level, BlockPos pos, MobSpawnType motivo, RandomSource random) {
         if (motivo != MobSpawnType.NATURAL && motivo != MobSpawnType.CHUNK_GENERATION) return true;
+        // nunca dentro d'água (nem com a cabeça na água)
+        if (!level.getFluidState(pos).isEmpty() || !level.getFluidState(pos.above()).isEmpty()) return false;
         PlanetLore planet = PlanetLore.byDimension(level.getLevel().dimension());
         BlockState chao = level.getBlockState(pos.below());
         if (planet == null) return !artificial(chao);
@@ -37,7 +39,7 @@ public final class ZonasDeNascimento {
         if (planet == PlanetLore.OA && dentro(pos, Palacio.CENTRO, Palacio.R + 40)) return false;
         if (qg(pos)) return random.nextFloat() < CHANCE_QG;
         if (artificial(chao)) return false;
-        if (planet == PlanetLore.ODYM) return ilha(chao);
+        if (planet == PlanetLore.ODYM) return ilhaSeca(level, pos, chao);
         if (planet == PlanetLore.OA) return pertoDeArvore(level, pos);
         return true;
     }
@@ -53,8 +55,26 @@ public final class ZonasDeNascimento {
         return dx * dx + dz * dz <= (double) r * r;
     }
 
+    /**
+     * Odym: só em cima das ilhas, de verdade. Nada no fundo do mar (areia submersa), em cavernas ou em barrancos da
+     * praia colados na água: acima do nível do mar, a céu aberto e com terra firme em volta.
+     */
+    private static boolean ilhaSeca(ServerLevelAccessor level, BlockPos pos, BlockState chao) {
+        if (!ilha(chao)) return false;
+        if (pos.getY() < level.getLevel().getChunkSource().getGenerator().getSeaLevel()) return false;
+        if (!level.canSeeSky(pos)) return false;
+        int seco = 0;
+        for (BlockPos q : new BlockPos[]{pos.north(2), pos.south(2), pos.east(2), pos.west(2)}) {
+            if (level.getFluidState(q).isEmpty() && level.getFluidState(q.below()).isEmpty()) seco++;
+        }
+        return seco >= 2;
+    }
+
     private static boolean ilha(BlockState chao) {
-        return chao.is(BlockTags.SAND) || chao.is(BlockTags.DIRT) || chao.is(net.minecraft.world.level.block.Blocks.GRAVEL);
+        if (chao.is(BlockTags.SAND) || chao.is(BlockTags.DIRT) || chao.is(net.minecraft.world.level.block.Blocks.GRAVEL)
+                || chao.is(net.minecraft.world.level.block.Blocks.STONE)) return true;
+        // a areia das ilhas de Odym é a do próprio planeta
+        return BuiltInRegistries.BLOCK.getKey(chao.getBlock()).getPath().startsWith("areia_");
     }
 
     private static boolean pertoDeArvore(ServerLevelAccessor level, BlockPos pos) {

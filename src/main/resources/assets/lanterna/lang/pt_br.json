@@ -2521,5 +2521,8 @@
   "objective.lanterna.fonte.mogo.nucleo": "Vencer a Ferida",
   "commands.lanterna.mogo.segunda": "Segunda Chance recarregada.",
   "mogo.lanterna.ponte.sem_voo": "O Mogo segura o seu voo aqui.",
-  "mogo.lanterna.montando": "O Mogo está se movendo para receber você..."
+  "mogo.lanterna.montando": "O Mogo está se movendo para receber você...",
+  "command.lanterna.laranja.unico": "Anel da Avareza: só UM Lanterna Laranja por mundo (dono atual: %s). Use /lanterna laranja varios para liberar para todos.",
+  "command.lanterna.laranja.varios": "Anel da Avareza: qualquer jogador pode virar Lanterna Laranja (primeiro dono: %s). Use /lanterna laranja unico para voltar a um só.",
+  "command.lanterna.laranja.liberado": "O Anel da Avareza ficou sem dono: o próximo a fazer o ritual fica com ele."
 }

@@ -14,6 +14,8 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,11 +69,13 @@ public class NaveItem extends Item {
         }
         BlockPos pos = ctx.getClickedPos().relative(ctx.getClickedFace());
         NaveEntity n = NaveEntity.create(level, t, pintura);
-        n.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, player != null ? player.getYRot() : 0, 0);
-        if (!level.noCollision(n, n.getBoundingBox())) {
+        float yaw = player != null ? player.getYRot() : 0;
+        Vec3 lugar = lugar(level, t, pos, yaw, player);
+        if (lugar == null) {
             if (player != null) player.displayClientMessage(Component.translatable("nave.lanterna.sem_espaco"), true);
             return InteractionResult.FAIL;
         }
+        n.moveTo(lugar.x, lugar.y, lugar.z, yaw, 0);
         if (player != null && !t.destrocos()) {
             n.setDono(player.getUUID());
             ItemStack key = TropaItems.ChaveNave.forShip(n.getUUID(), t.id, t.pinturas.equals("tropa") ? pintura : null);
@@ -80,6 +84,30 @@ public class NaveItem extends Item {
         level.addFreshEntity(n);
         if (player == null || !player.getAbilities().instabuild) stack.shrink(1);
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * Onde pôr a nave: no ponto clicado, mas empurrada para a frente até nenhuma parte dela pegar em quem colocou, e
+     * subindo um pouco se o terreno for irregular. A nave fica virada para onde o jogador olha.
+     */
+    @Nullable
+    static Vec3 lugar(Level level, NaveTipo t, BlockPos pos, float yaw, @Nullable Player player) {
+        Vec3 frente = Vec3.directionFromRotation(0, yaw);
+        // primeiro tenta no chão (indo para a frente), só depois um pouco acima
+        for (int[] faixa : new int[][]{{0, 1}, {2, 3}}) for (double avanco = 0; avanco <= 14; avanco += 0.5) {
+            double x = pos.getX() + 0.5 + frente.x * avanco, z = pos.getZ() + 0.5 + frente.z * avanco;
+            for (int sobe = faixa[0]; sobe <= faixa[1]; sobe++) {
+                double y = pos.getY() + sobe;
+                java.util.List<AABB> caixas = NaveEntity.caixas(t, x, y, z, yaw, false);
+                boolean ok = true;
+                for (AABB b : caixas) {
+                    AABB dentro = b.deflate(0.02);
+                    if (!level.noCollision(dentro) || player != null && dentro.intersects(player.getBoundingBox().inflate(0.4))) { ok = false; break; }
+                }
+                if (ok) return new Vec3(x, y, z);
+            }
+        }
+        return null;
     }
 
     @Override

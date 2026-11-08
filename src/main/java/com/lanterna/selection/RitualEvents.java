@@ -108,7 +108,7 @@ public final class RitualEvents {
                 if (claim.isTaken() && !player.getUUID().equals(claim.owner())) {
                     hint(player, "ritual.lanterna.orange.taken", BuiltinCorps.ORANGE.color());
                 } else {
-                    claim.claim(player.getUUID());
+                    if (claim.unico() || claim.owner() == null) claim.claim(player.getUUID());
                     SelectionManager.startSelection(player, BuiltinCorps.ORANGE.id());
                 }
             } else if (value >= LanternaConfig.ORANGE_TREASURE_VALUE.get() / 2) {
