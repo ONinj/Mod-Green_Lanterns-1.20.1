@@ -69,6 +69,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.43 ✅ (0.35) Energia da Emoção (Gerador Emocional das 7 emoções, Refinaria, Conversor de Luz), Mineradora Planetária animada nos planetas conquistados (produção offline e ataques), Forjador da guilda; integrações opcionais com Mekanism (10x), Create, JEI e Curios
 1.44 ✅ (0.36) Cerimônias de escolha do anel refeitas: cenas 3D por Tropa ligadas ao ritual (cometa, poço de plasma, olhos e raios, aurora, cristais, feixe, moedas, sombras, fusão dos sete), modelo 3D do anel, câmera de cinema, névoa do ritual, visíveis para quem está perto
 1.45 ✅ (0.37) Jade Viva (3 níveis na bateria verde), Chamado do Mogo (jaula, planeta no céu, raio que mata e abre poço, 1 h de recarga, recusa contra os guardiões corrompidos, comando para zerar) e aura de energia translúcida na cor da Tropa
+1.45.1 ✅ (0.37.1) Aura refeita: energia líquida arredondada e animada em volta do corpo
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

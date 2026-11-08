@@ -3083,6 +3083,32 @@ public final class DevAutoTest {
     }
 
 
+    private static void sceneAura() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 206; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        at(20, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(20, () -> shot("aura_1"));
+        at(4, () -> shot("aura_2"));
+        at(4, () -> shot("aura_3"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 40, 0)));
+        at(6, () -> shot("aura_lado"));
+        at(2, () -> cmd("time set 18000"));
+        at(30, () -> shot("aura_noite"));
+        at(5, () -> shot("aura_noite2"));
+    }
+
     private static void sceneMogo() {
         Minecraft mc = Minecraft.getInstance();
         int[] alvoId = {-1};
@@ -3799,6 +3825,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("energia")) sceneEnergia();
         else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
         else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
+        else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

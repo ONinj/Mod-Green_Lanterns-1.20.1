@@ -92,7 +92,7 @@ public final class ClientModEvents {
                         new PlayerModel<>(event.getEntityModels().bakeLayer(UniformModels.SLIM), true)));
                 renderer.addLayer(new RingHandLayer(renderer));
                 renderer.addLayer(new StaffLayer(renderer));
-                renderer.addLayer(new com.lanterna.client.aura.AuraEnergiaLayer(renderer, event.getEntityModels()));
+                renderer.addLayer(new com.lanterna.client.aura.AuraEnergiaLayer(renderer));
             }
         }
     }
@@ -122,9 +122,6 @@ public final class ClientModEvents {
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(UniformModels.WIDE, UniformModels::wide);
         event.registerLayerDefinition(UniformModels.SLIM, UniformModels::slim);
-        event.registerLayerDefinition(com.lanterna.client.aura.AuraEnergiaLayer.PERTO, com.lanterna.client.aura.AuraEnergiaLayer::perto);
-        event.registerLayerDefinition(com.lanterna.client.aura.AuraEnergiaLayer.MEIO, com.lanterna.client.aura.AuraEnergiaLayer::meio);
-        event.registerLayerDefinition(com.lanterna.client.aura.AuraEnergiaLayer.LONGE, com.lanterna.client.aura.AuraEnergiaLayer::longe);
     }
 
     /** Céu do espaço (estrelas, Terra, planetas, Sol). */

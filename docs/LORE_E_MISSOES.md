@@ -967,5 +967,6 @@ subindo pelo corpo. A cerimônia dura pelo menos 10 s (configurável para mais).
   carregou ao meu lado." — sem gastar carga nem tempo.
 - Comandos (operador): `/lanterna mogo resetar` (zera o tempo do Chamado), `/lanterna mogo jade` (3 Jades),
   `/lanterna mogo selo` (põe o Selo na bateria verde da mão).
-- **Aura de energia**: com o anel ligado, uma armadura de energia translúcida na cor da Tropa envolve o corpo (três
-  cascas suaves que vão sumindo para fora), junto com o contorno.
+- **Aura de energia** (0.37.1): com o anel ligado, energia líquida na cor da Tropa envolve cada parte do corpo em
+  formas arredondadas que ondulam sem parar; transparente no meio, acesa nas beiradas; no alto da cabeça e dos ombros
+  sobe em línguas como chama, e uma faixa de luz corre pelo corpo. Junto com o contorno.
