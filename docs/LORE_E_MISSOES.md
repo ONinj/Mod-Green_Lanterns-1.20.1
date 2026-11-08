@@ -970,3 +970,28 @@ subindo pelo corpo. A cerimônia dura pelo menos 10 s (configurável para mais).
 - **Aura de energia** (0.37.1): com o anel ligado, energia líquida na cor da Tropa envolve cada parte do corpo em
   formas arredondadas que ondulam sem parar; transparente no meio, acesa nas beiradas; no alto da cabeça e dos ombros
   sobe em línguas como chama, e uma faixa de luz corre pelo corpo. Junto com o contorno.
+
+## 0.38 — O planeta Mogo
+O Mogo fica no espaço (perto de -4600, 350, -3800). **Só os inimigos dos Verdes não pousam** (Amarela, Vermelha,
+Laranja, Negra): a nave ou o jogador é empurrado de volta para o espaço com um aviso do planeta. As outras Tropas e quem
+não tem anel podem visitar. No pouso há uma clareira com o Coração de Jade; a faixa de jade atravessa o planeta.
+
+**Linha do Mogo** (só Lanternas Verdes; o convite chega no nível 18). O Mogo fala pouco, em frases curtas:
+1. **A Chegada pelo Cinturão** — perto do Mogo, uma tempestade de rochas vem na direção da sua nave. Desvie e pouse.
+2. **A Corrida da Ferida** — no pouso, 8 focos amarelos aparecem ao longo da faixa de jade (para o leste). Você tem
+   2min10s para quebrar todos; a terra corrompida se espalha em volta deles. Falhou? recomeça. Recompensa: Jade Viva.
+3. **O Chão que se Move** — a ponte do cânion (ao sul) desaba de trás para frente e pedaços à frente afundam e voltam.
+   O Mogo segura o voo: só a pé. Caiu, volta ao começo.
+4. **A Prova do Mogo** — na arena ao norte o planeta luta com você: pedras arremessadas, linhas de raízes que rompem o
+   chão e guardiões de terra. Quebre os 4 olhos de cristal. Ninguém morre ali: o Mogo levanta você na borda.
+   Recompensa: Jade Viva.
+5. **O Cerco** — a oeste, três torres da faixa. Três levas da Tropa Amarela (com naves a partir da segunda) atacam as
+   torres. Perdeu as três, recomeça.
+6. **O Mergulho no Núcleo** — a fenda (a sudeste) desce até o núcleo; o Mogo segura sua queda. Lá embaixo está a
+   **Ferida**. Na metade da vida ela se fecha num casulo que nada atravessa: com qualquer bateria verde na mão,
+   botão direito — o primeiro Chamado, o raio desce do teto da câmara. Recompensa: Jade Viva (a terceira completa o Selo)
+   e o **Vínculo**.
+
+**Segunda Chance** (Vínculo + anel verde): ao morrer, uma vez por dia (tempo real), o Mogo aparece no céu, segura você
+num feixe calmo e te puxa até o pouso dele. Não vale contra o próprio raio do Mogo.
+Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lanterna mogo segunda` (recarrega).

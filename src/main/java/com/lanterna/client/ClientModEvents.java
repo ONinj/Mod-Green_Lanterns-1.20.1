@@ -99,6 +99,9 @@ public final class ClientModEvents {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(com.lanterna.mogo.MogoEntidades.ROCHA.get(), com.lanterna.client.mogo.MogoRenderers.Rocha::new);
+        event.registerEntityRenderer(com.lanterna.mogo.MogoEntidades.OLHO.get(), com.lanterna.client.mogo.MogoRenderers.Olho::new);
+        event.registerEntityRenderer(com.lanterna.mogo.MogoEntidades.FERIDA.get(), com.lanterna.client.mogo.MogoRenderers.FeridaR::new);
         event.registerEntityRenderer(com.lanterna.registry.ModEntities.ALIEN.get(), com.lanterna.client.alien.AlienRenderer::new);
         com.lanterna.client.lore.LoreRenderers.register(event);
         event.registerEntityRenderer(com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get(),

@@ -54,7 +54,8 @@ public final class ChamadoMogo {
     /** Roteiro (ticks): jaula 0, o Mogo chega até 50, carrega até 80, raio de 80 a 110 (acerta em 84). */
     public static final int CHEGA = 50, CARGA = 80, ACERTA = 84, FIM = 112;
 
-    private record Chamado(UUID dono, int alvo, ServerLevel level, Vec3 centro, Vec3 mogo, long inicio) {}
+    /** modo: 0 raio do céu · 1 de dentro do Mogo (núcleo, sem cavar) · 2 resgate (Segunda Chance: puxa, não mata). */
+    private record Chamado(UUID dono, int alvo, ServerLevel level, Vec3 centro, Vec3 mogo, long inicio, int modo) {}
 
     private static final List<Chamado> ATIVOS = new ArrayList<>();
 
@@ -134,10 +135,7 @@ public final class ChamadoMogo {
         if (h.lengthSqr() < 1e-3) h = p.getLookAngle().multiply(1, 0, 1);
         h = h.normalize();
         Vec3 mogo = c.add(h.scale(150)).add(0, 230, 0);
-        Chamado ch = new Chamado(p.getUUID(), alvo.getId(), l, c, mogo, l.getGameTime());
-        ATIVOS.add(ch);
-        ChamadoPacket pk = new ChamadoPacket(p.getId(), alvo.getId(), c.x, c.y, c.z, mogo.x, mogo.y, mogo.z, l.getGameTime());
-        for (ServerPlayer o : l.players()) if (o.distanceToSqr(c) < 400 * 400 || o == p) ModNetwork.sendTo(o, pk);
+        iniciar(p, alvo, c, mogo, 0);
         l.playSound(null, BlockPos.containing(c), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 2f, 0.5f);
         l.playSound(null, BlockPos.containing(c), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 3f, 0.6f);
         p.sendSystemMessage(Component.translatable("mogo.lanterna.chamado.fala").withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
@@ -145,8 +143,30 @@ public final class ChamadoMogo {
             sp.sendSystemMessage(Component.translatable("mogo.lanterna.chamado.preso").withStyle(ChatFormatting.DARK_GREEN));
     }
 
+    private static void iniciar(ServerPlayer p, LivingEntity alvo, Vec3 c, Vec3 mogo, int modo) {
+        ServerLevel l = p.serverLevel();
+        ATIVOS.add(new Chamado(p.getUUID(), alvo.getId(), l, c, mogo, l.getGameTime(), modo));
+        ChamadoPacket pk = new ChamadoPacket(p.getId(), alvo.getId(), c.x, c.y, c.z, mogo.x, mogo.y, mogo.z, l.getGameTime(), modo);
+        for (ServerPlayer o : l.players()) if (o.distanceToSqr(c) < 400 * 400 || o == p) ModNetwork.sendTo(o, pk);
+    }
+
+    /** No núcleo: o Mogo atira de dentro dele mesmo (o raio sai do teto da câmara). Não gasta nada. */
+    public static void interno(ServerPlayer p, LivingEntity alvo) {
+        Vec3 c = alvo.position();
+        iniciar(p, alvo, c, c.add(0, 26, 0), 1);
+        p.serverLevel().playSound(null, BlockPos.containing(c), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 3f, 0.6f);
+    }
+
+    /** Segunda Chance: o Mogo aparece no céu e puxa o jogador para a superfície dele. */
+    public static void resgate(ServerPlayer p) {
+        Vec3 c = p.position();
+        Vec3 h = p.getLookAngle().multiply(1, 0, 1);
+        if (h.lengthSqr() < 1e-3) h = new Vec3(1, 0, 0);
+        iniciar(p, p, c, c.add(h.normalize().scale(150)).add(0, 230, 0), 2);
+    }
+
     public static boolean preso(Entity e) {
-        for (Chamado c : ATIVOS) if (c.alvo == e.getId() && c.level == e.level()) return true;
+        for (Chamado c : ATIVOS) if (c.modo != 2 && c.alvo == e.getId() && c.level == e.level()) return true;
         return false;
     }
 
@@ -158,6 +178,11 @@ public final class ChamadoMogo {
             Chamado c = it.next();
             long t = c.level.getGameTime() - c.inicio;
             Entity alvo = c.level.getEntity(c.alvo);
+            if (c.modo == 2) {
+                resgateTick(c, alvo, t);
+                if (t >= FIM) it.remove();
+                continue;
+            }
             // jaula: o alvo não sai do lugar
             if (alvo instanceof LivingEntity le && le.isAlive() && t < ACERTA) {
                 le.setDeltaMovement(0, 0, 0);
@@ -175,8 +200,24 @@ public final class ChamadoMogo {
                 c.level.playSound(null, BlockPos.containing(c.centro), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 6f, 0.6f);
                 if (alvo instanceof LivingEntity le && le.isAlive()) matar(c, le);
             }
-            if (t >= ACERTA && t < FIM - 6) cavar(c, (int) (t - ACERTA));
+            if (c.modo == 0 && t >= ACERTA && t < FIM - 6) cavar(c, (int) (t - ACERTA));
             if (t >= FIM) it.remove();
+        }
+    }
+
+    private static void resgateTick(Chamado c, Entity alvo, long t) {
+        if (!(alvo instanceof ServerPlayer p)) return;
+        if (t == 1) {
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, FIM + 40, 4, false, false));
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, FIM + 200, 0, false, false));
+        }
+        if (t == CARGA) {
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.LEVITATION, FIM - CARGA, 3, false, false));
+            c.level.playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 3f, 0.6f);
+        }
+        if (t == FIM - 2) {
+            p.removeEffect(net.minecraft.world.effect.MobEffects.LEVITATION);
+            SegundaChance.chegar(p);
         }
     }
 

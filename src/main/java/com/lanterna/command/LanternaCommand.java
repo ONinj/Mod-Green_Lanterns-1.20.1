@@ -66,7 +66,20 @@ public final class LanternaCommand {
                             com.lanterna.mogo.JadeViva.definir(s, com.lanterna.mogo.JadeViva.MAX);
                             c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("mogo.lanterna.jade.subiu.3"), false);
                             return 1;
-                        })))
+                        }))
+                        .then(Commands.literal("segunda").executes(c -> {
+                            com.lanterna.mogo.SegundaChance.resetar(c.getSource().getPlayerOrException());
+                            c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("commands.lanterna.mogo.segunda"), false);
+                            return 1;
+                        }))
+                        .then(Commands.literal("ir").executes(c -> {
+                            com.lanterna.mogo.SegundaChance.chegar(c.getSource().getPlayerOrException());
+                            return 1;
+                        }))
+                        .then(Commands.literal("missao").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 6)).executes(c -> {
+                            com.lanterna.mogo.MogoMissoes.pular(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "n"));
+                            return 1;
+                        }))))
 
                 .then(Commands.literal("escolher")
                         .requires(source -> source.hasPermission(2))

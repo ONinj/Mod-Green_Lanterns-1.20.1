@@ -40,6 +40,8 @@ public class LanternaMod {
         com.lanterna.guilda.GuildaItems.init();
         com.lanterna.energia.EnergiaRegistro.init(modBus);
         com.lanterna.mogo.JadeViva.init();
+        com.lanterna.mogo.MogoBlocos.init();
+        com.lanterna.mogo.MogoEntidades.init();
         com.lanterna.naves.NaveEntities.init();
 
         ModBlocks.BLOCKS.register(modBus);

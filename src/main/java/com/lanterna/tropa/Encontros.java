@@ -126,6 +126,12 @@ public final class Encontros {
         aviso(p, ia.equals("patrulha") ? "encontro.lanterna.patrulha" : "encontro.lanterna.inimiga", corps.color());
     }
 
+    /** Uma nave inimiga de combate que vem atrás do jogador (usada pelo cerco do Mogo). */
+    public static NaveEntity naveInimiga(ServerPlayer p, BuiltinCorps corps) {
+        return nave(p, NaveTipo.NAVE_LANCEIRA, corps.id().getPath(), "inimiga",
+                LanternaEntity.lanterna(p.serverLevel(), corps, false), 20 * 60 * 3);
+    }
+
     private static void cargueiro(ServerPlayer p) {
         nave(p, NaveTipo.NAVE_CARGUEIRO, String.valueOf(1 + p.getRandom().nextInt(2)), "cargueiro",
                 LanternaEntity.mercador(p.serverLevel()), 20 * 60 * 3);

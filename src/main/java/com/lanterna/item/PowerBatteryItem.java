@@ -76,6 +76,10 @@ public class PowerBatteryItem extends BlockItem {
     @Override
     public net.minecraft.world.InteractionResultHolder<ItemStack> use(Level level, net.minecraft.world.entity.player.Player p, net.minecraft.world.InteractionHand hand) {
         ItemStack s = p.getItemInHand(hand);
+        // no núcleo do Mogo, com a Ferida no casulo, qualquer bateria verde faz o primeiro Chamado
+        if (p instanceof net.minecraft.server.level.ServerPlayer sp0 && com.lanterna.mogo.JadeViva.aceita(s)
+                && com.lanterna.mogo.MogoMissoes.tentarChamadoNucleo(sp0))
+            return net.minecraft.world.InteractionResultHolder.success(s);
         if (com.lanterna.mogo.JadeViva.nivel(s) >= com.lanterna.mogo.JadeViva.MAX && com.lanterna.mogo.JadeViva.aceita(s)) {
             if (p instanceof net.minecraft.server.level.ServerPlayer sp) com.lanterna.mogo.ChamadoMogo.usar(sp, s);
             return net.minecraft.world.InteractionResultHolder.sidedSuccess(s, level.isClientSide);

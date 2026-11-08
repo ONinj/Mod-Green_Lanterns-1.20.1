@@ -3176,6 +3176,124 @@ public final class DevAutoTest {
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
+
+    private static com.lanterna.mogo.MogoMundo.Dados md(net.minecraft.server.level.ServerPlayer sp) {
+        return com.lanterna.mogo.MogoMundo.dados(sp.server.getLevel(com.lanterna.mogo.MogoMundo.DIM));
+    }
+
+    private static void tpm(net.minecraft.server.level.ServerPlayer sp, double x, double y, double z, float yaw, float pitch) {
+        sp.teleportTo(sp.server.getLevel(com.lanterna.mogo.MogoMundo.DIM), x, y, z, yaw, pitch);
+    }
+
+    private static String flag(net.minecraft.server.level.ServerPlayer sp, String f) {
+        return f + "=" + com.lanterna.fonte.FonteDados.chamado(sp, f);
+    }
+
+    private static void sceneMogoPlaneta() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10); mc.options.hideGui = false;
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000");
+            cmd("gamemode creative"); cmd("lanterna anel green"); });
+        // 1. cinturão
+        at(20, () -> cmd("lanterna mogo missao 1"));
+        at(10, () -> server(sp -> {
+            var mogo = com.lanterna.space.SpaceBodies.byId("mogo");
+            var space = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
+            var p = mogo.center().add(mogo.radius() + 120, 0, 0);
+            sp.teleportTo(space, p.x, p.y, p.z, 90, 0);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+        }));
+        at(120, () -> shot("mp_cinturao"));
+        at(2, () -> server(sp -> glog("rochas=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.RochaMogo.class, sp.getBoundingBox().inflate(120)).size())));
+        // pousar
+        at(10, () -> cmd("lanterna mogo ir"));
+        at(400, () -> server(sp -> { var d = md(sp); glog("pronto=" + d.pronto + " pouso=" + d.pouso + " dim=" + sp.level().dimension().location() + " " + flag(sp, "mogo:cinturao")); }));
+        at(10, () -> server(sp -> { var d = md(sp); tpm(sp, d.pouso.getX() + 14.5, d.pouso.getY() + 6, d.pouso.getZ() + 14.5, 135, 15); }));
+        at(40, () -> shot("mp_pouso"));
+        // 2. corrida
+        at(5, () -> cmd("lanterna mogo missao 2"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.pouso.getX() + 0.5, d.pouso.getY() + 1, d.pouso.getZ() + 3.5, -90, 0); }));
+        at(10, () -> server(sp -> tpm(sp, 60, sp.getY() + 14, 14, 60, 30)));
+        at(60, () -> shot("mp_corrida"));
+        at(5, () -> server(sp -> {
+            var l = sp.server.getLevel(com.lanterna.mogo.MogoMundo.DIM);
+            int n = 0;
+            for (int x = 30; x < 340; x++) for (int z = -8; z <= 8; z++) for (int y = 40; y < 200; y++) {
+                var b = new net.minecraft.core.BlockPos(x, y, z);
+                if (l.getBlockState(b).is(com.lanterna.mogo.MogoBlocos.FOCO.get())) { l.setBlock(b, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3); n++; }
+            }
+            glog("focos quebrados=" + n);
+        }));
+        at(20, () -> server(sp -> glog(flag(sp, "mogo:corrida"))));
+        // 3. ponte
+        at(5, () -> cmd("lanterna mogo missao 3"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.ponteIni.getX() + 0.5, d.ponteIni.getY(), d.ponteIni.getZ() + 0.5, 0, 10); }));
+        at(70, () -> server(sp -> { var d = md(sp); tpm(sp, d.ponteIni.getX() + 6.5, d.ponteY + 5, d.ponteZ0 + 30, 160, 25); }));
+        at(20, () -> shot("mp_ponte"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.ponteFim.getX() + 0.5, d.ponteY, d.ponteFim.getZ() + 0.5, 0, 0); }));
+        at(10, () -> server(sp -> glog(flag(sp, "mogo:ponte") + " mayfly=" + sp.getAbilities().mayfly)));
+        at(2, () -> cmd("gamemode creative"));
+        // 4. prova
+        at(5, () -> cmd("lanterna mogo missao 4"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.arena.getX() + 0.5, d.arena.getY() + 1, d.arena.getZ() + 0.5, 0, 0); }));
+        at(10, () -> cmd("gamemode survival"));
+        at(60, () -> server(sp -> { var d = md(sp); tpm(sp, d.arena.getX() + 0.5, d.arena.getY() + 1, d.arena.getZ() + 12.5, 180, 10); }));
+        at(40, () -> shot("mp_prova"));
+        at(5, () -> server(sp -> { sp.hurt(sp.damageSources().generic(), 500); glog("prova nao morre vivo=" + sp.isAlive() + " hp=" + sp.getHealth()); }));
+        at(5, () -> server(sp -> {
+            int n = 0;
+            for (var o : sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.OlhoMogo.class, sp.getBoundingBox().inflate(60))) { o.kill(); n++; }
+            glog("olhos=" + n);
+        }));
+        at(10, () -> server(sp -> glog(flag(sp, "mogo:prova"))));
+        at(2, () -> cmd("gamemode creative"));
+        // 5. cerco
+        at(5, () -> cmd("lanterna mogo missao 5"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.torres[1].getX() + 12.5, d.torres[1].getY() + 4, d.torres[1].getZ() + 12.5, 135, 20); }));
+        at(100, () -> shot("mp_cerco"));
+        for (int i = 0; i < 4; i++) at(160, () -> server(sp -> {
+            int n = 0;
+            for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, sp.getBoundingBox().inflate(150),
+                    e -> e instanceof com.lanterna.especies.LanternaEntity)) { e.kill(); n++; }
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(150))) { e.discard(); n++; }
+            glog("cerco mortos=" + n + " " + flag(sp, "mogo:cerco"));
+        }));
+        // 6. núcleo
+        at(5, () -> cmd("lanterna mogo missao 6"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.fenda.getX() + 0.5, d.fenda.getY() - 20, d.fenda.getZ() + 0.5, 0, 60); }));
+        at(30, () -> shot("mp_fenda"));
+        at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.camara.getX() + 9.5, d.camara.getY() + 1, d.camara.getZ() + 0.5, 90, -10); }));
+        at(40, () -> shot("mp_ferida"));
+        at(5, () -> server(sp -> {
+            var f = sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.Ferida.class, sp.getBoundingBox().inflate(40));
+            glog("feridas=" + f.size());
+            for (var x : f) x.hurt(sp.damageSources().playerAttack(sp), 300);
+        }));
+        at(20, () -> server(sp -> {
+            var bat = com.lanterna.item.PowerBatteryItem.create(com.lanterna.corps.BuiltinCorps.GREEN.id(), com.lanterna.corps.BuiltinCorps.GREEN.color());
+            sp.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, bat);
+            var f = sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.Ferida.class, sp.getBoundingBox().inflate(40));
+            glog("casulo=" + (f.isEmpty() ? "?" : f.get(0).casulo) + " chamado=" + com.lanterna.mogo.MogoMissoes.tentarChamadoNucleo(sp));
+        }));
+        at(30, () -> shot("mp_chamado1"));
+        at(52, () -> shot("mp_chamado2"));
+        at(40, () -> server(sp -> glog(flag(sp, "mogo:nucleo") + " " + flag(sp, "mogo:vinculo") + " feridas=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.Ferida.class, sp.getBoundingBox().inflate(80)).size())));
+        // Segunda Chance
+        at(20, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
+        at(60, () -> { cmd("gamemode survival"); cmd("lanterna mogo segunda"); });
+        at(10, () -> server(sp -> { sp.hurt(sp.damageSources().generic(), 500); glog("segunda vivo=" + sp.isAlive()); }));
+        at(70, () -> shot("mp_segunda1"));
+        at(30, () -> shot("mp_segunda2"));
+        at(40, () -> server(sp -> glog("segunda dim=" + sp.level().dimension().location() + " restante=" + com.lanterna.mogo.SegundaChance.restante(sp))));
+        at(60, () -> shot("mp_segunda_chegou"));
+        // inimigo não entra
+        at(10, () -> { cmd("gamemode creative"); cmd("lanterna anel yellow"); });
+        at(10, () -> cmd("gamemode survival"));
+        at(30, () -> server(sp -> glog("amarelo dim=" + sp.level().dimension().location())));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -3826,6 +3944,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
         else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
+        else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();

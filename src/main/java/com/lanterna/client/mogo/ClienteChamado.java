@@ -56,8 +56,19 @@ public final class ClienteChamado {
     /** Posição do Mogo no céu: vem de longe e para em mogo(). */
     private static Vec3 posMogo(ChamadoPacket p, float t) {
         Vec3 c = new Vec3(p.x(), p.y(), p.z()), m = new Vec3(p.mx(), p.my(), p.mz());
+        if (p.modo() == 1) return m; // de dentro do Mogo: o raio sai do teto
+        if (p.modo() == 2) c = centro(p, 0);
         float q = Geo.suaveX(Math.min(1, t / ChamadoMogo.CHEGA));
         return c.add(m.subtract(c).scale(Mth.lerp(q, 2.6f, 1f)));
+    }
+
+    /** Onde o raio acerta: no resgate acompanha o jogador que sobe. */
+    private static Vec3 centro(ChamadoPacket p, float pt) {
+        Vec3 c = new Vec3(p.x(), p.y(), p.z());
+        if (p.modo() != 2) return c;
+        Minecraft mc = Minecraft.getInstance();
+        Entity e = mc.level == null ? null : mc.level.getEntity(p.alvo());
+        return e == null ? c : e.getPosition(pt);
     }
 
     // ===================================== desenho =====================================
@@ -73,7 +84,7 @@ public final class ClienteChamado {
         for (ChamadoPacket p : ATIVOS) {
             float t = t(p, pt);
             if (t < 0 || t > ChamadoMogo.FIM + 8) continue;
-            Vec3 c = new Vec3(p.x(), p.y(), p.z());
+            Vec3 c = centro(p, pt);
             ps.pushPose();
             ps.translate(c.x - cam.x, c.y - cam.y, c.z - cam.z);
             Geo.buf = buf;
@@ -83,10 +94,27 @@ public final class ClienteChamado {
             Vec3 m = posMogo(p, t).subtract(c);
             float escala = Mth.lerp(Geo.suaveX(Math.min(1, t / ChamadoMogo.CHEGA)), 0.45f, 1f);
             float some = 1 - Mth.clamp((t - ChamadoMogo.FIM + 4) / 12f, 0, 1);
-            planeta(new Vector3f((float) m.x, (float) m.y, (float) m.z), 62 * escala, t, some);
             Entity alvo = mc.level.getEntity(p.alvo());
-            jaula(alvo, t);
-            raio(new Vector3f((float) m.x, (float) m.y, (float) m.z), 62 * escala, t);
+            Vector3f mv = new Vector3f((float) m.x, (float) m.y, (float) m.z);
+            if (p.modo() == 1) {
+                // o teto da câmara se abre em luz e o raio desce
+                float abre = Geo.suaveX(Mth.clamp(t / ChamadoMogo.CHEGA, 0, 1)) * some;
+                Geo.bola(mv.x, mv.y, mv.z, 7 * abre, JADE, 0.7f * abre);
+                Geo.bola(mv.x, mv.y, mv.z, 3 * abre, 0xFFFFFF, 0.8f * abre);
+                Geo.ps.pushPose();
+                Geo.ps.translate(mv.x, mv.y - 0.5f, mv.z);
+                for (int k = 0; k < 3; k++) Geo.anelChao(4 + k * 3 + (Geo.tempo * 0.1f % 3), 4.6f + k * 3 + (Geo.tempo * 0.1f % 3), 0, JADE, 0.35f * abre, 0, true);
+                Geo.ps.popPose();
+                jaula(alvo, t);
+                raio(mv, 0, t);
+            } else if (p.modo() == 2) {
+                planeta(mv, 62 * escala, t, some);
+                resgate(mv, 62 * escala, t);
+            } else {
+                planeta(mv, 62 * escala, t, some);
+                jaula(alvo, t);
+                raio(mv, 62 * escala, t);
+            }
             ps.popPose();
         }
         buf.endBatch();
@@ -279,6 +307,32 @@ public final class ClienteChamado {
         }
     }
 
+    /** Segunda Chance: um feixe largo e calmo segura o jogador e o leva para cima. */
+    private static void resgate(Vector3f mogo, float raioMogo, float t) {
+        Vector3f dir = new Vector3f(mogo).normalize();
+        float dist = mogo.length() - raioMogo * 0.98f;
+        float abre = Geo.suaveX(Mth.clamp((t - ChamadoMogo.CHEGA + 10) / 20f, 0, 1));
+        float fecha = 1 - Mth.clamp((t - (ChamadoMogo.FIM - 8)) / 8f, 0, 1);
+        float f = abre * fecha;
+        if (f <= 0.01f) return;
+        PoseStack ps = Geo.ps;
+        ps.pushPose();
+        ps.mulPose(new Quaternionf().rotationTo(0, 1, 0, dir.x, dir.y, dir.z));
+        float pulso = 1 + 0.05f * Mth.sin(Geo.tempo * 1.4f);
+        Geo.tubo(3.2f * f * pulso, -1.5f, dist, JADE, 0.16f * f, 0.1f * f, 0.04f, true);
+        Geo.tubo(1.6f * f, -1.5f, dist, JADE, 0.35f * f, 0.25f * f, 0.06f, true);
+        // anéis subindo (o oposto do raio que mata)
+        for (int k = 0; k < 8; k++) {
+            float y = ((Geo.tempo * 2.5f + k * 9f) % 72f) - 2f;
+            float a = 1 - y / 72f;
+            Geo.anelChao(1.3f * f, 1.8f * f, y, JADE, 0.5f * f * a, 0, true);
+        }
+        ps.popPose();
+        // casulo de luz em volta do jogador
+        Geo.bola(0, 1, 0, 1.9f * f, JADE, 0.35f * f);
+        Geo.bola(0, 1, 0, 0.9f * f, 0xFFFFFF, 0.25f * f);
+    }
+
     // ===================================== câmera e tremor =====================================
 
     /** Câmera de quem chamou: {x,y,z,yaw,pitch} ou null. */
@@ -290,16 +344,19 @@ public final class ClienteChamado {
             float t = t(p, pt);
             if (t < 0 || t >= ChamadoMogo.FIM - 4) continue;
             Vec3 pe = ent.getPosition(pt);
-            Vec3 c = new Vec3(p.x(), p.y(), p.z());
+            Vec3 c = centro(p, pt);
             Vec3 m = posMogo(p, t);
             Vec3 h = new Vec3(c.x - pe.x, 0, c.z - pe.z);
+            if (h.lengthSqr() < 1e-3) h = new Vec3(p.mx() - pe.x, 0, p.mz() - pe.z);
             if (h.lengthSqr() < 1e-3) h = ent.getLookAngle().multiply(1, 0, 1);
             h = h.normalize();
             Vec3 lado = new Vec3(-h.z, 0, h.x);
             // atrás e um pouco acima de quem chamou
-            Vec3 pos = pe.add(h.scale(-4.2)).add(0, 2.4, 0).add(lado.scale(1.4));
+            Vec3 pos = p.modo() == 2 ? pe.add(h.scale(-6.5)).add(0, -1.5, 0).add(lado.scale(2.5))
+                    : pe.add(h.scale(-4.2)).add(0, 2.4, 0).add(lado.scale(1.4));
             // olha para o Mogo, depois desce junto com o raio até o alvo
-            float desce = Geo.suaveX(Mth.clamp((t - ChamadoMogo.CARGA + 6) / 14f, 0, 1));
+            float desce = p.modo() == 2 ? 0.25f + 0.55f * Geo.suaveX(Mth.clamp((t - ChamadoMogo.CARGA) / 20f, 0, 1))
+                    : Geo.suaveX(Mth.clamp((t - ChamadoMogo.CARGA + 6) / 14f, 0, 1));
             Vec3 olhoMogo = m, olhoAlvo = c.add(0, 1, 0);
             Vec3 alvo = olhoMogo.add(olhoAlvo.subtract(olhoMogo).scale(Mth.lerp(desce, 0.0, 0.92)));
             double dx = alvo.x - pos.x, dy = alvo.y - pos.y, dz = alvo.z - pos.z;
@@ -323,7 +380,7 @@ public final class ClienteChamado {
         for (ChamadoPacket p : ATIVOS) {
             float t = t(p, (float) e.getPartialTick());
             double d = mc.player.position().distanceTo(new Vec3(p.x(), p.y(), p.z()));
-            float perto = (float) Mth.clamp(1 - d / 90, 0, 1);
+            float perto = (float) Mth.clamp(1 - d / 90, 0, 1) * (p.modo() == 2 ? 0.15f : 1f);
             if (t > ChamadoMogo.CARGA && t < ChamadoMogo.FIM) {
                 float k = t < ChamadoMogo.ACERTA + 10 ? 3.5f : 1.2f * (1 - (t - ChamadoMogo.ACERTA - 10) / 20f);
                 forca = Math.max(forca, k * perto);

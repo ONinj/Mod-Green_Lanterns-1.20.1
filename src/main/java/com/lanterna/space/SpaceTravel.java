@@ -82,6 +82,10 @@ public final class SpaceTravel {
                 && !player.isCreative()) {
             body = null; // Gênese ainda escondido: não dá para pousar
         }
+        if (body != null && "mogo".equals(body.id()) && !com.lanterna.mogo.MogoMissoes.podePousar(player)) {
+            com.lanterna.mogo.MogoMissoes.repelir(player, null);
+            return;
+        }
         if (body != null) {
             land(player, body);
             return;

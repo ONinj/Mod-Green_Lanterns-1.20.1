@@ -67,6 +67,8 @@ public final class SpaceBodies {
             new Body("ryut",     new Vec3(-1400, -200, -6400), 160, 0x8A8A9A, true, planet("ryut"), false),
             // Gênese: onde o Coração Primordial se partiu. Escondido até o jogador juntar os sete anéis da fusão.
             new Body("genese",   new Vec3(-300, 700, 2600),   140, 0xF4FFF4, true, planet("genese"), true),
+            // Mogo: o planeta que é um Lanterna Verde (o maior corpo do mapa depois do Sol)
+            new Body("mogo",     new Vec3(-4600, 350, -3800), 280, 0x3CFF7A, true, planet("mogo"), true),
             // O Sol: só para ver (e iluminar os planetas), longe demais para alcançar
             new Body("sun",      new Vec3(30000, 9000, 20000), 4200, 0xFFF4C0, false, null, false)
     );

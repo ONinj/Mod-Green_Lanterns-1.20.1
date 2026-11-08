@@ -53,6 +53,12 @@ public final class NaveViagem {
         if (body == null) return;
         if (SpaceBodies.isHidden(body.id()) && !pilot.isCreative()
                 && !LoreCapability.get(pilot).map(LoreData::geneseRevealed).orElse(false)) return;
+        if ("mogo".equals(body.id())) {
+            for (Entity r : n.getPassengers()) if (r instanceof ServerPlayer rp && !com.lanterna.mogo.MogoMissoes.podePousar(rp)) {
+                com.lanterna.mogo.MogoMissoes.repelir(pilot, n);
+                return;
+            }
+        }
         ServerLevel target = server.getLevel(body.dimension());
         if (target == null) return;
         Vec3 pos = body == SpaceBodies.EARTH ? SpaceTravel.earthReturn(pilot, target) : SpaceTravel.landingPoint(body, n.position());
