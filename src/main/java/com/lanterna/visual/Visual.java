@@ -55,11 +55,11 @@ public final class Visual {
         return Math.max(-MASCARA_MAX, Math.min(MASCARA_MAX, tag(p).getInt("mascara")));
     }
 
-    /** Bits das opções da aura: 1 = aura desligada, 2 = iluminar ligado. */
-    public static final int SEM_AURA = 1, ILUMINAR = 2;
+    /** Bits das opções: 1 = aura desligada, 2 = iluminar ligado, 4 = sem máscara. */
+    public static final int SEM_AURA = 1, ILUMINAR = 2, SEM_MASCARA = 4;
 
     public static int flags(Player p) {
-        return tag(p).getInt("flags") & 3;
+        return tag(p).getInt("flags") & 7;
     }
 
     /** A aura em volta do corpo está ligada (padrão: sim)? */
@@ -83,7 +83,7 @@ public final class Visual {
         CompoundTag t = new CompoundTag();
         t.putString("traje", traje);
         t.putInt("mascara", mascara);
-        t.putInt("flags", flags & 3);
+        t.putInt("flags", flags & 7);
         persist.put(TAG, t);
         p.getPersistentData().put(Player.PERSISTED_NBT_TAG, persist);
         enviar(p);

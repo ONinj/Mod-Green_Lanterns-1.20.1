@@ -35,6 +35,8 @@ public final class AuraOutline {
         Minecraft mc = Minecraft.getInstance();
         // o jogador pode desligar a aura na Personalização
         if (!com.lanterna.client.visual.ClientVisual.of(player.getId()).aura()) return false;
+        // sem energia no anel a aura se apaga
+        if (com.lanterna.client.ClientVisibleRings.semEnergia(player)) return false;
         if (player == mc.player) return ClientRingData.hasRing && ClientRingData.active;
         return ClientVisibleRings.of(player.getId()).active();
     }

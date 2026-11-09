@@ -2690,5 +2690,9 @@
   "terra.lanterna.titulo.dra": "Dr. %s",
   "terra.lanterna.titulo.sgt": "Sgt. %s",
   "terra.lanterna.titulo.dona": "Ms. %s",
-  "terra.lanterna.titulo.seu": "Mr. %s"
+  "terra.lanterna.titulo.seu": "Mr. %s",
+  "perfil.lanterna.mascara_usar": "Mask",
+  "perfil.lanterna.mascara_com": "on",
+  "perfil.lanterna.mascara_sem": "off",
+  "perfil.lanterna.mascara_usar_desc": "Off shows your skin's face"
 }

@@ -96,6 +96,9 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
                 case SKRELL_VATH -> {
                     if (n.equals("mascara_lider")) bone.setHidden(!race.hasFlag(RaceEntity.LEADER_MASK));
                 }
+                case VES_KAI -> {
+                    if (race.hasFlag(RaceEntity.WOUNDED)) ajoelhado(n, bone, entity.tickCount + pt);
+                }
                 case VELTARI -> {
                     if (n.equals("body")) bone.setRotX(race.hasFlag(RaceEntity.BOW) ? -0.5f : 0f);
                 }
@@ -120,6 +123,32 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
         }
         super.renderRecursively(pose, entity, bone, type, buffers, vc, reRender, pt, light, overlay, r, g, b, a);
     }
+
+    /**
+     * Ves'Kai ferido: ajoelhado, as duas pernas dobradas para trás no chão, o corpo baixo e curvado, a mão direita
+     * fincando o cajado em pé e a esquerda segurando nele mais acima. Respira devagar (o tronco sobe e desce um pouco).
+     */
+    private static void ajoelhado(String n, GeoBone bone, float t) {
+        float resp = Mth.sin(t * 0.06f) * 0.03f;
+        switch (n) {
+            case "root" -> bone.setPosY(-9.5f);
+            case "leg_r", "leg_l" -> { bone.setRotX(-1.45f); bone.setRotY(0f); bone.setRotZ(n.equals("leg_r") ? -0.12f : 0.12f); }
+            case "body" -> { bone.setRotX(-0.32f - resp); bone.setRotY(0f); bone.setRotZ(0f); }
+            case "head" -> { bone.setRotX(-0.35f + resp); bone.setRotY(0.15f); bone.setRotZ(0f); }
+            case "arm_r" -> { bone.setRotX(0.55f); bone.setRotY(0f); bone.setRotZ(-0.1f); }
+            case "cajado" -> { bone.setRotX(-0.23f); bone.setRotY(0f); bone.setRotZ(0.1f); bone.setPosY(-5f); }
+            case "arm_l" -> { bone.setRotX(1.15f); bone.setRotY(-0.85f); bone.setRotZ(0f); }
+            default -> {}
+        }
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(T entity) {
+        if (entity instanceof RaceEntity r && r.race() == Race.VES_KAI && r.hasFlag(RaceEntity.WOUNDED)) return FERIDO;
+        return super.getTextureLocation(entity);
+    }
+
+    private static final ResourceLocation FERIDO = LanternaMod.id("textures/entity/ves_kai_ferido.png");
 
     /** O fio de luz do Zaëlith aponta e estica até o par. */
     private void aimThread(T entity, RaceEntity race, GeoBone bone, float pt) {

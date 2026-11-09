@@ -234,7 +234,8 @@ public final class PlanetSites {
             e.setCustomNameVisible(true);
         }
         if (role.equals("lider") && race == Race.SKRELL_VATH) e.setFlag(RaceEntity.LEADER_MASK, true);
-        if (race == Race.VES_KAI) e.setFlag(RaceEntity.WOUNDED, false);
+        // líderes e NPCs de missão nunca estão feridos; os moradores comuns podem estar (35%, ver RaceEntity)
+        if (race == Race.VES_KAI && !role.isEmpty()) e.setFlag(RaceEntity.WOUNDED, false);
         level.addFreshEntity(e);
         return e;
     }
@@ -324,6 +325,7 @@ public final class PlanetSites {
         java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) ->
                 level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.getX() + x, c.getZ() + z);
         int n = 0;
+        if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);
         if (planet == PlanetLore.OA) {
             String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
             for (long i = quantos.apply("guardiao"); i < 3; i++, n++) {
@@ -335,6 +337,32 @@ public final class PlanetSites {
             Race race = planet == PlanetLore.RYUT ? Race.COLETOR : Race.ofPlanet(planet.planet);
             if (race != null && quantos.apply("lider") == 0) { npc(level, race, new BlockPos(c.getX() - 3, chao.apply(-3, -3), c.getZ() - 3), "lider", "npc.lanterna.name." + planet.planet); n++; }
             if (quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 3, chao.apply(3, 9), c.getZ() + 9), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
+        }
+        return n;
+    }
+
+    /**
+     * Nok: em volta da base sempre há alguns Ves'Kai feridos (ajoelhados, apoiados no cajado) esperando cura. Quando
+     * um é curado ele vira um morador comum e, de tempos em tempos, outro ferido chega (até 4 feridos, 12 Ves'Kai).
+     */
+    private static int feridosNok(ServerLevel level, BlockPos c, net.minecraft.world.phys.AABB area,
+                                  java.util.function.BiFunction<Integer, Integer, Integer> chao) {
+        var todos = level.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.race() == Race.VES_KAI && e.role().isEmpty());
+        long feridos = todos.stream().filter(e -> e.hasFlag(RaceEntity.WOUNDED)).count();
+        int n = 0;
+        for (int t = 0; t < 24 && feridos + n < 4 && todos.size() + n < 12; t++) {
+            // em volta da base; se em volta for água, em cima da própria plataforma (raio 10)
+            double a = level.random.nextDouble() * Math.PI * 2, r = (t < 12 ? 13 + level.random.nextDouble() * 9 : 6 + level.random.nextDouble() * 3);
+            int x = (int) Math.round(Math.cos(a) * r), z = (int) Math.round(Math.sin(a) * r);
+            BlockPos at = new BlockPos(c.getX() + x, chao.apply(x, z), c.getZ() + z);
+            // em terra firme: nada de água (eles ficam parados) nem em cima de folhas
+            if (!level.getFluidState(at).isEmpty() || !level.getFluidState(at.below()).isEmpty()
+                    || !level.getBlockState(at.below()).isFaceSturdy(level, at.below(), net.minecraft.core.Direction.UP)) continue;
+            RaceEntity e = nativo(level, Race.VES_KAI, at);
+            if (e == null) continue;
+            e.setFlag(RaceEntity.WOUNDED, true);
+            e.setHealth(e.getMaxHealth() * 0.35f);
+            n++;
         }
         return n;
     }

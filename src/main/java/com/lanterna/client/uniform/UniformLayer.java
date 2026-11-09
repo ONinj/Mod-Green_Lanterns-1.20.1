@@ -105,6 +105,7 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
                                 net.minecraft.client.model.HumanoidModel<?> base, net.minecraft.world.entity.EquipmentSlot[] slots,
                                 @org.jetbrains.annotations.Nullable net.minecraft.world.entity.HumanoidArm soBraco) {
         if (renderer3D == null) renderer3D = new RingUniformRenderer();
+        renderer3D.apagar(com.lanterna.client.ClientVisibleRings.semEnergia(player));
         int color = ClientVisibleRings.of(player.getId()).color();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         // Traje escolhido na Personalização: o padrão da Tropa ou um dos trajes "segunda pele" (a, b)
@@ -148,13 +149,16 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
     public static void acessorios(PoseStack poseStack, int light, AbstractClientPlayer player, String tropa, float p,
                                   net.minecraft.client.model.HumanoidModel<?> base) {
         if (renderer3D == null) renderer3D = new RingUniformRenderer();
+        renderer3D.apagar(com.lanterna.client.ClientVisibleRings.semEnergia(player));
         int color = ClientVisibleRings.of(player.getId()).color();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();
         boolean traje = com.lanterna.visual.Visual.eSegundaPele(var);
         org.joml.Matrix4f layerPose = new org.joml.Matrix4f(poseStack.last().pose());
+        boolean semMascara = com.lanterna.client.visual.ClientVisual.of(player.getId()).semMascara();
         for (var slot : SLOTS) {
             if (!player.getItemBySlot(slot).isEmpty()) continue;
+            if (semMascara && slot == net.minecraft.world.entity.EquipmentSlot.HEAD) continue; // sem máscara: nada 3D na cabeça
             net.minecraft.world.item.ItemStack piece = PIECES.computeIfAbsent(tropa + "|" + var + "|" + slot, k -> {
                 var item = traje ? com.lanterna.armor.ModTrajes.peca(tropa, var, slot) : com.lanterna.armor.ModArmorItems.pieceFor(tropa, slot);
                 return item == null ? net.minecraft.world.item.ItemStack.EMPTY : new net.minecraft.world.item.ItemStack(item);

@@ -45,7 +45,7 @@ public final class LuzAura {
     public static boolean ativa(ServerPlayer p) {
         if (p.isSpectator() || !p.isAlive()) return false;
         var r = ModCapabilities.get(p).orElse(null);
-        return r != null && r.hasRing() && r.powerActive() && Visual.iluminar(p);
+        return r != null && r.hasRing() && r.powerActive() && (r.charge() > 0 || com.lanterna.corps.BuiltinCorps.WHITE.id().equals(r.corps())) && Visual.iluminar(p);
     }
 
     @SubscribeEvent

@@ -187,7 +187,8 @@ public final class PeleTraje {
         // só as partes de baixo (a segunda camada da skin fica como está); onde há armadura de verdade, não pinta
         ModelPart[] partes = {m.head, m.body, m.rightArm, m.leftArm, m.rightLeg, m.leftLeg};
         boolean[] cobre = {
-                player.getItemBySlot(EquipmentSlot.HEAD).isEmpty(),
+                // sem máscara (Personalização): a cabeça fica com a skin do jogador
+                player.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && !com.lanterna.client.visual.ClientVisual.of(player.getId()).semMascara(),
                 player.getItemBySlot(EquipmentSlot.CHEST).isEmpty(),
                 player.getItemBySlot(EquipmentSlot.CHEST).isEmpty(),
                 player.getItemBySlot(EquipmentSlot.CHEST).isEmpty(),
@@ -213,7 +214,7 @@ public final class PeleTraje {
             q.xScale = sx; q.yScale = sy; q.zScale = sz;
         }
         // o que brilha no escuro (lentes, emblema, fibras de energia), depois de formado
-        if (p >= 1f && pl.brilho != null) {
+        if (p >= 1f && pl.brilho != null && !com.lanterna.client.ClientVisibleRings.semEnergia(player)) {
             var eyes = buf.getBuffer(RenderType.eyes(pl.brilho));
             for (int i = 0; i < partes.length; i++) {
                 if (!cobre[i] || !partes[i].visible) continue;
@@ -248,7 +249,7 @@ public final class PeleTraje {
         manga.visible = true;
         manga.copyFrom(braco);
         manga.render(ps, vc, luz, OverlayTexture.NO_OVERLAY, r, g, b, pp);
-        if (p >= 1f && pl.brilho != null) {
+        if (p >= 1f && pl.brilho != null && !com.lanterna.client.ClientVisibleRings.semEnergia(player)) {
             var eyes = buf.getBuffer(RenderType.eyes(pl.brilho));
             braco.render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             manga.render(ps, eyes, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);

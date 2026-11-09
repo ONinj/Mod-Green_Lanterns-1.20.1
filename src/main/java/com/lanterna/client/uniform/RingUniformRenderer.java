@@ -43,6 +43,13 @@ public class RingUniformRenderer extends UniformeRenderer {
     private final Map<GeoCube, Float> noise = new IdentityHashMap<>();
 
     /** Prepara a etapa: p = progresso da transformação, color = cor da Tropa, layerPose = espaço do modelo do jogador. */
+    /** Anel sem energia: as partes que brilham ficam apagadas. Vale até o próximo reset(). */
+    private boolean apagado;
+
+    public void apagar(boolean v) {
+        this.apagado = v;
+    }
+
     public void setup(Mode mode, float p, int color, ResourceLocation[] stage, Matrix4f layerPose) {
         this.mode = mode;
         this.progress = p;
@@ -57,6 +64,7 @@ public class RingUniformRenderer extends UniformeRenderer {
     public void reset() {
         mode = Mode.NORMAL;
         semBase = false;
+        apagado = false;
     }
 
     @org.jetbrains.annotations.Nullable private net.minecraft.world.entity.HumanoidArm soBraco;
@@ -94,6 +102,8 @@ public class RingUniformRenderer extends UniformeRenderer {
 
     @Override
     public List<GeoRenderLayer<UniformeTropaItem>> getRenderLayers() {
+        // as camadas são o brilho (glowmask): sem energia no anel, apagadas
+        if (apagado) return List.of();
         return mode == Mode.NORMAL || mode == Mode.ACESSORIO && progress >= 1f ? super.getRenderLayers() : List.of();
     }
 

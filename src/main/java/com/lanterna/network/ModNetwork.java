@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "16";
+    private static final String VERSION = "17";
     public static SimpleChannel CHANNEL;
 
     public static void register() {

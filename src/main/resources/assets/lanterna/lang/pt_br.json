@@ -2690,5 +2690,9 @@
   "terra.lanterna.titulo.dra": "Dra. %s",
   "terra.lanterna.titulo.sgt": "Sgt. %s",
   "terra.lanterna.titulo.dona": "Dona %s",
-  "terra.lanterna.titulo.seu": "Seu %s"
+  "terra.lanterna.titulo.seu": "Seu %s",
+  "perfil.lanterna.mascara_usar": "Máscara",
+  "perfil.lanterna.mascara_com": "usando",
+  "perfil.lanterna.mascara_sem": "retirada",
+  "perfil.lanterna.mascara_usar_desc": "Tirar mostra o rosto da skin"
 }

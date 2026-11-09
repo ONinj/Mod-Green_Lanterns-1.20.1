@@ -9,6 +9,9 @@ public final class ClientVisual {
         /** A aura em volta do corpo está ligada? */
         public boolean aura() { return (flags & com.lanterna.visual.Visual.SEM_AURA) == 0; }
         /** A aura ilumina em volta (na cor da Tropa)? */
+        /** O jogador tirou a máscara do traje (o rosto da skin aparece). */
+        public boolean semMascara() { return (flags & com.lanterna.visual.Visual.SEM_MASCARA) != 0; }
+
         public boolean iluminar() { return aura() && (flags & com.lanterna.visual.Visual.ILUMINAR) != 0; }
     }
 

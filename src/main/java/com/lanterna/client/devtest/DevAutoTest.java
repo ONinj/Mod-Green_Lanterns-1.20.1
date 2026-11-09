@@ -3871,6 +3871,81 @@ public final class DevAutoTest {
         at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Ves'Kai ferido (ajoelhado no cajado, textura machucada) ao lado de um saudável; traje sem máscara; anel sem energia. */
+    private static void sceneVesKai() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.hideGui = true; cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 100 0 0 0"));
+        at(10, () -> cmd("fill -6 99 -2 6 99 10 minecraft:smooth_stone"));
+        at(10, () -> cmd("kill @e[type=!player]"));
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var e = com.lanterna.lore.LoreEntities.typeOf(com.lanterna.lore.entity.Race.VES_KAI).create(l);
+            e.moveTo(0, 100, 4, 180, 0);
+            e.setYHeadRot(180); e.setYBodyRot(180);
+            e.setNoAi(true);
+            l.addFreshEntity(e);
+            e.setFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED, true);
+        }));
+        at(10, () -> { cmd("tp @s 0 100.0 2.0 0 18"); cmd("effect give @s minecraft:night_vision 999 0 true"); });
+        at(80, () -> shot("vk_frente"));
+        at(5, () -> cmd("tp @s 2 100.0 4 90 18"));
+        at(30, () -> shot("vk_lado"));
+        at(5, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(10)).forEach(v -> v.setFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED, false))));
+        at(30, () -> shot("vk_curado"));
+        // traje sem máscara e anel sem energia (aura e brilho apagados)
+        at(5, () -> { mc.options.hideGui = false; cmd("kill @e[type=!player]"); cmd("tp @s 10 100 10 0 0"); cmd("lanterna anel green"); cmd("lanterna cheio"); });
+        at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.visual.VisualPackets.Pedido("a", 0, com.lanterna.visual.Visual.SEM_MASCARA)));
+        at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); cmd("time set 18000");
+            glog("look=" + com.lanterna.client.visual.ClientVisual.of(mc.player.getId()) + " semMascara=" + com.lanterna.client.visual.ClientVisual.of(mc.player.getId()).semMascara()); });
+        at(20, () -> shot("vk_semmascara_cheio"));
+        for (int i = 0; i < 30; i++) at(1, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> com.lanterna.power.RingPowers.setCharge(sp, d, 0))));
+        at(1, () -> { glog("vazio=" + com.lanterna.client.ClientVisibleRings.semEnergia(mc.player) + " carga=" + com.lanterna.client.ClientRingData.charge); shot("vk_semmascara_vazio"); });
+        at(1, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.visual.VisualPackets.Pedido("a", 0, 0)));
+        for (int i = 0; i < 20; i++) at(1, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> com.lanterna.power.RingPowers.setCharge(sp, d, 0))));
+        at(1, () -> shot("vk_commascara_vazio"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
+    /** Nok: feridos em volta da base; Odym: Ecos subindo nas ilhas. */
+    private static void sceneNokFeridos() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("lanterna anel indigo"); cmd("effect give @s minecraft:resistance 9999 4 true"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
+        at(10, () -> cmd("execute in lanterna:nok run tp @s 0 120 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
+        at(100, () -> { cmd("tp @s 0 ~ 0"); server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(48, 200, 48), r -> r.race() == com.lanterna.lore.entity.Race.VES_KAI && r.role().isEmpty()).forEach(net.minecraft.world.entity.Entity::discard)); });
+        at(200, () -> server(sp -> {
+            var l = sp.serverLevel();
+            glog("vigia=" + com.lanterna.lore.world.PlanetSites.vigiarBase(l, com.lanterna.lore.PlanetLore.NOK) + " obra=" + com.lanterna.cidade.Obra.ocupada());
+            for (int k = 0; k < 8; k++) {
+                double a = k * Math.PI / 4; int x = (int) Math.round(Math.cos(a) * 17), z = (int) Math.round(Math.sin(a) * 17);
+                int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+                var at = new net.minecraft.core.BlockPos(x, y, z);
+                glog("p" + k + " " + at + " below=" + l.getBlockState(at.below()) + " fluid=" + l.getFluidState(at).getType() + " sturdy=" + l.getBlockState(at.below()).isFaceSturdy(l, at.below(), net.minecraft.core.Direction.UP));
+            }
+        }));
+        at(100, () -> server(sp -> {
+            var vs = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(48, 200, 48), r -> r.race() == com.lanterna.lore.entity.Race.VES_KAI);
+            glog("nok vk=" + vs.size() + " feridos=" + vs.stream().filter(v -> v.hasFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED)).count());
+            var f = vs.stream().filter(v -> v.hasFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED)).findFirst().orElse(null);
+            if (f != null) sp.teleportTo(f.getX() + 2.5, f.getY() + 0.5, f.getZ() + 0.5);
+        }));
+        at(40, () -> { mc.player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES,
+                mc.level.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, mc.player.getBoundingBox().inflate(6), r -> r.hasFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED)).stream().findFirst().map(e -> e.position().add(0, 0.8, 0)).orElse(mc.player.position())); });
+        at(10, () -> shot("nok_ferido"));
+        at(5, () -> cmd("execute in lanterna:odym run tp @s 0 120 0"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("odym") && mc.screen == null, 900);
+        at(200, () -> server(sp -> {
+            int t = 0; for (int i = 0; i < 12; i++) t += com.lanterna.lore.world.EcosOdym.tentar(sp);
+            glog("odym ecos nascidos em 12 tentativas=" + t + " perto=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.LoreCreatures.Eco.class, sp.getBoundingBox().inflate(64)).size());
+        }));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4533,6 +4608,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("frenesi")) sceneFrenesi();
         else if (ENABLED && SCENE.equals("textos")) sceneTextos();
         else if (ENABLED && SCENE.equals("ingles")) sceneIngles();
+        else if (ENABLED && SCENE.equals("veskai")) sceneVesKai();
+        else if (ENABLED && SCENE.equals("nokferidos")) sceneNokFeridos();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

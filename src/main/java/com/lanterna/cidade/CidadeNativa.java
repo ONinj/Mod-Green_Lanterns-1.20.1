@@ -114,6 +114,7 @@ public final class CidadeNativa {
         List<BlockPos> carregadas = new java.util.ArrayList<>();
         for (BlockPos h : casas) if (l.isPositionEntityTicking(h)) carregadas.add(h);
         if (carregadas.isEmpty()) return 0;
+        if (planet == PlanetLore.NOK) quantos = Math.round(quantos * 1.6f); // Nok: cidade dos Ves'Kai mais cheia
         int meta = (int) Math.ceil(quantos * (double) carregadas.size() / casas.size());
         AABB area = new AABB(c.getX() - R, l.getMinBuildHeight(), c.getZ() - R, c.getX() + R, l.getMaxBuildHeight(), c.getZ() + R);
         List<RaceEntity> tem = l.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.race() == race && e.role().isEmpty());

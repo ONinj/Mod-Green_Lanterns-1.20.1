@@ -202,6 +202,18 @@ public class PerfilScreen extends Screen {
             int bx = x + (i % 2) * (cw + 6), by = y + (i / 2) * (ch + 4);
             if (i >= Visual.TRAJES.size()) {
                 // opções da aura: ligar/desligar a aura e iluminar em volta (só com a aura ligada)
+                if (i == Visual.TRAJES.size() + 2) {
+                    // máscara: usar ou tirar (sem ela, o rosto e o cabelo da skin aparecem)
+                    boolean usa = !look.semMascara();
+                    boolean hov3 = mx >= bx && mx < bx + cw && my >= by && my < by + ch;
+                    g.fill(bx, by, bx + cw, by + ch, usa ? Hud.argb(c, 70) : hov3 ? 0x40FFFFFF : 0x50000000);
+                    g.fill(bx, by, bx + 2, by + ch, usa ? Hud.argb(c, 255) : 0x40FFFFFF);
+                    Component nm = Component.translatable("perfil.lanterna.mascara_usar")
+                            .append(": ").append(Component.translatable(usa ? "perfil.lanterna.mascara_com" : "perfil.lanterna.mascara_sem"));
+                    Hud.textFit(g, Hud.bold(nm), bx + 7, by + 3, cw - 10, usa ? 0xFFFFFFFF : 0xFFD8E0E4, false);
+                    Hud.textFit(g, Hud.body(Component.translatable("perfil.lanterna.mascara_usar_desc")), bx + 7, by + 12, cw - 10, 0xFF8A98A4, false);
+                    continue;
+                }
                 boolean luz = i == Visual.TRAJES.size() + 1;
                 boolean on = luz ? look.iluminar() : look.aura();
                 boolean pode = !luz || look.aura();
@@ -286,6 +298,8 @@ public class PerfilScreen extends Screen {
                         int fl = look.flags() ^ Visual.SEM_AURA;
                         if ((fl & Visual.SEM_AURA) != 0) fl &= ~Visual.ILUMINAR;
                         escolher(look.traje(), look.mascara(), fl);
+                    } else if (i == Visual.TRAJES.size() + 2) {
+                        escolher(look.traje(), look.mascara(), look.flags() ^ Visual.SEM_MASCARA);
                     } else if (i == Visual.TRAJES.size() + 1) {
                         if (!look.aura()) return true;
                         escolher(look.traje(), look.mascara(), look.flags() ^ Visual.ILUMINAR);
@@ -322,9 +336,9 @@ public class PerfilScreen extends Screen {
         clique();
     }
 
-    /** Quantos cartões há na grade do visual: os trajes + as duas opções da aura. */
+    /** Quantos cartões há na grade do visual: os trajes + as duas opções da aura + a máscara. */
     private static int cartoes() {
-        return Visual.TRAJES.size() + 2;
+        return Visual.TRAJES.size() + 3;
     }
 
     private static int linhas() {

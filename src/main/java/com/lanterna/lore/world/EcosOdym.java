@@ -21,11 +21,11 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * Odym é quase todo mar, e o spawn normal do Minecraft quase nunca acerta as poucas ilhas: os Ecos sumiam do planeta.
  * Aqui, de tempos em tempos, perto de quem está em Odym, um Eco sobe do mar numa ilha (terra firme, a céu aberto,
- * acima da água, fora das cidades). Mesmas regras do resto: nunca mais de 3 por perto, nada no Pacífico.
+ * acima da água, fora das cidades). Nunca mais de 5 por perto, nada no Pacífico.
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class EcosOdym {
-    private static final int INTERVALO = 20 * 25;
+    private static final int INTERVALO = 20 * 14;
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent e) {
@@ -39,11 +39,11 @@ public final class EcosOdym {
         ServerLevel l = p.serverLevel();
         if (PlanetLore.byDimension(l.dimension()) != PlanetLore.ODYM || l.getDifficulty() == Difficulty.PEACEFUL) return 0;
         if (!LoreCreatures.Eco.allowSpawn(l, l.random)) return 0;
-        if (l.getEntitiesOfClass(LoreCreatures.Eco.class, p.getBoundingBox().inflate(48)).size() >= 3) return 0;
+        if (l.getEntitiesOfClass(LoreCreatures.Eco.class, p.getBoundingBox().inflate(48)).size() >= 5) return 0;
         BlockPos onde = procurar(l, p);
         if (onde == null) return 0;
         int feitos = 0;
-        int n = 1 + (l.random.nextFloat() < 0.3f ? 1 : 0);
+        int n = 1 + (l.random.nextFloat() < 0.45f ? 1 : 0);
         for (int i = 0; i < n; i++) {
             var eco = LoreEntities.ECO_CINZENTO.get().create(l);
             if (eco == null) return feitos;

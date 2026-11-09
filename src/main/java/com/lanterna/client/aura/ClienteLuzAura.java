@@ -41,7 +41,7 @@ public final class ClienteLuzAura {
         boolean algum = false;
         for (Player p : mc.level.players()) {
             if (p.isSpectator() || p.distanceToSqr(cam) > 80 * 80) continue;
-            if (!ClientVisual.of(p.getId()).iluminar()) continue;
+            if (!ClientVisual.of(p.getId()).iluminar() || com.lanterna.client.ClientVisibleRings.semEnergia(p)) continue;
             int cor;
             if (p == mc.player) {
                 if (!ClientRingData.hasRing || !ClientRingData.active) continue;

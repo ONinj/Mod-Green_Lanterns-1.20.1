@@ -1110,3 +1110,11 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - Livro do Arquivo da Fonte com nome traduzido; moradores da Terra com título traduzido (Dra./Dr., Dona/Ms., Seu/Mr.), inclusive em mundos antigos.
 - Respostas e ajuda dos comandos de teste (/lanterna ajuda, cheio, maximo, nivel, missao_*, poder, morte, fonte...) traduzidas.
 - Descrição do mod e comentários do lanterna-common.toml em inglês e português.
+
+## 0.39.6 — Máscara, energia, Nok e Odym
+
+- **Máscara:** novo cartão na Personalização ("Máscara: usando/retirada"). Sem máscara, a cabeça fica com a skin do jogador (rosto, cabelo, chapéu) e as peças 3D da cabeça somem.
+- **Anel sem energia (0%):** a aura em volta do corpo apaga, a luz do "Iluminar" apaga e as partes do traje que brilham (lentes, emblema, fibras) ficam apagadas, para todos os jogadores verem. O Anel Branco nunca descarrega.
+- **Minérios:** Fragmento de Pavor em Korugar (24 veios de 8, de y -60 a 72; antes 10 de 6 só abaixo de 0). Lágrima Índigo em Nok (20 veios de 7 e 60 gotas no teto das cavernas; antes 8 de 5 e 30).
+- **Ves'Kai feridos:** textura própria (curativos, cortes, cores apagadas, brilho fraco), ficam ajoelhados apoiados no cajado com as duas mãos e não andam até serem curados. Antes, por um defeito, nenhum Ves'Kai nascia ferido. Agora 35% dos moradores nascem feridos, a base de Nok mantém até 4 feridos em volta (até 12 Ves'Kai) e a cidade de Nok tem 60% mais moradores.
+- **Odym:** Ecos Cinzentos sobem nas ilhas a cada 14 s (antes 25 s), até 5 por perto (antes 3), mais vezes em dupla, e o spawn normal ficou mais frequente.

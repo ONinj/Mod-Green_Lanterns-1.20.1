@@ -115,7 +115,7 @@ public final class RingPowers {
         boolean staff = com.lanterna.item.BatteryItems.isStaff(EquipmentHelper.battery(player));
         String key = (data.hasRing()
                 ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled()
-                + "|" + data.hyper() + "|" + data.autopilot() : "") + "|" + staff;
+                + "|" + data.hyper() + "|" + data.autopilot() + "|" + (data.charge() <= 0) : "") + "|" + staff;
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
                 SyncVisibleRingPacket.of(player.getId(), data, staff));

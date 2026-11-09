@@ -151,7 +151,7 @@ public final class LoreCreatures {
             int bosses = LoreWorldData.get(level.getServer()).bossesDefeated();
             float chance = Math.min(0.35f, 0.06f + 0.03f * bosses);
             // Odym é quase todo mar: as poucas ilhas recebem mais tentativas que vingam
-            if (com.lanterna.lore.PlanetLore.byDimension(level.dimension()) == com.lanterna.lore.PlanetLore.ODYM) chance = Math.min(0.6f, chance * 3);
+            if (com.lanterna.lore.PlanetLore.byDimension(level.dimension()) == com.lanterna.lore.PlanetLore.ODYM) chance = Math.min(0.8f, chance * 5);
             if (random.nextFloat() >= chance) return false;
             return true;
         }

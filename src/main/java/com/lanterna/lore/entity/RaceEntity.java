@@ -198,7 +198,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             goalSelector.addGoal(3, new MeleeAttackGoal(this, 1.25, true) {
                 @Override
                 public boolean canUse() {
-                    return !hasFlag(KNEEL) && super.canUse();
+                    return !parado() && super.canUse();
                 }
             });
         }
@@ -206,7 +206,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, r == Race.VES_KAI ? 0.9 : 0.7) {
             @Override
             public boolean canUse() {
-                return !hasFlag(KNEEL) && super.canUse();
+                return !parado() && super.canUse();
             }
         });
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8f));
@@ -216,12 +216,17 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             targetSelector.addGoal(1, new HurtByTargetGoal(this, RaceEntity.class) {
                 @Override
                 public boolean canUse() {
-                    return !hasFlag(KNEEL) && role().isEmpty() && super.canUse();
+                    return !parado() && role().isEmpty() && super.canUse();
                 }
             }.setAlertOthers(RaceEntity.class));
             targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
                     e -> e instanceof Player p && hostileTo(p)));
         }
+    }
+
+    /** Ajoelhado (Brakkari vencido) ou Ves'Kai ferido (ajoelhado, apoiado no cajado): não anda nem luta. */
+    public boolean parado() {
+        return hasFlag(KNEEL) || race() == Race.VES_KAI && hasFlag(WOUNDED);
     }
 
     /** Este morador quer brigar com o jogador? */
@@ -266,7 +271,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             setFlag(FLEE, false);
             setFlag(BOW, false);
         }
-        if (hasFlag(KNEEL)) {
+        if (parado()) {
             getNavigation().stop();
             setTarget(null);
         }
@@ -625,7 +630,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             case BRAKKARI -> setVariant(1 + random.nextInt(6));                       // chifres
             case SKRELL_VATH -> setFlag(LEADER_MASK, random.nextInt(5) == 0);         // líder de colmeia
             case VES_KAI -> {
-                if (random.nextInt(10) < 3) {                                         // ferido
+                if (random.nextInt(20) < 7) {                                         // ferido (35%)
                     setFlag(WOUNDED, true);
                     setHealth(getMaxHealth() * 0.35f);
                 }
@@ -822,7 +827,7 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 4,
-                state -> Passos.andar(state, WALK, IDLE, state.isMoving() && !hasFlag(KNEEL))));
+                state -> Passos.andar(state, WALK, IDLE, state.isMoving() && !parado())));
         controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
                 .triggerableAnim("strike", STRIKE));
     }
