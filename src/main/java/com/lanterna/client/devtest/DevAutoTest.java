@@ -3946,6 +3946,68 @@ public final class DevAutoTest {
         at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Parede se formando com o fio do anel, picareta na frente da mão e a broca abrindo túnel. */
+    private static void sceneConstrutos2() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
+            cmd("lanterna anel green"); cmd("lanterna maximo"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 100 0 0 0"));
+        at(10, () -> { cmd("fill -10 99 -10 10 99 30 minecraft:smooth_stone"); cmd("fill -10 100 -10 10 110 30 minecraft:air"); cmd("fill -4 100 14 4 106 20 minecraft:stone"); });
+        at(30, () -> { cmd("tp @s 0 100 0 0 0"); });
+        at(10, () -> { mc.options.hideGui = true; mc.gui.getChat().clearMessages(false); mc.gui.clear(); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); cmd("tp @s 0 100 0 -35 25"); });
+        at(5, () -> server(sp -> com.lanterna.construct.Constructs.cast(sp, "parede")));
+        at(3, () -> shot("c2_parede_04"));
+        at(4, () -> { shot("c2_parede_08"); if (false) {
+            int n = 0, f = 0; long fd = -1;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(-6, 99, -6, 6, 108, 6)) {
+                var st = mc.level.getBlockState(q);
+                if (st.is(com.lanterna.construct.ConstructRegistry.CONSTRUCT_BLOCK.get())) { n++; if (st.getValue(com.lanterna.construct.ConstructBlock.FORMANDO)) f++;
+                    if (mc.level.getBlockEntity(q) instanceof com.lanterna.construct.ConstructBlock.Entity be) fd = be.formaDe(); }
+            }
+            glog("cliente: blocos=" + n + " formando=" + f + " formaDe=" + fd + " agora=" + mc.level.getGameTime()); }
+        });
+        at(4, () -> shot("c2_parede_14"));
+        at(20, () -> shot("c2_parede_fim"));
+        at(2, () -> mc.options.hideGui = false);
+        // picareta: olhando para a pedra
+        at(5, () -> { cmd("fill -10 100 -10 10 110 10 minecraft:air"); cmd("tp @s 0 100 10 0 10"); });
+        at(10, () -> { mc.options.hideGui = true; server(sp -> com.lanterna.construct.Constructs.cast(sp, "picareta")); });
+        at(2, () -> mc.options.particles().set(net.minecraft.client.ParticleStatus.MINIMAL));
+        at(14, () -> shot("c2_picareta_3p"));
+        at(2, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        at(6, () -> shot("c2_picareta_1p"));
+        at(2, () -> server(sp -> com.lanterna.construct.Constructs.release(sp, null)));
+        // broca
+        at(5, () -> { mc.options.particles().set(net.minecraft.client.ParticleStatus.MINIMAL); cmd("fill -4 100 12 4 106 20 minecraft:stone"); cmd("tp @s 0 101 9.5 0 8"); server(sp -> com.lanterna.construct.Constructs.cast(sp, "broca")); });
+        at(12, () -> shot("c2_broca_1p"));
+        at(2, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(10, () -> shot("c2_broca_3p"));
+        at(60, () -> { glog("tunel: ar em 0,101,15=" + mc.level.getBlockState(new net.minecraft.core.BlockPos(0, 101, 15)).isAir() + " 1,102,15=" + mc.level.getBlockState(new net.minecraft.core.BlockPos(1, 102, 15)).isAir()); shot("c2_broca_tunel"); });
+        at(2, () -> server(sp -> com.lanterna.construct.Constructs.release(sp, null)));
+        // broca no ar, vista de lado e de frente
+        at(5, () -> { cmd("tp @s 0 101 -6 90 0"); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); server(sp -> com.lanterna.construct.Constructs.cast(sp, "broca")); });
+        at(12, () -> shot("c2_broca_ar_frente"));
+        at(2, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(2, () -> server(sp -> com.lanterna.construct.Constructs.release(sp, null)));
+        // de lado: broca e picareta seguradas por um suporte de armadura virado para +x
+        at(4, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); cmd("fill -6 100 12 6 107 13 minecraft:stone"); cmd("tp @s 0.5 101 7.5 0 8");
+            server(sp -> {
+                var l = sp.serverLevel();
+                for (int k = 0; k < 2; k++) {
+                    var st = new net.minecraft.world.entity.decoration.ArmorStand(l, -1.5, 100.6, 11 - k * 1.6);
+                    st.setYRot(-90); st.setYHeadRot(-90); st.setYBodyRot(-90); st.setNoGravity(true); st.setInvisible(true);
+                    l.addFreshEntity(st);
+                    var c = com.lanterna.construct.ConstructEntity.create(st, k == 0 && !Boolean.getBoolean("lanterna.dbgbroca") ? com.lanterna.construct.ConstructEntity.Kind.DRILL : com.lanterna.construct.ConstructEntity.Kind.PICKAXE, 0x2BFF4A, 400, 0, 1f);
+                    c.setEnd(st.getEyePosition().add(10, 0, 0));
+                    l.addFreshEntity(c);
+                }
+            }); });
+        at(20, () -> shot("c2_lado"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4610,6 +4672,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("ingles")) sceneIngles();
         else if (ENABLED && SCENE.equals("veskai")) sceneVesKai();
         else if (ENABLED && SCENE.equals("nokferidos")) sceneNokFeridos();
+        else if (ENABLED && SCENE.equals("construtos2")) sceneConstrutos2();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

@@ -33,7 +33,8 @@ import org.joml.Vector3f;
  * Pode pertencer a um jogador ou a um boss (o Vigia Partido copia os construtos do jogador).
  */
 public class ConstructEntity extends Entity {
-    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS, DOOR, FORMA }
+    /** DRILL: broca de mineração; FIO: o fio de luz do anel até um construto de blocos que está se formando. */
+    public enum Kind { BEAM, HAMMER, FIST, BOLT, SHIELD, PICKAXE, GRAPPLE, BLADE, HAND, RAM, FEAR, NOVA, STREAM, CRYSTAL, TENDRIL, DEADHANDS, DOOR, FORMA, DRILL, FIO }
 
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(ConstructEntity.class, EntityDataSerializers.INT);
@@ -195,6 +196,10 @@ public class ConstructEntity extends Entity {
         switch (kind()) {
             case BEAM -> {
                 if (owner != null) updateBeam(owner);
+            }
+            case PICKAXE, DRILL -> {
+                // ferramentas seguradas: a entidade acompanha a mão (o desenho usa a mão e a mira do dono)
+                if (owner != null) setPos(owner.getX(), owner.getEyeY() - 0.3, owner.getZ());
             }
             case SHIELD, BLADE -> {
                 // escudo grande (Bastião) fica parado onde foi criado

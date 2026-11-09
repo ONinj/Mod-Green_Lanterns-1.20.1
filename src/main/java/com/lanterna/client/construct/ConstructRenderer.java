@@ -59,6 +59,18 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
             pose.pushPose();
             pose.translate(dono.x - origin.x, dono.y - origin.y, dono.z - origin.z);
         }
+        // construtos que nascem de uma vez: a energia se junta no lugar e o fio do anel encosta neles enquanto se formam
+        if (owner != null && age < 14) {
+            switch (e.kind()) {
+                case HAMMER, HAND, CRYSTAL, FIST, BOLT, RAM -> {
+                    Vec3 centro = e.kind() == ConstructEntity.Kind.HAMMER || e.kind() == ConstructEntity.Kind.HAND ? new Vec3(0, 0.6 * s, 0) : Vec3.ZERO;
+                    float fa = Mth.clamp((14 - age) / 6f, 0, 1);
+                    Ferramentas.fio(pose, body, glow, CastAnim.mao(owner, pt).subtract(origin), centro, color, gc, age, fa);
+                    Ferramentas.juntando(pose, glow, centro, gc, age, 1.2f * s, e.getId());
+                }
+                default -> {}
+            }
+        }
         switch (e.kind()) {
             case BEAM -> beam(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt);
             case HAMMER -> hammer(e, pose, body, glow, color, gc, age, alpha, s);
@@ -116,18 +128,16 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
                 pose.popPose();
             }
             case PICKAXE -> {
-                Vec3 at = e.end().subtract(origin);
-                pose.pushPose();
-                pose.translate(at.x, at.y, at.z);
-                if (owner != null) pose.mulPose(Axis.YP.rotationDegrees(-owner.getYRot()));
-                pose.translate(0, 0, -0.9);
-                pose.mulPose(Axis.XP.rotationDegrees(-60 + 70 * Math.abs(Mth.sin(age * 0.45f))));
-                pose.scale(grow, grow, grow);
-                EnergyShapes.box(pose, body, glow, -0.06f, 0, -0.06f, 0.06f, 1.3f, 0.06f, color, alpha);
-                EnergyShapes.box(pose, body, glow, -0.08f, 1.15f, -0.6f, 0.08f, 1.35f, 0.6f, color, alpha);
-                EnergyShapes.box(pose, body, glow, -0.05f, 1.17f, 0.55f, 0.05f, 1.31f, 0.85f, color, alpha);
-                EnergyShapes.box(pose, body, glow, -0.05f, 1.17f, -0.85f, 0.05f, 1.31f, -0.55f, color, alpha);
-                pose.popPose();
+                if (owner != null) Ferramentas.picareta(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt, grow);
+            }
+            case DRILL -> {
+                if (owner != null) Ferramentas.broca(e, pose, body, glow, color, gc, age, alpha, origin, owner, pt, grow);
+            }
+            case FIO -> {
+                if (owner != null) {
+                    float fa = Mth.clamp(age / 2f, 0, 1) * Mth.clamp((life - age) / 6f, 0, 1);
+                    Ferramentas.fio(pose, body, glow, CastAnim.mao(owner, pt).subtract(origin), e.end().subtract(origin), color, gc, age, fa);
+                }
             }
             case GRAPPLE -> {
                 Vec3 start = owner != null ? CastAnim.mao(owner, pt).subtract(origin) : Vec3.ZERO;

@@ -2694,5 +2694,8 @@
   "perfil.lanterna.mascara_usar": "Máscara",
   "perfil.lanterna.mascara_com": "usando",
   "perfil.lanterna.mascara_sem": "retirada",
-  "perfil.lanterna.mascara_usar_desc": "Tirar mostra o rosto da skin"
+  "perfil.lanterna.mascara_usar_desc": "Tirar mostra o rosto da skin",
+  "message.lanterna.troca_cara": "Eles desconfiam de você: tudo custa %s%% mais. Negociar com eles devolve o respeito.",
+  "construct.lanterna.broca": "Broca",
+  "construct.lanterna.broca.desc": "Um míssil de luz com coroas dentadas girando na ponta. Vai até a parede e abre um túnel 3x3 com 2 de fundo de uma vez (nível 4: 5x5). Segure a tecla."
 }

@@ -2694,5 +2694,8 @@
   "perfil.lanterna.mascara_usar": "Mask",
   "perfil.lanterna.mascara_com": "on",
   "perfil.lanterna.mascara_sem": "off",
-  "perfil.lanterna.mascara_usar_desc": "Off shows your skin's face"
+  "perfil.lanterna.mascara_usar_desc": "Off shows your skin's face",
+  "message.lanterna.troca_cara": "They distrust you: everything costs %s%% more. Trading with them restores respect.",
+  "construct.lanterna.broca": "Drill",
+  "construct.lanterna.broca.desc": "A missile of light with spinning toothed crowns at the tip. It reaches the wall and carves a 3x3 tunnel 2 deep at once (level 4: 5x5). Hold the key."
 }

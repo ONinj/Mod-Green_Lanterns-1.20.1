@@ -137,6 +137,8 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
     private int attackCooldown;
     @Nullable private BlockPos home;
     private final List<MerchantOffer> discounted = new ArrayList<>();
+    /** O que a sobretaxa somou em cada oferta para o jogador que está negociando (desfeito ao fechar). */
+    private final java.util.Map<MerchantOffer, Integer> acrescimo = new java.util.IdentityHashMap<>();
     private int lifetime = -1;
 
     /** Some depois de um tempo (cópias de cristal da Nyrielle). */
@@ -469,11 +471,13 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
             healWounded(sp, held);
             return InteractionResult.CONSUME;
         }
-        if (getTarget() == player && role().isEmpty()) return InteractionResult.PASS;
+        // a troca nunca fica trancada por falta de respeito: fica mais cara (ver sobretaxa)
         if (player.isShiftKeyDown() && canTradeWith(sp)) {
+            if (getTarget() == player) setTarget(null);
             openTrade(sp);
             return InteractionResult.CONSUME;
         }
+        if (getTarget() == player && role().isEmpty()) return InteractionResult.PASS;
         NpcDialogs.open(sp, this);
         return InteractionResult.CONSUME;
     }
@@ -529,17 +533,38 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
         return rep(p, r.repKey()) < com.lanterna.mission.Missions.repNeeded(r.repKey());
     }
 
+    /**
+     * Pode negociar? Só não negocia quem não troca, os Guardiões em serviço, um Zaëlith de luto e um povo que
+     * acabou de ver você matar um dos seus (5 minutos). Falta de respeito não tranca a troca: deixa tudo mais caro.
+     */
     public boolean canTradeWith(ServerPlayer p) {
         Race r = race();
         if (!r.trades() || !role().equals("") && r == Race.GUARDIAO) return false;
-        if (enemyCorps(p)) return false;
-        return switch (r) {
-            case BRAKKARI -> rep(p, "brakkari") >= 1;
-            case SKRELL_VATH -> rep(p, "skrell_vath") >= 1;
-            case VELTARI -> hasGreenRing(p) || rep(p, "veltari") >= 5;
-            case ZAELITH -> affection(p) >= 2 && !hasFlag(MOURNING);
-            default -> true;
-        };
+        if (r == Race.ZAELITH && hasFlag(MOURNING)) return false;
+        if (angryUntil.getOrDefault(p.getUUID(), 0L) > level().getGameTime()) return false;
+        return true;
+    }
+
+    /**
+     * Quanto mais caro este povo cobra do jogador (0 = preço normal, 2 = três vezes): cada ponto de respeito que
+     * falta para o que o povo pede (e cada ponto negativo) soma 20%, até +200%.
+     */
+    public float sobretaxa(Player p) {
+        Race r = race();
+        int falta;
+        if (r == Race.ZAELITH) falta = Math.max(0, 2 - affection(p));
+        else {
+            int rep = rep(p, r.repKey());
+            int pede = switch (r) {
+                case BRAKKARI, SKRELL_VATH -> 1;
+                case VELTARI -> hasGreenRing(p) ? 0 : 5;
+                default -> 0;
+            };
+            if (com.lanterna.lore.Factions.raceHatesPlayer(r, p)) pede = Math.max(pede, com.lanterna.mission.Missions.repNeeded(r.repKey()));
+            falta = Math.max(0, pede - rep);
+            if (rep < 0) falta = Math.max(falta, -rep + pede);
+        }
+        return Math.min(2f, falta * 0.2f);
     }
 
     public static boolean hasGreenRing(Player p) {
@@ -548,6 +573,11 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
     }
 
     public void openTrade(ServerPlayer p) {
+        // Ves'Kai de mundos antigos: ganham as trocas novas (maçã dourada) sem perder as outras
+        if (race() == Race.VES_KAI) {
+            var novas = RaceTrades.of(race());
+            if (getOffers().size() < novas.size()) { getOffers().clear(); getOffers().addAll(novas); }
+        }
         if (getOffers().isEmpty()) return;
         // Aelínos: com o anel verde, tudo fica mais barato ("esperança sem vontade não age")
         if (race() == Race.AELINOS && hasGreenRing(p)) {
@@ -555,6 +585,16 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
                 o.addToSpecialPriceDiff(-Math.max(1, o.getBaseCostA().getCount() / 3));
                 discounted.add(o);
             }
+        }
+        // falta de respeito: tudo mais caro enquanto este jogador negocia
+        float taxa = sobretaxa(p);
+        if (taxa > 0) {
+            for (MerchantOffer o : getOffers()) {
+                int mais = Math.max(1, Math.round(o.getBaseCostA().getCount() * taxa));
+                o.addToSpecialPriceDiff(mais);
+                acrescimo.merge(o, mais, Integer::sum);
+            }
+            p.displayClientMessage(Component.translatable("message.lanterna.troca_cara", Math.round(taxa * 100)).withStyle(net.minecraft.ChatFormatting.GOLD), true);
         }
         setTradingPlayer(p);
         openTradingScreen(p, getDisplayName(), 1);
@@ -565,6 +605,10 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
         if (player == null && !discounted.isEmpty()) {
             for (MerchantOffer o : discounted) o.resetSpecialPriceDiff();
             discounted.clear();
+        }
+        if (player == null && !acrescimo.isEmpty()) {
+            acrescimo.forEach((o, mais) -> o.addToSpecialPriceDiff(-mais));
+            acrescimo.clear();
         }
         super.setTradingPlayer(player);
     }
@@ -580,7 +624,10 @@ public class RaceEntity extends AbstractVillager implements GeoEntity {
                 LoreCapability.get(sp).ifPresent(d -> d.addRep("ghallos", 1));
             }
             case COLETOR -> LoreCapability.get(sp).ifPresent(d -> d.addRep("silente", 1));
-            default -> {}
+            // os outros povos: negociar devagar recupera o respeito perdido (até o que eles pedem)
+            default -> {
+                if (race() != Race.ZAELITH && sobretaxa(sp) > 0) LoreCapability.get(sp).ifPresent(d -> d.addRep(race().repKey(), 1));
+            }
         }
     }
 

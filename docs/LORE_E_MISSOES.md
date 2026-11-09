@@ -1118,3 +1118,11 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Minérios:** Fragmento de Pavor em Korugar (24 veios de 8, de y -60 a 72; antes 10 de 6 só abaixo de 0). Lágrima Índigo em Nok (20 veios de 7 e 60 gotas no teto das cavernas; antes 8 de 5 e 30).
 - **Ves'Kai feridos:** textura própria (curativos, cortes, cores apagadas, brilho fraco), ficam ajoelhados apoiados no cajado com as duas mãos e não andam até serem curados. Antes, por um defeito, nenhum Ves'Kai nascia ferido. Agora 35% dos moradores nascem feridos, a base de Nok mantém até 4 feridos em volta (até 12 Ves'Kai) e a cidade de Nok tem 60% mais moradores.
 - **Odym:** Ecos Cinzentos sobem nas ilhas a cada 14 s (antes 25 s), até 5 por perto (antes 3), mais vezes em dupla, e o spawn normal ficou mais frequente.
+
+## 0.40.0 — Construtos que se formam, Broca e trocas
+
+- **Trocas:** nenhum povo tranca a troca por falta de respeito (nem Tropa inimiga). Cada ponto que falta (e cada ponto negativo) deixa tudo 20% mais caro, até +200%, e o povo avisa. Cada troca feita assim devolve 1 de respeito. Só não negociam: Guardiões em serviço, Zaëlith de luto e quem viu você matar um dos seus nos últimos 5 minutos. Shift + clique abre a troca mesmo com o povo bravo com sua Tropa.
+- **Ves'Kai:** 3 Lágrimas Índigo → 1 Maçã Dourada; 4 Maçãs Douradas → 9 Moedas de Gratidão (além de 1 → 2). Ves'Kai de mundos antigos recebem as trocas novas.
+- **Formação dos construtos:** parede, ponte e jaula aparecem bloco a bloco: primeiro as arestas de luz crescem, depois o miolo enche e dá um clarão. Um fio de luz fino sai do anel, corre até o construto e encaixa nele (anel de encaixe na ponta) enquanto ele se forma. Martelo, mão, punho, rajada, aríete e cristal: a energia espirala até o lugar e o fio do anel encosta neles ao nascer.
+- **Picareta:** agora fica na frente da mão, apontada para a mira, batendo; ligada ao anel pelo fio.
+- **Broca (novo construto, todas as Tropas, nível 2, segure a tecla):** um míssil de luz com aletas na cauda e três coroas dentadas na ponta girando em sentidos alternados. Vai até a parede (até 4,5 blocos) e abre de uma vez um túnel 3x3 com 2 de fundo (5x5 no nível 4); não pega obsidiana e blocos mais duros. Custa 2 de carga por tick e mais pelos blocos quebrados.

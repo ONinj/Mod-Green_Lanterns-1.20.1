@@ -26,6 +26,8 @@ public enum ConstructType {
     JAULA("jaula", Category.CONTROL, 110, false, 3, 160),
     LAMINA("lamina", Category.ATTACK, 90, false, 4, 70),
     MAO("mao", Category.CONTROL, 50, false, 4, 50),
+    /** Broca de mineração: um míssil de luz com coroas dentadas girando na ponta; abre túneis largos. */
+    BROCA("broca", Category.UTILITY, 2, true, 2, 0),
 
     // ---- Construtos próprios de cada Tropa (só o anel daquela Tropa faz) ----
     ARIETE("ariete", Category.ATTACK, 80, false, 1, 60, "green"),

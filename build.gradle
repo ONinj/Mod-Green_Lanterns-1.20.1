@@ -38,6 +38,8 @@ minecraft {
             property 'lanterna.tropas', project.findProperty('tropas') ?: 'green,red,yellow,blue,violet,indigo,orange,black,white'
             property 'lanterna.planetas', project.findProperty('planetas') ?: 'oa,korugar,ysmault,odym,okaara,nok,zamaron,ryut'
             if (project.findProperty('refazer')) property 'lanterna.refazer', 'true'
+            if (project.findProperty('forma')) property 'lanterna.forma', project.findProperty('forma')
+            if (project.findProperty('dbgbroca')) property 'lanterna.dbgbroca', 'true'
             args '--quickPlaySingleplayer', 'test', '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
         }
         server {

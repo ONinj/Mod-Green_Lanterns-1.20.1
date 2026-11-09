@@ -224,7 +224,7 @@ public final class Constructs {
                     player.displayClientMessage(Component.translatable("message.lanterna.construct_no_target"), true);
                     return false;
                 }
-                cage(level, target, color, 120 + 30 * lvl);
+                cage(level, target, color, 120 + 30 * lvl, player);
                 target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120 + 30 * lvl, 3));
             }
             case MAO -> {
@@ -394,16 +394,24 @@ public final class Constructs {
         Direction side = facing.getClockWise();
         int placed = 0;
         int life = 20 * (20 + 4 * lvl);
+        // o fio do anel encaixa no meio da parede e ela se forma a partir dali
+        Vec3 encaixe = Vec3.atCenterOf(center).add(0, Math.min(1.5, height / 2.0 - 0.5), 0);
+        int maior = 0;
         for (int w = -half; w <= half; w++) {
             BlockPos column = center.relative(side, w);
             // Acompanha o chão
             int y = column.getY();
             while (y > column.getY() - 3 && level.getBlockState(new BlockPos(column.getX(), y - 1, column.getZ())).isAir()) y--;
             for (int h = 0; h < height; h++) {
-                if (ConstructBlock.place(level, new BlockPos(column.getX(), y + h, column.getZ()), color, life)) placed++;
+                BlockPos p = new BlockPos(column.getX(), y + h, column.getZ());
+                int at = atraso(encaixe, p);
+                if (ConstructBlock.place(level, p, color, life, at)) { placed++; maior = Math.max(maior, at); }
             }
         }
-        if (placed > 0) level.playSound(null, center, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 1.2f);
+        if (placed > 0) {
+            fio(player, color, encaixe, maior + ConstructBlock.FORMA + 8);
+            level.playSound(null, center, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 1.2f);
+        }
         return placed > 0;
     }
 
@@ -420,17 +428,26 @@ public final class Constructs {
         int life = 20 * (30 + 6 * lvl);
         int placed = 0;
         Vec3 start = player.position().add(0, -1, 0);
+        Vec3 encaixe = start.add(flat.scale(1.5)).add(0, 0.5, 0);
+        int maior = 0;
         for (int i = 1; i <= len; i++) {
             Vec3 p = start.add(flat.scale(i)).add(0, slope * i, 0);
             for (int w = -1; w <= 1; w++) {
-                if (ConstructBlock.place(level, BlockPos.containing(p.add(side.scale(w))), color, life)) placed++;
+                BlockPos q = BlockPos.containing(p.add(side.scale(w)));
+                int at = 3 + i;   // a ponte corre para a frente, um bloco por tick
+                if (ConstructBlock.place(level, q, color, life, at)) { placed++; maior = Math.max(maior, at); }
             }
         }
+        if (placed > 0) fio(player, color, encaixe, maior + ConstructBlock.FORMA + 6);
         if (placed > 0) level.playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 1.0f);
         return placed > 0;
     }
 
     private static void cage(ServerLevel level, LivingEntity target, int color, int life) {
+        cage(level, target, color, life, null);
+    }
+
+    private static void cage(ServerLevel level, LivingEntity target, int color, int life, @Nullable LivingEntity cagedBy) {
         AABB box = target.getBoundingBox();
         int x0 = (int) Math.floor(box.minX) - 1, x1 = (int) Math.floor(box.maxX) + 1;
         int y0 = (int) Math.floor(box.minY) - 1, y1 = (int) Math.floor(box.maxY) + 1;
@@ -440,10 +457,12 @@ public final class Constructs {
                 for (int z = z0; z <= z1; z++) {
                     boolean shell = x == x0 || x == x1 || y == y0 || y == y1 || z == z0 || z == z1;
                     boolean bars = (x + z) % 2 == 0 || y == y0 || y == y1;
-                    if (shell && bars) ConstructBlock.place(level, new BlockPos(x, y, z), color, life);
+                    if (shell && bars) ConstructBlock.place(level, new BlockPos(x, y, z), color, life, 3 + (y - y0) * 2 + level.random.nextInt(3));
                 }
             }
         }
+        // jaula: o fio vai até o topo dela
+        if (cagedBy instanceof ServerPlayer sp) fio(sp, color, new Vec3((x0 + x1 + 1) / 2.0, y1 + 0.5, (z0 + z1 + 1) / 2.0), (y1 - y0) * 2 + 3 + ConstructBlock.FORMA + 8);
         level.playSound(null, target.blockPosition(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 1.2f, 0.7f);
     }
 
@@ -463,7 +482,91 @@ public final class Constructs {
         if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, cost(a.type, level(player))));
         if (a.ticks % 40 == 0) Affinity.add(player, 1);
         if (a.type == ConstructType.PICARETA) mine(player, ring, a);
+        if (a.type == ConstructType.BROCA) drill(player, ring, a);
         if (a.ticks > 20 * 60 * 5) release(player, null);
+    }
+
+    /**
+     * Broca: mais lenta para começar, mas abre um túnel inteiro de uma vez (3x3 com 2 de fundo; 5x5 no nível 4+)
+     * e não pega blocos duros demais (obsidiana em diante).
+     */
+    private static void drill(ServerPlayer player, RingData ring, Active a) {
+        ServerLevel level = player.serverLevel();
+        Vec3 far = player.getEyePosition().add(player.getViewVector(1f).scale(4.5));
+        BlockHitResult hit = level.clip(new ClipContext(player.getEyePosition(), far, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        if (a.visual == null || !a.visual.isAlive()) {
+            a.visual = ConstructEntity.create(player, ConstructEntity.Kind.DRILL, ring.color(), 20 * 60 * 10, 0, 1f);
+            level.addFreshEntity(a.visual);
+            level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.7f, 1.4f);
+        }
+        if (a.ticks % 6 == 0) level.playSound(null, player.blockPosition(), SoundEvents.BEE_LOOP_AGGRESSIVE, SoundSource.PLAYERS, 0.35f, 0.5f);
+        if (hit.getType() != HitResult.Type.BLOCK) {
+            a.visual.setEnd(far);
+            if (a.mining != null) level.destroyBlockProgress(player.getId(), a.mining, -1);
+            a.mining = null;
+            return;
+        }
+        BlockPos pos = hit.getBlockPos();
+        a.visual.setEnd(hit.getLocation());
+        BlockState state = level.getBlockState(pos);
+        float hardness = state.getDestroySpeed(level, pos);
+        if (state.isAir() || hardness < 0 || hardness > 40) return;
+        if (!pos.equals(a.mining)) {
+            if (a.mining != null) level.destroyBlockProgress(player.getId(), a.mining, -1);
+            a.mining = pos;
+            a.progress = 0;
+        }
+        int lvl = level(player);
+        a.progress += (0.16f + 0.06f * lvl) / Math.max(0.6f, hardness * 0.3f);
+        level.destroyBlockProgress(player.getId(), pos, (int) Math.min(9, a.progress * 10));
+        if (a.ticks % 3 == 0) {
+            level.playSound(null, pos, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.8f, 0.7f);
+            level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, state),
+                    hit.getLocation().x, hit.getLocation().y, hit.getLocation().z, 2, 0.2, 0.2, 0.2, 0.05);
+        }
+        if (a.progress < 1f) return;
+        a.progress = 0;
+        level.destroyBlockProgress(player.getId(), pos, -1);
+        Direction face = hit.getDirection();
+        int raio = lvl >= 4 ? 2 : 1;
+        int fundo = 2;
+        int quebrados = 0;
+        for (int d = 0; d < fundo; d++) {
+            BlockPos base = pos.relative(face.getOpposite(), d);
+            for (int u = -raio; u <= raio; u++) {
+                for (int v = -raio; v <= raio; v++) {
+                    BlockPos p = switch (face.getAxis()) {
+                        case X -> base.offset(0, u, v);
+                        case Y -> base.offset(u, 0, v);
+                        case Z -> base.offset(u, v, 0);
+                    };
+                    BlockState s2 = level.getBlockState(p);
+                    float h = s2.getDestroySpeed(level, p);
+                    if (s2.isAir() || h < 0 || h > 40 || s2.is(ConstructRegistry.CONSTRUCT_BLOCK.get())) continue;
+                    breakBlock(player, p);
+                    quebrados++;
+                }
+            }
+        }
+        if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - Math.max(2, quebrados / 3));
+        level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 0.35f, 1.6f);
+        a.mining = null;
+    }
+
+    /**
+     * O fio de luz que sai do anel e "encaixa" no construto que está se formando (parede, ponte, jaula). Dura o
+     * tempo da formação e mais um pouco.
+     */
+    private static void fio(ServerPlayer player, int color, Vec3 alvo, int dura) {
+        ConstructEntity f = ConstructEntity.create(player, ConstructEntity.Kind.FIO, color, dura, 0, 1f);
+        f.setPos(alvo.x, alvo.y, alvo.z);
+        f.setEnd(alvo);
+        player.level().addFreshEntity(f);
+    }
+
+    /** Atraso (ticks) para um bloco do construto começar a se formar: os mais perto do ponto de encaixe primeiro. */
+    private static int atraso(Vec3 encaixe, BlockPos p) {
+        return (int) Math.round(Vec3.atCenterOf(p).distanceTo(encaixe) * 1.1) + 2;
     }
 
     private static void mine(ServerPlayer player, RingData ring, Active a) {

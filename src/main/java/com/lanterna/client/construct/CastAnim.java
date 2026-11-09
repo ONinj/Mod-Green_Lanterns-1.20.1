@@ -54,7 +54,7 @@ public final class CastAnim {
             case MARTELO, CEIFA -> Estilo.GOLPE;
             case PAREDE, ESCUDO, PAVOR, ESPERANCA, VIDA -> Estilo.EMPURRAO;
             case LAMINA -> Estilo.VARRIDA;
-            case LASER, PICARETA, NAPALM -> Estilo.MIRA;
+            case LASER, PICARETA, BROCA, NAPALM -> Estilo.MIRA;
             default -> Estilo.ESTOCADA;
         };
     }
@@ -157,7 +157,7 @@ public final class CastAnim {
         for (var e2 : SEGURA.keySet()) MIRANDO.put(e2, 0);
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e instanceof ConstructEntity c && (c.kind() == ConstructEntity.Kind.BEAM || c.kind() == ConstructEntity.Kind.STREAM
-                    || c.kind() == ConstructEntity.Kind.PICKAXE)) {
+                    || c.kind() == ConstructEntity.Kind.PICKAXE || c.kind() == ConstructEntity.Kind.DRILL)) {
                 LivingEntity o = c.owner();
                 if (o != null) MIRANDO.put(o.getId(), c.color());
             }

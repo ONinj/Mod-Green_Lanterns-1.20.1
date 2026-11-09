@@ -26,8 +26,24 @@ import org.joml.Vector3f;
  */
 public class ConstructBlock extends BaseEntityBlock {
 
+    /**
+     * Ainda se formando: o bloco já existe (é sólido) mas não aparece; o desenho (ConstructBlockRenderer) mostra a
+     * energia se juntando até ele ficar inteiro. Depois vira o bloco normal.
+     */
+    public static final net.minecraft.world.level.block.state.properties.BooleanProperty FORMANDO =
+            net.minecraft.world.level.block.state.properties.BooleanProperty.create("formando");
+
+    /** Ticks que cada bloco leva para se formar. */
+    public static final int FORMA = Integer.getInteger("lanterna.forma", 10);
+
     public ConstructBlock(Properties props) {
         super(props);
+        registerDefaultState(stateDefinition.any().setValue(FORMANDO, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> b) {
+        b.add(FORMANDO);
     }
 
     @Nullable
@@ -38,7 +54,7 @@ public class ConstructBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return state.getValue(FORMANDO) ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.MODEL;
     }
 
     @Override
@@ -53,7 +69,8 @@ public class ConstructBlock extends BaseEntityBlock {
 
     @Override
     public boolean skipRendering(BlockState state, BlockState other, net.minecraft.core.Direction dir) {
-        return other.is(this) || super.skipRendering(state, other, dir);
+        // a face encostada num bloco ainda se formando continua aparecendo
+        return other.is(this) && !other.getValue(FORMANDO) || super.skipRendering(state, other, dir);
     }
 
     @Nullable
@@ -65,13 +82,20 @@ public class ConstructBlock extends BaseEntityBlock {
 
     /** Coloca um bloco de construto (só no ar, água ou plantas). */
     public static boolean place(ServerLevel level, BlockPos pos, int color, int lifeTicks) {
+        return place(level, pos, color, lifeTicks, -1);
+    }
+
+    /** Coloca o bloco já com a animação de formação: começa a aparecer daqui a {@code atraso} ticks (-1 = sem animação). */
+    public static boolean place(ServerLevel level, BlockPos pos, int color, int lifeTicks, int atraso) {
         BlockState here = level.getBlockState(pos);
         if (!here.isAir() && !here.canBeReplaced() && !here.is(ConstructRegistry.CONSTRUCT_BLOCK.get())) return false;
         if (level.isOutsideBuildHeight(pos)) return false;
-        level.setBlock(pos, ConstructRegistry.CONSTRUCT_BLOCK.get().defaultBlockState(), 3);
+        boolean formar = atraso >= 0 && !here.is(ConstructRegistry.CONSTRUCT_BLOCK.get());
+        level.setBlock(pos, ConstructRegistry.CONSTRUCT_BLOCK.get().defaultBlockState().setValue(FORMANDO, formar), 3);
         if (level.getBlockEntity(pos) instanceof Entity be) {
             be.color = color;
-            be.expireAt = level.getGameTime() + lifeTicks;
+            be.formaDe = formar ? level.getGameTime() + atraso : 0;
+            be.expireAt = level.getGameTime() + lifeTicks + Math.max(0, atraso);
             be.setChanged();
             level.sendBlockUpdated(pos, be.getBlockState(), be.getBlockState(), 3);
         }
@@ -81,6 +105,8 @@ public class ConstructBlock extends BaseEntityBlock {
     public static class Entity extends BlockEntity {
         int color = 0x2BFF4A;
         long expireAt;
+        /** Quando começa a se formar (tempo do mundo); 0 = já formado. */
+        long formaDe;
 
         public Entity(BlockPos pos, BlockState state) {
             super(ConstructRegistry.CONSTRUCT_BLOCK_ENTITY.get(), pos, state);
@@ -90,8 +116,18 @@ public class ConstructBlock extends BaseEntityBlock {
             return color;
         }
 
+        public long formaDe() {
+            return formaDe;
+        }
+
         void serverTick() {
             if (level == null) return;
+            BlockState st = getBlockState();
+            if (st.getValue(FORMANDO) && level.getGameTime() >= formaDe + FORMA) {
+                formaDe = 0;
+                level.setBlock(worldPosition, st.setValue(FORMANDO, false), 3);
+                return;
+            }
             if (expireAt > 0 && level.getGameTime() >= expireAt) {
                 if (level instanceof ServerLevel sl) {
                     float r = ((color >> 16) & 0xFF) / 255f, g = ((color >> 8) & 0xFF) / 255f, b = (color & 0xFF) / 255f;
@@ -107,6 +143,7 @@ public class ConstructBlock extends BaseEntityBlock {
             super.saveAdditional(tag);
             tag.putInt("Color", color);
             tag.putLong("Expire", expireAt);
+            tag.putLong("Forma", formaDe);
         }
 
         @Override
@@ -114,6 +151,7 @@ public class ConstructBlock extends BaseEntityBlock {
             super.load(tag);
             color = tag.getInt("Color");
             expireAt = tag.getLong("Expire");
+            formaDe = tag.getLong("Forma");
             if (level != null && level.isClientSide) {
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 8);
             }
