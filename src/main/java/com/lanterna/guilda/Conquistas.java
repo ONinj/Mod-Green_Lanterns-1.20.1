@@ -45,7 +45,7 @@ public final class Conquistas {
         Conquista c = gs.conquistas.get(b.id());
         if (c != null) {
             Guilda dono = gs.guildas.get(c.guilda);
-            return Component.translatable("guilda.lanterna.erro.ja_tem_dono", dono == null ? "?" : dono.nome);
+            return Component.translatable("guilda.lanterna.erro.ja_tem_dono", dono == null ? "?" : Guilda.exibir(dono.nome));
         }
         if (gs.planetasDe(g.id).size() >= LanternaConfig.GUILDA_MAX_PLANETAS.get())
             return Component.translatable("guilda.lanterna.erro.max_planetas", LanternaConfig.GUILDA_MAX_PLANETAS.get());
@@ -57,7 +57,7 @@ public final class Conquistas {
         gs.conquistas.put(b.id(), c);
         gs.mudou();
         BaseGuilda.construir(level, pos, g, b.id());
-        anunciar(p.server, Component.translatable("guilda.lanterna.conquistou", g.nome, b.displayName()).withStyle(s -> s.withColor(g.cor()).withBold(true)));
+        anunciar(p.server, Component.translatable("guilda.lanterna.conquistou", Guilda.exibir(g.nome), b.displayName()).withStyle(s -> s.withColor(g.cor()).withBold(true)));
         return null;
     }
 
@@ -84,7 +84,7 @@ public final class Conquistas {
             BaseGuilda.npcs(level, c.bandeira, nova, c.planeta);
         }
         SpaceBodies.Body b = SpaceBodies.byId(c.planeta);
-        anunciar(server, Component.translatable("guilda.lanterna.tomou", nova.nome, b == null ? c.planeta : b.displayName(),
+        anunciar(server, Component.translatable("guilda.lanterna.tomou", Guilda.exibir(nova.nome), b == null ? c.planeta : b.displayName(),
                 velha == null ? "?" : velha.nome).withStyle(s -> s.withColor(nova.cor()).withBold(true)));
     }
 

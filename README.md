@@ -82,6 +82,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.47.2 ✅ (0.39.2) Waypoints no chão certo; Mogo com o símbolo do anel, andando pelo espaço, Rastro do Mogo e defesa contra a Morte
 1.47.3 ✅ (0.39.3) Mogo como planeta vivo; recarga do Índigo em 1ª pessoa corrigida; Fome do Anel Preto vira frenesi
 1.47.4 ✅ (0.39.4) Textos que saíam da tela com interface grande: mensagens longas da barra de ação, título e subtítulo vão para o chat; Bateria Cinzelada explica o ritual no chat em passos; HUD do anel, missões, roda de construtos, diário, perfil, oficina, árvore, comunicador e outros cabem em 427x240
+1.47.5 ✅ (0.39.5) Tudo em inglês quando o jogo está em inglês: nomes dos trajes (Shaman, Star Heart, Genesis, Phoenix, Specter...), guildas das Tropas e o Conselho, livro do Arquivo da Fonte, títulos dos moradores da Terra, respostas e ajuda dos comandos de teste, descrição do mod e comentários da config (inglês + português)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

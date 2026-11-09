@@ -1101,3 +1101,12 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Mensagens no meio da tela:** a barra de ação, o título e o subtítulo não quebram linha no Minecraft. Quando não cabem na largura da tela, vão inteiros para o chat (sem repetir em 6 s); título e subtítulo aparecem cortados com "…".
 - **HUDs e menus em interface grande** (testado em 427x240 e 480x270): HUD do anel (posto, afinidade, status em várias linhas), painel de missão (objetivo atual e dica quebram em linhas), aviso de missão nova, roda de construtos (a ficha vai para o lado ou a roda encolhe), diário (altura se ajusta, abas visíveis), perfil, oficina (modo compacto), árvore da luz (ficha do nó dentro da tela), mapa estelar, comunicador, ligação, guilda, quadro de contratos, portal e diálogo.
 - As técnicas (Y, U, I) não ficam mais por cima da barra de construtos.
+
+## 0.39.5 — Inglês completo
+
+- Com o jogo em inglês, nada mais aparece em português (fora os nomes próprios e os nomes dos comandos, como /lanterna missao_concluir).
+- Trajes: Specter, Herald of Terror, Guiding Star, Genesis, Phoenix, Pilgrim, Shaman, Treasurer, Plunderer, Ossuary, Reaper, Patroller, Sentinel, Boiling Blood, Sapphire, Star Heart.
+- Guildas das Tropas (e o dono "Conselho da Tropa") são traduzidas na hora de mostrar; guildas de jogadores mantêm o nome que o jogador deu.
+- Livro do Arquivo da Fonte com nome traduzido; moradores da Terra com título traduzido (Dra./Dr., Dona/Ms., Seu/Mr.), inclusive em mundos antigos.
+- Respostas e ajuda dos comandos de teste (/lanterna ajuda, cheio, maximo, nivel, missao_*, poder, morte, fonte...) traduzidas.
+- Descrição do mod e comentários do lanterna-common.toml em inglês e português.

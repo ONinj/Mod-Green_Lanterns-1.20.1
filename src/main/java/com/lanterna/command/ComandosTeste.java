@@ -80,13 +80,14 @@ public final class ComandosTeste {
         return LoreCapability.get(p).orElseThrow(() -> new IllegalStateException("sem dados"));
     }
 
-    private static int ok(CommandContext<CommandSourceStack> c, String texto) {
-        c.getSource().sendSuccess(() -> Component.literal("✔ " + texto).withStyle(ChatFormatting.GREEN), false);
+    /** Resposta de sucesso: a chave é traduzida no cliente (cmd.lanterna.<chave>). */
+    private static int ok(CommandContext<CommandSourceStack> c, String chave, Object... args) {
+        c.getSource().sendSuccess(() -> Component.literal("✔ ").append(Component.translatable("cmd.lanterna." + chave, args)).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static int erro(CommandContext<CommandSourceStack> c, String texto) {
-        c.getSource().sendFailure(Component.literal(texto));
+    private static int erro(CommandContext<CommandSourceStack> c, String chave, Object... args) {
+        c.getSource().sendFailure(Component.translatable("cmd.lanterna." + chave, args));
         return 0;
     }
 
@@ -114,18 +115,18 @@ public final class ComandosTeste {
                 .then(op("cheio").executes(c -> {
                     ServerPlayer p = eu(c);
                     RingData r = ModCapabilities.get(p).orElse(null);
-                    if (r == null || !r.hasRing()) return erro(c, "Sem anel.");
+                    if (r == null || !r.hasRing()) return erro(c, "sem_anel");
                     if (!r.powerActive()) RingPowers.togglePower(p);
                     RingPowers.setCharge(p, r, r.maxCharge());
                     Constructs.zerarRecargas(p.getUUID());
                     dados(p).setPortalCd(0);
-                    return ok(c, "Carga cheia, poder ligado, recargas e espera da Porta Estelar zeradas.");
+                    return ok(c, "cheio");
                 }))
                 // tudo no máximo para testes: nível, afinidade, técnicas, poderes, Fonte (selos, árvores, Essência, Corações) e carga 250%
                 .then(op("maximo").executes(c -> {
                     ServerPlayer p = eu(c);
                     RingData r0 = ModCapabilities.get(p).orElse(null);
-                    if (r0 == null || !r0.hasRing()) return erro(c, "Equipe um anel primeiro.");
+                    if (r0 == null || !r0.hasRing()) return erro(c, "equipe_anel");
                     poder(c, "tudo");
                     for (var t : com.lanterna.baterias.Tropa.values()) {
                         com.lanterna.fonte.FonteDados.darSelo(p, t.nome);
@@ -145,7 +146,7 @@ public final class ComandosTeste {
                     }
                     Constructs.zerarRecargas(p.getUUID());
                     sync(p);
-                    return ok(c, "TUDO NO MÁXIMO: nível " + Nivel.MAX + ", afinidade máxima, todas as técnicas e poderes, Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência e anel a 250%.");
+                    return ok(c, "maximo", Nivel.MAX);
                 }))
                 .then(op("nivel").then(Commands.argument("n", IntegerArgumentType.integer(1, Nivel.MAX)).executes(c -> {
                     ServerPlayer p = eu(c);
@@ -158,15 +159,15 @@ public final class ComandosTeste {
                         Nivel.aplicar(p);
                         sync(p);
                     }
-                    return ok(c, "Nível " + n + ".");
+                    return ok(c, "nivel", n);
                 })))
                 .then(op("afinidade_nivel").then(Commands.argument("n", IntegerArgumentType.integer(0, Affinity.MAX_LEVEL)).executes(c -> {
                     ServerPlayer p = eu(c);
                     ItemStack ring = EquipmentHelper.ring(p);
-                    if (ring.isEmpty()) return erro(c, "Equipe um anel primeiro.");
+                    if (ring.isEmpty()) return erro(c, "equipe_anel");
                     int n = IntegerArgumentType.getInteger(c, "n");
                     Affinity.add(p, Affinity.THRESHOLDS[n] - Affinity.points(ring));
-                    return ok(c, "Afinidade do anel: " + Affinity.levelName(n).getString() + ".");
+                    return ok(c, "afinidade", Affinity.levelName(n));
                 })))
 
                 // ---------- poderes ----------
@@ -178,12 +179,12 @@ public final class ComandosTeste {
                             LoreData dd = dados(p);
                             List<String> l = id.equals("todas") ? CidadeMissoes.TECNICAS : List.of(id);
                             for (String t : l) {
-                                if (!CidadeMissoes.TECNICAS.contains(t)) return erro(c, "Técnica desconhecida: " + t);
+                                if (!CidadeMissoes.TECNICAS.contains(t)) return erro(c, "tecnica_desconhecida", t);
                                 Tecnicas.desbloquear(p, dd, t);
                                 dd.completed().add("prov_" + t);
                             }
                             sync(p);
-                            return ok(c, "Técnica(s) liberada(s): " + String.join(", ", l) + ". Abra com O.");
+                            return ok(c, "tecnicas", String.join(", ", l));
                         })))
                 // ---------- a Fonte (Baterias Centrais) ----------
                 .then(op("fonte").then(Commands.argument("acao", StringArgumentType.word())
@@ -201,28 +202,28 @@ public final class ComandosTeste {
                 // ---------- missões ----------
                 .then(op("missao_iniciar").then(argMissao().executes(c -> {
                     MissionManager.start(eu(c), StringArgumentType.getString(c, "id"));
-                    return ok(c, "Missão iniciada.");
+                    return ok(c, "missao_iniciada");
                 })))
                 .then(op("missao_concluir").then(argMissao().executes(c -> MissionManager.forcarConclusao(eu(c), StringArgumentType.getString(c, "id"))
-                        ? ok(c, "Missão concluída (com recompensas e a próxima da linha).") : erro(c, "Missão desconhecida."))))
+                        ? ok(c, "missao_concluida") : erro(c, "missao_desconhecida"))))
                 .then(op("missao_abandonar").then(argMissao().executes(c -> {
                     ServerPlayer p = eu(c);
                     dados(p).abandon(StringArgumentType.getString(c, "id"));
                     sync(p);
-                    return ok(c, "Missão abandonada.");
+                    return ok(c, "missao_abandonada");
                 })))
                 .then(op("missao_limpar").executes(c -> {
                     ServerPlayer p = eu(c);
                     LoreData dd = dados(p);
                     for (String id : new ArrayList<>(dd.active().keySet())) dd.abandon(id);
                     sync(p);
-                    return ok(c, "Todas as missões ativas foram abandonadas.");
+                    return ok(c, "missoes_limpas");
                 }))
                 .then(op("missao_concluidas_limpar").executes(c -> {
                     ServerPlayer p = eu(c);
                     dados(p).completed().clear();
                     sync(p);
-                    return ok(c, "Histórico de missões concluídas apagado (dá para refazer tudo).");
+                    return ok(c, "concluidas_limpas");
                 }))
 
                 // ---------- mundo ----------
@@ -234,7 +235,7 @@ public final class ComandosTeste {
                             LoreData dd = dados(p);
                             for (String pl : id.equals("todos") ? planetas() : List.of(id)) dd.visitar(pl);
                             sync(p);
-                            return ok(c, "Marcado como visitado: " + id + " (aparece na Porta Estelar).");
+                            return ok(c, "visitado", id);
                         })))
                 .then(op("tropa_hostil").then(Commands.argument("tropa", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(lista(Arrays.asList(TROPAS), "limpar"), b))
@@ -244,7 +245,7 @@ public final class ComandosTeste {
                             LoreData dd = dados(p);
                             if (t.equals("limpar")) dd.tropasHostis().clear();
                             else dd.addTropaHostil(t);
-                            return ok(c, t.equals("limpar") ? "Nenhuma Tropa é sua inimiga agora." : "A Tropa " + t + " agora é sua inimiga.");
+                            return (t.equals("limpar") ? ok(c, "hostil_limpo") : ok(c, "hostil", t));
                         })))
 
                 // ---------- invocar ----------
@@ -298,7 +299,7 @@ public final class ComandosTeste {
     private static int anel(CommandContext<CommandSourceStack> c, String id) throws CommandSyntaxException {
         ServerPlayer p = eu(c);
         BuiltinCorps t = tropa(id);
-        if (t == null) return erro(c, "Tropa desconhecida: " + id);
+        if (t == null) return erro(c, "tropa_desconhecida", id);
         ItemStack velho = EquipmentHelper.take(p, RingData.RING_SLOT);
         if (!velho.isEmpty()) dar(p, velho);
         ItemStack novo = PowerRingItem.create(t.id(), t.color(), -1);
@@ -310,7 +311,7 @@ public final class ComandosTeste {
             dd.setMorte(3);
             dd.setUltimaCeifa(System.currentTimeMillis());
         }
-        return ok(c, "Anel " + id + " equipado" + (velho.isEmpty() ? "." : " (o anel antigo foi para o inventário)."));
+        return ok(c, velho.isEmpty() ? "anel" : "anel_troca", id);
     }
 
     private static int poder(CommandContext<CommandSourceStack> c, String qual) throws CommandSyntaxException {
@@ -350,17 +351,11 @@ public final class ComandosTeste {
                 Constructs.zerarRecargas(p.getUUID());
             }
             default -> {
-                return erro(c, "Use: portal, autorecarga, honra, genese ou tudo.");
+                return erro(c, "uso_poder");
             }
         }
         sync(p);
-        return ok(c, switch (qual) {
-            case "portal" -> "Porta Estelar liberada (tecla N).";
-            case "autorecarga" -> "O anel agora se recarrega sozinho (recompensa da Prova da Emoção).";
-            case "honra" -> "Guarda de Honra: posto e 3º espaço de técnica.";
-            case "genese" -> "Gênese revelada no espaço.";
-            default -> "Tudo liberado: nível 50, afinidade máxima, todas as técnicas, Guarda de Honra, Porta Estelar, autorrecarga, Gênese e todos os planetas visitados.";
-        });
+        return ok(c, "poder." + (List.of("portal", "autorecarga", "honra", "genese").contains(qual) ? qual : "tudo"));
     }
 
     private static int morte(CommandContext<CommandSourceStack> c, String acao) throws CommandSyntaxException {
@@ -384,17 +379,11 @@ public final class ComandosTeste {
                 for (String id : new ArrayList<>(dd.active().keySet())) if (id.startsWith("morte_")) dd.abandon(id);
             }
             default -> {
-                return erro(c, "Use: corromper, dominar, faminto, alimentar ou limpar.");
+                return erro(c, "uso_morte");
             }
         }
         sync(p);
-        return ok(c, switch (acao) {
-            case "corromper" -> "Anel corrompido: a linha \"A Morte\" começou.";
-            case "dominar" -> "Você domina a Morte (pode forjar/usar o Anel Preto; use /lanterna anel black para equipar).";
-            case "faminto" -> "O Lanterna Negro agora está faminto (dano reduzido).";
-            case "alimentar" -> "A fome do Lanterna Negro foi saciada.";
-            default -> "Corrupção removida.";
-        });
+        return ok(c, "morte." + (List.of("corromper", "dominar", "faminto", "alimentar").contains(acao) ? acao : "limpar"));
     }
 
     private static int invocar(CommandContext<CommandSourceStack> c, String oQue, int qtd) throws CommandSyntaxException {
@@ -404,7 +393,7 @@ public final class ComandosTeste {
         int feitos = 0;
         for (int i = 0; i < qtd; i++) {
             Entity e = criar(level, oQue);
-            if (e == null) return erro(c, "Não sei invocar: " + oQue);
+            if (e == null) return erro(c, "invocar_desconhecido", oQue);
             double a = i * 2.4;
             e.moveTo(frente.x + Math.cos(a) * (i == 0 ? 0 : 1.5), frente.y, frente.z + Math.sin(a) * (i == 0 ? 0 : 1.5), p.getYRot() + 180, 0);
             if (e instanceof Mob m && !(e instanceof LanternaEntity))
@@ -412,7 +401,7 @@ public final class ComandosTeste {
             level.addFreshEntity(e);
             feitos++;
         }
-        return ok(c, "Invocado: " + oQue + " x" + feitos + ".");
+        return ok(c, "invocado", oQue, feitos);
     }
 
     private static Entity criar(ServerLevel level, String oQue) {
@@ -440,10 +429,10 @@ public final class ComandosTeste {
         for (NaveTipo t : NaveTipo.values()) {
             if (t.id.equals(tipo)) {
                 dar(eu(c), NaveItem.of(t, pintura));
-                return ok(c, "Nave " + tipo + " (" + pintura + ") no inventário. Clique no chão para colocar.");
+                return ok(c, "nave", tipo, pintura);
             }
         }
-        return erro(c, "Nave desconhecida: " + tipo);
+        return erro(c, "nave_desconhecida", tipo);
     }
 
     private static int kit(CommandContext<CommandSourceStack> c, String qual) throws CommandSyntaxException {
@@ -478,8 +467,8 @@ public final class ComandosTeste {
         if (tudo || qual.equals("naves")) {
             for (NaveTipo t : NaveTipo.values()) dar(p, NaveItem.of(t, t.name().contains("PIRATA") || t.name().contains("CARGUEIRO") ? "1" : "green"));
         }
-        if (!tudo && !List.of("aneis", "materiais", "reliquias", "guilda", "naves").contains(qual)) return erro(c, "Kits: aneis, materiais, reliquias, guilda, naves, tudo.");
-        return ok(c, "Kit " + qual + " no inventário.");
+        if (!tudo && !List.of("aneis", "materiais", "reliquias", "guilda", "naves").contains(qual)) return erro(c, "uso_kit");
+        return ok(c, "kit", qual);
     }
 
     private static Item item(String id) {
@@ -490,38 +479,39 @@ public final class ComandosTeste {
     // ===================== Ajuda =====================
 
     private static int ajuda(CommandContext<CommandSourceStack> c) {
+        // {comando, chave da explicação}; sem comando = título da seção
         String[][] linhas = {
-                {"ANEL E NÍVEL", ""},
-                {"/lanterna anel <tropa>", "equipa um anel (green, yellow, red, blue, violet, indigo, orange, black, white)"},
-                {"/lanterna cheio", "carga cheia, poder ligado, zera recargas e a espera da Porta"},
-                {"/lanterna nivel <1-50>", "muda o nível da Tropa (dá as recompensas de posto ao subir)"},
-                {"/lanterna afinidade_nivel <0-5>", "afinidade do anel equipado (libera construtos)"},
-                {"/lanterna escolher <tropa>", "o anel escolhe você, com a animação"},
-                {"PODERES", ""},
-                {"/lanterna tecnica <id|todas>", "técnicas dos Capitães (olhar, bastiao, onda, salto, armadura, comando)"},
-                {"/lanterna maximo", "TUDO no máximo com o anel equipado: nível, afinidade, técnicas, poderes, Selos, Corações, Árvores da Luz, Essência e carga 250%"},
-                {"/lanterna poder <portal|autorecarga|honra|genese|tudo>", "Porta Estelar, autorrecarga da Prova, Guarda de Honra, Gênese, ou tudo"},
-                {"/lanterna morte <corromper|dominar|faminto|alimentar|limpar>", "linha da Morte e o Anel Preto"},
-                {"MISSÕES", ""},
-                {"/lanterna missao_iniciar <id>", "começa uma missão"},
-                {"/lanterna missao_concluir <id>", "conclui na hora (recompensas e próxima da linha)"},
+                {"", "ajuda.t0"},
+                {"/lanterna anel <tropa>", "ajuda.1"},
+                {"/lanterna cheio", "ajuda.2"},
+                {"/lanterna nivel <1-50>", "ajuda.3"},
+                {"/lanterna afinidade_nivel <0-5>", "ajuda.4"},
+                {"/lanterna escolher <tropa>", "ajuda.5"},
+                {"", "ajuda.t6"},
+                {"/lanterna tecnica <id|todas>", "ajuda.7"},
+                {"/lanterna maximo", "ajuda.8"},
+                {"/lanterna poder <portal|autorecarga|honra|genese|tudo>", "ajuda.9"},
+                {"/lanterna morte <corromper|dominar|faminto|alimentar|limpar>", "ajuda.10"},
+                {"", "ajuda.t11"},
+                {"/lanterna missao_iniciar <id>", "ajuda.12"},
+                {"/lanterna missao_concluir <id>", "ajuda.13"},
                 {"/lanterna missao_abandonar <id> | missao_limpar | missao_concluidas_limpar", ""},
-                {"MUNDO", ""},
-                {"/lanterna visitar <planeta|todos>", "marca planetas como visitados (Porta Estelar)"},
-                {"/lanterna tropa_hostil <tropa|limpar>", "inimizade com uma Tropa"},
+                {"", "ajuda.t15"},
+                {"/lanterna visitar <planeta|todos>", "ajuda.16"},
+                {"/lanterna tropa_hostil <tropa|limpar>", "ajuda.17"},
                 {"/lanterna genese | reconstruir | encontro <tipo> | contratos | interior", ""},
-                {"INVOCAR E ITENS", ""},
-                {"/lanterna invocar <o_que> [qtd]", "pirata, capitao, mercador, eco, alvo_treino, lanterna_<tropa>, oficial_<tropa>, boss_<nome>"},
-                {"/lanterna nave <tipo> [pintura]", "item de nave"},
+                {"", "ajuda.t19"},
+                {"/lanterna invocar <o_que> [qtd]", "ajuda.20"},
+                {"/lanterna nave <tipo> [pintura]", "ajuda.21"},
                 {"/lanterna kit <aneis|materiais|reliquias|guilda|naves|tudo>", ""},
-                {"/guilda admin tropas <n> | defesa <n> | sem_escudo", "guildas"},
+                {"/guilda admin tropas <n> | defesa <n> | sem_escudo", "ajuda.23"},
         };
         for (String[] l : linhas) {
-            if (l[1].isEmpty() && !l[0].startsWith("/")) {
-                c.getSource().sendSuccess(() -> Component.literal("— " + l[0] + " —").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+            if (l[0].isEmpty()) {
+                c.getSource().sendSuccess(() -> Component.literal("— ").append(Component.translatable("cmd.lanterna." + l[1])).append(" —").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
             } else {
                 c.getSource().sendSuccess(() -> Component.literal(l[0]).withStyle(ChatFormatting.AQUA)
-                        .append(Component.literal(l[1].isEmpty() ? "" : "  " + l[1]).withStyle(ChatFormatting.GRAY)), false);
+                        .append(l[1].isEmpty() ? Component.empty() : Component.literal("  ").append(Component.translatable("cmd.lanterna." + l[1])).withStyle(ChatFormatting.GRAY)), false);
             }
         }
         return 1;
@@ -540,54 +530,54 @@ public final class ComandosTeste {
             case "selo" -> {
                 for (var x : com.lanterna.baterias.Tropa.values())
                     if (valor.equals("todas") || valor.equals(x.nome) || (valor.isEmpty() && x == t)) com.lanterna.fonte.FonteDados.darSelo(p, x.nome);
-                return ok(c, "Selo da Fonte dado (" + (valor.isEmpty() ? (t == null ? "nenhuma" : t.nome) : valor) + ").");
+                return ok(c, "selo", valor.isEmpty() ? (t == null ? "-" : t.nome) : valor);
             }
-            case "pressao" -> { com.lanterna.fonte.FonteDados.pressao(p, n * 20 * 60); return ok(c, "Pressão da Fonte: " + n + " min."); }
-            case "banho" -> { com.lanterna.fonte.FonteDados.banho(p, n * 20 * 60); com.lanterna.fonte.FonteDados.banhoFeito(p, false); return ok(c, "Banho de Luz: " + n + " min nesta visita."); }
-            case "essencia" -> { com.lanterna.fonte.FonteDados.essencia(p, n); return ok(c, "Essência da Fonte: " + n + "."); }
+            case "pressao" -> { com.lanterna.fonte.FonteDados.pressao(p, n * 20 * 60); return ok(c, "pressao", n); }
+            case "banho" -> { com.lanterna.fonte.FonteDados.banho(p, n * 20 * 60); com.lanterna.fonte.FonteDados.banhoFeito(p, false); return ok(c, "banho", n); }
+            case "essencia" -> { com.lanterna.fonte.FonteDados.essencia(p, n); return ok(c, "essencia", n); }
             case "arvore" -> {
                 String corps = com.lanterna.construct.fonte.ArvoreDaLuz.corps(p);
                 var arv = corps == null ? null : com.lanterna.construct.fonte.ArvoreDados.ARVORES.get(corps);
-                if (arv == null) return erro(c, "Este anel não tem Árvore da Luz.");
+                if (arv == null) return erro(c, "sem_arvore");
                 if (valor.equals("zerar")) {
                     var set = com.lanterna.fonte.FonteDados.arvore(p);
                     set.removeIf(x -> x.startsWith(corps + ":"));
                     com.lanterna.fonte.FonteDados.zerarArvore(p);
                     for (String x : set) com.lanterna.fonte.FonteDados.darNo(p, x);
-                    return ok(c, "Árvore da Luz de " + corps + " zerada.");
+                    return ok(c, "arvore_zerada", corps);
                 }
                 for (var no : arv) com.lanterna.fonte.FonteDados.darNo(p, corps + ":" + no.id());
-                return ok(c, "Árvore da Luz de " + corps + " completa (" + arv.size() + " nós). Use Z para ver os construtos.");
+                return ok(c, "arvore_completa", corps, arv.size());
             }
             case "evento" -> {
-                return com.lanterna.fonte.BateriaEnfraquece.comecar(p.server, p) ? ok(c, "A Bateria Enfraquece: ataque pirata começou neste planeta.")
-                        : erro(c, "Fique num planeta com Bateria Central (e sem outro ataque em curso).");
+                return com.lanterna.fonte.BateriaEnfraquece.comecar(p.server, p) ? ok(c, "bateria_ataque")
+                        : erro(c, "bateria_sem");
             }
             case "chefe" -> {
                 com.lanterna.fonte.FonteMundo.DERROTA.clear();
-                return ok(c, "O Coração de cada Fonte pode despertar de novo.");
+                return ok(c, "coracao");
             }
             case "ir" -> {
                 var alvo = t == null ? null : p.server.getLevel(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, LanternaMod.id("fonte_" + t.nome)));
-                if (alvo == null) return erro(c, "Equipe o anel de uma Tropa com Bateria.");
+                if (alvo == null) return erro(c, "anel_bateria");
                 int z = valor.equals("ilha") ? com.lanterna.fonte.FonteMundo.ILHA.getZ() - 6 : 5;
                 p.teleportTo(alvo, 0.5, 101, z + 0.5, 0, 0);
-                return ok(c, "Na Fonte " + t.nome + ".");
+                return ok(c, "na_fonte", t.nome);
             }
             case "zerar" -> {
                 var tag = com.lanterna.fonte.FonteDados.tag(p);
                 for (String k : new java.util.ArrayList<>(tag.getAllKeys())) tag.remove(k);
-                return ok(c, "Dados da Fonte zerados.");
+                return ok(c, "fonte_zerada");
             }
             case "prova", "juramento" -> {
-                if (t == null) return erro(c, "Equipe o anel de uma Tropa com Bateria.");
+                if (t == null) return erro(c, "anel_bateria");
                 LoreData d = dados(p);
                 for (int i = 1; i <= 3; i++) d.abandon("fonte_" + t.nome + "_" + i);
                 com.lanterna.mission.MissionManager.start(p, "fonte_" + t.nome + (acao.equals("prova") ? "_2" : "_3"));
                 sync(p);
-                return ok(c, "Missão " + (acao.equals("prova") ? "da provação" : "do juramento") + " de " + t.nome + " ativa: clique na Bateria Central.");
+                return ok(c, acao.equals("prova") ? "fonte_prova" : "fonte_juramento", t.nome);
             }
-            default -> { return erro(c, "Ação desconhecida."); }
+            default -> { return erro(c, "acao_desconhecida"); }
         }
     }
 }

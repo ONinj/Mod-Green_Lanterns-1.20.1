@@ -402,17 +402,34 @@ public final class TerraSite {
 
     // ===================== Moradores =====================
 
-    private record Posto(String papel, BlockPos rel, String nome) {}
+    /** titulo: "dra", "sgt", "dona", "seu" ou "" (traduzido: "Dra." vira "Dr.", "Dona" vira "Ms." etc.). */
+    private record Posto(String papel, BlockPos rel, String titulo, String nome) {
+        String antigo() {
+            return switch (titulo) {
+                case "dra" -> "Dra. " + nome;
+                case "sgt" -> "Sgt. " + nome;
+                case "dona" -> "Dona " + nome;
+                case "seu" -> "Seu " + nome;
+                default -> nome;
+            };
+        }
+
+        Component exibido() {
+            return titulo.isEmpty() ? Component.literal(nome) : Component.translatable("terra.lanterna.titulo." + titulo, nome);
+        }
+    }
+
+    private static final String TAG_POSTO = "lanterna_posto";
 
     private static final List<Posto> POSTOS = List.of(
-            new Posto("cientista", LAB.offset(2, 0, -2), "Dra. Lívia Andrade"),
-            new Posto("assistente", LAB.offset(-4, 0, 2), "Téo Brandão"),
-            new Posto("seguranca", OBS.offset(-8, 0, 2), "Sgt. Rui Tavares"),
-            new Posto("morador", new BlockPos(-20, 0, -7), "Dona Cida"),
-            new Posto("morador", new BlockPos(-7, 0, -7), "Seu Jonas"),
-            new Posto("morador", new BlockPos(6, 0, 8), "Marina"),
-            new Posto("morador", new BlockPos(-20, 0, 7), "Caio"),
-            new Posto("morador", new BlockPos(-4, 0, 4), "Bia"));
+            new Posto("cientista", LAB.offset(2, 0, -2), "dra", "Lívia Andrade"),
+            new Posto("assistente", LAB.offset(-4, 0, 2), "", "Téo Brandão"),
+            new Posto("seguranca", OBS.offset(-8, 0, 2), "sgt", "Rui Tavares"),
+            new Posto("morador", new BlockPos(-20, 0, -7), "dona", "Cida"),
+            new Posto("morador", new BlockPos(-7, 0, -7), "seu", "Jonas"),
+            new Posto("morador", new BlockPos(6, 0, 8), "", "Marina"),
+            new Posto("morador", new BlockPos(-20, 0, 7), "", "Caio"),
+            new Posto("morador", new BlockPos(-4, 0, 4), "", "Bia"));
 
     static void pessoas(ServerLevel l, BlockPos c) {
         for (Posto p : POSTOS) garantir(l, c, p);
@@ -422,14 +439,23 @@ public final class TerraSite {
         BlockPos at = c.offset(p.rel());
         if (!l.hasChunkAt(at)) return;
         var lista = l.getEntitiesOfClass(RaceEntity.class, new AABB(at).inflate(48),
-                e -> e.race() == Race.TERRANO && e.role().equals(p.papel()) && e.hasCustomName() && e.getCustomName().getString().equals(p.nome()));
-        if (!lista.isEmpty()) return;
+                e -> e.race() == Race.TERRANO && e.role().equals(p.papel()) && (p.nome().equals(e.getPersistentData().getString(TAG_POSTO))
+                        || e.hasCustomName() && e.getCustomName().getString().equals(p.antigo())));
+        if (!lista.isEmpty()) {
+            // mundos antigos: o nome era salvo em português ("Dra. ..."); passa a ser traduzido
+            for (RaceEntity v : lista) if (!p.nome().equals(v.getPersistentData().getString(TAG_POSTO))) {
+                v.getPersistentData().putString(TAG_POSTO, p.nome());
+                v.setCustomName(p.exibido());
+            }
+            return;
+        }
         RaceEntity e = LoreEntities.typeOf(Race.TERRANO).create(l);
         if (e == null) return;
         e.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, l.getRandom().nextFloat() * 360, 0);
         e.finalizeSpawn(l, l.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null, null);
         e.setRole(p.papel(), at);
-        e.setCustomName(Component.literal(p.nome()));
+        e.setCustomName(p.exibido());
+        e.getPersistentData().putString(TAG_POSTO, p.nome());
         e.setCustomNameVisible(false);
         l.addFreshEntity(e);
     }

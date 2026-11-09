@@ -55,34 +55,34 @@ public final class LanternaConfig {
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
-        b.comment("Como cada Tropa escolhe o seu portador").push("selecao");
+        b.comment("How each Corps chooses its bearer", "Como cada Tropa escolhe o seu portador").push("selecao");
 
         GREEN_SLEEP_CHANCE = b
-                .comment("Verde: chance (0 a 1) de ser escolhido ao acordar depois de dormir a noite inteira")
+                .comment("Green: chance (0 to 1) of being chosen when waking up after sleeping through the night", "Verde: chance (0 a 1) de ser escolhido ao acordar depois de dormir a noite inteira")
                 .defineInRange("chance_verde_dormindo", 0.20, 0.0, 1.0);
 
         RED_KILLS_REQUIRED = b
-                .comment("Vermelho: quantos mobs hostis matar dentro da janela de tempo para despertar a fúria")
+                .comment("Red: how many hostile mobs to kill within the time window to awaken rage", "Vermelho: quantos mobs hostis matar dentro da janela de tempo para despertar a fúria")
                 .defineInRange("abates_vermelho", 30, 1, 10000);
 
         RED_WINDOW_SECONDS = b
-                .comment("Vermelho: janela de tempo em segundos para contar os abates")
+                .comment("Red: time window in seconds to count the kills", "Vermelho: janela de tempo em segundos para contar os abates")
                 .defineInRange("janela_vermelho_segundos", 300, 10, 36000);
 
         YELLOW_FEAR_SECONDS = b
-                .comment("Amarelo: segundos na Escuridão do Warden, com ele por perto, para ser escolhido")
+                .comment("Yellow: seconds under the Warden's Darkness, with it nearby, to be chosen", "Amarelo: segundos na Escuridão do Warden, com ele por perto, para ser escolhido")
                 .defineInRange("segundos_medo_amarelo", 30, 5, 3600);
 
         VIOLET_BREEDS = b
-                .comment("Violeta: filhotes que é preciso criar com seu bicho domado por perto")
+                .comment("Violet: babies you must breed with your tamed pet nearby", "Violeta: filhotes que é preciso criar com seu bicho domado por perto")
                 .defineInRange("filhotes_violeta", 5, 1, 1000);
 
         ORANGE_TREASURE_VALUE = b
-                .comment("Laranja: valor do tesouro no inventário (ouro=1, esmeralda=3, diamante=5, netherite=40; blocos x9)")
+                .comment("Orange: treasure value in the inventory (gold=1, emerald=3, diamond=5, netherite=40; blocks x9)", "Laranja: valor do tesouro no inventário (ouro=1, esmeralda=3, diamante=5, netherite=40; blocos x9)")
                 .defineInRange("tesouro_laranja", 1000, 10, 100000);
 
         CALL_ADVANCEMENTS = b
-                .comment("O Chamado: conquistas que chamam a atenção dos anéis. Cada uma conta 1 sinal.")
+                .comment("The Call: advancements that draw the rings' attention. Each counts as 1 sign.", "O Chamado: conquistas que chamam a atenção dos anéis. Cada uma conta 1 sinal.")
                 .defineListAllowEmpty(java.util.List.of("conquistas_chamado"), () -> java.util.List.of(
                         "minecraft:story/mine_diamond",
                         "minecraft:story/enter_the_nether",
@@ -97,83 +97,83 @@ public final class LanternaConfig {
                         "minecraft:end/kill_dragon"), o -> o instanceof String);
 
         CALL_REQUIRED = b
-                .comment("O Chamado: quantos sinais (conquistas da lista) até um anel aleatório escolher você. 0 desliga.")
+                .comment("The Call: how many signs (advancements from the list) until a random ring chooses you. 0 turns it off.", "O Chamado: quantos sinais (conquistas da lista) até um anel aleatório escolher você. 0 desliga.")
                 .defineInRange("sinais_chamado", 3, 0, 50);
 
         SELECTION_ANIMATION_TICKS = b
-                .comment("Duração da animação de entrega do anel, em ticks (20 ticks = 1 segundo)")
+                .comment("Length of the ring delivery animation, in ticks (20 ticks = 1 second)", "Duração da animação de entrega do anel, em ticks (20 ticks = 1 segundo)")
                 .defineInRange("duracao_animacao_ticks", 120, 20, 600);
 
         b.pop();
 
-        b.comment("Anel e bateria").push("anel");
+        b.comment("Ring and battery", "Anel e bateria").push("anel");
         POCKET_RECHARGE_COOLDOWN_SECONDS = b
-                .comment("Tempo de espera em segundos entre recargas usando a bateria do slot (tecla R)")
+                .comment("Wait time in seconds between recharges using the slot battery (R key)", "Tempo de espera em segundos entre recargas usando a bateria do slot (tecla R)")
                 .defineInRange("espera_recarga_bolso_segundos", 60, 0, 3600);
         b.pop();
 
-        b.comment("Combate e equilíbrio (pensado para multiplayer)").push("combate");
+        b.comment("Combat and balance (made for multiplayer)", "Combate e equilíbrio (pensado para multiplayer)").push("combate");
         VIDA_POR_NIVEL = b
-                .comment("Vida máxima a mais por nível da Tropa (2 = um coração). No nível 50 com 0.8: +40 de vida (20 corações a mais)")
+                .comment("Extra max health per Corps level (2 = one heart). At level 50 with 0.8: +40 health (20 extra hearts)", "Vida máxima a mais por nível da Tropa (2 = um coração). No nível 50 com 0.8: +40 de vida (20 corações a mais)")
                 .defineInRange("vida_por_nivel", 0.8, 0.0, 10.0);
         ARMADURA_POR_NIVEL = b
-                .comment("Armadura a mais por nível (vale contra tudo). No nível 50 com 0.16: +8 de armadura")
+                .comment("Extra armor per level (works against everything). At level 50 with 0.16: +8 armor", "Armadura a mais por nível (vale contra tudo). No nível 50 com 0.16: +8 de armadura")
                 .defineInRange("armadura_por_nivel", 0.16, 0.0, 2.0);
         DUREZA_POR_NIVEL = b
-                .comment("Dureza de armadura a mais por nível (reduz golpes fortes). No nível 50 com 0.1: +5")
+                .comment("Extra armor toughness per level (reduces heavy hits). At level 50 with 0.1: +5", "Dureza de armadura a mais por nível (reduz golpes fortes). No nível 50 com 0.1: +5")
                 .defineInRange("dureza_por_nivel", 0.1, 0.0, 2.0);
         PVP_DANO = b
-                .comment("Jogador contra jogador: fração do dano que passa (os poderes do anel são feitos para derrubar monstros grandes)")
+                .comment("Player vs player: fraction of damage that goes through (ring powers are made to take down big monsters)", "Jogador contra jogador: fração do dano que passa (os poderes do anel são feitos para derrubar monstros grandes)")
                 .defineInRange("pvp_dano", 0.4, 0.0, 1.0);
         PVP_RESISTENCIA_POR_NIVEL = b
-                .comment("Jogador contra jogador: resistência a mais por nível de quem apanha. No nível 50 com 0.005: 25% a menos")
+                .comment("Player vs player: extra resistance per level of the one being hit. At level 50 with 0.005: 25% less", "Jogador contra jogador: resistência a mais por nível de quem apanha. No nível 50 com 0.005: 25% a menos")
                 .defineInRange("pvp_resistencia_por_nivel", 0.005, 0.0, 0.02);
         PVP_DIFERENCA_NIVEL = b
-                .comment("Jogador contra jogador: quanto cada nível de diferença muda o dano (0.015 = 1,5% por nível; limitado entre -40% e +25%)")
+                .comment("Player vs player: how much each level of difference changes damage (0.015 = 1.5% per level; capped between -40% and +25%)", "Jogador contra jogador: quanto cada nível de diferença muda o dano (0.015 = 1,5% por nível; limitado entre -40% e +25%)")
                 .defineInRange("pvp_diferenca_nivel", 0.015, 0.0, 0.1);
         PVP_TETO_GOLPE = b
-                .comment("Jogador contra jogador: um golpe tira no máximo esta fração da vida máxima (0.3 = 30%; acaba com o hit kill)")
+                .comment("Player vs player: one hit takes at most this fraction of max health (0.3 = 30%; prevents one-hit kills)", "Jogador contra jogador: um golpe tira no máximo esta fração da vida máxima (0.3 = 30%; acaba com o hit kill)")
                 .defineInRange("pvp_teto_golpe", 0.3, 0.05, 1.0);
         PVP_MESMA_TROPA = b
-                .comment("Jogadores da mesma Tropa podem se ferir? (o pvp do servidor também precisa estar ligado)")
+                .comment("Can players of the same Corps hurt each other? (server pvp must also be on)", "Jogadores da mesma Tropa podem se ferir? (o pvp do servidor também precisa estar ligado)")
                 .define("pvp_mesma_tropa", true);
         PVP_MESMA_GUILDA = b
-                .comment("Jogadores da mesma guilda podem se ferir?")
+                .comment("Can players of the same guild hurt each other?", "Jogadores da mesma guilda podem se ferir?")
                 .define("pvp_mesma_guilda", false);
         b.pop();
 
-        b.comment("Energia da Emoção e Mineradora Planetária").push("energia");
-        ENERGIA_GERADOR_MULT = b.comment("Multiplica a Emoção Bruta que os Geradores Emocionais produzem").defineInRange("gerador_multiplicador", 1.0, 0.05, 100.0);
-        ENERGIA_MINERADORA_FE = b.comment("FE por tick que a Mineradora Planetária gasta enquanto trabalha").defineInRange("mineradora_fe_por_tick", 100, 0, 1_000_000);
-        ENERGIA_OFFLINE_HORAS = b.comment("Máximo de horas que a mineradora 'recupera' quando o planeta volta a carregar (trabalho com o chunk descarregado, limitado pela energia guardada)").defineInRange("mineradora_horas_offline", 24, 0, 720);
-        ENERGIA_ATAQUES = b.comment("Mineradoras trabalhando atraem ataques de criaturas do planeta").define("mineradora_ataques", true);
-        ENERGIA_ATAQUE_MINUTOS = b.comment("Minutos (em média) entre ataques a uma mineradora trabalhando com um jogador por perto").defineInRange("mineradora_minutos_ataque", 25, 2, 1440);
+        b.comment("Emotion Energy and Planetary Miner", "Energia da Emoção e Mineradora Planetária").push("energia");
+        ENERGIA_GERADOR_MULT = b.comment("Multiplies the Raw Emotion that Emotional Generators produce", "Multiplica a Emoção Bruta que os Geradores Emocionais produzem").defineInRange("gerador_multiplicador", 1.0, 0.05, 100.0);
+        ENERGIA_MINERADORA_FE = b.comment("FE per tick the Planetary Miner uses while working", "FE por tick que a Mineradora Planetária gasta enquanto trabalha").defineInRange("mineradora_fe_por_tick", 100, 0, 1_000_000);
+        ENERGIA_OFFLINE_HORAS = b.comment("Max hours the miner 'catches up' when the planet loads again (work while the chunk was unloaded, limited by stored energy)", "Máximo de horas que a mineradora 'recupera' quando o planeta volta a carregar (trabalho com o chunk descarregado, limitado pela energia guardada)").defineInRange("mineradora_horas_offline", 24, 0, 720);
+        ENERGIA_ATAQUES = b.comment("Working miners attract attacks from the planet's creatures", "Mineradoras trabalhando atraem ataques de criaturas do planeta").define("mineradora_ataques", true);
+        ENERGIA_ATAQUE_MINUTOS = b.comment("Minutes (average) between attacks on a working miner with a player nearby", "Minutos (em média) entre ataques a uma mineradora trabalhando com um jogador por perto").defineInRange("mineradora_minutos_ataque", 25, 2, 1440);
         b.pop();
 
-        b.comment("Guildas e conquista de planetas").push("guildas");
-        GUILDA_MAX_PLANETAS = b.comment("Quantos planetas uma guilda pode ter ao mesmo tempo").defineInRange("max_planetas", 3, 1, 50);
-        GUILDA_MAX_MEMBROS = b.comment("Máximo de jogadores numa guilda").defineInRange("max_membros", 20, 1, 500);
-        GUILDA_MAX_DEFESA = b.comment("Máximo de tropas de defesa em cada planeta").defineInRange("max_defesa", 20, 1, 200);
-        GUILDA_MAX_ATAQUE = b.comment("Máximo de tropas de ataque guardadas pela guilda").defineInRange("max_ataque", 30, 1, 300);
-        GUILDA_MIN_ESSENCIA = b.comment("Minutos de trabalho (com energia) para a Mineradora Planetária extrair uma leva de Essência de Poder").defineInRange("minutos_por_essencia", 3, 1, 1440);
-        GUILDA_ESSENCIA_ANEL = b.comment("Essências para forjar 1 Anel de Recruta").defineInRange("essencias_por_anel", 8, 1, 640);
-        GUILDA_SEG_TREINO = b.comment("Segundos (tempo real) para o general treinar 1 tropa").defineInRange("segundos_treino", 60, 1, 86400);
-        GUILDA_ESCUDO_CONQUISTA = b.comment("Horas de escudo (sem invasões) depois de fincar a bandeira").defineInRange("escudo_horas_conquista", 2.0, 0.0, 720.0);
-        GUILDA_ESCUDO_INVASAO = b.comment("Horas de escudo depois de cada invasão (ganhando ou perdendo)").defineInRange("escudo_horas_invasao", 4.0, 0.0, 720.0);
-        GUILDA_MIN_INVASAO = b.comment("Duração máxima de uma invasão, em minutos").defineInRange("minutos_invasao", 10, 1, 120);
-        GUILDA_RAIO = b.comment("Raio do território em volta da bandeira (só a guilda constrói/quebra; a invasão começa aqui)").defineInRange("raio_territorio", 64, 24, 512);
+        b.comment("Guilds and planet conquest", "Guildas e conquista de planetas").push("guildas");
+        GUILDA_MAX_PLANETAS = b.comment("How many planets a guild can own at the same time", "Quantos planetas uma guilda pode ter ao mesmo tempo").defineInRange("max_planetas", 3, 1, 50);
+        GUILDA_MAX_MEMBROS = b.comment("Max players in a guild", "Máximo de jogadores numa guilda").defineInRange("max_membros", 20, 1, 500);
+        GUILDA_MAX_DEFESA = b.comment("Max defense troops on each planet", "Máximo de tropas de defesa em cada planeta").defineInRange("max_defesa", 20, 1, 200);
+        GUILDA_MAX_ATAQUE = b.comment("Max attack troops stored by the guild", "Máximo de tropas de ataque guardadas pela guilda").defineInRange("max_ataque", 30, 1, 300);
+        GUILDA_MIN_ESSENCIA = b.comment("Minutes of work (with energy) for the Planetary Miner to extract a batch of Power Essence", "Minutos de trabalho (com energia) para a Mineradora Planetária extrair uma leva de Essência de Poder").defineInRange("minutos_por_essencia", 3, 1, 1440);
+        GUILDA_ESSENCIA_ANEL = b.comment("Essences to forge 1 Recruit Ring", "Essências para forjar 1 Anel de Recruta").defineInRange("essencias_por_anel", 8, 1, 640);
+        GUILDA_SEG_TREINO = b.comment("Seconds (real time) for the general to train 1 troop", "Segundos (tempo real) para o general treinar 1 tropa").defineInRange("segundos_treino", 60, 1, 86400);
+        GUILDA_ESCUDO_CONQUISTA = b.comment("Hours of shield (no invasions) after planting the flag", "Horas de escudo (sem invasões) depois de fincar a bandeira").defineInRange("escudo_horas_conquista", 2.0, 0.0, 720.0);
+        GUILDA_ESCUDO_INVASAO = b.comment("Hours of shield after each invasion (win or lose)", "Horas de escudo depois de cada invasão (ganhando ou perdendo)").defineInRange("escudo_horas_invasao", 4.0, 0.0, 720.0);
+        GUILDA_MIN_INVASAO = b.comment("Max length of an invasion, in minutes", "Duração máxima de uma invasão, em minutos").defineInRange("minutos_invasao", 10, 1, 120);
+        GUILDA_RAIO = b.comment("Territory radius around the flag (only the guild builds/breaks; invasions start here)", "Raio do território em volta da bandeira (só a guilda constrói/quebra; a invasão começa aqui)").defineInRange("raio_territorio", 64, 24, 512);
         b.pop();
 
-        b.comment("Planetas das Tropas (NPC)").push("tropas");
-        TROPAS_CHANCE_PLANETA = b.comment("Chance de um planeta gerado já ser de uma Tropa (com base e defensores). Invadir deixa a Tropa hostil a você.")
+        b.comment("Corps planets (NPC)", "Planetas das Tropas (NPC)").push("tropas");
+        TROPAS_CHANCE_PLANETA = b.comment("Chance that a generated planet already belongs to a Corps (with a base and defenders). Invading makes that Corps hostile to you.", "Chance de um planeta gerado já ser de uma Tropa (com base e defensores). Invadir deixa a Tropa hostil a você.")
                 .defineInRange("chance_planeta_tropa", 0.07, 0.0, 1.0);
         b.pop();
 
-        b.comment("O Anel Preto (Morte)").push("morte");
-        MORTE_CHANCE = b.comment("Chance de o anel se corromper quando o portador morre (0.004 = 0,4%)").defineInRange("chance_corrupcao", 0.004, 0.0, 1.0);
-        MORTE_CHANCE_CEIFADOR = b.comment("Chance quando quem matou foi um Lanterna Negro (jogador)").defineInRange("chance_corrupcao_ceifador", 0.08, 0.0, 1.0);
-        MORTE_NIVEL_MIN = b.comment("Nível mínimo para o anel poder se corromper").defineInRange("nivel_minimo", 15, 1, 50);
-        MORTE_DIAS_FOME = b.comment("Dias (tempo real) que o Lanterna Negro aguenta sem ceifar um portador de anel antes de enfraquecer (0 desliga)")
+        b.comment("The Black Ring (Death)", "O Anel Preto (Morte)").push("morte");
+        MORTE_CHANCE = b.comment("Chance the ring gets corrupted when its bearer dies (0.004 = 0.4%)", "Chance de o anel se corromper quando o portador morre (0.004 = 0,4%)").defineInRange("chance_corrupcao", 0.004, 0.0, 1.0);
+        MORTE_CHANCE_CEIFADOR = b.comment("Chance when the killer was a Black Lantern (player)", "Chance quando quem matou foi um Lanterna Negro (jogador)").defineInRange("chance_corrupcao_ceifador", 0.08, 0.0, 1.0);
+        MORTE_NIVEL_MIN = b.comment("Minimum level for the ring to be able to get corrupted", "Nível mínimo para o anel poder se corromper").defineInRange("nivel_minimo", 15, 1, 50);
+        MORTE_DIAS_FOME = b.comment("Days (real time) the Black Lantern lasts without reaping a ring bearer before going into a frenzy (0 turns it off)", "Dias (tempo real) que o Lanterna Negro aguenta sem ceifar um portador de anel antes de entrar em frenesi (0 desliga)")
                 .defineInRange("dias_fome", 3, 0, 365);
         b.pop();
 

@@ -3850,6 +3850,27 @@ public final class DevAutoTest {
         at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** Respostas dos comandos de teste, nomes de guildas e trajes com o jogo em inglês. */
+    private static void sceneIngles() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("lanterna anel indigo"); });
+        at(20, () -> { mc.gui.getChat().clearMessages(false); cmd("lanterna ajuda"); });
+        at(20, () -> shot("en_ajuda"));
+        at(5, () -> { mc.gui.getChat().clearMessages(false); cmd("lanterna cheio"); cmd("lanterna nivel 12"); cmd("lanterna morte faminto"); cmd("lanterna missao_concluir xyz"); cmd("lanterna poder genese"); });
+        at(20, () -> shot("en_cmds"));
+        at(5, () -> server(sp -> {
+            glog("guilda=" + com.lanterna.guilda.Guilda.exibir("Tropa Verde").getString() + " / " + com.lanterna.guilda.Guilda.exibir("Conselho da Tropa").getString() + " / " + com.lanterna.guilda.Guilda.exibir("Meus Amigos").getString());
+        }));
+        at(5, () -> glog("traje=" + net.minecraft.network.chat.Component.translatable("traje.lanterna.indigo_b").getString() + " / " + net.minecraft.network.chat.Component.translatable("item.lanterna.traje_preto_a_helmet").getString()
+                + " / npc=" + net.minecraft.network.chat.Component.translatable("terra.lanterna.titulo.dra", "Lívia Andrade").getString()
+                + " / cmd=" + net.minecraft.network.chat.Component.translatable("cmd.lanterna.maximo", 50).getString()));
+        at(5, () -> mc.setScreen(new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL)));
+        at(15, () -> shot("en_visual"));
+        at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
+        at(5, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     private static void sceneEscolha() {
         Minecraft mc = Minecraft.getInstance();
         String only = System.getProperty("lanterna.tropas", "green,red,yellow,blue,violet,indigo,orange,black,white");
@@ -4511,6 +4532,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("mogo2")) sceneMogo2();
         else if (ENABLED && SCENE.equals("frenesi")) sceneFrenesi();
         else if (ENABLED && SCENE.equals("textos")) sceneTextos();
+        else if (ENABLED && SCENE.equals("ingles")) sceneIngles();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("agua")) sceneAgua();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

@@ -174,8 +174,12 @@ public final class FonteMundo {
     private static ItemStack livro(String tropa) {
         ItemStack s = new ItemStack(Items.WRITTEN_BOOK);
         CompoundTag t = s.getOrCreateTag();
-        t.putString("title", "Arquivo da Fonte");
-        t.putString("author", "Arquivo da Fonte");
+        // o título e o autor de um livro escrito não se traduzem: o nome que aparece vem de display.Name (traduzido)
+        t.putString("title", "Arquivo");
+        t.putString("author", "Oa");
+        CompoundTag display = new CompoundTag();
+        display.putString("Name", "{\"translate\":\"item.lanterna.arquivo_fonte\",\"italic\":false}");
+        t.put("display", display);
         ListTag pages = new ListTag();
         for (int i = 1; i <= 5; i++) pages.add(StringTag.valueOf("{\"translate\":\"arquivo.lanterna." + tropa + "." + i + "\"}"));
         t.put("pages", pages);

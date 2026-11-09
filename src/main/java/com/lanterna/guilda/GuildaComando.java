@@ -223,8 +223,8 @@ public final class GuildaComando {
             }
             return erro(c, "guilda.lanterna.erro.nao_existe");
         }
-        msg(c, Component.literal("== " + g.nome + " ==").withStyle(s -> s.withColor(g.cor()).withBold(true)));
-        msg(c, Component.translatable("guilda.lanterna.info.dono", g.donoNome()));
+        msg(c, Component.literal("== ").append(Guilda.exibir(g.nome)).append(" ==").withStyle(s -> s.withColor(g.cor()).withBold(true)));
+        msg(c, Component.translatable("guilda.lanterna.info.dono", Guilda.exibir(g.donoNome())));
         msg(c, Component.translatable("guilda.lanterna.info.membros", String.join(", ", g.membros.values())));
         msg(c, Component.translatable("guilda.lanterna.info.ataque", g.ataque, LanternaConfig.GUILDA_MAX_ATAQUE.get()));
         long agora = System.currentTimeMillis();

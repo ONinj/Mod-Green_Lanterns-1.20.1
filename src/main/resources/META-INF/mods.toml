@@ -4,11 +4,13 @@ license="All Rights Reserved"
 
 [[mods]]
 modId="lanterna"
-version="0.39.4"
+version="0.39.5"
 displayName="Lanterna"
 authors="Johann"
 description='''
-Anéis de poder, baterias e o espectro emocional. Fase 1: anel, bateria e entrega do anel.
+Power rings, batteries and the emotional spectrum: the Lantern Corps of every color, their planets, missions, constructs, ships and guilds.
+
+Anéis de poder, baterias e o espectro emocional: as Tropas de cada cor, seus planetas, missões, construtos, naves e guildas.
 '''
 
 [[dependencies.lanterna]]

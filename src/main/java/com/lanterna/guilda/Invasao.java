@@ -148,7 +148,7 @@ public final class Invasao {
         }
         int falta = AVISO - (int) ((t - e.getValue()) / 20);
         if (falta > 0) {
-            p.displayClientMessage(Component.translatable("guilda.lanterna.aviso_invasao", dona == null ? "?" : dona.nome, falta)
+            p.displayClientMessage(Component.translatable("guilda.lanterna.aviso_invasao", dona == null ? "?" : Guilda.exibir(dona.nome), falta)
                     .withStyle(ChatFormatting.RED, ChatFormatting.BOLD), true);
             return;
         }
@@ -188,7 +188,7 @@ public final class Invasao {
         gs.mudou();
         SpaceBodies.Body b = SpaceBodies.byId(c.planeta);
         Component nome = b == null ? Component.literal(c.planeta) : b.displayName();
-        Conquistas.anunciar(p.server, Component.translatable("guilda.lanterna.invasao_comecou", minha.nome, nome, dona.nome, nDef, nAtk)
+        Conquistas.anunciar(p.server, Component.translatable("guilda.lanterna.invasao_comecou", Guilda.exibir(minha.nome), nome, Guilda.exibir(dona.nome), nDef, nAtk)
                 .withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
         level.playSound(null, c.bandeira, SoundEvents.RAID_HORN.get(), SoundSource.HOSTILE, 64f, 1f);
         level.playSound(null, p.blockPosition(), SoundEvents.RAID_HORN.get(), SoundSource.HOSTILE, 4f, 1f);
@@ -203,7 +203,7 @@ public final class Invasao {
         e.getPersistentData().putString(TAG_PAPEL, papel);
         e.getPersistentData().putString(TAG_PLANETA, planeta);
         if (alvo != null) e.getPersistentData().putString(TAG_ALVO, alvo.toString());
-        e.setCustomName(Component.literal("[" + g.nome + "] ").withStyle(s -> s.withColor(g.cor()))
+        e.setCustomName(Component.literal("[").append(Guilda.exibir(g.nome)).append("] ").withStyle(s -> s.withColor(g.cor()))
                 .append(Component.translatable(papel.equals("defesa") ? "guilda.lanterna.defensor" : "guilda.lanterna.atacante").withStyle(ChatFormatting.WHITE)));
         lista.add(e.getUUID()); // antes de entrar no mundo (senão onJoin acha que é sobra)
         level.addFreshEntity(e);
@@ -284,11 +284,11 @@ public final class Invasao {
         long seg = Math.max(0, (fim - level.getGameTime()) / 20);
         String t = String.format("%d:%02d", seg / 60, seg % 60);
         if (liberada) {
-            barra.setName(Component.translatable("guilda.lanterna.barra_bandeira", a == null ? "?" : a.nome, t));
+            barra.setName(Component.translatable("guilda.lanterna.barra_bandeira", a == null ? "?" : Guilda.exibir(a.nome), t));
             barra.setColor(BossEvent.BossBarColor.YELLOW);
             barra.setProgress(1f);
         } else {
-            barra.setName(Component.translatable("guilda.lanterna.barra", a == null ? "?" : a.nome, d == null ? "?" : d.nome,
+            barra.setName(Component.translatable("guilda.lanterna.barra", a == null ? "?" : Guilda.exibir(a.nome), d == null ? "?" : Guilda.exibir(d.nome),
                     defensores.size(), totalDefesa, tropas.size(), t));
             barra.setProgress(totalDefesa == 0 ? 0f : Math.min(1f, defensores.size() / (float) totalDefesa));
         }
@@ -325,7 +325,7 @@ public final class Invasao {
         terminar();
         Guilda d = gs.guildas.get(defensora);
         SpaceBodies.Body b = SpaceBodies.byId(c.planeta);
-        Conquistas.anunciar(server, Component.translatable("guilda.lanterna.defendeu", d == null ? "?" : d.nome,
+        Conquistas.anunciar(server, Component.translatable("guilda.lanterna.defendeu", d == null ? "?" : Guilda.exibir(d.nome),
                 b == null ? Component.literal(c.planeta) : b.displayName(), Component.translatable(motivo), vivos).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
         gs.mudou();
     }

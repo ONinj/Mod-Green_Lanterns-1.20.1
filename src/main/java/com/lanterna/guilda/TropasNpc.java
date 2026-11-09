@@ -61,6 +61,13 @@ public final class TropasNpc {
         return g;
     }
 
+    /** Chave de tradução do nome de uma guilda de Tropa (pelo nome salvo), ou null se for uma guilda de jogador. */
+    @org.jetbrains.annotations.Nullable
+    public static String chaveDoNome(String nome) {
+        for (BuiltinCorps c : BuiltinCorps.values()) if (nome(c).equals(nome) && !nome.equals("Tropa")) return "guilda.lanterna.tropa." + c.id().getPath();
+        return null;
+    }
+
     private static String nome(BuiltinCorps c) {
         return switch (c) {
             case GREEN -> "Tropa Verde";

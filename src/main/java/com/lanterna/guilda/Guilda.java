@@ -38,6 +38,17 @@ public final class Guilda {
         simboloPadrao();
     }
 
+    /**
+     * Nome da guilda para mostrar: as guildas das Tropas (criadas pelo mod, com nome em português salvo no mundo) e o
+     * dono delas, "Conselho da Tropa", aparecem traduzidos; o nome que um jogador deu à guilda aparece como ele escreveu.
+     */
+    public static net.minecraft.network.chat.Component exibir(String nome) {
+        if (nome == null) return net.minecraft.network.chat.Component.literal("?");
+        if (nome.equals("Conselho da Tropa")) return net.minecraft.network.chat.Component.translatable("guilda.lanterna.conselho");
+        String chave = TropasNpc.chaveDoNome(nome);
+        return chave != null ? net.minecraft.network.chat.Component.translatable(chave) : net.minecraft.network.chat.Component.literal(nome);
+    }
+
     public String donoNome() {
         return membros.getOrDefault(dono, "?");
     }

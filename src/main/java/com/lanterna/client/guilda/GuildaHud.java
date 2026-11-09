@@ -53,11 +53,11 @@ public final class GuildaHud {
         g.blit(ClientGuildas.simbolo(dona.id()), x + 8, y + 8, 0, 0, 30, 30, 30, 30);
         Hud.textFit(g, Hud.caps(Component.translatable("guilda.lanterna.hud.conquistado")), x + 44, y + 7, W - 50, Hud.argb(cor, 255), false);
         Hud.textFit(g, Hud.bold(alvo.displayName()), x + 44, y + 19, W - 50, 0xFFFFFFFF, false);
-        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.guilda", dona.nome())), x + 44, y + 30, W - 50, 0xFFD8E0E4, false);
+        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.guilda", com.lanterna.guilda.Guilda.exibir(dona.nome()))), x + 44, y + 30, W - 50, 0xFFD8E0E4, false);
         int ly = y + 44;
         g.fill(x + 8, ly, x + W - 8, ly + 1, 0x30FFFFFF);
         ly += 5;
-        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.dono", dona.dono())), x + 10, ly, W - 16, 0xFFD8E0E4, false);
+        Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.dono", com.lanterna.guilda.Guilda.exibir(dona.dono()))), x + 10, ly, W - 16, 0xFFD8E0E4, false);
         ly += 11;
         Hud.textFit(g, Hud.body(Component.translatable("guilda.lanterna.hud.defesa", dado.defesa())), x + 10, ly, W - 16, 0xFFFF9A80, false);
         ly += 11;
