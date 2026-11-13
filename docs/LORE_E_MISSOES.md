@@ -1178,3 +1178,10 @@ Os oito Lanternas lendários agora são personagens do próprio mod, cada um o m
 | Negra | Malachar Dusk | humano corrompido (pele cinza, veias negras, olhos brancos que brilham) | Necrópole |
 
 As raças novas são só dos lendários: não aparecem nos NPCs comuns. A missão Amarela de Hanks agora é "A Prova de Tarvok".
+
+## 0.45.0 — Sóis e buracos negros mais bonitos
+
+- **Espaçamento:** dois sóis ou buracos negros gerados nunca ficam a menos de 22 mil blocos um do outro (antes podiam ficar a uns 5 mil).
+- **Cores:** nove tipos de estrela com a mesma chance: gigante vermelha (a maior), laranja, amarela, branca, azul (pequena e furiosa), ciano, verde, violeta e rosa. Antes quase todas pareciam vermelhas ou amarelas, porque a textura era laranja e puxava tudo para essa cor; agora a textura é neutra e cada estrela fica na cor dela.
+- **Sóis:** superfície granulada com manchas e filamentos, miolo quase branco e borda mais escura e quente, um brilho por cima da superfície, coroa, raios de luz finos girando devagar e um halo grande.
+- **Buracos negros:** sombra preta densa (um disco opaco), disco de acreção grosso e turbulento girando mais rápido perto do centro, o lado em que o gás vem na sua direção mais brilhante, a luz de trás do disco curvada por cima e por baixo da sombra (lente), anel de fótons fino colado na sombra e um brilho quente em volta.

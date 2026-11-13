@@ -3383,6 +3383,19 @@ public final class DevAutoTest {
             }
             int n = 0; for (int sx = -6; sx <= 6; sx++) for (int sz = -6; sz <= 6; sz++) if (com.lanterna.space.Perigos.inSector(sx, sz) != null) n++;
             glog("perigos em 13x13 setores=" + n);
+            java.util.List<com.lanterna.space.Perigos.Perigo> todos = new java.util.ArrayList<>();
+            java.util.Map<Integer, Integer> cores = new java.util.TreeMap<>();
+            for (int sx = -12; sx <= 12; sx++) for (int sz = -12; sz <= 12; sz++) {
+                var h = com.lanterna.space.Perigos.inSector(sx, sz);
+                if (h == null) continue;
+                todos.add(h);
+                if (h.tipo() == com.lanterna.space.Perigos.Tipo.SOL) cores.merge(h.cor(), 1, Integer::sum);
+            }
+            double min = 1e9;
+            for (int i = 0; i < todos.size(); i++) for (int j = i + 1; j < todos.size(); j++) min = Math.min(min, todos.get(i).centro().distanceTo(todos.get(j).centro()));
+            StringBuilder cs = new StringBuilder();
+            cores.forEach((k, v) -> cs.append(String.format("%06X", k)).append('=').append(v).append(' '));
+            glog("25x25: perigos=" + todos.size() + " menor distancia=" + (int) min + " cores=" + cs);
             var a = com.lanterna.space.Perigos.ABISMO;
             olharDe(sp, a.centro().add(0, 60, 420), a.centro());
         }));

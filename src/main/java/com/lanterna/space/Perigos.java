@@ -45,26 +45,74 @@ public final class Perigos {
 
     /** O Sol grande do mapa (mesma posição e tamanho de {@link SpaceBodies#SUN}). */
     public static final Perigo SOL_CENTRAL = new Perigo("sol", Tipo.SOL, SpaceBodies.SUN.center(), SpaceBodies.SUN.radius(),
-            SpaceBodies.SUN.radius() * 2.0, 0xFFE9A0, "Hélio", 0);
+            SpaceBodies.SUN.radius() * 2.0, 0xFFD27A, "Hélio", 37);
     /** O Abismo: um buraco negro entre Nok e Odym, perto o bastante para todo mundo conhecer o perigo. */
-    public static final Perigo ABISMO = new Perigo("abismo", Tipo.BURACO, new Vec3(-6000, 150, 5600), 34, 34 * 40, 0xFFB060, "Abismo", 0.35);
+    public static final Perigo ABISMO = new Perigo("abismo", Tipo.BURACO, new Vec3(-6000, 150, 5600), 34, 34 * 40, 0xFFB060, "Abismo", 0.22);
     public static final List<Perigo> FIXOS = List.of(SOL_CENTRAL, ABISMO);
 
     private static final double CORE_RADIUS = 12000;
     private static final Map<Long, Optional<Perigo>> CACHE = new ConcurrentHashMap<>();
     private static long cacheSeed;
 
-    private static final int[] CORES_SOL = {0xFFE070, 0xFFB050, 0xFF6A3A, 0xB8D4FF, 0xFFF4D8};
+    /** Tipos de estrela: cor e faixa de raio. Todos com a mesma chance. */
+    private record TipoSol(int cor, double raioMin, double raioMax) {}
+    private static final TipoSol[] SOIS = {
+            new TipoSol(0xFF4A2A, 1200, 1800),   // gigante vermelha
+            new TipoSol(0xFF9A3A, 700, 1200),    // laranja
+            new TipoSol(0xFFE070, 650, 1100),    // amarela
+            new TipoSol(0xF4F6FF, 500, 900),     // branca
+            new TipoSol(0x5A96FF, 450, 750),     // azul: pequena e furiosa
+            new TipoSol(0x52F0FF, 500, 850),     // ciano
+            new TipoSol(0x52FF7C, 600, 1000),    // verde
+            new TipoSol(0xB070FF, 600, 1000),    // violeta
+            new TipoSol(0xFF62C4, 650, 1050)     // rosa
+    };
+    /** Distância mínima entre dois sóis/buracos negros gerados. */
+    public static final double ESPACO_MIN = 22000;
 
     @Nullable
     public static Perigo inSector(int sx, int sz) {
         long seed = ProceduralPlanets.seed();
         if (seed != cacheSeed) {
             CACHE.clear();
+            CANDIDATOS.clear();
             cacheSeed = seed;
         }
         long key = ((long) sx << 32) ^ (sz & 0xFFFFFFFFL);
-        return CACHE.computeIfAbsent(key, k -> Optional.ofNullable(generate(seed, sx, sz))).orElse(null);
+        return CACHE.computeIfAbsent(key, k -> Optional.ofNullable(espacado(seed, sx, sz))).orElse(null);
+    }
+
+    private static final Map<Long, Optional<Perigo>> CANDIDATOS = new ConcurrentHashMap<>();
+
+    @Nullable
+    private static Perigo candidato(long seed, int sx, int sz) {
+        if (seed != cacheSeed) return generate(seed, sx, sz);
+        long key = ((long) sx << 32) ^ (sz & 0xFFFFFFFFL);
+        return CANDIDATOS.computeIfAbsent(key, k -> Optional.ofNullable(generate(seed, sx, sz))).orElse(null);
+    }
+
+    /** Prioridade (fixa por setor): entre dois candidatos perto demais, fica o de maior prioridade. */
+    private static long prioridade(long seed, int sx, int sz) {
+        long h = seed ^ (sx * 0x9E3779B97F4A7C15L) ^ (sz * 0xC2B2AE3D27D4EB4FL);
+        h ^= h >>> 33; h *= 0xFF51AFD7ED558CCDL; h ^= h >>> 33;
+        return h;
+    }
+
+    /** O candidato do setor, se nenhum vizinho mais forte estiver a menos de {@link #ESPACO_MIN}. */
+    @Nullable
+    private static Perigo espacado(long seed, int sx, int sz) {
+        Perigo p = candidato(seed, sx, sz);
+        if (p == null) return null;
+        int r = (int) Math.ceil(ESPACO_MIN / ProceduralPlanets.SECTOR);
+        long minha = prioridade(seed, sx, sz);
+        for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+            if (dx == 0 && dz == 0) continue;
+            Perigo o = candidato(seed, sx + dx, sz + dz);
+            if (o == null || o.centro().distanceTo(p.centro()) >= ESPACO_MIN) continue;
+            long dela = prioridade(seed, sx + dx, sz + dz);
+            if (dela > minha || (dela == minha && (dx > 0 || (dx == 0 && dz > 0)))) return null;
+        }
+        return p;
     }
 
     @Nullable
@@ -80,16 +128,14 @@ public final class Perigos {
         float k = r.nextFloat();
         String nome = PlanetNames.generate(r);
         String id = "h" + (sx < 0 ? "m" + -sx : sx) + "_" + (sz < 0 ? "m" + -sz : sz);
-        if (k < 0.58f) {
-            int tipo = r.nextInt(CORES_SOL.length);
-            double raio = tipo == 2 ? 1200 + r.nextDouble() * 600    // gigante vermelha
-                    : tipo == 3 ? 450 + r.nextDouble() * 250         // azul: pequena e furiosa
-                    : 650 + r.nextDouble() * 550;
-            return new Perigo(id, Tipo.SOL, c, raio, raio * 3.0, CORES_SOL[tipo], nome, 0);
+        if (k < 0.62f) {
+            TipoSol t = SOIS[r.nextInt(SOIS.length)];
+            double raio = t.raioMin() + r.nextDouble() * (t.raioMax() - t.raioMin());
+            return new Perigo(id, Tipo.SOL, c, raio, raio * 3.0, t.cor(), nome, r.nextDouble() * 100);
         }
         if (k < 0.9f) {
             double h = 18 + r.nextDouble() * 24;
-            return new Perigo(id, Tipo.BURACO, c, h, h * 40, r.nextBoolean() ? 0xFFB060 : 0xFFD8A0, nome, (r.nextDouble() - 0.5) * 1.2);
+            return new Perigo(id, Tipo.BURACO, c, h, h * 40, r.nextBoolean() ? 0xFFB060 : 0xFFD8A0, nome, (r.nextDouble() - 0.5) * 0.9);
         }
         return null;
     }
