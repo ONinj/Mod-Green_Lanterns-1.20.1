@@ -90,6 +90,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.51.0 ✅ (0.43.0) HUD mais limpo (anel, missão e espaço enxutos); vida numa linha só de corações que mudam de cor a cada 20 de vida, com o número no meio; nível máximo 150 (Prova da Emoção continua no 50); anel dá armadura de netherite (20 de armadura, 12 de dureza)
 1.52.0 ✅ (0.44.0) Lanternas lendários com nomes e raças próprias do mod: Kael Ardent, Seraphine Vale e Malachar Dusk (humanos), Tarvok (vekthar, crista óssea), Grath (brakhul, chifres e rachaduras de fogo), Mizzuk (gobrin, orelhas enormes), Irmão Aurel (serenim, barbatanas) e Nhalé (nhai, tatuagens índigo)
 1.53.0 ✅ (0.45.0) Sóis e buracos negros a pelo menos 22 mil blocos um do outro; 9 cores de estrela com a mesma chance (vermelha, laranja, amarela, branca, azul, ciano, verde, violeta e rosa); sóis com superfície granulada, miolo brilhante, borda escura e raios; buracos negros com sombra densa, disco de acreção grosso girando, lado mais brilhante, lente e anel de fótons
+1.54.0 ✅ (0.46.0) 8 Bosses das Tropas (Karvhul, Vesk Morrath, Ghor'Maddu, Seraphel, Gêmeos Velados, Calithe, Morthaal, Verdan): um por planeta de Tropa, chamados no altar do planeta (shift + usar) depois de vencer o chefe de lá; animações de andar, ataque, fase e morte; mecânicas próprias; ovos de spawn
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

@@ -33,6 +33,15 @@ public final class LoreRenderers {
         event.registerEntityRenderer(LoreEntities.ARCANJO_DA_AURORA.get(), ctx -> new LoreRenderer<>(ctx, "arcanjo_da_aurora", 1.0f, true));
         event.registerEntityRenderer(LoreEntities.CERVO_SERENO.get(), ctx -> new LoreRenderer<>(ctx, "cervo_sereno", 1.0f, true));
         event.registerEntityRenderer(LoreEntities.RAINHA_DE_CRISTAL.get(), ctx -> new LoreRenderer<>(ctx, "rainha_de_cristal", 1.0f, true));
+        // Bosses das Tropas (escala do renderer e translúcido como na entrega)
+        event.registerEntityRenderer(LoreEntities.KARVHUL.get(), ctx -> new LoreRenderer<>(ctx, "karvhul_forjador_rubro", 1.6f, false));
+        event.registerEntityRenderer(LoreEntities.VESK.get(), ctx -> new LoreRenderer<>(ctx, "vesk_morrath_carcereiro", 1.3f, true));
+        event.registerEntityRenderer(LoreEntities.GHORMADDU.get(), ctx -> new LoreRenderer<>(ctx, "ghormaddu_arca_viva", 1.6f, false));
+        event.registerEntityRenderer(LoreEntities.SERAPHEL.get(), ctx -> new LoreRenderer<>(ctx, "seraphel_do_vitral", 1.4f, true));
+        event.registerEntityRenderer(LoreEntities.GEMEOS.get(), ctx -> new LoreRenderer<>(ctx, "gemeos_velados", 1.4f, true));
+        event.registerEntityRenderer(LoreEntities.CALITHE.get(), ctx -> new LoreRenderer<>(ctx, "calithe_rainha_do_espelho", 1.4f, true));
+        event.registerEntityRenderer(LoreEntities.MORTHAAL.get(), ctx -> new LoreRenderer<>(ctx, "morthaal_coletor_de_lanternas", 1.5f, true));
+        event.registerEntityRenderer(LoreEntities.VERDAN.get(), ctx -> new LoreRenderer<>(ctx, "verdan_o_arquiteto", 1.5f, true));
         event.registerEntityRenderer(ConstructRegistry.CONSTRUCT.get(), ConstructRenderer::new);
         event.registerEntityRenderer(com.lanterna.construct.oficina.OficinaRegistro.CONSTRUTO.get(), com.lanterna.client.oficina.ConstrutoProprioRenderer::new);
     }

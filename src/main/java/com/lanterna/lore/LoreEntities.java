@@ -85,15 +85,38 @@ public final class LoreEntities {
         EGGS.add(ModItems.ITEMS.register("alvo_treino_spawn_egg", () -> new ForgeSpawnEggItem(ALVO_TREINO, 0x9A7040, 0x2BFF4A, new Item.Properties())));
     }
 
+    // ---- Bosses das Tropas (um por emoção, no planeta da Tropa; chamados no Altar do Desafio, agachado) ----
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Karvhul>> KARVHUL =
+            boss("karvhul_forjador_rubro", com.lanterna.lore.entity.boss.ChefesTropa.Karvhul::new, 2.4f, 6.0f, true, 0x2A1410, 0xFF5A1A);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Vesk>> VESK =
+            boss("vesk_morrath_carcereiro", com.lanterna.lore.entity.boss.ChefesTropa.Vesk::new, 1.6f, 5.0f, false, 0x1A1A14, 0xFFE040);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.GhorMaddu>> GHORMADDU =
+            boss("ghormaddu_arca_viva", com.lanterna.lore.entity.boss.ChefesTropa.GhorMaddu::new, 3.7f, 3.5f, false, 0x6A4818, 0xFFB030);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Seraphel>> SERAPHEL =
+            boss("seraphel_do_vitral", com.lanterna.lore.entity.boss.ChefesTropa.Seraphel::new, 1.4f, 4.2f, false, 0xE8ECF0, 0x5AB0FF);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Gemeos>> GEMEOS =
+            boss("gemeos_velados", com.lanterna.lore.entity.boss.ChefesTropa.Gemeos::new, 2.4f, 3.3f, false, 0x4A3A80, 0xC8B8FF);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Calithe>> CALITHE =
+            boss("calithe_rainha_do_espelho", com.lanterna.lore.entity.boss.ChefesTropa.Calithe::new, 1.6f, 3.8f, false, 0x6A2080, 0xFF8AE0);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Morthaal>> MORTHAAL =
+            boss("morthaal_coletor_de_lanternas", com.lanterna.lore.entity.boss.ChefesTropa.Morthaal::new, 2.1f, 5.6f, true, 0xD8D0C0, 0x1A1A20);
+    public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefesTropa.Verdan>> VERDAN =
+            boss("verdan_o_arquiteto", com.lanterna.lore.entity.boss.ChefesTropa.Verdan::new, 2.5f, 4.7f, false, 0x1E4A2E, 0x4CFF8A);
+
     private static <T extends LoreBoss> RegistryObject<EntityType<T>> boss(String id, EntityType.EntityFactory<T> factory,
                                                                             float w, float h, boolean fireImmune) {
+        return boss(id, factory, w, h, fireImmune, 0x101010, 0xFFFFFF);
+    }
+
+    private static <T extends LoreBoss> RegistryObject<EntityType<T>> boss(String id, EntityType.EntityFactory<T> factory,
+                                                                            float w, float h, boolean fireImmune, int ovo1, int ovo2) {
         RegistryObject<EntityType<T>> type = ModEntities.ENTITIES.register(id, () -> {
             EntityType.Builder<T> b = EntityType.Builder.of(factory, MobCategory.MONSTER).sized(w, h).clientTrackingRange(12);
             if (fireImmune) b.fireImmune();
             return b.build(LanternaMod.id(id).toString());
         });
         BOSSES.put(id, type);
-        EGGS.add(ModItems.ITEMS.register(id + "_spawn_egg", () -> new ForgeSpawnEggItem(type, 0x101010, 0xFFFFFF, new Item.Properties())));
+        EGGS.add(ModItems.ITEMS.register(id + "_spawn_egg", () -> new ForgeSpawnEggItem(type, ovo1, ovo2, new Item.Properties())));
         return type;
     }
 
@@ -142,6 +165,15 @@ public final class LoreEntities {
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());
             event.put(NULO.get(), LoreBoss.attributes(800, 14, 0.30).build());
+            // Bosses das Tropas: um pouco acima do boss do planeta de cada um
+            event.put(VERDAN.get(), LoreBoss.attributes(480, 13, 0.24).add(Attributes.ARMOR, 12).build());          // Oa
+            event.put(SERAPHEL.get(), LoreBoss.attributes(560, 12, 0.26).add(Attributes.ARMOR, 6).build());         // Odym
+            event.put(GHORMADDU.get(), LoreBoss.attributes(680, 17, 0.22).add(Attributes.ARMOR, 14).build());       // Okaara
+            event.put(KARVHUL.get(), LoreBoss.attributes(650, 18, 0.26).add(Attributes.ARMOR, 12).build());         // Ysmault
+            event.put(CALITHE.get(), LoreBoss.attributes(560, 15, 0.30).add(Attributes.ARMOR, 10).build());         // Zamaron
+            event.put(VESK.get(), LoreBoss.attributes(540, 15, 0.30).add(Attributes.ARMOR, 8).build());             // Korugar
+            event.put(GEMEOS.get(), LoreBoss.attributes(600, 14, 0.28).add(Attributes.ARMOR, 8).build());           // Nok
+            event.put(MORTHAAL.get(), LoreBoss.attributes(900, 19, 0.26).add(Attributes.ARMOR, 12).build());        // Ryut
             event.put(COLOSSO_DE_JADE.get(), LoreBoss.attributes(1500, 34, 0.26).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
             event.put(MAE_DAS_SOMBRAS.get(), LoreBoss.attributes(1300, 34, 0.28).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());
             event.put(SERPENTE_ESCARLATE.get(), LoreBoss.attributes(1420, 34, 0.3).add(Attributes.ARMOR, 16).add(Attributes.ARMOR_TOUGHNESS, 8).build());

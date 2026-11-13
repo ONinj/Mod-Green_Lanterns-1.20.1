@@ -1,0 +1,401 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "misc.idle": {
+   "loop": true,
+   "animation_length": 4,
+   "bones": {
+    "body": {
+     "position": [
+      0,
+      "math.sin(query.anim_time * 120) * 0.25",
+      0
+     ]
+    },
+    "chaves": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 0.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 0.0) * 4"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 90) * 2",
+      "math.sin(query.anim_time * 45) * 4",
+      0
+     ]
+    },
+    "chama": {
+     "scale": [
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12",
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12",
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      0,
+      0,
+      "1 * (2 + math.sin(query.anim_time * 120) * 2)"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      0,
+      0,
+      "-1 * (2 + math.sin(query.anim_time * 120) * 2)"
+     ]
+    },
+    "pata_r_1": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 0.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 0.0) * 4"
+     ]
+    },
+    "pata_r_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 120.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 120.0) * 4"
+     ]
+    },
+    "pata_l_1": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 0.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 0.0) * 4"
+     ]
+    },
+    "pata_l_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 100 + 120.0) * 5",
+      0,
+      "math.cos(query.anim_time * 80 + 120.0) * 4"
+     ]
+    }
+   }
+  },
+  "move.walk": {
+   "loop": true,
+   "animation_length": 1,
+   "bones": {
+    "body": {
+     "rotation": [
+      "math.sin(query.anim_time * 720) * 1.5",
+      0,
+      "math.sin(query.anim_time * 360) * 1.5"
+     ]
+    },
+    "chaves": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 0.0) * 10",
+      0,
+      0
+     ]
+    },
+    "head": {
+     "rotation": [
+      "math.sin(query.anim_time * 720) * 2",
+      0,
+      0
+     ]
+    },
+    "chama": {
+     "scale": [
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12",
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12",
+      "1 + math.max(0, math.sin(query.anim_time * 400)) * 0.12"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0.0) * 28",
+      0,
+      0
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 180.0) * 28",
+      0,
+      0
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 180.0) * 30",
+      0,
+      0
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "math.sin(query.anim_time * 360 + 0.0) * 30",
+      0,
+      0
+     ]
+    },
+    "pata_r_1": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 0.0) * 10",
+      0,
+      0
+     ]
+    },
+    "pata_r_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 120.0) * 10",
+      0,
+      0
+     ]
+    },
+    "pata_l_1": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 0.0) * 10",
+      0,
+      0
+     ]
+    },
+    "pata_l_2": {
+     "rotation": [
+      "math.sin(query.anim_time * 300 + 120.0) * 10",
+      0,
+      0
+     ]
+    }
+   }
+  },
+  "attack.strike": {
+   "animation_length": 0.8,
+   "bones": {
+    "body": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.2": [
+       -6,
+       -12,
+       0
+      ],
+      "0.45": [
+       10,
+       18,
+       0
+      ],
+      "0.8": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.2": [
+       -110,
+       10,
+       0
+      ],
+      "0.45": [
+       20,
+       -10,
+       0
+      ],
+      "0.8": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "attack.grab": {
+   "animation_length": 1.2,
+   "bones": {
+    "arm_r": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.4": [
+       -90,
+       0,
+       20
+      ],
+      "0.7": [
+       -60,
+       0,
+       -10
+      ],
+      "1.2": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_l": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.4": [
+       -90,
+       0,
+       -20
+      ],
+      "0.7": [
+       -60,
+       0,
+       10
+      ],
+      "1.2": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "attack.legs": {
+   "animation_length": 1.0,
+   "bones": {
+    "pata_r_1": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -70,
+       0,
+       0
+      ],
+      "0.5": [
+       20,
+       0,
+       0
+      ],
+      "1.0": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "pata_l_1": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.3": [
+       -70,
+       0,
+       0
+      ],
+      "0.5": [
+       20,
+       0,
+       0
+      ],
+      "1.0": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "misc.phase2": {
+   "loop": true,
+   "animation_length": 0.5,
+   "bones": {
+    "chama": {
+     "scale": {
+      "0.0": [
+       1,
+       1,
+       1
+      ],
+      "0.25": [
+       1.6,
+       1.8,
+       1.6
+      ],
+      "0.5": [
+       1,
+       1,
+       1
+      ]
+     }
+    }
+   }
+  },
+  "misc.death": {
+   "animation_length": 2.0,
+   "bones": {
+    "root": {
+     "rotation": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "0.6": [
+       -10,
+       0,
+       0
+      ],
+      "1.6": [
+       80,
+       0,
+       0
+      ],
+      "2.0": [
+       90,
+       0,
+       0
+      ]
+     },
+     "position": {
+      "0.0": [
+       0,
+       0,
+       0
+      ],
+      "1.6": [
+       0,
+       -2,
+       0
+      ],
+      "2.0": [
+       0,
+       -4,
+       0
+      ]
+     }
+    }
+   }
+  }
+ }
+}

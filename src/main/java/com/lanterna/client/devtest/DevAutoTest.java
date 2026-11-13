@@ -3128,6 +3128,77 @@ public final class DevAutoTest {
         return com.lanterna.lendarios.ArenaLendaria.achar(sp.serverLevel(), l, s.centro);
     }
 
+    private static final String[] CHEFES = {"karvhul_forjador_rubro", "vesk_morrath_carcereiro", "ghormaddu_arca_viva", "seraphel_do_vitral",
+            "gemeos_velados", "calithe_rainha_do_espelho", "morthaal_coletor_de_lanternas", "verdan_o_arquiteto"};
+
+    private static java.util.List<com.lanterna.lore.entity.boss.ChefesTropa.Base> chefes(net.minecraft.server.level.ServerPlayer sp) {
+        return sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.ChefesTropa.Base.class, sp.getBoundingBox().inflate(80));
+    }
+
+    private static void sceneBrilhoTropa() {
+        Minecraft mc = Minecraft.getInstance();
+        String[] ids = {"karvhul_forjador_rubro", "vorgath", "verdan_o_arquiteto"};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 18000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
+            cmd("execute in minecraft:overworld run tp @s 300 200 300"); });
+        for (int i = 0; i < ids.length; i++) {
+            final int k = i;
+            at(30, () -> server(sp -> {
+                for (var c : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.LoreBoss.class, sp.getBoundingBox().inflate(80))) c.discard();
+                var e = (com.lanterna.lore.entity.boss.LoreBoss) com.lanterna.lore.LoreEntities.bossType(ids[k]).create(sp.serverLevel());
+                e.moveTo(300.5, 200, 300.5, 0, 0);
+                e.setYHeadRot(0); e.setYBodyRot(0);
+                e.setNoAi(true);
+                sp.serverLevel().addFreshEntity(e);
+                sp.teleportTo(300.5, 202.5, 307.5);
+            }));
+            at(30, () -> { look(180, 8); shot("brilho_" + k); });
+        }
+        at(2, () -> { cmd("time set 6000"); server(sp -> { for (var c : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.LoreBoss.class, sp.getBoundingBox().inflate(80))) c.hurt(sp.damageSources().genericKill(), 99999); }); });
+        at(36, () -> shot("brilho_morte_12"));
+        at(14, () -> shot("brilho_morte_27"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    private static void sceneChefesTropa() {
+        Minecraft mc = Minecraft.getInstance();
+        String[] extra = {"smash", "legs", "coins", "light", "hook", "shards", "reap", "build"};
+        double[] dist = {13, 10, 12, 10, 9, 8, 11, 10};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
+            cmd("execute in minecraft:overworld run tp @s 300 200 300"); });
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = 280; x <= 320; x++) for (int z = 280; z <= 330; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState());
+                for (int y = 200; y < 214; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+        }));
+        for (int i = 0; i < CHEFES.length; i++) {
+            final int k = i;
+            at(4, () -> { cmd("time set 6000"); server(sp -> {
+                for (var c : chefes(sp)) c.discard();
+                var e = (com.lanterna.lore.entity.boss.ChefesTropa.Base) com.lanterna.lore.LoreEntities.bossType(CHEFES[k]).create(sp.serverLevel());
+                e.moveTo(300.5, 200, 300.5, 0, 0);
+                e.setYHeadRot(0); e.setYBodyRot(0);
+                e.setNoAi(true);
+                sp.serverLevel().addFreshEntity(e);
+                sp.teleportTo(300.5, 201.5 + dist[k] * 0.12, 300.5 + dist[k]);
+            }); });
+            at(30, () -> { look(180, 6); shot("tropa_" + k + "_a"); });
+            at(2, () -> server(sp -> { for (var c : chefes(sp)) c.triggerAnim("attack", extra[k]); }));
+            at(10, () -> shot("tropa_" + k + "_b"));
+            at(2, () -> cmd("time set 18000"));
+            at(30, () -> shot("tropa_" + k + "_c"));
+            at(2, () -> server(sp -> { for (var c : chefes(sp)) c.hurt(sp.damageSources().genericKill(), 99999); }));
+            at(50, () -> shot("tropa_" + k + "_d"));
+            at(30, () -> server(sp -> glog(CHEFES[k] + " depois da morte restam=" + chefes(sp).size())));
+        }
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void sceneHud() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
@@ -4995,6 +5066,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("hanksdbg")) sceneHanksDbg();
         else if (ENABLED && SCENE.equals("retratos")) sceneRetratos();
         else if (ENABLED && SCENE.equals("hud")) sceneHud();
+        else if (ENABLED && SCENE.equals("chefestropa")) sceneChefesTropa();
+        else if (ENABLED && SCENE.equals("brilhotropa")) sceneBrilhoTropa();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();

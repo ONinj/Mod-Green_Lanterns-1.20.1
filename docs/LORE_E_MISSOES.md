@@ -1185,3 +1185,24 @@ As raças novas são só dos lendários: não aparecem nos NPCs comuns. A missã
 - **Cores:** nove tipos de estrela com a mesma chance: gigante vermelha (a maior), laranja, amarela, branca, azul (pequena e furiosa), ciano, verde, violeta e rosa. Antes quase todas pareciam vermelhas ou amarelas, porque a textura era laranja e puxava tudo para essa cor; agora a textura é neutra e cada estrela fica na cor dela.
 - **Sóis:** superfície granulada com manchas e filamentos, miolo quase branco e borda mais escura e quente, um brilho por cima da superfície, coroa, raios de luz finos girando devagar e um halo grande.
 - **Buracos negros:** sombra preta densa (um disco opaco), disco de acreção grosso e turbulento girando mais rápido perto do centro, o lado em que o gás vem na sua direção mais brilhante, a luz de trás do disco curvada por cima e por baixo da sombra (lente), anel de fótons fino colado na sombra e um brilho quente em volta.
+
+## 0.46.0 — Bosses das Tropas
+
+Cada planeta de Tropa ganhou um segundo chefe, sem tirar o que já existia:
+
+| Boss | Planeta | Vida | O que faz |
+|---|---|---|---|
+| Karvhul, o Forjador Rubro | Ysmault | 650 | Martelada em área com fogo, correntes que puxam; na fase 2 entra em fúria (mais rápido) |
+| Vesk Morrath, o Carcereiro | Korugar | 540 | Agarra, golpe de pernas com veneno; na fase 2 espalha cegueira e fraqueza em volta |
+| Ghor'Maddu, a Arca Viva | Okaara | 680 | Pinça, chuva de moedas que empurra; engole itens do chão, se cura e cresce (até 8 vezes) |
+| Seraphel do Vitral | Odym | 560 | Flutua, raio de luz, se cura; só toma dano cheio quando fica vulnerável (5 s a cada 15 s) |
+| Gêmeos Velados | Nok | 600 | Gancho que puxa, dividem a dor (15% volta para quem bate); na fase 2 se separam e batem em área |
+| Calithe, Rainha do Espelho | Zamaron | 560 | Investida, estilhaços em área; espelho que devolve flechas e projéteis (4 s a cada 12 s) |
+| Morthaal, Coletor de Lanternas | Ryut | 900 | Ceifada em arco com wither, solta almas (3 espíritos por 25 s) |
+| Verdan, o Arquiteto | Oa | 480 | Martelo em área, ergue uma prisão de vidro em volta do alvo (5 s); na fase 2 ataca bem mais rápido |
+
+- **Como chamar:** depois de vencer o chefe do planeta naquele mundo, use o altar do planeta agachado (shift + usar) com 8 minérios do planeta e nível do planeta + 5.
+- **Fase 2** aos 45% de vida, com aviso na tela; barra de boss na cor da Tropa.
+- **Morte:** o boss tomba (animação de 2 s) e o corpo fica 3 s antes de sumir.
+- **Recompensa:** 1200 de XP para quem lutou, o drop do planeta, 2 fragmentos lendários e 4 diamantes.
+- **Ovos de spawn** de todos no modo criativo, para testar.

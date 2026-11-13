@@ -5,6 +5,7 @@ import com.lanterna.lore.PlanetLore;
 import com.lanterna.lore.entity.Race;
 import com.lanterna.lore.entity.RaceEntity;
 import com.lanterna.lore.entity.boss.Bosses;
+import com.lanterna.lore.entity.boss.ChefesTropa;
 import com.lanterna.lore.entity.boss.LoreBoss;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -44,6 +45,15 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
         this.baseScale = scale;
         this.shadowRadius = 0.5f * scale;
         addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        // Bosses das Tropas: o brilho passa duas vezes (aditivo), para as runas aparecerem de verdade no escuro.
+        addRenderLayer(new AutoGlowingGeoLayer<>(this) {
+            @Override
+            public void render(com.mojang.blaze3d.vertex.PoseStack pose, T animatable, software.bernie.geckolib.cache.object.BakedGeoModel model,
+                               net.minecraft.client.renderer.RenderType type, net.minecraft.client.renderer.MultiBufferSource buffers,
+                               com.mojang.blaze3d.vertex.VertexConsumer buffer, float partialTick, int light, int overlay) {
+                if (animatable instanceof ChefesTropa.Base) super.render(pose, animatable, model, type, buffers, buffer, partialTick, light, overlay);
+            }
+        });
     }
 
     @Override
@@ -61,10 +71,17 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
         float s = baseScale;
         if (entity instanceof LoreBoss b && b.isEcho()) s *= 0.6f;
         if (entity instanceof Bosses.Vigia v && v.isSmall()) s *= 0.75f;
+        if (entity instanceof ChefesTropa.GhorMaddu g) s *= 1f + 0.05f * g.engolidos();
         withScale(s);
         shadowRadius = 0.5f * s * Math.max(1, entity.getBbWidth());
         if (entity instanceof Bosses.Thessara t) shadowRadius = t.isIllusion() ? 2.0f : 0f;
         super.render(entity, yaw, pt, pose, buffers, light);
+    }
+
+    /** Os Bosses das Tropas deitam pela própria animação (misc.death): sem o tombo do Minecraft por cima. */
+    @Override
+    protected float getDeathMaxRotation(T animatable) {
+        return animatable instanceof ChefesTropa.Base ? 0f : super.getDeathMaxRotation(animatable);
     }
 
     @Override

@@ -316,6 +316,12 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
             if (sl.getPlayerByUUID(id) instanceof ServerPlayer sp && sp.distanceTo(this) < 96) {
                 MissionManager.onBoss(sp, bossId());
                 sp.sendSystemMessage(Component.translatable("boss.lanterna.defeated", name).withStyle(s -> s.withColor(barRgb()).withBold(true)));
+                // derrotou o boss do planeta: agora o altar também chama o Boss da Tropa
+                PlanetLore pl = PlanetLore.byBoss(bossId());
+                String tropa = pl != null ? ChefesTropa.DO_PLANETA.get(pl) : null;
+                if (tropa != null) sp.sendSystemMessage(Component.translatable("message.lanterna.altar_tropa_liberado",
+                        Component.translatable("entity.lanterna." + tropa), BossAltar.CUSTO_TROPA, pl.oreItem().getDescription())
+                        .withStyle(s -> s.withColor(pl.color())));
             }
         }
         sl.playSound(null, blockPosition(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.HOSTILE, 2f, 0.8f);

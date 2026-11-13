@@ -31,6 +31,10 @@ public final class BossAltar {
             player.displayClientMessage(Component.translatable("message.lanterna.altar_wrong_place"), true);
             return;
         }
+        if (player.isShiftKeyDown() && ChefesTropa.DO_PLANETA.containsKey(planet)) {
+            usarTropa(player, pos, planet);
+            return;
+        }
         EntityType<?> type = LoreEntities.bossType(planet.boss);
         if (type == null) return;
         if (alive(level, pos)) {
@@ -58,6 +62,45 @@ public final class BossAltar {
                     planet.bossName().copy().withStyle(s -> s.withColor(planet.color()).withBold(true))));
             p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
                     Component.translatable("boss.lanterna." + planet.boss + ".intro").withStyle(s -> s.withItalic(true))));
+        }
+    }
+
+    /** Custo e nível a mais para chamar o Boss da Tropa (depois que o boss do planeta já caiu neste mundo). */
+    public static final int CUSTO_TROPA = 8, NIVEL_TROPA = 5;
+
+    /** Agachado no altar: chama o Boss da Tropa do planeta. */
+    private static void usarTropa(ServerPlayer player, BlockPos pos, PlanetLore planet) {
+        ServerLevel level = player.serverLevel();
+        String id = ChefesTropa.DO_PLANETA.get(planet);
+        EntityType<?> type = LoreEntities.bossType(id);
+        if (type == null) return;
+        Component nome = Component.translatable("entity.lanterna." + id);
+        if (!player.isCreative() && !com.lanterna.lore.LoreWorldData.get(player.server).bosses().contains(planet.boss)) {
+            player.displayClientMessage(Component.translatable("message.lanterna.altar_tropa_antes", planet.bossName(), nome), true);
+            return;
+        }
+        if (alive(level, pos)) {
+            player.displayClientMessage(Component.translatable("message.lanterna.altar_busy"), true);
+            return;
+        }
+        int req = com.lanterna.tropa.Nivel.nivelDoPlaneta(planet, com.lanterna.lore.Factions.playerCorps(player)) + NIVEL_TROPA;
+        if (!player.isCreative() && com.lanterna.tropa.Nivel.nivel(player) < req) {
+            player.displayClientMessage(Component.translatable("nivel.lanterna.precisa", req, nome), true);
+            return;
+        }
+        if (!player.isCreative() && MissionManager.countItem(player, planet.oreItem()) < CUSTO_TROPA) {
+            player.displayClientMessage(Component.translatable("message.lanterna.altar_needs", CUSTO_TROPA, planet.oreItem().getDescription(), nome), true);
+            return;
+        }
+        if (!player.isCreative()) MissionManager.removeItems(player, planet.oreItem(), CUSTO_TROPA);
+        Vec3 at = Vec3.atBottomCenterOf(pos).add(0, 1, -10);
+        LoreBoss boss = Bosses.summon(level, type, at, pos);
+        if (boss != null) boss.setTarget(player);
+        effects(level, pos, planet.color());
+        for (ServerPlayer p : level.getPlayers(p -> p.distanceToSqr(Vec3.atCenterOf(pos)) < 96 * 96)) {
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(nome.copy().withStyle(s -> s.withColor(planet.color()).withBold(true))));
+            p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                    Component.translatable("boss.lanterna." + id + ".intro").withStyle(s -> s.withItalic(true))));
         }
     }
 
