@@ -3128,6 +3128,29 @@ public final class DevAutoTest {
         return com.lanterna.lendarios.ArenaLendaria.achar(sp.serverLevel(), l, s.centro);
     }
 
+    private static void sceneHud() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lanterna anel green");
+            cmd("execute in minecraft:overworld run tp @s 0 200 0"); });
+        at(40, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -6; x <= 6; x++) for (int z = -6; z <= 6; z++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+            sp.teleportTo(0.5, 200, 0.5);
+            sp.setHealth(sp.getMaxHealth() * 0.62f);
+            sp.setAbsorptionAmount(6);
+            glog("vida max=" + sp.getMaxHealth() + " armadura=" + sp.getArmorValue() + " dureza=" + sp.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS) + " nivel=" + com.lanterna.tropa.Nivel.nivel(sp));
+        }));
+        at(40, () -> shot("hud_planeta"));
+        at(2, () -> cmd("lanterna nivel 120"));
+        at(40, () -> server(sp -> { sp.setHealth(sp.getMaxHealth() * 0.8f); glog("nivel 120 vida max=" + sp.getMaxHealth()); }));
+        at(30, () -> shot("hud_nivel120"));
+        at(2, () -> server(sp -> sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), 1500, 100, 1500, 0, 0)));
+        at(60, () -> shot("hud_espaco"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void sceneRetratos() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
@@ -4952,6 +4975,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("lendarios")) sceneLendarios();
         else if (ENABLED && SCENE.equals("hanksdbg")) sceneHanksDbg();
         else if (ENABLED && SCENE.equals("retratos")) sceneRetratos();
+        else if (ENABLED && SCENE.equals("hud")) sceneHud();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();

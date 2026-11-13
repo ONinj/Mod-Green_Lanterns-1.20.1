@@ -2627,7 +2627,7 @@
   "cmd.lanterna.poder.autorecarga": "O anel agora se recarrega sozinho (recompensa da Prova da Emoção).",
   "cmd.lanterna.poder.honra": "Guarda de Honra: posto e 3º espaço de técnica.",
   "cmd.lanterna.poder.genese": "Gênese revelada no espaço.",
-  "cmd.lanterna.poder.tudo": "Tudo liberado: nível 50, afinidade máxima, todas as técnicas, Guarda de Honra, Porta Estelar, autorrecarga, Gênese e todos os planetas visitados.",
+  "cmd.lanterna.poder.tudo": "Tudo liberado: nível 150, afinidade máxima, todas as técnicas, Guarda de Honra, Porta Estelar, autorrecarga, Gênese e todos os planetas visitados.",
   "cmd.lanterna.uso_morte": "Use: corromper, dominar, faminto, alimentar ou limpar.",
   "cmd.lanterna.morte.corromper": "Anel corrompido: a linha \"A Morte\" começou.",
   "cmd.lanterna.morte.dominar": "Você domina a Morte (pode forjar/usar o Anel Preto; use /lanterna anel black para equipar).",
@@ -2858,5 +2858,10 @@
   "mission.lanterna.hanks_3.desc": "Vá à cidadela, ao norte do pouso, fale com o Sinestro e vença o duelo de treino.",
   "objective.lanterna.fonte.hanks.pouso": "Pousar em Hanks",
   "objective.lanterna.fonte.hanks.nucleos": "Ligar os 3 núcleos",
-  "objective.lanterna.fonte.hanks.sinestro": "Vencer o duelo com o Sinestro"
+  "objective.lanterna.fonte.hanks.sinestro": "Vencer o duelo com o Sinestro",
+  "hud.lanterna.nv": "Nv %s",
+  "hud.lanterna.tag.desligado": "DESLIGADO (G)",
+  "hud.lanterna.tag.voo": "VOO",
+  "hud.lanterna.tag.bolso": "Bateria (R)",
+  "hud.lanterna.tag.bolso_espera": "Bateria %ss"
 }

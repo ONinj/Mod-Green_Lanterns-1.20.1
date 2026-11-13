@@ -2627,7 +2627,7 @@
   "cmd.lanterna.poder.autorecarga": "The ring now recharges by itself (Trial of Emotion reward).",
   "cmd.lanterna.poder.honra": "Honor Guard: rank and 3rd technique slot.",
   "cmd.lanterna.poder.genese": "Genesis revealed in space.",
-  "cmd.lanterna.poder.tudo": "Everything unlocked: level 50, max affinity, all techniques, Honor Guard, Star Gate, self-recharge, Genesis and all planets visited.",
+  "cmd.lanterna.poder.tudo": "Everything unlocked: level 150, max affinity, all techniques, Honor Guard, Star Gate, self-recharge, Genesis and all planets visited.",
   "cmd.lanterna.uso_morte": "Use: corromper, dominar, faminto, alimentar or limpar.",
   "cmd.lanterna.morte.corromper": "Ring corrupted: the \"Death\" line has begun.",
   "cmd.lanterna.morte.dominar": "You master Death (you can forge/use the Black Ring; use /lanterna anel black to equip).",
@@ -2858,5 +2858,10 @@
   "mission.lanterna.hanks_3.desc": "Go to the citadel, north of the landing pad, talk to Sinestro and win the training duel.",
   "objective.lanterna.fonte.hanks.pouso": "Land on Hanks",
   "objective.lanterna.fonte.hanks.nucleos": "Power the 3 cores",
-  "objective.lanterna.fonte.hanks.sinestro": "Win the duel with Sinestro"
+  "objective.lanterna.fonte.hanks.sinestro": "Win the duel with Sinestro",
+  "hud.lanterna.nv": "Lv %s",
+  "hud.lanterna.tag.desligado": "OFF (G)",
+  "hud.lanterna.tag.voo": "FLIGHT",
+  "hud.lanterna.tag.bolso": "Battery (R)",
+  "hud.lanterna.tag.bolso_espera": "Battery %ss"
 }

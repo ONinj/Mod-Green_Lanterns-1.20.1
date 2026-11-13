@@ -17,19 +17,20 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 /**
- * HUD do anel (canto superior esquerdo):
+ * HUD do anel (canto superior esquerdo), enxuto: só o que se olha no meio da luta.
  *
- *   TROPA DOS LANTERNAS VERDES
- *   Bateria  [██████████░░░░]  72%
- *   Afinidade ◆◆◇◇◇  Aceito
- *   Oa  ↗ 12,4 mil blocos
- *   VOO · Bateria pronta (R)
+ *   ● VERDE              Nv 50
+ *   [████████████░░░░]    72%
+ *   ▔▔▔▔▔▔ (experiência, fininha)
+ *
+ * Voo, bateria de bolso e anel desligado aparecem como etiquetas pequenas só quando importam; afinidade, posto e o
+ * caminho de casa ficam no perfil (P) e no diário (M).
  */
 public final class RingHudOverlay {
     private static float suave = 1f, rastro = 1f;
     private static long ultimoQuadro = System.currentTimeMillis();
 
-    private static final int W = 170;
+    private static final int W = 124;
 
     public static final IGuiOverlay HUD = (ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) -> {
         Minecraft mc = Minecraft.getInstance();
@@ -37,83 +38,66 @@ public final class RingHudOverlay {
         var font = Hud.font();
         int color = ClientRingData.color;
         int x = 6, y = 6;
-        // Voo e bateria de bolso
-        Component status;
-        if (ClientRingData.pocketStatus == 0) status = Component.translatable("hud.lanterna.pocket_ready");
-        else if (ClientRingData.pocketStatus > 0) status = Component.translatable("hud.lanterna.pocket_cooldown", ClientRingData.pocketStatus);
-        else status = Component.empty();
-        Component flight = ClientRingData.active && ClientRingData.flight ? Component.translatable("hud.lanterna.flight_on") : Component.empty();
-        Component line = flight.getString().isEmpty() ? status
-                : status.getString().isEmpty() ? flight : flight.copy().append(Component.literal("  ·  ")).append(status);
-        java.util.List<net.minecraft.util.FormattedCharSequence> linhas = font.split(Hud.body(line), W - 16);
-        int extraH = Math.max(0, linhas.size() - 1) * 10;
-        Hud.panel(g, x, y, W, 76 + extraH, color, 0.92f);
-        x += 8;
-
-        // Nome da Tropa
-        Component name = Hud.caps(Component.translatable(CorpsDefinition.fullNameKey(ClientRingData.corps)));
-        if (font.width(name) > W - 16) name = Hud.caps(Component.translatable(CorpsDefinition.nameKey(ClientRingData.corps)));
-        int offW = ClientRingData.active ? 0 : font.width(Hud.body(Component.translatable("hud.lanterna.power_off"))) + 6;
-        Hud.textFit(g, name, x, y + 5, W - 16 - offW, Hud.argb(color, 255), false);
-        if (!ClientRingData.active) {
-            Component off = Hud.body(Component.translatable("hud.lanterna.power_off"));
-            Hud.textRight(g, off, 6 + W - 6, y + 5, 0xFF7A8890);
-        }
-
-        // Bateria
         int max = Math.max(1, ClientRingData.maxCharge);
         int charge = Mth.clamp(ClientRingData.charge, 0, max);
         int percent = charge * 100 / max;
         boolean low = percent <= 15;
         boolean blink = mc.level != null && (mc.level.getGameTime() / 8) % 2 == 0;
-        g.drawString(font, Hud.body(Component.translatable("hud.lanterna.battery")), x, y + 17, 0xFF9AA8B0, false);
-        // barra suave: a carga desliza até o valor novo, e o que foi gasto fica um instante em branco atrás
+
+        // etiquetas (só quando têm algo a dizer)
+        java.util.List<Component> tags = new java.util.ArrayList<>();
+        if (!ClientRingData.active) tags.add(Component.translatable("hud.lanterna.tag.desligado"));
+        else if (ClientRingData.flight) tags.add(Component.translatable("hud.lanterna.tag.voo"));
+        if (ClientRingData.pocketStatus == 0) tags.add(Component.translatable("hud.lanterna.tag.bolso"));
+        else if (ClientRingData.pocketStatus > 0) tags.add(Component.translatable("hud.lanterna.tag.bolso_espera", ClientRingData.pocketStatus));
+        int h = 30 + (tags.isEmpty() ? 0 : 11);
+        Hud.panel(g, x, y, W, h, color, 0.85f);
+        x += 7;
+
+        // linha 1: cor da Tropa + nome curto · nível
+        int xp = ClientLoreData.DATA.xp();
+        int nivel = com.lanterna.tropa.Nivel.nivel(xp);
+        g.fill(x, y + 6, x + 5, y + 11, Hud.argb(ClientRingData.active ? color : 0x606870, 255));
+        Component nv = Hud.bold(Component.translatable("hud.lanterna.nv", nivel));
+        Component name = Hud.caps(Component.translatable(CorpsDefinition.nameKey(ClientRingData.corps)));
+        Hud.textFit(g, name, x + 8, y + 5, W - 22 - font.width(nv), Hud.argb(color, 255), false);
+        Hud.textRight(g, nv, 6 + W - 6, y + 5, 0xFFFFD870);
+
+        // linha 2: bateria (barra suave; o que foi gasto fica um instante em branco atrás)
+        int bw = W - 14 - 30;
         float alvo = charge / (float) max;
         long agora = System.currentTimeMillis();
         float dt = Math.min(0.1f, (agora - ultimoQuadro) / 1000f);
         ultimoQuadro = agora;
         suave += (alvo - suave) * Math.min(1f, dt * 10f);
         if (alvo >= rastro) rastro = alvo; else rastro += (alvo - rastro) * Math.min(1f, dt * 2.5f);
-        if (rastro > suave + 0.002f) {
-            int rx0 = x + 44 + Math.round(86 * suave), rx1 = x + 44 + Math.round(86 * rastro);
-            g.fill(rx0, y + 19, rx1, y + 24, 0xB0FFFFFF);
-        }
-        Hud.bar(g, x + 44, y + 19, 86, 5, suave, low && blink ? 0xFF4040 : color, true);
-        if (rastro > suave + 0.002f) g.fill(x + 44 + Math.round(86 * suave), y + 19, x + 44 + Math.round(86 * rastro), y + 24, 0x90FFFFFF);
-        com.lanterna.client.fonte.ClientFonte.barraSobrecarga(g, x + 44, y + 19, 86, max, color);
+        int by = y + 16;
+        Hud.bar(g, x, by, bw, 6, suave, low && blink ? 0xFF4040 : color, true);
+        if (rastro > suave + 0.002f) g.fill(x + Math.round(bw * suave), by, x + Math.round(bw * rastro), by + 6, 0x90FFFFFF);
+        com.lanterna.client.fonte.ClientFonte.barraSobrecarga(g, x, by, bw, max, color);
         int extra = com.lanterna.client.fonte.ClientFonte.sobrecarga * 100 / max;
-        Hud.textRight(g, Hud.bold(Component.literal(extra > 0 ? (percent + extra) + "%" : percent + "%")), 6 + W - 6, y + 17,
+        Hud.textRight(g, Hud.bold(Component.literal((percent + extra) + "%")), 6 + W - 6, by - 1,
                 extra > 0 ? Hud.argb(com.lanterna.client.construct.EnergyShapes.clarear(color, 0.6f), 255) : low && blink ? 0xFFFF5050 : 0xFFFFFFFF);
 
-        // Afinidade
-        int pts = ClientLoreData.DATA.affinity();
-        int lvl = Affinity.level(pts);
-        g.drawString(font, Hud.body(Component.translatable("hud.lanterna.affinity")), x, y + 28, 0xFF9AA8B0, false);
-        StringBuilder pips = new StringBuilder();
-        for (int i = 1; i <= Affinity.MAX_LEVEL; i++) pips.append(i <= lvl ? "◆" : "◇");
-        g.drawString(font, Component.literal(pips.toString()), x + 44, y + 28, Hud.argb(color, 255), false);
-        Component lname = Hud.fit(Hud.body(Affinity.levelName(lvl)), W - 14 - 44 - font.width(pips.toString()) - 4);
-        Hud.textRight(g, lname, 6 + W - 6, y + 28, 0xFFD8DEE4);
-        g.fill(x + 44, y + 37, x + 44 + (int) (48 * Affinity.progress(pts)), y + 38, Hud.argb(color, 200));
+        // experiência: um fio dourado embaixo da bateria
+        g.fill(x, by + 9, x + bw, by + 10, 0x40FFD870);
+        g.fill(x, by + 9, x + Math.round(bw * com.lanterna.tropa.Nivel.progresso(xp)), by + 10, 0xFFFFD040);
 
-        // Nível do Lanterna e posto
-        int xp = ClientLoreData.DATA.xp();
-        int nivel = com.lanterna.tropa.Nivel.nivel(xp);
-        g.drawString(font, Hud.body(Component.translatable("hud.lanterna.nivel", nivel)), x, y + 40, 0xFFFFD870, false);
-        int postoW = Math.min(font.width(Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel)))), W - 14 - 44 - 24);
-        Hud.bar(g, x + 44, y + 42, Math.max(20, Math.min(50, W - 14 - 44 - postoW - 6)), 4, com.lanterna.tropa.Nivel.progresso(xp), 0xFFD040, false);
-        // o posto vai à direita da barra de nível; se o nome for longo a barra encolhe
-        Component posto = Hud.body(Component.translatable("posto.lanterna." + com.lanterna.tropa.Nivel.posto(nivel)));
-        posto = Hud.fit(posto, W - 14 - 44 - 24);
-        Hud.textRight(g, posto, 6 + W - 6, y + 40, 0xFFD8DEE4);
-
-        // Planeta da Tropa e distância
-        Hud.textFit(g, home(mc), x, y + 52, W - 16, 0xFFE0E6EA, false);
-
-        for (int i = 0; i < linhas.size(); i++) g.drawString(font, linhas.get(i), x, y + 64 + i * 10, low && blink ? 0xFFFF5050 : 0xFFB8C4CC, false);
+        // etiquetas
+        if (!tags.isEmpty()) {
+            int tx = x;
+            for (Component t : tags) {
+                Component tc = Hud.body(t);
+                int tw = font.width(tc) + 6;
+                if (tx + tw > 6 + W - 4) break;
+                g.fill(tx, y + h - 12, tx + tw, y + h - 3, Hud.argb(color, 60));
+                g.drawString(font, tc, tx + 3, y + h - 11, 0xFFE0E6EA, false);
+                tx += tw + 3;
+            }
+        }
         if (low) {
             Component warn = Hud.bold(Component.translatable("hud.lanterna.low_charge"));
-            g.drawString(font, warn, 6, y + 80 + extraH, blink ? 0xFFFF4040 : 0xFF902020, true);
+            g.drawString(font, warn, 6, y + h + 3, blink ? 0xFFFF4040 : 0xFF902020, true);
         }
     };
 

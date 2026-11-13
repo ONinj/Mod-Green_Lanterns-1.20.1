@@ -159,7 +159,7 @@ public final class NpcDialogs {
                 }
             }
             // Prova da Emoção (nível 50) com o Guardião
-            if (race == Race.GUARDIAO && com.lanterna.tropa.Nivel.nivel(data.xp()) >= com.lanterna.tropa.Nivel.MAX && !data.autoRecarga()) {
+            if (race == Race.GUARDIAO && com.lanterna.tropa.Nivel.nivel(data.xp()) >= com.lanterna.tropa.Nivel.PROVA && !data.autoRecarga()) {
                 RingData rd = ModCapabilities.get(player).orElse(null);
                 if (rd != null && rd.hasRing() && !rd.corps().getPath().equals("white")) {
                     String prova = "prova_" + rd.corps().getPath();

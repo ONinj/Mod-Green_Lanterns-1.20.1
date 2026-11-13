@@ -1152,3 +1152,12 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Missões Amarelas (nível 25+, oferecidas sozinhas):** O Planeta-Máquina (achar e pousar em Hanks), Os Três Núcleos (ficar 5 s junto de cada núcleo: leste, oeste e sul) e A Prova de Sinestro (vencer o duelo na cidadela). Recompensas: Méritos, Fragmentos Lendários e Fragmentos de Pavor.
 - **Itens novos:** Insígnia de cada lendário e Fragmento Lendário (moeda da próxima saga).
 - **Comandos de teste:** `/lanterna lendario <id> ir|reviver`, `/lanterna hanks ir`, `/lanterna hanks missao <1-3>`.
+
+## 0.43.0 — HUD limpo, corações numa linha e nível 150
+
+- **HUD do anel (canto de cima, à esquerda):** só o essencial: cor e nome da Tropa, nível, barra de bateria com a porcentagem e um fio dourado de experiência. Voo, bateria de bolso e anel desligado viram etiquetas pequenas que só aparecem quando importam. Afinidade, posto e o caminho de casa ficam no perfil e no diário.
+- **Painel de missão:** título com o andamento (ex.: 2/3), só o objetivo de agora (com barra quando tem contagem) e a distância com seta. Objetivos feitos e próximos ficam no diário (M); a dica de caminho aparece no marcador da tela.
+- **Painel do espaço:** os 3 corpos mais perto, o sol ou buraco negro mais próximo e o aviso de oxigênio só quando falta.
+- **Corações numa linha só:** a vida não empilha mais várias fileiras. Uma fileira de 10 corações troca de cor a cada 20 de vida (vermelho, laranja, amarelo, verde, ciano, azul, roxo, rosa, branco); a camada de baixo aparece por trás. No meio vai o número (vida/máxima) e a absorção aparece em dourado. Envenenado, murchando ou congelado mudam a cor. O que se perde fica um instante em branco.
+- **Nível máximo 150:** a Prova da Emoção continua no nível 50. Do 50 em diante cada nível custa 2.100 + 25 por nível. Vida extra, força dos construtos e a defesa do nível (até 60% no 150) continuam subindo. Lendários dão mais experiência: 4.000 ao derrotar, 1.200 ao vencer um duelo.
+- **Armadura do anel:** quem tem um anel ganha 20 de armadura, 12 de dureza e 40% de resistência a empurrão (como netherite completa), mesmo sem armadura; soma com qualquer armadura (o Minecraft limita em 30 de armadura e 20 de dureza).

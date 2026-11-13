@@ -60,7 +60,7 @@ public final class Lendarios {
     private static final String CASA = "lanterna_lendario_casa", ONDA = "lanterna_lendario_onda", AJUDA = "lanterna_lendario_ajuda",
             CURAR = "lanterna_lendario_curar";
     private static final long ESPERA_DUELO_MS = 20L * 60 * 1000;
-    private static final int XP_CHEFE = 1500, XP_DUELO = 500;
+    private static final int XP_CHEFE = 4000, XP_DUELO = 1200;
 
     private static final Map<UUID, LanternaEntity> VIVOS = new HashMap<>();
     private static final Map<UUID, ServerBossEvent> BARRAS = new HashMap<>();

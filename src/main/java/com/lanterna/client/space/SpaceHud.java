@@ -23,7 +23,7 @@ import java.util.List;
  * em colunas, e o estado do oxigênio. Fontes do HUD (Rajdhani/Orbitron).
  */
 public final class SpaceHud {
-    private static final int W = 176;
+    private static final int W = 146;
 
     public static final IGuiOverlay HUD = (ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) -> {
         Minecraft mc = Minecraft.getInstance();
@@ -40,8 +40,8 @@ public final class SpaceHud {
             list.add(b);
         }
         list.sort(Comparator.comparingDouble(b -> b.center().distanceTo(pos) - b.radius()));
-        int rows = Math.min(5, list.size());
-        int x = width - W - 8, y = 8;
+        int rows = Math.min(3, list.size());
+        int x = width - W - 6, y = 6;
         // o sol ou buraco negro mais perto (até uns 6 mil blocos da zona de perigo)
         com.lanterna.space.Perigos.Perigo perigo = null;
         double perigoDist = 6000;
@@ -49,18 +49,17 @@ public final class SpaceHud {
             double d = p.centro().distanceTo(pos) - p.raio();
             if (d < perigoDist) { perigoDist = d; perigo = p; }
         }
-        int h = 22 + rows * 12 + 16 + (perigo != null ? 12 : 0);
+        boolean safe = mc.player.isCreative() || (ClientRingData.hasRing && ClientRingData.active);
+        int h = 20 + rows * 11 + (perigo != null ? 11 : 0) + (safe ? 0 : 12) + 2;
         int accent = ClientRingData.hasRing ? ClientRingData.color : 0x8AB4FF;
-        Hud.panel(g, x, y, W, h, accent, 0.9f);
+        Hud.panel(g, x, y, W, h, accent, 0.82f);
 
         Component title = Hud.caps(Component.translatable("space.lanterna.hud.title"));
-        g.drawString(font, title, x + 8, y + 5, Hud.argb(accent, 255), false);
+        g.drawString(font, title, x + 7, y + 5, Hud.argb(accent, 255), false);
         Component speed = Hud.body(Component.literal(String.format(java.util.Locale.ROOT, "%.0f b/s",
                 com.lanterna.client.flight.ClientFlight.localSpeed() * 20)));
-        Hud.textRight(g, speed, x + W - 8, y + 5, 0xFF8A98A4);
-        g.fill(x + 8, y + 16, x + W - 8, y + 17, 0x28FFFFFF);
-
-        int ly = y + 21;
+        Hud.textRight(g, speed, x + W - 7, y + 5, 0xFF8A98A4);
+        int ly = y + 18;
         for (int i = 0; i < rows; i++) {
             SpaceBodies.Body b = list.get(i);
             Vec3 rel = b.center().subtract(pos);
@@ -72,10 +71,10 @@ public final class SpaceHud {
             g.fill(x + 19, ly + 3, x + 22, ly + 6, color);
             Component name = Hud.bold(b.displayName());
             String ns = name.getString();
-            if (font.width(name) > 88) name = Hud.bold(Component.literal(font.plainSubstrByWidth(ns, 84) + "…"));
+            if (font.width(name) > 70) name = Hud.bold(Component.literal(font.plainSubstrByWidth(ns, 66) + "…"));
             g.drawString(font, name, x + 26, ly, i == 0 ? 0xFFFFFFFF : 0xFFD0D8DE, true);
-            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(dist))), x + W - 8, ly, color);
-            ly += 12;
+            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(dist))), x + W - 7, ly, color);
+            ly += 11;
         }
 
         if (perigo != null) {
@@ -85,18 +84,18 @@ public final class SpaceHud {
             int color = perto && (mc.player.tickCount / 6) % 2 == 0 ? 0xFFFF3020 : 0xFF000000 | perigo.cor();
             g.drawString(font, Component.literal(Hud.arrow(diff)), x + 8, ly, color, true);
             Component name = Hud.bold(Component.literal("☢ ").append(perigo.nomeExibido()));
-            if (font.width(name) > 100) name = Hud.bold(Component.literal(font.plainSubstrByWidth(name.getString(), 96) + "…"));
+            if (font.width(name) > 76) name = Hud.bold(Component.literal(font.plainSubstrByWidth(name.getString(), 72) + "…"));
             g.drawString(font, name, x + 19, ly, color, true);
-            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(Math.max(0, perigoDist)))), x + W - 8, ly, color);
-            ly += 12;
+            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(Math.max(0, perigoDist)))), x + W - 7, ly, color);
+            ly += 11;
         }
 
-        // Oxigênio
-        boolean safe = mc.player.isCreative() || (ClientRingData.hasRing && ClientRingData.active);
-        boolean blink = (mc.player.tickCount / 8) % 2 == 0;
-        g.fill(x + 8, ly + 1, x + W - 8, ly + 2, 0x20FFFFFF);
-        Component oxygen = Hud.body(Component.translatable(safe ? "space.lanterna.hud.oxygen_ok" : "space.lanterna.hud.oxygen_none"));
-        g.drawString(font, oxygen, x + 8, ly + 4, safe ? 0xFF9FE0A0 : (blink ? 0xFFFF4040 : 0xFF802020), true);
+        // Oxigênio: só aparece quando falta
+        if (!safe) {
+            boolean blink = (mc.player.tickCount / 8) % 2 == 0;
+            Component oxygen = Hud.bold(Component.translatable("space.lanterna.hud.oxygen_none"));
+            g.drawString(font, oxygen, x + 8, ly + 2, blink ? 0xFFFF4040 : 0xFF802020, true);
+        }
         MissionHud.topOffset = y + h + 6;
     };
 

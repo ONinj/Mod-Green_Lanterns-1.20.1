@@ -19,7 +19,7 @@ import java.util.List;
  * um marcador na tela apontando o objetivo (também no espaço) e o aviso grande de missão nova/concluída.
  */
 public final class MissionHud {
-    private static final int WIDTH = 184;
+    private static final int WIDTH = 150;
     private static Mission toastMission;
     private static boolean toastDone;
     private static long toastStart = -1000;
@@ -63,75 +63,47 @@ public final class MissionHud {
     };
 
     /**
-     * Painel da missão: faixa com o tipo da missão, título, objetivos (o atual em destaque, com barra de progresso;
-     * os feitos riscados; os próximos apagados) e, embaixo, para onde ir agora com seta relativa à sua visão.
+     * Painel da missão, enxuto: título (com o andamento "2/3"), só o objetivo de agora (com barra se tiver contagem) e
+     * a distância com a seta. Os objetivos feitos e os próximos ficam no diário (M); a dica de caminho aparece no
+     * marcador da tela.
      */
     private static void drawTracker(GuiGraphics g, Mission m, Waypoints.Target target, int width) {
-        int x = width - WIDTH - 8;
+        int x = width - WIDTH - 6;
         int y = topOffset;
         var font = Hud.font();
         int c = m.color();
-        List<FormattedCharSequence> title = font.split(Hud.bold(m.title()), WIDTH - 16);
-        int atual = -1;
-        for (int i = 0; i < m.objectives().size(); i++) {
-            if (ClientLoreData.DATA.progress(m.id(), i) < m.objectives().get(i).count()) { atual = i; break; }
+        int n = m.objectives().size(), feitosN = 0, atual = -1;
+        for (int i = 0; i < n; i++) {
+            if (ClientLoreData.DATA.progress(m.id(), i) >= m.objectives().get(i).count()) feitosN++;
+            else if (atual < 0) atual = i;
         }
-        // o objetivo atual e a dica de para onde ir quebram em linhas (os outros são cortados com "…")
-        int lw = WIDTH - 24;
-        List<FormattedCharSequence> atualLinhas = atual >= 0
+        int lw = WIDTH - 22;
+        List<FormattedCharSequence> linhas = atual >= 0
                 ? font.split(Hud.body(m.objectives().get(atual).label(ClientLoreData.DATA.progress(m.id(), atual))), lw) : List.of();
-        List<FormattedCharSequence> dica = target != null ? font.split(Hud.body(target.hint()), WIDTH - 32) : List.of();
-        if (dica.size() > 3) dica = dica.subList(0, 3);
-        int objH = 0;
-        for (int i = 0; i < m.objectives().size(); i++) {
-            Objective o = m.objectives().get(i);
-            objH += (i == atual ? 1 + 10 * Math.max(1, atualLinhas.size()) : 11) + (i == atual && o.count() > 1 ? 5 : 0);
-        }
-        int h = 18 + title.size() * 10 + 4 + objH + (target != null ? 18 + 10 * Math.max(1, dica.size()) : 0) + 4;
-        Hud.panel(g, x, y, WIDTH, h, c, 0.95f);
-        // faixa do topo
-        g.fillGradient(x + 2, y + 1, x + WIDTH - 1, y + 13, Hud.argb(c, 90), Hud.argb(c, 10));
-        Component kind = Component.translatable("hud.lanterna.mission." + m.line());
-        Component diario = Hud.body(Component.translatable("hud.lanterna.mission.diario"));
-        Hud.textFit(g, Hud.caps(kind), x + 8, y + 3, WIDTH - 20 - font.width(diario), Hud.argb(Hud.mix(c, 0xFFFFFF, 0.35f), 255), false);
-        Hud.textRight(g, diario, x + WIDTH - 6, y + 3, 0xFF8A98A4);
+        if (linhas.size() > 2) linhas = linhas.subList(0, 2);
+        Objective o = atual >= 0 ? m.objectives().get(atual) : null;
+        boolean barra = o != null && o.count() > 1;
+        int h = 17 + 10 * Math.max(1, linhas.size()) + (barra ? 4 : 0) + (target != null ? 12 : 0) + 3;
+        Hud.panel(g, x, y, WIDTH, h, c, 0.85f);
+        // título + andamento
+        Component cont = n > 1 ? Hud.body(Component.literal(feitosN + "/" + n)) : Component.empty();
+        int cw = n > 1 ? font.width(cont) + 4 : 0;
+        Hud.textFit(g, Hud.bold(m.title()), x + 7, y + 5, WIDTH - 14 - cw, Hud.argb(Hud.mix(c, 0xFFFFFF, 0.3f), 255), false);
+        if (n > 1) Hud.textRight(g, cont, x + WIDTH - 6, y + 5, 0xFF8A98A4);
         int ty = y + 17;
-        for (FormattedCharSequence line : title) {
-            g.drawString(font, line, x + 8, ty, 0xFFFFFFFF, true);
-            ty += 10;
-        }
-        ty += 3;
-        for (int i = 0; i < m.objectives().size(); i++) {
-            Objective o = m.objectives().get(i);
-            int p = ClientLoreData.DATA.progress(m.id(), i);
-            boolean done = p >= o.count();
-            boolean now = i == atual;
-            Component shown = Hud.fit(Hud.body(o.label(p)), lw);
-            if (done) {
-                long quando = feitos.computeIfAbsent(i, q -> System.currentTimeMillis());
-                float brilho = 1f - Math.min(1f, (System.currentTimeMillis() - quando) / 900f);
-                if (brilho > 0) g.fill(x + 5, ty - 2, x + WIDTH - 5, ty + 9, Hud.argb(0x6FD98A, (int) (110 * brilho)));
-                g.drawString(font, Component.literal("✔"), x + 8, ty, 0xFF6FD98A, true);
-                g.drawString(font, shown.copy().withStyle(net.minecraft.ChatFormatting.STRIKETHROUGH), x + 18, ty, 0xFF5E6E66, false);
-            } else if (now) {
-                float pulse = 0.6f + 0.4f * Mth.sin((System.currentTimeMillis() % 100000) / 220f);
-                int nl = Math.max(1, atualLinhas.size());
-                g.fill(x + 5, ty - 2, x + WIDTH - 5, ty + 9 + 10 * (nl - 1) + (o.count() > 1 ? 5 : 0), Hud.argb(c, 28));
-                g.drawString(font, Component.literal("▶"), x + 8, ty, Hud.argb(c, (int) (255 * pulse)), true);
-                for (int l = 0; l < atualLinhas.size(); l++) g.drawString(font, atualLinhas.get(l), x + 18, ty + l * 10, 0xFFFFFFFF, true);
-                ty += 10 * (nl - 1) + 1;
-                if (o.count() > 1) Hud.bar(g, x + 18, ty + 9, WIDTH - 30, 2, Math.min(p, o.count()) / (float) o.count(), c, false);
-            } else {
-                g.drawString(font, Component.literal("○"), x + 8, ty, 0xFF5A6670, false);
-                g.drawString(font, shown, x + 18, ty, 0xFF8A98A4, false);
+        if (o != null) {
+            int idx = atual;
+            long quando = feitos.getOrDefault(-1, 0L);
+            float pulse = 0.6f + 0.4f * Mth.sin((System.currentTimeMillis() % 100000) / 220f);
+            g.drawString(font, Component.literal("▶"), x + 7, ty, Hud.argb(c, (int) (255 * pulse)), true);
+            for (int l = 0; l < linhas.size(); l++) g.drawString(font, linhas.get(l), x + 16, ty + l * 10, 0xFFFFFFFF, true);
+            ty += 10 * Math.max(1, linhas.size());
+            if (barra) {
+                Hud.bar(g, x + 16, ty, WIDTH - 24, 2, Math.min(ClientLoreData.DATA.progress(m.id(), idx), o.count()) / (float) o.count(), c, false);
+                ty += 4;
             }
-            ty += 11 + (now && o.count() > 1 ? 5 : 0);
         }
         if (target != null) {
-            ty += 2;
-            g.fill(x + 7, ty, x + WIDTH - 7, ty + 1, Hud.argb(c, 50));
-            ty += 4;
-            // seta relativa para onde você está olhando
             var mc = Minecraft.getInstance();
             String seta = "•";
             if (mc.player != null) {
@@ -139,15 +111,9 @@ public final class MissionHud {
                 float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
                 seta = Hud.arrow(Mth.wrapDegrees(yaw - mc.player.getYRot()));
             }
-            g.pose().pushPose();
-            g.pose().translate(x + 13, ty + 9, 0);
-            g.pose().scale(1.6f, 1.6f, 1);
-            Component arrow = Component.literal(seta);
-            g.drawString(font, arrow, -font.width(arrow) / 2, -4, Hud.argb(c, 255), true);
-            g.pose().popPose();
-            Component dist = Hud.bold(Component.literal(Hud.distance(target.distance())));
-            g.drawString(font, dist, x + 25, ty, 0xFFFFFFFF, true);
-            for (int l = 0; l < dica.size(); l++) g.drawString(font, dica.get(l), x + 25, ty + 10 + l * 10, 0xFFB8C4CC, true);
+            ty += 1;
+            g.drawString(font, Component.literal(seta), x + 7, ty, Hud.argb(c, 255), true);
+            g.drawString(font, Hud.bold(Component.literal(Hud.distance(target.distance()))), x + 16, ty, 0xFFD8DEE4, true);
         }
     }
 

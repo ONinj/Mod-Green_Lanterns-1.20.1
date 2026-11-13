@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 /**
- * Nível do Lanterna (1 a 50): a experiência da pessoa, separada da afinidade (que é o laço com aquele anel).
+ * Nível do Lanterna (1 a 150): a experiência da pessoa, separada da afinidade (que é o laço com aquele anel).
  *
  *  - Cada nível custa mais XP que o anterior (do 1 ao 50 são ~54 mil XP).
  *  - A cada 5 níveis: +1 coração. Construtos e voo gastam 1% menos carga por nível (até 40%).
@@ -39,14 +39,17 @@ import java.util.UUID;
  */
 @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.lanterna.LanternaMod.MODID, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
 public final class Nivel {
-    public static final int MAX = 50;
+    public static final int MAX = 150;
+    /** Nível da Prova da Emoção (e do antigo nível máximo). */
+    public static final int PROVA = 50;
     private static final UUID VIDA = UUID.fromString("0a3f7e42-5b8c-4d1e-9f2a-6c7b8d9e0f11");
     private static final UUID ARMADURA = UUID.fromString("5d2b1c0e-8a4f-4b6d-9e3a-1f7c2d8b4a61");
     private static final UUID DUREZA = UUID.fromString("9c4e7a12-3b5d-4f8e-a6c1-2d9b0e7f3a52");
 
     /** XP para ir do nível n para o n+1. */
     public static int custo(int n) {
-        return 100 + 40 * n;
+        // até o 50 como sempre; depois cresce mais devagar (do 50 ao 150 é a fase dos lendários)
+        return n <= PROVA ? 100 + 40 * n : 100 + 40 * PROVA + 25 * (n - PROVA);
     }
 
     /** XP total para chegar ao nível n. */
@@ -123,7 +126,7 @@ public final class Nivel {
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.8f);
             aplicar(player);
             promover(player, data, after);
-            if (after >= MAX && before < MAX) Prova.comecar(player);
+            if (after >= PROVA && before < PROVA) Prova.comecar(player);
         }
         MissionManager.sync(player, data);
     }
@@ -147,7 +150,9 @@ public final class Nivel {
      * dureza que o nível dava antes (no nível 50 com a config padrão: cerca de 27%).
      */
     public static double defesa(int nivel) {
-        return Math.min(0.35, (armaduraExtra(nivel) * 2.6 + durezaExtra(nivel) * 1.2) / 100.0);
+        // até 35% no nível 50; depois do 50 continua subindo até 60% no 150
+        double base = Math.min(0.35, (armaduraExtra(Math.min(nivel, PROVA)) * 2.6 + durezaExtra(Math.min(nivel, PROVA)) * 1.2) / 100.0);
+        return nivel <= PROVA ? base : Math.min(0.6, base + (nivel - PROVA) * 0.0025);
     }
 
     @net.minecraftforge.eventbus.api.SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOW)

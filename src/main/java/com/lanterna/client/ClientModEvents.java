@@ -147,6 +147,7 @@ public final class ClientModEvents {
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerBelow(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.PLAYER_HEALTH.id(), "coracoes", com.lanterna.client.hud.CoracoesHud.HUD);
         event.registerAboveAll("pavor", com.lanterna.client.construct.PavorTela.HUD);
         event.registerAboveAll("portal", com.lanterna.client.portal.PortalCliente.HUD);
         event.registerAboveAll("uniforme_transformacao", com.lanterna.client.uniform.UniformeBraco.HUD);
