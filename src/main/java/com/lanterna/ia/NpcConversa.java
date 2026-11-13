@@ -168,7 +168,7 @@ public final class NpcConversa {
                 npc.level().playSound(null, npc.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1f, 0.7f);
                 yield fala(povo, "insulto");
             }
-            case LIGAR, DESLIGAR, VOAR, POUSAR, PARAR, CARGA, NIVEL, PERIGO, JURAMENTO, AJUDA -> fala(povo, "ajuda");
+            case LIGAR, DESLIGAR, VOAR, POUSAR, PARAR, CARGA, NIVEL, PERIGO, JURAMENTO, AJUDA, DUVIDA -> fala(povo, "ajuda");
             case NADA -> fala(povo, "nada");
         };
     }

@@ -49,7 +49,7 @@ public final class AnelIA {
     /** Sem vírgula ("anel me leve para Oa"), só pedidos claros contam: "anel verde é o melhor" continua no chat. */
     private static final java.util.Set<Intencao> PEDIDOS = java.util.EnumSet.of(Intencao.VIAJAR, Intencao.PARAR, Intencao.CARGA,
             Intencao.NIVEL, Intencao.MISSAO, Intencao.ONDE, Intencao.DISTANCIA, Intencao.PERIGO, Intencao.LIGAR, Intencao.DESLIGAR,
-            Intencao.VOAR, Intencao.POUSAR, Intencao.JURAMENTO, Intencao.QUEM, Intencao.AJUDA);
+            Intencao.VOAR, Intencao.POUSAR, Intencao.JURAMENTO, Intencao.QUEM, Intencao.AJUDA, Intencao.DUVIDA);
     /** Último destino falado (para "e quanto falta?"). */
     @Nullable private static String ultimoDestino;
 
@@ -147,6 +147,11 @@ public final class AnelIA {
             case JURAMENTO -> juramento();
             case QUEM -> persona("quem");
             case AJUDA -> Component.translatable("anel.ia.ajuda");
+            case DUVIDA -> {
+                Component d = Duvidas.responder(limpo, p);
+                if (d != null) yield d;
+                yield Component.translatable("anel.ia.duvida.nao_sei");
+            }
             case OI -> persona("oi");
             case COMO_VAI -> Component.translatable("anel.ia.como_vai", Math.round(100f * ClientRingData.charge / Math.max(1, ClientRingData.maxCharge)));
             case PIADA -> Component.translatable("anel.ia.piada." + (1 + RND.nextInt(5)));
@@ -155,7 +160,13 @@ public final class AnelIA {
             case ELOGIO -> persona("elogio");
             case INSULTO -> persona("insulto");
             case TROCA -> Component.translatable("anel.ia.troca");
-            case SOBRE -> sobre(lida.resto(), p);
+            case SOBRE -> {
+                if (destino(lida.resto(), p) == null) {
+                    Component d = Duvidas.responder(limpo, p);
+                    if (d != null) yield d;
+                }
+                yield sobre(lida.resto(), p);
+            }
             case NADA -> {
                 // "zamaron" sozinho: entende como pedido de viagem
                 Destinations.Destination d = destino(limpo, p);

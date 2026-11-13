@@ -6,7 +6,7 @@ package com.lanterna.ia;
  */
 public enum Intencao {
     VIAJAR, PARAR, CARGA, NIVEL, MISSAO, ONDE, DISTANCIA, PERIGO, LIGAR, DESLIGAR, VOAR, POUSAR, JURAMENTO, QUEM,
-    AJUDA, OI, TCHAU, OBRIGADO, SOBRE, ELOGIO, INSULTO, TROCA, COMO_VAI, PIADA, NADA;
+    AJUDA, DUVIDA, OI, TCHAU, OBRIGADO, SOBRE, ELOGIO, INSULTO, TROCA, COMO_VAI, PIADA, NADA;
 
     /** Intenção + o resto do texto (o destino, o assunto...). */
     public record Lida(Intencao intencao, String resto) {}
@@ -20,12 +20,46 @@ public enum Intencao {
             "head to", "set course to", "set course for", "course to", "autopilot to", "autopilot", "navigate to", "i want to go to",
             "lets go to", "let's go to", "warp to", "jump to"};
 
+    private static final String[] COMO_PT = {"faco", "faz", "fazer", "crafto", "craftar", "crafta", "craftando", "fabrico", "fabricar",
+            "fabrica", "consigo", "conseguir", "consegue", "pego", "pegar", "obtenho", "obter", "ganho", "ganhar", "chamo", "chamar",
+            "completo", "completar", "termino", "terminar", "passo", "passar", "uso", "usar", "funciona", "funcionam", "recarrego",
+            "recarregar", "abro", "abrir", "acho", "achar", "encontro", "encontrar", "chego", "chegar", "derroto", "derrotar", "mato",
+            "matar", "libero", "liberar", "desbloqueio", "desbloquear", "subo", "subir", "escolho", "escolher", "entro", "entrar",
+            "viro", "virar", "forjo", "forjar", "monto", "montar", "coloco", "colocar", "voo", "troco", "trocar", "compro", "comprar",
+            "crio", "criar", "jogo", "jogar", "comeco", "comecar", "ativo", "ativar", "melhoro", "melhorar", "invoco", "invocar", "acesso",
+            "acessar", "sobrevivo", "sobreviver", "respiro", "respirar", "pilota", "pilotar", "piloto", "evoluo", "evoluir", "funciona"};
+    private static final String[] ONDE_PT = {"acho", "encontro", "fica", "ficam", "consigo", "pego", "compro", "mora", "moram", "nasce", "nascem", "tem"};
+
+    /** "como eu faço...", "onde acho...", "receita de...", "how do I...", "where can I find..." */
+    public static boolean duvida(String t) {
+        if (Texto.tem(t, "receita", "receitas", "craft", "craftar", "crafto", "fabricar", "recipe", "recipes", "crafting", "duvida", "tutorial",
+                "me ensina", "me ensine", "me explica", "me explique", "explica como", "explique como", "pra que serve", "para que serve",
+                "how do i", "how do you", "how can i", "how to", "how does", "where do i", "where can i", "where is the", "where are the",
+                "where do you", "what does", "teach me", "explain")) return true;
+        java.util.List<String> w = Texto.palavras(t);
+        for (int i = 0; i + 1 < w.size(); i++) {
+            String a = w.get(i);
+            String b = w.get(i + 1).equals("eu") || w.get(i + 1).equals("se") || w.get(i + 1).equals("que") || w.get(i + 1).equals("da") || w.get(i + 1).equals("posso")
+                    ? (i + 2 < w.size() ? w.get(i + 2) : "") : w.get(i + 1);
+            if (a.equals("como") && java.util.Arrays.asList(COMO_PT).contains(b)) return true;
+            if (a.equals("onde") && java.util.Arrays.asList(ONDE_PT).contains(b)) return true;
+        }
+        return false;
+    }
+
     public static Lida ler(String limpo) {
+        return ler(limpo, true);
+    }
+
+    /** comDuvida = false: lê como pedido comum (quando o anel não achou resposta para a dúvida). */
+    public static Lida ler(String limpo, boolean comDuvida) {
         String t = limpo;
         // viagem primeiro: "me leve para X"
         String resto = Texto.depoisDe(t, VIAJAR_PT);
         if (resto == null) resto = Texto.depoisDe(t, VIAJAR_EN);
         if (resto != null && !resto.isBlank()) return new Lida(VIAJAR, resto);
+        // dúvida sobre o jogo: "como faço a bateria", "receita do anel vazio", "how do i get the green ring"
+        if (comDuvida && duvida(t)) return new Lida(DUVIDA, t);
         if (Texto.tem(t, "pare", "parar", "cancela", "cancelar", "cancele", "abortar", "aborta", "stop", "cancel", "abort", "halt",
                 "chega", "desliga o piloto", "desligar o piloto")
                 && Texto.palavras(t).size() <= 5) return new Lida(PARAR, "");

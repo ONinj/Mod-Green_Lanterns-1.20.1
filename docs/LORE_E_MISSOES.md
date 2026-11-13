@@ -1299,3 +1299,25 @@ pontuação). Letra errada recomeça a palavra.
 - Português: `pt_BR-faber-medium`. Inglês: `en_US-ryan-medium`. Dá para trocar em `config/lanterna-client.toml` (`voz_neural_pt`, `voz_neural_en`; outras opções: `pt_BR-cadu-medium`, `pt_BR-jeff-medium`, `en_US-lessac-medium`, `en_US-joe-medium`...).
 - Cada Tropa tem um tom: a voz fica um pouco mais grave (Vermelha, Negra, Amarela) ou mais aguda (Azul, Violeta, Branca), sem mudar a velocidade. Segue o volume geral e o de "Vozes" do jogo.
 - Se algo não funcionar neste computador, o anel volta sozinho para a voz do sistema. `voz_neural = false` desliga a voz nova.
+
+## 0.48.2 — O anel tira dúvidas
+
+Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele entende perguntas como "como eu faço...", "como consigo...", "onde acho...", "receita de...", "how do I...", "where can I find...".
+
+- **Receitas:** "como faço uma fornalha", "receita da bateria cinzelada", "como eu faço a bateria verde". O anel lê as receitas de verdade do jogo, inclusive as de outros mods, e diz:
+  - os ingredientes e a arrumação na bancada;
+  - ou a fornalha, o alto-forno, o defumador, a fogueira, o cortador ou a mesa de ferraria;
+  - e quantas outras receitas existem.
+- **Missões:** "como faço essa missão" explica a missão que você está acompanhando. "como passo da missão o juramento" procura a missão pelo nome. A resposta traz:
+  - a descrição e os passos, com o que já foi feito;
+  - uma dica do tipo de objetivo;
+  - onde fica (outro planeta, ou a distância e as coordenadas).
+- **Assuntos do mod** (`assets/lanterna/anel/duvidas.json`, 52 assuntos em português e inglês):
+  - como conseguir o anel e o ritual de cada Tropa;
+  - Bateria Cinzelada, Fragmentos Estelares, Cidade Aurora e a cratera;
+  - recarga, voo, teclas, construtos, Oficina, afinidade, nível e postos;
+  - missões, forja, chefes e Bosses das Tropas, lendários;
+  - espaço, sóis e buracos negros, naves, contratos, respeito e trocas, Tropas inimigas, morte;
+  - juramento, Fonte, Árvore da Luz, Corações, Prova da Emoção, Porta Estelar, técnicas, palácio;
+  - Mogo, Hanks, guildas, energia, comunicador, câmera, voz, comandos, Lágrimas Índigo, perfil, armadura e cidades.
+- Correção: "O Juramento do Medo" e "O Juramento do Amor" (estava "da").

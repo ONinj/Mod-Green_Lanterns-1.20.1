@@ -3378,6 +3378,28 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.2: o anel tira dúvidas (receitas, missões e assuntos do mod). -Plugar=en para inglês. */
+    private static void sceneDuvidas() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("lantern reset"); });
+        at(20, () -> cmd("lantern ring green"));
+        at(20, () -> cmd("lantern full"));
+        at(20, () -> cmd("lantern mission juramento_green"));
+        String[] frases = System.getProperty("lanterna.lugar", "pt").startsWith("en")
+                ? new String[]{"how do I craft the empty ring", "chiseled battery recipe", "how do I get the green ring", "how do I recharge",
+                "how do I do this mission", "where do I find star fragments", "how do i make a furnace", "what is the source", "how do I get a ship",
+                "how are you", "where am i", "how do I make iron ingot"}
+                : new String[]{"como faço o anel vazio", "receita da bateria cinzelada", "como consigo o anel verde", "como eu recarrego o anel",
+                "como faço essa missão", "onde acho fragmentos estelares", "como craftar uma fornalha", "o que é a fonte", "como consigo uma nave",
+                "como vai", "onde estou", "como faço lingote de ferro", "como eu faço a bateria verde", "como passo da missão o juramento",
+                "como funciona a árvore da luz", "como faço para voar", "qual a minha carga", "como chego em zamaron", "como faço uma tocha",
+                "como derrotar o chefe", "como faço a bandeira da guilda", "como eu invoco os bosses das tropas"};
+        for (String f : frases) at(6, () -> { com.lanterna.client.ia.AnelIA.ouvir(f, false); glog("anel <" + f + "> -> " + com.lanterna.client.ia.AnelIA.ultimaResposta); });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.47.0: conversa com o anel (chat), viagem por pedido, NPC respondendo, juramento escrito, chefes espertos e lendário escalando. */
     private static void sceneIA() {
         Minecraft mc = Minecraft.getInstance();
@@ -5350,6 +5372,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("densa")) sceneDensa();
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
         else if (ENABLED && SCENE.equals("ia")) sceneIA();
+        else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();

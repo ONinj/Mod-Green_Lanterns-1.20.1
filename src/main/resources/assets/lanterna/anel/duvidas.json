@@ -1,0 +1,974 @@
+[
+ {
+  "id": "anel",
+  "chaves": [
+   "conseguir anel",
+   "ganhar anel",
+   "pegar anel",
+   "ser escolhido",
+   "virar lanterna",
+   "virar um lanterna",
+   "primeiro anel",
+   "como ter anel",
+   "conseguir um anel",
+   "anel de poder",
+   "get a ring",
+   "get ring",
+   "become a lantern",
+   "be chosen",
+   "first ring",
+   "power ring",
+   "obtain ring"
+  ],
+  "pt": "Há três caminhos. 1) A história da Terra: vá à Cidade Aurora, fale com o Sgt. Rui e siga a Dra. Lívia até o Anel Apagado e o Ritual da Bateria. 2) O ritual de cada Tropa (pergunte 'como consigo o anel verde', por exemplo). 3) O Chamado: a cada 3 conquistas grandes na Terra (diamante, Nether, Dragão...), um anel aleatório escolhe você.",
+  "en": "There are three paths. 1) The Earth story: go to Aurora City, talk to Sgt. Rui and follow Dr. Lívia to the Dimmed Ring and the Battery Ritual. 2) Each Corps' ritual (ask 'how do I get the green ring', for example). 3) The Call: every 3 big achievements on Earth (diamond, Nether, Dragon...), a random ring chooses you."
+ },
+ {
+  "id": "anel_verde",
+  "chaves": [
+   "anel verde",
+   "tropa verde",
+   "lanterna verde",
+   "green ring",
+   "green lantern",
+   "green corps"
+  ],
+  "pt": "Anel Verde: durma noites inteiras. A partir da 4ª noite dormida, há 6% de chance por noite de o anel chegar enquanto você sonha.",
+  "en": "Green Ring: sleep through whole nights. From the 4th night slept, there is a 6% chance per night that the ring arrives while you dream."
+ },
+ {
+  "id": "anel_vermelho",
+  "chaves": [
+   "anel vermelho",
+   "tropa vermelha",
+   "lanterna vermelho",
+   "red ring",
+   "red lantern",
+   "red corps"
+  ],
+  "pt": "Anel Vermelho: mate muitos monstros hostis em pouco tempo. A fúria precisa transbordar.",
+  "en": "Red Ring: kill many hostile monsters in a short time. The rage has to overflow."
+ },
+ {
+  "id": "anel_amarelo",
+  "chaves": [
+   "anel amarelo",
+   "tropa amarela",
+   "lanterna amarelo",
+   "sinestro",
+   "yellow ring",
+   "yellow lantern",
+   "yellow corps"
+  ],
+  "pt": "Anel Amarelo: encare o medo. Fique sob a Escuridão do Warden, com ele por perto, sem fugir.",
+  "en": "Yellow Ring: face fear. Stay under the Warden's Darkness, with it nearby, without running."
+ },
+ {
+  "id": "anel_azul",
+  "chaves": [
+   "anel azul",
+   "tropa azul",
+   "lanterna azul",
+   "blue ring",
+   "blue lantern",
+   "blue corps"
+  ],
+  "pt": "Anel Azul: devolva a esperança curando um aldeão zumbi (poção de Fraqueza e depois maçã dourada).",
+  "en": "Blue Ring: restore hope by curing a zombie villager (Weakness potion, then a golden apple)."
+ },
+ {
+  "id": "anel_violeta",
+  "chaves": [
+   "anel violeta",
+   "tropa violeta",
+   "safira estrela",
+   "anel do amor",
+   "violet ring",
+   "violet corps",
+   "star sapphire"
+  ],
+  "pt": "Anel Violeta: crie filhotes com o seu bicho de estimação domado ao seu lado.",
+  "en": "Violet Ring: breed babies with your tamed pet by your side."
+ },
+ {
+  "id": "anel_indigo",
+  "chaves": [
+   "anel indigo",
+   "tropa indigo",
+   "anel da compaixao",
+   "indigo ring",
+   "indigo corps",
+   "indigo tribe"
+  ],
+  "pt": "Anel Índigo: tenha compaixão. Conserte com ferro um Golem de Ferro quase morto até a vida cheia.",
+  "en": "Indigo Ring: show compassion. Repair a nearly dead Iron Golem with iron until it is at full health."
+ },
+ {
+  "id": "anel_laranja",
+  "chaves": [
+   "anel laranja",
+   "tropa laranja",
+   "anel da avareza",
+   "larfleeze",
+   "orange ring",
+   "orange lantern",
+   "orange corps"
+  ],
+  "pt": "Anel Laranja: carregue um tesouro enorme parado em cima de um bloco de ouro. Normalmente só existe um Lanterna Laranja por mundo.",
+  "en": "Orange Ring: carry a huge treasure while standing on a gold block. Normally there is only one Orange Lantern per world."
+ },
+ {
+  "id": "anel_negro",
+  "chaves": [
+   "anel negro",
+   "anel preto",
+   "tropa negra",
+   "lanterna negro",
+   "lanterna negra",
+   "corromper",
+   "corrupcao",
+   "black ring",
+   "black lantern",
+   "black corps",
+   "corrupt"
+  ],
+  "pt": "Anel Negro: morra sob o efeito Wither, ou seja corrompido ao morrer com outro anel. A chance de corromper sobe um pouco a cada morte, e morrer para um Lanterna Negro conta. Em Ryut, Lanternas Negros caçam quem tem anel.",
+  "en": "Black Ring: die under the Wither effect, or get corrupted when dying with another ring. The corruption chance rises a little with each death, and dying to a Black Lantern counts. On Ryut, Black Lanterns hunt ring bearers."
+ },
+ {
+  "id": "anel_branco",
+  "chaves": [
+   "anel branco",
+   "tropa branca",
+   "lanterna branco",
+   "fusao",
+   "sete aneis",
+   "7 aneis",
+   "genese",
+   "white ring",
+   "white lantern",
+   "fusion",
+   "seven rings",
+   "genesis"
+  ],
+  "pt": "Anel Branco: junte os sete anéis forjados e os sete drops dos chefes. Qualquer Guardião ou líder de planeta diz o que falta. Com tudo, Gênese aparece: funda o Anel Branco no Altar da Vida e derrote o Nulo.",
+  "en": "White Ring: gather the seven forged rings and the seven boss drops. Any Guardian or planet leader tells you what is missing. With everything, Genesis appears: fuse the White Ring at the Altar of Life and defeat the Null."
+ },
+ {
+  "id": "bateria_cinzelada",
+  "chaves": [
+   "bateria cinzelada",
+   "ritual da bateria",
+   "anel apagado",
+   "velas",
+   "altar de ametista",
+   "chiseled battery",
+   "battery ritual",
+   "dimmed ring",
+   "candles"
+  ],
+  "pt": "Bateria Cinzelada: 2 Fragmentos Estelares, 1 bloco de ametista, 2 obsidianas, 1 lanterna, 2 pedras cinzeladas e 1 lingote de ouro. De noite e a céu aberto, ponha a bateria sobre um bloco de ametista com 4 velas acesas nas diagonais, a 2 blocos. Clique com um Fragmento Estelar, aguente 3 ondas de Contaminados por 1 minuto e depois agache ao lado dela por 5 segundos. Carregada, encoste o Anel Apagado.",
+  "en": "Chiseled Battery: 2 Star Fragments, 1 amethyst block, 2 obsidian, 1 lantern, 2 chiseled stone and 1 gold ingot. At night, under open sky, put the battery on an amethyst block with 4 lit candles on the diagonals, 2 blocks away. Click it with a Star Fragment, survive 3 waves of the Tainted for 1 minute, then crouch beside it for 5 seconds. Once charged, touch it with the Dimmed Ring."
+ },
+ {
+  "id": "fragmentos",
+  "chaves": [
+   "fragmento estelar",
+   "fragmentos estelares",
+   "estrela cadente",
+   "estrelas cadentes",
+   "rocha estelar",
+   "contaminados",
+   "star fragment",
+   "star fragments",
+   "shooting star",
+   "falling star",
+   "star rock",
+   "tainted"
+  ],
+  "pt": "De noite caem estrelas perto de você, abrindo crateras com uma Rocha Estelar. Quebre com picareta de ferro para ganhar 1 ou 2 Fragmentos Estelares. Cuidado com os Contaminados, zumbis brilhantes e mais fortes.",
+  "en": "At night, stars fall near you and leave craters with a Star Rock. Break it with an iron pickaxe to get 1 or 2 Star Fragments. Watch out for the Tainted, glowing and stronger zombies."
+ },
+ {
+  "id": "aurora",
+  "chaves": [
+   "cidade aurora",
+   "vila aurora",
+   "livia",
+   "dra livia",
+   "sgt rui",
+   "sargento",
+   "base vigilia",
+   "observatorio",
+   "historia da terra",
+   "aurora city",
+   "aurora village",
+   "livia",
+   "sgt rui",
+   "sergeant",
+   "vigil base",
+   "observatory",
+   "earth story"
+  ],
+  "pt": "A Cidade Aurora fica a uns 300 a 500 blocos do spawn. Fale com o Sgt. Rui na porta do observatório. Embaixo do observatório fica a Base Vigília da Dra. Lívia, e é ela quem guia a história até o seu primeiro anel.",
+  "en": "Aurora City is about 300 to 500 blocks from spawn. Talk to Sgt. Rui at the observatory door. Under the observatory is Dr. Lívia's Vigil Base, and she guides the story up to your first ring."
+ },
+ {
+  "id": "cratera",
+  "chaves": [
+   "cratera",
+   "anel caido",
+   "meteoro",
+   "crater",
+   "fallen ring",
+   "meteor"
+  ],
+  "pt": "A cratera do Anel Caído tem uma coluna de fumaça visível de longe. A Dra. Lívia dá o mapa na missão O Sinal, e o cartógrafo também vende o Mapa do Anel Caído. O Anel Apagado fica num baú no meio da cratera.",
+  "en": "The Fallen Ring crater has a smoke column visible from far away. Dr. Lívia gives you the map in the mission The Signal, and the cartographer also sells the Fallen Ring Map. The Dimmed Ring is in a chest in the middle of the crater."
+ },
+ {
+  "id": "recarregar",
+  "chaves": [
+   "recarregar",
+   "recarga",
+   "carregar o anel",
+   "encher o anel",
+   "anel sem carga",
+   "sem energia",
+   "bateria da tropa",
+   "bateria de poder",
+   "recharge",
+   "charge the ring",
+   "refill",
+   "out of charge",
+   "no energy",
+   "power battery",
+   "corps battery"
+  ],
+  "pt": "Para recarregar: ponha a bateria da sua Tropa no espaço da aba Lanterna (tecla K) e aperte R. Também dá para clicar com o anel numa bateria colocada no chão, usar a Estação de Recarga dentro da nave ou a Bateria Central do seu planeta. A bateria só recarrega anéis da mesma Tropa.",
+  "en": "To recharge: put your Corps battery in the Lantern tab slot (K key) and press R. You can also click a placed battery with the ring, use the Recharge Station inside a ship or your planet's Central Battery. A battery only recharges rings of the same Corps."
+ },
+ {
+  "id": "voar",
+  "chaves": [
+   "voar",
+   "voo",
+   "como voa",
+   "pousar",
+   "hiperpropulsao",
+   "turbo",
+   "fly",
+   "flight",
+   "land",
+   "hyperdrive",
+   "boost"
+  ],
+  "pt": "Com o anel ligado (G), aperte V para voar; Shift pousa. Voar gasta carga. No espaço e nos planetas há a hiperpropulsão para ir muito rápido, e ela freia sozinha perto de perigos.",
+  "en": "With the ring on (G), press V to fly; Shift lands. Flying uses charge. In space and on planets there is the hyperdrive to go very fast, and it brakes by itself near dangers."
+ },
+ {
+  "id": "teclas",
+  "chaves": [
+   "teclas",
+   "atalhos",
+   "controles",
+   "botoes",
+   "qual tecla",
+   "keys",
+   "keybinds",
+   "hotkeys",
+   "controls",
+   "which key"
+  ],
+  "pt": "Principais teclas: K aba Lanterna, G liga e desliga o anel, V voa, R recarrega, Z segura a roda de construtos e X usa, Alt+Z Oficina, M diário, J mapa estelar, N Porta Estelar, P Árvore da Luz, O técnicas (Y, U, I), H perfil, F4 comunicador, Tab trava a mira e Ç fala comigo. Todas mudam em Controles.",
+  "en": "Main keys: K Lantern tab, G turns the ring on and off, V flies, R recharges, hold Z for the construct wheel and X uses it, Alt+Z Workshop, M journal, J star map, N Star Gate, P Tree of Light, O techniques (Y, U, I), H profile, F4 communicator, Tab locks aim and ; talks to me. All can be changed in Controls."
+ },
+ {
+  "id": "construtos",
+  "chaves": [
+   "construto",
+   "construtos",
+   "roda de construtos",
+   "laser",
+   "martelo",
+   "escudo",
+   "jaula",
+   "ponte",
+   "picareta",
+   "broca",
+   "presets",
+   "construct",
+   "constructs",
+   "construct wheel",
+   "laser",
+   "hammer",
+   "shield",
+   "cage",
+   "bridge",
+   "pickaxe",
+   "drill",
+   "presets"
+  ],
+  "pt": "Segure Z para abrir a roda de construtos, escolha um e use com X. Na roda, passe o mouse e aperte 1 a 4 para gravar nos atalhos Alt+1 a Alt+4. Alguns construtos só liberam com mais afinidade, e a força cresce com a afinidade e o nível.",
+  "en": "Hold Z to open the construct wheel, pick one and use it with X. On the wheel, hover and press 1 to 4 to save it to the Alt+1 to Alt+4 shortcuts. Some constructs unlock only with more affinity, and their strength grows with affinity and level."
+ },
+ {
+  "id": "oficina",
+  "chaves": [
+   "oficina",
+   "desenhar construto",
+   "construto proprio",
+   "criar construto",
+   "workshop",
+   "draw a construct",
+   "custom construct",
+   "create construct"
+  ],
+  "pt": "Alt+Z abre a Oficina de Construtos: desenhe o seu construto cubinho por cubinho e escolha o comportamento (arma, escudo, disparo, queda do céu, veículo ou estrutura). Salve num dos 8 espaços e ponha num preset.",
+  "en": "Alt+Z opens the Construct Workshop: draw your construct cube by cube and choose its behavior (weapon, shield, shot, sky drop, vehicle or structure). Save it in one of the 8 slots and put it on a preset."
+ },
+ {
+  "id": "afinidade",
+  "chaves": [
+   "afinidade",
+   "aceitacao",
+   "confiavel",
+   "vinculado",
+   "uno com o anel",
+   "affinity",
+   "acceptance",
+   "trusted",
+   "bonded"
+  ],
+  "pt": "Afinidade é o quanto o anel aceita você: Desconfiado, Tolerante, Aceito, Confiável, Vinculado e Uno com o anel. Ela cresce com o tempo de anel ligado, usando construtos e fazendo missões. Mais afinidade dá mais cura, soco mais forte e construtos melhores.",
+  "en": "Affinity is how much the ring accepts you: Wary, Tolerant, Accepted, Trusted, Bonded and One with the ring. It grows with time wearing the ring switched on, using constructs and doing missions. More affinity gives more healing, a stronger punch and better constructs."
+ },
+ {
+  "id": "nivel",
+  "chaves": [
+   "subir de nivel",
+   "ganhar xp",
+   "ganhar experiencia",
+   "nivel maximo",
+   "postos",
+   "posto",
+   "patrulheiro",
+   "oficial",
+   "veterano",
+   "guarda de honra",
+   "level up",
+   "gain xp",
+   "gain experience",
+   "max level",
+   "ranks",
+   "rank"
+  ],
+  "pt": "XP vem de piratas, capitães, Lanternas inimigos, chefes, Ecos, naves destruídas, missões, contratos e da primeira visita a cada planeta. O nível vai até 150. No nível 10 você vira Patrulheiro e ganha uma nave Lanceira; no 20, Oficial e uma nave Patrulha; depois Veterano (30) e Guarda de Honra (40).",
+  "en": "XP comes from pirates, captains, enemy Lanterns, bosses, Echoes, destroyed ships, missions, contracts and your first visit to each planet. The level goes up to 150. At level 10 you become a Patroller and get a Lancer ship; at 20, an Officer and a Patrol ship; then Veteran (30) and Honor Guard (40)."
+ },
+ {
+  "id": "missoes",
+  "chaves": [
+   "missoes",
+   "diario",
+   "linha principal",
+   "proxima missao",
+   "pegar missao",
+   "como pegar missao",
+   "onde pego missao",
+   "missions",
+   "quests",
+   "journal",
+   "main line",
+   "next mission",
+   "get a mission"
+  ],
+  "pt": "Aperte M para abrir o diário com as suas missões. A linha principal começa no planeta da sua Tropa. Depois, fale com o Guardião ou o líder de qualquer planeta liberado para pegar a linha dele, na ordem que quiser. NPCs com '!' no nome também dão missões.",
+  "en": "Press M to open the journal with your missions. The main line starts on your Corps planet. Then talk to the Guardian or leader of any unlocked planet to take its line, in any order. NPCs with '!' in their name also give missions."
+ },
+ {
+  "id": "forjar",
+  "chaves": [
+   "forjar",
+   "forja do espectro",
+   "anel vazio",
+   "forjar anel",
+   "fabricar anel",
+   "forge",
+   "spectrum forge",
+   "empty ring",
+   "forge a ring",
+   "craft a ring"
+  ],
+  "pt": "Na Forja do Espectro do planeta, use o Anel Vazio, o drop do chefe e 4 minérios do planeta, e cumpra o ritual da emoção perto da forja por 10 segundos. O Anel Vazio sai na bancada com 4 diamantes, 4 Méritos e 1 lingote de netherite. Cada planeta exige um nível mínimo: Odym 5, Oa 8, Okaara 12, Ysmault 16, Zamaron 20, Korugar 25, Nok 30 e Ryut 32.",
+  "en": "At the planet's Spectrum Forge, use the Empty Ring, the boss drop and 4 of the planet's ores, and complete the emotion ritual near the forge for 10 seconds. The Empty Ring is crafted with 4 diamonds, 4 Merits and 1 netherite ingot. Each planet needs a minimum level: Odym 5, Oa 8, Okaara 12, Ysmault 16, Zamaron 20, Korugar 25, Nok 30 and Ryut 32."
+ },
+ {
+  "id": "chefe_planeta",
+  "chaves": [
+   "chefe do planeta",
+   "boss do planeta",
+   "altar do desafio",
+   "arena",
+   "drop do chefe",
+   "derrotar o chefe",
+   "vigia partido",
+   "vorgath",
+   "nyrielle",
+   "thessara",
+   "mammok",
+   "morrow",
+   "penitente",
+   "devorador",
+   "boss",
+   "bosses",
+   "chefe",
+   "chefes",
+   "boss da tropa",
+   "bosses das tropas",
+   "karvhul",
+   "vesk morrath",
+   "ghor maddu",
+   "seraphel",
+   "gemeos velados",
+   "calithe",
+   "morthaal",
+   "verdan",
+   "planet boss",
+   "challenge altar",
+   "arena",
+   "boss drop",
+   "defeat the boss",
+   "corps boss",
+   "corps bosses"
+  ],
+  "pt": "Cada planeta tem um chefe na arena, chamado no Altar do Desafio. Vencer dá 2 drops: um para forjar o anel e outro para o Altar da Vida. Depois de vencer o chefe do planeta, dá para chamar o Boss da Tropa no mesmo altar: agachado (Shift + usar), com 8 minérios do planeta e nível do planeta mais 5.",
+  "en": "Each planet has a boss in the arena, summoned at the Challenge Altar. Winning gives 2 drops: one to forge the ring and one for the Altar of Life. After beating the planet boss, you can summon the Corps Boss at the same altar: crouching (Shift + use), with 8 of the planet's ores and the planet level plus 5."
+ },
+ {
+  "id": "lendarios",
+  "chaves": [
+   "lendario",
+   "lendarios",
+   "planeta lendario",
+   "kael",
+   "tarvok",
+   "grath",
+   "mizzuk",
+   "aurel",
+   "nhale",
+   "seraphine",
+   "malachar",
+   "insignia",
+   "fragmento lendario",
+   "legendary",
+   "legendaries",
+   "legendary planet",
+   "insignia",
+   "legendary fragment"
+  ],
+  "pt": "Os 8 Lanternas lendários ficam em planetas fixos a 50 mil blocos do centro (veja no mapa estelar, J). Se ele é de Tropa inimiga, é luta de verdade e dá Insígnia e Fragmentos Lendários. Se é da sua Tropa ou aliada, clique nele para um duelo de treino. Eles ficam mais fortes com o seu nível e com mais jogadores.",
+  "en": "The 8 legendary Lanterns live on fixed planets 50 thousand blocks from the center (see the star map, J). If he is from an enemy Corps, it is a real fight and gives an Insignia and Legendary Fragments. If he is from your Corps or an ally, click him for a training duel. They get stronger with your level and with more players."
+ },
+ {
+  "id": "espaco",
+  "chaves": [
+   "espaco",
+   "viajar",
+   "ir para outro planeta",
+   "ir para os planetas",
+   "mapa estelar",
+   "piloto automatico",
+   "planetas",
+   "sair da terra",
+   "chego",
+   "chegar em",
+   "chegar a",
+   "ir ate",
+   "ir pra",
+   "space",
+   "travel",
+   "go to another planet",
+   "star map",
+   "autopilot",
+   "planets",
+   "leave earth"
+  ],
+  "pt": "Voe bem alto para sair para o espaço. Aperte J para abrir o mapa estelar e escolher um destino, ou só me peça: 'me leve para Zamaron'. No espaço não há ar: você só respira com o anel. Cuidado com sóis e buracos negros, que puxam e matam.",
+  "en": "Fly very high to leave for space. Press J to open the star map and pick a destination, or just ask me: 'take me to Zamaron'. There is no air in space: you only breathe with the ring. Beware of suns and black holes, which pull you in and kill."
+ },
+ {
+  "id": "sois",
+  "chaves": [
+   "sol",
+   "sois",
+   "buraco negro",
+   "buracos negros",
+   "abismo",
+   "gravidade",
+   "sun",
+   "suns",
+   "black hole",
+   "black holes",
+   "abyss",
+   "gravity"
+  ],
+  "pt": "Sóis puxam forte e queimam de perto; entrar num é morte. Buracos negros puxam cada vez mais forte e passar do horizonte mata. O painel do espaço mostra o mais perto, e a hiperpropulsão tira você de lá.",
+  "en": "Suns pull hard and burn up close; flying into one is death. Black holes pull harder and harder, and crossing the horizon kills. The space panel shows the closest one, and the hyperdrive gets you out."
+ },
+ {
+  "id": "naves",
+  "chaves": [
+   "nave",
+   "naves",
+   "pilotar",
+   "como pilotar",
+   "lanceira",
+   "patrulha",
+   "cargueiro",
+   "chave da nave",
+   "conseguir nave",
+   "estaleiro",
+   "ship",
+   "ships",
+   "pilot",
+   "how to pilot",
+   "lancer",
+   "patrol",
+   "freighter",
+   "ship key",
+   "get a ship",
+   "shipyard"
+  ],
+  "pt": "Você ganha naves ao subir de posto (Lanceira no nível 10, Patrulha no 20), compra no Estaleiro do hangar ou toma uma nave sem dono montando nela. Pilotando: W, A, S, D e mouse, Espaço sobe, C desce, Ctrl turbo, X atira e B abre a porta. Shift + clique entra no interior. A Chave da Nave, com clique direito, chama a nave até você.",
+  "en": "You get ships by ranking up (Lancer at level 10, Patrol at 20), buy them at the hangar Shipyard, or take an ownerless ship by mounting it. Piloting: W, A, S, D and mouse, Space goes up, C goes down, Ctrl boosts, X fires and B opens the door. Shift + click enters the interior. Right-clicking with the Ship Key calls the ship to you."
+ },
+ {
+  "id": "contratos",
+  "chaves": [
+   "contrato",
+   "contratos",
+   "quadro de contratos",
+   "missoes secundarias",
+   "contract",
+   "contracts",
+   "contract board",
+   "side missions"
+  ],
+  "pt": "Pegue contratos no Quadro de Contratos do quartel da sua Tropa ou no console dentro da sua nave. Saem 4 novos por dia, até 3 ativos: caçar piratas, derrubar capitães, limpar Ecos, resgates, entregas e mais. O alvo aparece quando você chega perto.",
+  "en": "Take contracts at the Contract Board in your Corps barracks or at the console inside your ship. There are 4 new ones a day, up to 3 active: hunting pirates, downing captains, clearing Echoes, rescues, deliveries and more. The target appears when you get close."
+ },
+ {
+  "id": "respeito",
+  "chaves": [
+   "respeito",
+   "reputacao",
+   "trocas",
+   "trocar",
+   "comerciar",
+   "negociar",
+   "comprar",
+   "moedas",
+   "meritos",
+   "respect",
+   "reputation",
+   "trades",
+   "trade",
+   "buy",
+   "coins",
+   "merits"
+  ],
+  "pt": "Para trocar com um morador, use Shift + clique direito nele. Respeito com o povo sobe com missões, favores, trocas e elogios. Falta de respeito encarece as trocas, mas nunca tranca. Nas lojas das cidades você paga em Méritos.",
+  "en": "To trade with a resident, Shift + right-click them. Respect with a people rises with missions, favors, trades and compliments. Low respect makes trades more expensive, but never locks them. City shops take Merits."
+ },
+ {
+  "id": "inimigas",
+  "chaves": [
+   "tropas inimigas",
+   "tropa inimiga",
+   "inimigos da tropa",
+   "quem e inimigo",
+   "aliados",
+   "enemy corps",
+   "enemies",
+   "allies",
+   "who is enemy"
+  ],
+  "pt": "Os povos tomam o lado da Tropa do seu planeta. A Verde é inimiga da Amarela, Vermelha, Laranja e Negra; a Laranja e a Negra são inimigas de quase todos. Lanternas de Tropas inimigas atacam você, e ninguém troca com você até ganhar o respeito daquele povo.",
+  "en": "Peoples side with their planet's Corps. Green is enemy of Yellow, Red, Orange and Black; Orange and Black are enemies of almost everyone. Lanterns from enemy Corps attack you, and nobody trades with you until you earn that people's respect."
+ },
+ {
+  "id": "morte",
+  "chaves": [
+   "morri",
+   "morte",
+   "quando morro",
+   "perdi o anel",
+   "anel sumiu",
+   "bateria ficou",
+   "died",
+   "death",
+   "when i die",
+   "lost my ring",
+   "ring disappeared"
+  ],
+  "pt": "Quando você morre, a bateria fica no lugar, e o chat mostra as coordenadas. Com 50% de carga ou mais, o anel volta sozinho para a sua mão gastando 25%. Com menos, ele fica no chão junto com a bateria. O Anel Branco sempre volta.",
+  "en": "When you die, the battery stays where you fell, and the chat shows the coordinates. With 50% charge or more, the ring returns to your hand by itself, using 25%. With less, it stays on the ground with the battery. The White Ring always returns."
+ },
+ {
+  "id": "juramento",
+  "chaves": [
+   "juramento",
+   "recitar",
+   "jurar",
+   "bateria central",
+   "microfone",
+   "oath",
+   "recite",
+   "pledge",
+   "central battery",
+   "microphone"
+  ],
+  "pt": "A primeira missão do anel é o Juramento: vá até a Bateria Central da sua Tropa e clique nela com o anel. Recite os versos em voz alta (cada palavra acende quando o microfone ouve), aperte TAB para digitar, ou segure Espaço se não tiver microfone.",
+  "en": "The ring's first mission is the Oath: go to your Corps Central Battery and click it with the ring. Recite the verses out loud (each word lights up when the microphone hears it), press TAB to type them, or hold Space if you have no microphone."
+ },
+ {
+  "id": "fonte",
+  "chaves": [
+   "fonte",
+   "chamado da fonte",
+   "banho de luz",
+   "pressao",
+   "essencia",
+   "selo da fonte",
+   "dimensao de energia",
+   "portal da bateria",
+   "source",
+   "call of the source",
+   "light bath",
+   "pressure",
+   "essence",
+   "source seal",
+   "energy dimension"
+  ],
+  "pt": "O Chamado da Fonte começa sozinho com afinidade Vinculado e nível 20. Vá à Bateria Central, faça a provação da sua emoção e recite o juramento para ganhar o Selo da Fonte. Com ele, o portal da Bateria leva à Fonte. Lá dentro você junta Essência e, ficando 10 minutos, ganha o Banho de Luz: o anel fica com 250% de carga. Dá para ficar até 2 horas por causa da pressão.",
+  "en": "The Call of the Source starts by itself at Bonded affinity and level 20. Go to the Central Battery, pass your emotion's trial and recite the oath to get the Source Seal. With it, the Battery portal takes you to the Source. Inside you gather Essence, and staying 10 minutes gives the Light Bath: the ring goes to 250% charge. You can stay up to 2 hours because of the pressure."
+ },
+ {
+  "id": "arvore",
+  "chaves": [
+   "arvore da luz",
+   "arvore",
+   "nos da arvore",
+   "construtos novos",
+   "tree of light",
+   "skill tree",
+   "tree nodes",
+   "new constructs"
+  ],
+  "pt": "A Árvore da Luz (tecla P) tem três ramos por Tropa: Ataque, Proteção e Domínio. Os nós custam Essência da Fonte e precisam do Selo da Fonte. Ela libera 10 construtos novos por Tropa e bônus passivos.",
+  "en": "The Tree of Light (P key) has three branches per Corps: Attack, Protection and Dominion. Nodes cost Source Essence and need the Source Seal. It unlocks 10 new constructs per Corps and passive bonuses."
+ },
+ {
+  "id": "coracoes",
+  "chaves": [
+   "coracao da emocao",
+   "coracoes das emocoes",
+   "ilha do coracao",
+   "colosso de jade",
+   "mae das sombras",
+   "serpente escarlate",
+   "rei faminto",
+   "arcanjo",
+   "cervo sereno",
+   "rainha de cristal",
+   "heart of emotion",
+   "emotion hearts",
+   "heart island"
+  ],
+  "pt": "Os Corações das Emoções são os chefes da Fonte. Vá à Ilha do Coração, ao sul da plataforma, e clique no altar com 8 nós da Árvore da Luz daquela Tropa. A primeira vitória dá o Coração da Emoção: mais 10% de dano e 20% de carga máxima para sempre.",
+  "en": "The Emotion Hearts are the Source bosses. Go to Heart Island, south of the platform, and click the altar with 8 Tree of Light nodes of that Corps. The first win gives the Heart of Emotion: 10% more damage and 20% more max charge forever."
+ },
+ {
+  "id": "prova_emocao",
+  "chaves": [
+   "prova da emocao",
+   "nivel 50",
+   "autorrecarga",
+   "recarregar sozinho",
+   "emotion trial",
+   "level 50",
+   "self recharge"
+  ],
+  "pt": "A Prova da Emoção libera no nível 50: junte 3000 pontos da emoção da sua Tropa, derrote 3 capitães piratas e fale com o Guardião do seu planeta. Depois disso, o anel se recarrega com a sua própria emoção.",
+  "en": "The Emotion Trial unlocks at level 50: gather 3000 points of your Corps' emotion, defeat 3 pirate captains and talk to your planet's Guardian. After that, the ring recharges from your own emotion."
+ },
+ {
+  "id": "porta_estelar",
+  "chaves": [
+   "porta estelar",
+   "teleporte",
+   "teleportar",
+   "star gate",
+   "stargate",
+   "teleport"
+  ],
+  "pt": "A Porta Estelar vem da linha dos Guardiões, a partir do nível 32 e afinidade Confiável. Depois disso, a tecla N teleporta você para planetas que já visitou.",
+  "en": "The Star Gate comes from the Guardians' line, from level 32 and Trusted affinity. After that, the N key teleports you to planets you have already visited."
+ },
+ {
+  "id": "tecnicas",
+  "chaves": [
+   "tecnicas",
+   "tecnica",
+   "capitaes",
+   "olhar do anel",
+   "bastiao",
+   "onda de vontade",
+   "salto de dobra",
+   "armadura de construto",
+   "techniques",
+   "technique",
+   "captains"
+  ],
+  "pt": "As técnicas são ensinadas pelos Capitães no Palácio dos Guardiões, em Oa, a partir do nível 30. Cada uma tem requisitos e uma provação. A tela fica na tecla O, e você usa até 3 nas teclas Y, U e I.",
+  "en": "Techniques are taught by the Captains in the Guardians' Palace on Oa, from level 30. Each has requirements and a trial. The screen is on the O key, and you use up to 3 with Y, U and I."
+ },
+ {
+  "id": "palacio",
+  "chaves": [
+   "palacio",
+   "palacio dos guardioes",
+   "conselho",
+   "guardioes",
+   "ancioes",
+   "oa",
+   "palace",
+   "guardians palace",
+   "council",
+   "guardians",
+   "elders"
+  ],
+  "pt": "Em Oa, o Conselho dos Guardiões fica no palácio central da cidade. Só entra quem foi chamado: a linha O Chamado de Oa começa no nível 30. Os Guardiões da chegada e o mestre ficam junto da Bateria Central.",
+  "en": "On Oa, the Guardians' Council lives in the city's central palace. Only those who were called can enter: the line The Call of Oa starts at level 30. The arrival Guardians and the master stand by the Central Battery."
+ },
+ {
+  "id": "mogo",
+  "chaves": [
+   "mogo",
+   "jade viva",
+   "segunda chance",
+   "chamado do mogo",
+   "selo do mogo",
+   "mogo",
+   "living jade",
+   "second chance",
+   "mogo call",
+   "mogo seal"
+  ],
+  "pt": "Mogo é o planeta vivo, aliado dos Verdes. Ele fica longe no espaço e muda de lugar de tempos em tempos (veja no mapa, J). Lanternas Verdes recebem o convite no nível 18 para 6 missões, que dão Jade Viva. Clique a Jade sobre a bateria verde para melhorá-la; a terceira dá o Selo e o Chamado do Mogo, e o Vínculo dá a Segunda Chance ao morrer.",
+  "en": "Mogo is the living planet, ally of the Greens. It is far away in space and moves from time to time (see the map, J). Green Lanterns get the invitation at level 18 for 6 missions, which give Living Jade. Click the Jade on the green battery to upgrade it; the third gives the Seal and Mogo's Call, and the Bond gives a Second Chance when you die."
+ },
+ {
+  "id": "hanks",
+  "chaves": [
+   "hanks",
+   "planeta maquina",
+   "nucleo de hanks",
+   "missoes amarelas",
+   "cidadela",
+   "hanks",
+   "machine planet",
+   "hanks core",
+   "yellow missions",
+   "citadel"
+  ],
+  "pt": "Hanks é o planeta-máquina da Tropa Amarela, que anda pelo espaço (procure no mapa, J). Na superfície fica a cidadela do lendário Tarvok; no fundo, o núcleo, a cidade viva dos Lanternas Amarelos. Não tem ar. As missões Amarelas começam sozinhas no nível 25.",
+  "en": "Hanks is the Yellow Corps' machine planet, which roams space (look for it on the map, J). On the surface is the citadel of the legendary Tarvok; deep below, the core, the living city of the Yellow Lanterns. There is no air. The Yellow missions start by themselves at level 25."
+ },
+ {
+  "id": "guilda",
+  "chaves": [
+   "guilda",
+   "guildas",
+   "bandeira",
+   "conquistar planeta",
+   "invasao",
+   "conquista",
+   "guild",
+   "guilds",
+   "banner",
+   "conquer planet",
+   "invasion"
+  ],
+  "pt": "Crie uma guilda com /guild create <nome>; você precisa ter um anel. Finque a Bandeira da Guilda num planeta gerado sem dono: o planeta e uma base pronta passam a ser da guilda, até 3 planetas. Outras guildas podem invadir quando o escudo estiver desligado.",
+  "en": "Create a guild with /guild create <name>; you need a ring. Plant the Guild Banner on an ownerless generated planet: the planet and a ready-made base become the guild's, up to 3 planets. Other guilds can invade when the shield is down."
+ },
+ {
+  "id": "energia",
+  "chaves": [
+   "gerador emocional",
+   "refinaria",
+   "conversor de luz",
+   "mineradora",
+   "cristal emocional",
+   "essencia de poder",
+   "energia",
+   "emotional generator",
+   "refinery",
+   "light converter",
+   "planetary miner",
+   "emotional crystal",
+   "power essence"
+  ],
+  "pt": "O Gerador Emocional faz Emoção Bruta com a emoção do lugar. A Refinaria transforma 1000 mB e 1 redstone num Cristal Emocional, e o Conversor de Luz transforma o cristal em energia (FE). Essa energia alimenta a Mineradora Planetária num planeta da sua guilda, que produz Essência de Poder e minérios.",
+  "en": "The Emotional Generator makes Raw Emotion from the emotion around it. The Refinery turns 1000 mB and 1 redstone into an Emotional Crystal, and the Light Converter turns the crystal into energy (FE). That energy powers the Planetary Miner on one of your guild's planets, which produces Power Essence and ores."
+ },
+ {
+  "id": "comunicador",
+  "chaves": [
+   "comunicador",
+   "ligacao",
+   "ligar para",
+   "chamada",
+   "holograma",
+   "communicator",
+   "call",
+   "holo",
+   "hologram"
+  ],
+  "pt": "Aperte F4 para abrir o comunicador: chame até 4 Lanternas online numa ligação com holograma. Com o mod Simple Voice Chat, a ligação também tem voz a qualquer distância.",
+  "en": "Press F4 to open the communicator: call up to 4 online Lanterns in a holographic call. With the Simple Voice Chat mod, the call also has voice at any distance."
+ },
+ {
+  "id": "camera",
+  "chaves": [
+   "camera",
+   "terceira pessoa",
+   "ombro",
+   "mira",
+   "camera",
+   "third person",
+   "shoulder",
+   "aim lock",
+   "lock on"
+  ],
+  "pt": "A câmera do Lanterna fica por cima do ombro: F6 liga e desliga, F7 troca o ombro e Alt + roda do mouse ajusta a distância. Tab trava a mira no inimigo mais perto do centro da tela.",
+  "en": "The Lantern camera sits over your shoulder: F6 toggles it, F7 switches shoulders and Alt + mouse wheel adjusts the distance. Tab locks your aim on the enemy closest to the center of the screen."
+ },
+ {
+  "id": "voz",
+  "chaves": [
+   "falar com o anel",
+   "voz do anel",
+   "voz",
+   "comandos de voz",
+   "reconhecimento de voz",
+   "talk to the ring",
+   "ring voice",
+   "voice",
+   "voice commands",
+   "speech"
+  ],
+  "pt": "Para falar comigo, segure Ç (ou ;), fale e solte; ou escreva no chat começando com 'anel,'. Na primeira vez eu baixo os modelos de voz e depois funciono sem internet. Dá para mudar a voz no config/lanterna-client.toml.",
+  "en": "To talk to me, hold ; and speak, then release; or type in chat starting with 'ring,'. The first time I download the voice models, and after that I work offline. You can change the voice in config/lanterna-client.toml."
+ },
+ {
+  "id": "comandos",
+  "chaves": [
+   "comandos",
+   "comando",
+   "barra",
+   "commands",
+   "command",
+   "slash"
+  ],
+  "pt": "/lantern help lista os comandos do mod, e muitos são só para operador, para teste. /guild cuida das guildas.",
+  "en": "/lantern help lists the mod's commands, and many are operator-only, for testing. /guild handles guilds."
+ },
+ {
+  "id": "indigo_lagrimas",
+  "chaves": [
+   "lagrima indigo",
+   "lagrimas indigo",
+   "moeda de gratidao",
+   "favores",
+   "ves kai",
+   "veskai",
+   "cajado",
+   "indigo tear",
+   "indigo tears",
+   "gratitude coin",
+   "favors",
+   "ves kai",
+   "staff of compassion"
+  ],
+  "pt": "Em Nok, cada Ves'Kai pede um favor por dia: fale com ele e aceite. Curar Ves'Kai feridos também paga Moedas de Gratidão. Troque as moedas por Lágrimas Índigo (Shift + clique direito).",
+  "en": "On Nok, each Ves'Kai asks for one favor a day: talk to them and accept. Healing wounded Ves'Kai also pays Gratitude Coins. Trade the coins for Indigo Tears (Shift + right-click)."
+ },
+ {
+  "id": "perfil",
+  "chaves": [
+   "perfil",
+   "estatisticas",
+   "mascara",
+   "tirar a mascara",
+   "traje",
+   "uniforme",
+   "aparencia",
+   "aura",
+   "profile",
+   "stats",
+   "mask",
+   "remove mask",
+   "suit",
+   "uniform",
+   "appearance",
+   "aura"
+  ],
+  "pt": "A tecla H abre o Perfil do Lanterna, com as estatísticas e o visual. Ali você ajusta a máscara, a tira na Personalização, escolhe o traje e liga ou desliga a aura.",
+  "en": "The H key opens the Lantern Profile, with stats and looks. There you adjust or remove the mask in Customization, pick the suit and turn the aura on or off."
+ },
+ {
+  "id": "armadura",
+  "chaves": [
+   "armadura",
+   "defesa",
+   "resistencia",
+   "dano",
+   "vida extra",
+   "coracoes",
+   "armor",
+   "defense",
+   "resistance",
+   "damage",
+   "extra health",
+   "hearts"
+  ],
+  "pt": "Com o anel, você ganha armadura igual a netherite completa, e o nível dá defesa que corta até 60% do dano no nível 150. A cada 5 níveis você ganha mais um coração. Tudo isso soma com armaduras de outros mods.",
+  "en": "With the ring you get armor equal to full netherite, and your level gives defense that cuts up to 60% of damage at level 150. Every 5 levels you gain one more heart. All of this stacks with armor from other mods."
+ },
+ {
+  "id": "cidades",
+  "chaves": [
+   "cidade",
+   "cidades",
+   "quartel",
+   "bateria central",
+   "moradores",
+   "bau",
+   "baus",
+   "casas",
+   "city",
+   "cities",
+   "barracks",
+   "central battery",
+   "residents",
+   "chest",
+   "chests",
+   "houses"
+  ],
+  "pt": "Cada planeta das Tropas tem uma cidade grande: no centro, o marco do povo; no quartel da Tropa, a Bateria Central com o guardião e o mestre; na borda, a arena. As casas têm baús com itens típicos do planeta.",
+  "en": "Each Corps planet has a big city: in the center, the people's landmark; in the Corps barracks, the Central Battery with the guardian and the master; at the edge, the arena. Houses have chests with items typical of the planet."
+ }
+]
