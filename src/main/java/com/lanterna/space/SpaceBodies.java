@@ -70,25 +70,27 @@ public final class SpaceBodies {
 
     public static final List<Body> BODIES = List.of(
             EARTH,
-            new Body("oa",       new Vec3(2500, 150, -1800),  220, 0x5CFF7A, true, planet("oa"), true),
-            new Body("korugar",  new Vec3(-3200, 250, -2600), 200, 0xFFD24A, true, planet("korugar"), true),
-            new Body("ysmault",  new Vec3(4200, -150, 2600),  180, 0xFF3B30, true, planet("ysmault"), true),
-            new Body("odym",     new Vec3(-2000, 100, 4200),  230, 0x7FC8FF, true, planet("odym"), true),
-            new Body("zamaron",  new Vec3(900, 300, 5200),    190, 0xE58BFF, true, planet("zamaron"), true),
-            new Body("nok",      new Vec3(-5600, -100, 600),  170, 0x7B6BFF, true, planet("nok"), true),
-            new Body("okaara",   new Vec3(6200, 200, -400),   240, 0xFFA040, true, planet("okaara"), true),
-            new Body("ryut",     new Vec3(-1400, -200, -6400), 160, 0x8A8A9A, true, planet("ryut"), false),
+            new Body("oa",       new Vec3(10000, 150, -7200),  220, 0x5CFF7A, true, planet("oa"), true),
+            new Body("korugar",  new Vec3(-12800, 250, -10400), 200, 0xFFD24A, true, planet("korugar"), true),
+            new Body("ysmault",  new Vec3(16800, -150, 10400),  180, 0xFF3B30, true, planet("ysmault"), true),
+            new Body("odym",     new Vec3(-8000, 100, 16800),  230, 0x7FC8FF, true, planet("odym"), true),
+            new Body("zamaron",  new Vec3(3600, 300, 20800),    190, 0xE58BFF, true, planet("zamaron"), true),
+            new Body("nok",      new Vec3(-22400, -100, 2400),  170, 0x7B6BFF, true, planet("nok"), true),
+            new Body("okaara",   new Vec3(24800, 200, -1600),   240, 0xFFA040, true, planet("okaara"), true),
+            new Body("ryut",     new Vec3(-5600, -200, -25600), 160, 0x8A8A9A, true, planet("ryut"), false),
             // Gênese: onde o Coração Primordial se partiu. Escondido até o jogador juntar os sete anéis da fusão.
-            new Body("genese",   new Vec3(-300, 700, 2600),   140, 0xF4FFF4, true, planet("genese"), true),
-            // Mogo: o planeta que é um Lanterna Verde (o maior corpo do mapa depois do Sol)
+            new Body("genese",   new Vec3(-1200, 700, 10400),   140, 0xF4FFF4, true, planet("genese"), true),
+            // Mogo: o planeta que é um Lanterna Verde (o maior corpo fixo do mapa)
             new Body("mogo",     new Vec3(-4600, 350, -3800), 280, 0x3CFF7A, true, planet("mogo"), true),
             // Hanks: o planeta-máquina dos Amarelos (também anda pelo espaço; a cidadela do Sinestro)
-            new Body("hanks",    new Vec3(42000, 200, -30000), 300, 0xFFC830, true, planet("hanks"), false),
-            // O Sol: só para ver (e iluminar os planetas), longe demais para alcançar
-            new Body("sun",      new Vec3(30000, 9000, 20000), 4200, 0xFFF4C0, false, null, false)
+            new Body("hanks",    new Vec3(42000, 200, -30000), 300, 0xFFC830, true, planet("hanks"), false)
     );
 
-    public static final Body SUN = BODIES.get(BODIES.size() - 1);
+    /**
+     * De onde vem a luz que ilumina os planetas no céu. Não é mais um corpo do mapa (o Sol gigante que não dava para
+     * alcançar saiu em 0.47.0): só a direção da luz.
+     */
+    public static final Body SUN = new Body("sun", new Vec3(30000, 9000, 20000), 4200, 0xFFF4C0, false, null, false);
 
     /** Planetas fixos + os dos Lanternas lendários. */
     public static final List<Body> TODOS = juntar();

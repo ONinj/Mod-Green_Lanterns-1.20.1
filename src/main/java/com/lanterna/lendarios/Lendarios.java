@@ -53,6 +53,13 @@ import java.util.UUID;
  *    Fragmentos Lendários; ele volta em 30 minutos;
  *  - mesma Tropa ou aliada: clique nele para um duelo de treino. Ninguém morre: quem chega no fim da vida perde
  *    (o lendário para em 12%). Vencer dá experiência e Fragmentos (a Insígnia na primeira vitória); espera de 20 min.
+ *
+ * Escala (0.47.0): a força acompanha quem está lutando. Conta os jogadores na arena (inimigos, ou o duelista) e o nível
+ * médio deles; a vida "efetiva" (o dano que ele aguenta) e o dano que ele causa sobem com isso. O pico da luta fica
+ * guardado até ele se curar sozinho (sair da arena não deixa o chefe mais fraco).
+ *   vida efetiva = 1,4 x (1 + 1,6 x nível/150) x (1 + 0,8 x (jogadores - 1))
+ *   dano         = 1,7 x (1 + 1,4 x nível/150) x (1 + 0,15 x (jogadores - 1))
+ * A onda vem mais vezes e os ajudantes são mais numerosos com mais gente.
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class Lendarios {
@@ -70,6 +77,40 @@ public final class Lendarios {
     private static final Map<UUID, Integer> SOZINHO = new HashMap<>();
 
     private record Duelo(UUID jogador, long inicio) {}
+
+    /** A cabeça de cada lendário (ameaça, saltos, esquiva): a mesma dos chefes. */
+    private static final Map<UUID, com.lanterna.ia.BossIA> IA = new HashMap<>();
+
+    /** Pico da luta: jogadores e nível médio (para a escala). */
+    private static final Map<UUID, int[]> PICO = new HashMap<>();
+
+    /** Multiplicadores atuais (vida efetiva, dano) deste lendário. */
+    public static float[] escala(LanternaEntity le) {
+        int[] p = PICO.get(le.getUUID());
+        int n = p == null ? 1 : Math.max(1, p[0]);
+        float nv = p == null ? 0 : Math.min(com.lanterna.tropa.Nivel.MAX, p[1]) / (float) com.lanterna.tropa.Nivel.MAX;
+        float vida = 1.4f * (1 + 1.6f * nv) * (1 + 0.8f * (n - 1));
+        float dano = 1.7f * (1 + 1.4f * nv) * (1 + 0.15f * (n - 1));
+        return new float[]{vida, dano};
+    }
+
+    /** Conta quem está lutando agora e guarda o maior valor da luta. */
+    private static void medir(LanternaEntity le, Lendario l) {
+        Duelo d = DUELOS.get(le.getUUID());
+        int n = 0, soma = 0;
+        for (Player p : le.level().getEntitiesOfClass(Player.class, le.getBoundingBox().inflate(48), x -> !x.isSpectator() && !x.isCreative())) {
+            boolean luta = d != null ? p.getUUID().equals(d.jogador()) : inimigo(l, p) || le.getTarget() == p
+                    || LUTARAM.getOrDefault(le.getUUID(), Set.of()).contains(p.getUUID());
+            if (!luta) continue;
+            n++;
+            soma += Nivel.nivel(p);
+        }
+        if (n == 0) return;
+        int media = soma / n;
+        int[] pico = PICO.computeIfAbsent(le.getUUID(), k -> new int[2]);
+        pico[0] = Math.max(pico[0], n);
+        pico[1] = Math.max(pico[1], media);
+    }
 
     @Nullable
     public static Lendario de(Entity e) {
@@ -144,6 +185,8 @@ public final class Lendarios {
         if (e.getLevel().isClientSide) return;
         UUID id = e.getEntity().getUUID();
         if (VIVOS.remove(id) != null) {
+            if (e.getEntity() instanceof LivingEntity le && !le.isAlive()) PICO.remove(id);
+            IA.remove(id);
             ServerBossEvent b = BARRAS.remove(id);
             if (b != null) b.removeAllPlayers();
         }
@@ -153,7 +196,16 @@ public final class Lendarios {
 
     @SubscribeEvent
     public static void tick(TickEvent.ServerTickEvent e) {
-        if (e.phase != TickEvent.Phase.END || VIVOS.isEmpty() || e.getServer().getTickCount() % 5 != 0) return;
+        if (e.phase != TickEvent.Phase.END || VIVOS.isEmpty()) return;
+        for (LanternaEntity le : VIVOS.values()) {
+            if (!le.isAlive() || DUELOS.containsKey(le.getUUID())) continue;
+            Lendario l = de(le);
+            if (l == null) continue;
+            float f = le.getHealth() / le.getMaxHealth();
+            IA.computeIfAbsent(le.getUUID(), k -> new com.lanterna.ia.BossIA(le, l.corps.color(),
+                    p -> inimigo(l, p) || LUTARAM.getOrDefault(le.getUUID(), Set.of()).contains(p.getUUID()))).tick(f < 0.33f ? 3 : f < 0.66f ? 2 : 1, true);
+        }
+        if (e.getServer().getTickCount() % 5 != 0) return;
         for (LanternaEntity le : VIVOS.values().toArray(new LanternaEntity[0])) {
             if (!le.isAlive() || !(le.level() instanceof ServerLevel level)) continue;
             Lendario l = de(le);
@@ -162,6 +214,7 @@ public final class Lendarios {
                 le.getPersistentData().remove(CURAR);
                 le.setHealth(le.getMaxHealth());
             }
+            medir(le, l);
             barra(le, l, level);
             casa(le, l);
             duelo(le, l);
@@ -177,6 +230,9 @@ public final class Lendarios {
             return n;
         });
         b.setProgress(le.getHealth() / le.getMaxHealth());
+        int[] pico = PICO.get(le.getUUID());
+        b.setName(pico == null ? le.getDisplayName() : le.getDisplayName().copy()
+                .append(Component.translatable("lendario.lanterna.escala", pico[1], pico[0]).withStyle(net.minecraft.ChatFormatting.GRAY)));
         for (ServerPlayer p : level.players()) {
             boolean perto = p.distanceToSqr(le) < 56 * 56;
             if (perto && !b.getPlayers().contains(p)) b.addPlayer(p);
@@ -208,10 +264,12 @@ public final class Lendarios {
         boolean alguem = !le.level().getEntitiesOfClass(Player.class, le.getBoundingBox().inflate(48), p -> !p.isSpectator() && !p.isCreative()).isEmpty();
         int s = alguem ? 0 : SOZINHO.getOrDefault(le.getUUID(), 0) + 5;
         SOZINHO.put(le.getUUID(), s);
+        if (s >= 600 && PICO.containsKey(le.getUUID()) && le.getHealth() >= le.getMaxHealth()) PICO.remove(le.getUUID());
         if (s >= 600 && le.getHealth() < le.getMaxHealth()) {
             le.setHealth(le.getMaxHealth());
             le.getPersistentData().putInt(AJUDA, 0);
             LUTARAM.remove(le.getUUID());
+            PICO.remove(le.getUUID());
         }
     }
 
@@ -221,14 +279,16 @@ public final class Lendarios {
         if (alvo == null || le.distanceTo(alvo) > 18) return;
         long agora = level.getGameTime();
         if (agora < le.getPersistentData().getLong(ONDA)) return;
-        le.getPersistentData().putLong(ONDA, agora + 160 + level.random.nextInt(80));
+        int[] pico = PICO.get(le.getUUID());
+        int gente = pico == null ? 1 : pico[0];
+        le.getPersistentData().putLong(ONDA, agora + Math.max(70, 150 - 20 * (gente - 1)) + level.random.nextInt(60));
         Duelo d = DUELOS.get(le.getUUID());
         raio(level, le.position().add(0, 1, 0), l.corps.color(), 7, 90);
         level.playSound(null, le.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.2f, 1.4f);
         for (LivingEntity v : level.getEntitiesOfClass(LivingEntity.class, le.getBoundingBox().inflate(7.5), x -> x != le)) {
             boolean vale = d != null ? v.getUUID().equals(d.jogador()) : le.hostilA(v);
             if (!vale) continue;
-            v.hurt(le.damageSources().mobAttack(le), (float) l.dano * 0.6f);
+            v.hurt(le.damageSources().mobAttack(le), (float) l.dano * 0.6f);   // a escala entra em apanhou()
             Vec3 k = v.position().subtract(le.position()).normalize().scale(1.6);
             v.push(k.x, 0.6, k.z);
             v.hurtMarked = true;
@@ -244,7 +304,9 @@ public final class Lendarios {
             le.getPersistentData().putInt(AJUDA, feitas + 1);
             le.level().getServer().getPlayerList().getPlayers().stream().filter(p -> p.level() == level && p.distanceToSqr(le) < 64 * 64)
                     .forEach(p -> p.sendSystemMessage(fala(l, "ajuda")));
-            for (int i = 0; i < 2; i++) {
+            int[] pico = PICO.get(le.getUUID());
+            int ajudantes = 2 + (pico == null ? 0 : Math.min(4, pico[0] - 1));
+            for (int i = 0; i < ajudantes; i++) {
                 LanternaEntity a = LanternaEntity.lanterna(level, l.corps, true);
                 double ang = level.random.nextDouble() * Math.PI * 2;
                 a.moveTo(le.getX() + Math.cos(ang) * 4, le.getY() + 2, le.getZ() + Math.sin(ang) * 4, 0, 0);
@@ -270,10 +332,19 @@ public final class Lendarios {
     public static void apanhou(LivingHurtEvent e) {
         // o lendário bate forte
         Lendario atk = de(e.getSource().getEntity());
-        if (atk != null && e.getSource().getEntity() != e.getEntity()) e.setAmount(e.getAmount() * 1.4f);
+        if (atk != null && e.getSource().getEntity() != e.getEntity() && e.getSource().getEntity() instanceof LanternaEntity le)
+            e.setAmount(e.getAmount() * escala(le)[1]);
+        // e aguenta mais conforme quem luta (a vida do Minecraft para em 1024: a escala vira resistência)
+        if (de(e.getEntity()) != null && e.getEntity() instanceof LanternaEntity alvo && e.getSource().getEntity() != e.getEntity())
+            e.setAmount(e.getAmount() / escala(alvo)[0]);
         // quem bateu no lendário entra na lista das recompensas
-        if (de(e.getEntity()) != null && e.getSource().getEntity() instanceof ServerPlayer p)
+        if (de(e.getEntity()) != null && e.getSource().getEntity() instanceof ServerPlayer p) {
             LUTARAM.computeIfAbsent(e.getEntity().getUUID(), k -> new HashSet<>()).add(p.getUUID());
+            var ia = IA.get(e.getEntity().getUUID());
+            if (ia != null) ia.apanhou(p, e.getAmount());
+        }
+        if (atk != null && e.getSource().getEntity() instanceof LanternaEntity le2 && IA.containsKey(le2.getUUID()))
+            e.setAmount(e.getAmount() * IA.get(le2.getUUID()).danoExtra());
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

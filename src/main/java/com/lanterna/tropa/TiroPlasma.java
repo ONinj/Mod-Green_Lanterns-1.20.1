@@ -68,6 +68,7 @@ public class TiroPlasma extends ThrowableProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult hit) {
+        if (level().isClientSide) return;   // o dano é só no servidor (no cliente travava o jogo com alguns chefes)
         Entity target = hit.getEntity();
         Entity owner = getOwner();
         if (target == owner || (owner != null && target.isPassengerOfSameVehicle(owner))) return;

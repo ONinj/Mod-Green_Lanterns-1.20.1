@@ -355,6 +355,9 @@ public final class NaveInterior {
         if (ent == null) { sala.destino = null; dados.setDirty(); return; }
         ent.setDeltaMovement(Vec3.ZERO);
         dest.addFreshEntity(ent);
+        // A sala sai onde a nave diz que está: grava já o lugar novo (antes ficava o do mundo antigo até a nave
+        // andar, e quem saía da sala voltava para o planeta de onde partiu, sem a nave).
+        dados.posicoes.put(id, new Posicao(dest.dimension().location().toString(), ent.getX(), ent.getY(), ent.getZ()));
         dest.playSound(null, ent.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.NEUTRAL, 1.5f, 0.6f);
         // A volta de quem está na sala passa a ser o destino
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {

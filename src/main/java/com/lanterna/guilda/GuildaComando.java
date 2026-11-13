@@ -35,30 +35,30 @@ public final class GuildaComando {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("guilda")
+        d.register(Commands.literal("guild")
                 .executes(c -> info(c, null))
-                .then(Commands.literal("criar").then(Commands.argument("nome", StringArgumentType.greedyString()).executes(GuildaComando::criar)))
-                .then(Commands.literal("convidar").then(Commands.argument("jogador", EntityArgument.player()).executes(GuildaComando::convidar)))
-                .then(Commands.literal("entrar").then(Commands.argument("nome", StringArgumentType.greedyString())
+                .then(Commands.literal("create").then(Commands.argument("name", StringArgumentType.greedyString()).executes(GuildaComando::criar)))
+                .then(Commands.literal("invite").then(Commands.argument("player", EntityArgument.player()).executes(GuildaComando::convidar)))
+                .then(Commands.literal("join").then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(Guildas.get(c.getSource().getServer()).guildas.values().stream().map(g -> g.nome), b))
                         .executes(GuildaComando::entrar)))
-                .then(Commands.literal("sair").executes(GuildaComando::sair))
-                .then(Commands.literal("expulsar").then(Commands.argument("nome", StringArgumentType.word())
+                .then(Commands.literal("leave").executes(GuildaComando::sair))
+                .then(Commands.literal("kick").then(Commands.argument("name", StringArgumentType.word())
                         .suggests((c, b) -> {
                             Guilda g = Guildas.get(c.getSource().getServer()).daJogador(c.getSource().getPlayerOrException().getUUID());
                             return SharedSuggestionProvider.suggest(g == null ? java.util.List.of() : g.membros.values(), b);
                         }).executes(GuildaComando::expulsar)))
-                .then(Commands.literal("desfazer").executes(GuildaComando::desfazer))
+                .then(Commands.literal("disband").executes(GuildaComando::desfazer))
                 .then(Commands.literal("info").executes(c -> info(c, null))
-                        .then(Commands.argument("nome", StringArgumentType.greedyString())
+                        .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Guildas.get(c.getSource().getServer()).guildas.values().stream().map(g -> g.nome), b))
-                                .executes(c -> info(c, StringArgumentType.getString(c, "nome")))))
-                .then(Commands.literal("lista").executes(GuildaComando::lista))
-                .then(Commands.literal("simbolo").executes(GuildaComando::simbolo))
-                .then(Commands.literal("abandonar").executes(GuildaComando::abandonar))
+                                .executes(c -> info(c, StringArgumentType.getString(c, "name")))))
+                .then(Commands.literal("list").executes(GuildaComando::lista))
+                .then(Commands.literal("symbol").executes(GuildaComando::simbolo))
+                .then(Commands.literal("abandon").executes(GuildaComando::abandonar))
                 // administração (op): dá tropas de ataque, encerra o escudo de um planeta
                 .then(Commands.literal("admin").requires(s -> s.hasPermission(2))
-                        .then(Commands.literal("tropas").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 300))
+                        .then(Commands.literal("troops").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 300))
                                 .executes(c -> {
                                     ServerPlayer p = c.getSource().getPlayerOrException();
                                     Guildas gs = Guildas.get(p.server);
@@ -68,7 +68,7 @@ public final class GuildaComando {
                                     gs.mudou();
                                     return 1;
                                 })))
-                        .then(Commands.literal("defesa").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 200))
+                        .then(Commands.literal("defense").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 200))
                                 .executes(c -> {
                                     ServerPlayer p = c.getSource().getPlayerOrException();
                                     Conquista q = aqui(p);
@@ -77,7 +77,7 @@ public final class GuildaComando {
                                     Guildas.get(p.server).mudou();
                                     return 1;
                                 })))
-                        .then(Commands.literal("sem_escudo").executes(c -> {
+                        .then(Commands.literal("no_shield").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             Conquista q = aqui(p);
                             if (q == null) return 0;
@@ -104,7 +104,7 @@ public final class GuildaComando {
     private static int criar(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
         Guildas gs = Guildas.get(p.server);
-        String nome = StringArgumentType.getString(c, "nome").trim();
+        String nome = StringArgumentType.getString(c, "name").trim();
         if (gs.daJogador(p.getUUID()) != null) return erro(c, "guilda.lanterna.erro.ja_tem");
         if (nome.length() < 3 || nome.length() > 24) return erro(c, "guilda.lanterna.erro.nome");
         if (gs.porNome(nome) != null) return erro(c, "guilda.lanterna.erro.nome_usado");
@@ -119,7 +119,7 @@ public final class GuildaComando {
 
     private static int convidar(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
-        ServerPlayer alvo = EntityArgument.getPlayer(c, "jogador");
+        ServerPlayer alvo = EntityArgument.getPlayer(c, "player");
         Guildas gs = Guildas.get(p.server);
         Guilda g = gs.daJogador(p.getUUID());
         if (g == null || !g.dono.equals(p.getUUID())) return erro(c, "guilda.lanterna.erro.so_dono");
@@ -128,7 +128,7 @@ public final class GuildaComando {
         gs.convites.put(alvo.getUUID(), g.id);
         msg(c, Component.translatable("guilda.lanterna.convidou", alvo.getDisplayName()));
         MutableComponent botao = Component.translatable("guilda.lanterna.convite_botao").withStyle(s -> s.withColor(ChatFormatting.GREEN).withBold(true)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/guilda entrar " + g.nome)));
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/guild join " + g.nome)));
         alvo.sendSystemMessage(Component.translatable("guilda.lanterna.convite", p.getDisplayName(), g.nome).append(" ").append(botao));
         return 1;
     }
@@ -136,7 +136,7 @@ public final class GuildaComando {
     private static int entrar(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
         Guildas gs = Guildas.get(p.server);
-        Guilda g = gs.porNome(StringArgumentType.getString(c, "nome").trim());
+        Guilda g = gs.porNome(StringArgumentType.getString(c, "name").trim());
         if (gs.daJogador(p.getUUID()) != null) return erro(c, "guilda.lanterna.erro.ja_tem");
         if (g == null || !g.id.equals(gs.convites.get(p.getUUID()))) return erro(c, "guilda.lanterna.erro.sem_convite");
         if (g.membros.size() >= LanternaConfig.GUILDA_MAX_MEMBROS.get()) return erro(c, "guilda.lanterna.erro.cheia");
@@ -165,7 +165,7 @@ public final class GuildaComando {
         Guildas gs = Guildas.get(p.server);
         Guilda g = gs.daJogador(p.getUUID());
         if (g == null || !g.dono.equals(p.getUUID())) return erro(c, "guilda.lanterna.erro.so_dono");
-        String nome = StringArgumentType.getString(c, "nome");
+        String nome = StringArgumentType.getString(c, "name");
         UUID alvo = null;
         for (Map.Entry<UUID, String> e : g.membros.entrySet()) if (e.getValue().equalsIgnoreCase(nome)) alvo = e.getKey();
         if (alvo == null || alvo.equals(g.dono)) return erro(c, "guilda.lanterna.erro.nao_membro");

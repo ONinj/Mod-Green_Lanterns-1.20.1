@@ -21,15 +21,15 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 - **Config**: `config/lanterna-common.toml` (chance do verde, abates do vermelho, duração da animação).
 
 ## Comandos de teste (cheats ligados)
-- `/lanterna escolher <tropa> [jogador]` — roda a cerimônia (ex: `lanterna:green`)
-- `/lanterna carga <valor>`
-- `/lanterna remover`
-- `/lanterna resetar`
+- `/lantern choose <corps> [player]` — roda a cerimônia (ex: `lanterna:green`)
+- `/lantern charge <value>`
+- `/lantern remove`
+- `/lantern reset`
 
 ## Roteiro
 1. ✅ Anel + bateria + entrega (verde e vermelho)
 1.5 ✅ Aba "Lanterna" própria no inventário (slots de anel e bateria, tecla K), modelos 3D, anel visível na mão, recarga pela bateria do slot (tecla R)
-1.6 ✅ Rituais para as 9 Tropas (`/lanterna rituais`), anel liga/desliga (G) com contorno na cor da Tropa, voo deitado com braço à frente e rastro de energia
+1.6 ✅ Rituais para as 9 Tropas (`/lantern rituals`), anel liga/desliga (G) com contorno na cor da Tropa, voo deitado com braço à frente e rastro de energia
 1.7 ✅ Voo com física (embalo, derrapagem nas curvas, inclinação lateral, mergulho, arrancada, vento, FOV), capa correta no voo, anel embaixo do punho, aba Lanterna também no criativo, botões Anel/Voo na tela
 1.8 ✅ Voo mais vivo (inclinação contínua, derrapagem lateral, estrondo sônico, poeira e água no rasante, pousar com Shift, tremor), uniformes com transformação estilo nanotecnologia, ESPAÇO com Terra, Sol e 8 planetas visitáveis
 1.9 ✅ Animação de recarga (tecla R): portal na cintura, a bateria sai dele, o braço encosta e a energia flui para o anel. Sistema pronto para modelos 3D próprios (anel, bateria e peças de uniforme)
@@ -49,14 +49,14 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.23 ✅ (0.18) Minerador com 4 níveis; Anéis Supremos (Branco e Preto); Anel Preto só por corrupção na morte (linha "A Morte"); linha principal mais longa e travada por nível; planetas das Tropas NPC; mais piratas e saque melhor
 1.24 ✅ (0.19) Construto próprio de cada Tropa (Pavor trava construtos), animações de lançar, laser novo e polimento visual de todos os construtos
 1.25 ✅ (0.20) Porta Estelar: linha dos Guardiões (nível 32, afinidade Confiável) e teleporte animado para planetas visitados (tecla N)
-1.26 ✅ (0.21) Comandos de teste (op): anel de qualquer Tropa, nível, afinidade, técnicas, poderes, linha da Morte, missões, invocar NPCs/chefes/naves e kits (`/lanterna ajuda`)
+1.26 ✅ (0.21) Comandos de teste (op): anel de qualquer Tropa, nível, afinidade, técnicas, poderes, linha da Morte, missões, invocar NPCs/chefes/naves e kits (`/lantern help`)
 1.27 ✅ (0.22) Trajes "segunda pele" (18), Perfil do Lanterna (H: estatísticas e visual, com ajuste da máscara), tela K e HUD de missões novos, voo de combate, piloto que abre caminho, naves destrutíveis pelo anel
 1.28 ✅ (0.23) Hiperpropulsão nos planetas (70 blocos/s), NPCs de missão que voltam se sumirem, uniforme sem a segunda camada da skin por cima, ícones novos dos uniformes, inglês completo e polimento de animações
 1.29 ✅ (0.24) Manga do uniforme em primeira pessoa com a transformação, laser saindo da mão certa, correção dos NPCs repetidos e das faces brilhando nos trajes
 1.30 ✅ (0.25) Cidade futurista dos nativos em cada planeta, NPCs que voltam ao posto, fontes e bordas da cidade sem vazar água
 1.31 ✅ (0.26) Megacidades dos povos (400 blocos, monumentos de até 210, ~150 casas, arquitetura própria em cada planeta) e as Baterias Centrais das 7 Tropas com portal para a dimensão de energia
 1.32 ✅ (0.27) A Fonte: Chamado da Fonte (provação + juramento), pressão de 2 h, Banho de Luz (+150% de carga e aura), Árvore da Luz com 70 construtos novos, construtos e ícones refeitos, 7 chefes (Corações das Emoções), salas da Fonte e o evento "A Bateria Enfraquece"
-1.33 ✅ (0.27.1) Corações das Emoções muito mais fortes (vida ~1300–1600, golpes de 40–60% da vida com aviso e recarga longa, golpe supremo na fase 2) e o comando /lanterna maximo
+1.33 ✅ (0.27.1) Corações das Emoções muito mais fortes (vida ~1300–1600, golpes de 40–60% da vida com aviso e recarga longa, golpe supremo na fase 2) e o comando /lantern max
 1.34 ✅ (0.28) Combate contra Lanternas NPC refeito (IA que mira e para para atirar, caixa de acerto no voo, compensação de atraso no laser e nos construtos), megacidades com bairro novo (~70 casas a mais) e mais moradores, Ecos Cinzentos só na floresta (raros nos QGs, nunca nas cidades; em Odym só nas ilhas)
 1.35 ✅ (0.29) Naves: sem dano de queda ao pousar, todos os poderes do anel ferem naves (tripulação protegida pelo casco), sair da nave depois de renascer no beliche leva até a nave, Chave da Nave fica na morte e chama a nave com reentrada na atmosfera, sons próprios das naves
 1.36 ✅ (0.30) Juramento falado na Bateria Central como primeira missão do anel (microfone, palavra por palavra, PT/EN), comunicador do anel com ligações em grupo e holograma (1ª e 3ª pessoa), voz via Simple Voice Chat, câmera em terceira pessoa por cima do ombro
@@ -71,7 +71,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.45 ✅ (0.37) Jade Viva (3 níveis na bateria verde), Chamado do Mogo (jaula, planeta no céu, raio que mata e abre poço, 1 h de recarga, recusa contra os guardiões corrompidos, comando para zerar) e aura de energia translúcida na cor da Tropa
 1.45.1 ✅ (0.37.1) Aura refeita: energia líquida arredondada e animada em volta do corpo
 1.46 ✅ (0.38.0) O planeta Mogo: as 6 missões (cinturão, corrida, ponte, prova, cerco, núcleo) e a Segunda Chance
-1.46.1 ✅ (0.38.1) Naves: saída ao lado da nave, colocar sem prender o jogador, hitbox justa; Ecos nas ilhas de Odym; /lanterna laranja
+1.46.1 ✅ (0.38.1) Naves: saída ao lado da nave, colocar sem prender o jogador, hitbox justa; Ecos nas ilhas de Odym; /lantern orange
 1.46.2 ✅ (0.38.2) Aura: halo contínuo e macio em volta da silhueta inteira (sem peças por parte do corpo)
 1.46.3 ✅ (0.38.3) Transformação: o uniforme escorre pelo corpo como líquido a partir da mão do anel
 1.46.4 ✅ (0.38.4) Trajes: máscaras refeitas e 9 trajes de energia (um por Tropa)
@@ -91,6 +91,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.52.0 ✅ (0.44.0) Lanternas lendários com nomes e raças próprias do mod: Kael Ardent, Seraphine Vale e Malachar Dusk (humanos), Tarvok (vekthar, crista óssea), Grath (brakhul, chifres e rachaduras de fogo), Mizzuk (gobrin, orelhas enormes), Irmão Aurel (serenim, barbatanas) e Nhalé (nhai, tatuagens índigo)
 1.53.0 ✅ (0.45.0) Sóis e buracos negros a pelo menos 22 mil blocos um do outro; 9 cores de estrela com a mesma chance (vermelha, laranja, amarela, branca, azul, ciano, verde, violeta e rosa); sóis com superfície granulada, miolo brilhante, borda escura e raios; buracos negros com sombra densa, disco de acreção grosso girando, lado mais brilhante, lente e anel de fótons
 1.54.0 ✅ (0.46.0) 8 Bosses das Tropas (Karvhul, Vesk Morrath, Ghor'Maddu, Seraphel, Gêmeos Velados, Calithe, Morthaal, Verdan): um por planeta de Tropa, chamados no altar do planeta (shift + usar) depois de vencer o chefe de lá; animações de andar, ataque, fase e morte; mecânicas próprias; ovos de spawn
+1.55.0 ✅ (0.47.0) IA fase 3: conversa com o anel pelo chat ("anel, ...") e pela voz (tecla Ç, reconhecimento e vozes do Windows), "me leve para Zamaron" liga o piloto automático, NPCs respondem no chat e lembram de você, chefes com ameaça, saltos, raio contra quem voa, esquiva e fúria; lendários escalam com o nível e o número de jogadores; juramento por escrito (TAB); comandos em inglês (/lantern, /guild); planetas das Tropas 4x mais longe; sem o Sol gigante; nave do piloto automático sai no mundo certo; arenas, bases e arenas lendárias com arquitetura nova
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

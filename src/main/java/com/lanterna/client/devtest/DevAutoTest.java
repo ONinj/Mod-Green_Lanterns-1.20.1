@@ -26,6 +26,9 @@ import java.util.List;
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class DevAutoTest {
+    /** Sol de teste (o Sol grande saiu do mapa em 0.47.0; as cenas antigas usam este). */
+    private static final com.lanterna.space.Perigos.Perigo SOL_TESTE = com.lanterna.space.Perigos.ABISMO;
+
     private static final boolean ENABLED = Boolean.getBoolean("lanterna.autotest");
     private static final List<Step> STEPS = new ArrayList<>();
     private static int tick;
@@ -155,7 +158,7 @@ public final class DevAutoTest {
             mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear");
             cmd("gamerule doMobSpawning false"); cmd("kill @e[type=!player]");
-            cmd("lanterna resetar"); cmd("clear @s");
+            cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 400.5 -40 400.5");
         });
         waitFor(() -> mc.level.hasChunkAt(400, 400) && mc.player.blockPosition().getY() < -45, 400);
@@ -287,7 +290,7 @@ public final class DevAutoTest {
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 410.5 -40 410.5"));
         at(60, () -> {});
         // O Chamado por conquistas
-        at(40, () -> { cmd("lanterna resetar"); cmd("advancement revoke @s everything"); });
+        at(40, () -> { cmd("lantern reset"); cmd("advancement revoke @s everything"); });
         at(20, () -> cmd("advancement grant @s only minecraft:story/mine_diamond"));
         at(20, () -> cmd("advancement grant @s only minecraft:story/enter_the_nether"));
         at(20, () -> shot("call1_sign"));
@@ -319,10 +322,10 @@ public final class DevAutoTest {
         at(60, () -> {
             mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("gamerule keepInventory false"); cmd("gamerule doImmediateRespawn true");
-            cmd("kill @e[type=item]"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("kill @e[type=item]"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 400.5 -44 400.5");
         });
-        at(40, () -> cmd("lanterna escolher lanterna:red"));
+        at(40, () -> cmd("lantern choose lanterna:red"));
         at(200, () -> report.accept("escolhido"));
         // 80% de carga: o anel volta, a bateria fica
         at(10, () -> server(sp -> {
@@ -353,7 +356,7 @@ public final class DevAutoTest {
             mc.options.hideGui = false;
             mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("gamerule doMobSpawning false");
-            cmd("lanterna resetar"); cmd("clear @s");
+            cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 600.5 -40 600.5");
         });
         waitFor(() -> mc.level.hasChunkAt(600, 600) && mc.player.blockPosition().getY() < -30, 400);
@@ -456,7 +459,7 @@ public final class DevAutoTest {
         at(5, () -> server(sp -> com.lanterna.naves.NaveInterior.sair(sp)));
         at(40, () -> LanternaMod.LOGGER.info("AUTOTEST saiu dim={} pos={}", mc.player.level().dimension().location(), mc.player.position()));
         // ---- Nível: XP e HUD ----
-        at(5, () -> { cmd("lanterna escolher lanterna:green"); });
+        at(5, () -> { cmd("lantern choose lanterna:green"); });
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         at(40, () -> { cmd("gamemode survival"); server(sp -> com.lanterna.tropa.Nivel.addXp(sp, 3200, net.minecraft.network.chat.Component.literal("teste"))); });
         at(10, () -> shot("n12_nivel"));
@@ -552,8 +555,8 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); });
-        at(20, () -> cmd("lanterna escolher lanterna:green"));
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lantern reset"); });
+        at(20, () -> cmd("lantern choose lanterna:green"));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         at(10, () -> { cmd("execute in lanterna:space run tp @s 300 -200 300"); });
         waitFor(() -> mc.player.level().dimension().location().getPath().equals("space"), 600);
@@ -591,7 +594,7 @@ public final class DevAutoTest {
             mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear"); cmd("gamerule doMobSpawning false");
             cmd("effect give @s resistance 99999 4 true");
-            cmd("lanterna resetar"); cmd("clear @s");
+            cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -40 900.5");
         });
         waitFor(() -> mc.level.dimension().location().getPath().equals("overworld") && mc.level.hasChunkAt(900, 900) && mc.player.blockPosition().getY() < -30, 400);
@@ -669,10 +672,10 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         Runnable tela = () -> LanternaMod.LOGGER.info("AUTOTEST tela={} dim={}", mc.screen == null ? null : mc.screen.getClass().getSimpleName(), mc.level.dimension().location());
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s");
+        at(40, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(40, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> {});
-            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green"); }));
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green"); }));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         // 1) Terra: não abre
@@ -739,9 +742,9 @@ public final class DevAutoTest {
                 mc.player.getVehicle() == null ? null : mc.player.getVehicle().getClass().getSimpleName(), com.lanterna.client.ClientRingData.charge);
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200))) n.discard(); }));
@@ -773,7 +776,7 @@ public final class DevAutoTest {
             LanternaMod.LOGGER.info("AUTOTEST escotilhas={} blocos={}", esc, BLOCOS.keySet());
         }));
         at(5, () -> shot("b1_sala"));
-        at(5, () -> { cmd("lanterna carga 10"); });
+        at(5, () -> { cmd("lantern charge 10"); });
         at(20, () -> { tela.run(); usar("nave_recarga"); });
         at(20, tela);
         at(5, () -> usar("nave_recarga"));
@@ -802,9 +805,9 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lantern reset"); cmd("clear @s"); cmd("time set 6000");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 0"); });
         at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(300))) n.discard(); }));
@@ -866,8 +869,8 @@ public final class DevAutoTest {
         };
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode creative"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+            cmd("gamemode creative"); cmd("lantern reset"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 120 0"); });
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
@@ -924,9 +927,9 @@ public final class DevAutoTest {
         java.util.function.Consumer<String> cs = c -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), c));
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("lantern reset"); cmd("clear @s"); cmd("time set 6000");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> cs.accept("lanterna escolher lanterna:green"));
+        at(40, () -> cs.accept("lantern choose lanterna:green"));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 8; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 0"); });
         at(10, () -> server(sp -> { for (var n : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(300), e -> !(e instanceof net.minecraft.world.entity.player.Player))) n.discard(); }));
@@ -942,7 +945,7 @@ public final class DevAutoTest {
             double want = a == null ? 0 : Math.toDegrees(Math.atan2(-(a.getX() - mc.player.getX()), a.getZ() - mc.player.getZ()));
             LanternaMod.LOGGER.info("AUTOTEST mira yaw={} esperado~{}", net.minecraft.util.Mth.wrapDegrees(mc.player.getYRot()), want); shot("n1_mira"); });
         // ---- Laser contínuo (segurando X com repetição de tecla) ----
-        at(5, () -> { cs.accept("lanterna afinidade 24000"); });
+        at(5, () -> { cs.accept("lantern affinity 24000"); });
         at(20, () -> { KeyBindings.CONSTRUCT_USE.setDown(true); KeyMapping.click(KeyBindings.CONSTRUCT_USE.getKey()); });
         for (int k = 0; k < 12; k++) {
             int kk = k;
@@ -1151,9 +1154,9 @@ public final class DevAutoTest {
                 d.tecnicas(), d.slotTecnica(0), d.slotTecnica(1), sp.blockPosition(), sp.level().dimension().location()); });
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 200 -150"); });
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
@@ -1230,7 +1233,7 @@ public final class DevAutoTest {
     private static void sceneBarreira() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in lanterna:oa run tp @s 0.5 175 -440"); });
+        at(40, () -> { cmd("gamemode survival"); cmd("lantern reset"); cmd("execute in lanterna:oa run tp @s 0.5 175 -440"); });
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
         for (int k = 0; k < 4; k++) at(30, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST barreira pos={} permitido={} criativo={} dim={} oa={}", sp.blockPosition(),
                 com.lanterna.cidade.Palacio.permitido(sp), sp.isCreative(), sp.level().dimension().location(), com.lanterna.space.SpaceBodies.byId("oa").dimension())));
@@ -1268,8 +1271,8 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s regeneration 99999 4 true"); cmd("time set 6000");
-            cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+            cmd("lantern reset"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(20, () -> server(sp -> {
@@ -1391,9 +1394,9 @@ public final class DevAutoTest {
                 var e = achar(r, sp); LanternaMod.LOGGER.info("AUTOTEST guardiao {} {}", r, e == null ? "SUMIU" : e.blockPosition() + " " + e.getClass().getSimpleName()); } });
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("time set 6000"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in lanterna:oa run tp @s 0 200 -360"); });
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 600);
@@ -1440,7 +1443,7 @@ public final class DevAutoTest {
     private static void scenePvp() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("effect clear @s"); cmd("difficulty normal"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s");
+        at(40, () -> { cmd("gamemode survival"); cmd("effect clear @s"); cmd("difficulty normal"); cmd("time set 6000"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(160, () -> server(sp -> {
             var lvl = sp.serverLevel();
@@ -1501,8 +1504,8 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s regeneration 99999 4 true"); cmd("difficulty normal");
-            cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+            cmd("time set 6000"); cmd("lantern reset"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(20, () -> server(sp -> {
@@ -1518,7 +1521,7 @@ public final class DevAutoTest {
             glog("planetas " + G_PLANETAS[0] + " " + G_PLANETAS[1]);
         }));
         // ---- criar a guilda (abre o editor de símbolo) ----
-        at(10, () -> cmd("guilda criar Zezinho do Grau"));
+        at(10, () -> cmd("guild create Zezinho do Grau"));
         at(30, () -> { glog("tela " + (mc.screen == null ? null : mc.screen.getClass().getSimpleName())); shot("g1_editor_vazio"); });
         at(5, () -> {
             // desenha um "Z" com raio (símbolo da guilda) e salva pelo próprio pacote do editor
@@ -1704,8 +1707,8 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("effect give @s resistance 99999 4 true"); cmd("difficulty normal");
-            cmd("time set 6000"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+            cmd("time set 6000"); cmd("lantern reset"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5"); });
         at(20, () -> server(sp -> {
@@ -1770,7 +1773,7 @@ public final class DevAutoTest {
             glog("almas no chao=" + almas.stream().mapToInt(e -> e.getItem().getCount()).sum() + " de 6 zumbis; progresso morte_2? " + d.isActive("morte_2") + " morte_1 prog=" + java.util.Arrays.toString(d.active().get("morte_1"))); }));
         at(20, () -> shot("v1_corrompido"));
         // ---- guilda + minerador nível 4 ----
-        at(10, () -> { cmd("effect give @s resistance 99999 4 true"); cmd("guilda criar Zezinho do Grau"); });
+        at(10, () -> { cmd("effect give @s resistance 99999 4 true"); cmd("guild create Zezinho do Grau"); });
         at(20, () -> mc.setScreen(null));
         at(5, () -> server(sp -> {
             var gs = com.lanterna.guilda.Guildas.get(sp.server);
@@ -1897,8 +1900,8 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
             cmd("gamemode survival"); cmd("effect clear @s"); cmd("effect give @s resistance 99999 4 true"); cmd("difficulty normal"); cmd("gamerule doDaylightCycle false");
-            cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+            cmd("time set 6000"); cmd("weather clear"); cmd("lantern reset"); cmd("clear @s"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
         at(20, () -> server(sp -> {
@@ -1974,8 +1977,8 @@ public final class DevAutoTest {
 
     private static void sceneFist() {
         Minecraft mc = Minecraft.getInstance();
-        at(40, () -> { cmd("gamemode survival"); cmd("time set 6000"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> { cmd("gamemode survival"); cmd("time set 6000"); cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
         at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); }); }));
@@ -2000,9 +2003,9 @@ public final class DevAutoTest {
             if (e.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) glog("DANO " + e.getSource().getMsgId() + " " + e.getAmount() + " dim=" + sp.level().dimension().location()
                     + " y=" + (int) sp.getY() + " auto=" + com.lanterna.client.flight.Autopilot.phase() + " hp=" + sp.getHealth()); }); }
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("difficulty normal"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
+        at(40, () -> { cmd("gamemode survival"); cmd("difficulty normal"); cmd("lantern reset"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
             cmd("execute in minecraft:overworld run tp @s 300.5 120 300.5 0 0"); });
-        at(60, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(60, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         for (int i = 0; i < 90; i++) {
             final int k = i;
             at(40, () -> {
@@ -2026,10 +2029,10 @@ public final class DevAutoTest {
                     + " y=" + (int) sp.getY() + " auto=" + com.lanterna.client.flight.Autopilot.phase()); }); }
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("difficulty normal"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
+            cmd("gamemode survival"); cmd("difficulty normal"); cmd("lantern reset"); cmd("clear @s"); cmd("time set 6000"); cmd("weather clear");
             cmd("execute in minecraft:overworld run tp @s 300.5 -60 300.5 0 0"); });
         at(40, () -> cmd("fill 296 -44 296 304 -42 304 minecraft:stone"));
-        at(20, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(20, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.flight.Autopilot.phase() == com.lanterna.client.flight.Autopilot.Phase.ASCEND, 900);
         at(1, () -> glog("comecou a subir em " + String.format("%.1f %.1f %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ())));
         at(30, () -> { glog("subindo y=" + (int) mc.player.getY()); shot("v22_subindo"); });
@@ -2121,10 +2124,10 @@ public final class DevAutoTest {
     private static void sceneTeto() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 520.5 -60 520.5 0 0"); });
+        at(40, () -> { cmd("gamemode survival"); cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 520.5 -60 520.5 0 0"); });
         at(30, () -> { cmd("fill 510 -59 510 530 -50 530 minecraft:air"); });
         at(10, () -> { cmd("fill 516 -55 516 524 -53 524 minecraft:stone"); });
-        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green")));
         at(20, () -> com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId("oa")));
         for (int i = 0; i < 30; i++) at(5, () -> {
             var p = mc.player;
@@ -2138,10 +2141,10 @@ public final class DevAutoTest {
     private static void sceneTeto2() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 620.5 -60 620.5 0 0"); });
+        at(40, () -> { cmd("gamemode survival"); cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 620.5 -60 620.5 0 0"); });
         at(30, () -> { cmd("fill 610 -59 610 630 -40 630 minecraft:air"); });
         at(10, () -> { cmd("fill 616 -50 616 624 -48 624 minecraft:stone"); });
-        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         for (int i = 0; i < 40; i++) at(5, () -> {
             var p = mc.player;
             int ar = 0; for (int x = 616; x <= 624; x++) for (int y = -50; y <= -48; y++) for (int z = 616; z <= 624; z++)
@@ -2182,9 +2185,9 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); });
-        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
-        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna nivel 35")));
+            cmd("gamemode creative"); cmd("time set 6000"); cmd("weather clear"); cmd("lantern reset"); });
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green")));
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern level 35")));
         // ---- Palácio: moradores ----
         at(10, () -> cmd("execute in lanterna:oa run tp @s 0 172 -440"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
@@ -2244,7 +2247,7 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { cmd("gamemode survival"); cmd("time set 6000"); cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 0"); });
         for (String t : new String[]{"white", "yellow", "green"}) for (String v : new String[]{"padrao", "a"}) {
-            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t)));
+            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + t)));
             at(5, () -> cmd("clear @s"));
             at(10, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null);
                 camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; mc.player.getInventory().selected = 8; look(0, 10); });
@@ -2301,8 +2304,8 @@ public final class DevAutoTest {
         waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
         String[] tropas = System.getProperty("lanterna.planetas", "green,yellow,red,orange,blue,indigo,violet").split(",");
         for (String tr : tropas) {
-            at(20, () -> { cmd("lanterna anel " + tr); });
-            at(20, () -> { cmd("lanterna fonte arvore tudo"); cmd("lanterna fonte selo todas"); cmd("lanterna cheio"); cmd("lanterna afinidade 100000"); });
+            at(20, () -> { cmd("lantern ring " + tr); });
+            at(20, () -> { cmd("lantern source tree all"); cmd("lantern source seal all"); cmd("lantern full"); cmd("lantern affinity 100000"); });
             at(30, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -300.5, h, 0.5, 90f, 10f); }));
             // a roda com os construtos novos
             at(40, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
@@ -2351,22 +2354,22 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
-            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); cmd("lanterna afinidade 100000"); });
+            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lantern ring green"); cmd("lantern affinity 100000"); });
         // o evento da Bateria em Oa
         at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
         at(20, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -387.5, h + 6, 2.5, 180f, 20f); }));
-        at(20, () -> { cmd("time set 6000"); cmd("lanterna fonte evento"); });
+        at(20, () -> { cmd("time set 6000"); cmd("lantern source event"); });
         at(80, () -> shot("evento_onda"));
         at(5, () -> server(sp -> glog("evento ativo=" + com.lanterna.fonte.BateriaEnfraquece.ativo() + " recarga=" + com.lanterna.fonte.BateriaEnfraquece.recarga(sp))));
         for (int i = 0; i < 6; i++) at(60, () -> { cmd("kill @e[type=lanterna:lanterna_npc,distance=..80]"); });
         at(60, () -> server(sp -> glog("evento depois ativo=" + com.lanterna.fonte.BateriaEnfraquece.ativo() + " recarga=" + com.lanterna.fonte.BateriaEnfraquece.recarga(sp) + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp))));
         String[] tropas = System.getProperty("lanterna.planetas", "green,yellow,red,orange,blue,indigo,violet").split(",");
         for (String tr : tropas) {
-            at(20, () -> cmd("lanterna anel " + tr));
-            at(20, () -> { cmd("lanterna fonte selo todas"); cmd("lanterna fonte arvore tudo"); cmd("lanterna fonte chefe"); });
-            at(20, () -> cmd("lanterna fonte ir"));
+            at(20, () -> cmd("lantern ring " + tr));
+            at(20, () -> { cmd("lantern source seal all"); cmd("lantern source tree all"); cmd("lantern source boss"); });
+            at(20, () -> cmd("lantern source go"));
             waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
             at(60, () -> {});
             waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
@@ -2401,14 +2404,14 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
-            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); });
-        at(20, () -> cmd("lanterna maximo"));
+            cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lantern ring green"); });
+        at(20, () -> cmd("lantern max"));
         at(20, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
             glog("maximo: nivel_xp=" + (d == null ? -1 : d.xp()) + " afinidade=" + com.lanterna.construct.Affinity.points(com.lanterna.power.EquipmentHelper.ring(sp))
                 + " carga=" + (r == null ? -1 : r.charge()) + "/" + (r == null ? -1 : r.maxCharge()) + " sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp)
                 + " essencia=" + com.lanterna.fonte.FonteDados.essencia(sp) + " nos=" + com.lanterna.fonte.FonteDados.arvore(sp).size() + " coracao=" + com.lanterna.lore.entity.boss.ChefeFonte.temCoracao(sp)); }));
-        at(10, () -> cmd("lanterna fonte chefe"));
-        at(10, () -> cmd("lanterna fonte ir ilha"));
+        at(10, () -> cmd("lantern source boss"));
+        at(10, () -> cmd("lantern source go island"));
         waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
         waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
         at(40, () -> server(sp -> {
@@ -2498,8 +2501,8 @@ public final class DevAutoTest {
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(12);
             mc.options.hideGui = true; mc.options.bobView().set(false);
             cmd("gamerule doDaylightCycle false"); cmd("gamerule doWeatherCycle false"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
-            cmd("lanterna anel green"); cmd("execute in minecraft:overworld run weather clear 1000000"); });
-        at(20, () -> { cmd("lanterna maximo"); cmd("effect give @s resistance 99999 4 true"); });
+            cmd("lantern ring green"); cmd("execute in minecraft:overworld run weather clear 1000000"); });
+        at(20, () -> { cmd("lantern max"); cmd("effect give @s resistance 99999 4 true"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s -480 200 -150 0 20"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
@@ -2524,7 +2527,7 @@ public final class DevAutoTest {
         String[] anel = {"green", "green", "red", "blue", "violet", "orange", "yellow", "indigo"};
         for (int i = 0; i < cons.length; i++) {
             final String id = cons[i], an = anel[i];
-            at(10, () -> cmd("lanterna anel " + an));
+            at(10, () -> cmd("lantern ring " + an));
             at(10, () -> server(sp -> {
                 var l = sp.serverLevel();
                 for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, sp.getBoundingBox().inflate(50), x -> !(x instanceof net.minecraft.world.entity.player.Player))) e.discard();
@@ -2553,13 +2556,13 @@ public final class DevAutoTest {
             corte();
         }
         // ---- 4. a roda e a Árvore da Luz ----
-        at(5, () -> cmd("lanterna anel green"));
+        at(5, () -> cmd("lantern ring green"));
         at(15, () -> { take("roda"); com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
         at(50, () -> { take("arvore"); com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(new com.lanterna.client.fonte.ArvoreScreen()); });
         at(50, () -> mc.setScreen(null));
         corte();
         // ---- 5. a Fonte: aura e voo até a Ilha do Coração ----
-        at(5, () -> cmd("lanterna fonte ir"));
+        at(5, () -> cmd("lantern source go"));
         waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
         waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
         at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); voar.run(); });
@@ -2576,8 +2579,8 @@ public final class DevAutoTest {
         // ---- 6. os chefes ----
         String[] tr = {"green", "red", "violet", "orange"};
         for (String t : tr) {
-            at(5, () -> { cmd("lanterna anel " + t); cmd("lanterna fonte chefe"); });
-            at(10, () -> cmd("lanterna fonte ir ilha"));
+            at(5, () -> { cmd("lantern ring " + t); cmd("lantern source boss"); });
+            at(10, () -> cmd("lantern source go island"));
             waitFor(() -> mc.level.dimension().location().getPath().startsWith("fonte_") && mc.screen == null, 900);
             waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
             at(40, () -> server(sp -> {
@@ -2616,7 +2619,7 @@ public final class DevAutoTest {
             corte();
         }
         // ---- 7. viagem no espaço ----
-        at(10, () -> { cmd("lanterna anel green"); cmd("execute in lanterna:space run tp @s 300 -200 300 90 0"); });
+        at(10, () -> { cmd("lantern ring green"); cmd("execute in lanterna:space run tp @s 300 -200 300 90 0"); });
         waitFor(() -> mc.level.dimension().location().getPath().equals("space") && mc.screen == null, 600);
         at(80, () -> { com.lanterna.client.flight.Autopilot.clear(); voar.run(); });
         at(10, () -> { mc.player.setXRot(0); mc.player.setYRot(90); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.options.keyUp.setDown(true); mc.options.keySprint.setDown(true); });
@@ -2628,7 +2631,7 @@ public final class DevAutoTest {
         at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         at(20, tempo);
-        at(20, () -> { cmd("gamemode creative"); cmd("lanterna fonte evento"); });
+        at(20, () -> { cmd("gamemode creative"); cmd("lantern source event"); });
         at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); take("evento"); });
         at(1, () -> {});
         trajeto(140, () -> v(-372.5, H[0] + 10, 6.5, 50, 22), () -> v(-404.5, H[0] + 12, 6.5, -45, 26));
@@ -2651,8 +2654,8 @@ public final class DevAutoTest {
         int[] cont = {0, 0};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
-            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); });
-        at(20, () -> { cmd("lanterna maximo"); });
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lantern ring green"); });
+        at(20, () -> { cmd("lantern max"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s 40 140 60"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         at(60, () -> server(sp -> {
@@ -2763,7 +2766,7 @@ public final class DevAutoTest {
         String miss = com.lanterna.juramento.Juramento.missao(com.lanterna.baterias.Tropa.VERDE);
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
-            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         at(100, () -> cmd("time set 6000"));
@@ -2839,7 +2842,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
-            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); cmd("gamemode creative"); });
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lantern ring green"); cmd("gamemode creative"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         at(60, () -> server(sp -> {
@@ -2882,7 +2885,7 @@ public final class DevAutoTest {
         net.minecraft.world.entity.decoration.ArmorStand[] cam = {null};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); cmd("gamemode creative"); });
+            cmd("gamerule doDaylightCycle false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lantern ring green"); cmd("gamemode creative"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         String[] tipos = {"NAVE_LANCEIRA", "NAVE_PATRULHA"};
@@ -2921,7 +2924,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel indigo"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring indigo"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -2960,7 +2963,7 @@ public final class DevAutoTest {
     private static void sceneFavores() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); cmd("gamemode creative"); cmd("lanterna anel indigo"); });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); cmd("gamemode creative"); cmd("lantern ring indigo"); });
         at(10, () -> cmd("execute in lanterna:nok run tp @s 0 120 0"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
         at(200, () -> server(sp -> {
@@ -3087,7 +3090,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3161,6 +3164,141 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    private static void sceneBases() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamemode creative"); cmd("time set 6000"); });
+        for (String pl : new String[]{"korugar", "zamaron", "oa"}) {
+            at(20, () -> cmd("execute in lanterna:" + pl + " run tp @s 0 200 30"));
+            at(100, () -> server(sp -> {
+                var lv = sp.serverLevel();
+                int y = lv.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 12);
+                sp.teleportTo(lv, 0.5, y + 16, 34.5, 180, 35); sp.getAbilities().flying = true; sp.onUpdateAbilities();
+            }));
+            at(60, () -> shot("est_base2_" + pl));
+        }
+        at(20, () -> mc.stop());
+    }
+
+    /** 0.47.0: arenas, bases e arena lendária com a arquitetura nova. */
+    private static void sceneEstruturas() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamemode creative"); cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamerule doMobSpawning false"); });
+        String[] planetas = {"korugar", "ysmault", "zamaron", "ryut", "okaara"};
+        for (String pl : planetas) {
+            at(20, () -> cmd("execute in lanterna:" + pl + " run tp @s 60 200 0"));
+            at(200, () -> cmd("execute in lanterna:" + pl + " run tp @s 120 200 0"));
+            at(200, () -> server(sp -> {
+                var lv = sp.serverLevel();
+                int y = lv.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 120, 0);
+                sp.teleportTo(lv, 120.5 + 34, y + 22, 34.5, 135, 28); sp.getAbilities().flying = true; sp.onUpdateAbilities();
+            }));
+            at(60, () -> shot("est_arena_" + pl));
+            at(5, () -> server(sp -> {
+                var lv = sp.serverLevel();
+                int y = lv.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
+                sp.teleportTo(lv, 18.5, y + 12, 18.5, 135, 30);
+            }));
+            at(60, () -> shot("est_base_" + pl));
+        }
+        at(20, () -> cmd("lantern legendary atrocitus go"));
+        at(400, () -> server(sp -> {
+            var st = com.lanterna.lendarios.ArenaLendaria.estado(sp.server, com.lanterna.lendarios.Lendario.ATROCITUS);
+            var c = st.centro;
+            sp.teleportTo(sp.serverLevel(), c.getX() + 30.5, c.getY() + 20, c.getZ() + 30.5, 135, 25); sp.getAbilities().flying = true; sp.onUpdateAbilities();
+            glog("lendaria construida=" + st.construida + " centro=" + c);
+        }));
+        at(80, () -> shot("est_lendaria"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.47.0: conversa com o anel (chat), viagem por pedido, NPC respondendo, juramento escrito, chefes espertos e lendário escalando. */
+    private static void sceneIA() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("gamerule doMobSpawning false");
+            cmd("effect give @s resistance 99999 3 true"); cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 600 200 600"); });
+        at(40, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = 570; x <= 630; x++) for (int z = 570; z <= 630; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState());
+                for (int y = 200; y < 216; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(80))) e.discard();
+        }));
+        at(20, () -> cmd("lantern ring green"));
+        at(20, () -> cmd("lantern full"));
+        String[] frases = {"qual a minha carga", "onde estou", "quem é você", "conte uma piada", "fale sobre korugar", "missão",
+                "procure perigos", "what is my level", "help", "recite o juramento"};
+        for (String f : frases) at(10, () -> { com.lanterna.client.ia.AnelIA.ouvir(f, false); glog("anel <" + f + "> -> " + com.lanterna.client.ia.AnelIA.ultimaResposta); });
+        // pedido de viagem pelo chat (com prefixo) e com erro de digitação
+        at(10, () -> { net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ClientChatEvent("anel, me leve para zamarom"));
+            glog("chat viagem -> " + com.lanterna.client.ia.AnelIA.ultimaResposta + " | ativo=" + com.lanterna.client.flight.Autopilot.active()
+                    + " alvo=" + (com.lanterna.client.flight.Autopilot.target() == null ? null : com.lanterna.client.flight.Autopilot.target().id())); });
+        at(60, () -> glog("subindo: fase=" + com.lanterna.client.flight.Autopilot.phase() + " y=" + (int) mc.player.getY()));
+        at(10, () -> { com.lanterna.client.ia.AnelIA.ouvir("pare", false); glog("pare -> " + com.lanterna.client.ia.AnelIA.ultimaResposta + " | ativo=" + com.lanterna.client.flight.Autopilot.active()); });
+        at(10, () -> { com.lanterna.client.ia.AnelIA.ouvir("take me to korugar", false); glog("en viagem -> alvo=" + (com.lanterna.client.flight.Autopilot.target() == null ? null : com.lanterna.client.flight.Autopilot.target().id())); });
+        at(5, () -> { com.lanterna.client.ia.AnelIA.ouvir("stop", false); com.lanterna.client.ia.AnelIA.ouvir("me leve para casa", false);
+            glog("casa -> alvo=" + (com.lanterna.client.flight.Autopilot.target() == null ? null : com.lanterna.client.flight.Autopilot.target().id())); });
+        at(5, () -> { com.lanterna.client.ia.AnelIA.ouvir("cancelar", false); com.lanterna.client.ia.AnelIA.ouvir("pousar", false); });
+        at(60, () -> cmd("execute in minecraft:overworld run tp @s 600 200 600 0 0"));
+        // chat comum sem prefixo não é interceptado
+        at(10, () -> { var ev = new net.minecraftforge.client.event.ClientChatEvent("anel verde é o melhor de todos");
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(ev); glog("frase comum cancelada=" + ev.isCanceled()); });
+        // NPC: um Veltari na frente
+        at(10, () -> server(sp -> {
+            var n = com.lanterna.lore.LoreEntities.typeOf(com.lanterna.lore.entity.Race.BRAKKARI).create(sp.serverLevel());
+            n.moveTo(600.5, 200, 603.5, 180, 0); n.setNoAi(true); sp.serverLevel().addFreshEntity(n);
+            sp.teleportTo(600.5, 200, 600.5); sp.setYRot(0); sp.setXRot(0); }));
+        at(10, () -> { mc.player.setYRot(0); mc.player.setXRot(0); });
+        String[] npc = {"olá", "oi de novo", "quem é você?", "fale sobre zamaron", "você é incrível", "hello there", "what is up"};
+        for (String f : npc) {
+            at(5, () -> mc.player.connection.sendChat(f));
+            at(40, () -> glog("npc <" + f + "> -> " + com.lanterna.ia.NpcConversa.ultimaFala));
+        }
+        // juramento escrito
+        at(10, () -> { com.lanterna.client.juramento.JuramentoScreen.abrir("anel", "verde", 0x2BFF4A); });
+        at(10, () -> { var sc = mc.screen; sc.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_TAB, 0, 0);
+            String texto = net.minecraft.client.resources.language.I18n.get("juramento_anel.lanterna.verde.1") + " x";
+            for (char ch : texto.toCharArray()) sc.charTyped(ch, 0); });
+        at(10, () -> shot("ia_juramento_escrito"));
+        at(5, () -> mc.setScreen(null));
+        // chefe esperto: jogador longe e no alto
+        at(10, () -> server(sp -> {
+            var e = (com.lanterna.lore.entity.boss.LoreBoss) com.lanterna.lore.LoreEntities.bossType("karvhul_forjador_rubro").create(sp.serverLevel());
+            e.moveTo(580.5, 200, 580.5, 0, 0); sp.serverLevel().addFreshEntity(e); e.setTarget(sp);
+            sp.teleportTo(600.5, 200, 600.5); }));
+        at(5, () -> cmd("lantern level 150"));
+        at(5, () -> server(sp -> { sp.getAbilities().mayfly = true; sp.getAbilities().flying = true; sp.onUpdateAbilities(); sp.teleportTo(600.5, 214, 600.5); }));
+        for (int i = 0; i < 10; i++) at(20, () -> server(sp -> {
+            var b = sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.LoreBoss.class, sp.getBoundingBox().inflate(80)).stream().findFirst().orElse(null);
+            glog("chefe: dist=" + (b == null ? -1 : (int) b.distanceTo(sp)) + " jogadorY=" + (int) sp.getY() + " vida=" + (int) sp.getHealth() + " reacao=" + com.lanterna.ia.BossIA.ultimo);
+        }));
+        at(10, () -> server(sp -> { for (var b : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.LoreBoss.class, sp.getBoundingBox().inflate(80))) b.discard();
+            sp.getAbilities().flying = false; sp.onUpdateAbilities(); }));
+        // lendário escalando com o nível
+        at(10, () -> server(sp -> {
+            var le = com.lanterna.lendarios.Lendarios.surgir(sp.serverLevel(), com.lanterna.lendarios.Lendario.ATROCITUS, sp.blockPosition().offset(0, 0, 14));
+            le.setTarget(sp);
+        }));
+        at(5, () -> cmd("lantern ring green"));
+        at(60, () -> server(sp -> {
+            var le = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(60)).stream()
+                    .filter(x -> com.lanterna.lendarios.Lendarios.de(x) != null).findFirst().orElse(null);
+            if (le != null) { float[] k = com.lanterna.lendarios.Lendarios.escala(le);
+                glog("lendario escala vida=" + k[0] + " dano=" + k[1] + " nivel=" + com.lanterna.tropa.Nivel.nivel(sp));
+                float antes = le.getHealth(); le.hurt(sp.damageSources().playerAttack(sp), 100); glog("lendario 100 de dano -> perdeu " + (antes - le.getHealth()));
+                le.discard(); }
+        }));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void sceneChefesTropa() {
         Minecraft mc = Minecraft.getInstance();
         String[] extra = {"smash", "legs", "coins", "light", "hook", "shards", "reap", "build"};
@@ -3203,7 +3341,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lanterna anel green");
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lantern ring green");
             cmd("execute in minecraft:overworld run tp @s 0 200 0"); });
         at(40, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3214,7 +3352,7 @@ public final class DevAutoTest {
             glog("vida max=" + sp.getMaxHealth() + " armadura=" + sp.getArmorValue() + " dureza=" + sp.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS) + " nivel=" + com.lanterna.tropa.Nivel.nivel(sp));
         }));
         at(40, () -> shot("hud_planeta"));
-        at(2, () -> cmd("lanterna nivel 120"));
+        at(2, () -> cmd("lantern level 120"));
         at(40, () -> server(sp -> { sp.setHealth(sp.getMaxHealth() * 0.8f); glog("nivel 120 vida max=" + sp.getMaxHealth()); }));
         at(30, () -> shot("hud_nivel120"));
         at(2, () -> server(sp -> sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), 1500, 100, 1500, 0, 0)));
@@ -3256,7 +3394,7 @@ public final class DevAutoTest {
 
     private static void sceneHanksDbg() {
         Minecraft mc = Minecraft.getInstance();
-        at(60, () -> { cmd("gamemode spectator"); cmd("lanterna hanks ir"); });
+        at(60, () -> { cmd("gamemode spectator"); cmd("lantern hanks go"); });
         at(100, () -> server(sp -> glog("antes servidor=" + com.lanterna.hanks.HanksOrbita.agora() + " dim=" + sp.level().dimension().location())));
         at(2, () -> server(sp -> { var h = com.lanterna.space.SpaceBodies.byId("hanks"); olharDe(sp, h.center().add(0, 120, h.radius() * 2.4), h.center()); }));
         at(60, () -> { shot("hanks_espaco"); glog("cliente=" + com.lanterna.hanks.HanksOrbita.agora() + " eu=" + mc.player.position()); });
@@ -3272,9 +3410,9 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
             mc.options.renderDistance().set(8);
-            cmd("gamerule doMobSpawning false"); cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doMobSpawning false"); cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lantern ring green"); });
         // 1. Vigília (Hal Jordan, mesma Tropa: duelo)
-        at(20, () -> { cmd("lanterna lendario hal_jordan reviver"); cmd("lanterna lendario hal_jordan ir"); });
+        at(20, () -> { cmd("lantern legendary hal_jordan revive"); cmd("lantern legendary hal_jordan go"); });
         waitFor(() -> mc.player != null && mc.player.onGround(), 600);
         at(60, () -> server(sp -> glog("arena hal=" + com.lanterna.lendarios.ArenaLendaria.estado(sp.server, HAL).construida + " centro=" + com.lanterna.lendarios.ArenaLendaria.estado(sp.server, HAL).centro + " corpo=" + com.lanterna.space.SpaceBodies.bodyAt(sp.level().dimension(), sp.getX(), sp.getZ()))));
         at(5, () -> cmd("gamemode survival"));
@@ -3311,7 +3449,7 @@ public final class DevAutoTest {
                 + " alvo=" + (le.getTarget()));
         }));
         // 2. Fornalha (Atrocitus, inimigo: luta de verdade)
-        at(10, () -> { cmd("gamemode creative"); cmd("lanterna lendario atrocitus reviver"); cmd("lanterna lendario atrocitus ir"); });
+        at(10, () -> { cmd("gamemode creative"); cmd("lantern legendary atrocitus revive"); cmd("lantern legendary atrocitus go"); });
         waitFor(() -> mc.player != null && mc.player.onGround(), 600);
         at(200, () -> server(sp -> {
             var s = com.lanterna.lendarios.ArenaLendaria.estado(sp.server, ATRO);
@@ -3343,7 +3481,7 @@ public final class DevAutoTest {
         }));
         // 3. Hanks
         at(20, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(20, () -> { cmd("gamemode creative"); cmd("lanterna anel yellow"); cmd("lanterna hanks ir"); });
+        at(20, () -> { cmd("gamemode creative"); cmd("lantern ring yellow"); cmd("lantern hanks go"); });
         waitFor(() -> mc.player != null && mc.player.onGround(), 600);
         at(300, () -> server(sp -> {
             var d = com.lanterna.hanks.HanksMundo.dados(sp.serverLevel());
@@ -3352,7 +3490,7 @@ public final class DevAutoTest {
             sp.setYRot(135); sp.setXRot(25);
         }));
         at(40, () -> shot("hanks_distrito"));
-        at(2, () -> cmd("lanterna hanks missao 3"));
+        at(2, () -> cmd("lantern hanks mission 3"));
         at(10, () -> server(sp -> {
             var d = com.lanterna.hanks.HanksMundo.dados(sp.serverLevel());
             sp.teleportTo(0.5, d.y + 0.2, com.lanterna.hanks.HanksMundo.CIDADELA_Z + 14.5);
@@ -3400,7 +3538,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamemode creative"); cmd("lantern ring green"); });
         at(20, () -> server(sp -> sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), 1500, 100, 1500, 0, 0)));
         java.util.UUID a = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000a"), b = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000b"),
                 c = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000c"), d = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000d");
@@ -3440,7 +3578,7 @@ public final class DevAutoTest {
         net.minecraft.world.phys.Vec3[] sol = {null}, bur = {null};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("gamerule doMobSpawning false"); cmd("gamerule doImmediateRespawn true"); cmd("gamemode spectator"); cmd("lanterna anel green"); });
+            cmd("gamerule doMobSpawning false"); cmd("gamerule doImmediateRespawn true"); cmd("gamemode spectator"); cmd("lantern ring green"); });
         at(20, () -> server(sp -> {
             glog("mogo centro=" + com.lanterna.space.SpaceBodies.byId("mogo").center() + " dist=" + (int) com.lanterna.space.SpaceBodies.byId("mogo").center().length());
             // primeiro sol e buraco negro gerados perto da origem
@@ -3474,9 +3612,9 @@ public final class DevAutoTest {
         at(2, () -> server(sp -> { var a = com.lanterna.space.Perigos.ABISMO; olharDe(sp, a.centro().add(40, 25, 150), a.centro()); }));
         at(20, () -> shot("perigo_abismo_perto"));
         // Sol central
-        at(2, () -> server(sp -> { var s = com.lanterna.space.Perigos.SOL_CENTRAL; olharDe(sp, s.centro().add(-9000, -2000, -9000), s.centro()); }));
+        at(2, () -> server(sp -> { var s = SOL_TESTE; olharDe(sp, s.centro().add(-9000, -2000, -9000), s.centro()); }));
         at(80, () -> shot("perigo_sol_longe"));
-        at(2, () -> server(sp -> { var s = com.lanterna.space.Perigos.SOL_CENTRAL; olharDe(sp, s.centro().add(-4200 * 1.45, 0, 0), s.centro().add(0, 1500, 3000)); }));
+        at(2, () -> server(sp -> { var s = SOL_TESTE; olharDe(sp, s.centro().add(-4200 * 1.45, 0, 0), s.centro().add(0, 1500, 3000)); }));
         at(30, () -> shot("perigo_sol_perto"));
         at(2, () -> server(sp -> { if (sol[0] != null) olharDe(sp, sol[0].add(0, 300, 3500), sol[0]); }));
         at(80, () -> shot("perigo_sol_gerado"));
@@ -3505,14 +3643,14 @@ public final class DevAutoTest {
         at(40, () -> server(sp -> {
             sp.setHealth(sp.getMaxHealth());
             com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
-            var s = com.lanterna.space.Perigos.SOL_CENTRAL;
+            var s = SOL_TESTE;
             olharDe(sp, s.centro().add(0, 0, -s.raio() * 1.4), s.centro());
         }));
         at(10, () -> shot("perigo_queimando"));
         at(2, () -> server(sp -> glog("modo=" + sp.gameMode.getGameModeForPlayer() + " invul=" + sp.getAbilities().invulnerable + " invT=" + sp.invulnerableTime
                 + " hurt=" + sp.hurt(new net.minecraft.world.damagesource.DamageSource(sp.level().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getHolderOrThrow(com.lanterna.space.PerigosEspaco.SOL)), 3f)
                 + " hp=" + sp.getHealth() + " absorc=" + sp.getAbsorptionAmount() + " efeitos=" + sp.getActiveEffects())));
-        for (int i = 0; i < 8; i++) at(20, () -> server(sp -> glog("sol d/R=" + String.format("%.2f", sp.position().distanceTo(com.lanterna.space.Perigos.SOL_CENTRAL.centro()) / com.lanterna.space.Perigos.SOL_CENTRAL.raio()) + " hp=" + sp.getHealth() + " fogo=" + sp.getRemainingFireTicks() + " vivo=" + sp.isAlive())));
+        for (int i = 0; i < 8; i++) at(20, () -> server(sp -> glog("sol d/R=" + String.format("%.2f", sp.position().distanceTo(SOL_TESTE.centro()) / SOL_TESTE.raio()) + " hp=" + sp.getHealth() + " fogo=" + sp.getRemainingFireTicks() + " vivo=" + sp.isAlive())));
         at(10, () -> server(sp -> { sp.setHealth(sp.getMaxHealth()); sp.clearFire(); var a = com.lanterna.space.Perigos.ABISMO; olharDe(sp, a.centro().add(0, 0, 110), a.centro()); }));
         for (int i = 0; i < 6; i++) at(10, () -> server(sp -> glog("horizonte d=" + (int) sp.position().distanceTo(com.lanterna.space.Perigos.ABISMO.centro()) + " hp=" + sp.getHealth() + " vivo=" + sp.isAlive())));
         at(20, () -> { glog("FIM"); mc.stop(); });
@@ -3524,7 +3662,7 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(12); mc.options.hideGui = true;
             cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000");
-            cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3578,7 +3716,7 @@ public final class DevAutoTest {
             boolean ok = com.lanterna.mogo.ChamadoMogo.usar(sp, sp.getMainHandItem());
             glog("segundo uso restante=" + com.lanterna.mogo.ChamadoMogo.restante(sp));
         }));
-        at(5, () -> cmd("lanterna mogo resetar"));
+        at(5, () -> cmd("lantern mogo reset"));
         at(5, () -> server(sp -> glog("depois do reset restante=" + com.lanterna.mogo.ChamadoMogo.restante(sp))));
         at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 8.5, 203, 12.5, 150, 35)));
         at(20, () -> shot("mogo_cratera"));
@@ -3603,9 +3741,9 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10); mc.options.hideGui = false;
             cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000");
-            cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamemode creative"); cmd("lantern ring green"); });
         // 1. cinturão
-        at(20, () -> cmd("lanterna mogo missao 1"));
+        at(20, () -> cmd("lantern mogo mission 1"));
         at(10, () -> server(sp -> {
             var mogo = com.lanterna.space.SpaceBodies.byId("mogo");
             var space = sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
@@ -3616,12 +3754,12 @@ public final class DevAutoTest {
         at(120, () -> shot("mp_cinturao"));
         at(2, () -> server(sp -> glog("rochas=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.RochaMogo.class, sp.getBoundingBox().inflate(120)).size())));
         // pousar
-        at(10, () -> cmd("lanterna mogo ir"));
+        at(10, () -> cmd("lantern mogo go"));
         at(400, () -> server(sp -> { var d = md(sp); glog("pronto=" + d.pronto + " pouso=" + d.pouso + " dim=" + sp.level().dimension().location() + " " + flag(sp, "mogo:cinturao")); }));
         at(10, () -> server(sp -> { var d = md(sp); tpm(sp, d.pouso.getX() + 14.5, d.pouso.getY() + 6, d.pouso.getZ() + 14.5, 135, 15); }));
         at(40, () -> shot("mp_pouso"));
         // 2. corrida
-        at(5, () -> cmd("lanterna mogo missao 2"));
+        at(5, () -> cmd("lantern mogo mission 2"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.pouso.getX() + 0.5, d.pouso.getY() + 1, d.pouso.getZ() + 3.5, -90, 0); }));
         at(10, () -> server(sp -> tpm(sp, 60, sp.getY() + 14, 14, 60, 30)));
         at(60, () -> shot("mp_corrida"));
@@ -3636,7 +3774,7 @@ public final class DevAutoTest {
         }));
         at(20, () -> server(sp -> glog(flag(sp, "mogo:corrida"))));
         // 3. ponte
-        at(5, () -> cmd("lanterna mogo missao 3"));
+        at(5, () -> cmd("lantern mogo mission 3"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.ponteIni.getX() + 0.5, d.ponteIni.getY(), d.ponteIni.getZ() + 0.5, 0, 10); }));
         at(70, () -> server(sp -> { var d = md(sp); tpm(sp, d.ponteIni.getX() + 6.5, d.ponteY + 5, d.ponteZ0 + 30, 160, 25); }));
         at(20, () -> shot("mp_ponte"));
@@ -3644,7 +3782,7 @@ public final class DevAutoTest {
         at(10, () -> server(sp -> glog(flag(sp, "mogo:ponte") + " mayfly=" + sp.getAbilities().mayfly)));
         at(2, () -> cmd("gamemode creative"));
         // 4. prova
-        at(5, () -> cmd("lanterna mogo missao 4"));
+        at(5, () -> cmd("lantern mogo mission 4"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.arena.getX() + 0.5, d.arena.getY() + 1, d.arena.getZ() + 0.5, 0, 0); }));
         at(10, () -> cmd("gamemode survival"));
         at(60, () -> server(sp -> { var d = md(sp); tpm(sp, d.arena.getX() + 0.5, d.arena.getY() + 1, d.arena.getZ() + 12.5, 180, 10); }));
@@ -3658,7 +3796,7 @@ public final class DevAutoTest {
         at(10, () -> server(sp -> glog(flag(sp, "mogo:prova"))));
         at(2, () -> cmd("gamemode creative"));
         // 5. cerco
-        at(5, () -> cmd("lanterna mogo missao 5"));
+        at(5, () -> cmd("lantern mogo mission 5"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.torres[1].getX() + 12.5, d.torres[1].getY() + 4, d.torres[1].getZ() + 12.5, 135, 20); }));
         at(100, () -> shot("mp_cerco"));
         for (int i = 0; i < 4; i++) at(160, () -> server(sp -> {
@@ -3669,7 +3807,7 @@ public final class DevAutoTest {
             glog("cerco mortos=" + n + " " + flag(sp, "mogo:cerco"));
         }));
         // 6. núcleo
-        at(5, () -> cmd("lanterna mogo missao 6"));
+        at(5, () -> cmd("lantern mogo mission 6"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.fenda.getX() + 0.5, d.fenda.getY() - 20, d.fenda.getZ() + 0.5, 0, 60); }));
         at(30, () -> shot("mp_fenda"));
         at(5, () -> server(sp -> { var d = md(sp); tpm(sp, d.camara.getX() + 9.5, d.camara.getY() + 1, d.camara.getZ() + 0.5, 90, -10); }));
@@ -3690,14 +3828,14 @@ public final class DevAutoTest {
         at(40, () -> server(sp -> glog(flag(sp, "mogo:nucleo") + " " + flag(sp, "mogo:vinculo") + " feridas=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.mogo.Ferida.class, sp.getBoundingBox().inflate(80)).size())));
         // Segunda Chance
         at(20, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
-        at(60, () -> { cmd("gamemode survival"); cmd("lanterna mogo segunda"); });
+        at(60, () -> { cmd("gamemode survival"); cmd("lantern mogo second"); });
         at(10, () -> server(sp -> { sp.hurt(sp.damageSources().generic(), 500); glog("segunda vivo=" + sp.isAlive()); }));
         at(70, () -> shot("mp_segunda1"));
         at(30, () -> shot("mp_segunda2"));
         at(40, () -> server(sp -> glog("segunda dim=" + sp.level().dimension().location() + " restante=" + com.lanterna.mogo.SegundaChance.restante(sp))));
         at(60, () -> shot("mp_segunda_chegou"));
         // inimigo não entra
-        at(10, () -> { cmd("gamemode creative"); cmd("lanterna anel yellow"); });
+        at(10, () -> { cmd("gamemode creative"); cmd("lantern ring yellow"); });
         at(10, () -> cmd("gamemode survival"));
         at(30, () -> server(sp -> glog("amarelo dim=" + sp.level().dimension().location())));
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
@@ -3710,7 +3848,7 @@ public final class DevAutoTest {
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
             cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000");
-            cmd("gamemode survival"); cmd("lanterna anel green"); });
+            cmd("gamemode survival"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3813,9 +3951,9 @@ public final class DevAutoTest {
         }));
         at(30, () -> shot("n3_odym_eco"));
         at(5, () -> cmd("gamemode creative"));
-        at(5, () -> { cmd("lanterna laranja"); cmd("lanterna laranja varios"); });
+        at(5, () -> { cmd("lantern orange"); cmd("lantern orange many"); });
         at(5, () -> server(sp -> glog("laranja unico=" + com.lanterna.selection.OrangeClaim.get(sp.server).unico() + " taken=" + com.lanterna.selection.OrangeClaim.get(sp.server).isTaken())));
-        at(5, () -> cmd("lanterna laranja unico"));
+        at(5, () -> cmd("lantern orange single"));
         at(5, () -> server(sp -> glog("laranja unico=" + com.lanterna.selection.OrangeClaim.get(sp.server).unico())));
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
@@ -3836,7 +3974,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3860,7 +3998,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3872,7 +4010,7 @@ public final class DevAutoTest {
         }));
         at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
         for (String t : new String[]{"green", "yellow", "red", "orange", "blue", "indigo", "violet", "black", "white"}) {
-            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t);
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + t);
                 com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
                 sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0); }));
             for (String v : new String[]{"a", "b", "energia"}) {
@@ -3888,7 +4026,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 18000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel red"); });
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule doMobSpawning false"); cmd("time set 18000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring red"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -3909,7 +4047,7 @@ public final class DevAutoTest {
         at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
         at(15, () -> shot("luz_2_frente"));
         for (String t : new String[]{"green", "blue", "violet", "yellow"}) {
-            at(5, () -> cmd("lanterna anel " + t));
+            at(5, () -> cmd("lantern ring " + t));
             at(5, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
             at(30, () -> shot("luz_3_" + t));
         }
@@ -3977,12 +4115,12 @@ public final class DevAutoTest {
         at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 12.5, 212, 12, 40, 15)));
         at(60, () -> shot("int_central_azul"));
         // máscara por cima da segunda camada, com o ajuste de altura
-        at(5, () -> { cmd("lanterna anel green"); server(sp -> { sp.teleportTo(sp.serverLevel(), 0.5, 200, -2.5, 0, 0);
+        at(5, () -> { cmd("lantern ring green"); server(sp -> { sp.teleportTo(sp.serverLevel(), 0.5, 200, -2.5, 0, 0);
             com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }); });
         at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(30); });
         String[][] casos = {{"green", "a"}, {"green", "b"}, {"red", "a"}, {"yellow", "energia"}, {"black", "a"}, {"orange", "b"}};
         for (String[] cs : casos) {
-            at(5, () -> cmd("lanterna anel " + cs[0]));
+            at(5, () -> cmd("lantern ring " + cs[0]));
             at(5, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
             for (int m : new int[]{0, -4, 4}) {
                 at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(cs[1], m); mc.setScreen(null); look(0, -5); });
@@ -3997,7 +4135,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -4017,7 +4155,7 @@ public final class DevAutoTest {
         });
         String[][] casos = {{"green", "energia"}, {"blue", "a"}};
         for (String[] c : casos) {
-            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + c[0]);
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + c[0]);
                 com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
             at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(c[1], 0); mc.setScreen(null); });
             for (int modo = 0; modo < 2; modo++) {
@@ -4046,7 +4184,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel blue"); cmd("execute in minecraft:overworld run tp @s 0 200 0 0 20"); });
+            cmd("time set 6000"); cmd("gamemode creative"); cmd("lantern ring blue"); cmd("execute in minecraft:overworld run tp @s 0 200 0 0 20"); });
         at(40, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
         at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("a", 0); mc.setScreen(null);
             mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.player.getInventory().selected = 8; mc.player.getInventory().setItem(8, net.minecraft.world.item.ItemStack.EMPTY); });
@@ -4061,7 +4199,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel white"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring white"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -4081,7 +4219,7 @@ public final class DevAutoTest {
         });
         String[][] casos = {{"white", "b"}, {"green", "padrao"}, {"yellow", "a"}, {"white", "a"}, {"red", "padrao"}};
         for (String[] c : casos) {
-            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + c[0]);
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + c[0]);
                 com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
             at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(c[1], 0); mc.setScreen(null); });
             for (int ang : new int[]{0, 135, 180, 270}) {
@@ -4090,7 +4228,7 @@ public final class DevAutoTest {
             }
         }
         at(5, () -> giro[0] = 0);
-        at(5, () -> { cmd("lanterna anel green"); });
+        at(5, () -> { cmd("lantern ring green"); });
         for (String v : new String[]{"energia", "padrao"}) for (int m : new int[]{-8, 0, 8}) {
             at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, m); mc.setScreen(null); });
             at(30, () -> shot("p2_masc_" + v + "_" + (m + 10)));
@@ -4103,7 +4241,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         // 1) waypoint no mundo: altura do chão que o marcador usa x a altura real
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 100 120 100"));
         at(80, () -> server(sp -> {
@@ -4137,7 +4275,7 @@ public final class DevAutoTest {
         at(20, () -> server(sp -> com.lanterna.mogo.MogoRastro.usar(sp, 0x3CFF7A)));
         at(20, () -> shot("m2_rastro"));
         // 4) Morte: o Mogo atira sempre (sem matar)
-        at(5, () -> { cmd("gamemode survival"); cmd("lanterna anel black"); });
+        at(5, () -> { cmd("gamemode survival"); cmd("lantern ring black"); });
         at(5, () -> server(sp -> {
             var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
             var pos = c.add(m.radius() + 90, 30, 0);
@@ -4147,7 +4285,7 @@ public final class DevAutoTest {
         at(32, () -> shot("m2_morte_raio"));
         at(120, () -> server(sp -> glog("morte: vida=" + sp.getHealth() + " vivo=" + sp.isAlive())));
         // 5) amarelo: não atira; só se for atacado
-        at(5, () -> { cmd("lanterna anel yellow"); server(sp -> sp.setHealth(20)); });
+        at(5, () -> { cmd("lantern ring yellow"); server(sp -> sp.setHealth(20)); });
         at(100, () -> server(sp -> glog("amarelo sem atirar: vida=" + sp.getHealth())));
         at(5, () -> server(sp -> {
             var m = com.lanterna.space.SpaceBodies.byId("mogo"); var c = m.center();
@@ -4160,7 +4298,7 @@ public final class DevAutoTest {
             com.lanterna.construct.ConstructEntity.spawnProjectile(sp, com.lanterna.construct.ConstructEntity.Kind.BOLT, dir, 2.2, 0xFFD040, 4f, 1f);
         }));
         at(80, () -> server(sp -> glog("amarelo depois de atirar: vida=" + sp.getHealth())));
-        at(5, () -> { cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(5, () -> { cmd("gamemode creative"); cmd("lantern ring green"); });
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
 
@@ -4169,7 +4307,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lanterna anel black"); cmd("difficulty normal"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("lantern ring black"); cmd("difficulty normal"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
         // o Mogo novo de perto (no espaço)
         at(40, () -> server(sp -> {
@@ -4187,7 +4325,7 @@ public final class DevAutoTest {
         at(40, () -> shot("fr_mogo2"));
         at(5, () -> cmd("gamemode survival"));
         // o frenesi
-        at(10, () -> cmd("lanterna frenesi"));
+        at(10, () -> cmd("lantern frenzy"));
         at(60, () -> server(sp -> glog("frenesi: dim=" + sp.level().dimension().location() + " ativo=" + com.lanterna.morte.Frenesi.ativo(sp))));
         at(5, () -> shot("fr_1"));
         // garante gente para caçar perto
@@ -4199,7 +4337,7 @@ public final class DevAutoTest {
         at(5, () -> shot("fr_4"));
         at(1200, () -> server(sp -> glog("frenesi depois de 105s: ativo=" + com.lanterna.morte.Frenesi.ativo(sp) + " dim=" + sp.level().dimension().location() + " pos=" + sp.blockPosition())));
         at(5, () -> shot("fr_5"));
-        at(5, () -> cmd("lanterna frenesi parar"));
+        at(5, () -> cmd("lantern frenzy stop"));
         at(20, () -> glog("cliente solto=" + !com.lanterna.client.morte.ClienteFrenesi.ativo()));
         at(5, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); });
     }
@@ -4210,7 +4348,7 @@ public final class DevAutoTest {
         int[][] cfgs = {{1920, 1080, 4}, {1280, 720, 3}};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.renderDistance().set(6); mc.options.hideGui = false;
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 120 0"));
         at(40, () -> server(sp -> {
             com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
@@ -4257,10 +4395,10 @@ public final class DevAutoTest {
     private static void sceneIngles() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode creative"); cmd("lanterna anel indigo"); });
-        at(20, () -> { mc.gui.getChat().clearMessages(false); cmd("lanterna ajuda"); });
+        at(40, () -> { cmd("gamemode creative"); cmd("lantern ring indigo"); });
+        at(20, () -> { mc.gui.getChat().clearMessages(false); cmd("lantern help"); });
         at(20, () -> shot("en_ajuda"));
-        at(5, () -> { mc.gui.getChat().clearMessages(false); cmd("lanterna cheio"); cmd("lanterna nivel 12"); cmd("lanterna morte faminto"); cmd("lanterna missao_concluir xyz"); cmd("lanterna poder genese"); });
+        at(5, () -> { mc.gui.getChat().clearMessages(false); cmd("lantern full"); cmd("lantern level 12"); cmd("lantern death hungry"); cmd("lantern mission_complete xyz"); cmd("lantern power genesis"); });
         at(20, () -> shot("en_cmds"));
         at(5, () -> server(sp -> {
             glog("guilda=" + com.lanterna.guilda.Guilda.exibir("Tropa Verde").getString() + " / " + com.lanterna.guilda.Guilda.exibir("Conselho da Tropa").getString() + " / " + com.lanterna.guilda.Guilda.exibir("Meus Amigos").getString());
@@ -4298,7 +4436,7 @@ public final class DevAutoTest {
         at(5, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(10)).forEach(v -> v.setFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED, false))));
         at(30, () -> shot("vk_curado"));
         // traje sem máscara e anel sem energia (aura e brilho apagados)
-        at(5, () -> { mc.options.hideGui = false; cmd("kill @e[type=!player]"); cmd("tp @s 10 100 10 0 0"); cmd("lanterna anel green"); cmd("lanterna cheio"); });
+        at(5, () -> { mc.options.hideGui = false; cmd("kill @e[type=!player]"); cmd("tp @s 10 100 10 0 0"); cmd("lantern ring green"); cmd("lantern full"); });
         at(10, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.visual.VisualPackets.Pedido("a", 0, com.lanterna.visual.Visual.SEM_MASCARA)));
         at(60, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); cmd("time set 18000");
             glog("look=" + com.lanterna.client.visual.ClientVisual.of(mc.player.getId()) + " semMascara=" + com.lanterna.client.visual.ClientVisual.of(mc.player.getId()).semMascara()); });
@@ -4316,7 +4454,7 @@ public final class DevAutoTest {
     private static void sceneNokFeridos() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode survival"); cmd("lanterna anel indigo"); cmd("effect give @s minecraft:resistance 9999 4 true"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
+        at(40, () -> { cmd("gamemode survival"); cmd("lantern ring indigo"); cmd("effect give @s minecraft:resistance 9999 4 true"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
         at(10, () -> cmd("execute in lanterna:nok run tp @s 0 120 0"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
         at(100, () -> { cmd("tp @s 0 ~ 0"); server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(48, 200, 48), r -> r.race() == com.lanterna.lore.entity.Race.VES_KAI && r.role().isEmpty()).forEach(net.minecraft.world.entity.Entity::discard)); });
@@ -4354,7 +4492,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
-            cmd("lanterna anel green"); cmd("lanterna maximo"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
+            cmd("lantern ring green"); cmd("lantern max"); cmd("effect give @s minecraft:night_vision 9999 0 true"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 100 0 0 0"));
         at(10, () -> { cmd("fill -10 99 -10 10 99 30 minecraft:smooth_stone"); cmd("fill -10 100 -10 10 110 30 minecraft:air"); cmd("fill -4 100 14 4 106 20 minecraft:stone"); });
         at(30, () -> { cmd("tp @s 0 100 0 0 0"); });
@@ -4531,7 +4669,7 @@ public final class DevAutoTest {
         String[] mods = {"espada", "escudo", "flecha", "martelo", "carro", "muralha"};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
-            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("lantern ring green"); });
         at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
@@ -4593,8 +4731,8 @@ public final class DevAutoTest {
         float[] hp0 = {0};
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(8);
-            cmd("gamerule doDaylightCycle false"); cmd("gamerule keepInventory false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lanterna anel green"); });
-        at(20, () -> cmd("lanterna maximo"));
+            cmd("gamerule doDaylightCycle false"); cmd("gamerule keepInventory false"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("lantern ring green"); });
+        at(20, () -> cmd("lantern max"));
         at(10, () -> cmd("execute in lanterna:oa run tp @s 60 140 60"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         // ---- 1. pousar descendo devagar de ~50 blocos ----
@@ -4698,7 +4836,7 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.renderDistance().set(10);
-            cmd("gamerule doDaylightCycle false"); cmd("weather clear"); cmd("gamemode creative"); cmd("lanterna fonte zerar"); });
+            cmd("gamerule doDaylightCycle false"); cmd("weather clear"); cmd("gamemode creative"); cmd("lantern source reset"); });
         at(10, () -> cmd("execute in lanterna:oa run tp @s -388 120 10"));
         waitFor(() -> mc.level.dimension().location().getPath().equals("oa") && mc.screen == null, 900);
         at(100, () -> cmd("time set 6000"));
@@ -4709,7 +4847,7 @@ public final class DevAutoTest {
             int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel());
             sp.teleportTo(sp.serverLevel(), -387.5, h, 25.5, 0f, 0f);
         }));
-        at(20, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 600 4 true"); cmd("lanterna fonte prova"); });
+        at(20, () -> { cmd("gamemode survival"); cmd("effect give @s resistance 600 4 true"); cmd("lantern source trial"); });
         at(20, () -> server(sp -> glog("selo antes=" + com.lanterna.fonte.FonteDados.temSelo(sp, "verde") + " usar=" + com.lanterna.fonte.FonteChamado.usarBateria(sp, new net.minecraft.core.BlockPos(-388, 60, 38)))));
         at(60, () -> shot("fonte_prova"));
         for (int i = 0; i < 4; i++) {
@@ -4722,14 +4860,14 @@ public final class DevAutoTest {
         // atravessa o campo
         at(20, () -> server(sp -> { int h = com.lanterna.cidade.CidadeNativa.altura(sp.serverLevel()); sp.teleportTo(sp.serverLevel(), -387.5, h, 38.5, 0f, 0f); }));
         at(120, () -> server(sp -> glog("dim=" + sp.level().dimension().location())));
-        at(20, () -> cmd("lanterna fonte banho 10"));
+        at(20, () -> cmd("lantern source bath 10"));
         at(60, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
             glog("sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp) + " carga=" + (r == null ? -1 : r.charge()) + "/" + (r == null ? -1 : r.maxCharge())); }));
         at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
         at(60, () -> shot("fonte_aura"));
         at(20, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
         at(30, () -> shot("fonte_hud"));
-        at(10, () -> cmd("lanterna fonte pressao 119"));
+        at(10, () -> cmd("lantern source pressure 119"));
         at(20, () -> server(sp -> com.lanterna.fonte.FonteDados.pressao(sp, com.lanterna.fonte.Fonte.PRESSAO_MAX - 30)));
         at(80, () -> server(sp -> glog("depois da pressao: dim=" + sp.level().dimension().location() + " bloqueado=" + com.lanterna.fonte.FonteDados.bloqueado(sp)
                 + " sobrecarga=" + com.lanterna.fonte.FonteDados.sobrecarga(sp))));
@@ -4874,11 +5012,11 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 0"); });
+            cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear"); cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 320.5 -60 330.5 0 0"); });
         at(30, () -> cmd("fill 310 -60 320 331 -50 345 minecraft:air"));
         String[] tropas = {"white", "green", "yellow", "black"};
         for (String t : tropas) {
-            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel " + t)));
+            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + t)));
             at(10, () -> server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
             for (String v : new String[]{"padrao", "a", "b"}) {
                 at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(v, 0); mc.setScreen(null);
@@ -4888,7 +5026,7 @@ public final class DevAutoTest {
         }
         // ---- primeira pessoa: braço com o uniforme e a transformação ----
         at(5, () -> { camera(CameraType.FIRST_PERSON); mc.options.hideGui = false; var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher("padrao", 0); mc.setScreen(null); });
-        at(5, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna anel green")));
+        at(5, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green")));
         at(10, () -> { mc.player.getInventory().selected = 8; look(0, 10); });
         at(30, () -> shot("v24_braco"));
         at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.TogglePowerPacket()));
@@ -4925,52 +5063,52 @@ public final class DevAutoTest {
     private static void sceneComandos() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
-        at(40, () -> { cmd("gamemode creative"); cmd("lanterna resetar"); cmd("clear @s"); cmd("time set 6000");
+        at(40, () -> { cmd("gamemode creative"); cmd("lantern reset"); cmd("clear @s"); cmd("time set 6000");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
-        at(40, () -> opc("lanterna ajuda"));
-        at(10, () -> opc("lanterna anel white"));
+        at(40, () -> opc("lantern help"));
+        at(10, () -> opc("lantern ring white"));
         at(20, () -> server(sp -> glog("anel=" + com.lanterna.power.EquipmentHelper.ring(sp).getHoverName().getString())));
-        at(10, () -> opc("lanterna anel black"));
+        at(10, () -> opc("lantern ring black"));
         at(20, () -> server(sp -> glog("anel=" + com.lanterna.power.EquipmentHelper.ring(sp).getHoverName().getString()
                 + " morte=" + com.lanterna.mission.LoreCapability.get(sp).orElse(null).morte())));
-        at(10, () -> opc("lanterna anel green"));
-        at(10, () -> opc("lanterna nivel 37"));
+        at(10, () -> opc("lantern ring green"));
+        at(10, () -> opc("lantern level 37"));
         at(10, () -> server(sp -> glog("nivel=" + com.lanterna.tropa.Nivel.nivel(com.lanterna.mission.LoreCapability.get(sp).orElse(null).xp()))));
-        at(10, () -> opc("lanterna nivel 5"));
+        at(10, () -> opc("lantern level 5"));
         at(10, () -> server(sp -> glog("nivel=" + com.lanterna.tropa.Nivel.nivel(com.lanterna.mission.LoreCapability.get(sp).orElse(null).xp()))));
-        at(10, () -> opc("lanterna afinidade_nivel 4"));
+        at(10, () -> opc("lantern affinity_level 4"));
         at(10, () -> server(sp -> glog("afin=" + com.lanterna.construct.Affinity.points(com.lanterna.power.EquipmentHelper.ring(sp)))));
-        at(10, () -> opc("lanterna tecnica todas"));
-        at(10, () -> opc("lanterna poder portal"));
-        at(10, () -> opc("lanterna poder honra"));
+        at(10, () -> opc("lantern technique all"));
+        at(10, () -> opc("lantern power portal"));
+        at(10, () -> opc("lantern power honor"));
         at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
             glog("portal=" + d.portal() + " honra=" + d.honra() + " slots=" + com.lanterna.cidade.Tecnicas.slots(d)); }));
-        at(10, () -> opc("lanterna morte corromper"));
+        at(10, () -> opc("lantern death corrupt"));
         at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("morte=" + d.morte() + " ativas=" + d.active().keySet()); }));
-        at(10, () -> opc("lanterna morte limpar"));
-        at(10, () -> opc("lanterna missao_iniciar ryut_1"));
-        at(10, () -> opc("lanterna missao_concluir ryut_1"));
+        at(10, () -> opc("lantern death clear"));
+        at(10, () -> opc("lantern mission_start ryut_1"));
+        at(10, () -> opc("lantern mission_complete ryut_1"));
         at(10, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("ryut_1 feita=" + d.completed().contains("ryut_1") + " ativas=" + d.active().keySet()); }));
-        at(10, () -> opc("lanterna missao_concluir portal_3"));
-        at(10, () -> opc("lanterna missao_limpar"));
-        at(10, () -> opc("lanterna visitar todos"));
-        at(10, () -> opc("lanterna tropa_hostil yellow"));
-        at(10, () -> opc("lanterna tropa_hostil limpar"));
-        at(10, () -> opc("lanterna invocar pirata 2"));
-        at(10, () -> opc("lanterna invocar oficial_yellow"));
-        at(10, () -> opc("lanterna invocar lanterna_red"));
-        at(10, () -> opc("lanterna invocar eco"));
-        at(10, () -> opc("lanterna invocar mercador"));
-        at(10, () -> opc("lanterna invocar alvo_treino"));
+        at(10, () -> opc("lantern mission_complete portal_3"));
+        at(10, () -> opc("lantern mission_clear"));
+        at(10, () -> opc("lantern visit all"));
+        at(10, () -> opc("lantern hostile_corps yellow"));
+        at(10, () -> opc("lantern hostile_corps clear"));
+        at(10, () -> opc("lantern summon pirate 2"));
+        at(10, () -> opc("lantern summon oficial_yellow"));
+        at(10, () -> opc("lantern summon lanterna_red"));
+        at(10, () -> opc("lantern summon eco"));
+        at(10, () -> opc("lantern summon merchant"));
+        at(10, () -> opc("lantern summon alvo_treino"));
         at(10, () -> server(sp -> { for (String b : com.lanterna.lore.LoreEntities.bosses().keySet()) {
-            int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna invocar boss_" + b);
+            int r = sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern summon boss_" + b);
             glog("boss_" + b + " -> " + r); } }));
-        at(10, () -> opc("lanterna nave nave_lanceira yellow"));
-        at(10, () -> opc("lanterna kit tudo"));
-        at(10, () -> opc("lanterna poder tudo"));
-        at(10, () -> opc("lanterna cheio"));
-        at(10, () -> opc("lanterna morte dominar"));
-        at(10, () -> opc("lanterna invocar nada"));
+        at(10, () -> opc("lantern ship nave_lanceira yellow"));
+        at(10, () -> opc("lantern kit all"));
+        at(10, () -> opc("lantern power all"));
+        at(10, () -> opc("lantern full"));
+        at(10, () -> opc("lantern death master"));
+        at(10, () -> opc("lantern summon nada"));
         at(40, () -> shot("comandos"));
         at(10, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); mc.stop(); });
     }
@@ -4979,9 +5117,9 @@ public final class DevAutoTest {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
-            cmd("gamemode survival"); cmd("effect clear @s"); cmd("time set 6000"); cmd("weather clear"); cmd("lanterna resetar"); cmd("clear @s");
+            cmd("gamemode survival"); cmd("effect clear @s"); cmd("time set 6000"); cmd("weather clear"); cmd("lantern reset"); cmd("clear @s");
             cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
-        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lanterna escolher lanterna:green")));
+        at(40, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern choose lanterna:green")));
         waitFor(() -> com.lanterna.client.ClientRingData.hasRing, 400);
         for (int k = 0; k < 6; k++) at(20, () -> { com.lanterna.client.flight.Autopilot.clear(); cmd("execute in minecraft:overworld run tp @s 900.5 -60 900.5 0 5"); });
         at(20, () -> server(sp -> {
@@ -5050,6 +5188,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("combate")) sceneCombate();
         else if (ENABLED && SCENE.equals("densa")) sceneDensa();
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
+        else if (ENABLED && SCENE.equals("ia")) sceneIA();
+        else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
+        else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
         else if (ENABLED && SCENE.equals("inclina2")) sceneInclina2();
@@ -5124,13 +5265,13 @@ public final class DevAutoTest {
                 cmd("gamemode survival"); cmd("time set 6000"); cmd("weather clear");
                 cmd("effect give @s resistance 99999 4 true"); cmd("effect give @s saturation 99999 1 true");
                 cmd("gamerule doMobSpawning false"); cmd("kill @e[type=!player]");
-                cmd("lanterna resetar"); cmd("clear @s");
+                cmd("lantern reset"); cmd("clear @s");
                 cmd("execute in minecraft:overworld run tp @s 0.5 150 0.5"); cmd("effect give @s slow_falling 30 0 true");
                 look(0, 0);
             });
             at(15, () -> { cmd("fill -8 149 -8 8 149 8 minecraft:smooth_stone"); cmd("fill -8 150 -8 8 160 8 minecraft:air"); cmd("tp @s 0.5 150 0.5"); });
             // ---- O anel verde escolhe: cerimônia e piloto automático até Oa ----
-            at(20, () -> cmd("lanterna escolher lanterna:green"));
+            at(20, () -> cmd("lantern choose lanterna:green"));
             at(60, () -> shot("g1_ceremony"));
             waitFor(() -> com.lanterna.client.flight.Autopilot.active(), 600);
             at(20, () -> { logState("after_choose"); shot("g2_autopilot_start"); });
@@ -5167,7 +5308,7 @@ public final class DevAutoTest {
             at(20, () -> shot("d1_dialog_instrutor"));
             at(5, () -> { mc.setScreen(null); logState("talked"); });
             // ---- Construtos ----
-            at(10, () -> { cmd("lanterna carga 1000"); com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+            at(10, () -> { cmd("lantern charge 1000"); com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
             at(10, () -> shot("k1_wheel"));
             at(2, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(null); });
             at(5, () -> server(sp -> {

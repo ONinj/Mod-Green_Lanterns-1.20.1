@@ -36,16 +36,16 @@ public final class LanternaCommand {
             (ctx, builder) -> SharedSuggestionProvider.suggestResource(CorpsManager.ids(), builder);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("lanterna")
+        dispatcher.register(Commands.literal("lantern")
 
                 // Qualquer jogador: lista dos rituais
-                .then(Commands.literal("rituais")
+                .then(Commands.literal("rituals")
                         .executes(LanternaCommand::rituals))
 
                 // Daqui para baixo: só operador (cheats)
                 .then(Commands.literal("mogo")
                         .requires(source -> source.hasPermission(2))
-                        .then(Commands.literal("resetar").executes(c -> {
+                        .then(Commands.literal("reset").executes(c -> {
                             net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
                             com.lanterna.mogo.ChamadoMogo.resetar(p);
                             c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("mogo.lanterna.cmd.resetado"), false);
@@ -56,7 +56,7 @@ public final class LanternaCommand {
                             p.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.mogo.JadeViva.ITEM.get(), 3));
                             return 1;
                         }))
-                        .then(Commands.literal("selo").executes(c -> {
+                        .then(Commands.literal("seal").executes(c -> {
                             net.minecraft.server.level.ServerPlayer p = c.getSource().getPlayerOrException();
                             net.minecraft.world.item.ItemStack s = p.getMainHandItem();
                             if (!com.lanterna.mogo.JadeViva.aceita(s)) {
@@ -67,37 +67,37 @@ public final class LanternaCommand {
                             c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("mogo.lanterna.jade.subiu.3"), false);
                             return 1;
                         }))
-                        .then(Commands.literal("segunda").executes(c -> {
+                        .then(Commands.literal("second").executes(c -> {
                             com.lanterna.mogo.SegundaChance.resetar(c.getSource().getPlayerOrException());
                             c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("commands.lanterna.mogo.segunda"), false);
                             return 1;
                         }))
-                        .then(Commands.literal("ir").executes(c -> {
+                        .then(Commands.literal("go").executes(c -> {
                             com.lanterna.mogo.SegundaChance.chegar(c.getSource().getPlayerOrException());
                             return 1;
                         }))
-                        .then(Commands.literal("missao").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 6)).executes(c -> {
+                        .then(Commands.literal("mission").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 6)).executes(c -> {
                             com.lanterna.mogo.MogoMissoes.pular(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "n"));
                             return 1;
                         }))))
 
                 .then(Commands.literal("hanks").requires(source -> source.hasPermission(2))
-                        .then(Commands.literal("ir").executes(c -> {
+                        .then(Commands.literal("go").executes(c -> {
                             var p = c.getSource().getPlayerOrException();
                             var l = p.server.getLevel(com.lanterna.hanks.HanksMundo.DIM);
                             if (l != null) p.teleportTo(l, 0.5, 120, 6.5, 180, 20);
                             p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20 * 20, 0, false, false));
                             return 1;
                         }))
-                        .then(Commands.literal("missao").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3)).executes(c -> {
+                        .then(Commands.literal("mission").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3)).executes(c -> {
                             com.lanterna.hanks.HanksMissoes.pular(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "n"));
                             return 1;
                         }))))
-                .then(Commands.literal("lendario").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("legendary").requires(source -> source.hasPermission(2))
                         .then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                                         java.util.Arrays.stream(com.lanterna.lendarios.Lendario.values()).map(x -> x.id), b))
-                                .then(Commands.literal("ir").executes(c -> {
+                                .then(Commands.literal("go").executes(c -> {
                                     var p = c.getSource().getPlayerOrException();
                                     var l = com.lanterna.lendarios.Lendario.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
                                     if (l == null) return 0;
@@ -112,7 +112,7 @@ public final class LanternaCommand {
                                     p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20 * 25, 0, false, false));
                                     return 1;
                                 }))
-                                .then(Commands.literal("reviver").executes(c -> {
+                                .then(Commands.literal("revive").executes(c -> {
                                     var l = com.lanterna.lendarios.Lendario.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
                                     if (l == null) return 0;
                                     var st = com.lanterna.lendarios.ArenaLendaria.estado(c.getSource().getServer(), l);
@@ -123,61 +123,61 @@ public final class LanternaCommand {
                                     return 1;
                                 }))))
 
-                .then(Commands.literal("frenesi").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("frenzy").requires(source -> source.hasPermission(2))
                         .executes(c -> { com.lanterna.morte.Frenesi.comecar(c.getSource().getPlayerOrException()); return 1; })
-                        .then(Commands.literal("parar").executes(c -> { com.lanterna.morte.Frenesi.acabar(c.getSource().getPlayerOrException(), true); return 1; })))
-                .then(Commands.literal("laranja").requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("stop").executes(c -> { com.lanterna.morte.Frenesi.acabar(c.getSource().getPlayerOrException(), true); return 1; })))
+                .then(Commands.literal("orange").requires(source -> source.hasPermission(2))
                         .executes(c -> laranja(c, null))
-                        .then(Commands.literal("unico").executes(c -> laranja(c, true)))
-                        .then(Commands.literal("varios").executes(c -> laranja(c, false)))
-                        .then(Commands.literal("liberar").executes(c -> {
+                        .then(Commands.literal("single").executes(c -> laranja(c, true)))
+                        .then(Commands.literal("many").executes(c -> laranja(c, false)))
+                        .then(Commands.literal("unlock").executes(c -> {
                             OrangeClaim claim = OrangeClaim.get(c.getSource().getServer());
                             claim.release();
                             c.getSource().sendSuccess(() -> Component.translatable("command.lanterna.laranja.liberado"), true);
                             return 1;
                         })))
 
-                .then(Commands.literal("escolher")
+                .then(Commands.literal("choose")
                         .requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("tropa", ResourceLocationArgument.id())
+                        .then(Commands.argument("corps", ResourceLocationArgument.id())
                                 .suggests(CORPS)
                                 .executes(ctx -> choose(ctx, ctx.getSource().getPlayerOrException()))
-                                .then(Commands.argument("jogador", EntityArgument.player())
-                                        .executes(ctx -> choose(ctx, EntityArgument.getPlayer(ctx, "jogador"))))))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> choose(ctx, EntityArgument.getPlayer(ctx, "player"))))))
 
-                .then(Commands.literal("carga")
+                .then(Commands.literal("charge")
                         .requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("valor", IntegerArgumentType.integer(0))
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0))
                                 .executes(LanternaCommand::setCharge)))
 
-                .then(Commands.literal("remover")
+                .then(Commands.literal("remove")
                         .requires(source -> source.hasPermission(2))
                         .executes(LanternaCommand::remove))
 
-                .then(Commands.literal("resetar")
+                .then(Commands.literal("reset")
                         .requires(source -> source.hasPermission(2))
                         .executes(LanternaCommand::reset))
 
                 // ---- Espécies, naves, nível (para testar) ----
                 .then(Commands.literal("spawn").requires(src -> src.hasPermission(2))
-                        .then(Commands.argument("especie", com.mojang.brigadier.arguments.StringArgumentType.word())
+                        .then(Commands.argument("species", com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(com.lanterna.especies.Especie.values()).map(e -> e.id), b))
                                 .executes(c -> spawnNpc(c, ""))
-                                .then(Commands.argument("opcoes", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
-                                        .executes(c -> spawnNpc(c, com.mojang.brigadier.arguments.StringArgumentType.getString(c, "opcoes"))))))
+                                .then(Commands.argument("options", com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                        .executes(c -> spawnNpc(c, com.mojang.brigadier.arguments.StringArgumentType.getString(c, "options"))))))
                 .then(Commands.literal("xp").requires(src -> src.hasPermission(2))
-                        .then(Commands.argument("pontos", IntegerArgumentType.integer(0))
+                        .then(Commands.argument("points", IntegerArgumentType.integer(0))
                                 .executes(c -> {
-                                    com.lanterna.tropa.Nivel.addXp(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "pontos"),
+                                    com.lanterna.tropa.Nivel.addXp(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "points"),
                                             Component.literal("comando"));
                                     return 1;
                                 })))
-                .then(Commands.literal("encontro").requires(src -> src.hasPermission(2))
-                        .then(Commands.argument("tipo", com.mojang.brigadier.arguments.StringArgumentType.word())
-                                .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"pirata", "capitania", "patrulha", "inimiga", "cargueiro", "destrocos"}, b))
+                .then(Commands.literal("encounter").requires(src -> src.hasPermission(2))
+                        .then(Commands.argument("type", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(new String[]{"pirata", "capitania", "patrulha", "inimiga", "cargueiro", "destrocos"}), b))
                                 .executes(c -> {
                                     com.lanterna.tropa.Encontros.forcar(c.getSource().getPlayerOrException(),
-                                            com.mojang.brigadier.arguments.StringArgumentType.getString(c, "tipo"));
+                                            Ingles.pt(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "type")));
                                     return 1;
                                 })))
                 .then(Commands.literal("interior").requires(src -> src.hasPermission(2))
@@ -189,14 +189,14 @@ public final class LanternaCommand {
                             com.lanterna.naves.NaveInterior.entrar(p, naves.get(0));
                             return 1;
                         }))
-                .then(Commands.literal("contratos").requires(src -> src.hasPermission(2))
+                .then(Commands.literal("contracts").requires(src -> src.hasPermission(2))
                         .executes(c -> {
                             com.lanterna.tropa.Contratos.abrirQuadro(c.getSource().getPlayerOrException(), true);
                             return 1;
                         }))
 
                 // ---- Lore (para testar) ----
-                .then(Commands.literal("missao").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("mission").requires(source -> source.hasPermission(2))
                         .then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                                         com.lanterna.mission.Missions.all().stream().map(com.lanterna.mission.Mission::id), b))
@@ -205,30 +205,30 @@ public final class LanternaCommand {
                                             com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
                                     return 1;
                                 })))
-                .then(Commands.literal("afinidade").requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("pontos", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                .then(Commands.literal("affinity").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("points", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                                 .executes(c -> {
                                     com.lanterna.construct.Affinity.add(c.getSource().getPlayerOrException(),
-                                            com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "pontos"));
+                                            com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "points"));
                                     return 1;
                                 })))
-                .then(Commands.literal("respeito").requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("raca", com.mojang.brigadier.arguments.StringArgumentType.word())
-                                .then(Commands.argument("valor", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                .then(Commands.literal("respect").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("race", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .then(Commands.argument("value", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                                         .executes(c -> {
                                             ServerPlayer p = c.getSource().getPlayerOrException();
                                             com.lanterna.mission.LoreCapability.get(p).ifPresent(d -> d.addRep(
-                                                    com.mojang.brigadier.arguments.StringArgumentType.getString(c, "raca"),
-                                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "valor")));
+                                                    com.mojang.brigadier.arguments.StringArgumentType.getString(c, "race"),
+                                                    com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "value")));
                                             return 1;
                                         }))))
-                .then(Commands.literal("genese").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("genesis").requires(source -> source.hasPermission(2))
                         .executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             com.lanterna.mission.LoreCapability.get(p).ifPresent(d -> d.setGeneseRevealed(true));
                             return 1;
                         }))
-                .then(Commands.literal("reconstruir").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("rebuild").requires(source -> source.hasPermission(2))
                         .executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
                             var planet = com.lanterna.lore.PlanetLore.byDimension(p.level().dimension());
@@ -259,7 +259,7 @@ public final class LanternaCommand {
             ctx.getSource().sendFailure(Component.translatable("message.lanterna.battery_no_ring"));
             return 0;
         }
-        RingPowers.setCharge(player, data, IntegerArgumentType.getInteger(ctx, "valor"));
+        RingPowers.setCharge(player, data, IntegerArgumentType.getInteger(ctx, "value"));
         RingPowers.sync(player, data);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.lanterna.charge_set", data.charge(), data.maxCharge()), false);
         return 1;
@@ -320,7 +320,7 @@ public final class LanternaCommand {
     /** /lanterna spawn <espécie> [papel=lanterna|pirata|capitao|mercador] [tropa=green..] [roupa=...|nenhuma] [pele=1..3] [oficial] [corrompido] */
     private static int spawnNpc(CommandContext<CommandSourceStack> ctx, String opts) throws CommandSyntaxException {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
-        var esp = com.lanterna.especies.Especie.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "especie"));
+        var esp = com.lanterna.especies.Especie.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "species"));
         var papel = esp.papel != null ? esp.papel : com.lanterna.especies.Especie.Papel.LANTERNA;
         com.lanterna.corps.BuiltinCorps corps = esp.tropa;
         String roupa = null;
@@ -329,6 +329,8 @@ public final class LanternaCommand {
         for (String o : opts.split(" ")) {
             if (o.isBlank()) continue;
             String[] kv = o.split("=", 2);
+            kv[0] = Ingles.pt(kv[0]);
+            if (kv.length > 1) kv[1] = Ingles.pt(kv[1]);
             switch (kv[0]) {
                 case "papel" -> papel = com.lanterna.especies.Especie.Papel.byId(kv[1]);
                 case "tropa" -> { for (var c : com.lanterna.corps.BuiltinCorps.values()) if (c.id().getPath().equals(kv[1])) corps = c; }

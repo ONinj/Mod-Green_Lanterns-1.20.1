@@ -41,6 +41,8 @@ public final class ArenaLendaria {
         public long volta;
         public BlockPos centro = BlockPos.ZERO;
         int sumido;
+        /** 2 = com a arquitetura da 0.47.0 (colunas, arcos, estandartes). */
+        int versao = 1;
     }
 
     public static final class Dados extends SavedData {
@@ -55,6 +57,7 @@ public final class ArenaLendaria {
                 s.vivo = e.getBoolean("vivo");
                 s.volta = e.getLong("volta");
                 s.centro = BlockPos.of(e.getLong("centro"));
+                s.versao = Math.max(1, e.getInt("versao"));
                 d.estados.put(k, s);
             }
             return d;
@@ -68,6 +71,7 @@ public final class ArenaLendaria {
                 e.putBoolean("vivo", s.vivo);
                 e.putLong("volta", s.volta);
                 e.putLong("centro", s.centro.asLong());
+                e.putInt("versao", s.versao);
                 t.put(k, e);
             });
             return t;
@@ -104,6 +108,12 @@ public final class ArenaLendaria {
         if (!s.construida) {
             if (!s.construindo && l != Lendario.SINESTRO) construir(level, l, s);
             return;
+        }
+        if (s.versao < 2 && l != Lendario.SINESTRO && !s.construindo && p.blockPosition().distSqr(s.centro) < 120 * 120) {
+            s.versao = 2;
+            marcar(p.server);
+            BlockPos c = s.centro;
+            Obra.etapa(level, lv -> enfeitar(lv, l, c, true));
         }
         if (p.blockPosition().distSqr(s.centro) > 90 * 90) return;
         LanternaEntity achado = achar(level, l, s.centro);
@@ -164,6 +174,7 @@ public final class ArenaLendaria {
             BlockPos c = montar(lv, l, cx, cz);
             s.centro = c;
             s.construida = true;
+            s.versao = 2;
             s.construindo = false;
             marcar(lv.getServer());
             LanternaMod.LOGGER.info("Lanterna: arena de {} pronta em {}", l.id, c);
@@ -201,13 +212,6 @@ public final class ArenaLendaria {
             set(lv, wx, y - 1, wz, faixa ? anel : chao);
             if (r < 1.5) set(lv, wx, y - 1, wz, luz);
         }
-        // pilares de luz
-        for (int i = 0; i < 10; i++) {
-            double a = Math.PI * 2 * i / 10;
-            int px = cx + (int) Math.round(Math.cos(a) * (RAIO - 3)), pz = cz + (int) Math.round(Math.sin(a) * (RAIO - 3));
-            int h = 7 + (i % 2) * 3;
-            for (int k = 0; k < h; k++) set(lv, px, y + k, pz, k == h - 1 ? luz : (k % 3 == 2 ? vidro : pilar));
-        }
         // trono ao norte: degraus, assento e um farol alto atrás
         int tz = cz - (RAIO - 6);
         for (int dx = -3; dx <= 3; dx++) for (int dz = -2; dz <= 2; dz++) {
@@ -216,7 +220,40 @@ public final class ArenaLendaria {
         }
         for (int k = 0; k < 16; k++) set(lv, cx, y + 2 + k, tz - 3, k % 4 == 3 ? luz : vidro);
         set(lv, cx, y + 18, tz - 3, luz);
-        return new BlockPos(cx, y, cz);
+        BlockPos c = new BlockPos(cx, y, cz);
+        enfeitar(lv, l, c, false);
+        return c;
+    }
+
+    /**
+     * Arquitetura da arena (0.47.0): 10 colunas com capitel ligadas por arcos, estandartes da Tropa, braseiros, dois
+     * obeliscos ao lado do trono e um piso desenhado no meio. Em mundos antigos, troca os pilares de luz por isto.
+     */
+    static void enfeitar(ServerLevel lv, Lendario l, BlockPos c, boolean antigo) {
+        int cx = c.getX(), cz = c.getZ(), y = c.getY();
+        BlockState ar = Blocks.AIR.defaultBlockState();
+        if (antigo) for (int i = 0; i < 10; i++) {
+            double a = Math.PI * 2 * i / 10;
+            int px = cx + (int) Math.round(Math.cos(a) * (RAIO - 3)), pz = cz + (int) Math.round(Math.sin(a) * (RAIO - 3));
+            for (int k = 0; k < 12; k++) set(lv, px, y + k, pz, ar);
+        }
+        com.lanterna.lore.world.Arquitetura.Estilo e = com.lanterna.lore.world.Arquitetura.estilo(l.corps);
+        com.lanterna.lore.world.Arquitetura.piso(lv, c, y, 10, e);
+        BlockPos[] topos = new BlockPos[10];
+        for (int i = 0; i < 10; i++) {
+            double a = Math.PI * 2 * i / 10 + Math.PI / 10;
+            int px = cx + (int) Math.round(Math.cos(a) * (RAIO - 4)), pz = cz + (int) Math.round(Math.sin(a) * (RAIO - 4));
+            int topo = com.lanterna.lore.world.Arquitetura.coluna(lv, new BlockPos(px, y, pz), 10 + (i % 2) * 2, e);
+            topos[i] = new BlockPos(px, topo, pz);
+            net.minecraft.core.Direction dentro = com.lanterna.lore.world.Arquitetura.rumo(cx - px, cz - pz);
+            com.lanterna.lore.world.Arquitetura.estandarte(lv, new BlockPos(px, y + 7, pz).relative(dentro), dentro, e.cor());
+        }
+        for (int i = 0; i < 10; i++) com.lanterna.lore.world.Arquitetura.arco(lv, topos[i], topos[(i + 1) % 10], 4, e);
+        for (int[] d : new int[][]{{13, 0}, {-13, 0}, {0, 13}, {9, 9}, {-9, 9}})
+            com.lanterna.lore.world.Arquitetura.braseiro(lv, new BlockPos(cx + d[0], y, cz + d[1]), e);
+        int tz = cz - (RAIO - 6);
+        com.lanterna.lore.world.Arquitetura.obelisco(lv, new BlockPos(cx - 6, y, tz), 7, e);
+        com.lanterna.lore.world.Arquitetura.obelisco(lv, new BlockPos(cx + 6, y, tz), 7, e);
     }
 
     private ArenaLendaria() {}

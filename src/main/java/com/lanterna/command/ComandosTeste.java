@@ -56,7 +56,7 @@ import java.util.List;
 
 /**
  * Comandos de teste (só operador / cheats ligados): tudo o que o jogo entrega pela história, conquistas e missões,
- * para poder testar sem jogar a história. Digite /lanterna ajuda para ver a lista.
+ * para poder testar sem jogar a história. Digite /lantern help para ver a lista.
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class ComandosTeste {
@@ -105,14 +105,14 @@ public final class ComandosTeste {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("lanterna")
-                .then(Commands.literal("ajuda").executes(ComandosTeste::ajuda))
+        d.register(Commands.literal("lantern")
+                .then(Commands.literal("help").executes(ComandosTeste::ajuda))
 
                 // ---------- anel ----------
-                .then(op("anel").then(Commands.argument("tropa", StringArgumentType.word())
+                .then(op("ring").then(Commands.argument("corps", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(TROPAS, b))
-                        .executes(c -> anel(c, StringArgumentType.getString(c, "tropa")))))
-                .then(op("cheio").executes(c -> {
+                        .executes(c -> anel(c, Ingles.pt(StringArgumentType.getString(c, "corps"))))))
+                .then(op("full").executes(c -> {
                     ServerPlayer p = eu(c);
                     RingData r = ModCapabilities.get(p).orElse(null);
                     if (r == null || !r.hasRing()) return erro(c, "sem_anel");
@@ -123,7 +123,7 @@ public final class ComandosTeste {
                     return ok(c, "cheio");
                 }))
                 // tudo no máximo para testes: nível, afinidade, técnicas, poderes, Fonte (selos, árvores, Essência, Corações) e carga 250%
-                .then(op("maximo").executes(c -> {
+                .then(op("max").executes(c -> {
                     ServerPlayer p = eu(c);
                     RingData r0 = ModCapabilities.get(p).orElse(null);
                     if (r0 == null || !r0.hasRing()) return erro(c, "equipe_anel");
@@ -148,7 +148,7 @@ public final class ComandosTeste {
                     sync(p);
                     return ok(c, "maximo", Nivel.MAX);
                 }))
-                .then(op("nivel").then(Commands.argument("n", IntegerArgumentType.integer(1, Nivel.MAX)).executes(c -> {
+                .then(op("level").then(Commands.argument("n", IntegerArgumentType.integer(1, Nivel.MAX)).executes(c -> {
                     ServerPlayer p = eu(c);
                     int n = IntegerArgumentType.getInteger(c, "n");
                     LoreData dd = dados(p);
@@ -161,7 +161,7 @@ public final class ComandosTeste {
                     }
                     return ok(c, "nivel", n);
                 })))
-                .then(op("afinidade_nivel").then(Commands.argument("n", IntegerArgumentType.integer(0, Affinity.MAX_LEVEL)).executes(c -> {
+                .then(op("affinity_level").then(Commands.argument("n", IntegerArgumentType.integer(0, Affinity.MAX_LEVEL)).executes(c -> {
                     ServerPlayer p = eu(c);
                     ItemStack ring = EquipmentHelper.ring(p);
                     if (ring.isEmpty()) return erro(c, "equipe_anel");
@@ -171,13 +171,13 @@ public final class ComandosTeste {
                 })))
 
                 // ---------- poderes ----------
-                .then(op("tecnica").then(Commands.argument("id", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(lista(CidadeMissoes.TECNICAS, "todas"), b))
+                .then(op("technique").then(Commands.argument("id", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(CidadeMissoes.TECNICAS, "todas")), b))
                         .executes(c -> {
                             ServerPlayer p = eu(c);
                             String id = StringArgumentType.getString(c, "id");
                             LoreData dd = dados(p);
-                            List<String> l = id.equals("todas") ? CidadeMissoes.TECNICAS : List.of(id);
+                            List<String> l = Ingles.todos(id) ? CidadeMissoes.TECNICAS : List.of(id);
                             for (String t : l) {
                                 if (!CidadeMissoes.TECNICAS.contains(t)) return erro(c, "tecnica_desconhecida", t);
                                 Tecnicas.desbloquear(p, dd, t);
@@ -187,39 +187,39 @@ public final class ComandosTeste {
                             return ok(c, "tecnicas", String.join(", ", l));
                         })))
                 // ---------- a Fonte (Baterias Centrais) ----------
-                .then(op("fonte").then(Commands.argument("acao", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"selo", "pressao", "banho", "essencia", "prova", "juramento", "arvore", "zerar", "evento", "chefe", "ir"}, b))
-                        .executes(c -> fonte(c, StringArgumentType.getString(c, "acao"), "", 0))
-                        .then(Commands.argument("valor", StringArgumentType.word())
-                                .executes(c -> fonte(c, StringArgumentType.getString(c, "acao"), StringArgumentType.getString(c, "valor"), 0)))))
-                .then(op("poder").then(Commands.argument("qual", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"portal", "autorecarga", "honra", "genese", "tudo"}, b))
-                        .executes(c -> poder(c, StringArgumentType.getString(c, "qual")))))
-                .then(op("morte").then(Commands.argument("acao", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"corromper", "dominar", "faminto", "alimentar", "limpar"}, b))
-                        .executes(c -> morte(c, StringArgumentType.getString(c, "acao")))))
+                .then(op("source").then(Commands.argument("action", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(new String[]{"selo", "pressao", "banho", "essencia", "prova", "juramento", "arvore", "zerar", "evento", "chefe", "ir"}), b))
+                        .executes(c -> fonte(c, Ingles.pt(StringArgumentType.getString(c, "action")), "", 0))
+                        .then(Commands.argument("value", StringArgumentType.word())
+                                .executes(c -> fonte(c, Ingles.pt(StringArgumentType.getString(c, "action")), Ingles.pt(StringArgumentType.getString(c, "value")), 0)))))
+                .then(op("power").then(Commands.argument("which", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(new String[]{"portal", "autorecarga", "honra", "genese", "tudo"}), b))
+                        .executes(c -> poder(c, Ingles.pt(StringArgumentType.getString(c, "which"))))))
+                .then(op("death").then(Commands.argument("action", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(new String[]{"corromper", "dominar", "faminto", "alimentar", "limpar"}), b))
+                        .executes(c -> morte(c, Ingles.pt(StringArgumentType.getString(c, "action"))))))
 
                 // ---------- missões ----------
-                .then(op("missao_iniciar").then(argMissao().executes(c -> {
+                .then(op("mission_start").then(argMissao().executes(c -> {
                     MissionManager.start(eu(c), StringArgumentType.getString(c, "id"));
                     return ok(c, "missao_iniciada");
                 })))
-                .then(op("missao_concluir").then(argMissao().executes(c -> MissionManager.forcarConclusao(eu(c), StringArgumentType.getString(c, "id"))
+                .then(op("mission_complete").then(argMissao().executes(c -> MissionManager.forcarConclusao(eu(c), StringArgumentType.getString(c, "id"))
                         ? ok(c, "missao_concluida") : erro(c, "missao_desconhecida"))))
-                .then(op("missao_abandonar").then(argMissao().executes(c -> {
+                .then(op("mission_abandon").then(argMissao().executes(c -> {
                     ServerPlayer p = eu(c);
                     dados(p).abandon(StringArgumentType.getString(c, "id"));
                     sync(p);
                     return ok(c, "missao_abandonada");
                 })))
-                .then(op("missao_limpar").executes(c -> {
+                .then(op("mission_clear").executes(c -> {
                     ServerPlayer p = eu(c);
                     LoreData dd = dados(p);
                     for (String id : new ArrayList<>(dd.active().keySet())) dd.abandon(id);
                     sync(p);
                     return ok(c, "missoes_limpas");
                 }))
-                .then(op("missao_concluidas_limpar").executes(c -> {
+                .then(op("mission_clear_completed").executes(c -> {
                     ServerPlayer p = eu(c);
                     dados(p).completed().clear();
                     sync(p);
@@ -227,21 +227,21 @@ public final class ComandosTeste {
                 }))
 
                 // ---------- mundo ----------
-                .then(op("visitar").then(Commands.argument("planeta", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(lista(planetas(), "todos"), b))
+                .then(op("visit").then(Commands.argument("planet", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(planetas(), "todos")), b))
                         .executes(c -> {
                             ServerPlayer p = eu(c);
-                            String id = StringArgumentType.getString(c, "planeta");
+                            String id = Ingles.pt(StringArgumentType.getString(c, "planet"));
                             LoreData dd = dados(p);
-                            for (String pl : id.equals("todos") ? planetas() : List.of(id)) dd.visitar(pl);
+                            for (String pl : Ingles.todos(id) ? planetas() : List.of(id)) dd.visitar(pl);
                             sync(p);
                             return ok(c, "visitado", id);
                         })))
-                .then(op("tropa_hostil").then(Commands.argument("tropa", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(lista(Arrays.asList(TROPAS), "limpar"), b))
+                .then(op("hostile_corps").then(Commands.argument("corps", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(Arrays.asList(TROPAS), "limpar")), b))
                         .executes(c -> {
                             ServerPlayer p = eu(c);
-                            String t = StringArgumentType.getString(c, "tropa");
+                            String t = Ingles.pt(StringArgumentType.getString(c, "corps"));
                             LoreData dd = dados(p);
                             if (t.equals("limpar")) dd.tropasHostis().clear();
                             else dd.addTropaHostil(t);
@@ -249,22 +249,22 @@ public final class ComandosTeste {
                         })))
 
                 // ---------- invocar ----------
-                .then(op("invocar").then(Commands.argument("o_que", StringArgumentType.word())
+                .then(op("summon").then(Commands.argument("what", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(invocaveis(), b))
-                        .executes(c -> invocar(c, StringArgumentType.getString(c, "o_que"), 1))
-                        .then(Commands.argument("qtd", IntegerArgumentType.integer(1, 50))
-                                .executes(c -> invocar(c, StringArgumentType.getString(c, "o_que"), IntegerArgumentType.getInteger(c, "qtd"))))))
-                .then(op("nave").then(Commands.argument("tipo", StringArgumentType.word())
+                        .executes(c -> invocar(c, Ingles.pt(StringArgumentType.getString(c, "what")), 1))
+                        .then(Commands.argument("amount", IntegerArgumentType.integer(1, 50))
+                                .executes(c -> invocar(c, Ingles.pt(StringArgumentType.getString(c, "what")), IntegerArgumentType.getInteger(c, "amount"))))))
+                .then(op("ship").then(Commands.argument("type", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(NaveTipo.values()).map(t -> t.id), b))
-                        .executes(c -> nave(c, StringArgumentType.getString(c, "tipo"), "green"))
-                        .then(Commands.argument("pintura", StringArgumentType.word())
-                                .suggests((c, b) -> SharedSuggestionProvider.suggest(lista(Arrays.asList(TROPAS), "1", "2"), b))
-                                .executes(c -> nave(c, StringArgumentType.getString(c, "tipo"), StringArgumentType.getString(c, "pintura"))))))
+                        .executes(c -> nave(c, Ingles.pt(StringArgumentType.getString(c, "type")), "green"))
+                        .then(Commands.argument("paint", StringArgumentType.word())
+                                .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(Arrays.asList(TROPAS), "1", "2")), b))
+                                .executes(c -> nave(c, Ingles.pt(StringArgumentType.getString(c, "type")), StringArgumentType.getString(c, "paint"))))))
 
                 // ---------- itens ----------
-                .then(op("kit").then(Commands.argument("qual", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"aneis", "materiais", "reliquias", "guilda", "naves", "tudo"}, b))
-                        .executes(c -> kit(c, StringArgumentType.getString(c, "qual"))))));
+                .then(op("kit").then(Commands.argument("which", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(new String[]{"aneis", "materiais", "reliquias", "guilda", "naves", "tudo"}), b))
+                        .executes(c -> kit(c, Ingles.pt(StringArgumentType.getString(c, "which")))))));
     }
 
     private static com.mojang.brigadier.builder.RequiredArgumentBuilder<CommandSourceStack, String> argMissao() {
@@ -437,7 +437,7 @@ public final class ComandosTeste {
 
     private static int kit(CommandContext<CommandSourceStack> c, String qual) throws CommandSyntaxException {
         ServerPlayer p = eu(c);
-        boolean tudo = qual.equals("tudo");
+        boolean tudo = Ingles.todos(qual);
         if (tudo || qual.equals("aneis")) {
             for (BuiltinCorps t : BuiltinCorps.values()) dar(p, PowerRingItem.create(t.id(), t.color(), -1));
             dar(p, new ItemStack(LoreItems.ANEL_VAZIO.get(), 8));
@@ -482,29 +482,29 @@ public final class ComandosTeste {
         // {comando, chave da explicação}; sem comando = título da seção
         String[][] linhas = {
                 {"", "ajuda.t0"},
-                {"/lanterna anel <tropa>", "ajuda.1"},
-                {"/lanterna cheio", "ajuda.2"},
-                {"/lanterna nivel <1-50>", "ajuda.3"},
-                {"/lanterna afinidade_nivel <0-5>", "ajuda.4"},
-                {"/lanterna escolher <tropa>", "ajuda.5"},
+                {"/lantern ring <corps>", "ajuda.1"},
+                {"/lantern full", "ajuda.2"},
+                {"/lantern level <1-150>", "ajuda.3"},
+                {"/lantern affinity_level <0-5>", "ajuda.4"},
+                {"/lantern choose <corps>", "ajuda.5"},
                 {"", "ajuda.t6"},
-                {"/lanterna tecnica <id|todas>", "ajuda.7"},
-                {"/lanterna maximo", "ajuda.8"},
-                {"/lanterna poder <portal|autorecarga|honra|genese|tudo>", "ajuda.9"},
-                {"/lanterna morte <corromper|dominar|faminto|alimentar|limpar>", "ajuda.10"},
+                {"/lantern technique <id|all>", "ajuda.7"},
+                {"/lantern max", "ajuda.8"},
+                {"/lantern power <portal|autorecharge|honor|genesis|all>", "ajuda.9"},
+                {"/lantern death <corrupt|master|hungry|feed|clear>", "ajuda.10"},
                 {"", "ajuda.t11"},
-                {"/lanterna missao_iniciar <id>", "ajuda.12"},
-                {"/lanterna missao_concluir <id>", "ajuda.13"},
-                {"/lanterna missao_abandonar <id> | missao_limpar | missao_concluidas_limpar", ""},
+                {"/lantern mission_start <id>", "ajuda.12"},
+                {"/lantern mission_complete <id>", "ajuda.13"},
+                {"/lantern mission_abandon <id> | mission_clear | mission_clear_completed", ""},
                 {"", "ajuda.t15"},
-                {"/lanterna visitar <planeta|todos>", "ajuda.16"},
-                {"/lanterna tropa_hostil <tropa|limpar>", "ajuda.17"},
-                {"/lanterna genese | reconstruir | encontro <tipo> | contratos | interior", ""},
+                {"/lantern visit <planet|all>", "ajuda.16"},
+                {"/lantern hostile_corps <corps|clear>", "ajuda.17"},
+                {"/lantern genesis | rebuild | encounter <type> | contracts | interior", ""},
                 {"", "ajuda.t19"},
-                {"/lanterna invocar <o_que> [qtd]", "ajuda.20"},
-                {"/lanterna nave <tipo> [pintura]", "ajuda.21"},
-                {"/lanterna kit <aneis|materiais|reliquias|guilda|naves|tudo>", ""},
-                {"/guilda admin tropas <n> | defesa <n> | sem_escudo", "ajuda.23"},
+                {"/lantern summon <what> [amount]", "ajuda.20"},
+                {"/lantern ship <type> [paint]", "ajuda.21"},
+                {"/lantern kit <rings|materials|relics|guild|ships|all>", ""},
+                {"/guild admin troops <n> | defense <n> | no_shield", "ajuda.23"},
         };
         for (String[] l : linhas) {
             if (l[0].isEmpty()) {
@@ -529,7 +529,7 @@ public final class ComandosTeste {
         switch (acao) {
             case "selo" -> {
                 for (var x : com.lanterna.baterias.Tropa.values())
-                    if (valor.equals("todas") || valor.equals(x.nome) || (valor.isEmpty() && x == t)) com.lanterna.fonte.FonteDados.darSelo(p, x.nome);
+                    if (Ingles.todos(valor) || valor.equals(x.nome) || (valor.isEmpty() && x == t)) com.lanterna.fonte.FonteDados.darSelo(p, x.nome);
                 return ok(c, "selo", valor.isEmpty() ? (t == null ? "-" : t.nome) : valor);
             }
             case "pressao" -> { com.lanterna.fonte.FonteDados.pressao(p, n * 20 * 60); return ok(c, "pressao", n); }

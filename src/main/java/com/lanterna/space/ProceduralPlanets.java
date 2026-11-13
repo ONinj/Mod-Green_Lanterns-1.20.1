@@ -54,7 +54,8 @@ public final class ProceduralPlanets {
         double cz = sz * (double) SECTOR + SECTOR / 2.0 + (r.nextDouble() - 0.5) * SECTOR * 0.6;
         if (Math.hypot(cx, cz) < CORE_RADIUS) return null;
         Vec3 center = new Vec3(cx, -200 + r.nextDouble() * 450, cz);
-        if (center.distanceTo(SpaceBodies.SUN.center()) < SpaceBodies.SUN.radius() + 4000) return null;
+        for (SpaceBodies.Body b : SpaceBodies.BODIES)   // os planetas das Tropas ficam com o céu só deles
+            if (!"mogo".equals(b.id()) && !"hanks".equals(b.id()) && center.distanceTo(b.center()) < b.radius() + 4500) return null;
         if (com.lanterna.lendarios.PlanetasLendarios.perto(center, 6000)) return null;
         double radius = 140 + r.nextDouble() * 180;
         Archetype type = Archetype.pick(r);

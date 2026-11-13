@@ -367,6 +367,7 @@ public final class Bosses {
         }
 
         private void poof() {
+            if (!(level() instanceof ServerLevel)) return;
             ((ServerLevel) level()).sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 1, getZ(), 20, 0.6, 1, 0.6, 0.02);
             discard();
         }

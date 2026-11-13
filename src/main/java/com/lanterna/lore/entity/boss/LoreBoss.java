@@ -74,6 +74,18 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
     protected final Set<UUID> fighters = new HashSet<>();
     protected int specialCooldown = 60;
     protected int meleeCooldown;
+    /** A "cabeça" do chefe: ameaça, saltos, raio contra quem voa, esquiva, fúria (fase 3 da inteligência). */
+    @Nullable private com.lanterna.ia.BossIA ia;
+
+    public com.lanterna.ia.BossIA ia() {
+        if (ia == null) ia = new com.lanterna.ia.BossIA(this, barRgb());
+        return ia;
+    }
+
+    /** O chefe pode dar o salto de energia até quem foge (os que não devem sair do lugar dizem não). */
+    protected boolean podeSaltar() {
+        return getAttributeValue(Attributes.MOVEMENT_SPEED) > 0.05;
+    }
     private int alone;
 
     protected LoreBoss(EntityType<? extends Monster> type, Level level, BossEvent.BossBarColor color) {
@@ -201,6 +213,7 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
             setPhase(3);
             onPhaseChange(3);
         }
+        if (!isEcho()) ia().tick(phase(), podeSaltar());
         LivingEntity target = getTarget();
         if (target != null && target.isAlive()) {
             getLookControl().setLookAt(target, 30, 30);
@@ -277,7 +290,10 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
         if (source.getEntity() instanceof LoreBoss) return false;
         float real = damageTaken(source, amount);
         if (real <= 0) return false;
-        if (source.getEntity() instanceof Player p) fighters.add(p.getUUID());
+        if (source.getEntity() instanceof Player p) {
+            fighters.add(p.getUUID());
+            ia().apanhou(p, real);
+        }
         return super.hurt(source, real);
     }
 

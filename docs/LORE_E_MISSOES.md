@@ -20,7 +20,7 @@ Cada planeta tem:
 Em Oa, a base é a cidadela: Bateria Central gigante, Instrutor Veltari (Mestre Toran) e os três Guardiões do Universo. Em Gênese ficam o Altar da Vida (0, 0) e a rachadura do Nulo (0, −24).
 
 ## Como ser escolhido na Terra
-Além dos rituais de cada Tropa (`/lanterna rituais`), há dois caminhos novos:
+Além dos rituais de cada Tropa (`/lantern rituals`), há dois caminhos novos:
 
 | Caminho | Como funciona |
 |---|---|
@@ -130,12 +130,12 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 ## Comandos de teste
 | Comando | O que faz |
 |---|---|
-| `/lanterna missao <id>` | começa uma missão |
-| `/lanterna afinidade <pontos>` | soma afinidade (24000 = nível máximo) |
-| `/lanterna respeito <raça> <valor>` | soma respeito com a raça |
-| `/lanterna genese` | revela Gênese |
-| `/lanterna reconstruir` | constrói de novo a base e a arena do planeta onde você está, na próxima vez que chegar perto |
-| `/lanterna resetar` | zera anel e lore |
+| `/lantern mission <id>` | começa uma missão |
+| `/lantern affinity <pontos>` | soma afinidade (24000 = nível máximo) |
+| `/lantern respect <raça> <valor>` | soma respeito com a raça |
+| `/lantern genesis` | revela Gênese |
+| `/lantern rebuild` | constrói de novo a base e a arena do planeta onde você está, na próxima vez que chegar perto |
+| `/lantern reset` | zera anel e lore |
 
 ## Trocar os modelos
 - Raças e bosses: `geo/entity/<nome>.geo.json`, `textures/entity/<nome>.png` (+ `_glowmask.png`) e `animations/entity/<nome>.animation.json`.
@@ -220,11 +220,11 @@ Os povos tomam o lado da Tropa do seu planeta. Lanternas de Tropas inimigas são
 ## Novos comandos de teste
 | Comando | O que faz |
 |---|---|
-| `/lanterna xp <n>` | soma XP |
-| `/lanterna spawn <espécie> [papel= tropa= roupa= pele= oficial corrompido]` | cria um NPC |
-| `/lanterna encontro <pirata\|capitania\|patrulha\|inimiga\|cargueiro\|destrocos>` | força um encontro |
-| `/lanterna interior` | entra na nave mais próxima |
-| `/lanterna contratos` | abre o quadro de contratos |
+| `/lantern xp <n>` | soma XP |
+| `/lantern spawn <species> [role= corps= outfit= skin= officer corrupted]` | cria um NPC |
+| `/lantern encounter <pirate\|flagship\|patrol\|enemy\|freighter\|wreck>` | força um encontro |
+| `/lantern interior` | entra na nave mais próxima |
+| `/lantern contracts` | abre o quadro de contratos |
 
 ## Limitações conhecidas
 - A cor das faixas e luzes do interior vem da região da sala (cada Tropa tem a sua).
@@ -343,9 +343,9 @@ entre jogadores da mesma Tropa). Ao subir de nível, o chat mostra a defesa nova
 
 # 0.17 — Guildas e conquista de planetas
 
-**Guilda** (`/guilda`): `criar <nome>` (precisa ter anel; a cor da guilda é a da sua Tropa) · `simbolo` (editor 16x16) ·
-`convidar <jogador>` · `entrar <guilda>` · `sair` · `expulsar <nome>` · `desfazer` · `info [guilda]` · `lista` ·
-`abandonar` (no planeta). Admin: `/guilda admin tropas <n>`, `admin defesa <n>`, `admin sem_escudo`.
+**Guilda** (`/guild`): `create <nome>` (precisa ter anel; a cor da guilda é a da sua Tropa) · `symbol` (editor 16x16) ·
+`invite <jogador>` · `join <guilda>` · `leave` · `kick <nome>` · `disband` · `info [guilda]` · `list` ·
+`abandon` (no planeta). Admin: `/guild admin troops <n>`, `admin defense <n>`, `admin no_shield`.
 
 **Bandeira da Guilda** (receita: bloco de esmeralda em cima, diamante · estandarte · diamante no meio, 3 ouros embaixo).
 Fincada num **planeta gerado** sem dono: o planeta é da guilda e aparece a base pronta (praça com a bandeira, Cabana
@@ -456,27 +456,27 @@ está atravessando. Se o planeta ainda está carregando, a animação de chegada
 
 # 0.21 — Comandos de teste (só operador / cheats ligados)
 
-`/lanterna ajuda` mostra tudo no jogo. Todos os argumentos têm autocompletar com Tab.
+`/lantern help` mostra tudo no jogo. Todos os argumentos têm autocompletar com Tab.
 
 | Comando | O que faz |
 |---|---|
-| `/lanterna anel <tropa>` | Equipa o anel de qualquer Tropa (green, yellow, red, blue, violet, indigo, orange, black, white). O antigo vai para o inventário. O Preto já vem "dominado". |
-| `/lanterna cheio` | Carga cheia, poder ligado, zera recargas dos construtos e a espera da Porta Estelar. |
-| `/lanterna nivel <1-50>` | Muda o nível da Tropa (ao subir dá as recompensas de posto). |
-| `/lanterna afinidade_nivel <0-5>` | Afinidade do anel equipado (libera os construtos). |
-| `/lanterna tecnica <id\|todas>` | Técnicas dos Capitães: olhar, bastiao, onda, salto, armadura, comando. |
-| `/lanterna poder <portal\|autorecarga\|honra\|genese\|tudo>` | Porta Estelar, autorrecarga (Prova da Emoção), Guarda de Honra (3º espaço), Gênese, ou tudo (nível 50, afinidade máxima, todas as técnicas e planetas visitados). |
-| `/lanterna morte <corromper\|dominar\|faminto\|alimentar\|limpar>` | Linha da Morte / Anel Preto e a fome do Lanterna Negro. |
-| `/lanterna missao_iniciar <id>` · `missao_concluir <id>` · `missao_abandonar <id>` | Missões (concluir dá recompensas e abre a próxima da linha). |
-| `/lanterna missao_limpar` · `missao_concluidas_limpar` | Abandona todas as ativas / apaga o histórico para refazer. |
-| `/lanterna visitar <planeta\|todos>` | Marca planetas como visitados (aparecem na Porta Estelar). |
-| `/lanterna tropa_hostil <tropa\|limpar>` | Inimizade com uma Tropa (como se tivesse invadido o planeta dela). |
-| `/lanterna invocar <o_que> [qtd]` | pirata, capitao, mercador, eco, alvo_treino, broto, lanterna_<tropa>, oficial_<tropa>, boss_<nome>. |
-| `/lanterna nave <tipo> [pintura]` | Item de nave. |
-| `/lanterna kit <aneis\|materiais\|reliquias\|guilda\|naves\|tudo>` | Itens. |
+| `/lantern ring <corps>` | Equipa o anel de qualquer Tropa (green, yellow, red, blue, violet, indigo, orange, black, white). O antigo vai para o inventário. O Preto já vem "dominado". |
+| `/lantern full` | Carga cheia, poder ligado, zera recargas dos construtos e a espera da Porta Estelar. |
+| `/lantern level <1-50>` | Muda o nível da Tropa (ao subir dá as recompensas de posto). |
+| `/lantern affinity_level <0-5>` | Afinidade do anel equipado (libera os construtos). |
+| `/lantern technique <id\|todas>` | Técnicas dos Capitães: olhar, bastiao, onda, salto, armadura, comando. |
+| `/lantern power <portal\|autorecarga\|honra\|genese\|tudo>` | Porta Estelar, autorrecarga (Prova da Emoção), Guarda de Honra (3º espaço), Gênese, ou tudo (nível 50, afinidade máxima, todas as técnicas e planetas visitados). |
+| `/lantern death <corrupt\|dominar\|faminto\|alimentar\|limpar>` | Linha da Morte / Anel Preto e a fome do Lanterna Negro. |
+| `/lantern mission_start <id>` · `missao_concluir <id>` · `missao_abandonar <id>` | Missões (concluir dá recompensas e abre a próxima da linha). |
+| `/lantern mission_clear` · `missao_concluidas_limpar` | Abandona todas as ativas / apaga o histórico para refazer. |
+| `/lantern visit <planet\|todos>` | Marca planetas como visitados (aparecem na Porta Estelar). |
+| `/lantern hostile_corps <corps\|limpar>` | Inimizade com uma Tropa (como se tivesse invadido o planeta dela). |
+| `/lantern summon <what> [amount]` | pirata, capitao, mercador, eco, alvo_treino, broto, lanterna_<tropa>, oficial_<tropa>, boss_<nome>. |
+| `/lantern ship <type> [paint]` | Item de nave. |
+| `/lantern kit <rings\|materiais\|reliquias\|guilda\|naves\|tudo>` | Itens. |
 
 Os comandos antigos continuam: `escolher`, `xp`, `afinidade`, `respeito`, `encontro`, `genese`, `contratos`, `interior`,
-`reconstruir`, `resetar`, `/guilda admin ...`.
+`reconstruir`, `resetar`, `/guild admin ...`.
 
 # 0.22 — Perfil, trajes, voo de combate e correções
 
@@ -684,9 +684,9 @@ usam bateria).
 - **Bateria resistiu:** recarga +50% por 30 min para aquela Tropa e 8–12 de Essência para quem defendeu. **Caiu:** recarga −50% por 30 min.
 
 ### Comandos de teste (operador)
-`/lanterna fonte <selo|pressao|banho|essencia|prova|juramento|arvore [tudo|zerar]|evento|chefe|ir [ilha]|zerar> [valor]`
+`/lantern source <seal|pressure|bath|essence|trial|oath|tree [all|reset]|event|boss|go [island]|reset> [value]`
 
-`/lanterna maximo` (com o anel equipado): nível máximo, afinidade máxima, todas as técnicas e poderes (Porta Estelar, autorrecarga, Guarda de Honra, Gênese, planetas visitados), Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência, pressão zerada e anel a 250% de carga.
+`/lantern max` (com o anel equipado): nível máximo, afinidade máxima, todas as técnicas e poderes (Porta Estelar, autorrecarga, Guarda de Honra, Gênese, planetas visitados), Selos e Corações das 7 Fontes, as 7 Árvores da Luz completas, 9999 de Essência, pressão zerada e anel a 250% de carga.
 
 # 0.28 — Combate contra os Lanternas NPC, cidades mais cheias e onde nascem os Ecos
 
@@ -965,8 +965,8 @@ subindo pelo corpo. A cerimônia dura pelo menos 10 s (configurável para mais).
   por perto veem o planeta, o raio e sentem o tremor.
 - O Mogo **se recusa** contra os chefes (os guardiões corrompidos): "Eu não ergo a minha luz contra quem um dia a
   carregou ao meu lado." — sem gastar carga nem tempo.
-- Comandos (operador): `/lanterna mogo resetar` (zera o tempo do Chamado), `/lanterna mogo jade` (3 Jades),
-  `/lanterna mogo selo` (põe o Selo na bateria verde da mão).
+- Comandos (operador): `/lantern mogo reset` (zera o tempo do Chamado), `/lantern mogo jade` (3 Jades),
+  `/lantern mogo seal` (põe o Selo na bateria verde da mão).
 - **Aura de energia** (0.37.1): com o anel ligado, energia líquida na cor da Tropa envolve cada parte do corpo em
   formas arredondadas que ondulam sem parar; transparente no meio, acesa nas beiradas; no alto da cabeça e dos ombros
   sobe em línguas como chama, e uma faixa de luz corre pelo corpo. Junto com o contorno.
@@ -994,7 +994,7 @@ não tem anel podem visitar. No pouso há uma clareira com o Coração de Jade; 
 
 **Segunda Chance** (Vínculo + anel verde): ao morrer, uma vez por dia (tempo real), o Mogo aparece no céu, segura você
 num feixe calmo e te puxa até o pouso dele. Não vale contra o próprio raio do Mogo.
-Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lanterna mogo segunda` (recarrega).
+Comandos (operador): `/lantern mogo go`, `/lantern mogo mission <1-6>`, `/lantern mogo second` (recarrega).
 
 ## 0.38.1 — Naves, Ecos em Odym e o Anel da Avareza
 - **Sair da nave**: o jogador sai do lado da porta (ou do outro lado, atrás, na frente), sempre fora das caixas da
@@ -1006,8 +1006,8 @@ Comandos (operador): `/lanterna mogo ir`, `/lanterna mogo missao <1-6>`, `/lante
 - **Ecos Cinzentos em Odym**: só nas ilhas (areia do planeta, a céu aberto, acima do mar, longe da beira, fora das
   cidades), nunca na água. Como Odym é quase todo mar, de tempos em tempos um Eco sobe do mar numa ilha perto de
   quem está lá (no máximo 3 por perto).
-- **Anel da Avareza**: `/lanterna laranja` mostra o modo; `/lanterna laranja unico` (padrão: um só Lanterna Laranja
-  por mundo), `/lanterna laranja varios` (qualquer um pode fazer o ritual), `/lanterna laranja liberar` (tira o dono).
+- **Anel da Avareza**: `/lantern orange` mostra o modo; `/lantern orange single` (padrão: um só Lanterna Laranja
+  por mundo), `/lantern orange many` (qualquer um pode fazer o ritual), `/lantern orange unlock` (tira o dono).
 
 ## 0.38.2 — Aura contínua
 A aura do anel ligado agora é um único halo de luz macio em volta da silhueta inteira do personagem, na cor da Tropa:
@@ -1093,7 +1093,7 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
   travados, tela escura com a borda vermelha) e é levado para um planeta de Tropa ao acaso (Oa, Korugar, Ysmault, Odym,
   Zamaron, Nok ou Okaara — nunca a Gênese nem Ryut). Ele voa sozinho até qualquer ser vivo (criaturas, NPCs, aliados ou
   não; jogadores não) e mata até se saciar: **25 a 30 mortes**. Sem ninguém por perto por 15 s, o anel o leva para outro
-  planeta. Saciado, o controle volta e a fome some por mais uns dias. Comando de teste: `/lanterna frenesi [parar]`.
+  planeta. Saciado, o controle volta e a fome some por mais uns dias. Comando de teste: `/lantern frenzy [stop]`.
 
 ## 0.39.4 — Textos que cabem na tela
 
@@ -1104,11 +1104,11 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 
 ## 0.39.5 — Inglês completo
 
-- Com o jogo em inglês, nada mais aparece em português (fora os nomes próprios e os nomes dos comandos, como /lanterna missao_concluir).
+- Com o jogo em inglês, nada mais aparece em português (fora os nomes próprios e os nomes dos comandos, como /lantern mission_complete).
 - Trajes: Specter, Herald of Terror, Guiding Star, Genesis, Phoenix, Pilgrim, Shaman, Treasurer, Plunderer, Ossuary, Reaper, Patroller, Sentinel, Boiling Blood, Sapphire, Star Heart.
 - Guildas das Tropas (e o dono "Conselho da Tropa") são traduzidas na hora de mostrar; guildas de jogadores mantêm o nome que o jogador deu.
 - Livro do Arquivo da Fonte com nome traduzido; moradores da Terra com título traduzido (Dra./Dr., Dona/Ms., Seu/Mr.), inclusive em mundos antigos.
-- Respostas e ajuda dos comandos de teste (/lanterna ajuda, cheio, maximo, nivel, missao_*, poder, morte, fonte...) traduzidas.
+- Respostas e ajuda dos comandos de teste (/lantern help, cheio, maximo, nivel, missao_*, poder, morte, fonte...) traduzidas.
 - Descrição do mod e comentários do lanterna-common.toml em inglês e português.
 
 ## 0.39.6 — Máscara, energia, Nok e Odym
@@ -1151,7 +1151,7 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Hanks:** o planeta-máquina que a Tropa Amarela construiu. Anda pelo espaço como o Mogo (volta de 40 min, a 40–55 mil blocos do centro, muda de setor a cada 25 min se ninguém estiver nele ou perto). Mundo próprio: placas de metal escuro com veios de luz amarela, torres, respiros, três núcleos de energia e a cidadela do Sinestro ao norte do pouso. Não tem ar (só com o anel). Quem é de Tropa inimiga dos Amarelos é atacado por sentinelas Amarelas a cada 40 s.
 - **Missões Amarelas (nível 25+, oferecidas sozinhas):** O Planeta-Máquina (achar e pousar em Hanks), Os Três Núcleos (ficar 5 s junto de cada núcleo: leste, oeste e sul) e A Prova de Sinestro (vencer o duelo na cidadela). Recompensas: Méritos, Fragmentos Lendários e Fragmentos de Pavor.
 - **Itens novos:** Insígnia de cada lendário e Fragmento Lendário (moeda da próxima saga).
-- **Comandos de teste:** `/lanterna lendario <id> ir|reviver`, `/lanterna hanks ir`, `/lanterna hanks missao <1-3>`.
+- **Comandos de teste:** `/lantern legendary <id> go|revive`, `/lantern hanks go`, `/lantern hanks mission <1-3>`.
 
 ## 0.43.0 — HUD limpo, corações numa linha e nível 150
 
@@ -1206,3 +1206,64 @@ Cada planeta de Tropa ganhou um segundo chefe, sem tirar o que já existia:
 - **Morte:** o boss tomba (animação de 2 s) e o corpo fica 3 s antes de sumir.
 - **Recompensa:** 1200 de XP para quem lutou, o drop do planeta, 2 fragmentos lendários e 4 diamantes.
 - **Ovos de spawn** de todos no modo criativo, para testar.
+
+## 0.47.0 — Inteligência (fase 3), comandos em inglês e espaço maior
+
+### Conversa com o anel
+- **Chat:** comece com `anel,` / `ring,` (ou `@anel`, `@ring`). A mensagem não vai para os outros: só você e o anel.
+  Sem vírgula (`anel me leve para Oa`) também funciona para pedidos claros; frases comuns ("anel verde é demais") seguem no chat.
+- **Voz:** aperte **Ç** (tecla `;` no teclado americano; muda em Controles) e fale. Usa o reconhecimento de fala do
+  próprio Windows: o ditado livre precisa de "Reconhecimento de fala online" ligado (Configurações > Privacidade > Fala);
+  sem ele, o anel entende uma lista de frases (destinos e comandos). No Mac e no Linux, use o chat.
+- **O anel fala:** as respostas saem em voz alta com as vozes do Windows (Mac: `say`; Linux: `espeak-ng`), cada Tropa
+  com um tom. Desliga em `config/lanterna-client.toml` (`voz_do_anel`).
+- **O que ele entende (PT e EN, com erro de digitação):** "me leve para Zamaron" / "take me to Korugar" (liga o piloto
+  automático), "me leve para casa" (planeta da sua Tropa), "pare", carga, nível, missão, onde estou, distância até um
+  lugar, perigos por perto (com direção), ligar/desligar, voar/pousar, recitar o juramento, quem é você, ajuda, piadas,
+  "fale sobre <planeta>". Cada Tropa responde do seu jeito.
+
+### NPCs que conversam
+- Fale no chat olhando para um morador, um Lanterna NPC, um pirata ou um alienígena (até 6 blocos): ele responde no
+  jeito do povo dele (Brakkari grosseiros, Ghallos espertinhos, Silentes calados...).
+- Lembram de você (contam as conversas e cumprimentam pelo nome). Elogio dá +1 de respeito com o povo (uma vez a
+  cada 10 min); ofensa tira 1, e Brakkari e piratas partem para a briga.
+
+### Chefes mais espertos (todos os chefes de planeta, das Tropas e os lendários)
+- **Ameaça:** escolhem o alvo por dano causado, distância e vida baixa; em grupo, trocam de alvo.
+- **Quem foge:** longe por ~4 s, o chefe salta até você (rastro de energia).
+- **Quem voa:** no alto por ~3 s, um raio puxa você para o chão (com dano).
+- **Esquiva** de flechas e tiros (mais nas fases 2 e 3). **Escudo** levantado demais é quebrado.
+- **Fúria** depois de 3 min de luta: +15% de velocidade e +25% de dano.
+
+### Lanternas lendários
+- Escalam com quem luta: vida efetiva = 1,4 × (1 + 1,6 × nível/150) × (1 + 0,8 × (jogadores − 1)); dano =
+  1,7 × (1 + 1,4 × nível/150) × (1 + 0,15 × (jogadores − 1)). O pico da luta fica até ele se curar sozinho.
+- A onda vem mais vezes com mais gente; os ajudantes passam de 2 para até 6. A barra mostra o nível e quantos lutam.
+
+### Juramento por escrito
+Na tela do juramento, **TAB** troca para o modo escrito: digite cada palavra (sem precisar de acento, maiúscula ou
+pontuação). Letra errada recomeça a palavra.
+
+### Comandos em inglês
+`/lanterna` virou **`/lantern`** e `/guilda` virou **`/guild`**, com todos os subcomandos e opções em inglês
+(ex.: `/lantern choose <corps>`, `/lantern ring <corps>`, `/lantern source oath`, `/guild create <name>`).
+`/lantern help` lista tudo.
+
+### Espaço
+- Os planetas das Tropas ficam 4x mais longe da Terra (12 a 26 mil blocos) e a pelo menos 10 mil blocos uns dos outros.
+  O Abismo foi junto (entre Nok e Odym). Planetas gerados e sóis não nascem colados nos planetas das Tropas.
+- O Sol gigante perto da Terra (que não dava para alcançar) saiu.
+
+### Correções
+- Piloto automático da nave: ao sair da nave depois da viagem, você sai no planeta de destino, ao lado da nave
+  (antes voltava para o mundo de onde partiu e a nave ficava no outro).
+- Tiros de plasma acertando certos chefes travavam o jogo no cliente.
+
+### Estruturas
+- **Arenas do desafio** (todos os planetas): piso desenhado, 8 colunas com capitel ligadas por arcos, estandartes da
+  Tropa, arquibancada de 3 degraus com 4 portões, braseiros e obeliscos em volta do altar.
+- **Bases dos planetas:** colunas, toldo com lanternas penduradas, bancos, braseiros e estandartes.
+- **Oa:** 12 colunas com arcos em volta da praça dos Guardiões. **Gênese:** 7 colunas (uma por Tropa) com arcos;
+  a Rachadura do Nulo ganhou ruínas.
+- **Arenas lendárias:** 10 colunas com arcos, estandartes, braseiros, obeliscos ao lado do trono e piso desenhado.
+- Mundos antigos ganham isso sozinhos na próxima visita (a arena é refeita; os NPCs das bases ficam onde estão).

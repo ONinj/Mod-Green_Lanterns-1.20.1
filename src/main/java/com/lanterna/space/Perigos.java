@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Perigos do espaço: sóis (queimam de perto e puxam muito mais forte que os planetas) e buracos negros (puxam tudo
  * para dentro; quem passa do horizonte não volta). Ficam nos setores vazios ({@link ProceduralPlanets#SECTOR}),
- * sempre os mesmos para a mesma semente do mundo, e ainda há o Sol grande e um buraco negro fixo (o Abismo).
+ * sempre os mesmos para a mesma semente do mundo, e ainda há um buraco negro fixo (o Abismo).
  *
  * A física é igual no servidor e no cliente: o puxão de quem voa é calculado no cliente (o voo roda lá) e o
  * servidor cuida das queimaduras, das mortes e de puxar as naves e criaturas.
@@ -43,12 +43,9 @@ public final class Perigos {
         }
     }
 
-    /** O Sol grande do mapa (mesma posição e tamanho de {@link SpaceBodies#SUN}). */
-    public static final Perigo SOL_CENTRAL = new Perigo("sol", Tipo.SOL, SpaceBodies.SUN.center(), SpaceBodies.SUN.radius(),
-            SpaceBodies.SUN.radius() * 2.0, 0xFFD27A, "Hélio", 37);
     /** O Abismo: um buraco negro entre Nok e Odym, perto o bastante para todo mundo conhecer o perigo. */
-    public static final Perigo ABISMO = new Perigo("abismo", Tipo.BURACO, new Vec3(-6000, 150, 5600), 34, 34 * 40, 0xFFB060, "Abismo", 0.22);
-    public static final List<Perigo> FIXOS = List.of(SOL_CENTRAL, ABISMO);
+    public static final Perigo ABISMO = new Perigo("abismo", Tipo.BURACO, new Vec3(-15200, 150, 9600), 34, 34 * 40, 0xFFB060, "Abismo", 0.22);
+    public static final List<Perigo> FIXOS = List.of(ABISMO);
 
     private static final double CORE_RADIUS = 12000;
     private static final Map<Long, Optional<Perigo>> CACHE = new ConcurrentHashMap<>();
@@ -123,7 +120,9 @@ public final class Perigos {
         double cz = sz * (double) ProceduralPlanets.SECTOR + ProceduralPlanets.SECTOR / 2.0 + (r.nextDouble() - 0.5) * ProceduralPlanets.SECTOR * 0.5;
         if (Math.hypot(cx, cz) < CORE_RADIUS) return null;
         Vec3 c = new Vec3(cx, -300 + r.nextDouble() * 700, cz);
-        if (c.distanceTo(SOL_CENTRAL.centro()) < SOL_CENTRAL.alcance() + 3000) return null;
+        for (SpaceBodies.Body b : SpaceBodies.BODIES)   // longe dos planetas fixos (a gravidade não pode alcançá-los)
+            if (!"mogo".equals(b.id()) && !"hanks".equals(b.id()) && c.distanceTo(b.center()) < b.radius() + 9000) return null;
+        if (c.distanceTo(ABISMO.centro()) < 9000) return null;
         if (com.lanterna.lendarios.PlanetasLendarios.perto(c, 9000)) return null;
         float k = r.nextFloat();
         String nome = PlanetNames.generate(r);
