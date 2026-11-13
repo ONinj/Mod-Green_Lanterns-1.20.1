@@ -35,7 +35,7 @@ import static com.lanterna.cidade.Kit.*;
  *          S (portão principal)
  */
 public final class Cidade {
-    public static final BlockPos CENTRO = new BlockPos(0, 0, -150);
+    public static BlockPos CENTRO = new BlockPos(0, 0, -150);
     public static final int R = 62;
     /** Dono "fictício" das naves estacionadas no hangar (ficam trancadas). */
     public static final UUID DONO_CIDADE = UUID.nameUUIDFromBytes("lanterna:cidade".getBytes());
@@ -104,7 +104,7 @@ public final class Cidade {
         Obra.etapa(level, l -> fontes(k, c));
     }
 
-    private static void fontes(Kit k, BlockPos c) {
+    static void fontes(Kit k, BlockPos c) {
         for (int[] f : new int[][]{{9, 9}, {-9, 9}, {9, -9}, {-9, -9}}) {
             BlockPos fc = c.offset(f[0], 0, f[1]);
             for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
@@ -119,7 +119,8 @@ public final class Cidade {
 
     /** Lista dos moradores da cidade já construída (para o vigia de moradores). */
     static void censo(ServerLevel level, PlanetLore planet) {
-        moradores(level, CENTRO.atY(Moradores.alturaCidade(level, CENTRO)), planet);
+        int y = Layout.novo() ? CidadeUnica.planta(level, planet).y : Moradores.alturaCidade(level, CENTRO);
+        moradores(level, CENTRO.atY(y), planet);
     }
 
     private static int chao(ServerLevel level) {
@@ -142,7 +143,7 @@ public final class Cidade {
 
     // ===================== Terreno, avenidas, praça, muralha =====================
 
-    private static void terreno(Kit k, BlockPos c, int x0, int x1) {
+    static void terreno(Kit k, BlockPos c, int x0, int x1) {
         BlockState air = b(Blocks.AIR);
         for (int dx = x0; dx <= x1; dx++) for (int dz = -R - 2; dz <= R + 2; dz++) {
             int x = c.getX() + dx, z = c.getZ() + dz;
@@ -150,18 +151,18 @@ public final class Cidade {
             k.s(x, c.getY() - 1, z, dentro && ((dx + dz) & 7) == 0 ? k.p.parede() : k.p.chao());
             for (int i = 2; i < 30; i++) {
                 BlockPos below = new BlockPos(x, c.getY() - i, z);
-                BlockState s = k.L.getBlockState(below);
+                BlockState s = k.get(below);
                 if (!s.isAir() && !s.liquid() && !s.canBeReplaced()) break;
                 k.s(below, k.p.parede());
             }
             for (int i = 0; i < 46; i++) {
                 BlockPos above = new BlockPos(x, c.getY() + i, z);
-                if (!k.L.getBlockState(above).isAir()) k.s(above, air);
+                if (!k.get(above).isAir()) k.s(above, air);
             }
         }
     }
 
-    private static void avenidas(Kit k, BlockPos c) {
+    static void avenidas(Kit k, BlockPos c) {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             Direction lado = d.getClockWise();
             for (int i = 14; i <= R; i++) {
@@ -175,7 +176,7 @@ public final class Cidade {
         }
     }
 
-    private static void praca(Kit k, BlockPos c) {
+    static void praca(Kit k, BlockPos c) {
         for (int dx = -14; dx <= 14; dx++) for (int dz = -14; dz <= 14; dz++) {
             double d = Math.sqrt(dx * dx + dz * dz);
             if (d > 14.5) continue;
@@ -207,7 +208,7 @@ public final class Cidade {
         return laje.defaultBlockState();
     }
 
-    private static void muralha(Kit k, BlockPos c) {
+    static void muralha(Kit k, BlockPos c) {
         for (int i = -R; i <= R; i++) {
             for (int[] p : new int[][]{{i, -R}, {i, R}, {-R, i}, {R, i}}) {
                 boolean portao = Math.abs(p[0]) <= 3 && Math.abs(p[1]) == R || Math.abs(p[1]) <= 3 && Math.abs(p[0]) == R;
@@ -242,7 +243,7 @@ public final class Cidade {
     // ===================== Quartel-General =====================
 
     /** QG: centro (0, -38), 29 x 21, três andares de 6. */
-    private static void qgCasca(Kit k, BlockPos c) {
+    static void qgCasca(Kit k, BlockPos c) {
         BlockPos q = c.offset(0, 0, -38);
         k.predio(q, 14, 10, 3, 6, Direction.SOUTH);
         // escadas: térreo -> 1º pela parede oeste; 1º -> 2º pela parede leste
@@ -258,7 +259,7 @@ public final class Cidade {
         for (int h = 19; h < 26; h++) k.s(q.offset(0, h, -6), h == 25 ? k.p.luz() : b(Blocks.LIGHTNING_ROD));
     }
 
-    private static void qgInterior(Kit k, BlockPos c, PlanetLore planet) {
+    static void qgInterior(Kit k, BlockPos c, PlanetLore planet) {
         BlockPos q = c.offset(0, 0, -38);
         // ---- Térreo: recepção e contratos ----
         for (int dx = -6; dx <= 6; dx++) k.s(q.offset(dx, 0, 2), lajeAlta(k.p.laje()));
@@ -306,7 +307,7 @@ public final class Cidade {
 
     // ===================== Arquivo =====================
 
-    private static void arquivo(Kit k, BlockPos c) {
+    static void arquivo(Kit k, BlockPos c) {
         BlockPos a = c.offset(36, 0, -38);
         k.predio(a, 11, 9, 1, 7, Direction.SOUTH);
         for (int x : new int[]{-8, -5, 5, 8}) for (int dz = -7; dz <= -1; dz++) for (int h = 0; h < 4; h++) {
@@ -330,7 +331,7 @@ public final class Cidade {
 
     // ===================== Celas de energia =====================
 
-    private static void celas(Kit k, BlockPos c) {
+    static void celas(Kit k, BlockPos c) {
         BlockPos a = c.offset(-36, 0, -38);
         k.predio(a, 11, 9, 1, 6, Direction.SOUTH);
         // corredor x -2..2; celas dos dois lados
@@ -356,7 +357,7 @@ public final class Cidade {
 
     // ===================== Academia e arena =====================
 
-    private static void academia(Kit k, BlockPos c) {
+    static void academia(Kit k, BlockPos c) {
         BlockPos a = c.offset(-38, 0, -14);
         for (int dx = -14; dx <= 14; dx++) for (int dz = -9; dz <= 8; dz++) {
             boolean borda = Math.abs(dx) == 14 || dz == -9 || dz == 8;
@@ -391,7 +392,7 @@ public final class Cidade {
 
     // ===================== Mercado =====================
 
-    private static void mercado(Kit k, BlockPos c) {
+    static void mercado(Kit k, BlockPos c) {
         Block[] toldos = {k.p.la(), Blocks.WHITE_WOOL, Blocks.ORANGE_WOOL, Blocks.LIGHT_BLUE_WOOL};
         BlockState[][] bens = {
                 {b(Blocks.HAY_BLOCK), b(Blocks.MELON), b(Blocks.PUMPKIN)},
@@ -416,7 +417,7 @@ public final class Cidade {
     }
 
     /** Loja com vitrine para a avenida, balcão e prateleiras. */
-    private static void loja(Kit k, BlockPos l) {
+    static void loja(Kit k, BlockPos l) {
         k.predio(l, 6, 5, 1, 5, Direction.NORTH);
         for (int dx = -4; dx <= 4; dx++) if (Math.abs(dx) >= 2) for (int h = 1; h <= 2; h++) k.s(l.offset(dx, h, -5), k.p.vidro());
         for (int dx = -4; dx <= 2; dx++) k.s(l.offset(dx, 0, 0), lajeAlta(Blocks.SMOOTH_QUARTZ_SLAB));
@@ -434,7 +435,7 @@ public final class Cidade {
 
     // ===================== Enfermaria =====================
 
-    private static void enfermaria(Kit k, BlockPos c) {
+    static void enfermaria(Kit k, BlockPos c) {
         BlockPos e = c.offset(36, 0, 38);
         k.predio(e, 11, 9, 1, 6, Direction.NORTH);
         for (int i = 0; i < 3; i++) {
@@ -461,7 +462,7 @@ public final class Cidade {
 
     // ===================== Hangar / porto espacial =====================
 
-    private static void hangar(Kit k, BlockPos c) {
+    static void hangar(Kit k, BlockPos c) {
         BlockPos h = c.offset(0, 0, 40);
         int W = 16, D = 12, H = 12;
         for (int dx = -W; dx <= W; dx++) for (int dz = -D; dz <= D; dz++) {
@@ -496,21 +497,21 @@ public final class Cidade {
         NaveEntity n1 = NaveEntity.create(k.L, NaveTipo.NAVE_PATRULHA, cor(k));
         n1.moveTo(h.getX() - 9 + 0.5, h.getY(), h.getZ() + 2.5, 180, 0);
         n1.setDono(DONO_CIDADE);
-        k.L.addFreshEntity(n1);
+        k.m.entidade(n1);
         NaveEntity n2 = NaveEntity.create(k.L, NaveTipo.NAVE_LANCEIRA, cor(k));
         n2.moveTo(h.getX() + 9 + 0.5, h.getY(), h.getZ() + 2.5, 180, 0);
         n2.setDono(DONO_CIDADE);
-        k.L.addFreshEntity(n2);
+        k.m.entidade(n2);
     }
 
     private static String cor(Kit k) {
-        PlanetLore pl = PlanetLore.byDimension(k.L.dimension());
+        PlanetLore pl = PlanetLore.byDimension(k.m.dimensao());
         return pl != null && pl.corps != BuiltinCorps.WHITE ? pl.corps.id().getPath() : "green";
     }
 
     // ===================== Casas =====================
 
-    private static void casa(Kit k, BlockPos o, Direction porta) {
+    static void casa(Kit k, BlockPos o, Direction porta) {
         k.predio(o, 5, 4, 1, 4, porta);
         int f = porta == Direction.SOUTH ? 1 : -1; // "frente" no eixo z
         k.cama(k.p.cama(), o.offset(-4, 0, -2 * f), porta.getOpposite());
@@ -534,9 +535,9 @@ public final class Cidade {
     }
 
     /** Anéis de luz no céu (teste de voo do Engenheiro). */
-    private static void aneis(Kit k, BlockPos c) {
+    static void aneis(Kit k, BlockPos c) {
         for (BlockPos r : CidadeMissoes.aneisCidade()) {
-            BlockPos rc = r.atY(altura(k.L, r.getX(), r.getZ()) + r.getY());
+            BlockPos rc = r.atY(k.altura(r.getX(), r.getZ()) + r.getY());
             for (int i = 0; i < 28; i++) {
                 double a = Math.PI * 2 * i / 28;
                 int ox = (int) Math.round(Math.cos(a) * 4);

@@ -67,10 +67,36 @@ public final class VozAnel {
 
     @Mod.EventBusSubscriber(modid = LanternaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static final class Tecla {
+        private static boolean antes, comVosk, semVosk;
+
         @SubscribeEvent
         public static void tick(TickEvent.ClientTickEvent e) {
             if (e.phase != TickEvent.Phase.END) return;
-            while (FALAR.consumeClick()) ouvir();
+            while (FALAR.consumeClick()) { /* o que vale é segurar (abaixo) */ }
+            boolean baixo = FALAR.isDown() && Minecraft.getInstance().screen == null;
+            if (baixo && !antes) apertou();
+            if (!baixo && antes && comVosk) VozVosk.soltar();
+            antes = baixo;
+        }
+
+        /** Segurou a tecla: o Vosk ouve enquanto ela estiver apertada; sem o Vosk, o reconhecedor do Windows. */
+        private static void apertou() {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player == null) return;
+            if (!ClientRingData.hasRing) {
+                AnelIA.responder(Component.translatable("anel.ia.sem_anel"), false);
+                return;
+            }
+            comVosk = false;
+            if (!semVosk) {
+                try {
+                    comVosk = !VozVosk.quebrado && VozVosk.comecar(idioma());
+                } catch (Throwable t) {
+                    semVosk = true;
+                    LanternaMod.LOGGER.info("Lanterna: Vosk indisponível ({}), usando o reconhecimento do sistema", t.toString());
+                }
+            }
+            if (!comVosk) ouvir();
         }
     }
 
@@ -203,7 +229,7 @@ public final class VozAnel {
         };
     }
 
-    private static String idioma() {
+    static String idioma() {
         String code = Minecraft.getInstance().getLanguageManager().getSelected();
         return code != null && code.startsWith("pt") ? "pt-BR" : "en-US";
     }

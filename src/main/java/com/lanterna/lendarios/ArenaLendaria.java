@@ -238,22 +238,22 @@ public final class ArenaLendaria {
             for (int k = 0; k < 12; k++) set(lv, px, y + k, pz, ar);
         }
         com.lanterna.lore.world.Arquitetura.Estilo e = com.lanterna.lore.world.Arquitetura.estilo(l.corps);
-        com.lanterna.lore.world.Arquitetura.piso(lv, c, y, 10, e);
+        com.lanterna.lore.world.Arquitetura.piso(new com.lanterna.cidade.Mundo.Servidor(lv), c, y, 10, e);
         BlockPos[] topos = new BlockPos[10];
         for (int i = 0; i < 10; i++) {
             double a = Math.PI * 2 * i / 10 + Math.PI / 10;
             int px = cx + (int) Math.round(Math.cos(a) * (RAIO - 4)), pz = cz + (int) Math.round(Math.sin(a) * (RAIO - 4));
-            int topo = com.lanterna.lore.world.Arquitetura.coluna(lv, new BlockPos(px, y, pz), 10 + (i % 2) * 2, e);
+            int topo = com.lanterna.lore.world.Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(lv), new BlockPos(px, y, pz), 10 + (i % 2) * 2, e);
             topos[i] = new BlockPos(px, topo, pz);
             net.minecraft.core.Direction dentro = com.lanterna.lore.world.Arquitetura.rumo(cx - px, cz - pz);
-            com.lanterna.lore.world.Arquitetura.estandarte(lv, new BlockPos(px, y + 7, pz).relative(dentro), dentro, e.cor());
+            com.lanterna.lore.world.Arquitetura.estandarte(new com.lanterna.cidade.Mundo.Servidor(lv), new BlockPos(px, y + 7, pz).relative(dentro), dentro, e.cor());
         }
-        for (int i = 0; i < 10; i++) com.lanterna.lore.world.Arquitetura.arco(lv, topos[i], topos[(i + 1) % 10], 4, e);
+        for (int i = 0; i < 10; i++) com.lanterna.lore.world.Arquitetura.arco(new com.lanterna.cidade.Mundo.Servidor(lv), topos[i], topos[(i + 1) % 10], 4, e);
         for (int[] d : new int[][]{{13, 0}, {-13, 0}, {0, 13}, {9, 9}, {-9, 9}})
-            com.lanterna.lore.world.Arquitetura.braseiro(lv, new BlockPos(cx + d[0], y, cz + d[1]), e);
+            com.lanterna.lore.world.Arquitetura.braseiro(new com.lanterna.cidade.Mundo.Servidor(lv), new BlockPos(cx + d[0], y, cz + d[1]), e);
         int tz = cz - (RAIO - 6);
-        com.lanterna.lore.world.Arquitetura.obelisco(lv, new BlockPos(cx - 6, y, tz), 7, e);
-        com.lanterna.lore.world.Arquitetura.obelisco(lv, new BlockPos(cx + 6, y, tz), 7, e);
+        com.lanterna.lore.world.Arquitetura.obelisco(new com.lanterna.cidade.Mundo.Servidor(lv), new BlockPos(cx - 6, y, tz), 7, e);
+        com.lanterna.lore.world.Arquitetura.obelisco(new com.lanterna.cidade.Mundo.Servidor(lv), new BlockPos(cx + 6, y, tz), 7, e);
     }
 
     private ArenaLendaria() {}

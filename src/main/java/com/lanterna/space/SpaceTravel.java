@@ -147,6 +147,12 @@ public final class SpaceTravel {
         Vec3 flat = new Vec3(dir.x, 0, dir.z);
         if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
         flat = flat.normalize().scale(body.lendario() ? 55 : body.procedural() != null ? 256 : 40);
+        // cidade única (0.48): quem chega a um planeta de Tropa pousa no quartel, perto da Bateria Central
+        if (com.lanterna.cidade.Layout.novo() && body.procedural() == null && !body.lendario()) {
+            com.lanterna.lore.PlanetLore pl = com.lanterna.lore.PlanetLore.byPlanet(body.id());
+            if (pl != null && pl != com.lanterna.lore.PlanetLore.GENESE)
+                return new Vec3(com.lanterna.cidade.Cidade.CENTRO.getX() + flat.x * 0.25, 300, com.lanterna.cidade.Cidade.CENTRO.getZ() + 24);
+        }
         // Planetas gerados ficam numa região própria do mundo do tipo deles
         double ox = body.procedural() != null ? body.procedural().regionX() : 0;
         double oz = body.procedural() != null ? body.procedural().regionZ() : 0;

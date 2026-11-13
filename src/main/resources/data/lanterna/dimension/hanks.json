@@ -1,17 +1,32 @@
 {
-  "type": "lanterna:planet_dark",
+  "type": "lanterna:hanks",
   "generator": {
     "type": "minecraft:flat",
     "settings": {
       "biome": "lanterna:hanks",
       "lakes": false,
-      "features": false,
+      "features": true,
       "layers": [
-        {"block": "minecraft:bedrock", "height": 1},
-        {"block": "minecraft:deepslate", "height": 46},
-        {"block": "minecraft:tuff", "height": 4},
-        {"block": "minecraft:polished_deepslate", "height": 2},
-        {"block": "minecraft:deepslate_tiles", "height": 1}
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:deepslate",
+          "height": 174
+        },
+        {
+          "block": "minecraft:tuff",
+          "height": 4
+        },
+        {
+          "block": "minecraft:polished_deepslate",
+          "height": 2
+        },
+        {
+          "block": "minecraft:deepslate_tiles",
+          "height": 1
+        }
       ],
       "structure_overrides": []
     }

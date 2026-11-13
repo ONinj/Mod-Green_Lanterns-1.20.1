@@ -57,6 +57,28 @@ public final class Moradores {
         PlanetLore planet = PlanetLore.byDimension(level.dimension());
         if (planet == null || planet == PlanetLore.GENESE || Obra.ocupada()) return;
         LoreWorldData data = LoreWorldData.get(level.getServer());
+        if (Layout.novo()) {
+            // cidade única (0.48): tudo já nasce com o mundo; aqui só entram (e voltam) os moradores
+            if (planet == PlanetLore.OA && perto(p, Palacio.CENTRO, 110)) conferir(level, "oa:palacio", () -> Palacio.censo(level));
+            if (perto(p, PlanetLore.HUB, 80)) {
+                String chave = level.dimension().location() + "|hub";
+                if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
+                    ULTIMA.put(chave, level.getGameTime());
+                    int n = com.lanterna.lore.world.PlanetSites.vigiarBase(level, planet);
+                    if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} NPC(s) da Bateria Central voltaram em {}", n, planet.planet);
+                }
+            }
+            if (perto(p, CidadeNativa.CENTRO, 250)) {
+                String chave = level.dimension().location() + "|nativa";
+                if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
+                    ULTIMA.put(chave, level.getGameTime());
+                    int n = CidadeNativa.nativos(level, CidadeNativa.CENTRO.atY(CidadeNativa.altura(level)), planet, 105);
+                    if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} nativo(s) chegaram à cidade de {}", n, planet.planet);
+                }
+            }
+            if (perto(p, Cidade.CENTRO, 110)) conferir(level, planet.planet + ":cidade2", () -> Cidade.censo(level, planet));
+            return;
+        }
         if (planet == PlanetLore.OA && data.siteBuilt("oa:palacio") && perto(p, Palacio.CENTRO, 110)) {
             conferir(level, "oa:palacio", () -> Palacio.censo(level));
         }

@@ -32,9 +32,9 @@ public enum PlanetLore {
     GENESE("genese", BuiltinCorps.WHITE, "broto", "nulo", null, "fragmento_primordial", null);
 
     /** Centro da base de cada planeta (forja, líder, alvos de treino). */
-    public static final BlockPos HUB = new BlockPos(0, 0, 0);
+    public static BlockPos HUB = new BlockPos(0, 0, 0);
     /** Arena do boss (altar do desafio). */
-    public static final BlockPos ARENA = new BlockPos(120, 0, 0);
+    public static BlockPos ARENA = new BlockPos(120, 0, 0);
 
     /** Onde fica o altar do boss neste planeta (em Gênese, a rachadura do Nulo ao lado do Altar da Vida). */
     public static BlockPos arena(PlanetLore p) {

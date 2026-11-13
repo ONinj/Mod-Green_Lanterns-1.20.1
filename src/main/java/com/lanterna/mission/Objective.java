@@ -53,7 +53,20 @@ public record Objective(Type type, String target, int count, @Nullable String pl
     }
 
     public static Objective of(Type type, String target, int count, @Nullable String planet, @Nullable BlockPos pos) {
+        // escrito antes de saber o desenho do mundo: guarda como ponto "antigo" (traduzido na hora de usar)
+        if (pos != null && !com.lanterna.cidade.Layout.aplicado) pos = new PosAntiga(pos);
         return new Objective(type, target, count, planet, pos);
+    }
+
+    /** Ponto no desenho antigo dos planetas (ver {@link com.lanterna.cidade.Layout#traduzir}). */
+    static final class PosAntiga extends BlockPos {
+        PosAntiga(BlockPos p) { super(p.getX(), p.getY(), p.getZ()); }
+    }
+
+    @Override
+    @Nullable
+    public BlockPos pos() {
+        return pos instanceof PosAntiga ? com.lanterna.cidade.Layout.traduzir(pos, planet) : pos;
     }
 
     public Component label(int progress) {

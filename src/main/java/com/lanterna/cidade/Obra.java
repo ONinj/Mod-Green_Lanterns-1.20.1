@@ -24,7 +24,21 @@ public final class Obra {
 
     private static final Deque<Etapa> FILA = new ArrayDeque<>();
 
+    /** Desenhando na memória (geração do mundo): as etapas rodam na hora, nesta thread, sem fila. */
+    private static final ThreadLocal<Boolean> IMEDIATO = ThreadLocal.withInitial(() -> false);
+
+    public static void imediato(ServerLevel level, Runnable r) {
+        boolean antes = IMEDIATO.get();
+        IMEDIATO.set(true);
+        try { r.run(); } finally { IMEDIATO.set(antes); }
+    }
+
+    public static boolean imediato() {
+        return IMEDIATO.get();
+    }
+
     public static void etapa(ServerLevel level, Consumer<ServerLevel> passo) {
+        if (IMEDIATO.get()) { passo.accept(level); return; }
         FILA.add(new Etapa(level, passo, null));
     }
 
@@ -33,6 +47,7 @@ public final class Obra {
      * todos prontos.
      */
     public static void carregar(ServerLevel level, java.util.List<net.minecraft.world.level.ChunkPos> pedacos) {
+        if (IMEDIATO.get()) return;
         FILA.add(new Etapa(level, l -> {}, l -> {
             for (var c : pedacos) l.getChunkSource().addRegionTicket(TICKET, c, 1, c);
             return true;

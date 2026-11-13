@@ -13,12 +13,29 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 
 /** Ferramentas de construção (blocos, prédios ocos com andares, escadas e móveis). */
 public final class Kit {
+    /** O mundo de verdade (para criar entidades). Para ler e escrever blocos, use {@link #m}. */
     public final ServerLevel L;
+    /** Onde os blocos vão: direto no mundo ou desenhados na memória (geração). */
+    public final Mundo m;
     public final Paleta p;
 
     public Kit(ServerLevel level, Paleta paleta) {
-        this.L = level;
+        this(new Mundo.Servidor(level), paleta);
+    }
+
+    public Kit(Mundo mundo, Paleta paleta) {
+        this.m = mundo;
+        this.L = mundo.nivel();
         this.p = paleta;
+    }
+
+    public BlockState get(BlockPos pos) {
+        return m.get(pos);
+    }
+
+    /** Altura do chão neste mundo (na geração: a do gerador). */
+    public int altura(int x, int z) {
+        return m.altura(x, z);
     }
 
     /** Altura do chão (carrega o pedaço do mundo antes, senão o mapa de alturas vem vazio). */
@@ -32,15 +49,15 @@ public final class Kit {
     }
 
     public void s(BlockPos pos, BlockState st) {
-        L.setBlock(pos, st, 2);
+        m.set(pos, st);
     }
 
     public void s(int x, int y, int z, BlockState st) {
-        L.setBlock(new BlockPos(x, y, z), st, 2);
+        m.set(new BlockPos(x, y, z), st);
     }
 
     public void box(BlockPos a, BlockPos c, BlockState st) {
-        for (BlockPos q : BlockPos.betweenClosed(a, c)) L.setBlock(q, st, 2);
+        for (BlockPos q : BlockPos.betweenClosed(a, c)) m.set(q, st);
     }
 
     public void ar(BlockPos a, BlockPos c) {

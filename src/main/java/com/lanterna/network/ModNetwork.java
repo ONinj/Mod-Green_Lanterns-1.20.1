@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "18";
+    private static final String VERSION = "19";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -85,6 +85,9 @@ public final class ModNetwork {
                 .consumerMainThread(PocketRechargePacket::handle)
                 .add();
 
+        CHANNEL.messageBuilder(com.lanterna.cidade.Layout.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.cidade.Layout.Pacote::encode).decoder(com.lanterna.cidade.Layout.Pacote::decode)
+                .consumerMainThread(com.lanterna.cidade.Layout.Pacote::handle).add();
         CHANNEL.messageBuilder(TogglePowerPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(TogglePowerPacket::encode)
                 .decoder(TogglePowerPacket::decode)

@@ -58,12 +58,20 @@ import java.util.function.Supplier;
 public final class TerraSite {
     static final int R = 32;
     /** Observatório (centro da torre). */
-    static final BlockPos OBS = new BlockPos(22, 0, 0);
+    static BlockPos OBS = new BlockPos(22, 0, 0);
     /** Altar de ensaio, no terraço ao lado do observatório. */
-    static final BlockPos ALTAR = new BlockPos(22, 0, -11);
+    static BlockPos ALTAR = new BlockPos(22, 0, -11);
     /** Base Vigília (centro do laboratório), embaixo do observatório. */
     static final int FUNDO = -14;
-    static final BlockPos LAB = new BlockPos(22, FUNDO, 9);
+    static BlockPos LAB = new BlockPos(22, FUNDO, 9);
+
+    /** Cidade Aurora (mundos da 0.48+): o observatório fica no fim da avenida leste. */
+    public static void desenho(boolean novo) {
+        int x = novo ? 58 : 22;
+        OBS = new BlockPos(x, 0, 0);
+        ALTAR = new BlockPos(x, 0, -11);
+        LAB = new BlockPos(x, FUNDO, 9);
+    }
 
     /** Centro da vila neste mundo (servidor) ou o que o servidor mandou (cliente). Null = ainda não existe. */
     @Nullable
@@ -114,7 +122,7 @@ public final class TerraSite {
         var rs = l.getChunkSource().randomState();
         BlockPos melhor = null;
         double nota = Double.MAX_VALUE;
-        for (int raio = 260; raio <= 520 && (melhor == null || nota > 6); raio += 65) {
+        for (int raio = com.lanterna.cidade.Layout.novo() ? 330 : 260; raio <= 560 && (melhor == null || nota > 6); raio += 65) {
             for (int k = 0; k < 16; k++) {
                 double a = k * Math.PI / 8 + raio * 0.01;
                 int x = spawn.getX() + (int) (Math.cos(a) * raio), z = spawn.getZ() + (int) (Math.sin(a) * raio);
@@ -128,8 +136,8 @@ public final class TerraSite {
                     min = Math.min(min, fundo);
                     max = Math.max(max, fundo);
                 }
-                if (agua || min < l.getSeaLevel()) continue;
-                double n = (max - min) + Math.abs(raio - 300) * 0.01;
+                // água ou chão abaixo do mar ainda serve (a cidade aterra), mas vale bem menos que um campo seco
+                double n = (max - min) + Math.abs(raio - 300) * 0.01 + (agua ? 25 : 0) + Math.max(0, l.getSeaLevel() - min) * 2;
                 if (n < nota) {
                     nota = n;
                     melhor = new BlockPos(x, (min + max) / 2, z);
@@ -138,6 +146,26 @@ public final class TerraSite {
         }
         if (melhor == null) melhor = spawn.offset(300, 0, 0);
         return melhor;
+    }
+
+    /**
+     * Mundos da 0.48: o lugar da Cidade Aurora é escolhido quando o servidor liga, antes de a região existir, e a cidade
+     * nasce com o terreno ({@link AuroraGeracao}).
+     */
+    public static void escolherNaCriacao(MinecraftServer s) {
+        Dados d = Dados.get(s);
+        ServerLevel ow = s.overworld();
+        // só o gerador normal põe decorações (num mundo plano a cidade é construída ao entrar, como antes)
+        if (d.c == null && !(ow.getChunkSource().getGenerator() instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator)) return;
+        if (d.c == null) {
+            BlockPos esc = escolher(ow);
+            int y = Math.max(com.lanterna.cidade.Mundo.alturaGerador(ow, esc.getX(), esc.getZ()), ow.getMinBuildHeight() + 24);
+            d.c = new BlockPos(esc.getX(), y, esc.getZ());
+            d.pronto = true;
+            d.setDirty();
+            LanternaMod.LOGGER.info("Lanterna: a Cidade Aurora vai nascer em {}", d.c);
+        }
+        centro = d.c;
     }
 
     // ===================== Entrar no mundo =====================
@@ -155,10 +183,12 @@ public final class TerraSite {
             d.c = new BlockPos(esc.getX(), y, esc.getZ());
             d.setDirty();
             LanternaMod.LOGGER.info("Lanterna: Vila Aurora será construída em {}", d.c);
-            construir(ow, d.c, () -> {
+            Runnable fim = () -> {
                 d.pronto = true;
                 d.setDirty();
-            });
+            };
+            if (com.lanterna.cidade.Layout.novo()) AuroraGeracao.construirAgora(ow, d.c, fim);
+            else construir(ow, d.c, fim);
         }
         centro = d.c;
         ModNetwork.sendTo(p, new Sync(d.c));
@@ -230,7 +260,7 @@ public final class TerraSite {
         }
     }
 
-    private static void poste(Kit k, BlockPos b) {
+    static void poste(Kit k, BlockPos b) {
         k.s(b, Kit.b(Blocks.SPRUCE_FENCE));
         k.s(b.above(), Kit.b(Blocks.SPRUCE_FENCE));
         k.s(b.above(2), Kit.b(Blocks.SPRUCE_FENCE));
@@ -275,7 +305,7 @@ public final class TerraSite {
     }
 
     /** Torre redonda branca com cúpula de vidro e o telescópio apontado para o céu. */
-    private static void observatorio(Kit k, BlockPos c) {
+    static void observatorio(Kit k, BlockPos c) {
         BlockPos o = c.offset(OBS);
         int raio = 6, alt = 9;
         for (int dx = -raio; dx <= raio; dx++) for (int dz = -raio; dz <= raio; dz++) {
@@ -331,7 +361,7 @@ public final class TerraSite {
     }
 
     /** Base Vigília: laboratório escondido embaixo do observatório. */
-    private static void base(Kit k, BlockPos c) {
+    static void base(Kit k, BlockPos c) {
         BlockPos o = c.offset(OBS);
         int y0 = FUNDO;
         // corredor da escada até o laboratório (para o sul)
@@ -378,7 +408,7 @@ public final class TerraSite {
     }
 
     /** Altar de ensaio do Ritual da Bateria (terraço a céu aberto ao lado do observatório). */
-    private static void altar(Kit k, BlockPos c) {
+    static void altar(Kit k, BlockPos c) {
         BlockPos a = c.offset(ALTAR);
         for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
             boolean borda = Math.abs(dx) == 4 || Math.abs(dz) == 4;
@@ -421,6 +451,24 @@ public final class TerraSite {
 
     private static final String TAG_POSTO = "lanterna_posto";
 
+    private static List<Posto> postos() {
+        if (com.lanterna.cidade.Layout.novo()) return List.of(
+                new Posto("cientista", LAB.offset(2, 0, -2), "dra", "Lívia Andrade"),
+                new Posto("assistente", LAB.offset(-4, 0, 2), "", "Téo Brandão"),
+                new Posto("seguranca", OBS.offset(-8, 0, 2), "sgt", "Rui Tavares"),
+                new Posto("morador", new BlockPos(-20, 0, -13), "dona", "Cida"),
+                new Posto("morador", new BlockPos(20, 0, -13), "seu", "Jonas"),
+                new Posto("morador", new BlockPos(20, 0, 13), "", "Marina"),
+                new Posto("morador", new BlockPos(-20, 0, 13), "", "Caio"),
+                new Posto("morador", new BlockPos(-6, 0, 6), "", "Bia"),
+                new Posto("morador", new BlockPos(0, 0, 18), "", "Rafa"),
+                new Posto("morador", new BlockPos(-46, 0, -18), "", "Prof. Helena"),
+                new Posto("morador", new BlockPos(-46, 0, 18), "", "Enf. Davi"),
+                new Posto("morador", new BlockPos(-24, 0, 45), "", "Seu Tonho"),
+                new Posto("morador", new BlockPos(0, 0, -16), "", "Prefeita Lúcia"));
+        return POSTOS;
+    }
+
     private static final List<Posto> POSTOS = List.of(
             new Posto("cientista", LAB.offset(2, 0, -2), "dra", "Lívia Andrade"),
             new Posto("assistente", LAB.offset(-4, 0, 2), "", "Téo Brandão"),
@@ -432,7 +480,7 @@ public final class TerraSite {
             new Posto("morador", new BlockPos(-4, 0, 4), "", "Bia"));
 
     static void pessoas(ServerLevel l, BlockPos c) {
-        for (Posto p : POSTOS) garantir(l, c, p);
+        for (Posto p : postos()) garantir(l, c, p);
     }
 
     private static void garantir(ServerLevel l, BlockPos c, Posto p) {

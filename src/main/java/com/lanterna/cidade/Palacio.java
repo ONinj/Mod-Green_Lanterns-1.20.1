@@ -52,16 +52,31 @@ import static com.lanterna.cidade.Kit.*;
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class Palacio {
-    public static final int Y = 170;
-    public static final BlockPos CENTRO = new BlockPos(0, Y, -470);
-    public static final BlockPos SALAO = CENTRO.offset(0, 0, -6);
-    public static final BlockPos BIBLIOTECA = CENTRO.offset(-24, 0, -34);
-    public static final BlockPos CAMARA = CENTRO.offset(0, 0, -34);
-    public static final BlockPos CAMPO = CENTRO.offset(-84, 0, 0);
-    public static final BlockPos PORTAO = CENTRO.offset(0, 0, 54);
+    public static int Y = 170;
+    public static BlockPos CENTRO = new BlockPos(0, Y, -470);
+    public static BlockPos SALAO, BIBLIOTECA, CAMARA, CAMPO, PORTAO;
     public static final int R = 56;
-    public static final List<BlockPos> ANEIS = List.of(CENTRO.offset(40, 22, 60), CENTRO.offset(75, 32, 0), CENTRO.offset(40, 44, -70),
-            CENTRO.offset(-30, 36, -80), CENTRO.offset(-60, 26, 55));
+    public static List<BlockPos> ANEIS;
+    /** Palácio no chão, no centro da cidade (mundos da 0.48+); senão, a ilha flutuante antiga. */
+    public static boolean noChao;
+
+    static {
+        posicionar(new BlockPos(0, 170, -470), false);
+    }
+
+    /** Põe o palácio (e tudo que é medido a partir dele) neste centro. */
+    public static void posicionar(BlockPos centro, boolean chao) {
+        noChao = chao;
+        Y = centro.getY();
+        CENTRO = centro;
+        SALAO = CENTRO.offset(0, 0, -6);
+        BIBLIOTECA = CENTRO.offset(-24, 0, -34);
+        CAMARA = CENTRO.offset(0, 0, -34);
+        CAMPO = CENTRO.offset(-84, 0, 0);
+        PORTAO = CENTRO.offset(0, 0, 54);
+        ANEIS = List.of(CENTRO.offset(40, 22, 60), CENTRO.offset(75, 32, 0), CENTRO.offset(40, 44, -70),
+                CENTRO.offset(-30, 36, -80), CENTRO.offset(-60, 26, 55));
+    }
 
     /** Sala de cada Capitão (técnica -> centro da ala). */
     public static BlockPos ala(String tec) {
@@ -83,11 +98,14 @@ public final class Palacio {
     }
 
     private static Kit kit(ServerLevel level) {
-        Paleta pal = new Paleta(b(LoreBlocks.ROCHA_POLIDA_VERIDIA.get()), b(Blocks.QUARTZ_BRICKS), b(Blocks.LIME_CONCRETE), b(Blocks.LIME_STAINED_GLASS),
+        return new Kit(level, paleta());
+    }
+
+    static Paleta paleta() {
+        return new Paleta(b(LoreBlocks.ROCHA_POLIDA_VERIDIA.get()), b(Blocks.QUARTZ_BRICKS), b(Blocks.LIME_CONCRETE), b(Blocks.LIME_STAINED_GLASS),
                 b(Blocks.SEA_LANTERN), b(Blocks.WHITE_CONCRETE), b(Blocks.EMERALD_BLOCK), b(Blocks.VERDANT_FROGLIGHT), b(Blocks.QUARTZ_PILLAR),
                 Blocks.BIRCH_PLANKS, Blocks.QUARTZ_STAIRS, Blocks.SMOOTH_QUARTZ_SLAB, Blocks.LIME_WOOL, Blocks.LIME_CARPET, Blocks.LIME_BED,
                 Blocks.LIME_STAINED_GLASS_PANE);
-        return new Kit(level, pal);
     }
 
     private static void construirCom(ServerLevel level, Kit k) {
@@ -108,7 +126,7 @@ public final class Palacio {
     }
 
     /** Ilha flutuante: chão redondo e a parte de baixo afinando como uma pedra pendurada (faixa de x0 a x1). */
-    private static void ilha(Kit k, BlockPos c, int raio, int x0, int x1, int fundo) {
+    static void ilha(Kit k, BlockPos c, int raio, int x0, int x1, int fundo) {
         BlockState rocha = b(LoreBlocks.ROCHA_POLIDA_VERIDIA.get()), pedra = b(Blocks.STONE), musgo = b(Blocks.MOSS_BLOCK);
         for (int dx = x0; dx <= x1; dx++) for (int dz = -raio; dz <= raio; dz++) {
             double d = Math.sqrt(dx * dx + dz * dz);
@@ -120,13 +138,13 @@ public final class Palacio {
             for (int y = 2; y <= prof; y++) k.s(x, c.getY() - y, z, y < 4 ? rocha : (y % 7 == 0 ? musgo : pedra));
             for (int y = 0; y < 50; y++) {
                 BlockPos up = new BlockPos(x, c.getY() + y, z);
-                if (!k.L.getBlockState(up).isAir()) k.s(up, b(Blocks.AIR));
+                if (!k.get(up).isAir()) k.s(up, b(Blocks.AIR));
             }
             if (d > raio - 1 && d <= raio + 0.5 && ((dx + dz) & 1) == 0) k.s(x, c.getY(), z, k.p.painel().defaultBlockState());
         }
     }
 
-    private static void portaoEPatio(Kit k) {
+    static void portaoEPatio(Kit k) {
         BlockPos g = PORTAO;
         for (int s : new int[]{-7, 7}) for (int h = 0; h < 17; h++) {
             k.s(g.offset(s, h, 0), h == 16 ? k.p.destaque() : k.p.pilar());
@@ -166,7 +184,7 @@ public final class Palacio {
     }
 
     /** Grande Salão: redondo, colunas, tronos do Conselho ao norte, disco do julgamento no centro, cúpula de vidro. */
-    private static void salao(Kit k) {
+    static void salao(Kit k) {
         BlockPos c = SALAO;
         int r = 16, h = 18;
         for (int dx = -r - 1; dx <= r + 1; dx++) for (int dz = -r - 1; dz <= r + 1; dz++) {
@@ -213,7 +231,7 @@ public final class Palacio {
     }
 
     /** Câmara da Bateria Primordial: cúpula com a maior bateria do jogo sobre um poço de luz. */
-    private static void camara(Kit k) {
+    static void camara(Kit k) {
         BlockPos c = CAMARA;
         int r = 11;
         for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) for (int dy = 0; dy <= r + 6; dy++) {
@@ -224,10 +242,10 @@ public final class Palacio {
             if (d > r - 0.5 && d <= r + 0.5) k.s(c.offset(dx, dy, dz), dy < 6 ? (dy % 3 == 2 ? k.p.faixa() : k.p.parede()) : k.p.vidro());
         }
         for (int dx = -2; dx <= 2; dx++) for (int y = 0; y < 7; y++) k.s(c.offset(dx, y, r), b(Blocks.AIR));
-        CidadeTropa.bateriaCentral(k.L, c, PlanetLore.OA);
+        CidadeTropa.bateriaCentral(k.m, c, PlanetLore.OA);
     }
 
-    private static void alaCapitao(Kit k, String tec) {
+    static void alaCapitao(Kit k, String tec) {
         BlockPos a = ala(tec);
         boolean oeste = a.getX() < CENTRO.getX();
         k.predio(a, 6, 6, 1, 7, oeste ? Direction.EAST : Direction.WEST);
@@ -277,7 +295,7 @@ public final class Palacio {
         k.estandarte(a.offset(-lado * 4, 0, 5), 4);
     }
 
-    private static void biblioteca(Kit k) {
+    static void biblioteca(Kit k) {
         BlockPos b0 = BIBLIOTECA;
         k.predio(b0, 9, 7, 1, 9, Direction.SOUTH);
         for (int ring = 3; ring <= 7; ring += 2) {
@@ -293,7 +311,7 @@ public final class Palacio {
         bau(k, b0.offset(-8, 0, -6), 1);
     }
 
-    private static void observatorio(Kit k) {
+    static void observatorio(Kit k) {
         BlockPos o = CENTRO.offset(24, 0, -34);
         for (int y = 0; y < 30; y++) for (int dx = -5; dx <= 5; dx++) for (int dz = -5; dz <= 5; dz++) {
             double d = Math.sqrt(dx * dx + dz * dz);
@@ -308,7 +326,7 @@ public final class Palacio {
         bau(k, o.offset(3, 0, -3), 2);
     }
 
-    private static void celas(Kit k) {
+    static void celas(Kit k) {
         BlockPos c = CENTRO.offset(30, 0, 36);
         k.predio(c, 7, 5, 1, 6, Direction.WEST);
         for (int i = -1; i <= 1; i++) {
@@ -320,15 +338,16 @@ public final class Palacio {
     }
 
     /** Baú escondido com uma relíquia (provação do Olhar do Anel). */
-    private static void bau(Kit k, BlockPos p, int n) {
+    static void bau(Kit k, BlockPos p, int n) {
         k.s(p, b(Blocks.CHEST));
+        if (!(k.m instanceof Mundo.Servidor)) { k.m.bau(p, com.lanterna.LanternaMod.id("chests/oa/reliquia")); return; }
         if (k.L.getBlockEntity(p) instanceof ChestBlockEntity be) {
             be.setItem(13, new ItemStack(LoreItems.RELIQUIA.get()));
             be.setItem(4, new ItemStack(LoreItems.MERITO.get(), n));
         }
     }
 
-    private static void campo(Kit k) {
+    static void campo(Kit k) {
         BlockPos c = CAMPO;
         for (int dx = -20; dx <= 20; dx++) for (int dz = -20; dz <= 20; dz++) {
             double d = Math.sqrt(dx * dx + dz * dz);
@@ -343,7 +362,7 @@ public final class Palacio {
         for (int x = c.getX() + 20; x <= CENTRO.getX() - R + 2; x += 5) for (int dz : new int[]{-2, 2}) k.s(x, Y, c.getZ() + dz, k.p.luz());
     }
 
-    private static void aneis(Kit k) {
+    static void aneis(Kit k) {
         for (BlockPos r : ANEIS) {
             for (int i = 0; i < 32; i++) {
                 double a = Math.PI * 2 * i / 32;
@@ -353,9 +372,9 @@ public final class Palacio {
     }
 
     /** Ponte de luz: do portão norte da cidade de Oa até o portão do palácio (feita em 6 pedaços). */
-    private static void ponte(Kit k, int parte) {
+    static void ponte(Kit k, int parte) {
         int zIni = Cidade.CENTRO.getZ() - Cidade.R - 1, zFim = PORTAO.getZ() + 2;
-        int yIni = altura(k.L, 0, zIni + 2);
+        int yIni = k.altura(0, zIni + 2);
         int total = zIni - zFim;
         int passo = (total + 5) / 6;
         for (int i = parte * passo; i <= Math.min(total, (parte + 1) * passo); i++) {
@@ -500,7 +519,7 @@ public final class Palacio {
      * Escadinha na frente de cada trono (o Guardião fica 4 blocos acima do chão: sem degraus só dava para falar voando).
      * Do último degrau o jogador fica cara a cara com o Guardião.
      */
-    private static void degrausTronos(Kit k) {
+    static void degrausTronos(Kit k) {
         for (int a : new int[]{-60, -30, 0, 30, 60}) {
             double rad = Math.toRadians(a);
             BlockPos t = SALAO.offset((int) Math.round(Math.sin(rad) * 10), 0, (int) Math.round(-Math.cos(rad) * 10));

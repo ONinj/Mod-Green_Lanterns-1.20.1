@@ -48,6 +48,18 @@ public class LoreWorldData extends SavedData {
         if (bosses.add(boss)) setDirty();
     }
 
+    /** Desenho dos planetas (0 = ainda não decidido, 1 = antigo, 2 = cidade única da 0.48). */
+    public int layout() {
+        return sites.contains("layout:2") ? 2 : sites.contains("layout:1") ? 1 : 0;
+    }
+
+    public void setLayout(int v) {
+        sites.remove("layout:1");
+        sites.remove("layout:2");
+        sites.add("layout:" + v);
+        setDirty();
+    }
+
     public boolean siteBuilt(String id) {
         return sites.contains(id);
     }

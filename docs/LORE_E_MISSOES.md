@@ -1267,3 +1267,27 @@ pontuação). Letra errada recomeça a palavra.
   a Rachadura do Nulo ganhou ruínas.
 - **Arenas lendárias:** 10 colunas com arcos, estandartes, braseiros, obeliscos ao lado do trono e piso desenhado.
 - Mundos antigos ganham isso sozinhos na próxima visita (a arena é refeita; os NPCs das bases ficam onde estão).
+
+## 0.48.0 — Cidades únicas, Cidade Aurora, o núcleo de Hanks e voz offline
+
+**Precisa de um mundo novo.** Mundos criados antes continuam com o desenho antigo (o mod guarda qual desenho o mundo usa e não mexe no que já existe).
+
+- **Uma cidade por planeta das Tropas** (cerca de 440 blocos de diâmetro, mais o anel de 600 com a arena): tudo nasce junto com o terreno, nas threads de geração do mundo. Antes o servidor construía bloco a bloco e travava de 30 a 60 segundos; agora o tick fica entre 10 e 30 ms.
+  - Centro: o marco do povo (torres, prédios, praças) e mais de 130 casas, com a mesma densidade de antes.
+  - Quartel da Tropa ao sul, com a Bateria Central: o guardião e o mestre ficam fixos em volta dela. A arena fica na borda leste.
+  - Casas mobiliadas: cama, baú e barril com itens do planeta (flores e lírios em Zamaron, ouro e mercadorias em Okaara...), bancada, fornalha ou defumador, a oficina de cada povo, estante, vasos, mesa, tapete e luz.
+- **Oa**: o Conselho dos Guardiões mora no palácio central, que tem as mesmas portas por nível. A ilha voadora saiu. Os 3 Guardiões da chegada e o mestre ficam atrás da Bateria Central.
+- **Cidade Aurora** (Terra) no lugar da Vila Aurora:
+  - praça com fonte e o monumento da estrela cadente;
+  - prefeitura com torre do relógio, mercado, escola, clínica, padaria e hortas;
+  - 8 casas e 10 sobrados mobiliados;
+  - o observatório, a Base Vigília e o terraço do Ritual no fim da avenida leste.
+  - Em mundo normal ela nasce com o terreno, a 330 blocos ou mais do spawn. Em mundo plano é construída aos poucos na primeira entrada, como era antes.
+- **Hanks**:
+  - a superfície agora é mecânica: placas, blocos elevados, máquinas, trincheiras e poços de lava que soltam a energia do planeta;
+  - a cidadela do lendário continua lá;
+  - embaixo fica o núcleo, uma cúpula gigante com a esfera de energia, avenidas, pilares e prédios. É a cidade viva dos Lanternas Amarelos, que patrulham quem desce até lá. Um poço com escada leva até ela.
+- **Voz com Vosk embutido**: segure a tecla de falar com o anel (Ç/;) enquanto fala.
+  - Na primeira vez o mod baixa o modelo pequeno do idioma (português ~31 MB, inglês ~40 MB) para `config/lanterna/vosk`. Depois funciona sem internet, em Windows, Mac e Linux.
+  - Se o Vosk não carregar, o reconhecedor do Windows continua como reserva.
+  - O jar ficou ~26 MB maior por causa das bibliotecas nativas.

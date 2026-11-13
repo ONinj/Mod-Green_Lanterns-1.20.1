@@ -24,7 +24,7 @@ import static com.lanterna.cidade.Kit.b;
  * se mudam para a cidade nova.
  */
 public final class CidadeNativa {
-    public static final BlockPos CENTRO = new BlockPos(-480, 0, 0);
+    public static BlockPos CENTRO = new BlockPos(-480, 0, 0);
     public static final int R = CidadesPovos.R;
     /** A cidade antiga (0.25). */
     public static final BlockPos ANTIGA = new BlockPos(-210, 0, 0);
@@ -89,6 +89,8 @@ public final class CidadeNativa {
      * mais se repete.
      */
     public static int altura(ServerLevel level) {
+        PlanetLore pl0 = PlanetLore.byDimension(level.dimension());
+        if (Layout.novo() && pl0 != null && pl0 != PlanetLore.GENESE) return CidadeUnica.planta(level, pl0).y;
         Map<Integer, Integer> conta = new HashMap<>();
         for (int ang : new int[]{0, 45, 135, 180, 225, 315}) for (int d : new int[]{84, 92}) {
             double a = Math.toRadians(ang);
@@ -108,9 +110,17 @@ public final class CidadeNativa {
     public static int nativos(ServerLevel l, BlockPos c, PlanetLore planet, int quantos) {
         Race race = Race.ofPlanet(planet.planet);
         if (race == null) return 0;
-        CidadesPovos.lembrar(l, planet, c);
-        List<BlockPos> casas = new java.util.ArrayList<>(CidadesPovos.casas(c));
-        casas.addAll(CidadesPovos.casasExtras(c));
+        List<BlockPos> casas;
+        if (Layout.novo()) {
+            // cidade única: as casas vêm da planta (com a altura do chão da cidade)
+            CidadeUnica.Planta pl = CidadeUnica.planta(l, planet);
+            casas = new java.util.ArrayList<>();
+            for (BlockPos h : pl.casas) casas.add(h.atY(pl.y));
+        } else {
+            CidadesPovos.lembrar(l, planet, c);
+            casas = new java.util.ArrayList<>(CidadesPovos.casas(c));
+            casas.addAll(CidadesPovos.casasExtras(c));
+        }
         List<BlockPos> carregadas = new java.util.ArrayList<>();
         for (BlockPos h : casas) if (l.isPositionEntityTicking(h)) carregadas.add(h);
         if (carregadas.isEmpty()) return 0;

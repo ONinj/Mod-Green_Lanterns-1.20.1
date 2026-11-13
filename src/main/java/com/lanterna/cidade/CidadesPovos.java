@@ -45,7 +45,7 @@ import static com.lanterna.cidade.Kit.b;
  *   Ryut     · Silentes    · A Necrópole: o Colosso de ossos e o Obelisco do Silêncio, mausoléus
  */
 public final class CidadesPovos {
-    public static final int R = 200;
+    public static final int R = 220;
     static final int PRACA = 40;
     static final int[] ANEIS = {70, 130, 176};
     public static final int NATIVOS = 90;
@@ -179,7 +179,7 @@ public final class CidadesPovos {
         return noCirculo(c, 100, 22.5 + 45 * i);
     }
 
-    private static boolean pertoDeTorre(BlockPos c, BlockPos p, double raio) {
+    static boolean pertoDeTorre(BlockPos c, BlockPos p, double raio) {
         for (int i = 0; i < 8; i++) if (torre(c, i).distSqr(p) < raio * raio) return true;
         return false;
     }
@@ -190,12 +190,12 @@ public final class CidadesPovos {
         return Math.abs(Math.sin(a - Math.round(a / (Math.PI / 4)) * (Math.PI / 4))) * d;
     }
 
-    private static boolean pertoDaAvenida(BlockPos c, BlockPos p, double w) {
+    static boolean pertoDaAvenida(BlockPos c, BlockPos p, double w) {
         return distAvenida(p.getX() - c.getX(), p.getZ() - c.getZ()) < w;
     }
 
     /** 0 bairro, 1 avenida, 2 praça, 3 anel de rua. */
-    private static int tipo(int dx, int dz) {
+    static int tipo(int dx, int dz) {
         double d = dist(dx, dz);
         if (d <= PRACA) return 2;
         if (distAvenida(dx, dz) < 4.5) return 1;
@@ -223,7 +223,7 @@ public final class CidadesPovos {
         default int pisoAltura(ServerLevel l, int fundo, int superficie) { return fundo; }
     }
 
-    private static Estilo estilo(PlanetLore p) {
+    static Estilo estilo(PlanetLore p) {
         return switch (p) {
             case KORUGAR -> new Korugar();
             case YSMAULT -> new Ysmault();
@@ -289,7 +289,7 @@ public final class CidadesPovos {
         for (int i = 0; i < 8; i++) {
             int f = i;
             // a Bateria Central da Tropa do planeta fica no lugar do primeiro marco (a sudeste do centro, entre duas avenidas)
-            if (i == 0 && bateria != null) Obra.etapa(level, l -> pracaDaBateria(l, k, e, c, torre(c, 0), bateria));
+            if (i == 0 && bateria != null) Obra.etapa(level, l -> pracaDaBateria(k, e, c, torre(c, 0), bateria));
             else Obra.etapa(level, l -> e.torre(k, torre(c, f), f, c));
         }
         List<BlockPos> pr = predios(c);
@@ -324,13 +324,13 @@ public final class CidadesPovos {
      * A praça da Bateria Central: um largo de 40 blocos no estilo do povo, com postes em volta, e a Bateria no meio
      * (estrutura do pacote das Baterias, com a câmara virada para o norte).
      */
-    private static void pracaDaBateria(ServerLevel l, Kit k, Estilo e, BlockPos c, BlockPos p, com.lanterna.baterias.Tropa t) {
+    static void pracaDaBateria(Kit k, Estilo e, BlockPos c, BlockPos p, com.lanterna.baterias.Tropa t) {
         int r = 20;
         for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
             double d = dist(dx, dz);
             if (d > r) continue;
             BlockPos q = p.offset(dx, 0, dz);
-            for (int y = 0; y < 40; y++) if (!l.getBlockState(q.above(y)).isAir()) k.s(q.above(y), b(Blocks.AIR));
+            for (int y = 0; y < 40; y++) if (!k.get(q.above(y)).isAir()) k.s(q.above(y), b(Blocks.AIR));
             BlockState s = e.piso(dx, dz, d, Math.atan2(dz, dx), 2);
             if (s != null) k.s(q.below(), d > r - 1.2 ? e.piso(dx, dz, d, 0, 3) : s);
         }
@@ -342,14 +342,12 @@ public final class CidadesPovos {
         }
         int[] o = com.lanterna.baterias.BateriaCentralItem.origem(t);
         BlockPos nucleo = p.below(), canto = nucleo.offset(-o[0], -o[1], -o[2]);
-        l.getStructureManager().get(new net.minecraft.resources.ResourceLocation(LanternaMod.MODID, "bateria_central_" + t.nome)).ifPresentOrElse(
-                tpl -> tpl.placeInWorld(l, canto, canto, new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings(), l.random, 2),
-                () -> LanternaMod.LOGGER.warn("Lanterna: estrutura da Bateria Central {} não encontrada", t.nome));
+        k.m.molde(new net.minecraft.resources.ResourceLocation(LanternaMod.MODID, "bateria_central_" + t.nome), canto);
         LanternaMod.LOGGER.info("Lanterna: Bateria Central {} colocada em {}", t.nome, nucleo);
     }
 
     /** A direção de quem atravessa o portão (do centro para fora), arredondada para o eixo mais próximo. */
-    private static Direction radial(double ang) {
+    static Direction radial(double ang) {
         double a = Math.toRadians(ang);
         return Math.abs(Math.cos(a)) >= Math.abs(Math.sin(a)) - 1e-6 ? (Math.cos(a) > 0 ? Direction.EAST : Direction.WEST) : (Math.sin(a) > 0 ? Direction.SOUTH : Direction.NORTH);
     }
@@ -917,8 +915,8 @@ public final class CidadesPovos {
                 if (dx * dx + dz * dz > r * r) continue;
                 for (int y = 1; y < 50; y++) {
                     BlockPos q = base.offset(dx, -y, dz);
-                    var s = k.L.getBlockState(q);
-                    if (!s.isAir() && k.L.getFluidState(q).isEmpty() && !s.canBeReplaced()) break;
+                    var s = k.get(q);
+                    if (!s.isAir() && k.get(q).getFluidState().isEmpty() && !s.canBeReplaced()) break;
                     k.s(q, estaca);
                 }
             }
@@ -995,7 +993,7 @@ public final class CidadesPovos {
             estacas(k, h.below(), 6.5);
             for (int s = 1; s < 9; s++) for (int w = -1; w <= 1; w++) { // passarela até a rua
                 BlockPos q = h.relative(frente, 6 + s).relative(frente.getClockWise(), w).below();
-                if (k.L.getBlockState(q).isAir() || !k.L.getFluidState(q).isEmpty()) k.s(q, deck);
+                if (k.get(q).isAir() || !k.get(q).getFluidState().isEmpty()) k.s(q, deck);
             }
             int ri = 6;
             for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) for (int dy = 0; dy <= ri; dy++) {
@@ -1017,7 +1015,7 @@ public final class CidadesPovos {
         public void muro(Kit k, BlockPos p, int i, boolean fora) {
             k.s(p.below(), deck);
             if (fora) { k.s(p, b(Blocks.PRISMARINE_WALL)); if (i % 12 == 0) k.s(p.above(), luz); }
-            if (i % 8 == 0 && fora) for (int y = 2; y < 40; y++) { BlockPos q = p.below(y); var s = k.L.getBlockState(q); if (!s.isAir() && k.L.getFluidState(q).isEmpty()) break; k.s(q, estaca); }
+            if (i % 8 == 0 && fora) for (int y = 2; y < 40; y++) { BlockPos q = p.below(y); var s = k.get(q); if (!s.isAir() && k.get(q).getFluidState().isEmpty()) break; k.s(q, estaca); }
         }
 
         public void poste(Kit k, BlockPos p, int i) {
@@ -1161,7 +1159,7 @@ public final class CidadesPovos {
 
         public void enfeite(Kit k, BlockPos p, int dx, int dz, int t) {
             int h = (dx * 53 + dz * 29) & 63;
-            if (k.L.getBlockState(p.below()).is(Blocks.GRASS_BLOCK)) {
+            if (k.get(p.below()).is(Blocks.GRASS_BLOCK)) {
                 if (h == 0) k.s(p, b(Blocks.FLOWERING_AZALEA));
                 else if (h < 6) k.s(p, b(Blocks.GRASS));
                 else if (h == 7) k.s(p, b(Blocks.MOSS_CARPET));
@@ -1319,7 +1317,7 @@ public final class CidadesPovos {
         }
 
         public void enfeite(Kit k, BlockPos p, int dx, int dz, int t) {
-            if (!k.L.getBlockState(p.below()).is(Blocks.GRASS_BLOCK) || ((dx * 7 + dz * 11) & 3) != 0) return;
+            if (!k.get(p.below()).is(Blocks.GRASS_BLOCK) || ((dx * 7 + dz * 11) & 3) != 0) return;
             Block fl = flores[Math.floorMod(dx * 3 + dz, flores.length)];
             if (fl == Blocks.LILAC || fl == Blocks.PEONY || fl == Blocks.ROSE_BUSH) {
                 k.s(p, fl.defaultBlockState()); k.s(p.above(), fl.defaultBlockState().setValue(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER));

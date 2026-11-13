@@ -47,6 +47,7 @@ public class LanternaMod {
         ModBlocks.BLOCKS.register(modBus);
         com.lanterna.registry.ModStructures.TYPES.register(modBus);
         com.lanterna.registry.ModStructures.PIECES.register(modBus);
+        com.lanterna.registry.ModStructures.FEATURES.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         com.lanterna.armor.ModArmorItems.register(modBus);

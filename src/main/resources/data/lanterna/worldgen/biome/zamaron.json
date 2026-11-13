@@ -59,7 +59,9 @@
     [],
     [],
     [],
-    [],
+    [
+      "lanterna:cidade_unica"
+    ],
     [],
     [
       "minecraft:ore_gravel",
@@ -102,6 +104,8 @@
       "minecraft:patch_pumpkin",
       "lanterna:cristal_devoto_jardim"
     ],
-    []
+    [
+      "lanterna:cidade_limpeza"
+    ]
   ]
 }

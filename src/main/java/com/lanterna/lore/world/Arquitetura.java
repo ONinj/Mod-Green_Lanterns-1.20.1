@@ -3,7 +3,7 @@ package com.lanterna.lore.world;
 import com.lanterna.corps.BuiltinCorps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
+import com.lanterna.cidade.Mundo;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -60,8 +60,8 @@ public final class Arquitetura {
 
     // ===================== básicos =====================
 
-    public static void set(ServerLevel l, BlockPos p, BlockState s) {
-        l.setBlock(p, s, 2);
+    public static void set(Mundo l, BlockPos p, BlockState s) {
+        l.set(p, s);
     }
 
     /** Luz de bloco inteiro (para piso e arcos): lanterna não serve, vira um bloco que brilha. */
@@ -102,7 +102,7 @@ public final class Arquitetura {
      * Coluna: base 3x3 com degraus, fuste com faixas, capitel 3x3 com laje e luz no topo, e luzes penduradas nos 4 lados.
      * @return a altura do topo (y do capitel)
      */
-    public static int coluna(ServerLevel l, BlockPos base, int altura, Estilo e) {
+    public static int coluna(Mundo l, BlockPos base, int altura, Estilo e) {
         int x = base.getX(), y = base.getY(), z = base.getZ();
         // base: bloco no meio, escadas viradas para fora em volta
         for (Direction d : Direction.Plane.HORIZONTAL) {
@@ -121,7 +121,7 @@ public final class Arquitetura {
             set(l, p, escada(e, d.getOpposite(), true));
             set(l, p.above(), laje(e, false));
             BlockPos pendura = p.relative(d);
-            if (l.getBlockState(pendura.below()).isAir()) {
+            if (l.get(pendura.below()).isAir()) {
                 set(l, pendura, Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y));
                 set(l, pendura.below(), pendurada(Blocks.LANTERN));
             }
@@ -133,7 +133,7 @@ public final class Arquitetura {
     }
 
     /** Estandarte da Tropa pendurado numa parede, virado para "frente". */
-    public static void estandarte(ServerLevel l, BlockPos p, Direction frente, DyeColor cor) {
+    public static void estandarte(Mundo l, BlockPos p, Direction frente, DyeColor cor) {
         Block b = switch (cor) {
             case LIME -> Blocks.LIME_WALL_BANNER;
             case YELLOW -> Blocks.YELLOW_WALL_BANNER;
@@ -146,11 +146,11 @@ public final class Arquitetura {
             case GREEN -> Blocks.GREEN_WALL_BANNER;
             default -> Blocks.WHITE_WALL_BANNER;
         };
-        if (l.getBlockState(p).isAir()) set(l, p, b.defaultBlockState().setValue(WallBannerBlock.FACING, frente));
+        if (l.get(p).isAir()) set(l, p, b.defaultBlockState().setValue(WallBannerBlock.FACING, frente));
     }
 
     /** Arco entre o topo de duas colunas (curva com uma faixa de luz no meio). */
-    public static void arco(ServerLevel l, BlockPos a, BlockPos b, int subida, Estilo e) {
+    public static void arco(Mundo l, BlockPos a, BlockPos b, int subida, Estilo e) {
         double dx = b.getX() - a.getX(), dz = b.getZ() - a.getZ();
         int n = (int) Math.ceil(Math.hypot(dx, dz) * 2);
         BlockPos ultimo = null;
@@ -162,18 +162,18 @@ public final class Arquitetura {
             if (p.equals(ultimo)) continue;
             ultimo = p;
             set(l, p, Math.abs(t - 0.5) < 0.04 ? luzCheia(e) : e.s(e.tijolo()));
-            if (l.getBlockState(p.below()).isAir() && Math.abs(t - 0.5) > 0.2) set(l, p.below(), laje(e, true));
+            if (l.get(p.below()).isAir() && Math.abs(t - 0.5) > 0.2) set(l, p.below(), laje(e, true));
         }
     }
 
     /** Braseiro: pedestal de muro com fogo (ou alma, no estilo da Morte). */
-    public static void braseiro(ServerLevel l, BlockPos p, Estilo e) {
+    public static void braseiro(Mundo l, BlockPos p, Estilo e) {
         set(l, p, e.s(e.muro()));
         set(l, p.above(), e.cor() == DyeColor.BLACK ? Blocks.SOUL_CAMPFIRE.defaultBlockState() : Blocks.CAMPFIRE.defaultBlockState());
     }
 
     /** Obelisco afinando para cima, com a ponta de luz. */
-    public static void obelisco(ServerLevel l, BlockPos p, int altura, Estilo e) {
+    public static void obelisco(Mundo l, BlockPos p, int altura, Estilo e) {
         for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
             boolean canto = dx != 0 && dz != 0;
             set(l, p.offset(dx, 0, dz), canto ? laje(e, false) : e.s(e.tijolo()));
@@ -188,7 +188,7 @@ public final class Arquitetura {
      * Arquibancada em volta de um círculo: degraus subindo de raioInt para fora, com 4 entradas (N, L, S, O).
      * Termina num muro baixo com luzes.
      */
-    public static void arquibancada(ServerLevel l, BlockPos c, int y, int raioInt, int degraus, Estilo e) {
+    public static void arquibancada(Mundo l, BlockPos c, int y, int raioInt, int degraus, Estilo e) {
         int ext = raioInt + degraus;
         for (int dx = -ext - 1; dx <= ext + 1; dx++) for (int dz = -ext - 1; dz <= ext + 1; dz++) {
             double r = Math.sqrt(dx * dx + dz * dz);
@@ -222,7 +222,7 @@ public final class Arquitetura {
     }
 
     /** Portão: dois pilares e uma verga com luz, atravessando a direção "d". */
-    public static void portao(ServerLevel l, BlockPos meio, Direction d, int altura, Estilo e) {
+    public static void portao(Mundo l, BlockPos meio, Direction d, int altura, Estilo e) {
         Direction lado = d.getClockWise();
         for (int s = -1; s <= 1; s += 2) {
             BlockPos p = meio.relative(lado, 3 * s);
@@ -244,7 +244,7 @@ public final class Arquitetura {
      * Piso desenhado num círculo: anéis de destaque, 8 raios, quadrantes alternados e pontos de luz embutidos.
      * Só muda o bloco do chão (y - 1).
      */
-    public static void piso(ServerLevel l, BlockPos c, int y, int raio, Estilo e) {
+    public static void piso(Mundo l, BlockPos c, int y, int raio, Estilo e) {
         for (int dx = -raio; dx <= raio; dx++) for (int dz = -raio; dz <= raio; dz++) {
             double r = Math.sqrt(dx * dx + dz * dz);
             if (r > raio + 0.5) continue;

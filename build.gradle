@@ -38,9 +38,11 @@ minecraft {
             property 'lanterna.tropas', project.findProperty('tropas') ?: 'green,red,yellow,blue,violet,indigo,orange,black,white'
             property 'lanterna.planetas', project.findProperty('planetas') ?: 'oa,korugar,ysmault,odym,okaara,nok,zamaron,ryut'
             if (project.findProperty('refazer')) property 'lanterna.refazer', 'true'
+            if (project.findProperty('cidadeUnica')) property 'lanterna.cidadeUnica', 'true'
+            if (project.findProperty('lugar')) property 'lanterna.lugar', project.findProperty('lugar')
             if (project.findProperty('forma')) property 'lanterna.forma', project.findProperty('forma')
             if (project.findProperty('dbgbroca')) property 'lanterna.dbgbroca', 'true'
-            args '--quickPlaySingleplayer', 'test', '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
+            args '--quickPlaySingleplayer', (project.findProperty('mundo') ?: 'test'), '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
         }
         server {
             workingDirectory project.file('run')
@@ -71,8 +73,17 @@ repositories {
     maven { url = 'https://maven.blamejared.com/' }
 }
 
+configurations {
+    // bibliotecas que vão dentro do .jar do mod (o Vosk: reconhecimento de fala offline)
+    embutir
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // Vosk (fala -> texto, offline). O JNA já vem com o Minecraft.
+    implementation('com.alphacephei:vosk:0.3.45') { transitive = false }
+    minecraftLibrary('com.alphacephei:vosk:0.3.45') { transitive = false }
+    embutir('com.alphacephei:vosk:0.3.45') { transitive = false }
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
     compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.5.0'
@@ -93,6 +104,9 @@ tasks.named('jar', Jar).configure {
         ])
     }
     exclude 'com/lanterna/client/devtest/**'
+    from({ configurations.embutir.collect { zipTree(it) } }) {
+        exclude 'META-INF/MANIFEST.MF', 'META-INF/*.SF', 'META-INF/*.RSA', 'META-INF/*.DSA', 'META-INF/maven/**'
+    }
     finalizedBy 'reobfJar'
 }
 

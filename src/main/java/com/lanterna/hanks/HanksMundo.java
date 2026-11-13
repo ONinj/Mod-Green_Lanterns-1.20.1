@@ -95,12 +95,14 @@ public final class HanksMundo {
             d.y = lv.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
             d.setDirty();
         });
-        // a grade em faixas (para não travar o servidor)
-        for (int x0 = -RAIO_DISTRITO; x0 <= RAIO_DISTRITO; x0 += 20) {
-            int a = x0;
-            Obra.etapa(l, lv -> grade(lv, d, a, Math.min(a + 19, RAIO_DISTRITO)));
+        // a grade em faixas (para não travar o servidor); mundos da 0.48 já nascem com a superfície mecânica
+        if (!com.lanterna.cidade.Layout.novo()) {
+            for (int x0 = -RAIO_DISTRITO; x0 <= RAIO_DISTRITO; x0 += 20) {
+                int a = x0;
+                Obra.etapa(l, lv -> grade(lv, d, a, Math.min(a + 19, RAIO_DISTRITO)));
+            }
+            Obra.etapa(l, lv -> torres(lv, d));
         }
-        Obra.etapa(l, lv -> torres(lv, d));
         Obra.etapa(l, lv -> pouso(lv, d));
         Obra.etapa(l, lv -> { for (int i = 0; i < 3; i++) nucleoBase(lv, nucleo(d, i)); });
         Obra.etapa(l, lv -> {
@@ -227,6 +229,34 @@ public final class HanksMundo {
         for (int z = cz + ArenaLendaria.RAIO; z <= -12; z++) for (int x = -2; x <= 2; x++)
             set(l, x, y - 1, z, Math.abs(x) == 2 ? luz : Blocks.POLISHED_BLACKSTONE.defaultBlockState());
         return c;
+    }
+
+    // ===================== O Núcleo: a cidade dos Lanternas Amarelos =====================
+
+    /**
+     * Quem desce ao Núcleo encontra a cidade cheia: até 14 Lanternas Amarelos andando pelas ruas (os que faltam chegam
+     * quando alguém está lá embaixo). Eles atacam quem for de uma Tropa inimiga.
+     */
+    @SubscribeEvent
+    public static void moradoresNucleo(TickEvent.PlayerTickEvent e) {
+        if (e.phase != TickEvent.Phase.END || !(e.player instanceof ServerPlayer p) || p.tickCount % 200 != 57) return;
+        if (!com.lanterna.cidade.Layout.novo() || !p.level().dimension().equals(DIM) || p.getY() > HanksGeracao.NUCLEO_Y + HanksGeracao.NUCLEO_RY) return;
+        if (p.getX() * p.getX() + p.getZ() * p.getZ() > 100 * 100) return;
+        ServerLevel l = p.serverLevel();
+        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(-100, HanksGeracao.CHAO - 4, -100, 100, HanksGeracao.NUCLEO_Y + HanksGeracao.NUCLEO_RY, 100);
+        int tem = l.getEntitiesOfClass(LanternaEntity.class, area, x -> x.getPersistentData().getBoolean("lanterna_nucleo")).size();
+        for (int tenta = 0, i = tem; i < 14 && tenta < 40; tenta++) {
+            double a = l.random.nextDouble() * Math.PI * 2, r = 22 + l.random.nextDouble() * 50;
+            BlockPos at = new BlockPos((int) (Math.cos(a) * r), HanksGeracao.CHAO, (int) (Math.sin(a) * r));
+            if (!l.isLoaded(at) || !l.getBlockState(at).isAir()) continue;
+            LanternaEntity s = LanternaEntity.lanterna(l, BuiltinCorps.YELLOW, i % 5 == 0);
+            s.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, l.random.nextFloat() * 360, 0);
+            s.getPersistentData().putBoolean("lanterna_nucleo", true);
+            s.restrictTo(new BlockPos(0, HanksGeracao.CHAO, 0), 75);
+            s.setPersistenceRequired();
+            l.addFreshEntity(s);
+            i++;
+        }
     }
 
     // ===================== Sentinelas: Hanks se defende =====================

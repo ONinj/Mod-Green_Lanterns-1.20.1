@@ -3164,6 +3164,148 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48: a cidade única de um planeta (geração, desempenho e fotos). Planeta em -Plugar=korugar. */
+    private static void sceneCidade() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        String pl = System.getProperty("lanterna.lugar", "korugar");
+        long[] t0 = {0};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            mc.options.renderDistance().set(16);
+            cmd("gamemode creative"); cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamerule doMobSpawning false");
+            glog("layout novo=" + com.lanterna.cidade.Layout.novo()); });
+        at(20, () -> { t0[0] = System.currentTimeMillis(); cmd("execute in lanterna:" + pl + " run tp @s 0 260 150 180 70"); });
+        for (int i = 0; i < 30; i++) at(20, () -> server(sp -> glog("tick medio=" + String.format("%.1f", sp.server.getAverageTickTime()) + " ms, t="
+                + (System.currentTimeMillis() - t0[0]) / 1000 + "s, chunks=" + sp.serverLevel().getChunkSource().getLoadedChunksCount())));
+        at(20, () -> server(sp -> { var p = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl));
+            glog("planta chao=" + p.y + " casas=" + p.casas.size()); }));
+        at(5, () -> server(sp -> { var y = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(sp.serverLevel(), 0.5, y + 120, 175.5, 180, 42); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }));
+        at(300, () -> shot("cidade_" + pl + "_geral"));
+        at(5, () -> server(sp -> { var y = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(sp.serverLevel(), 0.5, y + 40, 200.5, 180, 25); }));
+        at(260, () -> shot("cidade_" + pl + "_quartel"));
+        at(5, () -> server(sp -> { var y = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(sp.serverLevel(), 0.5, y + 70, 120.5, 180, 30); }));
+        at(260, () -> shot("cidade_" + pl + "_centro"));
+        at(5, () -> server(sp -> { var y = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(sp.serverLevel(), 0.5, y + 4, 150.5, 0, 5); }));
+        at(80, () -> shot("cidade_" + pl + "_bateria"));
+        at(5, () -> server(sp -> { var y = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(sp.serverLevel(), 250.5, y + 42, 48.5, 180, 48); }));
+        at(260, () -> shot("cidade_" + pl + "_arena"));
+        // dentro de uma casa
+        at(5, () -> server(sp -> { var p = com.lanterna.cidade.CidadeUnica.planta(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl));
+            var h = p.casas.get(5);
+            sp.teleportTo(sp.serverLevel(), h.getX() + 0.5, p.y + 1, h.getZ() + 0.5, 0, 20);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities();
+            int baus = 0, moveis = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(h.offset(-9, -1, -9).atY(p.y - 1), h.offset(9, 0, 9).atY(p.y + 10))) {
+                var st = sp.serverLevel().getBlockState(q);
+                if (st.is(net.minecraft.world.level.block.Blocks.CHEST) || st.is(net.minecraft.world.level.block.Blocks.BARREL)) baus++;
+                if (st.is(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE) || st.is(net.minecraft.world.level.block.Blocks.FURNACE) || st.is(net.minecraft.world.level.block.Blocks.SMOKER)) moveis++;
+            }
+            glog("casa 5 em " + h + ": baus=" + baus + " bancada/fornalha=" + moveis);
+            for (int c = 0; c < 6; c++) glog(com.lanterna.cidade.CidadeUnica.testeCasa(sp.serverLevel(), com.lanterna.lore.PlanetLore.byPlanet(pl), c)); }));
+        at(60, () -> shot("cidade_" + pl + "_casa"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(20, () -> shot("cidade_" + pl + "_casa2"));
+        at(5, () -> server(sp -> glog("moradores perto: " + sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(250)).size())));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48: a Cidade Aurora nasce com o terreno (mundo novo). */
+    private static void sceneAurora() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            mc.options.renderDistance().set(12);
+            cmd("gamemode creative"); cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamerule doMobSpawning false");
+            glog("layout novo=" + com.lanterna.cidade.Layout.novo() + " aurora=" + com.lanterna.terra.TerraSite.centro); });
+        java.util.function.BiConsumer<int[], float[]> ir = (o, r) -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro;
+            sp.teleportTo(sp.server.overworld(), c.getX() + o[0] + 0.5, c.getY() + o[1], c.getZ() + o[2] + 0.5, r[0], r[1]);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities(); });
+        at(10, () -> ir.accept(new int[]{0, 75, 95}, new float[]{180, 38}));
+        for (int i = 0; i < 8; i++) at(20, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; var l = sp.serverLevel();
+            glog("tick medio=" + String.format("%.1f", sp.server.getAverageTickTime()) + " ms dim=" + l.dimension().location() + " pos=" + sp.blockPosition()
+                    + " chunkCentro=" + (l.getChunkSource().getChunkNow(c.getX() >> 4, c.getZ() >> 4) != null) + " carregados=" + l.getChunkSource().getLoadedChunksCount()
+                    + " cliente=" + (mc.level == null ? "-" : mc.level.dimension().location() + "/" + mc.level.getChunkSource().getLoadedChunksCount())); }));
+        waitFor(() -> { var c = com.lanterna.terra.TerraSite.centro; return mc.level != null && mc.level.getChunkSource().hasChunk((c.getX() >> 4) + 4, c.getZ() >> 4); }, 20 * 60);
+        at(300, () -> shot("aurora_geral"));
+        at(5, () -> ir.accept(new int[]{0, 22, 40}, new float[]{180, 22}));
+        at(200, () -> shot("aurora_praca"));
+        at(5, () -> ir.accept(new int[]{-60, 30, 60}, new float[]{225, 25}));
+        at(200, () -> shot("aurora_bairro"));
+        at(5, () -> ir.accept(new int[]{70, 28, -60}, new float[]{45, 25}));
+        at(200, () -> shot("aurora_bairro2"));
+        at(5, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; var l = sp.server.overworld();
+            int baus = 0, moveis = 0, camas = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(c.offset(-72, -3, -72), c.offset(72, 20, 72))) {
+                var st = l.getBlockState(q);
+                if (st.is(net.minecraft.world.level.block.Blocks.CHEST) || st.is(net.minecraft.world.level.block.Blocks.BARREL)) baus++;
+                if (st.is(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE) || st.is(net.minecraft.world.level.block.Blocks.FURNACE) || st.is(net.minecraft.world.level.block.Blocks.SMOKER)) moveis++;
+                if (st.getBlock() instanceof net.minecraft.world.level.block.BedBlock) camas++;
+            }
+            glog("aurora baus=" + baus + " bancadas=" + moveis + " camas=" + camas);
+            glog("moradores: " + l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(c).inflate(80)).stream().filter(e -> e.getTags().contains("lanterna_terra") || e.hasCustomName()).map(e -> e.getName().getString()).toList()); }));
+        at(5, () -> ir.accept(new int[]{0, 2, 12}, new float[]{180, 5}));
+        at(80, () -> shot("aurora_chao"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48: Hanks — superfície mecânica, poços de energia e a cidade viva no núcleo. */
+    private static void sceneHanks() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            mc.options.renderDistance().set(12);
+            cmd("gamemode creative"); cmd("gamerule doMobSpawning false"); });
+        java.util.function.BiConsumer<int[], float[]> ir = (o, r) -> server(sp -> { var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("hanks").dimension());
+            sp.teleportTo(l, o[0] + 0.5, o[1], o[2] + 0.5, r[0], r[1]); sp.getAbilities().flying = true; sp.onUpdateAbilities(); });
+        at(10, () -> ir.accept(new int[]{0, 60, 120}, new float[]{180, 30}));
+        at(260, () -> shot("hanks_superficie"));
+        at(5, () -> ir.accept(new int[]{0, 10, 70}, new float[]{180, 20}));
+        at(200, () -> shot("hanks_poco"));
+        at(5, () -> ir.accept(new int[]{-90, 30, -40}, new float[]{240, 25}));
+        at(200, () -> shot("hanks_maquinas"));
+        at(5, () -> ir.accept(new int[]{0, com.lanterna.hanks.HanksGeracao.NUCLEO_Y + 25, 80}, new float[]{180, 18}));
+        at(260, () -> shot("hanks_nucleo"));
+        at(5, () -> ir.accept(new int[]{40, com.lanterna.hanks.HanksGeracao.NUCLEO_Y + 3, 40}, new float[]{225, 0}));
+        at(200, () -> shot("hanks_nucleo_rua"));
+        at(5, () -> server(sp -> glog("amarelos no nucleo: " + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(120))
+                .stream().filter(e -> e.getPersistentData().getBoolean("lanterna_nucleo")).count() + ", tick=" + String.format("%.1f", sp.server.getAverageTickTime()))));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48: o Vosk embutido carrega, baixa o modelo e reconhece (um .wav de teste, se existir; senão silêncio). */
+    private static void sceneVosk() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        long[] t0 = {0};
+        at(40, () -> { t0[0] = System.currentTimeMillis(); com.lanterna.client.ia.VozVosk.prepararModelo(System.getProperty("lanterna.lugar", "pt-BR")); });
+        waitFor(() -> com.lanterna.client.ia.VozVosk.pronto(System.getProperty("lanterna.lugar", "pt-BR")) || com.lanterna.client.ia.VozVosk.quebrado, 20 * 240);
+        at(10, () -> {
+            glog("vosk pronto=" + com.lanterna.client.ia.VozVosk.pronto("pt-BR") + " quebrado=" + com.lanterna.client.ia.VozVosk.quebrado
+                    + " em " + (System.currentTimeMillis() - t0[0]) / 1000 + "s");
+            try {
+                java.nio.file.Path wav = java.nio.file.Path.of(System.getProperty("lanterna.lugar", "pt").startsWith("en") ? "vosk_teste_en.wav" : "vosk_teste.wav");
+                if (!java.nio.file.Files.exists(wav)) {
+                    byte[] silencio = new byte[16000 * 2];
+                    java.util.Random r = new java.util.Random(1);
+                    for (int i = 0; i < silencio.length; i += 2) { short v = (short) (r.nextGaussian() * 30); silencio[i] = (byte) v; silencio[i + 1] = (byte) (v >> 8); }
+                    var fmt = new javax.sound.sampled.AudioFormat(16000f, 16, 1, true, false);
+                    javax.sound.sampled.AudioSystem.write(new javax.sound.sampled.AudioInputStream(new java.io.ByteArrayInputStream(silencio), fmt, silencio.length / 2),
+                            javax.sound.sampled.AudioFileFormat.Type.WAVE, wav.toFile());
+                }
+                glog("vosk ouviu: [" + com.lanterna.client.ia.VozVosk.reconhecerArquivo(wav) + "]");
+            } catch (Throwable t) { glog("vosk erro: " + t); }
+        });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void sceneBases() {
         Minecraft mc = Minecraft.getInstance();
         com.lanterna.client.ia.VozAnel.mudo = true;
@@ -5191,6 +5333,10 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("ia")) sceneIA();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
+        else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
+        else if (ENABLED && SCENE.equals("aurora")) sceneAurora();
+        else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
+        else if (ENABLED && SCENE.equals("vosk")) sceneVosk();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
         else if (ENABLED && SCENE.equals("inclina2")) sceneInclina2();

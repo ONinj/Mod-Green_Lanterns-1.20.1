@@ -82,7 +82,7 @@ public final class CidadeTropa {
         terreno(level, c, y, pal);
         ruas(level, c, y, pal);
         praca(level, c, y, pal);
-        bateria(level, c.atY(y), planet, pal);
+        bateria(new com.lanterna.cidade.Mundo.Servidor(level), c.atY(y), planet, pal);
         salao(level, c.offset(0, 0, -21).atY(y), pal);
         alojamento(level, c.offset(21, 0, 0).atY(y), pal);
         treino(level, c.offset(-21, 0, 0).atY(y), planet, pal);
@@ -108,6 +108,14 @@ public final class CidadeTropa {
 
     private static void set(ServerLevel level, BlockPos p, BlockState s) {
         level.setBlock(p, s, 2);
+    }
+
+    private static void set(com.lanterna.cidade.Mundo level, BlockPos p, BlockState s) {
+        level.set(p, s);
+    }
+
+    private static void set(com.lanterna.cidade.Mundo level, int x, int y, int z, BlockState s) {
+        level.set(new BlockPos(x, y, z), s);
     }
 
     private static void set(ServerLevel level, int x, int y, int z, BlockState s) {
@@ -177,10 +185,14 @@ public final class CidadeTropa {
 
     /** Usado pela cidade completa (0.15): só a bateria gigante, com degraus. */
     public static void bateriaCentral(ServerLevel level, BlockPos base, PlanetLore planet) {
+        bateria(new com.lanterna.cidade.Mundo.Servidor(level), base, planet, paleta(planet));
+    }
+
+    public static void bateriaCentral(com.lanterna.cidade.Mundo level, BlockPos base, PlanetLore planet) {
         bateria(level, base, planet, paleta(planet));
     }
 
-    private static void bateria(ServerLevel level, BlockPos base, PlanetLore planet, Paleta pal) {
+    private static void bateria(com.lanterna.cidade.Mundo level, BlockPos base, PlanetLore planet, Paleta pal) {
         // degraus de base
         for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
             set(level, base.offset(dx, 0, dz), Math.max(Math.abs(dx), Math.abs(dz)) == 4 ? pal.faixa : pal.parede);
@@ -200,13 +212,13 @@ public final class CidadeTropa {
         }
     }
 
-    private static void disco(ServerLevel level, BlockPos c, double r, BlockState s) {
+    private static void disco(com.lanterna.cidade.Mundo level, BlockPos c, double r, BlockState s) {
         int ri = (int) Math.ceil(r);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++)
             if (dx * dx + dz * dz <= r * r + 0.5) set(level, c.offset(dx, 0, dz), s);
     }
 
-    private static void anel(ServerLevel level, BlockPos c, double r, BlockState borda, BlockState dentro) {
+    private static void anel(com.lanterna.cidade.Mundo level, BlockPos c, double r, BlockState borda, BlockState dentro) {
         int ri = (int) Math.ceil(r);
         for (int dx = -ri; dx <= ri; dx++) for (int dz = -ri; dz <= ri; dz++) {
             double d = Math.sqrt(dx * dx + dz * dz);
@@ -216,7 +228,7 @@ public final class CidadeTropa {
     }
 
     /** Verde: lanterna de vigia (corpo de vidro com núcleo de luz, tampa e alça). */
-    private static void lanterna(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void lanterna(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         disco(level, b, 3.2, pal.faixa);
         for (int k = 1; k <= 9; k++) {
             anel(level, b.above(k), 3.2, pal.vidro, pal.nucleo);
@@ -230,7 +242,7 @@ public final class CidadeTropa {
     }
 
     /** Amarelo: torre de lâminas (torre quadrada com lâminas saindo dos lados). */
-    private static void torreLaminas(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void torreLaminas(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         for (int k = 0; k < 15; k++) {
             int r = k > 12 ? 1 : 2;
             for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
@@ -249,7 +261,7 @@ public final class CidadeTropa {
     }
 
     /** Vermelho: braseiro (pedestal e uma bacia larga em chamas). */
-    private static void braseiro(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void braseiro(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         for (int k = 0; k < 5; k++) disco(level, b.above(k), k < 1 ? 2.2 : 1.2, pal.parede);
         disco(level, b.above(5), 4.2, pal.faixa);
         for (int k = 6; k <= 7; k++) anel(level, b.above(k), 5.2, pal.parede, Blocks.NETHERRACK.defaultBlockState());
@@ -261,7 +273,7 @@ public final class CidadeTropa {
     }
 
     /** Azul: farol (torre redonda que afina, com a sala de luz no topo). */
-    private static void farol(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void farol(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         for (int k = 0; k < 16; k++) {
             double r = 4 - k * 0.14;
             anel(level, b.above(k), r, (k / 3) % 2 == 0 ? pal.parede : pal.faixa, Blocks.AIR.defaultBlockState());
@@ -273,7 +285,7 @@ public final class CidadeTropa {
     }
 
     /** Laranja: relicário (um cofre ornamentado, com âmbar brilhando nas janelas). */
-    private static void relicario(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void relicario(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         for (int k = 0; k < 7; k++) {
             for (int dx = -4; dx <= 4; dx++) for (int dz = -3; dz <= 3; dz++) {
                 boolean borda = Math.abs(dx) == 4 || Math.abs(dz) == 3;
@@ -291,7 +303,7 @@ public final class CidadeTropa {
     }
 
     /** Violeta: drusa (um aglomerado de cristais gigantes). */
-    private static void drusa(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void drusa(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         int[][] picos = {{0, 0, 16}, {3, 1, 10}, {-3, 2, 11}, {1, -3, 9}, {-2, -2, 12}, {2, 3, 7}, {-4, -1, 6}};
         for (int[] p : picos) {
             for (int k = 0; k < p[2]; k++) {
@@ -307,7 +319,7 @@ public final class CidadeTropa {
     }
 
     /** Preto: caveira (a cabeça sobre um pedestal, com os olhos acesos). */
-    private static void caveira(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void caveira(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         disco(level, b, 2.2, pal.parede);
         BlockPos c = b.above(7);
         for (int dx = -5; dx <= 5; dx++) for (int dy = -5; dy <= 5; dy++) for (int dz = -5; dz <= 5; dz++) {
@@ -329,7 +341,7 @@ public final class CidadeTropa {
     }
 
     /** Índigo (Nok): o Cajado da Compaixão gigante, com o cristal no alto. */
-    private static void cajado(ServerLevel level, BlockPos b, Paleta pal) {
+    private static void cajado(com.lanterna.cidade.Mundo level, BlockPos b, Paleta pal) {
         for (int k = 0; k < 16; k++) {
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
                 if (Math.abs(dx) + Math.abs(dz) <= 1) set(level, b.offset(dx, k, dz), k % 5 == 4 ? pal.faixa : pal.parede);

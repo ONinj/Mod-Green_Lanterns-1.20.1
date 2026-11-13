@@ -59,7 +59,9 @@
     [],
     [],
     [],
-    [],
+    [
+      "lanterna:cidade_unica"
+    ],
     [],
     [
       "minecraft:ore_gravel",
@@ -91,6 +93,8 @@
     [],
     [],
     [],
-    []
+    [
+      "lanterna:cidade_limpeza"
+    ]
   ]
 }

@@ -59,7 +59,9 @@
     [],
     [],
     [],
-    [],
+    [
+      "lanterna:cidade_unica"
+    ],
     [],
     [
       "minecraft:ore_gravel",
@@ -101,6 +103,8 @@
       "minecraft:patch_sugar_cane",
       "minecraft:patch_pumpkin"
     ],
-    []
+    [
+      "lanterna:cidade_limpeza"
+    ]
   ]
 }

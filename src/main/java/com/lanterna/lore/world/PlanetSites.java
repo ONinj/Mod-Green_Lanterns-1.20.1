@@ -46,6 +46,8 @@ public final class PlanetSites {
         PlanetLore planet = PlanetLore.byDimension(level.dimension());
         if (planet == null) return;
         LoreWorldData data = LoreWorldData.get(level.getServer());
+        // mundos da 0.48: a cidade única nasce com o terreno (CidadeUnica); nada é construído aqui
+        if (com.lanterna.cidade.Layout.novo() && planet != PlanetLore.GENESE) return;
         // Uma construção por vez (a cada segundo), para não travar o servidor
         if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220)
                 && !tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140)
@@ -330,9 +332,29 @@ public final class PlanetSites {
         }
         java.util.function.Function<String, Long> quantos = role -> level.getEntitiesOfClass(RaceEntity.class, area,
                 e -> e.isAlive() && e.role().equals(role)).stream().count();
-        java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) ->
+        boolean novo = com.lanterna.cidade.Layout.novo();
+        int yCidade = novo ? com.lanterna.cidade.CidadeUnica.planta(level, planet).y : 0;
+        java.util.function.BiFunction<Integer, Integer, Integer> chao = (x, z) -> novo ? yCidade :
                 level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.getX() + x, c.getZ() + z);
         int n = 0;
+        if (novo) {
+            // cidade única: o Guardião e o mestre (líder do povo) em volta da Bateria Central, de frente para quem chega
+            if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);
+            if (planet == PlanetLore.OA) {
+                String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
+                for (long i = quantos.apply("guardiao"); i < 3; i++, n++) {
+                    int x = -4 + (int) i * 4;
+                    npc(level, Race.GUARDIAO, new BlockPos(c.getX() + x, chao.apply(x, -12), c.getZ() - 12), "guardiao", names[(int) i]);
+                }
+                if (quantos.apply("instrutor") == 0) { npc(level, Race.VELTARI, new BlockPos(c.getX() + 7, chao.apply(7, -11), c.getZ() - 11), "instrutor", "npc.lanterna.name.oa_instrutor"); n++; }
+            } else {
+                Race race = planet == PlanetLore.RYUT ? Race.COLETOR : Race.ofPlanet(planet.planet);
+                if (race != null && quantos.apply("lider") == 0) { npc(level, race, new BlockPos(c.getX() - 5, chao.apply(-5, 12), c.getZ() + 12), "lider", "npc.lanterna.name." + planet.planet); n++; }
+                if (planet == PlanetLore.ZAMARON && quantos.apply("lider") < 2) { npc(level, Race.ZAELITH, new BlockPos(c.getX() - 7, chao.apply(-7, 12), c.getZ() + 12), "lider", "npc.lanterna.name.zamaron_par"); n++; }
+                if (quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 5, chao.apply(5, 12), c.getZ() + 12), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
+            }
+            return n;
+        }
         if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);
         if (planet == PlanetLore.OA) {
             String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
@@ -477,7 +499,7 @@ public final class PlanetSites {
         BlockState stone = planet.stoneBlock().defaultBlockState();
         Arquitetura.Estilo e = Arquitetura.estilo(planet.corps);
         platform(level, c, y, 26, stone, accent(planet), stone);
-        Arquitetura.piso(level, c, y, 19, e);
+        Arquitetura.piso(new com.lanterna.cidade.Mundo.Servidor(level), c, y, 19, e);
         BlockPos altar = new BlockPos(c.getX(), y, c.getZ());
         if (planet == PlanetLore.ODYM) {
             // Lago no meio e o altar na margem sul
@@ -493,21 +515,21 @@ public final class PlanetSites {
             // estrado do altar e 4 obeliscos
             for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++)
                 if (Math.max(Math.abs(dx), Math.abs(dz)) == 2) set(level, new BlockPos(c.getX() + dx, y, c.getZ() + dz), Arquitetura.laje(e, false));
-            for (int[] d : new int[][]{{4, 4}, {-4, 4}, {4, -4}, {-4, -4}}) Arquitetura.obelisco(level, c.offset(d[0], 0, d[1]).atY(y), 4, e);
-            for (int[] d : new int[][]{{9, 0}, {-9, 0}, {0, 9}, {0, -9}}) Arquitetura.braseiro(level, c.offset(d[0], 0, d[1]).atY(y), e);
+            for (int[] d : new int[][]{{4, 4}, {-4, 4}, {4, -4}, {-4, -4}}) Arquitetura.obelisco(new com.lanterna.cidade.Mundo.Servidor(level), c.offset(d[0], 0, d[1]).atY(y), 4, e);
+            for (int[] d : new int[][]{{9, 0}, {-9, 0}, {0, 9}, {0, -9}}) Arquitetura.braseiro(new com.lanterna.cidade.Mundo.Servidor(level), c.offset(d[0], 0, d[1]).atY(y), e);
         }
         // 8 colunas (fora dos eixos, onde ficam os portões) ligadas por arcos
         BlockPos[] topos = new BlockPos[8];
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4 + Math.PI / 8;
             int bx = c.getX() + (int) Math.round(Math.cos(a) * 17), bz = c.getZ() + (int) Math.round(Math.sin(a) * 17);
-            int topo = Arquitetura.coluna(level, new BlockPos(bx, y, bz), 9, e);
+            int topo = Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y, bz), 9, e);
             topos[i] = new BlockPos(bx, topo, bz);
             net.minecraft.core.Direction paraDentro = Arquitetura.rumo(c.getX() - bx, c.getZ() - bz);
-            Arquitetura.estandarte(level, new BlockPos(bx, y + 6, bz).relative(paraDentro), paraDentro, e.cor());
+            Arquitetura.estandarte(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y + 6, bz).relative(paraDentro), paraDentro, e.cor());
         }
-        for (int i = 0; i < 8; i++) Arquitetura.arco(level, topos[i], topos[(i + 1) % 8], 3, e);
-        Arquitetura.arquibancada(level, c, y, 21, 3, e);
+        for (int i = 0; i < 8; i++) Arquitetura.arco(new com.lanterna.cidade.Mundo.Servidor(level), topos[i], topos[(i + 1) % 8], 3, e);
+        Arquitetura.arquibancada(new com.lanterna.cidade.Mundo.Servidor(level), c, y, 21, 3, e);
         if (planet == PlanetLore.RYUT) {
             battery(level, new BlockPos(c.getX() + 12, y, c.getZ()), planet);
             battery(level, new BlockPos(c.getX() - 12, y, c.getZ()), planet);
@@ -530,7 +552,7 @@ public final class PlanetSites {
         for (int i = 0; i < 4; i++) {
             BlockPos b = cantos[i];
             for (int k = 0; k < 8; k++) if (!level.getBlockState(b.above(k)).isAir() && k > 0) set(level, b.above(k), Blocks.AIR.defaultBlockState());
-            int topo = Arquitetura.coluna(level, b, 6, e);
+            int topo = Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(level), b, 6, e);
             topos[i] = new BlockPos(b.getX(), topo, b.getZ());
         }
         // toldo: borda de lajes ligando as colunas, com estandartes
@@ -548,14 +570,14 @@ public final class PlanetSites {
         }
         for (int i = 0; i < 4; i++) {
             net.minecraft.core.Direction d = net.minecraft.core.Direction.from2DDataValue(i);
-            Arquitetura.estandarte(level, c.relative(d, 8).atY(topos[0].getY()), d, e.cor());
+            Arquitetura.estandarte(new com.lanterna.cidade.Mundo.Servidor(level), c.relative(d, 8).atY(topos[0].getY()), d, e.cor());
             // bancos virados para dentro, dos dois lados de cada lado
             for (int s = -5; s <= 5; s += 10) {
                 BlockPos banco = c.relative(d, 9).relative(d.getClockWise(), s / 2).atY(y);
                 if (level.getBlockState(banco).isAir()) set(level, banco, Arquitetura.escada(e, d, false));
             }
-            Arquitetura.braseiro(level, c.relative(d, 9).relative(d.getClockWise(), 4).atY(y), e);
-            Arquitetura.braseiro(level, c.relative(d, 9).relative(d.getCounterClockWise(), 4).atY(y), e);
+            Arquitetura.braseiro(new com.lanterna.cidade.Mundo.Servidor(level), c.relative(d, 9).relative(d.getClockWise(), 4).atY(y), e);
+            Arquitetura.braseiro(new com.lanterna.cidade.Mundo.Servidor(level), c.relative(d, 9).relative(d.getCounterClockWise(), 4).atY(y), e);
         }
     }
 
@@ -570,12 +592,12 @@ public final class PlanetSites {
             double a = i * Math.PI / 6 + Math.PI / 12;
             int bx = c.getX() + (int) Math.round(Math.cos(a) * 18), bz = c.getZ() + (int) Math.round(Math.sin(a) * 18);
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) set(level, new BlockPos(bx + dx, y - 1, bz + dz), e.s(e.polido()));
-            int topo = Arquitetura.coluna(level, new BlockPos(bx, y, bz), 10, e);
+            int topo = Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y, bz), 10, e);
             topos[i] = new BlockPos(bx, topo, bz);
             net.minecraft.core.Direction paraDentro = Arquitetura.rumo(c.getX() - bx, c.getZ() - bz);
-            Arquitetura.estandarte(level, new BlockPos(bx, y + 7, bz).relative(paraDentro), paraDentro, e.cor());
+            Arquitetura.estandarte(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y + 7, bz).relative(paraDentro), paraDentro, e.cor());
         }
-        for (int i = 0; i < 12; i++) Arquitetura.arco(level, topos[i], topos[(i + 1) % 12], 2, e);
+        for (int i = 0; i < 12; i++) Arquitetura.arco(new com.lanterna.cidade.Mundo.Servidor(level), topos[i], topos[(i + 1) % 12], 2, e);
     }
 
     /** O Altar da Vida ganha 7 colunas (uma por Tropa da fusão) e arcos de quartzo. */
@@ -591,13 +613,13 @@ public final class PlanetSites {
             Arquitetura.Estilo e = new Arquitetura.Estilo(base.cheio(), base.tijolo(), base.polido(), base.escada(), base.laje(), base.muro(),
                     accent(p).getBlock(), base.luz(), base.vidro(), Arquitetura.estilo(p.corps).cor());
             for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) set(level, new BlockPos(bx + dx, y - 1, bz + dz), Blocks.SMOOTH_QUARTZ.defaultBlockState());
-            int topo = Arquitetura.coluna(level, new BlockPos(bx, y, bz), 7, e);
+            int topo = Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y, bz), 7, e);
             topos[i] = new BlockPos(bx, topo, bz);
             net.minecraft.core.Direction paraDentro = Arquitetura.rumo(c.getX() - bx, c.getZ() - bz);
-            Arquitetura.estandarte(level, new BlockPos(bx, y + 5, bz).relative(paraDentro), paraDentro, e.cor());
+            Arquitetura.estandarte(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y + 5, bz).relative(paraDentro), paraDentro, e.cor());
         }
         Arquitetura.Estilo branco = Arquitetura.estilo(com.lanterna.corps.BuiltinCorps.WHITE);
-        for (int i = 0; i < 7; i++) Arquitetura.arco(level, topos[i], topos[(i + 1) % 7], 3, branco);
+        for (int i = 0; i < 7; i++) Arquitetura.arco(new com.lanterna.cidade.Mundo.Servidor(level), topos[i], topos[(i + 1) % 7], 3, branco);
     }
 
     // ===================== Gênese =====================
@@ -640,7 +662,7 @@ public final class PlanetSites {
             double a = i * Math.PI * 2 / 9 + r.nextDouble() * 0.2;
             int bx = c.getX() + (int) Math.round(Math.cos(a) * 11), bz = c.getZ() + (int) Math.round(Math.sin(a) * 11);
             int h = 2 + r.nextInt(7);
-            if (r.nextInt(3) == 0) Arquitetura.coluna(level, new BlockPos(bx, y, bz), h + 2, e);
+            if (r.nextInt(3) == 0) Arquitetura.coluna(new com.lanterna.cidade.Mundo.Servidor(level), new BlockPos(bx, y, bz), h + 2, e);
             else for (int k = 0; k < h; k++) set(level, new BlockPos(bx, y + k, bz), k % 3 == 1 ? e.s(e.tijolo()) : e.s(e.cheio()));
             // pedaço caído ao lado
             for (int k = 0; k < 3; k++) {
