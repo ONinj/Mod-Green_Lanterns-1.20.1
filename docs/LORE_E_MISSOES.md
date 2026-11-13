@@ -1161,3 +1161,20 @@ O uniforme do anel (padrão da Tropa, trajes A e B e de Energia) não é mais um
 - **Corações numa linha só:** a vida não empilha mais várias fileiras. Uma fileira de 10 corações troca de cor a cada 20 de vida (vermelho, laranja, amarelo, verde, ciano, azul, roxo, rosa, branco); a camada de baixo aparece por trás. No meio vai o número (vida/máxima) e a absorção aparece em dourado. Envenenado, murchando ou congelado mudam a cor. O que se perde fica um instante em branco.
 - **Nível máximo 150:** a Prova da Emoção continua no nível 50. Do 50 em diante cada nível custa 2.100 + 25 por nível. Vida extra, força dos construtos e a defesa do nível (até 60% no 150) continuam subindo. Lendários dão mais experiência: 4.000 ao derrotar, 1.200 ao vencer um duelo.
 - **Armadura do anel:** quem tem um anel ganha 20 de armadura, 12 de dureza e 40% de resistência a empurrão (como netherite completa), mesmo sem armadura; soma com qualquer armadura (o Minecraft limita em 30 de armadura e 20 de dureza).
+
+## 0.44.0 — Lendários com nomes e raças próprias
+
+Os oito Lanternas lendários agora são personagens do próprio mod, cada um o maior campeão da sua Tropa, com raça e visual novos (as arenas, os planetas, as recompensas, os duelos e o Hanks continuam iguais; o nome muda sozinho nos mundos antigos e quem já nasceu ganha o corpo novo ao carregar):
+
+| Tropa | Lendário | Raça | Planeta |
+|---|---|---|---|
+| Verde | Kael Ardent | humano | Vigília Esmeralda |
+| Amarela | Tarvok, o Ordenador | vekthar: pele cinza, crista óssea alta, olhos dourados | Hanks (cidadela) |
+| Vermelha | Grath, a Fúria Rubra | brakhul (corpo grande): pele carvão com rachaduras de fogo, chifres e presas | Fornalha Rubra |
+| Laranja | Mizzuk, o Guarda-Tesouro | gobrin (corpo pequeno): orelhas enormes, nariz comprido, olhos amarelos | Cofre Laranja |
+| Azul | Irmão Aurel | serenim: pele azul-clara, olhos brancos que brilham, barbatanas e gema na testa | Remanso Azul |
+| Índigo | Nhalé, a Silente | nhai: pele escura, tatuagens índigo que brilham, coque alto | Silêncio Índigo |
+| Violeta | Seraphine Vale | humana | Coração Violeta |
+| Negra | Malachar Dusk | humano corrompido (pele cinza, veias negras, olhos brancos que brilham) | Necrópole |
+
+As raças novas são só dos lendários: não aparecem nos NPCs comuns. A missão Amarela de Hanks agora é "A Prova de Tarvok".

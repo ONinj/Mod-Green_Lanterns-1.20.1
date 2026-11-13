@@ -26,7 +26,19 @@ public enum Especie {
     VELKOR("velkor", Corpo.GRANDE, BuiltinCorps.ORANGE, null),
     DREVAN("drevan", Corpo.PADRAO, null, Papel.PIRATA),
     BRUTOR("brutor", Corpo.GRANDE, null, Papel.PIRATA),
-    QIRI("qiri", Corpo.PEQUENO, null, Papel.MERCADOR);
+    QIRI("qiri", Corpo.PEQUENO, null, Papel.MERCADOR),
+    // Espécies dos Lanternas lendários (só eles usam; não aparecem nos sorteios)
+    HUMANO("humano", Corpo.PADRAO, null, null),
+    VEKTHAR("vekthar", Corpo.PADRAO, null, null),
+    BRAKHUL("brakhul", Corpo.GRANDE, null, null),
+    GOBRIN("gobrin", Corpo.PEQUENO, null, null),
+    SERENIM("serenim", Corpo.PADRAO, null, null),
+    NHAI("nhai", Corpo.PADRAO, null, null);
+
+    /** Espécie só dos lendários (fora dos sorteios de NPCs). */
+    public boolean lendaria() {
+        return ordinal() >= HUMANO.ordinal();
+    }
 
     public enum Corpo {
         PADRAO("padrao", 0.6f, 2.0f, 30), GRANDE("grande", 1.1f, 2.6f, 44), PEQUENO("pequeno", 0.5f, 1.3f, 22);
@@ -68,7 +80,7 @@ public enum Especie {
         List<Especie> own = new ArrayList<>();
         for (Especie e : values()) if (e.papel == papel) own.add(e);
         if (!own.isEmpty() && r.nextFloat() < 0.65f) return own.get(r.nextInt(own.size()));
-        return values()[r.nextInt(values().length)];
+        return values()[r.nextInt(HUMANO.ordinal())];
     }
 
     public enum Papel {

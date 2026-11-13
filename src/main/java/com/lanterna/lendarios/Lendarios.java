@@ -82,10 +82,9 @@ public final class Lendarios {
 
     public static LanternaEntity surgir(ServerLevel level, Lendario l, BlockPos centro) {
         LanternaEntity e = new LanternaEntity(EspeciesEntities.LANTERNA_NPC.get(), level);
-        e.setup(l.especie, l.pele, Especie.Papel.LANTERNA, l.corps, l.roupa(), true, l == Lendario.MAO_NEGRA);
+        vestir(e, l);
         e.getPersistentData().putString(TAG, l.id);
         e.getPersistentData().putLong(CASA, centro.above().asLong());
-        e.getAttribute(Attributes.MAX_HEALTH).setBaseValue(l.vida);
         e.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(l.dano);
         var armor = e.getAttribute(Attributes.ARMOR);
         if (armor != null) armor.setBaseValue(12);
@@ -106,6 +105,14 @@ public final class Lendarios {
         return e;
     }
 
+    /** Espécie, traje e atributos do lendário (também atualiza os que nasceram numa versão antiga). */
+    private static void vestir(LanternaEntity e, Lendario l) {
+        float f = e.getMaxHealth() > 0 ? e.getHealth() / e.getMaxHealth() : 1f;
+        e.setup(l.especie, l.pele, Especie.Papel.LANTERNA, l.corps, l.roupa(), true, l == Lendario.MAO_NEGRA);
+        e.getAttribute(Attributes.MAX_HEALTH).setBaseValue(l.vida);
+        e.setHealth((float) l.vida * Math.max(0.05f, f));
+    }
+
     private static Component fala(Lendario l, String chave) {
         return Component.literal("<").append(l.nome()).append("> ")
                 .append(Component.translatable("lendario.lanterna." + l.id + "." + chave)).withStyle(s -> s.withColor(l.corps.color()));
@@ -121,7 +128,15 @@ public final class Lendarios {
 
     @SubscribeEvent
     public static void entrou(EntityJoinLevelEvent e) {
-        if (!e.getLevel().isClientSide && de(e.getEntity()) != null) VIVOS.put(e.getEntity().getUUID(), (LanternaEntity) e.getEntity());
+        if (e.getLevel().isClientSide) return;
+        Lendario l = de(e.getEntity());
+        if (l == null) return;
+        LanternaEntity le = (LanternaEntity) e.getEntity();
+        VIVOS.put(le.getUUID(), le);
+        if (!l.especie.id.equals(le.getEspecie())) {
+            vestir(le, l);
+            le.setCustomName(l.nome().copy().withStyle(st -> st.withColor(l.corps.color()).withBold(true)));
+        }
     }
 
     @SubscribeEvent

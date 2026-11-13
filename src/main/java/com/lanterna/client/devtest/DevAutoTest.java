@@ -3166,13 +3166,19 @@ public final class DevAutoTest {
             for (int i = 0; i < ls.length; i++) {
                 var le = com.lanterna.lendarios.Lendarios.surgir(l, ls[i], new net.minecraft.core.BlockPos(-10 + i * 3, 199, 6));
                 le.setNoAi(true);
-                le.moveTo(-10.5 + i * 3, 200, 0.5, 180, 0);
-                le.setYHeadRot(180); le.setYBodyRot(180);
+                le.moveTo(-10.5 + i * 3, 200, 0.5, 0, 0);
+                le.setYHeadRot(0); le.setYBodyRot(0);
             }
-            sp.teleportTo(0.5, 200, 9.5);
+            sp.teleportTo(0.5, 201, 9.5);
             sp.setYRot(180); sp.setXRot(5);
         }));
-        at(60, () -> { look(180, 5); shot("retratos"); });
+        at(60, () -> { look(180, 8); shot("retratos"); });
+        for (int k = 0; k < 4; k++) {
+            double px = -9.0 + k * 6;
+            String nome = "retratos_perto" + (k + 1);
+            at(2, () -> server(sp -> sp.teleportTo(px, 199.6, 4.6)));
+            at(20, () -> { look(180, -6); shot(nome); });
+        }
         at(2, () -> server(sp -> { for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(30))) e.discard(); }));
         at(20, () -> { glog("FIM"); mc.stop(); });
     }

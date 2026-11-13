@@ -17,14 +17,14 @@ import org.jetbrains.annotations.Nullable;
  * dos planetas gerados.
  */
 public enum Lendario {
-    HAL("hal_jordan", BuiltinCorps.GREEN, Especie.ILITH, 2, Archetype.LUSH, "vigilia", 80, 900, 13),
-    LARFLEEZE("larfleeze", BuiltinCorps.ORANGE, Especie.GRUBBIX, 3, Archetype.DESERT, "tesouro", 125, 1000, 12),
-    ATROCITUS("atrocitus", BuiltinCorps.RED, Especie.GORRHAK, 2, Archetype.VOLCANIC, "fornalha", 170, 1000, 15),
-    SANTO_ANDARILHO("santo_andarilho", BuiltinCorps.BLUE, Especie.LUMIAE, 1, Archetype.OCEAN, "remanso", 215, 850, 11),
-    INDIGO_1("indigo_1", BuiltinCorps.INDIGO, Especie.TARU, 2, Archetype.CRYSTAL, "silencio", 260, 850, 12),
-    CAROL("carol_ferris", BuiltinCorps.VIOLET, Especie.SELVYN, 1, Archetype.FUNGAL, "coracao", 305, 900, 12),
-    MAO_NEGRA("mao_negra", BuiltinCorps.BLACK, Especie.ILITH, 3, Archetype.BARREN, "necropole", 350, 980, 14),
-    SINESTRO("sinestro", BuiltinCorps.YELLOW, Especie.VHORR, 1, null, "hanks", 0, 1024, 15);
+    HAL("hal_jordan", BuiltinCorps.GREEN, Especie.HUMANO, 1, Archetype.LUSH, "vigilia", 80, 900, 13),
+    LARFLEEZE("larfleeze", BuiltinCorps.ORANGE, Especie.GOBRIN, 1, Archetype.DESERT, "tesouro", 125, 1000, 12),
+    ATROCITUS("atrocitus", BuiltinCorps.RED, Especie.BRAKHUL, 1, Archetype.VOLCANIC, "fornalha", 170, 1000, 15),
+    SANTO_ANDARILHO("santo_andarilho", BuiltinCorps.BLUE, Especie.SERENIM, 1, Archetype.OCEAN, "remanso", 215, 850, 11),
+    INDIGO_1("indigo_1", BuiltinCorps.INDIGO, Especie.NHAI, 1, Archetype.CRYSTAL, "silencio", 260, 850, 12),
+    CAROL("carol_ferris", BuiltinCorps.VIOLET, Especie.HUMANO, 2, Archetype.FUNGAL, "coracao", 305, 900, 12),
+    MAO_NEGRA("mao_negra", BuiltinCorps.BLACK, Especie.HUMANO, 3, Archetype.BARREN, "necropole", 350, 980, 14),
+    SINESTRO("sinestro", BuiltinCorps.YELLOW, Especie.VEKTHAR, 1, null, "hanks", 0, 1024, 15);
 
     public final String id;
     public final BuiltinCorps corps;
