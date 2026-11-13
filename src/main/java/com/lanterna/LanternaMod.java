@@ -69,6 +69,9 @@ public class LanternaMod {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        // as missões guardam os pontos no desenho antigo dos planetas; precisam nascer antes de qualquer mundo abrir
+        // (num servidor, se nascessem depois, os marcadores ficariam nos lugares velhos)
+        event.enqueueWork(() -> com.lanterna.mission.Missions.all().size());
         event.enqueueWork(ModNetwork::register);
     }
 

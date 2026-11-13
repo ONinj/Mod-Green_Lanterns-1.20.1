@@ -3378,6 +3378,31 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.5: na cidade única, a praça da Bateria tem forja, bateria e alvos; nativos chegam; marcadores no lugar novo. */
+    private static void scenePraca() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        String pl = System.getProperty("lanterna.lugar", "zamaron");
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.hideGui = true; cmd("gamemode creative"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false"); });
+        at(20, () -> server(sp -> { var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(pl).dimension());
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            sp.teleportTo(l, 0.5, y + 14, 112.5, 0, 35); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }));
+        at(20 * 50, () -> server(sp -> { var l = sp.serverLevel(); var h = com.lanterna.lore.PlanetLore.HUB;
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            glog("forja=" + l.getBlockState(new net.minecraft.core.BlockPos(h.getX() - 13, y, h.getZ() - 2)).getBlock()
+                + " bateria=" + l.getBlockState(new net.minecraft.core.BlockPos(h.getX() - 13, y, h.getZ() + 2)).getBlock()
+                + " alvos=" + l.getEntities(com.lanterna.lore.LoreEntities.ALVO_TREINO.get(), sp.getBoundingBox().inflate(60), e -> true).size()
+                + " nativos=" + l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(300), e -> e.role().isEmpty()).size());
+            for (String id : new String[]{"inicio_" + "green" + "_1", "fonte_verde_2", "juramento_green"}) {
+                var m = com.lanterna.mission.Missions.get(id);
+                if (m != null) for (var o : m.objectives()) glog("missao " + id + " " + o.type() + " -> " + o.pos());
+            }
+        }));
+        at(20, () -> shot("praca_" + pl));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.3: /lantern choose funciona (o argumento se chama "corps"). */
     private static void sceneChoose() {
         Minecraft mc = Minecraft.getInstance();
@@ -5388,6 +5413,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("ia")) sceneIA();
         else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
         else if (ENABLED && SCENE.equals("choose")) sceneChoose();
+        else if (ENABLED && SCENE.equals("praca")) scenePraca();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();

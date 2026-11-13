@@ -99,6 +99,8 @@ public final class Layout {
         PlanetLore pl = PlanetLore.byPlanet(planeta);
         if (pl == null || pl == PlanetLore.GENESE) return p;
         if (perto(p, HUB_ANTIGO, 70)) return mover(p, HUB_ANTIGO, CIDADE_NOVA);
+        // a praça das Baterias da megacidade antiga: a Bateria Central agora fica no quartel
+        if (perto(p, com.lanterna.fonte.FonteChamado.PRACA, 30)) return CIDADE_NOVA.atY(p.getY());
         if (perto(p, ARENA_ANTIGA, 45)) return mover(p, ARENA_ANTIGA, ARENA_NOVA);
         if (perto(p, CIDADE_ANTIGA, 95)) return mover(p, CIDADE_ANTIGA, CIDADE_NOVA);
         if (perto(p, NATIVA_ANTIGA, 240)) return mover(p, NATIVA_ANTIGA, NATIVA_NOVA);

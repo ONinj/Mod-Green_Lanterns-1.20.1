@@ -250,6 +250,36 @@ public final class PlanetSites {
         return e;
     }
 
+    /**
+     * Cidade única: o que a base antiga tinha fica na praça da Bateria Central — a Forja do Espectro e a bateria da
+     * Tropa a oeste, e três alvos de treino a leste. Repõe o que faltar (vale também para mundos já criados na 0.48).
+     */
+    private static int baseNaPraca(ServerLevel level, PlanetLore planet, BlockPos c, int y) {
+        int n = 0;
+        BlockPos forja = new BlockPos(c.getX() - 13, y, c.getZ() - 2), bat = new BlockPos(c.getX() - 13, y, c.getZ() + 2);
+        if (level.isLoaded(forja) && !level.getBlockState(forja).is(LoreBlocks.FORJA.get())) {
+            set(level, forja, LoreBlocks.FORJA.get().defaultBlockState());
+            n++;
+        }
+        if (planet != PlanetLore.NOK && planet != PlanetLore.RYUT && level.isLoaded(bat)
+                && !level.getBlockState(bat).is(ModBlocks.POWER_BATTERY.get())) {
+            battery(level, bat, planet);
+            n++;
+        }
+        BlockPos alvos = new BlockPos(c.getX() + 13, y, c.getZ());
+        if (level.isLoaded(alvos)) {
+            int tem = level.getEntities(LoreEntities.ALVO_TREINO.get(), new net.minecraft.world.phys.AABB(alvos).inflate(10, 6, 10), e -> e.isAlive()).size();
+            for (int i = tem; i < 3; i++) {
+                Entity d = LoreEntities.ALVO_TREINO.get().create(level);
+                if (d == null) continue;
+                d.moveTo(alvos.getX() + 0.5, y, alvos.getZ() + (i - 1) * 4 + 0.5, 90, 0);
+                level.addFreshEntity(d);
+                n++;
+            }
+        }
+        return n;
+    }
+
     private static void dummies(ServerLevel level, BlockPos origin, int y, int z) {
         for (int i = -1; i <= 1; i++) {
             Entity d = LoreEntities.ALVO_TREINO.get().create(level);
@@ -353,6 +383,7 @@ public final class PlanetSites {
                 if (planet == PlanetLore.ZAMARON && quantos.apply("lider") < 2) { npc(level, Race.ZAELITH, new BlockPos(c.getX() - 7, chao.apply(-7, 12), c.getZ() + 12), "lider", "npc.lanterna.name.zamaron_par"); n++; }
                 if (quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 5, chao.apply(5, 12), c.getZ() + 12), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
             }
+            n += baseNaPraca(level, planet, c, yCidade);
             return n;
         }
         if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);

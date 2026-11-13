@@ -55,8 +55,11 @@ public final class Moradores {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 100 != 37) return;
         ServerLevel level = p.serverLevel();
         PlanetLore planet = PlanetLore.byDimension(level.dimension());
-        if (planet == null || planet == PlanetLore.GENESE || Obra.ocupada()) return;
+        if (planet == null || planet == PlanetLore.GENESE) return;
         LoreWorldData data = LoreWorldData.get(level.getServer());
+        // cidade única: nada é construído com o servidor ligado, então uma obra em outro lugar (a Cidade Aurora num
+        // mundo plano, por exemplo) não segura os moradores
+        if (!Layout.novo() && Obra.ocupada()) return;
         if (Layout.novo()) {
             // cidade única (0.48): tudo já nasce com o mundo; aqui só entram (e voltam) os moradores
             if (planet == PlanetLore.OA && perto(p, Palacio.CENTRO, 110)) conferir(level, "oa:palacio", () -> Palacio.censo(level));

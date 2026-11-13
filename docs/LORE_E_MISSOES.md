@@ -1342,3 +1342,15 @@ Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele enten
 - "me ajuda com a missão do juramento" acha a missão pelo nome.
 - Assuntos novos: as 9 Tropas e os minérios de cada planeta.
 - As perguntas sem resposta ficam guardadas em `config/lanterna/perguntas_sem_resposta.txt`, só no computador do jogador, para melhorar as respostas nas próximas versões.
+
+## 0.48.5 — Praça da Bateria, marcadores e moradores (cidade única)
+
+- **Praça da Bateria Central** (no quartel da Tropa) ganhou o que ficava na base antiga:
+  - a **Forja do Espectro** e a **bateria da Tropa**, a oeste da Bateria Central (Nok e Ryut não têm a bateria comum);
+  - **3 alvos de treino**, a leste.
+  
+  Tudo é reposto sozinho quando alguém chega perto, inclusive em mundos já criados na 0.48.
+- **Marcadores das missões:** num servidor, as missões nasciam depois de o mundo abrir e guardavam os pontos antigos. Agora elas nascem antes, e os pontos são traduzidos para o desenho novo. O juramento e o Chamado da Fonte apontam para a Bateria Central do quartel, não mais para a praça antiga da megacidade.
+- **Nativos nas cidades:**
+  - em servidores com distância de simulação pequena, quase nenhuma casa contava e a cidade ficava vazia; agora contam todas as casas carregadas;
+  - uma obra em andamento em outro lugar (a Cidade Aurora num mundo plano, por exemplo) não segura mais a chegada dos moradores.

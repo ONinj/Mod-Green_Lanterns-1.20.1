@@ -122,7 +122,9 @@ public final class CidadeNativa {
             casas.addAll(CidadesPovos.casasExtras(c));
         }
         List<BlockPos> carregadas = new java.util.ArrayList<>();
-        for (BlockPos h : casas) if (l.isPositionEntityTicking(h)) carregadas.add(h);
+        // casas em pedaços carregados (não só os que estão "rodando" perto do jogador: com a distância de simulação
+        // pequena dos servidores quase nenhuma casa contava e a cidade ficava vazia)
+        for (BlockPos h : casas) if (Layout.novo() ? l.isLoaded(h) : l.isPositionEntityTicking(h)) carregadas.add(h);
         if (carregadas.isEmpty()) return 0;
         if (planet == PlanetLore.NOK) quantos = Math.round(quantos * 1.6f); // Nok: cidade dos Ves'Kai mais cheia
         int meta = (int) Math.ceil(quantos * (double) carregadas.size() / casas.size());

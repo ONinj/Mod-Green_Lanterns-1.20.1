@@ -97,6 +97,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.2 ✅ (0.48.2) O anel tira dúvidas do mod: receitas de verdade de qualquer item (inclusive de outros mods), como fazer cada missão (passos, dica e onde fica) e 52 assuntos do mod (anéis de cada Tropa, rituais, recarga, construtos, naves, Fonte, chefes, lendários, Mogo, Hanks, guildas...), em português e inglês
 1.56.3 ✅ (0.48.3) /lantern choose volta a funcionar (dava "erro inesperado" por causa do nome do argumento)
 1.56.4 ✅ (0.48.4) O anel entende dúvidas escritas de qualquer jeito ("qual a receita...", "tem como eu voar?", "quem são os inimigos da tropa verde", "jade viva", "me ajuda com a missão do juramento"); 54 assuntos; guarda as perguntas sem resposta em config/lanterna/perguntas_sem_resposta.txt
+1.56.5 ✅ (0.48.5) Cidade única: Forja do Espectro, bateria da Tropa e 3 alvos de treino na praça da Bateria Central; marcadores das missões no lugar novo também em servidor; nativos chegando nas cidades em servidores (distância de simulação pequena e obras em andamento não seguram mais)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte
