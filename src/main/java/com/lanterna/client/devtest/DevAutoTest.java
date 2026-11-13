@@ -3402,11 +3402,14 @@ public final class DevAutoTest {
                 ? new String[]{"how do I craft the empty ring", "chiseled battery recipe", "how do I get the green ring", "how do I recharge",
                 "how do I do this mission", "where do I find star fragments", "how do i make a furnace", "what is the source", "how do I get a ship",
                 "how are you", "where am i", "how do I make iron ingot"}
-                : new String[]{"como faço o anel vazio", "receita da bateria cinzelada", "como consigo o anel verde", "como eu recarrego o anel",
-                "como faço essa missão", "onde acho fragmentos estelares", "como craftar uma fornalha", "o que é a fonte", "como consigo uma nave",
-                "como vai", "onde estou", "como faço lingote de ferro", "como eu faço a bateria verde", "como passo da missão o juramento",
-                "como funciona a árvore da luz", "como faço para voar", "qual a minha carga", "como chego em zamaron", "como faço uma tocha",
-                "como derrotar o chefe", "como faço a bandeira da guilda", "como eu invoco os bosses das tropas"};
+                : new String[]{"qual a receita do anel vazio", "o que eu preciso pra forjar o anel", "como que eu pego o anel verde",
+                "onde fica a cidade aurora", "pra que serve a jade viva", "como faz pra ir pro espaço", "tem como eu voar", "o que faço agora",
+                "como funciona a afinidade", "como eu subo de nível rápido", "onde eu acho minério de jade estelar", "quais são as tropas",
+                "quem são os inimigos da tropa verde", "o que é o mogo", "como mato o boss de oa", "o que dropa o vigia partido",
+                "qual tecla abre o diário", "como eu faço contratos", "como eu tiro a máscara", "como recarrego sem bateria", "como faço a nave",
+                "me ajuda com a missão do juramento", "o que fazer na fonte", "como uso construtos", "receita da bandeira da guilda",
+                "como craftar bateria vermelha", "como eu entro no palácio", "jade viva", "bateria cinzelada", "lendários",
+                "qual a minha carga", "procure perigos", "voar", "me leve para oa", "pare", "obrigado"};
         for (String f : frases) at(6, () -> { com.lanterna.client.ia.AnelIA.ouvir(f, false); glog("anel <" + f + "> -> " + com.lanterna.client.ia.AnelIA.ultimaResposta); });
         at(20, () -> { glog("FIM"); mc.stop(); });
     }

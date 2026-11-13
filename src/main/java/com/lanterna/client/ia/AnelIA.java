@@ -97,7 +97,16 @@ public final class AnelIA {
 
     // ===================== respostas =====================
 
+    private static final java.util.Set<Intencao> PODE_SER_DUVIDA = java.util.EnumSet.of(Intencao.PERIGO, Intencao.CARGA, Intencao.NIVEL,
+            Intencao.VOAR, Intencao.POUSAR, Intencao.LIGAR, Intencao.DESLIGAR, Intencao.QUEM, Intencao.JURAMENTO, Intencao.TROCA,
+            Intencao.PARAR, Intencao.ONDE, Intencao.DISTANCIA);
+
     private static Component responder(Intencao.Lida lida, String limpo, LocalPlayer p) {
+        if (PODE_SER_DUVIDA.contains(lida.intencao())) {
+            Component d = Duvidas.perguntaSobreOMod(limpo);
+            if (d == null) d = Duvidas.topicoForte(limpo); // "bateria cinzelada" sozinho não é pedir a carga
+            if (d != null) return d;
+        }
         return switch (lida.intencao()) {
             case VIAJAR -> viajar(lida.resto(), p);
             case PARAR -> {
@@ -115,7 +124,18 @@ public final class AnelIA {
                 yield nv >= Nivel.MAX ? Component.translatable("anel.ia.nivel_max", nv)
                         : Component.translatable("anel.ia.nivel", nv, Math.max(0, Nivel.total(nv + 1) - xp));
             }
-            case MISSAO -> missao();
+            case MISSAO -> {
+                // "me ajuda com a missão do juramento": a missão pelo nome; "o que fazer na fonte": o assunto
+                String assunto = Duvidas.assunto(limpo);
+                if (!assunto.isBlank()) {
+                    com.lanterna.mission.Mission m = Duvidas.missaoPeloNome(assunto);
+                    if (m != null) yield Duvidas.guia(m, p);
+                    Component d = Duvidas.perguntaSobreOMod(limpo);
+                    if (d == null) d = Duvidas.topicoForte(limpo);
+                    if (d != null) yield d;
+                }
+                yield missao();
+            }
             case ONDE -> onde(p);
             case DISTANCIA -> {
                 Destinations.Destination d = destino(lida.resto().isBlank() && ultimoDestino != null ? ultimoDestino : lida.resto(), p);
@@ -150,6 +170,7 @@ public final class AnelIA {
             case DUVIDA -> {
                 Component d = Duvidas.responder(limpo, p);
                 if (d != null) yield d;
+                Duvidas.semResposta(limpo);
                 yield Component.translatable("anel.ia.duvida.nao_sei");
             }
             case OI -> persona("oi");
@@ -161,7 +182,9 @@ public final class AnelIA {
             case INSULTO -> persona("insulto");
             case TROCA -> Component.translatable("anel.ia.troca");
             case SOBRE -> {
-                if (destino(lida.resto(), p) == null) {
+                // um planeta com história própria fica com a história; o resto, os assuntos do mod
+                Destinations.Destination dest = destino(lida.resto(), p);
+                if (dest == null || !I18n.exists("mission.lanterna.main_" + dest.id() + "_1.desc")) {
                     Component d = Duvidas.responder(limpo, p);
                     if (d != null) yield d;
                 }
@@ -171,6 +194,10 @@ public final class AnelIA {
                 // "zamaron" sozinho: entende como pedido de viagem
                 Destinations.Destination d = destino(limpo, p);
                 if (d != null && Texto.palavras(limpo).size() <= 3) yield viajar(limpo, p);
+                // qualquer outra frase: talvez seja uma dúvida escrita de outro jeito ("qual a receita...", "jade viva?")
+                Component duv = Duvidas.responder(limpo, p);
+                if (duv != null) yield duv;
+                Duvidas.semResposta(limpo);
                 yield persona("nada");
             }
         };

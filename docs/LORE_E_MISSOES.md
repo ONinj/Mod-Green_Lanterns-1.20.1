@@ -1325,3 +1325,20 @@ Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele enten
 ## 0.48.3 — /lantern choose
 
 - `/lantern choose <tropa> [jogador]` voltou a funcionar. O comando procurava o argumento com outro nome ("tropa" em vez de "corps") e dava "erro inesperado" em qualquer servidor ou mundo.
+
+## 0.48.4 — O anel entende mais perguntas
+
+- Frases que o anel não reconhecia como pedido agora também são procuradas nas dúvidas. Antes, ele respondia "Não entendi".
+- Exemplos que passaram a funcionar:
+  - "qual a receita do anel vazio", "o que eu preciso pra forjar o anel" e "onde fica a cidade aurora";
+  - "como eu subo de nível rápido", "quais são as tropas" e "o que é o mogo";
+  - só o nome do assunto, como "jade viva" ou "lendários".
+- Perguntas que antes viravam um comando agora são respondidas como pergunta:
+  - "quem são os inimigos da tropa verde" não procura mais perigos por perto;
+  - "tem como eu voar?" não sai voando;
+  - "bateria cinzelada" não mostra mais a carga.
+  
+  Pedidos sobre você mesmo continuam funcionando como antes: "qual a minha carga", "onde estou" e "voar".
+- "me ajuda com a missão do juramento" acha a missão pelo nome.
+- Assuntos novos: as 9 Tropas e os minérios de cada planeta.
+- As perguntas sem resposta ficam guardadas em `config/lanterna/perguntas_sem_resposta.txt`, só no computador do jogador, para melhorar as respostas nas próximas versões.

@@ -46,7 +46,8 @@ public final class Duvidas {
             "my", "meu", "minha", "this", "isso", "esse", "essa", "no", "na", "em", "in", "on", "at", "duvida", "tutorial", "por", "favor",
             "please", "fica", "ficam", "tem", "ter", "dar", "da", "will", "would", "you", "your", "build", "construir", "construo",
             "missao", "missoes", "mission", "missions", "quest", "passo", "passar", "completar", "completo", "terminar", "termino",
-            "complete", "finish", "pass", "beat", "objetivo", "objective", "agora", "now", "aquela", "aquele", "that"));
+            "complete", "finish", "pass", "beat", "objetivo", "objective", "agora", "now", "aquela", "aquele", "that",
+            "ajuda", "ajude", "help", "com", "with", "sobre", "about", "preciso", "need", "fazer", "faco"));
 
     /** A resposta, ou null se não achou nada que valha (aí o anel tenta do jeito antigo). */
     @Nullable
@@ -82,8 +83,40 @@ public final class Duvidas {
         return null;
     }
 
+    /**
+     * Guarda as perguntas que o anel não soube responder em config/lanterna/perguntas_sem_resposta.txt, para melhorar
+     * as respostas nas próximas versões (fica só no computador do jogador).
+     */
+    public static void semResposta(String limpo) {
+        try {
+            java.nio.file.Path f = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().resolve("lanterna").resolve("perguntas_sem_resposta.txt");
+            java.nio.file.Files.createDirectories(f.getParent());
+            if (java.nio.file.Files.exists(f) && java.nio.file.Files.size(f) > 200_000) return;
+            java.nio.file.Files.writeString(f, limpo + "\n", StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (Exception ignored) {}
+    }
+
+    private static final String[] PERGUNTA = {"como", "qual", "quais", "quem sao", "o que", "oque", "onde", "por que", "porque", "pq",
+            "pra que", "para que", "quando", "quanto", "quantos", "quantas", "tem como", "da pra", "da para", "posso", "existe", "e possivel",
+            "how", "what", "which", "where", "why", "when", "who are", "can i", "is there", "do i need"};
+
+    /**
+     * Pergunta sobre o mod que caiu num pedido de outra coisa ("quem são os inimigos da tropa verde" não é procurar
+     * perigos; "tem como eu voar?" não é para sair voando): começa como pergunta, não é sobre o próprio estado
+     * ("minha carga", "onde estou") e bate com um assunto do mod.
+     */
+    @Nullable
+    public static Component perguntaSobreOMod(String limpo) {
+        boolean pergunta = false;
+        for (String q : PERGUNTA) if (limpo.equals(q) || limpo.startsWith(q + " ")) { pergunta = true; break; }
+        if (!pergunta || Texto.tem(limpo, "minha", "meu", "meus", "minhas", "my", "estou", "estamos", "am i", "are we", "voce", "you")) return null;
+        Topico t = topico(limpo);
+        if (t == null) return null;
+        return Component.literal(VozAnel.idioma().startsWith("pt") ? t.pt() : t.en());
+    }
+
     /** Tira as palavras de pergunta e deixa só o assunto ("como eu faço a bateria verde" -> "bateria verde"). */
-    static String assunto(String limpo) {
+    public static String assunto(String limpo) {
         StringBuilder b = new StringBuilder();
         List<String> ws = new ArrayList<>(Texto.palavras(limpo));
         if (!ws.isEmpty() && (ws.get(0).equals("anel") || ws.get(0).equals("ring"))) ws.remove(0);
@@ -119,6 +152,16 @@ public final class Duvidas {
     }
 
     /** O assunto que mais bate com a pergunta (frases inteiras valem mais; palavra quase igual vale um pouco). */
+    /** Só quando a pergunta bate forte com um assunto (uma expressão inteira, como "bateria cinzelada"). */
+    @Nullable
+    public static Component topicoForte(String limpo) {
+        Topico t = topico(limpo);
+        if (t == null || ultimaNota < 2.15) return null;
+        return Component.literal(VozAnel.idioma().startsWith("pt") ? t.pt() : t.en());
+    }
+
+    private static double ultimaNota;
+
     @Nullable
     static Topico topico(String limpo) {
         Topico melhor = null;
@@ -126,11 +169,23 @@ public final class Duvidas {
         List<String> ws = Texto.palavras(limpo);
         for (Topico t : topicos()) {
             double n = 0;
+            Set<String> usadas = new HashSet<>();
+            // primeiro as chaves exatas; depois as quase iguais, só em palavras que nenhuma chave exata usou
             for (String c : t.chaves()) {
+                if (!(" " + limpo + " ").contains(" " + c + " ")) continue;
+                List<String> cw = Texto.palavras(c);
+                n += 1 + cw.size() * 0.6;
+                usadas.addAll(cw);
+            }
+            for (String c : t.chaves()) {
+                if ((" " + limpo + " ").contains(" " + c + " ")) continue;
                 int tam = Texto.palavras(c).size();
-                if ((" " + limpo + " ").contains(" " + c + " ")) n += 1 + tam * 0.6;
-                else if (tam == 1 && c.length() >= 5) {
-                    for (String w : ws) if (w.length() >= 5 && (Texto.distancia(w, c) <= 1 || mesmaRaiz(w, c))) { n += c.length() >= 6 ? 1.0 : 0.7; break; }
+                if (tam == 1 && c.length() >= 5) {
+                    for (String w : ws) if (!usadas.contains(w) && w.length() >= 5 && (Texto.distancia(w, c) <= 1 || mesmaRaiz(w, c))) {
+                        n += c.length() >= 6 ? 1.0 : 0.7;
+                        usadas.add(w);
+                        break;
+                    }
                 } else if (tam > 1 && Texto.semelhanca(limpo, c) >= 0.86) n += 0.8 + tam * 0.4;
             }
             if (n > nota) { nota = n; melhor = t; }
@@ -282,7 +337,7 @@ public final class Duvidas {
     // ===================== missões =====================
 
     @Nullable
-    static Mission missaoPeloNome(String assunto) {
+    public static Mission missaoPeloNome(String assunto) {
         if (assunto.isBlank()) return null;
         Mission melhor = null;
         double nota = 0;
@@ -301,7 +356,7 @@ public final class Duvidas {
     }
 
     /** Como fazer a missão: o que é, os passos, onde está o próximo e uma dica do tipo de objetivo. */
-    static Component guia(Mission m, LocalPlayer p) {
+    public static Component guia(Mission m, LocalPlayer p) {
         int[] prog = ClientLoreData.DATA.active().get(m.id());
         boolean ativa = prog != null;
         Objective atual = null;
