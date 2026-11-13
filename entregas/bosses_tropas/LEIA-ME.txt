@@ -1,0 +1,41 @@
+BOSSES DAS TROPAS — 8 criaturas originais do mod (GeckoLib 4, Forge 1.20.1)
+==========================================================================
+Um boss por emoção. Todos são criaturas próprias do mod (não são personagens de quadrinhos) e usam os
+emblemas das Tropas que já existem no mod.
+
+ARQUIVOS (já com o mod id "lanterna")
+  src/main/resources/assets/lanterna/geo/entity/<boss>.geo.json
+  src/main/resources/assets/lanterna/animations/entity/<boss>.animation.json
+  src/main/resources/assets/lanterna/textures/entity/<boss>.png + <boss>_glowmask.png   (512x512)
+  blockbench/bosses/<boss>.geo.json + .png    abre no Blockbench (Bedrock / GeckoLib)
+  bosses_meta.json                            escala, animações, ossos e notas de cada um
+  previas/                                    bosses_tropas.png (galeria) e uma folha por boss (frente e costas)
+  gerador/                                    bosses_tropas.py e o motor
+
+OS 8 BOSSES                                    escala   cubos  animações extras (além de misc.idle, move.walk, attack.strike, misc.death)
+  karvhul_forjador_rubro          Fúria         1.6      197    attack.smash, attack.chains, misc.rage
+     titã de forja com 4 braços: punhos de escória, ganchos em brasa nas correntes, fornalha no peito com o emblema
+  vesk_morrath_carcereiro         Medo          1.3      154    attack.grab, attack.legs, misc.phase2
+     carcereiro magro de manto rasgado, cabeça de gaiola-lanterna com chama, 4 patas de aranha nas costas, molho de chaves
+  ghormaddu_arca_viva             Avareza       1.6      133    attack.pinch, attack.coins, misc.hoard
+     caranguejo gigante com casco de tesouro (coroa, espada, taça, gemas), pinça direita enorme, 6 patas
+  seraphel_do_vitral              Esperança     1.4      124    attack.light, misc.heal, misc.vulnerable
+     monge de porcelana que flutua, asas de vitral acesas, coroa de cristais girando
+  gemeos_velados                  Compaixão     1.4      140    attack.hook, misc.share_pain, misc.split
+     dois corpos enfaixados unidos por um véu de energia, um olho aceso cada, cajado-anzol
+  calithe_rainha_do_espelho       Amor          1.4      121    attack.thrust, attack.shards, misc.reflect
+     rainha-cavaleira de armadura de cristal facetado, elmo fechado com coroa de agulhas, lança e escudo-espelho, capa
+  morthaal_coletor_de_lanternas   Morte         1.5      153    attack.reap, misc.release_souls
+     golem de ossos com galhada, alma presa na caixa torácica aberta, gadanha, lanternas de almas no cinto, almas girando
+  verdan_o_arquiteto              Vontade       1.5      120    attack.hammer, attack.build, misc.phase2
+     armadura pesada com visor de fenda, gerador nas costas, mão-martelo de construto, construtos flutuando em volta
+
+COMO USAR
+  • Renderer GeckoLib com AutoGlowingGeoLayer (glowmask) e withScale(<escala>) como nos bosses do Vazio Cromático.
+  • Translúcidos (precisam de RenderType translúcido, ex. entityTranslucent): Vesk (vidro da gaiola), Seraphel (vitral),
+    Gêmeos (véu), Calithe (escudo-espelho), Morthaal (almas e lanternas), Verdan (construtos). Karvhul e Ghor'Maddu são opacos.
+  • Frente = -z. Ossos com papel automático: body, head, arm_*, leg_*, wing (asas), sway (patas, mortalha, véu, chaves),
+    spin (coroa, almas, construtos), pulse (chama, alma), jaw (mandíbulas, pinça), float (flutuar).
+  • misc.death deita o boss (2 s). Use um controlador separado para os ataques (attack.*) e para as fases (misc.rage/phase2).
+  • Sugestões de mecânica estão nas "notes" do bosses_meta.json (ex.: Calithe devolve projéteis durante misc.reflect,
+    Seraphel só toma dano cheio em misc.vulnerable, dano num gêmeo toca misc.share_pain nos dois).

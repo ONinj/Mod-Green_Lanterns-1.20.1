@@ -1,0 +1,257 @@
+[
+ {
+  "scale": 1.6,
+  "label": "Karvhul, o Forjador Rubro (Fúria)",
+  "notes": "Titã de forja com 4 braços. attack.smash (punhos de escória no chão), attack.chains (ganchos em brasa), misc.rage (fase 2, treme e ruge). Fornalha do peito com o emblema da Fúria no glowmask.",
+  "name": "karvhul_forjador_rubro",
+  "cubes": 197,
+  "tex": 512,
+  "translucent": false,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.smash",
+   "attack.chains",
+   "misc.rage",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "head",
+   "mandibula",
+   "arm_r",
+   "braco_baixo_r",
+   "arm_l",
+   "braco_baixo_l",
+   "leg_r",
+   "leg_l"
+  ]
+ },
+ {
+  "scale": 1.3,
+  "label": "Vesk Morrath, o Carcereiro (Medo)",
+  "translucent": true,
+  "notes": "Cabeça é uma gaiola-lanterna com chama (vidro translúcido, use RenderType translúcido). 4 patas de aranha nas costas (attack.legs), garras longas (attack.grab), misc.phase2 = chama cresce.",
+  "name": "vesk_morrath_carcereiro",
+  "cubes": 154,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.grab",
+   "attack.legs",
+   "misc.phase2",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "chaves",
+   "head",
+   "chama",
+   "arm_r",
+   "arm_l",
+   "leg_r",
+   "leg_l",
+   "pata_r_1",
+   "pata_r_2",
+   "pata_l_1",
+   "pata_l_2"
+  ]
+ },
+ {
+  "scale": 1.6,
+  "label": "Ghor'Maddu, a Arca Viva (Avareza)",
+  "notes": "Casco de tesouro. attack.pinch (pinça grande), attack.coins (gira e solta um tornado de moedas), misc.hoard (engole itens do chão: aumente a escala do boss a cada item, por código).",
+  "name": "ghormaddu_arca_viva",
+  "cubes": 133,
+  "tex": 512,
+  "translucent": false,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.pinch",
+   "attack.coins",
+   "misc.hoard",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "head",
+   "olho_r",
+   "mandibula_r",
+   "olho_l",
+   "mandibula_l",
+   "arm_r",
+   "pinca_r",
+   "arm_l",
+   "pinca_l",
+   "perna_r_1",
+   "perna_r_2",
+   "perna_r_3",
+   "perna_l_1",
+   "perna_l_2",
+   "perna_l_3"
+  ]
+ },
+ {
+  "scale": 1.4,
+  "label": "Seraphel do Vitral (Esperança)",
+  "translucent": true,
+  "notes": "Flutua (sem pernas). Asas de vitral translúcidas e acesas. attack.light (raio das mãos), misc.heal (cura aliados), misc.vulnerable (asas abertas = ponto fraco, a janela de dano).",
+  "name": "seraphel_do_vitral",
+  "cubes": 124,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.light",
+   "misc.heal",
+   "misc.vulnerable",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "head",
+   "coroa",
+   "arm_r",
+   "arm_l",
+   "asa_r",
+   "asa_l"
+  ]
+ },
+ {
+  "scale": 1.4,
+  "label": "Auun e Iel, os Gêmeos Velados (Compaixão)",
+  "translucent": true,
+  "notes": "Dois corpos num só boss (ossos gemeo_r / gemeo_l). Dano em um = misc.share_pain nos dois. misc.split separa os gêmeos (fase 2; o véu estica entre eles). attack.hook = cajado-anzol puxa o jogador.",
+  "name": "gemeos_velados",
+  "cubes": 140,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.hook",
+   "misc.share_pain",
+   "misc.split",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "gemeo_r",
+   "cabeca_r",
+   "arm_r_fora",
+   "arm_r_dentro",
+   "leg_r_a",
+   "leg_r_b",
+   "gemeo_l",
+   "cabeca_l",
+   "arm_l_fora",
+   "arm_l_dentro",
+   "leg_l_a",
+   "leg_l_b",
+   "veu",
+   "cajado"
+  ]
+ },
+ {
+  "scale": 1.4,
+  "label": "Rainha Calithe do Espelho (Amor)",
+  "translucent": true,
+  "notes": "Armadura de cristal facetado, elmo fechado com coroa de agulhas, lança e escudo-espelho (translúcido). misc.reflect = postura de escudo (devolve projéteis enquanto toca), attack.thrust, attack.shards.",
+  "name": "calithe_rainha_do_espelho",
+  "cubes": 121,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.thrust",
+   "misc.reflect",
+   "attack.shards",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "capa",
+   "head",
+   "arm_r",
+   "arm_l",
+   "escudo",
+   "leg_r",
+   "leg_l"
+  ]
+ },
+ {
+  "scale": 1.5,
+  "label": "Morthaal, o Coletor de Lanternas (Morte)",
+  "translucent": true,
+  "notes": "Golem de ossos com a caixa torácica aberta e uma alma presa (pulsa). Gadanha na mão direita, lanterna apagada na esquerda, 4 lanternas de almas no cinto (balançam). attack.reap, misc.release_souls (solta as almas que giram em volta).",
+  "name": "morthaal_coletor_de_lanternas",
+  "cubes": 153,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.reap",
+   "misc.release_souls",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "alma",
+   "mortalha",
+   "head",
+   "mandibula",
+   "arm_r",
+   "arm_l",
+   "lanterna_1",
+   "lanterna_2",
+   "lanterna_3",
+   "lanterna_4",
+   "leg_r",
+   "leg_l",
+   "almas"
+  ]
+ },
+ {
+  "scale": 1.5,
+  "label": "Verdan, o Arquiteto (Vontade)",
+  "translucent": true,
+  "notes": "Armadura pesada com fenda de visor, gerador nas costas. Mão direita = martelo de construto (translúcido). attack.hammer, attack.build (o osso 'construtos' se junta à frente: use para gerar paredes/prisões), misc.phase2.",
+  "name": "verdan_o_arquiteto",
+  "cubes": 120,
+  "tex": 512,
+  "anims": [
+   "misc.idle",
+   "move.walk",
+   "attack.strike",
+   "attack.hammer",
+   "attack.build",
+   "misc.phase2",
+   "misc.death"
+  ],
+  "bones": [
+   "root",
+   "body",
+   "head",
+   "arm_r",
+   "arm_l",
+   "leg_r",
+   "leg_l",
+   "construtos"
+  ]
+ }
+]
