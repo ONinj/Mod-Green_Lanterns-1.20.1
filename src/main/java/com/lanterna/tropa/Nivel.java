@@ -37,6 +37,7 @@ import java.util.UUID;
  *  - Nível 50: começa a Prova da Emoção.
  *  - Os anéis só podem ser forjados a partir de um nível (veja {@link #nivelParaForjar}).
  */
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.lanterna.LanternaMod.MODID, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
 public final class Nivel {
     public static final int MAX = 50;
     private static final UUID VIDA = UUID.fromString("0a3f7e42-5b8c-4d1e-9f2a-6c7b8d9e0f11");
@@ -117,7 +118,7 @@ public final class Nivel {
         ModNetwork.sendTo(player, new TropaSyncPacket(amount, motivo == null ? "" : motivo.getString()));
         if (after > before) {
             player.sendSystemMessage(Component.translatable("nivel.lanterna.subiu", after).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-            player.sendSystemMessage(Component.translatable("nivel.lanterna.defesa", vidaExtra(after) / 2, fmt(armaduraExtra(after)), fmt(durezaExtra(after)),
+            player.sendSystemMessage(Component.translatable("nivel.lanterna.defesa", vidaExtra(after) / 2, Math.round(defesa(after) * 100),
                     Math.round(Math.min(0.5, (after - 1) * com.lanterna.LanternaConfig.PVP_RESISTENCIA_POR_NIVEL.get()) * 100)).withStyle(ChatFormatting.GRAY));
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.8f);
             aplicar(player);
@@ -141,12 +142,32 @@ public final class Nivel {
         return Math.round((nivel - 1) * com.lanterna.LanternaConfig.DUREZA_POR_NIVEL.get() * 2) / 2.0;
     }
 
+    /**
+     * Fração do dano que a defesa do nível tira, depois da armadura (0 a 0,35). Equivale aos pontos de armadura e
+     * dureza que o nível dava antes (no nível 50 com a config padrão: cerca de 27%).
+     */
+    public static double defesa(int nivel) {
+        return Math.min(0.35, (armaduraExtra(nivel) * 2.6 + durezaExtra(nivel) * 1.2) / 100.0);
+    }
+
+    @net.minecraftforge.eventbus.api.SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOW)
+    public static void defender(net.minecraftforge.event.entity.living.LivingDamageEvent e) {
+        if (!(e.getEntity() instanceof ServerPlayer p)) return;
+        var s = e.getSource();
+        if (s.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR) || s.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        double d = defesa(nivel(p));
+        if (d > 0) e.setAmount((float) (e.getAmount() * (1 - d)));
+    }
+
     /** Vida, armadura e dureza pelo nível (chamado ao entrar, renascer e subir de nível). */
     public static void aplicar(ServerPlayer player) {
         int n = nivel(player);
         modificar(player, Attributes.MAX_HEALTH, VIDA, "lanterna_nivel", vidaExtra(n));
-        modificar(player, Attributes.ARMOR, ARMADURA, "lanterna_nivel_armadura", armaduraExtra(n));
-        modificar(player, Attributes.ARMOR_TOUGHNESS, DUREZA, "lanterna_nivel_dureza", durezaExtra(n));
+        // A defesa do nível não entra mais como pontos de armadura: o Minecraft limita a armadura em 30 e a dureza em 20,
+        // então com armaduras fortes de outros mods (netherite encantada, MekaSuit...) o bônus do anel sumia. Agora ela
+        // reduz o dano depois da armadura (ver defesa()), somando com qualquer armadura.
+        modificar(player, Attributes.ARMOR, ARMADURA, "lanterna_nivel_armadura", 0);
+        modificar(player, Attributes.ARMOR_TOUGHNESS, DUREZA, "lanterna_nivel_dureza", 0);
         if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
     }
 

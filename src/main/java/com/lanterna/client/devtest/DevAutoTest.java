@@ -3115,6 +3115,84 @@ public final class DevAutoTest {
         at(5, () -> shot("aura_noite2"));
     }
 
+    /** Olha (servidor) de um ponto para um alvo no espaço e teleporta para lá. */
+    private static void olharDe(net.minecraft.server.level.ServerPlayer sp, net.minecraft.world.phys.Vec3 de, net.minecraft.world.phys.Vec3 alvo) {
+        net.minecraft.world.phys.Vec3 d = alvo.subtract(de);
+        float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
+        float pitch = (float) -Math.toDegrees(Math.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)));
+        sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), de.x, de.y, de.z, yaw, pitch);
+    }
+
+    private static void scenePerigos() {
+        Minecraft mc = Minecraft.getInstance();
+        net.minecraft.world.phys.Vec3[] sol = {null}, bur = {null};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamerule doMobSpawning false"); cmd("gamerule doImmediateRespawn true"); cmd("gamemode spectator"); cmd("lanterna anel green"); });
+        at(20, () -> server(sp -> {
+            glog("mogo centro=" + com.lanterna.space.SpaceBodies.byId("mogo").center() + " dist=" + (int) com.lanterna.space.SpaceBodies.byId("mogo").center().length());
+            // primeiro sol e buraco negro gerados perto da origem
+            outer:
+            for (int r = 1; r < 8; r++) for (int sx = -r; sx <= r; sx++) for (int sz = -r; sz <= r; sz++) {
+                var h = com.lanterna.space.Perigos.inSector(sx, sz);
+                if (h == null) continue;
+                if (h.tipo() == com.lanterna.space.Perigos.Tipo.SOL && sol[0] == null) { sol[0] = h.centro(); glog("sol gerado " + h); }
+                if (h.tipo() == com.lanterna.space.Perigos.Tipo.BURACO && bur[0] == null) { bur[0] = h.centro(); glog("buraco gerado " + h); }
+                if (sol[0] != null && bur[0] != null) break outer;
+            }
+            int n = 0; for (int sx = -6; sx <= 6; sx++) for (int sz = -6; sz <= 6; sz++) if (com.lanterna.space.Perigos.inSector(sx, sz) != null) n++;
+            glog("perigos em 13x13 setores=" + n);
+            var a = com.lanterna.space.Perigos.ABISMO;
+            olharDe(sp, a.centro().add(0, 60, 420), a.centro());
+        }));
+        at(80, () -> shot("perigo_abismo_longe"));
+        at(2, () -> server(sp -> { var a = com.lanterna.space.Perigos.ABISMO; olharDe(sp, a.centro().add(40, 25, 150), a.centro()); }));
+        at(20, () -> shot("perigo_abismo_perto"));
+        // Sol central
+        at(2, () -> server(sp -> { var s = com.lanterna.space.Perigos.SOL_CENTRAL; olharDe(sp, s.centro().add(-9000, -2000, -9000), s.centro()); }));
+        at(80, () -> shot("perigo_sol_longe"));
+        at(2, () -> server(sp -> { var s = com.lanterna.space.Perigos.SOL_CENTRAL; olharDe(sp, s.centro().add(-4200 * 1.45, 0, 0), s.centro().add(0, 1500, 3000)); }));
+        at(30, () -> shot("perigo_sol_perto"));
+        at(2, () -> server(sp -> { if (sol[0] != null) olharDe(sp, sol[0].add(0, 300, 3500), sol[0]); }));
+        at(80, () -> shot("perigo_sol_gerado"));
+        at(2, () -> server(sp -> { if (bur[0] != null) olharDe(sp, bur[0].add(200, 120, 500), bur[0]); }));
+        at(80, () -> shot("perigo_buraco_gerado"));
+        // um planeta gerado (textura nova com relevo)
+        at(2, () -> server(sp -> {
+            var b = com.lanterna.space.ProceduralPlanets.near(new net.minecraft.world.phys.Vec3(14000, 0, 0), 1).get(0);
+            olharDe(sp, b.center().add(0, 0, -b.radius() * 2.6), b.center());
+        }));
+        at(80, () -> shot("perigo_planeta_gerado"));
+        at(2, () -> server(sp -> { var b = com.lanterna.space.SpaceBodies.byId("korugar"); olharDe(sp, b.center().add(b.radius() * 2.2, 50, 0), b.center()); }));
+        at(60, () -> shot("perigo_korugar"));
+        at(2, () -> server(sp -> { var b = com.lanterna.space.SpaceBodies.byId("oa"); olharDe(sp, b.center().add(0, 80, b.radius() * 2.3), b.center()); }));
+        at(60, () -> shot("perigo_oa"));
+        // física: sobrevivência com o anel ligado, solto perto do Abismo (sem voar)
+        at(2, () -> { cmd("gamemode survival"); });
+        at(10, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            var a = com.lanterna.space.Perigos.ABISMO;
+            olharDe(sp, a.centro().add(0, 0, 300), a.centro());
+        }));
+        for (int i = 0; i < 12; i++) at(20, () -> server(sp -> glog("abismo d=" + (int) sp.position().distanceTo(com.lanterna.space.Perigos.ABISMO.centro()) + " hp=" + sp.getHealth() + " vivo=" + sp.isAlive())));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { glog("morreu no abismo"); mc.player.respawn(); mc.setScreen(null); } });
+        // sol: queimando a 1,4 raio
+        at(40, () -> server(sp -> {
+            sp.setHealth(sp.getMaxHealth());
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(d -> { if (!d.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            var s = com.lanterna.space.Perigos.SOL_CENTRAL;
+            olharDe(sp, s.centro().add(0, 0, -s.raio() * 1.4), s.centro());
+        }));
+        at(10, () -> shot("perigo_queimando"));
+        at(2, () -> server(sp -> glog("modo=" + sp.gameMode.getGameModeForPlayer() + " invul=" + sp.getAbilities().invulnerable + " invT=" + sp.invulnerableTime
+                + " hurt=" + sp.hurt(new net.minecraft.world.damagesource.DamageSource(sp.level().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE).getHolderOrThrow(com.lanterna.space.PerigosEspaco.SOL)), 3f)
+                + " hp=" + sp.getHealth() + " absorc=" + sp.getAbsorptionAmount() + " efeitos=" + sp.getActiveEffects())));
+        for (int i = 0; i < 8; i++) at(20, () -> server(sp -> glog("sol d/R=" + String.format("%.2f", sp.position().distanceTo(com.lanterna.space.Perigos.SOL_CENTRAL.centro()) / com.lanterna.space.Perigos.SOL_CENTRAL.raio()) + " hp=" + sp.getHealth() + " fogo=" + sp.getRemainingFireTicks() + " vivo=" + sp.isAlive())));
+        at(10, () -> server(sp -> { sp.setHealth(sp.getMaxHealth()); sp.clearFire(); var a = com.lanterna.space.Perigos.ABISMO; olharDe(sp, a.centro().add(0, 0, 110), a.centro()); }));
+        for (int i = 0; i < 6; i++) at(10, () -> server(sp -> glog("horizonte d=" + (int) sp.position().distanceTo(com.lanterna.space.Perigos.ABISMO.centro()) + " hp=" + sp.getHealth() + " vivo=" + sp.isAlive())));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void sceneMogo() {
         Minecraft mc = Minecraft.getInstance();
         int[] alvoId = {-1};
@@ -4657,6 +4735,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("energia")) sceneEnergia();
         else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
         else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
+        else if (ENABLED && SCENE.equals("perigos")) scenePerigos();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();

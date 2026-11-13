@@ -143,6 +143,11 @@ public final class ProvaFonte {
     /** O centro da prova é a frente da Bateria (lado norte da praça, onde fica a entrada). */
     private static int PRACAz() { return FonteChamado.PRACA.getZ() - 13; }
 
+    /** Onde fica a Bateria Central em relação ao centro da prova (13 blocos ao sul). */
+    private static BlockPos bateria(Estado e) {
+        return e.centro.offset(0, 0, 13);
+    }
+
     private static void forte(Mob m, double vida, double dano) {
         var hp = m.getAttribute(Attributes.MAX_HEALTH);
         if (hp != null) hp.setBaseValue(hp.getBaseValue() * vida);
@@ -152,9 +157,9 @@ public final class ProvaFonte {
     }
 
     private static void surgir(ServerLevel l, Estado e, Mob m, double raio) {
-        double a = l.random.nextDouble() * Math.PI * 2;
-        int x = (int) Math.round(e.centro.getX() + Math.cos(a) * raio), z = (int) Math.round(e.centro.getZ() + Math.sin(a) * raio);
-        int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        // em volta do centro da prova, no chão, nunca em cima da Bateria Central
+        BlockPos onde = LugarDeSurgir.achar(l, e.centro, raio * 0.8, raio, bateria(e));
+        int x = onde.getX(), y = onde.getY(), z = onde.getZ();
         m.moveTo(x + 0.5, y, z + 0.5, l.random.nextFloat() * 360, 0);
         m.finalizeSpawn(l, l.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null, null);
         m.setPersistenceRequired();
@@ -211,7 +216,11 @@ public final class ProvaFonte {
                 if (contaVivos(e) < 2 && e.mortes + contaVivos(e) < 10) {
                     Mob m = inimigo(l, true);
                     Vec3 tras = p.position().subtract(p.getLookAngle().scale(7));
-                    m.moveTo(tras.x, l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) tras.x, (int) tras.z), tras.z, 0, 0);
+                    BlockPos atras = new BlockPos((int) Math.floor(tras.x), l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(tras.x), (int) Math.floor(tras.z)), (int) Math.floor(tras.z));
+                    // atrás do jogador; se "atrás" for em cima da Bateria, em volta dele no chão
+                    if (!LugarDeSurgir.serve(l, atras, l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, e.centro.getX(), e.centro.getZ()), bateria(e)))
+                        atras = LugarDeSurgir.achar(l, p.blockPosition(), 6, 9, bateria(e));
+                    m.moveTo(atras.getX() + 0.5, atras.getY(), atras.getZ() + 0.5, 0, 0);
                     m.finalizeSpawn(l, l.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null, null);
                     m.setPersistenceRequired();
                     l.addFreshEntity(m);

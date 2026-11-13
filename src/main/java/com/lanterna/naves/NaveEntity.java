@@ -397,6 +397,9 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             chegadaTick(t);
         } else if (isControlledByLocalInstance()) {
             lerpSteps = 0;
+            // sóis e buracos negros puxam a nave de quem pilota (o servidor puxa as sem piloto)
+            if (espaco && !t.destrocos() && getControllingPassenger() instanceof Player)
+                setDeltaMovement(getDeltaMovement().add(com.lanterna.space.Perigos.puxao(position())));
             syncPacketPositionCodec(getX(), getY(), getZ());
             if (getControllingPassenger() instanceof Player) pilot(t, espaco);
             else if (!ia().isEmpty() || getControllingPassenger() != null) ai.tick(t, espaco);

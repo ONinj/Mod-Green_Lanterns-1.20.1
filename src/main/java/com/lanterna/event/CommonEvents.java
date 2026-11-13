@@ -109,6 +109,13 @@ public final class CommonEvents {
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null || !RitualEvents.canBeChosen(player, data) || data.everChosen()) return;
 
+        // o anel Verde só começa a reparar em quem já dormiu algumas noites inteiras (antes era fácil demais)
+        var raiz = player.getPersistentData();
+        if (!raiz.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) raiz.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+        var tag = raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        int noites = tag.getInt("lanterna_noites_dormidas") + 1;
+        tag.putInt("lanterna_noites_dormidas", noites);
+        if (noites < LanternaConfig.GREEN_SLEEP_MIN_NIGHTS.get()) return;
         if (player.getRandom().nextDouble() < LanternaConfig.GREEN_SLEEP_CHANCE.get()) {
             SelectionManager.startSelection(player, BuiltinCorps.GREEN.id());
         }

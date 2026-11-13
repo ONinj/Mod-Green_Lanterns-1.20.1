@@ -51,8 +51,20 @@ public final class Corrupcao {
             ceifador.sendSystemMessage(Component.translatable("morte.lanterna.ceifou", vitima.getDisplayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }
         if (d.morte() != 0 || Supremos.supremo(ring.corps()) || Nivel.nivel(vitima) < LanternaConfig.MORTE_NIVEL_MIN.get()) return;
-        double chance = negro ? LanternaConfig.MORTE_CHANCE_CEIFADOR.get() : LanternaConfig.MORTE_CHANCE.get();
-        if (vitima.getRandom().nextDouble() >= chance) return;
+        // Lanternas Negros do mod (NPCs, como os de Ryut) também ceifam: assim dá para ter o Anel Preto jogando sozinho
+        boolean negroNpc = event.getSource().getEntity() instanceof com.lanterna.especies.LanternaEntity le && le.tropa() == com.lanterna.corps.BuiltinCorps.BLACK;
+        double chance = negro || negroNpc ? LanternaConfig.MORTE_CHANCE_CEIFADOR.get() : LanternaConfig.MORTE_CHANCE.get();
+        // a Morte vai chegando perto: cada morte sem corromper soma 0,4% (até +10%)
+        var raiz = vitima.getPersistentData();
+        if (!raiz.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) raiz.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+        var tag = raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        int perto = tag.getInt("lanterna_mortes_sem_corrupcao");
+        chance += Math.min(0.10, perto * 0.004);
+        if (vitima.getRandom().nextDouble() >= chance) {
+            tag.putInt("lanterna_mortes_sem_corrupcao", perto + 1);
+            return;
+        }
+        tag.putInt("lanterna_mortes_sem_corrupcao", 0);
         d.setMorte(1);
         LanternaMod.LOGGER.info("Lanterna: o anel de {} foi corrompido pela morte", vitima.getGameProfile().getName());
     }

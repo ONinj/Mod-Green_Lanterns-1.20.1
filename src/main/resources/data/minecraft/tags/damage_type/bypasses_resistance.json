@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "lanterna:mogo"
+    "lanterna:mogo",
+    "lanterna:buraco_negro",
+    "lanterna:sol"
   ]
 }

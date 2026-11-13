@@ -46,6 +46,8 @@ public final class SegundaChance {
         if (!MogoMissoes.podePousar(p)) return;
         // morrer pelo próprio raio do Mogo não conta
         if (e.getSource().is(ChamadoMogo.DANO)) return;
+        // nem o Mogo tira ninguém de dentro de um sol ou de um buraco negro
+        if (e.getSource().is(com.lanterna.space.PerigosEspaco.SOL) || e.getSource().is(com.lanterna.space.PerigosEspaco.BURACO)) return;
         e.setCanceled(true);
         p.getPersistentData().putLong(TAG, System.currentTimeMillis());
         p.setHealth(Math.max(4, p.getMaxHealth() * 0.3f));

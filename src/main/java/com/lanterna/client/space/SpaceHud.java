@@ -41,7 +41,14 @@ public final class SpaceHud {
         list.sort(Comparator.comparingDouble(b -> b.center().distanceTo(pos) - b.radius()));
         int rows = Math.min(5, list.size());
         int x = width - W - 8, y = 8;
-        int h = 22 + rows * 12 + 16;
+        // o sol ou buraco negro mais perto (até uns 6 mil blocos da zona de perigo)
+        com.lanterna.space.Perigos.Perigo perigo = null;
+        double perigoDist = 6000;
+        for (var p : com.lanterna.space.Perigos.near(pos, 1)) {
+            double d = p.centro().distanceTo(pos) - p.raio();
+            if (d < perigoDist) { perigoDist = d; perigo = p; }
+        }
+        int h = 22 + rows * 12 + 16 + (perigo != null ? 12 : 0);
         int accent = ClientRingData.hasRing ? ClientRingData.color : 0x8AB4FF;
         Hud.panel(g, x, y, W, h, accent, 0.9f);
 
@@ -67,6 +74,19 @@ public final class SpaceHud {
             if (font.width(name) > 88) name = Hud.bold(Component.literal(font.plainSubstrByWidth(ns, 84) + "…"));
             g.drawString(font, name, x + 26, ly, i == 0 ? 0xFFFFFFFF : 0xFFD0D8DE, true);
             Hud.textRight(g, Hud.body(Component.literal(Hud.distance(dist))), x + W - 8, ly, color);
+            ly += 12;
+        }
+
+        if (perigo != null) {
+            Vec3 rel = perigo.centro().subtract(pos);
+            float diff = Mth.wrapDegrees((float) Math.toDegrees(Math.atan2(-rel.x, rel.z)) - mc.player.getYRot());
+            boolean perto = rel.length() < perigo.alcance();
+            int color = perto && (mc.player.tickCount / 6) % 2 == 0 ? 0xFFFF3020 : 0xFF000000 | perigo.cor();
+            g.drawString(font, Component.literal(Hud.arrow(diff)), x + 8, ly, color, true);
+            Component name = Hud.bold(Component.literal("☢ ").append(perigo.nomeExibido()));
+            if (font.width(name) > 100) name = Hud.bold(Component.literal(font.plainSubstrByWidth(name.getString(), 96) + "…"));
+            g.drawString(font, name, x + 19, ly, color, true);
+            Hud.textRight(g, Hud.body(Component.literal(Hud.distance(Math.max(0, perigoDist)))), x + W - 8, ly, color);
             ly += 12;
         }
 

@@ -17,7 +17,7 @@ import java.util.Set;
  * O ruído é calculado sobre a esfera, então não há emenda na textura.
  */
 public final class PlanetTextures {
-    private static final int W = 128, H = 64;
+    private static final int W = 256, H = 128;
     private static final Set<ResourceLocation> MADE = new HashSet<>();
 
     public static void ensure(SpaceBodies.Body body) {
@@ -38,7 +38,11 @@ public final class PlanetTextures {
             for (int x = 0; x < W; x++) {
                 double phi = Math.PI * 2 * (x + 0.5) / W;
                 double nx = Math.sin(theta) * Math.cos(phi), ny = Math.cos(theta), nz = Math.sin(theta) * Math.sin(phi);
-                double h = fbm(nx * scale, ny * scale, nz * scale, seed, 5);
+                double h = fbm(nx * scale, ny * scale, nz * scale, seed, 6);
+                // relevo: compara com um ponto um pouco a leste/norte (luz batendo de lado)
+                double phi2 = phi + 0.035, theta2 = theta - 0.035;
+                double h2 = fbm(Math.sin(theta2) * Math.cos(phi2) * scale, Math.cos(theta2) * scale, Math.sin(theta2) * Math.sin(phi2) * scale, seed, 6);
+                double relevo = Mth.clamp(1 + (h - h2) * 7, 0.8, 1.2);
                 int color;
                 if (h < type.sea - 0.12) color = pal[0];
                 else if (h < type.sea) color = mix(pal[0], pal[1], (h - (type.sea - 0.12)) / 0.12);
@@ -59,6 +63,7 @@ public final class PlanetTextures {
                     double cr = fbm(nx * 9, ny * 9, nz * 9, seed + 3, 2);
                     if (cr > 0.68) color = mix(color, 0x2A2A30, 0.5);
                 }
+                if (h >= type.sea) color = escurecer(color, relevo);
                 img.setPixelRGBA(x, y, 0xFF000000 | abgr(color));
             }
         }
@@ -106,6 +111,13 @@ public final class PlanetTextures {
         int g = (int) Mth.lerp(t, (a >> 8) & 0xFF, (b >> 8) & 0xFF);
         int bl = (int) Mth.lerp(t, a & 0xFF, b & 0xFF);
         return (r << 16) | (g << 8) | bl;
+    }
+
+    private static int escurecer(int c, double k) {
+        int r = Mth.clamp((int) (((c >> 16) & 0xFF) * k), 0, 255);
+        int g = Mth.clamp((int) (((c >> 8) & 0xFF) * k), 0, 255);
+        int b = Mth.clamp((int) ((c & 0xFF) * k), 0, 255);
+        return (r << 16) | (g << 8) | b;
     }
 
     private static int abgr(int rgb) {

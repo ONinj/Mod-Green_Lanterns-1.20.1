@@ -166,10 +166,9 @@ public final class BateriaEnfraquece {
             boolean capitao = a.onda == ONDAS && i == 0;
             Mob m = LanternaEntity.pirata(l, capitao);
             if (m == null) continue;
-            double ang = l.random.nextDouble() * Math.PI * 2, r = 18 + l.random.nextDouble() * 8;
-            int x = (int) Math.round(a.bateria.getX() + Math.cos(ang) * r), z = (int) Math.round(a.bateria.getZ() + Math.sin(ang) * r);
-            int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            m.moveTo(x + 0.5, y, z + 0.5, l.random.nextFloat() * 360, 0);
+            // em volta da Bateria, no chão (nunca em cima dela)
+            BlockPos onde = LugarDeSurgir.achar(l, a.bateria, 18, 26, a.bateria);
+            m.moveTo(onde.getX() + 0.5, onde.getY(), onde.getZ() + 0.5, l.random.nextFloat() * 360, 0);
             m.finalizeSpawn(l, l.getCurrentDifficultyAt(m.blockPosition()), MobSpawnType.EVENT, null, null);
             m.getPersistentData().putBoolean("lanterna_evento", true);
             l.addFreshEntity(m);

@@ -30,9 +30,12 @@ import java.util.function.Supplier;
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class MogoOrbita {
-    public static final Vec3 PADRAO = new Vec3(-4600, 350, -3800);
+    public static final Vec3 PADRAO = new Vec3(-26000, 350, -21000);
     public static final double RAIO_VOLTA = 420;
     public static final long VOLTA = 20L * 60 * 30;
+    public static final double DIST_MIN = 25000, DIST_MAX = 45000;
+    /** De quanto em quanto tempo o Mogo muda de lugar sozinho (se ninguém estiver perto dele). */
+    private static final long MUDA_A_CADA = 20L * 60 * 20;
 
     private static Vec3 servidor = PADRAO, cliente = PADRAO;
     /** Relógio do cliente (atualizado pelo cliente a cada tick). */
@@ -93,18 +96,46 @@ public final class MogoOrbita {
         mudar(p.server, p.getRandom());
     }
 
+    /** A cada 20 minutos o Mogo vai para outro canto do espaço, a não ser que alguém esteja perto dele ou nele. */
+    @SubscribeEvent
+    public static void tick(net.minecraftforge.event.TickEvent.ServerTickEvent e) {
+        if (e.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+        MinecraftServer s = e.getServer();
+        long t = s.overworld().getGameTime();
+        if (t % MUDA_A_CADA != 0) return;
+        var mogo = s.getLevel(MogoMundo.DIM);
+        if (mogo != null && !mogo.players().isEmpty()) return;
+        var space = s.getLevel(SpaceBodies.SPACE);
+        Vec3 aqui = posicao(dados(s).c, t);
+        if (space != null && space.players().stream().anyMatch(p -> p.position().distanceTo(aqui) < 4000)) return;
+        mudar(s, s.overworld().getRandom());
+    }
+
+    /** Mundos antigos: o Mogo estava perto dos planetas; na primeira vez ele já vai para longe. */
+    @SubscribeEvent
+    public static void iniciou(net.minecraftforge.event.server.ServerStartedEvent e) {
+        Dados d = dados(e.getServer());
+        if (new Vec3(d.c.x, 0, d.c.z).length() < DIST_MIN * 0.8) mudar(e.getServer(), e.getServer().overworld().getRandom());
+        servidor = d.c;
+    }
+
     /** Escolhe um ponto novo para a volta do Mogo, longe dos outros planetas, e avisa todo mundo. */
     public static void mudar(MinecraftServer s, RandomSource r) {
         Dados d = dados(s);
         Vec3 novo = d.c;
         for (int tent = 0; tent < 60; tent++) {
-            double ang = r.nextDouble() * Math.PI * 2, dist = 2600 + r.nextDouble() * 3600;
+            // bem longe de tudo: de 25 a 45 mil blocos do centro (uns 20 a 30 segundos em hiperpropulsão)
+            double ang = r.nextDouble() * Math.PI * 2, dist = DIST_MIN + r.nextDouble() * (DIST_MAX - DIST_MIN);
             Vec3 c = new Vec3(Math.cos(ang) * dist, -150 + r.nextDouble() * 650, Math.sin(ang) * dist);
             boolean ok = true;
             for (SpaceBodies.Body b : SpaceBodies.BODIES) {
                 if ("mogo".equals(b.id()) || "sun".equals(b.id())) continue;
                 if (b.center().distanceTo(c) < b.radius() + 280 + RAIO_VOLTA + 350) { ok = false; break; }
             }
+            if (ok) for (SpaceBodies.Body b : com.lanterna.space.ProceduralPlanets.near(c, 1))
+                if (b.center().distanceTo(c) < b.radius() + 280 + RAIO_VOLTA + 350) { ok = false; break; }
+            // longe dos sóis e buracos negros
+            if (ok && com.lanterna.space.Perigos.perigoso(c, RAIO_VOLTA + 900)) ok = false;
             if (ok) { novo = c; break; }
         }
         d.c = novo;

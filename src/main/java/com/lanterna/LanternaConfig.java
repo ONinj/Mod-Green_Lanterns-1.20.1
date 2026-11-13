@@ -9,6 +9,7 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec SPEC;
 
     public static final ForgeConfigSpec.DoubleValue GREEN_SLEEP_CHANCE;
+    public static final ForgeConfigSpec.IntValue GREEN_SLEEP_MIN_NIGHTS;
     public static final ForgeConfigSpec.IntValue RED_KILLS_REQUIRED;
     public static final ForgeConfigSpec.IntValue RED_WINDOW_SECONDS;
     public static final ForgeConfigSpec.IntValue SELECTION_ANIMATION_TICKS;
@@ -58,8 +59,13 @@ public final class LanternaConfig {
         b.comment("How each Corps chooses its bearer", "Como cada Tropa escolhe o seu portador").push("selecao");
 
         GREEN_SLEEP_CHANCE = b
-                .comment("Green: chance (0 to 1) of being chosen when waking up after sleeping through the night", "Verde: chance (0 a 1) de ser escolhido ao acordar depois de dormir a noite inteira")
-                .defineInRange("chance_verde_dormindo", 0.20, 0.0, 1.0);
+                .comment("Green: chance (0 to 1) of being chosen when waking up after sleeping through the night (only after the minimum nights below)",
+                        "Verde: chance (0 a 1) de ser escolhido ao acordar depois de dormir a noite inteira (só depois das noites mínimas abaixo)")
+                .defineInRange("chance_verde_por_noite", 0.06, 0.0, 1.0);
+
+        GREEN_SLEEP_MIN_NIGHTS = b
+                .comment("Green: full nights a player must sleep before the Green ring can choose them", "Verde: noites inteiras dormidas antes de o anel Verde poder escolher o jogador")
+                .defineInRange("noites_minimas_verde", 4, 0, 100);
 
         RED_KILLS_REQUIRED = b
                 .comment("Red: how many hostile mobs to kill within the time window to awaken rage", "Vermelho: quantos mobs hostis matar dentro da janela de tempo para despertar a fúria")

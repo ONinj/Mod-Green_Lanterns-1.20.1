@@ -28,6 +28,27 @@ import java.util.Map;
  */
 public final class NpcDialogs {
 
+    /**
+     * O que ainda falta para a fusão do Anel Branco, no chat: o anel e/ou a relíquia de cada planeta, e onde conseguir
+     * (o anel se forja na Bateria Central do planeta com 1 Anel Vazio, a relíquia e 4 minérios; a relíquia cai do chefe
+     * invocado no altar da arena do planeta).
+     */
+    private static void faltamNaFusao(ServerPlayer player, List<String> faltam) {
+        player.sendSystemMessage(Component.translatable("dialog.lanterna.genese.faltam").withStyle(s -> s.withColor(0xF4F4FF).withBold(true)));
+        for (String id : faltam) {
+            com.lanterna.lore.PlanetLore pl = com.lanterna.lore.PlanetLore.byPlanet(id);
+            if (pl == null) continue;
+            boolean anel = MissionManager.hasRing(player, pl.corps.id().getPath());
+            boolean reliquia = MissionManager.countItem(player, pl.dropItem()) > 0;
+            Component o = Component.literal("  • ").append(pl.planetName()).append(": ");
+            if (!anel) o = o.copy().append(Component.translatable("dialog.lanterna.genese.anel", pl.planetName()));
+            if (!anel && !reliquia) o = o.copy().append(" · ");
+            if (!reliquia) o = o.copy().append(Component.translatable("dialog.lanterna.genese.reliquia", pl.dropItem().getDescription(), pl.bossName()));
+            int cor = pl.color();
+            player.sendSystemMessage(o.copy().withStyle(s -> s.withColor(cor)));
+        }
+    }
+
     public static void open(ServerPlayer player, RaceEntity npc) {
         if (npc.role().startsWith("conselho_")) {
             com.lanterna.cidade.Palacio.conselho(player, npc);
@@ -100,6 +121,31 @@ public final class NpcDialogs {
             boolean introDone = data.completed().stream().anyMatch(k -> k.startsWith("inicio_") && k.endsWith("_4"));
             if (race == Race.GUARDIAO && introDone && !data.isActive("ryut_1") && !data.isDone("ryut_1")
                     && com.lanterna.tropa.Nivel.nivel(data.xp()) >= 32) options.add("accept:ryut_1");
+            // Caminho do Anel Branco: quem já está juntando os 7 anéis pega com QUALQUER Guardião (ou líder) a linha de um
+            // anel que ainda falta, sem depender de nível, de outra linha ativa nem do Guardião daquele planeta
+            boolean genese = data.isActive("main_genese_0") || data.isActive("main_genese_1") || data.isDone("main_genese_0");
+            if (genese && (race == Race.GUARDIAO || role.equals("lider"))) {
+                com.lanterna.lore.PlanetLore aqui = com.lanterna.lore.PlanetLore.byPlanet(planet);
+                List<String> faltam = new ArrayList<>();
+                for (com.lanterna.lore.PlanetLore pl : Missions.MAIN_ORDER) {
+                    if (!pl.fusion()) continue;
+                    boolean anel = MissionManager.hasRing(player, pl.corps.id().getPath());
+                    boolean reliquia = MissionManager.countItem(player, pl.dropItem()) > 0;
+                    if (anel && reliquia) continue;
+                    faltam.add(pl.planet);
+                    // o Guardião de Oa oferece todas; os outros, a do próprio planeta
+                    boolean oferece = race == Race.GUARDIAO && "oa".equals(planet) || pl == aqui;
+                    if (!oferece) continue;
+                    String linha = null;
+                    for (int k = 1; k <= 5 && linha == null; k++) {
+                        String id = "main_" + pl.planet + "_" + k;
+                        if (data.isActive(id)) linha = "";            // já está fazendo
+                        else if (!data.isDone(id)) linha = id;
+                    }
+                    if (linha != null && !linha.isEmpty() && !options.contains("accept:" + linha)) options.add("accept:" + linha);
+                }
+                if (!faltam.isEmpty()) faltamNaFusao(player, faltam);
+            }
             // Ordem livre: o Guardião ou o líder do planeta oferecem a linha deste planeta, se o nível deixar
             if (introDone && (race == Race.GUARDIAO || role.equals("lider"))) {
                 com.lanterna.lore.PlanetLore pl = com.lanterna.lore.PlanetLore.byPlanet(planet);

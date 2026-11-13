@@ -1220,7 +1220,7 @@
   "key.lanterna.tecnica_2": "Técnica 2",
   "key.lanterna.tecnica_3": "Técnica 3",
   "missao.lanterna.alvos_perto": "Alvos da sua missão apareceram por perto.",
-  "nivel.lanterna.defesa": "Vida +%s ❤ · Armadura +%s · Dureza +%s · Resistência contra jogadores %s%%",
+  "nivel.lanterna.defesa": "Vida +%s ❤ · Defesa do anel %s%% (soma com qualquer armadura) · Resistência contra jogadores %s%%",
   "block.lanterna.bandeira_guilda": "Bandeira da Guilda",
   "item.lanterna.bandeira_guilda.desc": "Finque num planeta gerado (sem dono) para conquistá-lo. Monta a base da guilda em volta.",
   "item.lanterna.essencia_poder": "Essência de Poder",
@@ -2697,5 +2697,18 @@
   "perfil.lanterna.mascara_usar_desc": "Tirar mostra o rosto da skin",
   "message.lanterna.troca_cara": "Eles desconfiam de você: tudo custa %s%% mais. Negociar com eles devolve o respeito.",
   "construct.lanterna.broca": "Broca",
-  "construct.lanterna.broca.desc": "Um míssil de luz com coroas dentadas girando na ponta. Vai até a parede e abre um túnel 3x3 com 2 de fundo de uma vez (nível 4: 5x5). Segure a tecla."
+  "construct.lanterna.broca.desc": "Um míssil de luz com coroas dentadas girando na ponta. Vai até a parede e abre um túnel 3x3 com 2 de fundo de uma vez (nível 4: 5x5). Segure a tecla.",
+  "dialog.lanterna.genese.faltam": "Para a fusão do Anel Branco ainda faltam:",
+  "dialog.lanterna.genese.anel": "anel (forje na Bateria Central de %s)",
+  "dialog.lanterna.genese.reliquia": "%s (cai de %s, invocado no altar da arena)",
+  "morte.lanterna.negros_ryut": "Em Ryut a Morte caça quem carrega um anel. Os Lanternas Negros se levantam do chão... e morrer para eles pode corromper o seu anel.",
+  "perfil.lanterna.defesa_nivel": "Defesa do anel",
+  "perigo.lanterna.sol": "a estrela %s",
+  "perigo.lanterna.buraco": "o buraco negro %s",
+  "perigo.lanterna.aviso": "⚠ Gravidade forte: %s está puxando você (%s blocos)",
+  "perigo.lanterna.aviso_critico": "☢ PERIGO! %s vai te engolir! Hiperpropulsão para fugir! (%s blocos)",
+  "death.attack.lanterna.sol": "%1$s chegou perto demais de um sol e virou cinza",
+  "death.attack.lanterna.sol.player": "%1$s chegou perto demais de um sol fugindo de %2$s",
+  "death.attack.lanterna.buraco_negro": "%1$s foi engolido por um buraco negro",
+  "death.attack.lanterna.buraco_negro.player": "%1$s foi engolido por um buraco negro fugindo de %2$s"
 }

@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class SpaceSkyEffects extends DimensionSpecialEffects {
     /** Distância máxima em que os corpos são desenhados (mantém tudo dentro do campo de visão da câmera). */
-    private static final double DRAW_LIMIT = 150.0;
+    static final double DRAW_LIMIT = 150.0;
     private static final int LAT = 32;
     private static final int LON = 64;
 
@@ -142,11 +142,21 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
         Vec3 cam = camera.getPosition();
         List<SpaceBodies.Body> sorted = new ArrayList<>(SpaceBodies.near(cam, 3));
         if (!com.lanterna.client.mission.ClientLoreData.geneseRevealed()) sorted.removeIf(b -> SpaceBodies.isHidden(b.id()));
-        sorted.sort(Comparator.comparingDouble((SpaceBodies.Body b) -> b.center().distanceToSqr(cam)).reversed());
+        sorted.removeIf(b -> b == SpaceBodies.SUN);   // o Sol agora é desenhado como os outros sóis (Perigos)
+        // planetas, sóis e buracos negros juntos, do mais longe para o mais perto
+        List<Object> todos = new ArrayList<>(sorted);
+        todos.addAll(com.lanterna.space.Perigos.near(cam, 3));
+        todos.sort(Comparator.comparingDouble((Object o) -> o instanceof SpaceBodies.Body b ? b.center().distanceToSqr(cam)
+                : ((com.lanterna.space.Perigos.Perigo) o).centro().distanceToSqr(cam)).reversed());
 
         Matrix4f pose = poseStack.last().pose();
         RenderSystem.enableCull();
-        for (SpaceBodies.Body body : sorted) {
+        for (Object obj : todos) {
+            if (obj instanceof com.lanterna.space.Perigos.Perigo h) {
+                PerigosRender.desenhar(pose, cam, h, time);
+                continue;
+            }
+            SpaceBodies.Body body = (SpaceBodies.Body) obj;
             Vec3 rel = body.center().subtract(cam);
             double dist = rel.length();
             if (dist <= body.radius()) continue;
@@ -254,7 +264,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
         }
     }
 
-    private static void vertex(BufferBuilder b, Matrix4f pose, Vec3 center, float radius, int lat, int lon,
+    static void vertex(BufferBuilder b, Matrix4f pose, Vec3 center, float radius, int lat, int lon,
                                int latN, int lonN, Vec3 sunDir, boolean isSun, float spin) {
         float theta = (float) Math.PI * lat / latN;           // 0 = polo norte
         float phi = (float) Math.PI * 2 * lon / lonN;
@@ -275,7 +285,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
                 .endVertex();
     }
 
-    private static void drawAtmosphere(Matrix4f pose, Vec3 center, float radius, int color, float strength) {
+    static void drawAtmosphere(Matrix4f pose, Vec3 center, float radius, int color, float strength) {
         float r = ((color >> 16) & 0xFF) / 255f, g = ((color >> 8) & 0xFF) / 255f, bl = (color & 0xFF) / 255f;
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);

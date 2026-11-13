@@ -1220,7 +1220,7 @@
   "key.lanterna.tecnica_2": "Technique 2",
   "key.lanterna.tecnica_3": "Technique 3",
   "missao.lanterna.alvos_perto": "Targets for your mission showed up nearby.",
-  "nivel.lanterna.defesa": "Health +%s ❤ · Armor +%s · Toughness +%s · Resistance vs players %s%%",
+  "nivel.lanterna.defesa": "Health +%s ❤ · Ring defense %s%% (stacks with any armor) · Resistance vs players %s%%",
   "block.lanterna.bandeira_guilda": "Guild Banner",
   "item.lanterna.bandeira_guilda.desc": "Plant it on an unclaimed generated planet to conquer it. Builds the guild base around it.",
   "item.lanterna.essencia_poder": "Power Essence",
@@ -2697,5 +2697,18 @@
   "perfil.lanterna.mascara_usar_desc": "Off shows your skin's face",
   "message.lanterna.troca_cara": "They distrust you: everything costs %s%% more. Trading with them restores respect.",
   "construct.lanterna.broca": "Drill",
-  "construct.lanterna.broca.desc": "A missile of light with spinning toothed crowns at the tip. It reaches the wall and carves a 3x3 tunnel 2 deep at once (level 4: 5x5). Hold the key."
+  "construct.lanterna.broca.desc": "A missile of light with spinning toothed crowns at the tip. It reaches the wall and carves a 3x3 tunnel 2 deep at once (level 4: 5x5). Hold the key.",
+  "dialog.lanterna.genese.faltam": "For the White Ring fusion you still need:",
+  "dialog.lanterna.genese.anel": "ring (forge it at the Central Battery of %s)",
+  "dialog.lanterna.genese.reliquia": "%s (dropped by %s, summoned at the arena altar)",
+  "morte.lanterna.negros_ryut": "On Ryut, Death hunts those who carry a ring. Black Lanterns rise from the ground... and dying to them can corrupt your ring.",
+  "perfil.lanterna.defesa_nivel": "Ring defense",
+  "perigo.lanterna.sol": "the star %s",
+  "perigo.lanterna.buraco": "the black hole %s",
+  "perigo.lanterna.aviso": "⚠ Strong gravity: %s is pulling you in (%s blocks)",
+  "perigo.lanterna.aviso_critico": "☢ DANGER! %s is about to swallow you! Hyperdrive out! (%s blocks)",
+  "death.attack.lanterna.sol": "%1$s flew too close to a sun and turned to ash",
+  "death.attack.lanterna.sol.player": "%1$s flew too close to a sun while fleeing %2$s",
+  "death.attack.lanterna.buraco_negro": "%1$s was swallowed by a black hole",
+  "death.attack.lanterna.buraco_negro.player": "%1$s was swallowed by a black hole while fleeing %2$s"
 }

@@ -120,6 +120,9 @@ public final class ClientFlight {
         }
 
         if (!flying) {
+            // sem voar, no espaço: os sóis e buracos negros puxam do mesmo jeito
+            if (inSpaceNow(player) && !player.isPassenger() && !player.isSpectator())
+                player.setDeltaMovement(player.getDeltaMovement().add(com.lanterna.space.Perigos.puxao(player.position())));
             velocity = player.getDeltaMovement(); // ao ligar o voo, começa com o embalo atual
             wasFlying = false;
             dropHyper();
@@ -219,6 +222,9 @@ public final class ClientFlight {
         } else {
             v = normalPhysics(player, v, look, left, forward, strafe, up, down, boost, inSpace, maxCruise, maxBoost, auto);
         }
+
+        // Sóis e buracos negros: puxam sempre, mesmo acelerando (perto demais, nem o impulso escapa)
+        if (inSpace) v = v.add(com.lanterna.space.Perigos.puxao(player.position()));
 
         // Teto do espaço: não deixa subir para sempre
         if (inSpace && player.getY() > 1500 && v.y > 0) v = new Vec3(v.x, v.y * 0.5, v.z);
@@ -429,7 +435,7 @@ public final class ClientFlight {
 
     /** Velocidade máxima segura perto dos planetas: freia sozinho ao se aproximar. */
     private static double brakeLimit(Vec3 pos) {
-        double limit = HYPER_MAX;
+        double limit = com.lanterna.space.Perigos.limiteHiper(pos, HYPER_MAX, SPACE_BOOST * 1.4);
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
             if (!b.landable()) continue;
             double surface = pos.distanceTo(b.center()) - b.radius();
