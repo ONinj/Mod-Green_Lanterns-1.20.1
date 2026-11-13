@@ -3080,5 +3080,7 @@
   "anel.ia.voz.baixando": "◈ Downloading the ring voice (about %s MB, only this once)... Wait for the ready message.",
   "anel.ia.voz.pronto": "◈ The ring voice is ready. Hold ; and speak.",
   "anel.ia.voz.vosk_falhou": "The built-in speech recognition did not work on this computer (%s). Using the system one; you can also type \"ring, ...\" in chat.",
-  "anel.ia.voz.sem_microfone": "The ring could not open the microphone (%s)."
+  "anel.ia.voz.sem_microfone": "The ring could not open the microphone (%s).",
+  "anel.ia.voz.piper_baixando": "◈ Downloading the ring's new voice (about 90 MB, only once). Until then it uses the system voice.",
+  "anel.ia.voz.piper_pronta": "◈ The ring's new voice is ready."
 }

@@ -3080,5 +3080,7 @@
   "anel.ia.voz.baixando": "◈ Baixando a voz do anel (uns %s MB, só desta vez)... Aguarde a mensagem de pronto.",
   "anel.ia.voz.pronto": "◈ A voz do anel está pronta. Segure Ç (ou ;) e fale.",
   "anel.ia.voz.vosk_falhou": "O reconhecimento de voz embutido não funcionou neste computador (%s). Usando o do sistema; você também pode escrever \"anel, ...\" no chat.",
-  "anel.ia.voz.sem_microfone": "O anel não conseguiu abrir o microfone (%s)."
+  "anel.ia.voz.sem_microfone": "O anel não conseguiu abrir o microfone (%s).",
+  "anel.ia.voz.piper_baixando": "◈ Baixando a voz nova do anel (uns 90 MB, só desta vez). Enquanto isso ele fala com a voz do sistema.",
+  "anel.ia.voz.piper_pronta": "◈ A voz nova do anel está pronta."
 }

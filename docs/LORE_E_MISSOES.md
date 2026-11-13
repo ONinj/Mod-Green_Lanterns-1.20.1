@@ -1291,3 +1291,11 @@ pontuação). Letra errada recomeça a palavra.
   - Na primeira vez o mod baixa o modelo pequeno do idioma (português ~31 MB, inglês ~40 MB) para `config/lanterna/vosk`. Depois funciona sem internet, em Windows, Mac e Linux.
   - Se o Vosk não carregar, o reconhecedor do Windows continua como reserva.
   - O jar ficou ~26 MB maior por causa das bibliotecas nativas.
+
+## 0.48.1 — Voz do anel com som de gente
+
+- O anel agora fala com uma **voz neural** (Piper, de código aberto), bem mais natural que as vozes antigas do sistema. Roda no próprio computador e funciona sem internet.
+- Na primeira fala, o mod baixa o programa do Piper do seu sistema (~20 MB) e a voz do idioma do jogo (~63 MB) para `config/lanterna/piper`. Enquanto isso, o anel usa a voz do sistema.
+- Português: `pt_BR-faber-medium`. Inglês: `en_US-ryan-medium`. Dá para trocar em `config/lanterna-client.toml` (`voz_neural_pt`, `voz_neural_en`; outras opções: `pt_BR-cadu-medium`, `pt_BR-jeff-medium`, `en_US-lessac-medium`, `en_US-joe-medium`...).
+- Cada Tropa tem um tom: a voz fica um pouco mais grave (Vermelha, Negra, Amarela) ou mais aguda (Azul, Violeta, Branca), sem mudar a velocidade. Segue o volume geral e o de "Vozes" do jogo.
+- Se algo não funcionar neste computador, o anel volta sozinho para a voz do sistema. `voz_neural = false` desliga a voz nova.

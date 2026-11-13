@@ -3280,6 +3280,25 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48: a voz neural (Piper) baixa e gera fala. */
+    private static void scenePiper() {
+        Minecraft mc = Minecraft.getInstance();
+        String idi = System.getProperty("lanterna.lugar", "pt-BR");
+        long[] t0 = {0};
+        at(40, () -> { t0[0] = System.currentTimeMillis(); com.lanterna.client.ia.VozPiper.preparar(idi); });
+        waitFor(() -> com.lanterna.client.ia.VozPiper.pronto(idi) || com.lanterna.client.ia.VozPiper.quebrado, 20 * 400);
+        at(20, () -> {
+            glog("piper pronto=" + com.lanterna.client.ia.VozPiper.pronto(idi) + " quebrado=" + com.lanterna.client.ia.VozPiper.quebrado + " em " + (System.currentTimeMillis() - t0[0]) / 1000 + "s");
+            try {
+                long t = System.currentTimeMillis();
+                boolean ok = com.lanterna.client.ia.VozPiper.gerarArquivo(idi.startsWith("pt") ? "Eu sou o anel da Tropa dos Lanternas Verdes. Vamos para Zamaron, Lanterna."
+                        : "I am the ring of the Green Lantern Corps. Setting course for Zamaron, Lantern.", idi, java.nio.file.Path.of("piper_teste.wav"));
+                glog("piper wav ok=" + ok + " em " + (System.currentTimeMillis() - t) + " ms");
+            } catch (Exception e) { glog("piper erro " + e); }
+        });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48: o Vosk embutido carrega, baixa o modelo e reconhece (um .wav de teste, se existir; senão silêncio). */
     private static void sceneVosk() {
         Minecraft mc = Minecraft.getInstance();
@@ -5335,6 +5354,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
         else if (ENABLED && SCENE.equals("aurora")) sceneAurora();
+        else if (ENABLED && SCENE.equals("piper")) scenePiper();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("vosk")) sceneVosk();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();

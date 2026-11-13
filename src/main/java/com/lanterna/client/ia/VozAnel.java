@@ -36,7 +36,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  Fala); sem ele, usa uma lista de frases que o anel conhece (funciona offline, com o pacote de fala do idioma). Se nada
  *  disso existir, tenta o reconhecedor antigo do Windows (inglês). No Mac e no Linux, avisa para usar o chat.
  *
- *  Falar (as respostas do anel): Windows: as vozes do Windows (ex.: "Maria" em português); Mac: "say"; Linux: espeak.
+ *  Falar (as respostas do anel): voz neural do Piper ({@link VozPiper}), que soa como gente; enquanto ela baixa (ou se
+ *  não funcionar), Windows: as vozes do Windows (ex.: "Maria" em português); Mac: "say"; Linux: espeak.
  *  Cada Tropa tem um tom de voz próprio. Liga e desliga em config/lanterna-client.toml (voz_do_anel).
  *
  * O texto nunca é montado dentro de um comando: vai por variável de ambiente para o processo (sem risco de injeção).
@@ -184,11 +185,14 @@ public final class VozAnel {
         if (limpo.length() > 400) limpo = limpo.substring(0, 400);
         final String fala = limpo;
         final String idioma = idioma();
-        final String tom = tom(ClientRingData.corps.getPath());
+        final String tropa = ClientRingData.corps.getPath();
+        final String tom = tom(tropa);
         final int vel = com.lanterna.ia.ConfigCliente.VELOCIDADE.get();
         naFila++;
         FALA.submit(() -> {
             try {
+                // voz neural (com som de gente); se ainda não baixou ou não funciona aqui, a voz do sistema
+                if (VozPiper.falar(fala, idioma, tropa, vel)) return;
                 ProcessBuilder pb;
                 if (WINDOWS) {
                     pb = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
