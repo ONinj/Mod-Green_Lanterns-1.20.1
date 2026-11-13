@@ -1321,3 +1321,7 @@ Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele enten
   - juramento, Fonte, Árvore da Luz, Corações, Prova da Emoção, Porta Estelar, técnicas, palácio;
   - Mogo, Hanks, guildas, energia, comunicador, câmera, voz, comandos, Lágrimas Índigo, perfil, armadura e cidades.
 - Correção: "O Juramento do Medo" e "O Juramento do Amor" (estava "da").
+
+## 0.48.3 — /lantern choose
+
+- `/lantern choose <tropa> [jogador]` voltou a funcionar. O comando procurava o argumento com outro nome ("tropa" em vez de "corps") e dava "erro inesperado" em qualquer servidor ou mundo.

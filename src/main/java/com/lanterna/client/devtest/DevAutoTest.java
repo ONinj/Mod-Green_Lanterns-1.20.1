@@ -3378,6 +3378,17 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.3: /lantern choose funciona (o argumento se chama "corps"). */
+    private static void sceneChoose() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("lantern reset"); glog("antes: anel=" + com.lanterna.client.ClientRingData.hasRing); });
+        at(20, () -> cmd("lantern choose lanterna:red"));
+        at(20 * 25, () -> glog("depois do choose: anel=" + com.lanterna.client.ClientRingData.hasRing + " tropa=" + com.lanterna.client.ClientRingData.corps));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.2: o anel tira dúvidas (receitas, missões e assuntos do mod). -Plugar=en para inglês. */
     private static void sceneDuvidas() {
         Minecraft mc = Minecraft.getInstance();
@@ -5373,6 +5384,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("naves2")) sceneNaves2();
         else if (ENABLED && SCENE.equals("ia")) sceneIA();
         else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
+        else if (ENABLED && SCENE.equals("choose")) sceneChoose();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();

@@ -95,6 +95,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.0 ✅ (0.48.0) Cidade única em cada planeta das Tropas (gerada junto com o terreno, sem travar o mundo): quartel com Bateria Central, guardião e mestre fixos, arena na borda, casas mobiliadas e baús com itens de cada planeta; Oa com o palácio central dos Guardiões no lugar da ilha voadora; Cidade Aurora no lugar da Vila Aurora; Hanks com superfície mecânica, poços de energia e a cidade viva dos Lanternas Amarelos no núcleo; voz com Vosk embutido (Windows, Mac e Linux, sem internet depois de baixar o modelo). Precisa de mundo novo
 1.56.1 ✅ (0.48.1) Voz do anel neural (Piper), com som de gente, em português e inglês, sem internet depois de baixar (~90 MB na primeira vez); cada Tropa com um tom; volta sozinha para a voz do sistema se não funcionar
 1.56.2 ✅ (0.48.2) O anel tira dúvidas do mod: receitas de verdade de qualquer item (inclusive de outros mods), como fazer cada missão (passos, dica e onde fica) e 52 assuntos do mod (anéis de cada Tropa, rituais, recarga, construtos, naves, Fonte, chefes, lendários, Mogo, Hanks, guildas...), em português e inglês
+1.56.3 ✅ (0.48.3) /lantern choose volta a funcionar (dava "erro inesperado" por causa do nome do argumento)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

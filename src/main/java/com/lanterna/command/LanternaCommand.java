@@ -238,7 +238,7 @@ public final class LanternaCommand {
     }
 
     private static int choose(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
-        ResourceLocation corpsId = ResourceLocationArgument.getId(ctx, "tropa");
+        ResourceLocation corpsId = ResourceLocationArgument.getId(ctx, "corps");
         if (!CorpsManager.exists(corpsId)) {
             ctx.getSource().sendFailure(Component.translatable("command.lanterna.unknown_corps", corpsId.toString()));
             return 0;
