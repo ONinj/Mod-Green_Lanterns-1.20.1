@@ -37,11 +37,18 @@ public final class SpaceBodies {
         /** O Mogo anda pelo espaço (MogoOrbita); os outros corpos ficam parados. */
         @Override
         public Vec3 center() {
-            return "mogo".equals(id) ? com.lanterna.mogo.MogoOrbita.agora() : center;
+            if ("mogo".equals(id)) return com.lanterna.mogo.MogoOrbita.agora();
+            if ("hanks".equals(id)) return com.lanterna.hanks.HanksOrbita.agora();
+            return center;
+        }
+
+        /** Planeta de um Lanterna lendário (região fixa num mundo de tipo; textura própria). */
+        public boolean lendario() {
+            return id.startsWith("lend_");
         }
 
         public ResourceLocation texture() {
-            if (procedural != null) return LanternaMod.id("dynamic/planet/" + id);
+            if (procedural != null && !lendario()) return LanternaMod.id("dynamic/planet/" + id);
             return LanternaMod.id("textures/space/" + id + ".png");
         }
 
@@ -50,7 +57,7 @@ public final class SpaceBodies {
         }
 
         public Component displayName() {
-            if (procedural != null) return Component.literal(procedural.name());
+            if (procedural != null && !lendario()) return Component.literal(procedural.name());
             return Component.translatable(nameKey());
         }
     }
@@ -75,11 +82,22 @@ public final class SpaceBodies {
             new Body("genese",   new Vec3(-300, 700, 2600),   140, 0xF4FFF4, true, planet("genese"), true),
             // Mogo: o planeta que é um Lanterna Verde (o maior corpo do mapa depois do Sol)
             new Body("mogo",     new Vec3(-4600, 350, -3800), 280, 0x3CFF7A, true, planet("mogo"), true),
+            // Hanks: o planeta-máquina dos Amarelos (também anda pelo espaço; a cidadela do Sinestro)
+            new Body("hanks",    new Vec3(42000, 200, -30000), 300, 0xFFC830, true, planet("hanks"), false),
             // O Sol: só para ver (e iluminar os planetas), longe demais para alcançar
             new Body("sun",      new Vec3(30000, 9000, 20000), 4200, 0xFFF4C0, false, null, false)
     );
 
     public static final Body SUN = BODIES.get(BODIES.size() - 1);
+
+    /** Planetas fixos + os dos Lanternas lendários. */
+    public static final List<Body> TODOS = juntar();
+
+    private static List<Body> juntar() {
+        List<Body> l = new ArrayList<>(BODIES);
+        l.addAll(com.lanterna.lendarios.PlanetasLendarios.CORPOS);
+        return List.copyOf(l);
+    }
 
     /** Corpo que só aparece para quem já revelou (Gênese). */
     public static boolean isHidden(String id) {
@@ -93,7 +111,7 @@ public final class SpaceBodies {
 
     /** Corpos fixos + planetas gerados em volta da posição (raio em setores de 8.000 blocos). */
     public static List<Body> near(Vec3 pos, int sectorRadius) {
-        List<Body> list = new ArrayList<>(BODIES);
+        List<Body> list = new ArrayList<>(TODOS);
         list.addAll(ProceduralPlanets.near(pos, sectorRadius));
         return list;
     }
@@ -110,13 +128,15 @@ public final class SpaceBodies {
     public static Body bodyAt(ResourceKey<Level> dimension, double x, double z) {
         Body fixed = byDimension(dimension);
         if (fixed != null) return fixed;
+        Body lend = com.lanterna.lendarios.PlanetasLendarios.noMundo(dimension, x, z);
+        if (lend != null) return lend;
         Archetype type = Archetype.byDimension(dimension);
         return type != null ? ProceduralPlanets.byRegion(type, x, z) : null;
     }
 
     @Nullable
     public static Body byId(String id) {
-        for (Body b : BODIES) if (b.id().equals(id)) return b;
+        for (Body b : TODOS) if (b.id().equals(id)) return b;
         return ProceduralPlanets.byId(id);
     }
 

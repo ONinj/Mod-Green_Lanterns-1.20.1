@@ -81,6 +81,48 @@ public final class LanternaCommand {
                             return 1;
                         }))))
 
+                .then(Commands.literal("hanks").requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("ir").executes(c -> {
+                            var p = c.getSource().getPlayerOrException();
+                            var l = p.server.getLevel(com.lanterna.hanks.HanksMundo.DIM);
+                            if (l != null) p.teleportTo(l, 0.5, 120, 6.5, 180, 20);
+                            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20 * 20, 0, false, false));
+                            return 1;
+                        }))
+                        .then(Commands.literal("missao").then(Commands.argument("n", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 3)).executes(c -> {
+                            com.lanterna.hanks.HanksMissoes.pular(c.getSource().getPlayerOrException(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "n"));
+                            return 1;
+                        }))))
+                .then(Commands.literal("lendario").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("id", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(com.lanterna.lendarios.Lendario.values()).map(x -> x.id), b))
+                                .then(Commands.literal("ir").executes(c -> {
+                                    var p = c.getSource().getPlayerOrException();
+                                    var l = com.lanterna.lendarios.Lendario.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
+                                    if (l == null) return 0;
+                                    if (l.tipo == null) {
+                                        var lv = p.server.getLevel(com.lanterna.hanks.HanksMundo.DIM);
+                                        if (lv != null) p.teleportTo(lv, 0.5, 120, com.lanterna.hanks.HanksMundo.CIDADELA_Z + 30.5, 180, 20);
+                                    } else {
+                                        var lv = p.server.getLevel(l.tipo.dimension);
+                                        int x = com.lanterna.lendarios.PlanetasLendarios.regiaoX(l), z = com.lanterna.lendarios.PlanetasLendarios.REGIAO_BASE;
+                                        if (lv != null) p.teleportTo(lv, x + 0.5, 300, z + 40.5, 180, 30);
+                                    }
+                                    p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 20 * 25, 0, false, false));
+                                    return 1;
+                                }))
+                                .then(Commands.literal("reviver").executes(c -> {
+                                    var l = com.lanterna.lendarios.Lendario.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
+                                    if (l == null) return 0;
+                                    var st = com.lanterna.lendarios.ArenaLendaria.estado(c.getSource().getServer(), l);
+                                    st.volta = 0;
+                                    st.vivo = false;
+                                    com.lanterna.lendarios.ArenaLendaria.marcar(c.getSource().getServer());
+                                    c.getSource().getPlayerOrException().getPersistentData().remove("lanterna_duelo_" + l.id);
+                                    return 1;
+                                }))))
+
                 .then(Commands.literal("frenesi").requires(source -> source.hasPermission(2))
                         .executes(c -> { com.lanterna.morte.Frenesi.comecar(c.getSource().getPlayerOrException()); return 1; })
                         .then(Commands.literal("parar").executes(c -> { com.lanterna.morte.Frenesi.acabar(c.getSource().getPlayerOrException(), true); return 1; })))

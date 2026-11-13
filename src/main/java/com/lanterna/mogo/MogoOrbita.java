@@ -102,6 +102,11 @@ public final class MogoOrbita {
         if (e.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
         MinecraftServer s = e.getServer();
         long t = s.overworld().getGameTime();
+        // de vez em quando, lembra todo mundo de onde ele está (por segurança)
+        if (t % 600 == 0) {
+            Vec3 c = dados(s).c;
+            ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new Pacote(c.x, c.y, c.z));
+        }
         if (t % MUDA_A_CADA != 0) return;
         var mogo = s.getLevel(MogoMundo.DIM);
         if (mogo != null && !mogo.players().isEmpty()) return;
@@ -128,7 +133,7 @@ public final class MogoOrbita {
             double ang = r.nextDouble() * Math.PI * 2, dist = DIST_MIN + r.nextDouble() * (DIST_MAX - DIST_MIN);
             Vec3 c = new Vec3(Math.cos(ang) * dist, -150 + r.nextDouble() * 650, Math.sin(ang) * dist);
             boolean ok = true;
-            for (SpaceBodies.Body b : SpaceBodies.BODIES) {
+            for (SpaceBodies.Body b : SpaceBodies.TODOS) {
                 if ("mogo".equals(b.id()) || "sun".equals(b.id())) continue;
                 if (b.center().distanceTo(c) < b.radius() + 280 + RAIO_VOLTA + 350) { ok = false; break; }
             }

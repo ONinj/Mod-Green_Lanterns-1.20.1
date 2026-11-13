@@ -74,6 +74,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
 
         drawStars(poseStack, projectionMatrix);
         drawBodies(level, poseStack, camera, ticks + partialTick);
+        VisaoLongeCliente.desenharCeu(poseStack.last().pose(), camera.getPosition(), partialTick);
 
         RenderSystem.disableBlend();
         RenderSystem.defaultBlendFunc();

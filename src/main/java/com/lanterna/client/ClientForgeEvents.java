@@ -37,7 +37,10 @@ public final class ClientForgeEvents {
         if (event.phase != TickEvent.Phase.END) return;
         com.lanterna.client.voz.ClientLigacao.tick();
         var mcRelogio = net.minecraft.client.Minecraft.getInstance();
-        if (mcRelogio.level != null) com.lanterna.mogo.MogoOrbita.tempoCliente = mcRelogio.level.getGameTime();
+        if (mcRelogio.level != null) {
+            com.lanterna.mogo.MogoOrbita.tempoCliente = mcRelogio.level.getGameTime();
+            com.lanterna.hanks.HanksOrbita.tempoCliente = mcRelogio.level.getGameTime();
+        }
 
         while (KeyBindings.TOGGLE_FLIGHT.consumeClick()) {
             if (ClientRingData.hasRing) {
@@ -237,6 +240,7 @@ public final class ClientForgeEvents {
         com.lanterna.client.mission.ClientLoreData.reset();
         com.lanterna.client.construct.ClientConstructs.clear();
         com.lanterna.client.combat.MiraTravada.clear();
+        com.lanterna.client.space.VisaoLongeCliente.limpar();
     }
 
     private ClientForgeEvents() {}

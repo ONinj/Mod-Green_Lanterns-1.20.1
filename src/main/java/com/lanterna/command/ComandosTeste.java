@@ -280,7 +280,7 @@ public final class ComandosTeste {
 
     private static List<String> planetas() {
         List<String> l = new ArrayList<>();
-        for (SpaceBodies.Body b : SpaceBodies.BODIES) if (b.landable()) l.add(b.id());
+        for (SpaceBodies.Body b : SpaceBodies.TODOS) if (b.landable()) l.add(b.id());
         return l;
     }
 

@@ -3123,6 +3123,218 @@ public final class DevAutoTest {
         sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), de.x, de.y, de.z, yaw, pitch);
     }
 
+    private static com.lanterna.especies.LanternaEntity lenda(net.minecraft.server.level.ServerPlayer sp, com.lanterna.lendarios.Lendario l) {
+        var s = com.lanterna.lendarios.ArenaLendaria.estado(sp.server, l);
+        return com.lanterna.lendarios.ArenaLendaria.achar(sp.serverLevel(), l, s.centro);
+    }
+
+    private static void sceneRetratos() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("gamerule doMobSpawning false");
+            cmd("execute in minecraft:overworld run tp @s 0 200 0"); });
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -14; x <= 14; x++) for (int z = -8; z <= 8; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState());
+                for (int y = 200; y < 206; y++) l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
+            var ls = com.lanterna.lendarios.Lendario.values();
+            for (int i = 0; i < ls.length; i++) {
+                var le = com.lanterna.lendarios.Lendarios.surgir(l, ls[i], new net.minecraft.core.BlockPos(-10 + i * 3, 199, 6));
+                le.setNoAi(true);
+                le.moveTo(-10.5 + i * 3, 200, 0.5, 180, 0);
+                le.setYHeadRot(180); le.setYBodyRot(180);
+            }
+            sp.teleportTo(0.5, 200, 9.5);
+            sp.setYRot(180); sp.setXRot(5);
+        }));
+        at(60, () -> { look(180, 5); shot("retratos"); });
+        at(2, () -> server(sp -> { for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(30))) e.discard(); }));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    private static void sceneHanksDbg() {
+        Minecraft mc = Minecraft.getInstance();
+        at(60, () -> { cmd("gamemode spectator"); cmd("lanterna hanks ir"); });
+        at(100, () -> server(sp -> glog("antes servidor=" + com.lanterna.hanks.HanksOrbita.agora() + " dim=" + sp.level().dimension().location())));
+        at(2, () -> server(sp -> { var h = com.lanterna.space.SpaceBodies.byId("hanks"); olharDe(sp, h.center().add(0, 120, h.radius() * 2.4), h.center()); }));
+        at(60, () -> { shot("hanks_espaco"); glog("cliente=" + com.lanterna.hanks.HanksOrbita.agora() + " eu=" + mc.player.position()); });
+        at(1, () -> server(sp -> glog("depois servidor=" + com.lanterna.hanks.HanksOrbita.agora())));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    private static void sceneLendarios() {
+        Minecraft mc = Minecraft.getInstance();
+        var HAL = com.lanterna.lendarios.Lendario.HAL;
+        var ATRO = com.lanterna.lendarios.Lendario.ATROCITUS;
+        var SIN = com.lanterna.lendarios.Lendario.SINESTRO;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            mc.options.renderDistance().set(8);
+            cmd("gamerule doMobSpawning false"); cmd("gamerule doDaylightCycle false"); cmd("gamemode creative"); cmd("lanterna anel green"); });
+        // 1. Vigília (Hal Jordan, mesma Tropa: duelo)
+        at(20, () -> { cmd("lanterna lendario hal_jordan reviver"); cmd("lanterna lendario hal_jordan ir"); });
+        waitFor(() -> mc.player != null && mc.player.onGround(), 600);
+        at(60, () -> server(sp -> glog("arena hal=" + com.lanterna.lendarios.ArenaLendaria.estado(sp.server, HAL).construida + " centro=" + com.lanterna.lendarios.ArenaLendaria.estado(sp.server, HAL).centro + " corpo=" + com.lanterna.space.SpaceBodies.bodyAt(sp.level().dimension(), sp.getX(), sp.getZ()))));
+        at(5, () -> cmd("gamemode survival"));
+        waitFor(() -> { boolean[] ok = {false}; return false; }, 1);
+        at(140, () -> server(sp -> {
+            var le = lenda(sp, HAL);
+            glog("hal vivo=" + (le != null) + (le != null ? " hp=" + le.getHealth() + "/" + le.getMaxHealth() + " nome=" + le.getDisplayName().getString() : ""));
+            var s = com.lanterna.lendarios.ArenaLendaria.estado(sp.server, HAL);
+            sp.teleportTo(s.centro.getX() + 0.5, s.centro.getY() + 0.2, s.centro.getZ() + 10.5);
+            sp.setYRot(180); sp.setXRot(5);
+        }));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, HAL);
+            if (le == null) return;
+            le.setNoAi(true);
+            le.moveTo(sp.getX(), sp.getY(), sp.getZ() - 5, 0, 0);
+            le.setYHeadRot(0); le.setYBodyRot(0);
+        }));
+        at(20, () -> { look(180, 8); shot("lend_hal"); });
+        at(2, () -> server(sp -> { var le = lenda(sp, HAL); if (le != null) le.setNoAi(false); }));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, HAL);
+            if (le == null) return;
+            var r = com.lanterna.lendarios.Lendarios.interagir(sp, le);
+            glog("duelo=" + r + " alvo=" + (le.getTarget() == sp));
+        }));
+        at(80, () -> server(sp -> glog("durante duelo jogador hp=" + sp.getHealth())));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, HAL);
+            int xp = com.lanterna.mission.LoreCapability.get(sp).map(d -> d.xp()).orElse(-1);
+            le.hurt(sp.damageSources().playerAttack(sp), 5000);
+            glog("depois do golpe hal hp=" + le.getHealth() + " xp antes=" + xp + " depois=" + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.xp()).orElse(-1)
+                + " insignia=" + sp.getInventory().countItem(com.lanterna.lore.LoreItems.INSIGNIAS.get(HAL).get()) + " frag=" + sp.getInventory().countItem(com.lanterna.lore.LoreItems.FRAGMENTO_LENDARIO.get())
+                + " alvo=" + (le.getTarget()));
+        }));
+        // 2. Fornalha (Atrocitus, inimigo: luta de verdade)
+        at(10, () -> { cmd("gamemode creative"); cmd("lanterna lendario atrocitus reviver"); cmd("lanterna lendario atrocitus ir"); });
+        waitFor(() -> mc.player != null && mc.player.onGround(), 600);
+        at(200, () -> server(sp -> {
+            var s = com.lanterna.lendarios.ArenaLendaria.estado(sp.server, ATRO);
+            sp.teleportTo(s.centro.getX() + 0.5, s.centro.getY() + 0.2, s.centro.getZ() + 12.5);
+            sp.setYRot(180); sp.setXRot(5);
+        }));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, ATRO);
+            if (le == null) return;
+            le.setNoAi(true);
+            le.moveTo(sp.getX(), sp.getY(), sp.getZ() - 6, 0, 0);
+            le.setYHeadRot(0); le.setYBodyRot(0);
+        }));
+        at(20, () -> { look(180, 5); shot("lend_atrocitus"); });
+        at(2, () -> server(sp -> { var le = lenda(sp, ATRO); if (le != null) le.setNoAi(false); }));
+        at(40, () -> cmd("gamemode survival"));
+        at(60, () -> server(sp -> { var le = lenda(sp, ATRO); glog("atrocitus vivo=" + (le != null) + (le != null ? " alvo=" + le.getTarget() + " hp jogador=" + sp.getHealth() : "")); }));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, ATRO);
+            if (le == null) return;
+            le.hurt(sp.damageSources().playerAttack(sp), le.getMaxHealth() * 0.4f);
+        }));
+        at(40, () -> server(sp -> glog("ajudantes=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), x -> x.getPersistentData().getBoolean("lanterna_encontro")).size())));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, ATRO);
+            if (le == null) return;
+            le.hurt(sp.damageSources().playerAttack(sp), 99999);
+            glog("atrocitus morto=" + !le.isAlive() + " insignia=" + sp.getInventory().countItem(com.lanterna.lore.LoreItems.INSIGNIAS.get(ATRO).get()) + " volta=" + com.lanterna.lendarios.ArenaLendaria.estado(sp.server, ATRO).volta);
+        }));
+        // 3. Hanks
+        at(20, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(20, () -> { cmd("gamemode creative"); cmd("lanterna anel yellow"); cmd("lanterna hanks ir"); });
+        waitFor(() -> mc.player != null && mc.player.onGround(), 600);
+        at(300, () -> server(sp -> {
+            var d = com.lanterna.hanks.HanksMundo.dados(sp.serverLevel());
+            glog("hanks pronto=" + d.pronto + " y=" + d.y + " dim=" + sp.level().dimension().location());
+            sp.teleportTo(30.5, d.y + 25, 30.5);
+            sp.setYRot(135); sp.setXRot(25);
+        }));
+        at(40, () -> shot("hanks_distrito"));
+        at(2, () -> cmd("lanterna hanks missao 3"));
+        at(10, () -> server(sp -> {
+            var d = com.lanterna.hanks.HanksMundo.dados(sp.serverLevel());
+            sp.teleportTo(0.5, d.y + 0.2, com.lanterna.hanks.HanksMundo.CIDADELA_Z + 14.5);
+            sp.setYRot(180); sp.setXRot(-5);
+        }));
+        at(5, () -> cmd("gamemode survival"));
+        at(100, () -> server(sp -> {
+            var le = lenda(sp, SIN);
+            if (le == null) return;
+            le.setNoAi(true);
+            le.moveTo(sp.getX(), sp.getY(), sp.getZ() - 5, 0, 0);
+            le.setYHeadRot(0); le.setYBodyRot(0);
+        }));
+        at(20, () -> { look(180, 5); shot("hanks_sinestro"); });
+        at(2, () -> server(sp -> { var le = lenda(sp, SIN); if (le != null) le.setNoAi(false); var d = com.lanterna.hanks.HanksMundo.dados(sp.serverLevel()); sp.teleportTo(0.5, d.y + 12, com.lanterna.hanks.HanksMundo.CIDADELA_Z + 34.5); sp.setYRot(180); sp.setXRot(15); }));
+        at(20, () -> shot("hanks_cidadela"));
+        at(2, () -> server(sp -> {
+            var le = lenda(sp, SIN);
+            glog("sinestro vivo=" + (le != null));
+            if (le == null) return;
+            com.lanterna.lendarios.Lendarios.interagir(sp, le);
+            le.hurt(sp.damageSources().playerAttack(sp), 99999);
+            var dd = com.lanterna.mission.MissionManager.data(sp);
+            glog("hanks_3 feita=" + (dd != null && dd.isDone("hanks_3")) + " sinestro hp=" + le.getHealth());
+        }));
+        at(40, () -> server(sp -> { var dd = com.lanterna.mission.MissionManager.data(sp); var le = lenda(sp, SIN);
+            glog("depois: hanks_3 feita=" + (dd != null && dd.isDone("hanks_3")) + " sinestro hp=" + (le != null ? le.getHealth() : -1)); }));
+        // 4. do espaço: Hanks e um planeta lendário
+        at(20, () -> { cmd("gamemode spectator"); });
+        at(10, () -> server(sp -> {
+            var h = com.lanterna.space.SpaceBodies.byId("hanks");
+            olharDe(sp, h.center().add(0, 120, h.radius() * 2.4), h.center());
+        }));
+        at(80, () -> { shot("hanks_espaco"); glog("hanks cliente=" + com.lanterna.hanks.HanksOrbita.agora()); });
+        at(1, () -> server(sp -> glog("hanks servidor=" + com.lanterna.hanks.HanksOrbita.agora())));
+        at(2, () -> server(sp -> {
+            var b = com.lanterna.space.SpaceBodies.byId("lend_fornalha");
+            olharDe(sp, b.center().add(b.radius() * 2.5, 60, 0), b.center());
+        }));
+        at(80, () -> shot("lend_espaco"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    private static void sceneVisao() {
+        Minecraft mc = Minecraft.getInstance();
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = false;
+            cmd("gamemode creative"); cmd("lanterna anel green"); });
+        at(20, () -> server(sp -> sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), 1500, 100, 1500, 0, 0)));
+        java.util.UUID a = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000a"), b = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000b"),
+                c = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000c"), d = java.util.UUID.fromString("00000000-0000-0000-0000-00000000000d");
+        int[] tt = {0};
+        for (int i = 0; i < 70; i++) at(2, () -> {
+            tt[0] += 2;
+            mc.player.setPos(1500, 100, 1500); mc.player.setDeltaMovement(0, 0, 0); look(0, 0);
+            double k = tt[0];
+            var base = new net.minecraft.world.phys.Vec3(1500, 100, 1500);
+            java.util.List<com.lanterna.space.VisaoLonge.Visto> l = new java.util.ArrayList<>();
+            l.add(new com.lanterna.space.VisaoLonge.Visto(a, "Perto", base.x + 3, base.y + 1, base.z + 22, 0, 0, 0, 160, 0x2BFF4A, "", ""));
+            l.add(new com.lanterna.space.VisaoLonge.Visto(b, "Medio", base.x - 60 + k * 1.2, base.y + 25, base.z + 200, 1.2f, 0, 0, 90, 0xFFE01A, "", ""));
+            l.add(new com.lanterna.space.VisaoLonge.Visto(c, "Longe", base.x + 1400 - k * 40, base.y + 200, base.z + 1500, -40f, 0, 0, 90, 0xE01010, "", ""));
+            l.add(new com.lanterna.space.VisaoLonge.Visto(d, "Nave", base.x - 30, base.y - 8, base.z + 110, 0, 0, 0.5f, 200, 0x2A7BFF, "nave_lanceira", "blue"));
+            com.lanterna.client.space.VisaoLongeCliente.testar(l);
+        });
+        at(1, () -> { shot("visao_1"); glog(com.lanterna.client.space.VisaoLongeCliente.depurar()); });
+        at(1, () -> mc.options.hideGui = true);
+        at(3, () -> shot("visao_1b"));
+        at(1, () -> mc.options.hideGui = false);
+        for (int i = 0; i < 20; i++) at(2, () -> {
+            tt[0] += 2;
+            mc.player.setPos(1500, 100, 1500); mc.player.setDeltaMovement(0, 0, 0); look(0, 0);
+            double k = tt[0];
+            var base = new net.minecraft.world.phys.Vec3(1500, 100, 1500);
+            java.util.List<com.lanterna.space.VisaoLonge.Visto> l = new java.util.ArrayList<>();
+            l.add(new com.lanterna.space.VisaoLonge.Visto(c, "Longe", base.x + 1400 - k * 40, base.y + 200, base.z + 1500, -40f, 0, 0, 90, 0xE01010, "", ""));
+            l.add(new com.lanterna.space.VisaoLonge.Visto(b, "Bem longe", base.x + 300, base.y - 300, base.z + 6000, 0, 0, 0, 90, 0xC23BFF, "", ""));
+            com.lanterna.client.space.VisaoLongeCliente.testar(l);
+        });
+        at(1, () -> shot("visao_2"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     private static void scenePerigos() {
         Minecraft mc = Minecraft.getInstance();
         net.minecraft.world.phys.Vec3[] sol = {null}, bur = {null};
@@ -4736,6 +4948,10 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("escolha")) sceneEscolha();
         else if (ENABLED && SCENE.equals("mogo")) sceneMogo();
         else if (ENABLED && SCENE.equals("perigos")) scenePerigos();
+        else if (ENABLED && SCENE.equals("visao")) sceneVisao();
+        else if (ENABLED && SCENE.equals("lendarios")) sceneLendarios();
+        else if (ENABLED && SCENE.equals("hanksdbg")) sceneHanksDbg();
+        else if (ENABLED && SCENE.equals("retratos")) sceneRetratos();
         else if (ENABLED && SCENE.equals("aura")) sceneAura();
         else if (ENABLED && SCENE.equals("mogoplaneta")) sceneMogoPlaneta();
         else if (ENABLED && SCENE.equals("naves3")) sceneNaves3();

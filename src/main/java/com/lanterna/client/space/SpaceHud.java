@@ -30,6 +30,7 @@ public final class SpaceHud {
         MissionHud.topOffset = 8;
         if (mc.player == null || mc.options.hideGui || !mc.player.level().dimension().equals(SpaceBodies.SPACE)) return;
         Font font = mc.font;
+        VisaoLongeCliente.nomes(g, width, height);
         Vec3 pos = mc.player.position();
 
         List<SpaceBodies.Body> list = new ArrayList<>();

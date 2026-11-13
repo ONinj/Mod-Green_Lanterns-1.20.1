@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "17";
+    private static final String VERSION = "18";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -35,6 +35,18 @@ public final class ModNetwork {
                 .encoder(com.lanterna.mogo.ChamadoPacket::encode)
                 .decoder(com.lanterna.mogo.ChamadoPacket::decode)
                 .consumerMainThread(com.lanterna.mogo.ChamadoPacket::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.lanterna.space.VisaoLonge.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.space.VisaoLonge.Pacote::encode)
+                .decoder(com.lanterna.space.VisaoLonge.Pacote::decode)
+                .consumerMainThread(com.lanterna.space.VisaoLonge.Pacote::handle)
+                .add();
+
+        CHANNEL.messageBuilder(com.lanterna.hanks.HanksOrbita.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.hanks.HanksOrbita.Pacote::encode)
+                .decoder(com.lanterna.hanks.HanksOrbita.Pacote::decode)
+                .consumerMainThread(com.lanterna.hanks.HanksOrbita.Pacote::handle)
                 .add();
 
         CHANNEL.messageBuilder(com.lanterna.mogo.MogoOrbita.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)

@@ -394,6 +394,12 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         setTarget(p);
     }
 
+    /** Para de brigar com o jogador (fim de duelo). */
+    public void acalmar(Player p) {
+        angry.remove(p.getUUID());
+        if (getTarget() == p) setTarget(null);
+    }
+
     /** Aliado de um jogador (mesma Tropa)? */
     public boolean aliadoDe(Player p) {
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
@@ -694,6 +700,8 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (level().isClientSide) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
+        if (!getPersistentData().getString(com.lanterna.lendarios.Lendarios.TAG).isEmpty())
+            return com.lanterna.lendarios.Lendarios.interagir(sp, this);
         if (getTarget() == player) return InteractionResult.PASS;
         // NPCs da cidade e do palácio (lojas, missões, capitães)
         String funcao = funcao();

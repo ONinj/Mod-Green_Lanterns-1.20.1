@@ -22,7 +22,7 @@ public final class PlanetTextures {
 
     public static void ensure(SpaceBodies.Body body) {
         ResourceLocation id = body.texture();
-        if (MADE.contains(id) || body.procedural() == null) return;
+        if (MADE.contains(id) || body.procedural() == null || body.lendario()) return;
         MADE.add(id);
         Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(paint(body)));
     }

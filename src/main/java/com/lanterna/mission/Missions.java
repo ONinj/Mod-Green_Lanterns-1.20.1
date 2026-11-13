@@ -243,6 +243,7 @@ public final class Missions {
         if (m == null && com.lanterna.lore.entity.FavoresVesKai.eFavor(id)) return com.lanterna.lore.entity.FavoresVesKai.mission(id);
         if (m == null && com.lanterna.terra.TerraHistoria.eDaTerra(id)) return com.lanterna.terra.TerraHistoria.mission(id);
         if (m == null && com.lanterna.mogo.MogoMissoes.eDoMogo(id)) return com.lanterna.mogo.MogoMissoes.mission(id);
+        if (m == null && com.lanterna.hanks.HanksMissoes.eDoHanks(id)) return com.lanterna.hanks.HanksMissoes.mission(id);
         return m;
     }
 

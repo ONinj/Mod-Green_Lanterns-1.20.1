@@ -146,7 +146,7 @@ public final class SpaceTravel {
         Vec3 dir = spacePos.subtract(body.center());
         Vec3 flat = new Vec3(dir.x, 0, dir.z);
         if (flat.lengthSqr() < 1.0E-4) flat = new Vec3(1, 0, 0);
-        flat = flat.normalize().scale(body.procedural() != null ? 256 : 40);
+        flat = flat.normalize().scale(body.lendario() ? 55 : body.procedural() != null ? 256 : 40);
         // Planetas gerados ficam numa região própria do mundo do tipo deles
         double ox = body.procedural() != null ? body.procedural().regionX() : 0;
         double oz = body.procedural() != null ? body.procedural().regionZ() : 0;

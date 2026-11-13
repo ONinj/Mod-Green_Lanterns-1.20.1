@@ -55,6 +55,7 @@ public final class ProceduralPlanets {
         if (Math.hypot(cx, cz) < CORE_RADIUS) return null;
         Vec3 center = new Vec3(cx, -200 + r.nextDouble() * 450, cz);
         if (center.distanceTo(SpaceBodies.SUN.center()) < SpaceBodies.SUN.radius() + 4000) return null;
+        if (com.lanterna.lendarios.PlanetasLendarios.perto(center, 6000)) return null;
         double radius = 140 + r.nextDouble() * 180;
         Archetype type = Archetype.pick(r);
         String name = PlanetNames.generate(r);

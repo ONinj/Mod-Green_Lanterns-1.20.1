@@ -76,6 +76,7 @@ public final class Perigos {
         if (Math.hypot(cx, cz) < CORE_RADIUS) return null;
         Vec3 c = new Vec3(cx, -300 + r.nextDouble() * 700, cz);
         if (c.distanceTo(SOL_CENTRAL.centro()) < SOL_CENTRAL.alcance() + 3000) return null;
+        if (com.lanterna.lendarios.PlanetasLendarios.perto(c, 9000)) return null;
         float k = r.nextFloat();
         String nome = PlanetNames.generate(r);
         String id = "h" + (sx < 0 ? "m" + -sx : sx) + "_" + (sz < 0 ? "m" + -sz : sz);

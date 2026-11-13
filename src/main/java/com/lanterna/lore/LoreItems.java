@@ -57,6 +57,17 @@ public final class LoreItems {
     public static final RegistryObject<Item> ALMA = reg("alma", () -> new LoreItem(new Item.Properties().rarity(Rarity.UNCOMMON), true));
     public static final RegistryObject<Item> RELIQUIA = material("reliquia", Rarity.RARE);
 
+    // ---- Lanternas lendários: insígnias (uma de cada) e fragmentos (moeda da próxima saga) ----
+    public static final RegistryObject<Item> FRAGMENTO_LENDARIO = reg("fragmento_lendario",
+            () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant(), true));
+    public static final java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> INSIGNIAS = insignias();
+
+    private static java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> insignias() {
+        java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> m = new java.util.EnumMap<>(com.lanterna.lendarios.Lendario.class);
+        for (var l : com.lanterna.lendarios.Lendario.values()) m.put(l, relic("insignia_" + l.id));
+        return m;
+    }
+
     public static final RegistryObject<Item> CARNE_DE_FERA = reg("carne_de_fera", () -> new LoreItem(new Item.Properties()
             .food(new FoodProperties.Builder().nutrition(10).saturationMod(1.0f).meat()
                     .effect(() -> new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * 90, 1), 1.0f).build()), false));
