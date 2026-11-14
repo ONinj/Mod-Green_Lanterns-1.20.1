@@ -3252,6 +3252,27 @@ public final class DevAutoTest {
             glog("moradores: " + l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(c).inflate(80)).stream().filter(e -> e.getTags().contains("lanterna_terra") || e.hasCustomName()).map(e -> e.getName().getString()).toList()); }));
         at(5, () -> ir.accept(new int[]{0, 2, 12}, new float[]{180, 5}));
         at(80, () -> shot("aurora_chao"));
+        // de perto: janelas, postes e lampiões
+        at(5, () -> ir.accept(new int[]{-14, 4, 26}, new float[]{200, 10}));
+        at(120, () -> shot("aurora_perto1"));
+        at(5, () -> ir.accept(new int[]{24, 4, -30}, new float[]{20, 10}));
+        at(120, () -> shot("aurora_perto2"));
+        at(5, () -> ir.accept(new int[]{-40, 5, -20}, new float[]{300, 12}));
+        at(120, () -> shot("aurora_perto3"));
+        at(5, () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; var l = sp.server.overworld();
+            int soltos = 0, vidros = 0, ligados = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(c.offset(-72, -2, -72), c.offset(72, 24, 72))) {
+                var st = l.getBlockState(q);
+                if (st.getBlock() instanceof net.minecraft.world.level.block.LanternBlock) {
+                    if (!st.canSurvive(l, q)) { soltos++; if (soltos <= 8) glog("lampiao solto em " + q.subtract(c) + " embaixo=" + l.getBlockState(q.below()).getBlock() + " cima=" + l.getBlockState(q.above()).getBlock()); }
+                }
+                if (st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock) {
+                    vidros++;
+                    if (st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.NORTH) || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.EAST)
+                            || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.SOUTH) || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.WEST)) ligados++;
+                }
+            }
+            glog("aurora acabamento: vidros finos=" + vidros + " ligados=" + ligados + " lampioes soltos=" + soltos); }));
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
@@ -3424,6 +3445,29 @@ public final class DevAutoTest {
             var m = com.lanterna.mission.Missions.get("juramento_green");
             if (m != null) glog("MP marcador juramento -> " + m.objectives().get(0).pos());
         });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48.7: /lantern acabar conserta construções já geradas (vidros soltos, lampiões no ar). */
+    private static void sceneAcabar() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        java.util.function.Function<String, Runnable> contar = (tag) -> () -> server(sp -> { var c = com.lanterna.terra.TerraSite.centro; var l = sp.server.overworld();
+            int soltos = 0, vidros = 0, ligados = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(c.offset(-72, -2, -72), c.offset(72, 24, 72))) {
+                var st = l.getBlockState(q);
+                if (st.getBlock() instanceof net.minecraft.world.level.block.LanternBlock && !st.canSurvive(l, q)) soltos++;
+                if (st.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock) { vidros++;
+                    if (st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.NORTH) || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.EAST)
+                        || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.SOUTH) || st.getValue(net.minecraft.world.level.block.CrossCollisionBlock.WEST)) ligados++; }
+            }
+            glog(tag + ": vidros=" + vidros + " ligados=" + ligados + " lampioes soltos=" + soltos); });
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); server(sp -> { var c = com.lanterna.terra.TerraSite.centro;
+            sp.teleportTo(sp.server.overworld(), c.getX() + 0.5, c.getY() + 5, c.getZ() + 0.5, 0, 0); }); });
+        at(200, contar.apply("antes"));
+        at(10, () -> cmd("lantern acabar 80"));
+        at(40, contar.apply("depois"));
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
@@ -5438,6 +5482,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
         else if (ENABLED && SCENE.equals("choose")) sceneChoose();
         else if (ENABLED && SCENE.equals("praca")) scenePraca();
+        else if (ENABLED && SCENE.equals("acabar")) sceneAcabar();
         else if (ENABLED && SCENE.equals("pracamp")) scenePracaMp();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();

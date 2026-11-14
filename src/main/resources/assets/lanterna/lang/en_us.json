@@ -3120,5 +3120,6 @@
   "anel.ia.dica.emocao": "Tip: feel your Corps' emotion (for example, Green fights while wounded, Blue heals and stays with allies).",
   "anel.ia.dica.setor": "Tip: fly to the marked point in space.",
   "anel.ia.dica.descobrir": "Tip: open the star map (J) and land on a planet you have never visited.",
-  "anel.ia.dica.ponto": "Tip: follow the on-screen marker to the point."
+  "anel.ia.dica.ponto": "Tip: follow the on-screen marker to the point.",
+  "commands.lanterna.acabar": "Finishing within %s blocks: %s block(s) reconnected (panes, bars, fences, walls, stairs) and %s lantern(s)/torch(es) secured."
 }

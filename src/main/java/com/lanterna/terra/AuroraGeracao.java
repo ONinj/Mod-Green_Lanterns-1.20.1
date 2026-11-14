@@ -78,6 +78,7 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
                 Desenho d = desenho(l.getLevel(), c, p);
                 if (d != null && d.toca(cx, cz)) d.copiar(l, cx, cz, ctx.random());
             }
+            com.lanterna.cidade.Acabamento.prenderNoPedaco(l, cx, cz, c.getY() - 2, c.getY() + 40);
         } catch (Exception e) {
             LanternaMod.LOGGER.error("Lanterna: falha gerando a Cidade Aurora", e);
         }
@@ -96,7 +97,7 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
         Kit k = new Kit(new Mundo.Servidor(l), TerraSite.paleta());
         for (var p : pedacos) com.lanterna.cidade.Obra.etapa(l, x -> terreno(k, c, p.x, p.z));
         for (Peca p : pecas(c)) com.lanterna.cidade.Obra.etapa(l, x -> {
-            try { p.obra().accept(k); } catch (Exception e) { LanternaMod.LOGGER.error("Lanterna: falha construindo {} da Cidade Aurora", p.id(), e); }
+            try { p.obra().accept(k); ((Mundo.Servidor) k.m).acabar(); } catch (Exception e) { LanternaMod.LOGGER.error("Lanterna: falha construindo {} da Cidade Aurora", p.id(), e); }
         });
         com.lanterna.cidade.Obra.etapa(l, x -> fim.run());
     }
@@ -107,8 +108,10 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
         if (f != null) return f.join();
         try {
             Desenho d = new Desenho();
-            Kit k = new Kit(new Mundo.Virtual(l, d, (x, z) -> chao(l, c, x, z)), TerraSite.paleta());
+            Mundo.Virtual v = new Mundo.Virtual(l, d, (x, z) -> chao(l, c, x, z));
+            Kit k = new Kit(v, TerraSite.paleta());
             Obra.imediato(l, () -> p.obra().accept(k));
+            d.acabar(v);
             nova.complete(d);
             return d;
         } catch (Throwable t) {
@@ -147,7 +150,7 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
                 for (int y = c.getY() + 30; y >= c.getY(); y--) {
                     BlockState s = l.getBlockState(m.set(x, y, z));
                     if (s.getBlock() instanceof LeavesBlock && !s.getValue(LeavesBlock.PERSISTENT)) { l.setBlock(m, Blocks.AIR.defaultBlockState(), 2); arvore = true; }
-                    else if (arvore && s.is(net.minecraft.tags.BlockTags.LOGS)) l.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
+                    else if (arvore && s.is(net.minecraft.tags.BlockTags.LOGS) && !net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock()).getPath().startsWith("stripped")) l.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
                     else if (s.is(Blocks.TALL_GRASS) || s.is(Blocks.VINE)) l.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
                 }
             }
@@ -403,12 +406,24 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
         Block[] toldos = {Blocks.RED_WOOL, Blocks.YELLOW_WOOL, Blocks.LIME_WOOL, Blocks.LIGHT_BLUE_WOOL, Blocks.ORANGE_WOOL, Blocks.MAGENTA_WOOL};
         for (int i = 0; i < 6; i++) {
             BlockPos b = o.offset(-10 + (i % 3) * 10, 0, (i / 3) * 8 - 4);
-            for (int[] q : new int[][]{{-2, -1}, {2, -1}, {-2, 1}, {2, 1}}) for (int y = 0; y < 3; y++) k.s(b.offset(q[0], y, q[1]), Kit.b(Blocks.SPRUCE_FENCE));
-            for (int dx = -3; dx <= 3; dx++) for (int dz = -2; dz <= 2; dz++) k.s(b.offset(dx, 3, dz), Kit.b(toldos[i]));
-            for (int dx = -1; dx <= 1; dx++) k.s(b.offset(dx, 0, -1), Kit.b(Blocks.BARREL));
-            k.m.bau(b.offset(0, 0, -1), Mobilia.tabela(null, "barril"));
+            // postes de tronco, toldo listrado (cor e branco) caindo para a frente, balcão de laje e caixotes
+            for (int[] q : new int[][]{{-3, -2}, {3, -2}, {-3, 2}, {3, 2}})
+                for (int y = 0; y < 3; y++) k.s(b.offset(q[0], y, q[1]), Kit.b(Blocks.STRIPPED_SPRUCE_LOG));
+            for (int dx = -3; dx <= 3; dx++) {
+                Block faixa = (dx & 1) == 0 ? toldos[i] : Blocks.WHITE_WOOL;
+                for (int dz = -1; dz <= 2; dz++) k.s(b.offset(dx, 3, dz), Kit.b(faixa));
+                k.s(b.offset(dx, 4, 1), Kit.b(faixa));
+                k.s(b.offset(dx, 4, 2), Kit.b(faixa));
+                k.s(b.offset(dx, 2, -2), Kit.b(faixa)); // a aba da frente, mais baixa
+                k.s(b.offset(dx, 3, -2), Kit.b(faixa));
+            }
+            for (int dx = -2; dx <= 2; dx++) k.s(b.offset(dx, 0, -1), Kit.lajeAlta(Blocks.SPRUCE_SLAB));
+            k.s(b.offset(-2, 0, 1), Kit.b(Blocks.BARREL));
+            k.m.bau(b.offset(-2, 0, 1), Mobilia.tabela(null, "barril"));
+            k.s(b.offset(2, 0, 1), Kit.b(Blocks.BARREL));
             k.s(b.offset(-1, 1, -1), Kit.b(i % 2 == 0 ? Blocks.MELON : Blocks.PUMPKIN));
             k.s(b.offset(1, 1, -1), Kit.b(Blocks.HAY_BLOCK));
+            k.s(b.offset(0, 2, 0), Kit.b(Blocks.LANTERN).setValue(LanternBlock.HANGING, true));
         }
     }
 

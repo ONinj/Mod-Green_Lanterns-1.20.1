@@ -3120,5 +3120,6 @@
   "anel.ia.dica.emocao": "Dica: sinta a emoção da sua Tropa (por exemplo, a Verde luta ferida, a Azul cura e fica com aliados).",
   "anel.ia.dica.setor": "Dica: voe até o ponto marcado no espaço.",
   "anel.ia.dica.descobrir": "Dica: abra o mapa estelar (J) e pouse num planeta em que você nunca esteve.",
-  "anel.ia.dica.ponto": "Dica: siga o marcador na tela até o ponto."
+  "anel.ia.dica.ponto": "Dica: siga o marcador na tela até o ponto.",
+  "commands.lanterna.acabar": "Acabamento num raio de %s blocos: %s bloco(s) religado(s) (vidros, grades, cercas, muros, escadas) e %s lampião(ões)/tocha(s) preso(s)."
 }

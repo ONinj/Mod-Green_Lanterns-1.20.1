@@ -39,6 +39,10 @@ public final class LanternaCommand {
         dispatcher.register(Commands.literal("lantern")
 
                 // Qualquer jogador: lista dos rituais
+                .then(Commands.literal("acabar").requires(src -> src.hasPermission(2))
+                        .executes(ctx -> acabar(ctx.getSource(), 64))
+                        .then(Commands.argument("raio", IntegerArgumentType.integer(8, 128))
+                                .executes(ctx -> acabar(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "raio")))))
                 .then(Commands.literal("rituals")
                         .executes(LanternaCommand::rituals))
 
@@ -385,4 +389,35 @@ public final class LanternaCommand {
     }
 
     private LanternaCommand() {}
+
+    /**
+     * Conserta construções já geradas em volta de quem chamou: vidros finos, grades, cercas, muros e escadas refazem as
+     * ligações com os vizinhos, e lampiões ou tochas soltos são presos (corrente, poste ou parede).
+     */
+    private static int acabar(net.minecraft.commands.CommandSourceStack src, int raio) {
+        net.minecraft.server.level.ServerLevel l = src.getLevel();
+        net.minecraft.core.BlockPos c = net.minecraft.core.BlockPos.containing(src.getPosition());
+        int ligados = 0, presos = 0;
+        var m = new net.minecraft.core.BlockPos.MutableBlockPos();
+        java.util.List<net.minecraft.core.BlockPos> soltos = new java.util.ArrayList<>();
+        for (int x = c.getX() - raio; x <= c.getX() + raio; x++) for (int z = c.getZ() - raio; z <= c.getZ() + raio; z++) {
+            if (!l.hasChunkAt(m.set(x, c.getY(), z))) continue;
+            for (int y = Math.max(l.getMinBuildHeight(), c.getY() - 24); y <= Math.min(l.getMaxBuildHeight() - 1, c.getY() + 48); y++) {
+                net.minecraft.world.level.block.state.BlockState st = l.getBlockState(m.set(x, y, z));
+                if (com.lanterna.cidade.Acabamento.pendurado(st)) soltos.add(m.immutable());
+                else if (com.lanterna.cidade.Acabamento.conectavel(st)) {
+                    net.minecraft.world.level.block.state.BlockState n = net.minecraft.world.level.block.Block.updateFromNeighbourShapes(st, l, m);
+                    if (n != st && !n.isAir()) { l.setBlock(m, n, 2); ligados++; }
+                }
+            }
+        }
+        for (net.minecraft.core.BlockPos p : soltos) {
+            net.minecraft.world.level.block.state.BlockState antes = l.getBlockState(p);
+            com.lanterna.cidade.Acabamento.prender(p, l::getBlockState, (q, st) -> l.setBlock(q, st, 2));
+            if (l.getBlockState(p) != antes || l.getBlockState(p.above()) != antes) presos++;
+        }
+        final int a = ligados, b = presos;
+        src.sendSuccess(() -> Component.translatable("commands.lanterna.acabar", raio, a, b), true);
+        return a + b;
+    }
 }

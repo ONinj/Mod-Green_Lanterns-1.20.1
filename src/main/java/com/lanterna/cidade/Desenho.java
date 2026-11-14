@@ -62,6 +62,14 @@ public final class Desenho {
         return blocos;
     }
 
+    /** Prende lampiões e tochas soltos (depois de a construção inteira estar desenhada). */
+    public void acabar(Mundo.Virtual v) {
+        List<BlockPos> ps = new ArrayList<>();
+        for (var m : porChunk.values()) for (var e : m.long2ObjectEntrySet())
+            if (Acabamento.pendurado(e.getValue())) ps.add(BlockPos.of(e.getLongKey()));
+        for (BlockPos p : ps) Acabamento.prender(p, v::get, v::set);
+    }
+
     /** Toca este pedaço do mundo? */
     public boolean toca(int cx, int cz) {
         if (porChunk.containsKey(ChunkPos.asLong(cx, cz))) return true;
@@ -80,6 +88,8 @@ public final class Desenho {
             q.set(BlockPos.getX(e.getLongKey()), BlockPos.getY(e.getLongKey()), BlockPos.getZ(e.getLongKey()));
             if (q.getY() < level.getMinBuildHeight() || q.getY() >= level.getMaxBuildHeight()) continue;
             level.setBlock(q, e.getValue(), 2);
+            // vidro, grade, cerca, muro, escada: o jogo refaz as ligações com os vizinhos quando o pedaço termina de nascer
+            if (Acabamento.conectavel(e.getValue())) level.getChunk(cx, cz).markPosForPostprocessing(q.immutable());
         }
         BoundingBox caixa = new BoundingBox(cx << 4, level.getMinBuildHeight(), cz << 4, (cx << 4) + 15, level.getMaxBuildHeight() - 1, (cz << 4) + 15);
         for (Object[] mo : moldes) {

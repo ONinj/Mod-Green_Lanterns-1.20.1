@@ -99,6 +99,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.4 ✅ (0.48.4) O anel entende dúvidas escritas de qualquer jeito ("qual a receita...", "tem como eu voar?", "quem são os inimigos da tropa verde", "jade viva", "me ajuda com a missão do juramento"); 54 assuntos; guarda as perguntas sem resposta em config/lanterna/perguntas_sem_resposta.txt
 1.56.5 ✅ (0.48.5) Cidade única: Forja do Espectro, bateria da Tropa e 3 alvos de treino na praça da Bateria Central; marcadores das missões no lugar novo também em servidor; nativos chegando nas cidades em servidores (distância de simulação pequena e obras em andamento não seguram mais)
 1.56.6 ✅ (0.48.6) Voz entende os nomes do mod (conserto pelo som: "noque" vira Nok, "sama rom" vira Zamaron, "coro gar" vira Korugar) e escolhe entre as 6 frases mais prováveis do Vosk; sinônimos ("me leve para o seu planeta", "quero voltar pra base", "bora pra Zamaron" = viagem); 63 assuntos, com um por planeta (Tropa, povo, chefe, drop, minério, nível e ritual da forja); forja, bateria e alvos conferidos num servidor dedicado
+1.56.7 ✅ (0.48.7) Acabamento das construções: vidros finos, grades, cercas, muros e escadas se ligam aos vizinhos; lampiões pendurados no teto ou de pé num poste (nada solto no ar); barracas do mercado com toldo listrado; /lantern acabar [raio] conserta o que já foi gerado
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

@@ -49,10 +49,28 @@ public interface Mundo {
 
     final class Servidor implements Mundo {
         private final ServerLevel l;
+        private final java.util.Set<BlockPos> acabar = new java.util.LinkedHashSet<>();
 
         public Servidor(ServerLevel l) { this.l = l; }
 
-        @Override public void set(BlockPos p, BlockState s) { l.setBlock(p, s, 2); }
+        @Override
+        public void set(BlockPos p, BlockState s) {
+            l.setBlock(p, s, 2);
+            if (Acabamento.conectavel(s) || Acabamento.pendurado(s)) acabar.add(p.immutable());
+        }
+
+        /** Depois de uma peça: refaz as ligações (vidro, cerca, muro, escada) e prende lampiões e tochas. */
+        public void acabar() {
+            for (BlockPos p : acabar) {
+                BlockState s = l.getBlockState(p);
+                if (Acabamento.pendurado(s)) Acabamento.prender(p, l::getBlockState, (q, st) -> l.setBlock(q, st, 2));
+                else if (Acabamento.conectavel(s)) {
+                    BlockState n = net.minecraft.world.level.block.Block.updateFromNeighbourShapes(s, l, p);
+                    if (n != s && !n.isAir()) l.setBlock(p, n, 2);
+                }
+            }
+            acabar.clear();
+        }
         @Override public BlockState get(BlockPos p) { return l.getBlockState(p); }
         @Override public ServerLevel nivel() { return l; }
         @Override public int altura(int x, int z) { return Kit.altura(l, x, z); }
@@ -141,7 +159,12 @@ public interface Mundo {
             return (p.getX() >> 4) == cx && (p.getZ() >> 4) == cz && p.getY() >= l.getMinBuildHeight() && p.getY() < l.getMaxBuildHeight();
         }
 
-        @Override public void set(BlockPos p, BlockState s) { if (dentro(p)) l.setBlock(p, s, 2); }
+        @Override
+        public void set(BlockPos p, BlockState s) {
+            if (!dentro(p)) return;
+            l.setBlock(p, s, 2);
+            if (Acabamento.conectavel(s)) l.getChunk(cx, cz).markPosForPostprocessing(p.immutable());
+        }
         @Override public BlockState get(BlockPos p) { return l.getBlockState(p); }
         @Override public ServerLevel nivel() { return l.getLevel(); }
         @Override public net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimensao() { return l.getLevel().dimension(); }

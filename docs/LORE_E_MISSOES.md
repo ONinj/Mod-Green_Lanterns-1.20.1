@@ -1386,3 +1386,18 @@ Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele enten
   - os moradores chegam;
   - o marcador do juramento aponta para a Bateria Central do quartel.
 - Teste: `-Pmp=1` conecta o cliente de teste a um servidor em `localhost:25565` (cena `pracamp`).
+
+## 0.48.7 — Acabamento das construções
+
+As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso pareciam "scriptadas". Esta versão corrige isso (`cidade/Acabamento`).
+
+- **Vidros finos, grades, cercas, muros e escadas:** o jogo refaz as ligações quando o pedaço do mundo termina de nascer. O vidro emenda no vidro e na parede, a cerca na cerca e a escada faz a quina. Na Cidade Aurora, quase todos os vidros finos ficaram ligados.
+- **Lampiões:**
+  - ficam pendurados quando há teto em cima e de pé quando há chão embaixo;
+  - soltos no ar, ganham uma corrente até o teto ou um poste de cerca até o chão;
+  - os lampiões que eram usados como "bloco de luz" dentro do teto agora ficam pendurados embaixo dele;
+  - os das portas ficam presos num braço da viga.
+- **Tochas de pé sem chão** viram tochas de parede.
+- Depois de todas as peças de um pedaço do mundo, os lampiões são conferidos de novo, porque uma peça vizinha podia apagar o apoio de outra. A limpeza das árvores não apaga mais troncos descascados, que são os das construções.
+- **Mercado da Cidade Aurora:** postes de tronco, toldo listrado (cor e branco) caído para a frente, balcão de laje, caixotes e lampião pendurado.
+- **`/lantern acabar [raio]`** (operador, raio padrão de 64 e máximo de 128) conserta o que já foi gerado em volta de quem chamou. Na Cidade Aurora antiga, os lampiões soltos caíram de 226 para 8 e os vidros ficaram ligados.

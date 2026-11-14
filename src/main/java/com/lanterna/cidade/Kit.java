@@ -101,8 +101,32 @@ public final class Kit {
      * Prédio oco retangular (centro c no chão), com "andares" de altura h cada, laje entre andares com luzes,
      * faixa de janelas em cada andar, cantos de pilar e telhado com borda. A porta (3 de largura) fica no lado "porta".
      */
+    /** A luz da paleta não é um bloco cheio (lampião): não dá para embutir no teto. */
+    private boolean luzSolta() {
+        return !p.luz().canOcclude();
+    }
+
+    /** Luz no teto em "teto": embutida se for bloco cheio; se for lampião, teto fechado e lampião pendurado embaixo. */
+    private void luzNoTeto(BlockPos teto, BlockState fechado) {
+        if (!luzSolta()) { s(teto, p.luz()); return; }
+        s(teto, fechado);
+        BlockState l = p.luz();
+        if (l.hasProperty(net.minecraft.world.level.block.LanternBlock.HANGING)) l = l.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true);
+        s(teto.below(), l);
+    }
+
+    /** Luz ao lado da porta: embutida, ou lampião pendurado num braço da viga. */
+    private void luzDaPorta(BlockPos pos) {
+        if (!luzSolta()) { s(pos, p.luz()); return; }
+        s(pos.above(), p.faixa());
+        BlockState l = p.luz();
+        if (l.hasProperty(net.minecraft.world.level.block.LanternBlock.HANGING)) l = l.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true);
+        s(pos, l);
+    }
+
     public void predio(BlockPos c, int hw, int hd, int andares, int h, Direction porta) {
         int topo = andares * h;
+        java.util.List<BlockPos> luzes = new java.util.ArrayList<>();
         for (int dx = -hw; dx <= hw; dx++) for (int dz = -hd; dz <= hd; dz++) {
             boolean borda = Math.abs(dx) == hw || Math.abs(dz) == hd;
             boolean canto = Math.abs(dx) == hw && Math.abs(dz) == hd;
@@ -111,27 +135,32 @@ public final class Kit {
                 int nk = k % h;
                 BlockState st;
                 if (!borda) {
-                    st = (nk == 0 && k > 0) ? ((Math.floorMod(dx, 4) == 0 && Math.floorMod(dz, 4) == 0) ? p.luz() : b(p.madeira())) : b(Blocks.AIR);
+                    boolean luz = nk == 0 && k > 0 && Math.floorMod(dx, 4) == 0 && Math.floorMod(dz, 4) == 0;
+                    if (luz && luzSolta()) luzes.add(c.offset(dx, k, dz));
+                    st = (nk == 0 && k > 0) ? (luz && !luzSolta() ? p.luz() : b(p.madeira())) : b(Blocks.AIR);
                 } else if (canto || (Math.abs(dx) == hw ? Math.floorMod(dz, 6) == 0 : Math.floorMod(dx, 6) == 0)) st = p.pilar();
                 else if (nk == 0 && k > 0) st = p.faixa();
                 else if (nk >= 2 && nk <= 3 && (Math.abs(dx) == hw ? Math.floorMod(dz, 3) != 0 : Math.floorMod(dx, 3) != 0)) st = p.vidro();
                 else st = p.parede();
                 s(c.offset(dx, k, dz), st);
             }
-            s(c.offset(dx, topo, dz), borda ? p.faixa() : ((Math.floorMod(dx, 4) == 2 && Math.floorMod(dz, 4) == 2) ? p.luz() : p.teto()));
+            if (!borda && Math.floorMod(dx, 4) == 2 && Math.floorMod(dz, 4) == 2) luzNoTeto(c.offset(dx, topo, dz), p.teto());
+            else s(c.offset(dx, topo, dz), borda ? p.faixa() : p.teto());
             if (borda) s(c.offset(dx, topo + 1, dz), (dx + dz) % 2 == 0 ? p.parede() : b(Blocks.AIR));
         }
         // luz no teto do térreo também
         for (int dx = -hw + 2; dx <= hw - 2; dx += 4) for (int dz = -hd + 2; dz <= hd - 2; dz += 4) {
-            if (andares == 1) s(c.offset(dx, topo, dz), p.luz());
+            if (andares == 1) luzNoTeto(c.offset(dx, topo, dz), p.teto());
         }
+        // lampiões pendurados nos tetos dos andares de baixo (depois das paredes, para não serem apagados)
+        for (BlockPos q : luzes) luzNoTeto(q, b(p.madeira()));
         int alcance = porta.getAxis() == Direction.Axis.X ? hw : hd;
         BlockPos pp = c.relative(porta, alcance);
         Direction lado = porta.getClockWise();
         for (int w = -1; w <= 1; w++) for (int k = 0; k < 3; k++) s(pp.relative(lado, w).above(k), b(Blocks.AIR));
         for (int w = -2; w <= 2; w++) s(pp.relative(lado, w).above(3), p.faixa());
-        s(pp.relative(lado, -2).relative(porta).above(2), p.luz());
-        s(pp.relative(lado, 2).relative(porta).above(2), p.luz());
+        luzDaPorta(pp.relative(lado, -2).relative(porta).above(2));
+        luzDaPorta(pp.relative(lado, 2).relative(porta).above(2));
         // degrau na frente
         for (int w = -1; w <= 1; w++) s(pp.relative(porta).relative(lado, w).below(), p.faixa());
     }

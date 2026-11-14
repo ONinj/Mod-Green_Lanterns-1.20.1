@@ -477,7 +477,7 @@ public final class CidadeUnica {
                     if (s.getBlock() instanceof net.minecraft.world.level.block.LeavesBlock && !s.getValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT)) {
                         level.setBlock(m, ar, 2);
                         arvore = true;
-                    } else if (arvore && s.is(net.minecraft.tags.BlockTags.LOGS)) level.setBlock(m, ar, 2);
+                    } else if (arvore && s.is(net.minecraft.tags.BlockTags.LOGS) && !net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock()).getPath().startsWith("stripped")) level.setBlock(m, ar, 2);
                     else if (s.is(Blocks.VINE) || s.is(Blocks.BEE_NEST)) level.setBlock(m, ar, 2);
                 }
             }
@@ -499,6 +499,7 @@ public final class CidadeUnica {
                 if (falta.isEmpty()) { DESENHOS.remove(pl.chave + "|" + p.id()); FALTAM.remove(pl.chave + "|" + p.id()); }
             }
         }
+        Acabamento.prenderNoPedaco(level, cx, cz, pl.y - 2, pl.y + 60);
     }
 
     /** O desenho da peça (feito uma vez e guardado até todos os pedaços dela serem gerados). */
@@ -512,6 +513,7 @@ public final class CidadeUnica {
             Mundo.Virtual v = new Mundo.Virtual(l, d, (x, z) -> chao(l, pl, x, z));
             Kit k = new Kit(v, pl.pal);
             Obra.imediato(l, () -> p.obra().accept(k));
+            d.acabar(v);
             Set<Long> pedacos = ConcurrentHashMap.newKeySet();
             for (int x = p.x0() >> 4; x <= p.x1() >> 4; x++) for (int z = p.z0() >> 4; z <= p.z1() >> 4; z++)
                 if (d.toca(x, z)) pedacos.add(net.minecraft.world.level.ChunkPos.asLong(x, z));
@@ -580,7 +582,8 @@ public final class CidadeUnica {
         for (Peca x : pl.pecas) if (x.id().equals("casa" + i)) pc = x;
         if (pc == null) return "sem casa " + i;
         Desenho d = new Desenho();
-        Kit k = new Kit(new Mundo.Virtual(l, d, (x, z) -> chao(l, pl, x, z)), pl.pal);
+        Mundo.Virtual vt = new Mundo.Virtual(l, d, (x, z) -> chao(l, pl, x, z));
+        Kit k = new Kit(vt, pl.pal);
         Mobilia.DEBUG = true;
         final Peca alvo = pc;
         Obra.imediato(l, () -> alvo.obra().accept(k));
