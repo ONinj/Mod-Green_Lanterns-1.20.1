@@ -65,6 +65,17 @@ public final class WhiteAltar {
         // Fusão: os anéis e os drops somem (inclusive o anel que está no dedo)
         RingData data = ModCapabilities.get(player).orElse(null);
         if (data == null) return;
+        // A afinidade de cada anel fundido soma no Anel Branco (até o máximo, "Uno com o anel")
+        int soma = 0;
+        for (PlanetLore p : PlanetLore.values()) {
+            if (!p.fusion()) continue;
+            ItemStack r = acharAnel(player, p.corps.id().getPath());
+            if (!r.isEmpty()) soma += com.lanterna.construct.Affinity.points(r);
+        }
+        int maxAf = com.lanterna.construct.Affinity.THRESHOLDS[com.lanterna.construct.Affinity.MAX_LEVEL];
+        player.getPersistentData().putInt("lanterna_afinidade_fusao", Math.min(maxAf, soma));
+        player.sendSystemMessage(Component.translatable("message.lanterna.afinidade_fusao",
+                com.lanterna.construct.Affinity.levelName(com.lanterna.construct.Affinity.level(Math.min(maxAf, soma)))).withStyle(st -> st.withColor(0xFFFFFF)));
         for (PlanetLore p : PlanetLore.values()) {
             if (!p.fusion()) continue;
             removeRing(player, p.corps.id().getPath());
@@ -78,6 +89,16 @@ public final class WhiteAltar {
         ForgeRituals.burst(level, pos, 0xFFFFFF);
         // O Anel Branco chega com a cerimônia da Vida
         SelectionManager.startSelection(player, BuiltinCorps.WHITE.id());
+    }
+
+    /** O anel daquela Tropa com o jogador (no dedo, no inventário ou na outra mão). */
+    private static ItemStack acharAnel(ServerPlayer player, String corps) {
+        ItemStack worn = EquipmentHelper.ring(player);
+        if (!worn.isEmpty() && PowerRingItem.getCorps(worn).getPath().equals(corps)) return worn;
+        for (ItemStack s : player.getInventory().items)
+            if (s.getItem() instanceof PowerRingItem && PowerRingItem.getCorps(s).getPath().equals(corps)) return s;
+        ItemStack off = player.getOffhandItem();
+        return off.getItem() instanceof PowerRingItem && PowerRingItem.getCorps(off).getPath().equals(corps) ? off : ItemStack.EMPTY;
     }
 
     private static void removeRing(ServerPlayer player, String corps) {

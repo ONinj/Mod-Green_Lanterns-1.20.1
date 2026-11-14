@@ -80,6 +80,7 @@ public final class RingPowers {
             applyFlightAbility(player, data);
         }
 
+        com.lanterna.lore.entity.boss.Controle.tick(player);
         if (data.hasRing()) {
             tickFlight(player, data);
             tickSustento(player, data);
@@ -291,6 +292,10 @@ public final class RingPowers {
         }
 
         boolean enable = !data.flightEnabled();
+        if (enable && com.lanterna.lore.entity.boss.Controle.semVoo(player)) {
+            player.displayClientMessage(Component.translatable("boss.lanterna.controle.sem_voo"), true);
+            return;
+        }
         data.setFlightEnabled(enable);
         applyFlightAbility(player, data);
 

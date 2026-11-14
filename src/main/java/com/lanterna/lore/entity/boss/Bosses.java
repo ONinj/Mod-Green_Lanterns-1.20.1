@@ -575,6 +575,20 @@ public final class Bosses {
                     level().setBlockAndUpdate(p, s.setValue(RitualBlocks.FarolPerola.ACESO, false));
                 }
             }
+            // a arena da cidade única não tinha os faróis: cinco deles sobem do chão, em pentágono, já apagados
+            for (int i = beacons.size(); i < 5; i++) {
+                double a = Math.PI * 2 * i / 5 + Math.PI / 10;
+                int x = c.getX() + (int) Math.round(Math.cos(a) * 15), z = c.getZ() + (int) Math.round(Math.sin(a) * 15);
+                int y = c.getY() + 8;
+                while (y > c.getY() - 10 && !level().getBlockState(new BlockPos(x, y - 1, z)).isFaceSturdy(level(), new BlockPos(x, y - 1, z), net.minecraft.core.Direction.UP)) y--;
+                BlockPos base = new BlockPos(x, y, z);
+                for (int k = 0; k < 2; k++) level().setBlockAndUpdate(base.above(k), net.minecraft.world.level.block.Blocks.PRISMARINE_BRICKS.defaultBlockState());
+                BlockPos f = base.above(2);
+                level().setBlockAndUpdate(f, LoreBlocks.FAROL_PEROLA.get().defaultBlockState().setValue(RitualBlocks.FarolPerola.ACESO, false));
+                ((ServerLevel) level()).sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, f.getX() + 0.5, f.getY() + 1, f.getZ() + 0.5, 30, 0.3, 1.5, 0.3, 0.05);
+                beacons.add(f);
+            }
+            for (Player pl : playersNear(40)) pl.displayClientMessage(Component.translatable("boss.lanterna.morrow.beacons"), false);
             level().playSound(null, blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3f, 0.4f);
         }
 

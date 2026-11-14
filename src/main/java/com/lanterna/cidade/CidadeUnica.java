@@ -420,6 +420,49 @@ public final class CidadeUnica {
         for (int i = 0; i < 8; i++) Arquitetura.arco(l, topos[i], topos[(i + 1) % 8], 3, e);
         Arquitetura.arquibancada(l, c, y, 21, 3, e);
         k.s(altar, b(LoreBlocks.ALTAR_DESAFIO.get()));
+        muroArena(k, c);
+    }
+
+    /**
+     * Muro em volta da arena (e dos lados da estrada que chega nela): a arena fica fora da muralha da cidade e, perto
+     * do mar, a água entrava e inundava tudo. Vai de 2 blocos abaixo do chão até 3 acima, com o portão a oeste.
+     */
+    static void muroArena(Kit k, BlockPos c) {
+        int y = c.getY();
+        for (int dx = -28; dx <= 28; dx++) for (int dz = -28; dz <= 28; dz++) {
+            double d = Math.sqrt(dx * dx + dz * dz);
+            if (d <= 25.6 || d > 27.4) continue;
+            boolean portao = dx < 0 && Math.abs(dz) <= 4;
+            for (int h = -2; h <= (portao ? -1 : 2); h++) k.s(c.offset(dx, h, dz), h == 2 ? k.p.faixa() : k.p.parede());
+            if (!portao && (dx + dz) % 2 == 0) k.s(c.offset(dx, 3, dz), k.p.parede()); // ameias
+        }
+        // os lados da estrada, da muralha da cidade até o portão
+        for (int x = R - 4; x <= c.getX() - 25; x++) for (int lado : new int[]{-5, 5})
+            for (int h = -2; h <= 1; h++) k.s(new BlockPos(x, y + h, c.getZ() + lado), h == 1 ? k.p.faixa() : k.p.parede());
+    }
+
+    /**
+     * Mundos gerados antes da 0.48.12: levanta o muro da arena e tira a água que já entrou (só acima do chão; o lago
+     * de Morrow em Odym fica abaixo dele e continua). Roda uma vez por planeta.
+     */
+    public static void repararArena(ServerLevel l, PlanetLore p) {
+        Planta pl = planta(l, p);
+        BlockPos c = ARENA.atY(pl.y);
+        if (!l.isLoaded(c) || !l.isLoaded(c.offset(28, 0, 28)) || !l.isLoaded(c.offset(-28, 0, -28))) return;
+        Mundo.Servidor m = new Mundo.Servidor(l);
+        Kit k = new Kit(m, pl.pal);
+        muroArena(k, c);
+        int tirada = 0;
+        for (BlockPos q : BlockPos.betweenClosed(c.offset(-27, 0, -27), c.offset(27, 8, 27))) {
+            double dx = q.getX() - c.getX(), dz = q.getZ() - c.getZ();
+            if (dx * dx + dz * dz > 26 * 26) continue;
+            if (l.getBlockState(q).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) { l.setBlock(q, b(Blocks.AIR), 2); tirada++; }
+        }
+        for (BlockPos q : BlockPos.betweenClosed(new BlockPos(R - 4, pl.y, -4), new BlockPos(c.getX() - 25, pl.y + 4, 4)))
+            if (l.getBlockState(q).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock) { l.setBlock(q, b(Blocks.AIR), 2); tirada++; }
+        m.acabar();
+        com.lanterna.lore.LoreWorldData.get(l.getServer()).markSite("arena_muro:" + p.planet);
+        LanternaMod.LOGGER.info("Lanterna: muro da arena de {} levantado ({} blocos de água tirados)", p.planet, tirada);
     }
 
     // ===================== Geração =====================

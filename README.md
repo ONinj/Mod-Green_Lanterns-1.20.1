@@ -104,6 +104,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.9 ✅ (0.48.9) Sem as fontes de água nas quatro diagonais da praça da Bateria Central (cidades novas e mundos já gerados)
 1.56.10 ✅ (0.48.10) Cargueiro mercador: clique na nave para entrar; o mercador espera no porão para negociar (Shift + clique direito) e a nave espera quem entrou
 1.56.11 ✅ (0.48.11) Voz: o anel ouve o mesmo microfone do Simple Voice Chat (ou o escolhido em /lanternmic), grava em qualquer formato do microfone (48/44,1 kHz, estéreo) e converte, aumenta o volume de microfone baixo e avisa quando só gravou silêncio
+1.56.12 ✅ (0.48.12) Chefes mais fortes com Silêncio/Prisão/Queda, faróis do Morrow de volta, lendários no nível 60 (só a partir do 50), afinidade somada no anel Branco, muro nas arenas, Farejar e novos construtos da Morte, Branco com construtos de todas as Tropas, voz desligada (só chat), laser melhor no PvP
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

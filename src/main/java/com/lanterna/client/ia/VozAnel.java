@@ -57,12 +57,17 @@ public final class VozAnel {
     private static volatile int naFila;
     /** Teste automático: não abre processo nenhum. */
     public static boolean mudo;
+    /**
+     * 0.48.12: falar com o anel pela voz está desligado (só pelo chat). O anel continua respondendo em voz alta.
+     * Para religar no futuro, basta trocar para true.
+     */
+    public static final boolean OUVIR_VOZ = false;
 
     @Mod.EventBusSubscriber(modid = LanternaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static final class Registro {
         @SubscribeEvent
         public static void teclas(RegisterKeyMappingsEvent e) {
-            e.register(FALAR);
+            if (OUVIR_VOZ) e.register(FALAR);
         }
     }
 
@@ -72,7 +77,7 @@ public final class VozAnel {
 
         @SubscribeEvent
         public static void tick(TickEvent.ClientTickEvent e) {
-            if (e.phase != TickEvent.Phase.END) return;
+            if (e.phase != TickEvent.Phase.END || !OUVIR_VOZ) return;
             while (FALAR.consumeClick()) { /* o que vale é segurar (abaixo) */ }
             boolean baixo = FALAR.isDown() && Minecraft.getInstance().screen == null;
             if (baixo && !antes) apertou();
@@ -105,7 +110,7 @@ public final class VozAnel {
 
     public static void ouvir() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+        if (mc.player == null || !OUVIR_VOZ) return;
         if (!ClientRingData.hasRing) {
             AnelIA.responder(Component.translatable("anel.ia.sem_anel"), false);
             return;

@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
@@ -96,6 +97,10 @@ public final class Constructs {
     // ===================== Usar =====================
 
     public static void cast(ServerPlayer player, String id) {
+        if (com.lanterna.lore.entity.boss.Controle.silenciado(player)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("boss.lanterna.controle.sem_construto"), true);
+            return;
+        }
         if (com.lanterna.construct.oficina.MeusConstrutos.eMeu(id)) {
             com.lanterna.construct.oficina.MeusConstrutos.lancar(player, com.lanterna.construct.oficina.MeusConstrutos.slot(id));
             return;
@@ -351,6 +356,50 @@ public final class Constructs {
                 level.addFreshEntity(hands);
                 level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 1.2f, 0.6f);
             }
+            case FAREJAR -> farejar(player, level, color, lvl);
+            case DRENAR -> {
+                LivingEntity target = lookedEntity(player, 20);
+                if (target == null) {
+                    player.displayClientMessage(Component.translatable("message.lanterna.construct_no_target"), true);
+                    return false;
+                }
+                float d = (6f + lvl) * pow;
+                com.lanterna.combate.Equilibrio.ferirComPoder(target, player.damageSources().playerAttack(player), d);
+                player.heal(d * 0.5f);
+                target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
+                Vec3 de = target.position().add(0, target.getBbHeight() * 0.6, 0), ate = player.position().add(0, 1.2, 0);
+                for (int i = 0; i <= 24; i++) {
+                    Vec3 q = de.lerp(ate, i / 24.0);
+                    level.sendParticles(new DustParticleOptions(new Vector3f(0.55f, 0.05f, 0.1f), 1.3f), q.x, q.y + Math.sin(i * 0.6) * 0.25, q.z, 1, 0.05, 0.05, 0.05, 0);
+                }
+                level.playSound(null, target.blockPosition(), SoundEvents.WITHER_HURT, SoundSource.PLAYERS, 0.8f, 0.7f);
+            }
+            case MORTALHA -> {
+                Vec3 spot = groundAhead(player, 24);
+                double r = 5 + 0.5 * lvl;
+                for (int i = 0; i < 90; i++) {
+                    double a = player.getRandom().nextDouble() * Math.PI * 2, d = Math.sqrt(player.getRandom().nextDouble()) * r;
+                    level.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * d, spot.y + 0.3 + player.getRandom().nextDouble() * 2.5, spot.z + Math.sin(a) * d, 1, 0, 0.02, 0, 0.01);
+                }
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(spot, spot).inflate(r, 3, r), x -> x != player && ConstructEntity.inimigo(player, x))) {
+                    e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 100 + 20 * lvl, 0));
+                    e.addEffect(new MobEffectInstance(MobEffects.WITHER, 100 + 20 * lvl, 1));
+                    e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100 + 20 * lvl, 2));
+                    if (e instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.silenciar(sp, 40, color);
+                }
+                level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1.5f, 0.6f);
+            }
+            case TUMULO -> {
+                LivingEntity target = lookedEntity(player, 24);
+                if (target == null) {
+                    player.displayClientMessage(Component.translatable("message.lanterna.construct_no_target"), true);
+                    return false;
+                }
+                cage(level, target, color, 100 + 20 * lvl, player);
+                target.addEffect(new MobEffectInstance(MobEffects.WITHER, 100 + 20 * lvl, 1));
+                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100 + 20 * lvl, 4));
+                level.playSound(null, target.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 1.4f);
+            }
             case RASTRO_MOGO -> com.lanterna.mogo.MogoRastro.usar(player, color);
             case VIDA -> {
                 double r = 12;
@@ -381,6 +430,54 @@ public final class Constructs {
             }
         }
         return true;
+    }
+
+    /**
+     * Farejar (Tropa da Morte): sente quem carrega um anel. No mesmo mundo, até 400 blocos: cada portador (jogador ou
+     * Lanterna) deixa um rastro de fumaça até ele e aparece na lista com direção e distância; os mais perto (64 blocos)
+     * ficam brilhando por alguns segundos. Jogadores com anel em outros mundos aparecem só pelo nome do mundo.
+     */
+    private static void farejar(ServerPlayer player, ServerLevel level, int color, int lvl) {
+        double alcance = 400;
+        java.util.List<LivingEntity> achados = new java.util.ArrayList<>();
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(alcance, 256, alcance), x -> x != player && x.isAlive())) {
+            boolean anel = e instanceof Player p ? ModCapabilities.get(p).map(RingData::hasRing).orElse(false) && !p.isSpectator()
+                    : e instanceof com.lanterna.especies.LanternaEntity le && le.tropa() != null;
+            if (anel) achados.add(e);
+        }
+        achados.sort(java.util.Comparator.comparingDouble(player::distanceToSqr));
+        player.sendSystemMessage(Component.translatable("construct.lanterna.farejar.titulo", achados.size()).withStyle(st -> st.withColor(color).withBold(true)));
+        int n = 0;
+        for (LivingEntity e : achados) {
+            Vec3 d = e.position().subtract(player.position());
+            if (n < 8) {
+                player.sendSystemMessage(Component.literal(" • ").append(e.getDisplayName()).append(Component.literal(" — " + Math.round(d.length()) + " m, "))
+                        .append(Component.translatable("construct.lanterna.farejar." + direcao(d))).withStyle(st -> st.withColor(0xB0B0B0)));
+                // rastro de fumaça na direção
+                Vec3 dir = d.normalize();
+                for (int i = 2; i < 18; i++) {
+                    Vec3 q = player.position().add(0, 1.2, 0).add(dir.scale(i));
+                    level.sendParticles(player, ParticleTypes.SMOKE, true, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0);
+                }
+            }
+            if (d.length() < 64 + 16 * lvl) e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200 + 40 * lvl, 0, false, false));
+            n++;
+        }
+        // jogadores com anel em outros mundos
+        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+            if (p.level() == level || p.isSpectator() || !ModCapabilities.get(p).map(RingData::hasRing).orElse(false)) continue;
+            player.sendSystemMessage(Component.literal(" • ").append(p.getDisplayName())
+                    .append(Component.translatable("construct.lanterna.farejar.longe", p.level().dimension().location().getPath())).withStyle(st -> st.withColor(0x808080)));
+        }
+        level.playSound(null, player.blockPosition(), SoundEvents.WOLF_SHAKE, SoundSource.PLAYERS, 1f, 0.5f);
+        level.playSound(null, player.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1.2f, 0.7f);
+    }
+
+    private static String direcao(Vec3 d) {
+        if (Math.abs(d.y) > Math.max(Math.abs(d.x), Math.abs(d.z)) * 1.5) return d.y > 0 ? "acima" : "abaixo";
+        double ang = Math.toDegrees(Math.atan2(d.x, -d.z));   // 0 = norte (-z)
+        String[] r = {"n", "ne", "l", "se", "s", "so", "o", "no"};
+        return r[(int) Math.floorMod(Math.round(ang / 45.0), 8)];
     }
 
     // ===================== Construtos de blocos =====================

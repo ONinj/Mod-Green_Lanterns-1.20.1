@@ -47,7 +47,10 @@ public final class ArvoreDaLuz {
 
     /** O construto da árvore está liberado para o anel que o jogador usa? */
     public static boolean liberado(Player p, ConstructType t) {
-        return !t.arvore || tem(p, t.id);
+        if (!t.arvore) return true;
+        // o anel Branco tem todos os construtos das outras Tropas (menos os da Morte) sem precisar da árvore
+        if ("white".equals(corps(p))) return !"black".equals(t.corps);
+        return tem(p, t.id);
     }
 
     // ---- passivas ----

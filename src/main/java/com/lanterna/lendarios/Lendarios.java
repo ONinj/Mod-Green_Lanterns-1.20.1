@@ -84,13 +84,17 @@ public final class Lendarios {
     /** Pico da luta: jogadores e nível médio (para a escala). */
     private static final Map<UUID, int[]> PICO = new HashMap<>();
 
-    /** Multiplicadores atuais (vida efetiva, dano) deste lendário. */
+    /** 0.48.12: todo lendário luta no nível 60; só quem tem nível 50 ou mais pode enfrentá-lo. */
+    public static final int NIVEL = 60, NIVEL_MIN = 50;
+    private static final String CONSTRUTO = "lanterna_lendario_construto";
+
+    /** Multiplicadores atuais (vida efetiva, dano) deste lendário: nível fixo 60, sobe só com o número de jogadores. */
     public static float[] escala(LanternaEntity le) {
         int[] p = PICO.get(le.getUUID());
         int n = p == null ? 1 : Math.max(1, p[0]);
-        float nv = p == null ? 0 : Math.min(com.lanterna.tropa.Nivel.MAX, p[1]) / (float) com.lanterna.tropa.Nivel.MAX;
-        float vida = 1.4f * (1 + 1.6f * nv) * (1 + 0.8f * (n - 1));
-        float dano = 1.7f * (1 + 1.4f * nv) * (1 + 0.15f * (n - 1));
+        float nv = NIVEL / (float) com.lanterna.tropa.Nivel.MAX;
+        float vida = 2.0f * (1 + 1.6f * nv) * (1 + 0.8f * (n - 1));
+        float dano = 2.0f * (1 + 1.4f * nv) * (1 + 0.15f * (n - 1));
         return new float[]{vida, dano};
     }
 
@@ -215,10 +219,12 @@ public final class Lendarios {
                 le.setHealth(le.getMaxHealth());
             }
             medir(le, l);
+            fracos(le, l, level);
             barra(le, l, level);
             casa(le, l);
             duelo(le, l);
             onda(le, l, level);
+            construtos(le, l, level);
             ajuda(le, l, level);
         }
     }
@@ -232,7 +238,7 @@ public final class Lendarios {
         b.setProgress(le.getHealth() / le.getMaxHealth());
         int[] pico = PICO.get(le.getUUID());
         b.setName(pico == null ? le.getDisplayName() : le.getDisplayName().copy()
-                .append(Component.translatable("lendario.lanterna.escala", pico[1], pico[0]).withStyle(net.minecraft.ChatFormatting.GRAY)));
+                .append(Component.translatable("lendario.lanterna.escala", NIVEL, pico[0]).withStyle(net.minecraft.ChatFormatting.GRAY)));
         for (ServerPlayer p : level.players()) {
             boolean perto = p.distanceToSqr(le) < 56 * 56;
             if (perto && !b.getPlayers().contains(p)) b.addPlayer(p);
@@ -295,6 +301,93 @@ public final class Lendarios {
         }
     }
 
+    /**
+     * Jogador de Tropa inimiga abaixo do nível 50 que chega perto (ou bate): o lendário "acaba" com ele num golpe, mas
+     * não mata de verdade: sobra pouca vida e ele é arremessado para fora do planeta, no espaço.
+     */
+    private static void fracos(LanternaEntity le, Lendario l, ServerLevel level) {
+        if (DUELOS.containsKey(le.getUUID())) return;
+        for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, le.getBoundingBox().inflate(22),
+                x -> !x.isSpectator() && !x.isCreative() && x.isAlive())) {
+            if (!inimigo(l, p) || Nivel.nivel(p) >= NIVEL_MIN) continue;
+            expulsar(le, l, p);
+        }
+    }
+
+    private static void expulsar(LanternaEntity le, Lendario l, ServerPlayer p) {
+        ServerLevel level = (ServerLevel) le.level();
+        p.sendSystemMessage(Component.literal("<").append(l.nome()).append("> ")
+                .append(Component.translatable("lendario.lanterna.fraco", NIVEL)).withStyle(st -> st.withColor(l.corps.color())));
+        p.sendSystemMessage(Component.translatable("lendario.lanterna.expulso", l.nome(), NIVEL_MIN).withStyle(ChatFormatting.GRAY));
+        raio(level, p.position().add(0, 1, 0), l.corps.color(), 3, 60);
+        level.playSound(null, p.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 2f, 0.7f);
+        if (le.getTarget() == p) le.setTarget(null);
+        var ls = LUTARAM.get(le.getUUID());
+        if (ls != null) ls.remove(p.getUUID());
+        p.setHealth(Math.min(p.getHealth(), 3f));
+        p.removeAllEffects();
+        ServerLevel espaco = level.getServer().getLevel(com.lanterna.space.SpaceBodies.SPACE);
+        if (espaco != null && level.dimension() != com.lanterna.space.SpaceBodies.SPACE) {
+            Vec3 fora = com.lanterna.space.SpaceTravel.exitPoint(p, level.dimension(), p.getX(), p.getZ());
+            p.teleportTo(espaco, fora.x, fora.y, fora.z, -90f, 0f);
+        } else {
+            // sem espaço: longe da arena, lá no alto
+            Vec3 d = p.position().subtract(le.position()).multiply(1, 0, 1);
+            d = d.lengthSqr() < 0.01 ? new Vec3(1, 0, 0) : d.normalize();
+            p.teleportTo(p.getX() + d.x * 200, Math.min(300, p.getY() + 60), p.getZ() + d.z * 200);
+        }
+        p.setDeltaMovement(Vec3.ZERO);
+        p.hurtMarked = true;
+    }
+
+    /**
+     * Construtos do lendário (0.48.12): a cada 3 a 5 segundos de luta, um ataque de construto que alterna entre
+     * martelo, rajada de punhos, chuva de disparos em volta do alvo e uma prisão de luz (Silêncio/Prisão dos chefes).
+     */
+    private static void construtos(LanternaEntity le, Lendario l, ServerLevel level) {
+        LivingEntity alvo = le.getTarget();
+        if (alvo == null || !alvo.isAlive() || le.distanceTo(alvo) > 32) return;
+        long agora = level.getGameTime();
+        var tag = le.getPersistentData();
+        if (agora < tag.getLong(CONSTRUTO)) return;
+        float f = le.getHealth() / le.getMaxHealth();
+        tag.putLong(CONSTRUTO, agora + (f < 0.33f ? 50 : f < 0.66f ? 70 : 90) + level.random.nextInt(30));
+        int cor = l.corps.color();
+        float dano = (float) l.dano * 0.7f;
+        int qual = tag.getInt(CONSTRUTO + "_n");
+        tag.putInt(CONSTRUTO + "_n", qual + 1);
+        le.getLookControl().setLookAt(alvo, 60, 60);
+        switch (qual % 5) {
+            case 0 -> com.lanterna.construct.ConstructEntity.spawnHammer(le, alvo.position(), cor, dano * 1.4f, 1.4f);
+            case 1 -> {
+                Vec3 base = alvo.getEyePosition().subtract(le.getEyePosition()).normalize();
+                for (int i = -1; i <= 1; i++) {
+                    Vec3 dir = base.yRot(i * 0.18f);
+                    com.lanterna.construct.ConstructEntity.spawnProjectile(le, com.lanterna.construct.ConstructEntity.Kind.FIST, dir, 1.6, cor, dano, 1.2f);
+                }
+            }
+            case 2 -> {
+                for (int i = 0; i < 6; i++) {
+                    double a = Math.PI * 2 * i / 6;
+                    Vec3 de = alvo.position().add(Math.cos(a) * 5, 6, Math.sin(a) * 5);
+                    var c = com.lanterna.construct.ConstructEntity.create(le, com.lanterna.construct.ConstructEntity.Kind.BOLT, cor, 40, dano * 0.6f, 1f);
+                    c.setPos(de.x, de.y, de.z);
+                    c.setVelocidade(alvo.position().add(0, 1, 0).subtract(de).normalize().scale(1.2));
+                    level.addFreshEntity(c);
+                }
+                level.playSound(null, alvo.blockPosition(), SoundEvents.TRIDENT_THUNDER, SoundSource.HOSTILE, 1f, 1.4f);
+            }
+            case 3 -> {
+                if (alvo instanceof ServerPlayer sp && !DUELOS.containsKey(le.getUUID())) com.lanterna.lore.entity.boss.Controle.prender(sp, 50, cor);
+                else com.lanterna.construct.ConstructEntity.spawnHammer(le, alvo.position(), cor, dano * 1.4f, 1.4f);
+            }
+            default -> {
+                if (alvo instanceof ServerPlayer sp && !DUELOS.containsKey(le.getUUID())) com.lanterna.lore.entity.boss.Controle.silenciar(sp, 80, cor);
+                com.lanterna.construct.ConstructEntity.spawnBeam(le, cor, dano * 0.25f, 30);
+            }
+        }
+    }
+
     /** Contra inimigos: chama dois Lanternas da Tropa aos 66% e aos 33% de vida. */
     private static void ajuda(LanternaEntity le, Lendario l, ServerLevel level) {
         if (DUELOS.containsKey(le.getUUID()) || !(le.getTarget() instanceof Player alvo)) return;
@@ -337,6 +430,14 @@ public final class Lendarios {
         // e aguenta mais conforme quem luta (a vida do Minecraft para em 1024: a escala vira resistência)
         if (de(e.getEntity()) != null && e.getEntity() instanceof LanternaEntity alvo && e.getSource().getEntity() != e.getEntity())
             e.setAmount(e.getAmount() / escala(alvo)[0]);
+        // inimigo abaixo do nível 50 não arranha o lendário: é arremessado para fora
+        Lendario lf = de(e.getEntity());
+        if (lf != null && e.getSource().getEntity() instanceof ServerPlayer fraco
+                && !fraco.isCreative() && inimigo(lf, fraco) && Nivel.nivel(fraco) < NIVEL_MIN) {
+            e.setCanceled(true);
+            expulsar((LanternaEntity) e.getEntity(), lf, fraco);
+            return;
+        }
         // quem bateu no lendário entra na lista das recompensas
         if (de(e.getEntity()) != null && e.getSource().getEntity() instanceof ServerPlayer p) {
             LUTARAM.computeIfAbsent(e.getEntity().getUUID(), k -> new HashSet<>()).add(p.getUUID());
@@ -433,6 +534,10 @@ public final class Lendarios {
             return InteractionResult.CONSUME;
         }
         if (inimigo(l, p)) {
+            if (Nivel.nivel(p) < NIVEL_MIN) {
+                expulsar(le, l, p);
+                return InteractionResult.CONSUME;
+            }
             p.sendSystemMessage(fala(l, "inimigo"));
             le.setTarget(p);
             return InteractionResult.CONSUME;
@@ -444,6 +549,11 @@ public final class Lendarios {
         }
         if (Factions.playerCorps(p) == null) {
             p.sendSystemMessage(fala(l, "sem_anel"));
+            return InteractionResult.CONSUME;
+        }
+        if (Nivel.nivel(p) < NIVEL_MIN) {
+            p.sendSystemMessage(Component.literal("<").append(l.nome()).append("> ")
+                    .append(Component.translatable("lendario.lanterna.cedo", p.getDisplayName(), NIVEL_MIN)).withStyle(s -> s.withColor(l.corps.color())));
             return InteractionResult.CONSUME;
         }
         long espera = p.getPersistentData().getLong("lanterna_duelo_" + l.id) - System.currentTimeMillis();

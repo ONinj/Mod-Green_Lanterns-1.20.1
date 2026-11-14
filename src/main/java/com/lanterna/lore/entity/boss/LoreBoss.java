@@ -103,13 +103,15 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
     }
 
     public static AttributeSupplier.Builder attributes(double health, double damage, double speed) {
+        // 0.48.12: chefes mais fortes (vida +60%, dano +35%, mais armadura)
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, health)
-                .add(Attributes.ATTACK_DAMAGE, damage)
+                .add(Attributes.MAX_HEALTH, Math.min(1024, health * 1.6))
+                .add(Attributes.ATTACK_DAMAGE, damage * 1.35)
                 .add(Attributes.MOVEMENT_SPEED, speed)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
                 .add(Attributes.FOLLOW_RANGE, 64)
-                .add(Attributes.ARMOR, 8);
+                .add(Attributes.ARMOR, 12)
+                .add(Attributes.ARMOR_TOUGHNESS, 6);
     }
 
     @Override
@@ -218,8 +220,34 @@ public abstract class LoreBoss extends Monster implements GeoEntity {
         if (target != null && target.isAlive()) {
             getLookControl().setLookAt(target, 30, 30);
             bossTick(target);
+            if (!isEcho()) poderDeControle(target);
         } else {
             idleTick();
+        }
+    }
+
+    private int controleCooldown = 200;
+    private int controleProximo;
+
+    /**
+     * Silêncio (sem construtos), Prisão (preso no lugar) ou Queda (sem voo), em rodízio, a cada 9 a 14 segundos
+     * (mais rápido nas fases seguintes). Avisa um segundo antes, com um brilho no chefe, para dar tempo de reagir.
+     */
+    protected void poderDeControle(LivingEntity target) {
+        if (--controleCooldown == 20) {
+            ((ServerLevel) level()).sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + getBbHeight() * 0.6, getZ(), 40, getBbWidth() * 0.6, getBbHeight() * 0.4, getBbWidth() * 0.6, 0.1);
+            level().playSound(null, blockPosition(), SoundEvents.EVOKER_PREPARE_ATTACK, SoundSource.HOSTILE, 2f, 0.6f);
+        }
+        if (controleCooldown > 0) return;
+        controleCooldown = (phase() >= 2 ? 160 : 220) + getRandom().nextInt(80);
+        int cor = barRgb();
+        int qual = controleProximo++ % 3;
+        java.util.List<Player> alvos = playersNear(28);
+        if (alvos.isEmpty()) return;
+        switch (qual) {
+            case 0 -> { for (Player p : alvos) if (p instanceof net.minecraft.server.level.ServerPlayer sp) Controle.silenciar(sp, phase() >= 2 ? 120 : 80, cor); }
+            case 1 -> { if (target instanceof net.minecraft.server.level.ServerPlayer sp) Controle.prender(sp, phase() >= 2 ? 70 : 50, cor); }
+            default -> { for (Player p : alvos) if (p instanceof net.minecraft.server.level.ServerPlayer sp) Controle.derrubar(sp, phase() >= 2 ? 100 : 70, cor, true); }
         }
     }
 

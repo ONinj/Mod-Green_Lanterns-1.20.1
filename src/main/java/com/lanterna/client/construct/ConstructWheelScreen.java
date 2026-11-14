@@ -102,9 +102,21 @@ public class ConstructWheelScreen extends Screen {
 
         // anel de dentro: construtos de qualquer anel; anel de fora: os da Tropa (os da Árvore da Luz só depois de liberados)
         java.util.List<ConstructType> comuns = new java.util.ArrayList<>(), tropa = new java.util.ArrayList<>();
+        boolean branco = ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white");
+        String pagina = branco ? ConstructType.PAGINAS_BRANCO[Math.floorMod(paginaBranco, ConstructType.PAGINAS_BRANCO.length)] : null;
         for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
-            if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)) continue;
+            if (branco) {
+                if (t.corps != null && !t.corps.equals(pagina)) continue;
+            } else if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)) continue;
             (t.corps == null ? comuns : tropa).add(t);
+        }
+        if (branco) {
+            Component pg = Component.translatable("construct.lanterna.pagina_branco",
+                    Component.translatable("corps.lanterna." + pagina), Math.floorMod(paginaBranco, ConstructType.PAGINAS_BRANCO.length) + 1, ConstructType.PAGINAS_BRANCO.length);
+            int ty = Math.max(2, cy - (int) (OUTER * 1.08f * k) - 34);
+            g.drawString(font, pg, cx - font.width(pg) / 2, ty, 0xFFFFFFFF, true);
+            Component dica = Component.translatable("construct.lanterna.pagina_dica");
+            g.drawString(font, dica, cx - font.width(dica) / 2, ty + 10, 0xFFA0A8B0, true);
         }
         int r1 = (int) (OUTER * 0.62f * k), r2 = (int) (OUTER * 1.08f * k);
         int borda = (int) ((tropa.isEmpty() ? r1 + 22 : r2 + 16) * 1f);
@@ -203,6 +215,19 @@ public class ConstructWheelScreen extends Screen {
         return h;
     }
 
+    /** Anel Branco: qual Tropa a roda mostra (rodinha do mouse ou setas trocam). */
+    private static int paginaBranco;
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        if (ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white")) {
+            paginaBranco += delta < 0 ? 1 : -1;
+            if (minecraft.player != null) minecraft.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4f, 1.6f);
+            return true;
+        }
+        return super.mouseScrolled(mx, my, delta);
+    }
+
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (hovered != null) {
@@ -215,6 +240,10 @@ public class ConstructWheelScreen extends Screen {
 
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
+        if ((key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT) && ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white")) {
+            paginaBranco += key == GLFW.GLFW_KEY_RIGHT ? 1 : -1;
+            return true;
+        }
         if (hovered != null && key >= GLFW.GLFW_KEY_1 && key <= GLFW.GLFW_KEY_4) {
             int p = key - GLFW.GLFW_KEY_1;
             if (ClientConstructs.level() >= hovered.unlockLevel) {

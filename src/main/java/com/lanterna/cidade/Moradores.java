@@ -71,6 +71,8 @@ public final class Moradores {
                     if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} NPC(s) da Bateria Central voltaram em {}", n, planet.planet);
                 }
             }
+            if (perto(p, CidadeUnica.ARENA, 90) && !LoreWorldData.get(level.getServer()).siteBuilt("arena_muro:" + planet.planet))
+                CidadeUnica.repararArena(level, planet);
             if (perto(p, CidadeNativa.CENTRO, 250)) {
                 String chave = level.dimension().location() + "|nativa";
                 if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {

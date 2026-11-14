@@ -232,6 +232,12 @@ public final class SelectionManager {
         int startCharge = "dormant".equals(reason) ? Math.max(1, def.maxCharge() / 10) : def.maxCharge();
         ItemStack ring = PowerRingItem.create(def.id(), def.color(), startCharge);
         PowerRingItem.setOwner(ring, player);
+        // Anel Branco: herda a afinidade somada dos sete anéis que foram fundidos (guardada pelo Altar da Vida)
+        var raizAf = player.getPersistentData();
+        if (def.id().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) && raizAf.contains("lanterna_afinidade_fusao")) {
+            ring.getOrCreateTag().putInt(com.lanterna.construct.Affinity.TAG, raizAf.getInt("lanterna_afinidade_fusao"));
+            raizAf.remove("lanterna_afinidade_fusao");
+        }
         EquipmentHelper.equipOrGive(player, RingData.RING_SLOT, ring);
 
         // A bateria da Tropa vem junto, no slot de bateria

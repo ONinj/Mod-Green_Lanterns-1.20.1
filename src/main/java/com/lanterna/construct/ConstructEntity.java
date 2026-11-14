@@ -244,7 +244,7 @@ public class ConstructEntity extends Entity {
         }
         switch (kind()) {
             case BEAM -> {
-                if (tickCount % 4 == 0 && owner != null) beamHit(owner);
+                if (owner != null) beamHit(owner);
             }
             case HAMMER -> {
                 if (tickCount == 11) hammerImpact(owner);
@@ -552,16 +552,24 @@ public class ConstructEntity extends Entity {
         setEnd(nave != null ? nave : end);
     }
 
+    private int ultimoDano = -100, ultimoAlvo = -1;
+
     private void beamHit(LivingEntity owner) {
         Vec3 stop = end();
         LivingEntity hit = firstEntityOnLine(owner, owner.getEyePosition(), stop.add(owner.getViewVector(1f).scale(0.5)));
         ServerLevel sl = (ServerLevel) level();
         sl.sendParticles(dust(), stop.x, stop.y, stop.z, 4, 0.1, 0.1, 0.1, 0);
+        // 0.48.12: confere o acerto a cada tick (antes só de 4 em 4: em PvP o alvo tinha que estar na mira justo naquele
+        // tick); o dano continua no mesmo ritmo, de 4 em 4 ticks, por alvo.
         if (hit != null) {
-            com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
-            hit.invulnerableTime = 0;
-            sl.sendParticles(ParticleTypes.CRIT, stop.x, stop.y, stop.z, 3, 0.2, 0.2, 0.2, 0.1);
-        } else {
+            if (tickCount - ultimoDano >= 4 || hit.getId() != ultimoAlvo) {
+                ultimoDano = tickCount;
+                ultimoAlvo = hit.getId();
+                com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
+                hit.invulnerableTime = 0;
+                sl.sendParticles(ParticleTypes.CRIT, stop.x, stop.y, stop.z, 3, 0.2, 0.2, 0.2, 0.1);
+            }
+        } else if (tickCount % 4 == 0) {
             naveNaLinha(owner, owner.getEyePosition(), stop.add(owner.getViewVector(1f).scale(0.6)), 0.3, damage);
         }
         if (tickCount % 12 == 0) level().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8f, 2f);
@@ -569,7 +577,7 @@ public class ConstructEntity extends Entity {
 
     @Nullable
     private LivingEntity firstEntityOnLine(LivingEntity owner, Vec3 from, Vec3 to) {
-        AABB box = new AABB(from, to).inflate(2.5);
+        AABB box = new AABB(from, to).inflate(6);   // quem voa rápido pode estar até alguns blocos da caixa (histórico da Mira)
         LivingEntity best = null;
         double bestD = Double.MAX_VALUE;
         for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, box, e -> e != owner && e.isAlive() && !e.isSpectator() && !naTripulacao(e))) {

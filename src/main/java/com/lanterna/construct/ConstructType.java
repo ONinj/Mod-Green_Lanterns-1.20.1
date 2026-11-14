@@ -38,6 +38,11 @@ public enum ConstructType {
     TELEPORTE("teleporte", Category.UTILITY, 60, false, 1, 120, "indigo"),
     AVAREZA("avareza", Category.CONTROL, 100, false, 1, 160, "orange"),
     CEIFA("ceifa", Category.ATTACK, 120, false, 1, 180, "black"),
+    /** Farejar (0.48.12): a Tropa da Morte sente o cheiro de quem carrega um anel (rastro e direção de cada um). */
+    FAREJAR("farejar", Category.UTILITY, 60, false, 1, 400, "black"),
+    DRENAR("drenar", Category.ATTACK, 90, false, 1, 120, "black"),
+    MORTALHA("mortalha", Category.CONTROL, 110, false, 2, 220, "black"),
+    TUMULO("tumulo", Category.CONTROL, 120, false, 3, 260, "black"),
     VIDA("vida", Category.DEFENSE, 150, false, 1, 300, "white"),
     /** Rastro do Mogo: mostra onde o planeta-Lanterna está agora (ele anda pelo espaço). */
     RASTRO_MOGO("rastro_mogo", Category.UTILITY, 40, false, 2, 400, "green"),
@@ -159,10 +164,19 @@ public enum ConstructType {
         this.corps = corps;
     }
 
-    /** Este anel (Tropa) pode fazer o construto? */
+    /**
+     * Este anel (Tropa) pode fazer o construto? O anel Branco (0.48.12) faz os de todas as Tropas, menos os da Tropa da
+     * Morte.
+     */
     public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
-        return corps == null || (ringCorps != null && ringCorps.getPath().equals(corps));
+        if (corps == null) return true;
+        if (ringCorps == null) return false;
+        if (ringCorps.getPath().equals("white")) return !corps.equals("black");
+        return ringCorps.getPath().equals(corps);
     }
+
+    /** As Tropas que o anel Branco percorre na roda (uma página por Tropa). */
+    public static final String[] PAGINAS_BRANCO = {"white", "green", "yellow", "red", "orange", "blue", "indigo", "violet"};
 
     /** Construtos que este anel mostra na roda: os de todos + o próprio da Tropa. */
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
@@ -174,7 +188,8 @@ public enum ConstructType {
     /** O construto próprio da Tropa (ou null). */
     @Nullable
     public static ConstructType daTropa(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
-        for (ConstructType t : values()) if (t.corps != null && t.disponivel(ringCorps)) return t;
+        if (ringCorps == null) return null;
+        for (ConstructType t : values()) if (t.corps != null && !t.arvore && t.corps.equals(ringCorps.getPath())) return t;
         return null;
     }
 

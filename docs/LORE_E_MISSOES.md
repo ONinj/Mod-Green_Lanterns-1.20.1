@@ -1442,3 +1442,24 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - **Formatos:** microfone que não grava em 16 kHz mono agora grava no formato dele (48 ou 44,1 kHz, estéreo...) e é convertido.
 - **Volume:** microfone baixo ganha até 4x de volume antes do reconhecimento.
 - **Aviso:** se a gravação foi só silêncio, o anel avisa qual microfone ouviu e sugere o `/lanternmic`. A lista de microfones também vai para o log.
+
+## 0.48.12 — Chefes mais duros, lendários no nível 60 e o arsenal da Morte
+
+- **Chefes (todos, menos os lendários):** vida +60%, dano +35% e mais armadura. A cada 8 a 14 segundos de luta (mais rápido na segunda fase) eles usam um poder de controle, em rodízio, com um brilho e um som de aviso um segundo antes:
+  - **Silêncio:** quem está perto fica 4 a 6 s sem fazer construtos;
+  - **Prisão:** o alvo fica preso no lugar por 2,5 a 3,5 s, entre correntes de luz, e sem voo;
+  - **Queda:** quem está perto perde o voo por 3,5 a 5 s (cai); o voo volta sozinho depois.
+- **Morrow (Odym):** os cinco faróis voltaram. Na troca de fase, se a arena não tiver os faróis, cinco sobem do chão em pentágono, apagados; é preciso reacender cada um com uma Pérola do Amanhã.
+- **Lendários:**
+  - lutam sempre no **nível 60** (a força só sobe com o número de jogadores), batem mais forte e usam muito mais construtos: martelo, rajada de três punhos, chuva de disparos em volta do alvo, prisão de luz e silêncio do anel;
+  - só dá para enfrentá-los a partir do **nível 50**. Jogador de Tropa inimiga abaixo disso que chega perto ou bate é derrubado num golpe, mas não morre: sobra pouca vida e ele é arremessado para fora do planeta, no espaço;
+  - jogador de Tropa aliada abaixo do 50 que pede um duelo ouve que ainda não é hora de treinar.
+- **Anel Branco:** a afinidade dos sete anéis usados no Altar Branco é somada (até o máximo) e vai para o anel Branco. Ele também faz **todos os construtos das outras Tropas, menos os da Tropa da Morte**, inclusive os da Árvore da Luz sem precisar comprar os nós. Na roda, cada Tropa é uma página: a rodinha do mouse ou as setas trocam.
+- **Tropa da Morte, construtos novos:**
+  - **Farejar:** lista quem carrega um anel até 400 blocos (distância e direção), solta um rastro de fumaça até cada um e faz os mais perto brilharem; mostra também quem tem anel em outros mundos;
+  - **Drenar Vida:** suga a vida do alvo na mira e cura você com metade;
+  - **Mortalha:** nuvem negra que cega, seca e deixa lentos os inimigos, e abafa anéis inimigos por 2 s;
+  - **Túmulo:** cripta de luz negra que prende e seca o alvo.
+- **Arenas com muro:** as arenas dos chefes nas cidades ganharam muro em volta (com portão para a estrada), e a estrada até elas ganhou muretas. Em mundos já gerados o muro sobe sozinho quando alguém chega perto da arena e a água que tinha entrado sai. O tanque de dentro da arena de Odym continua (é do Morrow).
+- **Voz:** falar com o anel pela voz foi desligado; agora é só pelo chat. O anel continua respondendo em voz alta.
+- **PvP:** o laser confere o acerto a cada tick (antes só de 4 em 4) e leva em conta onde o outro jogador esteve nos últimos 0,4 s, como nos jogos de tiro. O dano por segundo é o mesmo.

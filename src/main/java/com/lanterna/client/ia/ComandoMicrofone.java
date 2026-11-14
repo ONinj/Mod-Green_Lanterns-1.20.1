@@ -20,6 +20,7 @@ public final class ComandoMicrofone {
 
     @SubscribeEvent
     public static void registrar(RegisterClientCommandsEvent e) {
+        if (!VozAnel.OUVIR_VOZ) return;   // 0.48.12: voz desligada (só chat)
         e.getDispatcher().register(Commands.literal("lanternmic")
                 .executes(c -> {
                     List<String> l = Microfone.lista();

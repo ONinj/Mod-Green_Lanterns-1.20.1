@@ -3505,6 +3505,119 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.12: poderes de controle dos chefes, faróis do Morrow, lendários (nível 50), construtos da Morte e do Branco. */
+    private static void sceneV4812() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        Object[] boss = {null};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("gamerule doMobSpawning false");
+            cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 0 -60 0"); cmd("kill @e[type=!player]"); });
+        at(20, () -> cmd("lantern ring green"));
+        at(40, () -> { cmd("lantern full"); cmd("effect give @s resistance 100000 4 true"); cmd("effect give @s regeneration 100000 4 true"); });
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })));
+        // ---- 1) chefe comum: Silêncio, Prisão, Queda ----
+        at(10, () -> server(sp -> { var b = com.lanterna.lore.LoreEntities.VORGATH.get().create(sp.serverLevel());
+            b.moveTo(sp.getX() + 8, sp.getY(), sp.getZ(), 0, 0); sp.serverLevel().addFreshEntity(b); b.setTarget(sp); boss[0] = b;
+            glog("vorgath vida max=" + b.getMaxHealth() + " armadura=" + b.getArmorValue()); }));
+        for (int i = 0; i < 12; i++) at(60, () -> server(sp -> {
+            var t = sp.getPersistentData(); long g = sp.level().getGameTime();
+            boolean voo = com.lanterna.capability.ModCapabilities.get(sp).map(r -> r.flightEnabled()).orElse(false);
+            com.lanterna.construct.Constructs.cast(sp, "punho");
+            glog("controle: silencio=" + com.lanterna.lore.entity.boss.Controle.silenciado(sp) + " preso=" + (g < t.getLong(com.lanterna.lore.entity.boss.Controle.PRESO))
+                    + " semVoo=" + com.lanterna.lore.entity.boss.Controle.semVoo(sp) + " voo=" + voo + " pos=" + sp.blockPosition().toShortString() + " vida=" + sp.getHealth());
+            if (boss[0] instanceof net.minecraft.world.entity.LivingEntity b) b.setPos(sp.getX() + 8, sp.getY(), sp.getZ());
+        }));
+        at(10, () -> server(sp -> { if (boss[0] instanceof net.minecraft.world.entity.Entity b) b.discard(); }));
+        // ---- 2) Morrow: cinco faróis ----
+        at(20, () -> server(sp -> { var b = com.lanterna.lore.LoreEntities.MORROW.get().create(sp.serverLevel());
+            b.moveTo(sp.getX() + 6, sp.getY(), sp.getZ(), 0, 0); sp.serverLevel().addFreshEntity(b); b.setTarget(sp); boss[0] = b; }));
+        at(40, () -> server(sp -> { if (boss[0] instanceof net.minecraft.world.entity.LivingEntity b) b.setHealth(b.getMaxHealth() * 0.45f); }));
+        at(60, () -> server(sp -> glog("morrow farois=" + net.minecraft.core.BlockPos.betweenClosedStream(sp.blockPosition().offset(-30, -12, -30), sp.blockPosition().offset(30, 12, 30))
+                .filter(q -> sp.level().getBlockState(q).is(com.lanterna.lore.LoreBlocks.FAROL_PEROLA.get())).count())));
+        at(10, () -> shot("v4812_morrow"));
+        at(10, () -> server(sp -> { if (boss[0] instanceof net.minecraft.world.entity.Entity b) b.discard(); }));
+        // ---- 3) lendário: inimigo abaixo do 50 é jogado para fora ----
+        at(20, () -> server(sp -> { boss[0] = com.lanterna.lendarios.Lendarios.surgir(sp.serverLevel(), com.lanterna.lendarios.Lendario.MAO_NEGRA, sp.blockPosition().offset(12, 0, 0));
+            glog("nivel antes=" + com.lanterna.tropa.Nivel.nivel(sp)); }));
+        at(40, () -> server(sp -> glog("inimigo fraco: mundo=" + sp.level().dimension().location() + " vida=" + sp.getHealth())));
+        at(20, () -> cmd("lantern ring black"));
+        at(30, () -> server(sp -> sp.teleportTo(sp.server.overworld(), 0.5, -60, 0.5, 0, 0)));
+        at(40, () -> server(sp -> { var r = com.lanterna.lendarios.Lendarios.interagir(sp, (com.lanterna.especies.LanternaEntity) boss[0]);
+            glog("aliado fraco: interagir=" + r + " mundo=" + sp.level().dimension().location()); }));
+        at(10, () -> server(sp -> com.lanterna.tropa.Nivel.addXp(sp, com.lanterna.tropa.Nivel.total(61), null)));
+        at(10, () -> cmd("lantern ring green"));
+        at(30, () -> { cmd("lantern full"); server(sp -> { glog("nivel agora=" + com.lanterna.tropa.Nivel.nivel(sp));
+            var le = (com.lanterna.especies.LanternaEntity) boss[0]; sp.teleportTo(le.getX() - 8, le.getY(), le.getZ());
+            le.setTarget(sp); glog("lendario em " + le.blockPosition().toShortString() + " jogador em " + sp.blockPosition().toShortString()); }); });
+        int[] construtos = {0};
+        for (int i = 0; i < 15; i++) at(20, () -> server(sp -> {
+            construtos[0] += sp.serverLevel().getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(40)).size();
+            ((com.lanterna.especies.LanternaEntity) boss[0]).setTarget(sp); }));
+        at(10, () -> server(sp -> glog("lendario nivel 60: mundo=" + sp.level().dimension().location() + " construtos vistos=" + construtos[0] + " vida=" + sp.getHealth())));
+        at(5, () -> shot("v4812_lendario"));
+        at(10, () -> server(sp -> { ((net.minecraft.world.entity.Entity) boss[0]).discard(); cmd("kill @e[type=!player]"); }));
+        // ---- 4) construtos da Morte ----
+        at(20, () -> cmd("lantern ring black"));
+        at(10, () -> server(sp -> sp.teleportTo(sp.server.overworld(), 300.5, -60, 300.5, -90, 5)));
+        at(30, () -> { cmd("lantern full"); cmd("lantern affinity 3000"); cmd("summon minecraft:husk ~6 ~ ~ {NoAI:1b}"); cmd("summon minecraft:husk ~6 ~ ~3 {NoAI:1b}"); });
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(10, () -> { server(sp -> { sp.setYRot(-90); sp.setXRot(5); sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), -90, 5); }); });
+        for (String id : new String[]{"farejar", "drenar", "mortalha", "tumulo", "ceifa"})
+            at(30, () -> server(sp -> { var z = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(12));
+                float antes = z.isEmpty() ? -1 : z.get(0).getHealth();
+                var rr = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                glog("  pre " + id + ": poder=" + rr.powerActive() + " tropa=" + rr.corps() + " carga=" + rr.charge() + " nivelAfin=" + com.lanterna.construct.Constructs.level(sp)
+                        + " olhando=" + (com.lanterna.construct.Constructs.lookedEntity(sp, 24) == null ? "-" : com.lanterna.construct.Constructs.lookedEntity(sp, 24).getType().toShortString()));
+                com.lanterna.construct.Constructs.cast(sp, id);
+                glog("morte " + id + ": zumbi " + antes + " -> " + (z.isEmpty() ? -1 : z.get(0).getHealth()) + " efeitos=" + (z.isEmpty() ? "" : z.get(0).getActiveEffectsMap().keySet().size())); }));
+        at(20, () -> shot("v4812_morte"));
+        // ---- 5) anel Branco ----
+        at(20, () -> cmd("lantern ring white"));
+        at(40, () -> server(sp -> { var w = new net.minecraft.resources.ResourceLocation("lanterna", "white");
+            var roda = com.lanterna.construct.ConstructType.daRoda(w);
+            glog("branco: roda=" + roda.size() + " ceifa=" + roda.contains(com.lanterna.construct.ConstructType.CEIFA) + " farejar=" + roda.contains(com.lanterna.construct.ConstructType.FAREJAR)
+                    + " napalm=" + roda.contains(com.lanterna.construct.ConstructType.NAPALM) + " g_canhao liberado=" + com.lanterna.construct.fonte.ArvoreDaLuz.liberado(sp, com.lanterna.construct.ConstructType.G_CANHAO)
+                    + " daTropa=" + com.lanterna.construct.ConstructType.daTropa(w)); }));
+        at(10, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+        at(20, () -> shot("v4812_branco_p1"));
+        at(5, () -> mc.screen.mouseScrolled(0, 0, -1));
+        at(5, () -> mc.screen.mouseScrolled(0, 0, -1));
+        at(15, () -> shot("v4812_branco_p3"));
+        at(10, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(null); });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48.12: muro em volta da arena (sem resetar o mundo). -Plugar=planeta, -PcidadeUnica=1. */
+    private static void sceneArenaMuro() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        String pl = System.getProperty("lanterna.lugar", "odym");
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode creative"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false"); });
+        at(20, () -> server(sp -> { var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(pl).dimension());
+            var a = com.lanterna.cidade.Layout.ARENA_NOVA;
+            sp.teleportTo(l, a.getX() - 45.5, 140, a.getZ() + 0.5, -90, 35); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }));
+        at(20 * 40, () -> server(sp -> { var l = sp.serverLevel(); var a = com.lanterna.cidade.Layout.ARENA_NOVA;
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
+            long muro = 0, agua = 0;
+            for (int dx = -30; dx <= 30; dx++) for (int dz = -30; dz <= 30; dz++) {
+                double d = Math.sqrt(dx * dx + dz * dz);
+                for (int dy = -2; dy <= 8; dy++) {
+                    var q = new net.minecraft.core.BlockPos(a.getX() + dx, y + dy, a.getZ() + dz);
+                    if (dy <= 3 && d > 25.6 && d <= 27.4 && !l.getBlockState(q).isAir() && !l.getFluidState(q).is(net.minecraft.tags.FluidTags.WATER)) muro++;
+                    if (dy >= 0 && d <= 25 && l.getFluidState(q).is(net.minecraft.tags.FluidTags.WATER)) agua++;
+                }
+            }
+            glog("arena " + pl + ": y=" + y + " blocos de muro=" + muro + " agua dentro=" + agua
+                    + " marcado=" + com.lanterna.lore.LoreWorldData.get(sp.server).siteBuilt("arena_muro:" + pl));
+            sp.teleportTo(l, a.getX() - 42.5, y + 30, a.getZ() + 0.5, -90, 35);
+        }));
+        at(40, () -> shot("arena_muro_" + pl));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.10: dá para entrar no cargueiro mercador e negociar com o mercador lá dentro. */
     private static void sceneCargueiro() {
         Minecraft mc = Minecraft.getInstance();
@@ -5580,6 +5693,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("construtos2")) sceneConstrutos2();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("aguaanel")) sceneAguaAnel();
+        else if (ENABLED && SCENE.equals("v4812")) sceneV4812();
+        else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
