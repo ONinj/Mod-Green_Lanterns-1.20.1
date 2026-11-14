@@ -3505,6 +3505,101 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.1: morto por um Lanterna Negro (NPC) com chance 100%: renasce convertido. */
+    private static void sceneConversao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode survival"); cmd("lantern ring blue"); cmd("lantern corrupcao 0"); cmd("time set 6000"); });
+        at(30, () -> { cmd("lantern full"); server(sp -> {
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            com.lanterna.LanternaConfig.MORTE_CHANCE_CEIFADOR.set(1.0);
+            com.lanterna.LanternaConfig.MORTE_CHANCE.set(1.0);
+            var npc = com.lanterna.especies.EspeciesEntities.LANTERNA_NPC.get().create(sp.serverLevel());
+            npc.setup(com.lanterna.especies.Especie.values()[0], 1, com.lanterna.especies.Especie.Papel.values()[0], com.lanterna.corps.BuiltinCorps.BLACK, null, false, false);
+            npc.moveTo(sp.getX() + 3, sp.getY(), sp.getZ(), 0, 0);
+            sp.serverLevel().addFreshEntity(npc);
+            glog("antes: morte=" + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.morte()).orElse(-1) + " npc=" + npc.tropa());
+            sp.hurt(sp.damageSources().mobAttack(npc), 99999f);
+        }); });
+        at(40, () -> { mc.player.respawn(); mc.setScreen(null); });
+        at(80, () -> server(sp -> {
+            var anel = com.lanterna.power.EquipmentHelper.ring(sp);
+            glog("depois: morte=" + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.morte()).orElse(-1) + " anel=" + com.lanterna.item.PowerRingItem.getCorps(anel)
+                    + " corrupcao=" + com.lanterna.item.PowerRingItem.getCorrupcao(anel) + " origem=" + com.lanterna.item.PowerRingItem.getOrigem(anel));
+        }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.49.1: anel e traje corrompidos (1) e convertidos em Lanterna Negro (2). */
+    private static void sceneCorrupcao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+        // 1) os anéis de perto: limpo, corrompido e convertido, de algumas Tropas
+        at(10, () -> mc.setScreen(new net.minecraft.client.gui.screens.Screen(net.minecraft.network.chat.Component.literal("aneis")) {
+            @Override public void render(net.minecraft.client.gui.GuiGraphics g, int mx, int my, float pt) {
+                g.fill(0, 0, width, height, 0xFF30343A);
+                String[] cs = {"green", "yellow", "red", "blue", "violet", "indigo", "orange"};
+                for (int i = 0; i < cs.length; i++) for (int e = 0; e < 3; e++) {
+                    var c = com.lanterna.corps.BuiltinCorps.valueOf(cs[i].toUpperCase());
+                    var st = e == 2 ? com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLACK.id(), com.lanterna.corps.BuiltinCorps.BLACK.color(), -1)
+                            : com.lanterna.item.PowerRingItem.create(c.id(), c.color(), -1);
+                    if (e > 0) com.lanterna.item.PowerRingItem.setCorrupcao(st, e, e == 2 ? c.id() : null);
+                    g.pose().pushPose();
+                    g.pose().translate(14 + i * 88, 14 + e * 110, 0);
+                    g.pose().scale(4.5f, 4.5f, 1f);
+                    g.renderItem(st, 0, 0);
+                    g.pose().popPose();
+                }
+            }
+        }));
+        at(20, () -> { mc.options.guiScale().set(1); mc.resizeDisplay(); });
+        at(20, () -> shot("corrupcao_aneis"));
+        at(5, () -> { mc.options.guiScale().set(0); mc.resizeDisplay(); });
+        at(5, () -> mc.setScreen(null));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
+        float[] giro = {0};
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.client.event.RenderPlayerEvent.Pre ev) -> {
+            var pl = ev.getEntity();
+            pl.yBodyRot = pl.yBodyRotO = pl.getYRot() + giro[0];
+            pl.yHeadRot = pl.yHeadRotO = pl.getYRot() + giro[0];
+        });
+        String[][] casos = {{"green", "padrao"}, {"red", "a"}};
+        for (String[] c : casos) {
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + c[0]);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
+            at(5, () -> { var sc = new com.lanterna.client.visual.PerfilScreen(com.lanterna.client.visual.PerfilScreen.Aba.VISUAL); mc.setScreen(sc); sc.escolher(c[1], 0); mc.setScreen(null); });
+            for (int nivel = 0; nivel <= 2; nivel++) {
+                int nv = nivel;
+                at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corrupcao " + nv)));
+                at(30, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+                    glog("corrupcao " + c[0] + " nivel " + nv + ": tropa=" + r.corps() + " corrupcao=" + r.corrupcao() + " origem=" + r.origem()); })));
+                for (int ang : new int[]{0, 180}) {
+                    at(5, () -> giro[0] = ang);
+                    at(40, () -> shot("corrupcao_" + c[0] + "_" + c[1] + "_n" + nv + "_" + ang));
+                }
+            }
+            at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corrupcao 0")));
+        }
+        // primeira pessoa com o anel convertido
+        at(10, () -> server(sp -> sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corrupcao 2")));
+        at(30, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.player.getInventory().selected = 8; });
+        at(30, () -> shot("corrupcao_braco"));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49: Guia do Portador, capítulo por capítulo. */
     private static void sceneGuia() {
         Minecraft mc = Minecraft.getInstance();
@@ -5767,6 +5862,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("v4812")) sceneV4812();
         else if (ENABLED && SCENE.equals("luzagua")) sceneLuzAgua();
         else if (ENABLED && SCENE.equals("guia")) sceneGuia();
+        else if (ENABLED && SCENE.equals("corrupcao")) sceneCorrupcao();
+        else if (ENABLED && SCENE.equals("conversao")) sceneConversao();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

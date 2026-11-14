@@ -3165,5 +3165,9 @@
   "guia.lanterna.dica": "DICA",
   "guia.lanterna.controles": "←/→ páginas · ↑/↓ capítulos · rodinha rola",
   "guia.lanterna.aviso_titulo": "Guia do Portador",
-  "guia.lanterna.aviso": "Novo por aqui? Aperte %s e abra o guia."
+  "guia.lanterna.aviso": "Novo por aqui? Aperte %s e abra o guia.",
+  "morte.lanterna.convertido_1": "O anel apaga... e acende de novo, preto.",
+  "morte.lanterna.convertido_2": "Você se ergueu como Lanterna Negro. A cor da sua Tropa ainda está no símbolo, mas a luz agora é da Morte. Leve-a a outros portadores.",
+  "morte.lanterna.convertido_servidor": "%s caiu para um Lanterna Negro... e se ergueu como um deles.",
+  "command.lanterna.corrupcao": "Corrupção do anel: %s (0 limpo, 1 corrompido, 2 convertido em Lanterna Negro)."
 }

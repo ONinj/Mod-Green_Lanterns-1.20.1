@@ -209,6 +209,16 @@ public final class LanternaCommand {
                                             com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
                                     return 1;
                                 })))
+                .then(Commands.literal("corrupcao").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("nivel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
+                                .executes(c -> {
+                                    var sp = c.getSource().getPlayerOrException();
+                                    int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "nivel");
+                                    if (n == 1) com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { if (d.morte() < 2) d.setMorte(2); });
+                                    com.lanterna.morte.Corrupcao.marcarAnel(sp, n);
+                                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("command.lanterna.corrupcao", n), false);
+                                    return 1;
+                                })))
                 .then(Commands.literal("affinity").requires(source -> source.hasPermission(2))
                         .then(Commands.argument("points", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                                 .executes(c -> {

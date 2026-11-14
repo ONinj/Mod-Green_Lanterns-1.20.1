@@ -106,6 +106,7 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
                                 @org.jetbrains.annotations.Nullable net.minecraft.world.entity.HumanoidArm soBraco) {
         if (renderer3D == null) renderer3D = new RingUniformRenderer();
         renderer3D.apagar(com.lanterna.client.ClientVisibleRings.semEnergia(player));
+        renderer3D.corrupcao(Corrompida.nivel(player));
         int color = ClientVisibleRings.of(player.getId()).color();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         // Traje escolhido na Personalização: o padrão da Tropa ou um dos trajes "segunda pele" (a, b)
@@ -150,6 +151,7 @@ public class UniformLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
                                   net.minecraft.client.model.HumanoidModel<?> base) {
         if (renderer3D == null) renderer3D = new RingUniformRenderer();
         renderer3D.apagar(com.lanterna.client.ClientVisibleRings.semEnergia(player));
+        renderer3D.corrupcao(Corrompida.nivel(player));
         int color = ClientVisibleRings.of(player.getId()).color();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0f);
         String var = com.lanterna.client.visual.ClientVisual.of(player.getId()).traje();

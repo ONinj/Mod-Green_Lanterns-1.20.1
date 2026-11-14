@@ -36,6 +36,21 @@ public class RingData implements INBTSerializable<CompoundTag> {
 
     // --- Anel em uso ---
     private boolean hasRing;
+    /** Espelho do anel no slot (0.49.1): corrupção 0..2 e a Tropa de origem do convertido. */
+    private transient int corrupcao;
+    private transient String origem = "";
+
+    public int corrupcao() { return corrupcao; }
+    public String origem() { return origem; }
+
+    public void espelharCorrupcao(int nivel, @org.jetbrains.annotations.Nullable ResourceLocation o) {
+        String os = o == null ? "" : o.toString();
+        if (nivel != corrupcao || !os.equals(origem)) {
+            corrupcao = nivel;
+            origem = os;
+            markDirty();
+        }
+    }
     private String corps = "";
     private int color = 0x2BFF4A;
     private int charge;

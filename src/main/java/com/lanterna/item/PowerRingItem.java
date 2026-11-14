@@ -63,6 +63,34 @@ public class PowerRingItem extends Item {
         return BuiltinCorps.colorOf(getCorps(stack));
     }
 
+    /**
+     * Corrupção (0.49.1): 0 = anel limpo; 1 = corrompido pela morte (rachaduras brancas, manchas cinzas); 2 = o
+     * portador foi convertido em Lanterna Negro (anel preto com rachaduras, símbolo da Tropa de origem).
+     */
+    public static int getCorrupcao(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        return tag == null ? 0 : Math.max(0, Math.min(2, tag.getInt("Corrupcao")));
+    }
+
+    /** A Tropa de antes da conversão (só no anel convertido), ou null. */
+    @Nullable
+    public static ResourceLocation getOrigem(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        return tag != null && tag.contains("Origem") ? ResourceLocation.tryParse(tag.getString("Origem")) : null;
+    }
+
+    public static void setCorrupcao(ItemStack stack, int nivel, @Nullable ResourceLocation origem) {
+        CompoundTag tag = stack.getOrCreateTag();
+        if (nivel <= 0) tag.remove("Corrupcao"); else tag.putInt("Corrupcao", nivel);
+        if (origem == null) tag.remove("Origem"); else tag.putString("Origem", origem.toString());
+    }
+
+    /** A Tropa cujo símbolo e traje aparecem: a de origem no anel convertido, senão a do anel. */
+    public static ResourceLocation getCorpsVisual(ItemStack stack) {
+        ResourceLocation o = getCorrupcao(stack) == 2 ? getOrigem(stack) : null;
+        return o != null ? o : getCorps(stack);
+    }
+
     public static int getStoredCharge(ItemStack stack) {
         CompoundTag tag = stack.getTag();
         return tag != null && tag.contains("Charge") ? tag.getInt("Charge") : -1;

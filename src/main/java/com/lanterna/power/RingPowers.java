@@ -74,6 +74,7 @@ public final class RingPowers {
                 PowerRingItem.setStoredCharge(ring, charge);
             }
             data.refresh(def.id(), def.color(), charge, max);
+            data.espelharCorrupcao(PowerRingItem.getCorrupcao(ring), PowerRingItem.getOrigem(ring));
             data.setEverChosen(true);
         } else if (data.hasRing()) {
             data.unequip();
@@ -136,7 +137,7 @@ public final class RingPowers {
         boolean staff = com.lanterna.item.BatteryItems.isStaff(EquipmentHelper.battery(player));
         String key = (data.hasRing()
                 ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled()
-                + "|" + data.hyper() + "|" + data.autopilot() + "|" + (data.charge() <= 0) : "") + "|" + staff;
+                + "|" + data.hyper() + "|" + data.autopilot() + "|" + (data.charge() <= 0) + "|" + data.corrupcao() + "|" + data.origem() : "") + "|" + staff;
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
                 SyncVisibleRingPacket.of(player.getId(), data, staff));

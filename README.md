@@ -106,6 +106,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.11 ✅ (0.48.11) Voz: o anel ouve o mesmo microfone do Simple Voice Chat (ou o escolhido em /lanternmic), grava em qualquer formato do microfone (48/44,1 kHz, estéreo) e converte, aumenta o volume de microfone baixo e avisa quando só gravou silêncio
 1.56.12 ✅ (0.48.12) Chefes mais fortes com Silêncio/Prisão/Queda, faróis do Morrow de volta, lendários no nível 60 (só a partir do 50), afinidade somada no anel Branco, muro nas arenas, Farejar e novos construtos da Morte, Branco com construtos de todas as Tropas, voz desligada (só chat), laser melhor no PvP
 1.57.0 ✅ (0.49.0) Guia do Portador (F9 ou /guia): tutorial interativo com 14 capítulos, teclas reais, receitas de verdade na grade, progresso salvo e uma transmissão interceptada da próxima saga; luz do traje no chão sem falhas debaixo d'água e em lajes/caminhos; menos bolhas no voo submerso
+1.57.1 ✅ (0.49.1) Anel corrompido (rachaduras brancas, manchas cinzas) e traje manchado; morto por Lanterna Negro e corrompido vira Lanterna Negro na hora: anel preto rachado com o símbolo da Tropa antiga e traje antigo em preto e branco; /lantern corrupcao 0|1|2 para testar
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

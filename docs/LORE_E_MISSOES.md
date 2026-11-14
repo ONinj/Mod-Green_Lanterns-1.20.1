@@ -1481,3 +1481,15 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - com alga ou capim marinho na altura da cabeça, a luz procura um lugar livre do lado em vez de não acender.
 - **Voo debaixo d'água:** as bolhas saem só andando e atrás do corpo (antes eram 4 por tick em volta do corpo todo e tapavam a visão).
 - O anel, quando perguntado sobre voz ou sobre os lendários, agora responde com as regras novas (só chat; lendários no nível 60, mínimo 50) e conhece o guia ("anel, como jogar?").
+
+## 0.49.1 — As marcas da Morte
+
+- **Anel corrompido** (morreu e o anel voltou corrompido, linha "A Morte"): o anel ganha **rachaduras brancas** e umas poucas **manchas cinzas**; o traje fica com **partes cinzas** espalhadas, como se a cor estivesse morrendo. Vale também para quem já estava corrompido antes desta versão (o anel se marca sozinho).
+- **Convertido em Lanterna Negro:** quem é corrompido ao ser **morto por um Lanterna Negro** (jogador com o Anel Preto ou Lanterna Negro de Ryut) não passa pela linha da Morte: **renasce já como Lanterna Negro**.
+  - O anel que ele usava fica **todo preto**, com **rachaduras brancas** e o **símbolo da Tropa de antes** em tom de osso.
+  - O traje continua o **da Tropa de antes**, mas em **preto e branco**, com contraste forte (o que brilhava vira branco).
+  - Os poderes, a roda de construtos e o dever de ceifar são os da Tropa Negra. O jogo guarda a Tropa de antes no anel (para a próxima saga).
+  - Todo o servidor recebe o aviso: "fulano caiu para um Lanterna Negro... e se ergueu como um deles".
+- Quando o Anel Preto de verdade é forjado em Ryut (fim da linha da Morte), as marcas do anel antigo somem.
+- Teste (operador): **/lantern corrupcao 0|1|2** — limpa, corrompe ou converte o próprio anel.
+- As texturas do traje são feitas na hora a partir das originais, inclusive dos trajes personalizados e das peças 3D; os anéis têm modelos próprios (`models/item/ring/corrompido/` e `.../negro/`).

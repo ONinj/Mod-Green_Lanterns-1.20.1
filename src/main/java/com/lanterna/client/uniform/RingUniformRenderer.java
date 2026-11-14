@@ -50,6 +50,13 @@ public class RingUniformRenderer extends UniformeRenderer {
         this.apagado = v;
     }
 
+    /** Corrupção de quem veste (0.49.1): a textura vira a versão manchada ou preto e branco. */
+    private int corrupcao;
+
+    public void corrupcao(int n) {
+        this.corrupcao = n;
+    }
+
     public void setup(Mode mode, float p, int color, ResourceLocation[] stage, Matrix4f layerPose) {
         this.mode = mode;
         this.progress = p;
@@ -62,6 +69,7 @@ public class RingUniformRenderer extends UniformeRenderer {
     }
 
     public void reset() {
+        corrupcao = 0;
         mode = Mode.NORMAL;
         semBase = false;
         apagado = false;
@@ -90,7 +98,7 @@ public class RingUniformRenderer extends UniformeRenderer {
     public ResourceLocation getTextureLocation(UniformeTropaItem item) {
         if (mode == Mode.BASE && baseTexture != null) return baseTexture;
         if (mode == Mode.BAND && bandTexture != null) return bandTexture;
-        return super.getTextureLocation(item);
+        return Corrompida.variante(super.getTextureLocation(item), corrupcao);
     }
 
     @Override
@@ -103,7 +111,7 @@ public class RingUniformRenderer extends UniformeRenderer {
     @Override
     public List<GeoRenderLayer<UniformeTropaItem>> getRenderLayers() {
         // as camadas são o brilho (glowmask): sem energia no anel, apagadas
-        if (apagado) return List.of();
+        if (apagado || corrupcao > 0) return List.of();
         return mode == Mode.NORMAL || mode == Mode.ACESSORIO && progress >= 1f ? super.getRenderLayers() : List.of();
     }
 

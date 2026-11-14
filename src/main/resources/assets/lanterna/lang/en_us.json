@@ -3165,5 +3165,9 @@
   "guia.lanterna.dica": "TIP",
   "guia.lanterna.controles": "←/→ pages · ↑/↓ chapters · wheel scrolls",
   "guia.lanterna.aviso_titulo": "Bearer's Guide",
-  "guia.lanterna.aviso": "New here? Press %s to open the guide."
+  "guia.lanterna.aviso": "New here? Press %s to open the guide.",
+  "morte.lanterna.convertido_1": "The ring goes dark... and lights again, black.",
+  "morte.lanterna.convertido_2": "You rose as a Black Lantern. Your Corps' color still lives in the symbol, but the light now belongs to Death. Bring it to other bearers.",
+  "morte.lanterna.convertido_servidor": "%s fell to a Black Lantern... and rose as one of them.",
+  "command.lanterna.corrupcao": "Ring corruption: %s (0 clean, 1 corrupted, 2 converted into a Black Lantern)."
 }

@@ -132,8 +132,8 @@
    "black corps",
    "corrupt"
   ],
-  "pt": "Anel Negro: morra sob o efeito Wither, ou seja corrompido ao morrer com outro anel. A chance de corromper sobe um pouco a cada morte, e morrer para um Lanterna Negro conta. Em Ryut, Lanternas Negros caçam quem tem anel.",
-  "en": "Black Ring: die under the Wither effect, or get corrupted when dying with another ring. The corruption chance rises a little with each death, and dying to a Black Lantern counts. On Ryut, Black Lanterns hunt ring bearers."
+  "pt": "Anel Negro: morra sob o efeito Wither, ou seja corrompido ao morrer com outro anel. A chance de corromper sobe um pouco a cada morte. O anel corrompido ganha rachaduras brancas e o traje fica com manchas cinzas. Quem é corrompido ao ser morto por um Lanterna Negro (jogador ou de Ryut) já se ergue como Lanterna Negro: o anel fica preto, com rachaduras e o símbolo da Tropa antiga, e o traje fica em preto e branco.",
+  "en": "Black Ring: die under the Wither effect, or get corrupted when dying with another ring. The corruption chance rises a little with each death. A corrupted ring shows white cracks and your suit gets gray stains. Whoever is corrupted while being killed by a Black Lantern (a player or one from Ryut) rises at once as a Black Lantern: the ring turns black, cracked, with the old Corps symbol, and the suit turns black and white."
  },
  {
   "id": "anel_branco",

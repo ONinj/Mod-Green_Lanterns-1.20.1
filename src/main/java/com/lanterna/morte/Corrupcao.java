@@ -13,6 +13,8 @@ import com.lanterna.tropa.Nivel;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -65,6 +67,9 @@ public final class Corrupcao {
             return;
         }
         tag.putInt("lanterna_mortes_sem_corrupcao", 0);
+        // 0.49.1: morto por um Lanterna Negro (jogador ou NPC) e corrompido, não passa pela linha da Morte:
+        // volta já como Lanterna Negro, com o anel da Tropa de antes tingido de preto
+        if (negro || negroNpc) tag.putBoolean(CONVERSAO, true);
         d.setMorte(1);
         LanternaMod.LOGGER.info("Lanterna: o anel de {} foi corrompido pela morte", vitima.getGameProfile().getName());
     }
@@ -74,7 +79,69 @@ public final class Corrupcao {
         if (event.isEndConquered() || !(event.getEntity() instanceof ServerPlayer p)) return;
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d == null || d.morte() != 1) return;
+        var t = p.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        if (t.getBoolean(CONVERSAO)) {
+            t.remove(CONVERSAO);
+            // o anel pode voltar para a mão um instante depois do renascer: converte no próximo segundo
+            p.getPersistentData().putInt(CONVERTER_EM, p.tickCount + 20);
+            d.setMorte(3);
+            return;
+        }
         corromper(p, d);
+    }
+
+    private static final String CONVERSAO = "lanterna_conversao_negra", CONVERTER_EM = "lanterna_converter_em";
+
+    /**
+     * Morto por um Lanterna Negro: ergue-se como Lanterna Negro. O anel da Tropa de antes fica preto, com rachaduras
+     * brancas e o símbolo antigo; o traje continua o da Tropa de antes, em preto e branco. Os poderes são os da Morte.
+     */
+    public static void converter(ServerPlayer p, LoreData d) {
+        RingData r = ModCapabilities.get(p).orElse(null);
+        ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
+        ResourceLocation origem = !anel.isEmpty() ? com.lanterna.item.PowerRingItem.getCorpsVisual(anel)
+                : r != null && r.hasRing() ? r.corps() : com.lanterna.corps.BuiltinCorps.GREEN.id();
+        if (Supremos.preto(origem) || Supremos.supremo(origem)) origem = com.lanterna.corps.BuiltinCorps.GREEN.id();
+        var negra = com.lanterna.corps.BuiltinCorps.BLACK;
+        if (anel.isEmpty()) {
+            anel = com.lanterna.item.PowerRingItem.create(negra.id(), negra.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(anel, p);
+            com.lanterna.power.EquipmentHelper.equipOrGive(p, RingData.RING_SLOT, anel);
+        } else {
+            anel.getOrCreateTag().putString("Corps", negra.id().toString());
+            anel.getOrCreateTag().putInt("Color", negra.color());
+        }
+        com.lanterna.item.PowerRingItem.setCorrupcao(anel, 2, origem);
+        d.setMorte(3);
+        d.setUltimaCeifa(System.currentTimeMillis());
+        p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 8, 0, false, false));
+        p.level().playSound(null, p.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 1f, 0.5f);
+        p.serverLevel().sendParticles(ParticleTypes.SCULK_SOUL, p.getX(), p.getY() + 1, p.getZ(), 90, 0.7, 1.2, 0.7, 0.04);
+        p.serverLevel().sendParticles(ParticleTypes.SMOKE, p.getX(), p.getY() + 1, p.getZ(), 60, 0.5, 1, 0.5, 0.02);
+        p.sendSystemMessage(Component.translatable("morte.lanterna.convertido_1").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.BOLD));
+        p.sendSystemMessage(Component.translatable("morte.lanterna.convertido_2").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        for (ServerPlayer o : p.server.getPlayerList().getPlayers())
+            if (o != p) o.sendSystemMessage(Component.translatable("morte.lanterna.convertido_servidor", p.getDisplayName()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+        LanternaMod.LOGGER.info("Lanterna: {} foi convertido em Lanterna Negro (era {})", p.getGameProfile().getName(), origem);
+    }
+
+    /** Marca (ou limpa) a corrupção do anel que o jogador está usando. Comando de teste e linha da Morte. */
+    public static void marcarAnel(ServerPlayer p, int nivel) {
+        ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
+        if (anel.isEmpty()) return;
+        if (nivel == 2) {
+            LoreData d = LoreCapability.get(p).orElse(null);
+            if (d != null) converter(p, d);
+            return;
+        }
+        ResourceLocation origem = com.lanterna.item.PowerRingItem.getOrigem(anel);
+        if (nivel == 0 && com.lanterna.item.PowerRingItem.getCorrupcao(anel) > 0) LoreCapability.get(p).ifPresent(d -> d.setMorte(0));
+        if (nivel == 0 && origem != null && com.lanterna.item.PowerRingItem.getCorrupcao(anel) == 2) {
+            // desfaz a conversão: volta a ser o anel da Tropa de antes
+            anel.getOrCreateTag().putString("Corps", origem.toString());
+            anel.getOrCreateTag().putInt("Color", com.lanterna.corps.BuiltinCorps.colorOf(origem));
+        }
+        com.lanterna.item.PowerRingItem.setCorrupcao(anel, nivel, null);
     }
 
     /** O anel volta corrompido: começa a linha da Morte. */
@@ -95,6 +162,9 @@ public final class Corrupcao {
     public static void aoConcluir(ServerPlayer p, LoreData d, Mission m) {
         if (m.id().equals("morte_8")) {
             d.setMorte(3);
+            // o Anel Preto de verdade nasceu: o anel antigo deixa de mostrar a corrupção
+            ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
+            if (!anel.isEmpty() && com.lanterna.item.PowerRingItem.getCorrupcao(anel) == 1) com.lanterna.item.PowerRingItem.setCorrupcao(anel, 0, null);
             d.setUltimaCeifa(System.currentTimeMillis());
             p.level().playSound(null, p.blockPosition(), SoundEvents.WITHER_DEATH, SoundSource.PLAYERS, 1f, 0.7f);
             for (ServerPlayer o : p.server.getPlayerList().getPlayers())
@@ -118,7 +188,23 @@ public final class Corrupcao {
     /** Sussurros: a cada ~5 min o anel corrompido lembra o que quer. */
     @SubscribeEvent
     public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 6000 != 1234) return;
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+        // conversão pendente (logo depois de renascer)
+        var raiz = p.getPersistentData();
+        if (raiz.contains(CONVERTER_EM) && p.tickCount >= raiz.getInt(CONVERTER_EM)) {
+            raiz.remove(CONVERTER_EM);
+            LoreData dc = LoreCapability.get(p).orElse(null);
+            if (dc != null) converter(p, dc);
+        }
+        // o anel de quem está corrompido mostra a corrupção (também em mundos de antes desta versão)
+        if (p.tickCount % 40 == 7) {
+            LoreData dm = LoreCapability.get(p).orElse(null);
+            ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
+            if (dm != null && dm.morte() == 2 && !anel.isEmpty() && com.lanterna.item.PowerRingItem.getCorrupcao(anel) == 0
+                    && !Supremos.preto(com.lanterna.item.PowerRingItem.getCorps(anel)) && !Supremos.supremo(com.lanterna.item.PowerRingItem.getCorps(anel)))
+                com.lanterna.item.PowerRingItem.setCorrupcao(anel, 1, null);
+        }
+        if (p.tickCount % 6000 != 1234) return;
         LoreData d = LoreCapability.get(p).orElse(null);
         if (d == null || d.morte() != 2) return;
         p.sendSystemMessage(Component.translatable("morte.lanterna.sussurro." + p.getRandom().nextInt(4)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));

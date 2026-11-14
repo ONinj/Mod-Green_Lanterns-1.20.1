@@ -68,7 +68,10 @@ public final class ClientModEvents {
             MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new);
             // Modelo do anel e da bateria de cada Tropa (overrides "lanterna:corps" nos modelos de item)
             net.minecraft.client.renderer.item.ItemProperties.register(ModItems.POWER_RING.get(), com.lanterna.LanternaMod.id("corps"),
-                    (stack, level, entity, seed) -> corpsIndex(com.lanterna.item.PowerRingItem.getCorps(stack)));
+                    (stack, level, entity, seed) -> corpsIndex(com.lanterna.item.PowerRingItem.getCorpsVisual(stack)));
+            // 0.49.1: anel corrompido (1) ou convertido em Lanterna Negro (2)
+            net.minecraft.client.renderer.item.ItemProperties.register(ModItems.POWER_RING.get(), com.lanterna.LanternaMod.id("corrupcao"),
+                    (stack, level, entity, seed) -> com.lanterna.item.PowerRingItem.getCorrupcao(stack));
             net.minecraft.client.renderer.item.ItemProperties.register(ModItems.POWER_BATTERY.get(), com.lanterna.LanternaMod.id("corps"),
                     (stack, level, entity, seed) -> corpsIndex(PowerBatteryItem.getCorps(stack)));
         });

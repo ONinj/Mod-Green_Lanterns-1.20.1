@@ -54,6 +54,104 @@
     "lanterna:corps": 9
    },
    "model": "lanterna:item/ring/anel_vida_branco"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 1,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_vontade_verde"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 2,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_medo_amarelo"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 3,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_raiva_vermelho"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 4,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_esperanca_azul"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 5,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_amor_violeta"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 6,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_compaixao_indigo"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 7,
+    "lanterna:corrupcao": 1
+   },
+   "model": "lanterna:item/ring/corrompido/anel_avareza_laranja"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 1,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_vontade_verde"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 2,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_medo_amarelo"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 3,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_raiva_vermelho"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 4,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_esperanca_azul"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 5,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_amor_violeta"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 6,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_compaixao_indigo"
+  },
+  {
+   "predicate": {
+    "lanterna:corps": 7,
+    "lanterna:corrupcao": 2
+   },
+   "model": "lanterna:item/ring/negro/anel_avareza_laranja"
   }
  ]
 }

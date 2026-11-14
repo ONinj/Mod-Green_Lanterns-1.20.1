@@ -110,9 +110,9 @@ public final class PeleTraje {
     }
 
     @Nullable
-    private static Pele pele(String arq, boolean slim, int mascara) {
+    private static Pele pele(String arq, boolean slim, int mascara, int corrupcao) {
         String k0 = arq + "_" + (slim ? "slim" : "wide");
-        String k = k0 + (mascara == 0 ? "" : "_m" + (mascara + 100));
+        String k = k0 + (mascara == 0 ? "" : "_m" + (mascara + 100)) + (corrupcao == 0 ? "" : "_c" + corrupcao);
         if (PELES.containsKey(k)) return PELES.get(k);
         Pele pl = null;
         try (InputStream in = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + ".png"))) {
@@ -127,14 +127,17 @@ public final class PeleTraje {
                 int a = 1 + Math.round(Math.max(0f, Math.min(1f, t < 0 ? 0f : t)) * 254f);
                 img.setPixelRGBA(x, y, (c & 0x00FFFFFF) | (a << 24));
             }
+            // 0.49.1: traje de quem a Morte tocou (manchas cinzas, ou preto e branco)
+            if (corrupcao > 0) Corrompida.aplicar(img, corrupcao, esc, false);
             ResourceLocation tex = LanternaMod.id("dynamic/pele_" + k);
             Minecraft.getInstance().getTextureManager().register(tex, new DynamicTexture(img));
             ResourceLocation brilho = null;
             if (existe(k0 + "_glow")) {
-                if (mascara == 0) brilho = LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png");
+                if (mascara == 0 && corrupcao == 0) brilho = LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png");
                 else try (InputStream gin = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png"))) {
                     NativeImage gl = NativeImage.read(gin);
                     subirMascara(gl, esc, mascara);
+                    if (corrupcao > 0) Corrompida.aplicar(gl, corrupcao, esc, true);
                     brilho = LanternaMod.id("dynamic/pele_" + k + "_glow");
                     Minecraft.getInstance().getTextureManager().register(brilho, new DynamicTexture(gl));
                 }
@@ -166,6 +169,7 @@ public final class PeleTraje {
     }
 
     public static void limpar() {
+        Corrompida.limpar();
         var tm = Minecraft.getInstance().getTextureManager();
         PELES.values().forEach(p -> { if (p != null) tm.release(p.tex); });
         PELES.clear();
@@ -178,7 +182,7 @@ public final class PeleTraje {
     public static boolean corpo(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, PlayerModel<AbstractClientPlayer> m, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara());
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player));
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
@@ -239,7 +243,7 @@ public final class PeleTraje {
     public static boolean braco(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, ModelPart braco, ModelPart manga, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara());
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player));
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f, pp = Math.max(0.0005f, p);
