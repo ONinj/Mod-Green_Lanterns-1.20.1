@@ -86,29 +86,52 @@ public final class VozVosk {
     private static void gravar() {
         Minecraft mc = Minecraft.getInstance();
         String texto = "";
-        AudioFormat fmt = new AudioFormat(16000f, 16, 1, true, false);
-        try (org.vosk.Recognizer rec = new org.vosk.Recognizer(modelo, 16000f);
-             TargetDataLine line = (TargetDataLine) AudioSystem.getLine(new DataLine.Info(TargetDataLine.class, fmt))) {
+        String micNome = "?";
+        int pico = 0;
+        Microfone.Linha mic = null;
+        try (org.vosk.Recognizer rec = new org.vosk.Recognizer(modelo, 16000f)) {
+            mic = Microfone.abrir();
+            micNome = mic.nome();
             rec.setMaxAlternatives(6);
-            line.open(fmt, 8000);
-            line.start();
-            byte[] buf = new byte[3200];
+            byte[] bruto = new byte[(int) (mic.formato().getSampleRate() * mic.formato().getFrameSize() / 10)];
+            byte[] buf = new byte[bruto.length + 64];
             long inicio = System.currentTimeMillis();
             // grava enquanto a tecla está apertada (no máximo 15 s), e mais um pouquinho depois de soltar
             long fimDepoisDeSoltar = -1;
             List<List<String>> trechos = new ArrayList<>();
             while (System.currentTimeMillis() - inicio < 15000) {
-                int n = line.read(buf, 0, buf.length);
+                int n = mic.ler(buf, bruto);
+                int picoTrecho = 0;
+                for (int i = 0; i + 1 < n; i += 2) picoTrecho = Math.max(picoTrecho, Math.abs((short) ((buf[i + 1] << 8) | (buf[i] & 0xFF))));
+                pico = Math.max(pico, picoTrecho);
+                // microfone baixo: aumenta o volume (até 4x) para o Vosk entender melhor
+                if (picoTrecho > 80 && picoTrecho < 4000) {
+                    float ganho = Math.min(4f, 4000f / picoTrecho);
+                    for (int i = 0; i + 1 < n; i += 2) {
+                        int v = Math.round((short) ((buf[i + 1] << 8) | (buf[i] & 0xFF)) * ganho);
+                        v = Math.max(-32768, Math.min(32767, v));
+                        buf[i] = (byte) v;
+                        buf[i + 1] = (byte) (v >> 8);
+                    }
+                }
                 // o Vosk fecha um trecho a cada pausa (quem fala devagar faz várias): guarda cada um, senão só a
                 // última parte da frase chegava ao anel
                 if (n > 0 && rec.acceptWaveForm(buf, n)) trecho(trechos, rec.getResult());
                 if (soltou && fimDepoisDeSoltar < 0) fimDepoisDeSoltar = System.currentTimeMillis() + 450;
                 if (fimDepoisDeSoltar > 0 && System.currentTimeMillis() > fimDepoisDeSoltar) break;
             }
-            line.stop();
+            mic.linha().stop();
+            mic.linha().close();
             trecho(trechos, rec.getFinalResult());
             texto = montar(trechos);
+            if (pico < 300) {
+                // silêncio: quase sempre é o microfone errado (o padrão do Windows não é o que a pessoa usa)
+                String nm = micNome;
+                LanternaMod.LOGGER.warn("Lanterna: o microfone '{}' só gravou silêncio (pico {}). Microfones: {}", nm, pico, Microfone.lista());
+                mc.execute(() -> { if (mc.player != null) mc.player.displayClientMessage(Component.translatable("anel.ia.voz.mic_mudo", nm), false); });
+            }
         } catch (Throwable e) {
+            if (mic != null) try { mic.linha().close(); } catch (Exception ignored) {}
             LanternaMod.LOGGER.warn("Lanterna: Vosk não conseguiu ouvir ({})", e.toString());
             if (e instanceof LinkageError) quebrado = true;
             String msg = e.toString();

@@ -3122,5 +3122,8 @@
   "anel.ia.dica.descobrir": "Tip: open the star map (J) and land on a planet you have never visited.",
   "anel.ia.dica.ponto": "Tip: follow the on-screen marker to the point.",
   "commands.lanterna.acabar": "Finishing within %s blocks: %s block(s) reconnected (panes, bars, fences, walls, stairs) and %s lantern(s)/torch(es) secured.",
-  "encontro.lanterna.mercador_a_bordo": "The merchant waits in the hold: Shift + right-click them to trade. Use the door to leave."
+  "encontro.lanterna.mercador_a_bordo": "The merchant waits in the hold: Shift + right-click them to trade. Use the door to leave.",
+  "anel.ia.voz.mic_mudo": "◈ The microphone \"%s\" only recorded silence. It may not be the one you use: type /lanternmic to list microphones and pick the right one.",
+  "anel.ia.voz.mic_lista": "◈ Ring microphone: %s (using: %s). Pick one with /lanternmic <number>:",
+  "anel.ia.voz.mic_escolhido": "◈ The ring now listens to: %s"
 }

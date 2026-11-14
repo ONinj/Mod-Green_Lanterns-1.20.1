@@ -1432,3 +1432,13 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - Antes, o cargueiro mercador dos encontros no espaço dizia "essa nave não é sua" e não deixava entrar.
 - Agora, clicando na nave, qualquer jogador entra no porão. O mercador espera lá dentro, num lugar livre perto da entrada (um por nave), e negocia com Shift + clique direito. A porta leva de volta para onde a nave estava.
 - Quem entra faz o cargueiro esperar até 10 minutos antes de ir embora.
+
+## 0.48.11 — O anel ouve o microfone certo
+
+- **Por que o anel ouvia uns jogadores e outros não:** o anel gravava do "dispositivo de gravação padrão" do Windows. O Simple Voice Chat escolhe o microfone à parte, então quando o padrão do Windows é outro (a webcam, um microfone desligado, o "Mixagem estéreo"...), o anel gravava silêncio e dizia "não ouvi nada", mesmo com o voice chat funcionando.
+- **Escolha do microfone:**
+  - `microfone = "auto"` (o padrão) usa o mesmo microfone escolhido no Simple Voice Chat, lido de `config/voicechat/voicechat-client.properties`; sem ele, o padrão do sistema.
+  - **`/lanternmic`** (no cliente, cada jogador o seu) lista os microfones; `/lanternmic <número>` escolhe e `/lanternmic 0` volta ao automático.
+- **Formatos:** microfone que não grava em 16 kHz mono agora grava no formato dele (48 ou 44,1 kHz, estéreo...) e é convertido.
+- **Volume:** microfone baixo ganha até 4x de volume antes do reconhecimento.
+- **Aviso:** se a gravação foi só silêncio, o anel avisa qual microfone ouviu e sugere o `/lanternmic`. A lista de microfones também vai para o log.

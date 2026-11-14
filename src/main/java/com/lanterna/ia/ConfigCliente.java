@@ -8,7 +8,7 @@ public final class ConfigCliente {
     public static final ForgeConfigSpec.BooleanValue VOZ;
     public static final ForgeConfigSpec.IntValue VELOCIDADE;
     public static final ForgeConfigSpec.BooleanValue VOZ_NEURAL;
-    public static final ForgeConfigSpec.ConfigValue<String> VOZ_PT, VOZ_EN;
+    public static final ForgeConfigSpec.ConfigValue<String> VOZ_PT, VOZ_EN, MICROFONE;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -24,6 +24,9 @@ public final class ConfigCliente {
                 "Voz do Piper em português: pt_BR-faber-medium, pt_BR-cadu-medium, pt_BR-jeff-medium").define("voz_neural_pt", "pt_BR-faber-medium");
         VOZ_EN = b.comment("Piper voice for English: en_US-ryan-medium, en_US-lessac-medium, en_US-joe-medium, en_US-amy-medium...",
                 "Voz do Piper em inglês").define("voz_neural_en", "en_US-ryan-medium");
+        MICROFONE = b.comment("Microphone the ring listens to: 'auto' (same as Simple Voice Chat, or the system default) or part of the device name. Use /lanternmic in game to list and pick",
+                "Microfone que o anel ouve: 'auto' (o mesmo do Simple Voice Chat, ou o padrão do sistema) ou parte do nome. Use /lanternmic no jogo para ver e escolher")
+                .define("microfone", "auto");
         b.pop();
         SPEC = b.build();
     }
