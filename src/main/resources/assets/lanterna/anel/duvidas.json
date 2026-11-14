@@ -472,8 +472,8 @@
    "insignia",
    "legendary fragment"
   ],
-  "pt": "Os 8 Lanternas lendários ficam em planetas fixos a 50 mil blocos do centro (veja no mapa estelar, J). Se ele é de Tropa inimiga, é luta de verdade e dá Insígnia e Fragmentos Lendários. Se é da sua Tropa ou aliada, clique nele para um duelo de treino. Eles ficam mais fortes com o seu nível e com mais jogadores.",
-  "en": "The 8 legendary Lanterns live on fixed planets 50 thousand blocks from the center (see the star map, J). If he is from an enemy Corps, it is a real fight and gives an Insignia and Legendary Fragments. If he is from your Corps or an ally, click him for a training duel. They get stronger with your level and with more players."
+  "pt": "Os 8 Lanternas lendários ficam em planetas fixos a 50 mil blocos do centro (veja no mapa estelar, J). Se ele é de Tropa inimiga, é luta de verdade e dá Insígnia e Fragmentos Lendários. Se é da sua Tropa ou aliada, clique nele para um duelo de treino. Eles lutam sempre no nível 60 e só enfrentam quem tem nível 50 ou mais: abaixo disso, o inimigo te arremessa para fora do planeta e o aliado diz que ainda não é hora.",
+  "en": "The 8 legendary Lanterns live on fixed planets 50 thousand blocks from the center (see the star map, J). If he is from an enemy Corps, it is a real fight and gives an Insignia and Legendary Fragments. If he is from your Corps or an ally, click him for a training duel. They always fight at level 60 and only face players of level 50 or higher: below that, an enemy hurls you off the planet and an ally says it's not time yet."
  },
  {
   "id": "espaco",
@@ -880,8 +880,30 @@
    "voice commands",
    "speech"
   ],
-  "pt": "Para falar comigo, segure Ç (ou ;), fale e solte; ou escreva no chat começando com 'anel,'. Na primeira vez eu baixo os modelos de voz e depois funciono sem internet. Dá para mudar a voz no config/lanterna-client.toml.",
-  "en": "To talk to me, hold ; and speak, then release; or type in chat starting with 'ring,'. The first time I download the voice models, and after that I work offline. You can change the voice in config/lanterna-client.toml."
+  "pt": "Para falar comigo, escreva no chat começando com 'anel,' (por exemplo: anel, como faço a bateria?). Eu respondo em voz alta; a voz pode ser mudada no config/lanterna-client.toml.",
+  "en": "To talk to me, type in chat starting with 'ring,' (for example: ring, how do I make the battery?). I answer out loud; the voice can be changed in config/lanterna-client.toml."
+ },
+ {
+  "id": "guia",
+  "chaves": [
+   "guia",
+   "guia do portador",
+   "tutorial",
+   "manual",
+   "como jogar",
+   "comecar",
+   "começar",
+   "iniciante",
+   "guide",
+   "bearer's guide",
+   "tutorial",
+   "manual",
+   "how to play",
+   "getting started",
+   "beginner"
+  ],
+  "pt": "Aperte F9 (ou use /guia) para abrir o Guia do Portador: um tutorial com capítulos sobre o anel, voo, construtos, Tropas, missões, chefes, lendários, todas as receitas de bancada e o Anel Branco.",
+  "en": "Press F9 (or use /guide) to open the Bearer's Guide: a tutorial with chapters on the ring, flight, constructs, Corps, missions, bosses, legendaries, every crafting recipe and the White Ring."
  },
  {
   "id": "comandos",

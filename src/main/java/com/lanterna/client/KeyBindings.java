@@ -87,6 +87,10 @@ public final class KeyBindings {
     public static final KeyMapping NAVE_HANGAR = new KeyMapping(
             "key.lanterna.nave_hangar", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY);
 
+    /** 0.49: Guia do Portador (tutorial do mod). */
+    public static final KeyMapping GUIA = new KeyMapping(
+            "key.lanterna.guia", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F9, CATEGORY);
+
     /** Oficina de Construtos (desenhar os próprios construtos): Alt+Z. */
     public static final KeyMapping OFICINA = new KeyMapping("key.lanterna.oficina", KeyConflictContext.IN_GAME,
             net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY);

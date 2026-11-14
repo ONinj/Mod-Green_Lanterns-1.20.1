@@ -311,7 +311,7 @@ public final class ClientFlight {
             // Água: o voo fica um pouco mais pesado, mas dá para voar e acelerar (Ctrl) livremente
             if (player.isInWater()) {
                 v = v.scale(0.95);
-                if (player.tickCount % 2 == 0) bubbles(player);
+                if (player.tickCount % 2 == 0) bubbles(player, v);
             } else if (wasInWater && speed > 0.35) {
                 waterBurst(player, v);
             }
@@ -363,7 +363,7 @@ public final class ClientFlight {
         // Acelera e para rápido; vindo do impulso (Ctrl), perde o excesso de velocidade aos poucos
         double k = speed > cruise * 1.15 && target.lengthSqr() > 0 ? 0.08 : target.lengthSqr() > 0 ? 0.24 : 0.2;
         v = v.add(target.subtract(v).scale(k));
-        if (player.isInWater() && player.tickCount % 2 == 0) bubbles(player);
+        if (player.isInWater() && player.tickCount % 2 == 0) bubbles(player, v);
         else if (wasInWater && !player.isInWater() && speed > 0.35) waterBurst(player, v);
         wasInWater = player.isInWater();
         // Pairando: um balanço bem leve
@@ -613,11 +613,17 @@ public final class ClientFlight {
         }
     }
 
-    private static void bubbles(LocalPlayer player) {
+    /**
+     * Rastro de bolhas voando debaixo d'água. 0.49: só andando, poucas e atrás do corpo (antes saíam 4 por tick em
+     * volta do corpo todo, até parado, e as bolhas na frente do rosto tapavam a visão e a luz do chão).
+     */
+    private static void bubbles(LocalPlayer player, Vec3 v) {
+        if (v.lengthSqr() < 0.0025) return;
         var rnd = player.getRandom();
-        for (int i = 0; i < 4; i++) {
-            player.level().addParticle(ParticleTypes.BUBBLE, player.getX() + (rnd.nextDouble() - 0.5),
-                    player.getY() + rnd.nextDouble() * 1.8, player.getZ() + (rnd.nextDouble() - 0.5), 0, 0.1, 0);
+        Vec3 tras = v.normalize().scale(-0.9);
+        for (int i = 0; i < 2; i++) {
+            player.level().addParticle(ParticleTypes.BUBBLE, player.getX() + tras.x + (rnd.nextDouble() - 0.5) * 0.6,
+                    player.getY() + 0.2 + rnd.nextDouble() * 1.0 + tras.y, player.getZ() + tras.z + (rnd.nextDouble() - 0.5) * 0.6, 0, 0.05, 0);
         }
     }
 

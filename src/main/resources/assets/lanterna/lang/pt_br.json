@@ -2981,7 +2981,7 @@
   "anel.ia.precisa_ligar": "Me ligue primeiro (G).",
   "anel.ia.voar": "Voo ligado.",
   "anel.ia.pousar": "Descendo. Voo desligado.",
-  "anel.ia.ajuda": "Posso: levar você a um planeta (\"me leve para Zamaron\", \"me leve para casa\"), parar a viagem (\"pare\"), dizer a carga, o nível, a missão, onde estamos, a distância até um lugar, procurar perigos, ligar/desligar, voar/pousar e recitar o juramento. Também tiro dúvidas do mod: \"como faço a bateria cinzelada\", \"receita do anel vazio\", \"como faço essa missão\", \"como consigo o anel verde\", \"como recarrego\". Escreva \"anel, ...\" no chat ou segure Ç (ou ;) para falar.",
+  "anel.ia.ajuda": "Posso: levar você a um planeta (\"me leve para Zamaron\", \"me leve para casa\"), parar a viagem (\"pare\"), dizer a carga, o nível, a missão, onde estamos, a distância até um lugar, procurar perigos, ligar/desligar, voar/pousar e recitar o juramento. Também tiro dúvidas do mod: \"como faço a bateria cinzelada\", \"receita do anel vazio\", \"como faço essa missão\", \"como consigo o anel verde\", \"como recarrego\". Escreva \"anel, ...\" no chat. Para o tutorial completo, aperte F9 (Guia do Portador).",
   "anel.ia.como_vai": "Estou com %s%% de carga e pronto para o que vier.",
   "anel.ia.piada.1": "Por que o Lanterna Verde não joga esconde-esconde? Porque ele sempre brilha.",
   "anel.ia.piada.2": "Qual o construto favorito de um Lanterna preguiçoso? Uma cadeira.",
@@ -3156,5 +3156,14 @@
   "construct.lanterna.tumulo": "Túmulo",
   "construct.lanterna.tumulo.desc": "Só o Anel Preto. Fecha o alvo na mira numa cripta de luz negra que o seca enquanto ele estiver preso.",
   "construct.lanterna.pagina_branco": "◀ %s (%s/%s) ▶",
-  "construct.lanterna.pagina_dica": "rodinha do mouse ou setas trocam de Tropa"
+  "construct.lanterna.pagina_dica": "rodinha do mouse ou setas trocam de Tropa",
+  "key.lanterna.guia": "Guia do Portador",
+  "guia.lanterna.titulo": "Guia do Portador",
+  "guia.lanterna.titulo_curto": "Guia do Portador",
+  "guia.lanterna.progresso": "%s de %s páginas lidas",
+  "guia.lanterna.capitulo": "CAPÍTULO %s DE %s",
+  "guia.lanterna.dica": "DICA",
+  "guia.lanterna.controles": "←/→ páginas · ↑/↓ capítulos · rodinha rola",
+  "guia.lanterna.aviso_titulo": "Guia do Portador",
+  "guia.lanterna.aviso": "Novo por aqui? Aperte %s e abra o guia."
 }

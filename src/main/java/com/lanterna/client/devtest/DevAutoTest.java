@@ -3505,6 +3505,77 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49: Guia do Portador, capítulo por capítulo. */
+    private static void sceneGuia() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("time set 6000"); cmd("lantern ring " + System.getProperty("lanterna.lugar", "green")); com.lanterna.client.guia.GuiaProgresso.zerar(); });
+        at(140, () -> shot("guia_aviso"));
+        java.util.List<com.lanterna.client.guia.GuiaDados.Capitulo> caps = new java.util.ArrayList<>();
+        at(5, () -> { caps.addAll(com.lanterna.client.guia.GuiaDados.capitulos()); glog("guia: capitulos=" + caps.size()); mc.setScreen(new com.lanterna.client.guia.GuiaScreen()); });
+        at(20, () -> shot("guia_00_inicio"));
+        String[] alvos = System.getProperty("lanterna.guiaPaginas", "inicio:1,anel:1,voo:1,construtos:0,chefes:1,chefes:2,lendarios:0,receitas:0,receitas:2,receitas:3,branco:1,morte:1,prepare:0,noite:0").split(",");
+        int n = 0;
+        for (String a : alvos) {
+            String[] cp = a.split(":");
+            int idx = ++n;
+            at(15, () -> { var s = com.lanterna.client.guia.GuiaScreen.em(cp[0]); mc.setScreen(s);
+                for (int i = 0; i < Integer.parseInt(cp[1]); i++) s.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT, 0, 0); });
+            at(25, () -> shot(String.format("guia_%02d_%s_%s", idx, cp[0], cp[1])));
+        }
+        at(10, () -> { mc.screen.mouseScrolled(400, 150, -10); });
+        at(15, () -> shot("guia_99_rolado"));
+        at(10, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.49: luz da aura no chão debaixo d'água e em blocos que não são inteiros. */
+    private static void sceneLuzAgua() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 18000"); cmd("gamemode creative"); cmd("kill @e[type=!player]"); });
+        at(20, () -> cmd("lantern ring red"));
+        at(30, () -> { cmd("lantern full"); server(sp -> {
+            var l = sp.serverLevel();
+            int y0 = -52;
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) for (int y = y0 - 8; y <= y0 + 6; y++)
+                l.setBlock(new net.minecraft.core.BlockPos(500 + x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            // piscina: chão de areia, 7 de fundo, com capim marinho
+            for (int x = -12; x <= 0; x++) for (int z = -12; z <= 12; z++) {
+                for (int y = y0 - 12; y <= y0 - 8; y++) l.setBlock(new net.minecraft.core.BlockPos(500 + x, y, z), net.minecraft.world.level.block.Blocks.SMOOTH_SANDSTONE.defaultBlockState(), 2);
+                for (int y = y0 - 7; y <= y0 - 1; y++) l.setBlock(new net.minecraft.core.BlockPos(500 + x, y, z), net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 2);
+                if ((x * 7 + z * 3) % 5 == 0) l.setBlock(new net.minecraft.core.BlockPos(500 + x, y0 - 7, z), net.minecraft.world.level.block.Blocks.SEAGRASS.defaultBlockState(), 2);
+            }
+            for (int x = -13; x <= 1; x++) for (int z = -13; z <= 13; z++) for (int y = y0 - 12; y <= y0 - 1; y++)
+                if (x == -13 || x == 1 || z == -13 || z == 13) l.setBlock(new net.minecraft.core.BlockPos(500 + x, y, z), net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState(), 2);
+            // margem: caminho de terra, lajes e terra arada
+            for (int x = 2; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlock(new net.minecraft.core.BlockPos(500 + x, y0 - 2, z), net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState(), 2);
+                var b = z < -4 ? net.minecraft.world.level.block.Blocks.DIRT_PATH : z < 4 ? net.minecraft.world.level.block.Blocks.SMOOTH_STONE_SLAB : net.minecraft.world.level.block.Blocks.FARMLAND;
+                l.setBlock(new net.minecraft.core.BlockPos(500 + x, y0 - 1, z), b.defaultBlockState(), 2);
+            }
+            com.lanterna.visual.Visual.definir(sp, com.lanterna.visual.Visual.traje(sp), com.lanterna.visual.Visual.mascara(sp), com.lanterna.visual.Visual.ILUMINAR);
+            sp.connection.teleport(494.5, y0 - 4, 0.5, -90, 60);
+        }); });
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(20, () -> server(sp -> sp.connection.teleport(494.5, -56, 0.5, -90, 60)));
+        for (int i = 0; i < 60; i++) at(10, () -> { mc.player.setXRot(60); mc.player.setYRot(-90); mc.player.xRotO = 60; mc.player.yRotO = -90; });
+        at(1, () -> cmd("time set 6000"));
+        at(20, () -> { mc.player.setXRot(60); mc.player.setYRot(-90); shot("luz_agua_dia"); });
+        at(1, () -> cmd("time set 18000"));
+        at(20, () -> { mc.player.setXRot(60); mc.player.setYRot(-90); });
+        at(1, () -> { glog("agua: pos=" + mc.player.position() + " pitch=" + mc.player.getXRot() + " cam=" + mc.options.getCameraType() + " bloco=" + mc.level.getBlockState(mc.player.blockPosition()) + " abaixo=" + mc.level.getBlockState(mc.player.blockPosition().below(3)) + " chao4=" + mc.level.getBlockState(mc.player.blockPosition().below(4)) + " chao5=" + mc.level.getBlockState(mc.player.blockPosition().below(5))
+                + " faces=" + com.lanterna.client.aura.ClienteLuzAura.faces + " luzChao=" + mc.level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, mc.player.blockPosition().below(3))
+                + " luzCabeca=" + mc.level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, mc.player.blockPosition().above()) + " blocoLuz=" + net.minecraft.core.BlockPos.betweenClosedStream(mc.player.blockPosition().offset(-1,-2,-1), mc.player.blockPosition().offset(1,3,1)).filter(q -> mc.level.getBlockState(q).is(net.minecraft.world.level.block.Blocks.LIGHT)).map(net.minecraft.core.BlockPos::toShortString).toList()
+                + " particulas=" + mc.particleEngine.countParticles()); shot("luz_agua_fundo"); });
+        at(20, () -> server(sp -> sp.connection.teleport(493.5, -58.5, 0.5, 30, 75)));
+        at(50, () -> shot("luz_agua_capim"));
+        at(20, () -> server(sp -> sp.connection.teleport(506.5, -51, 0.5, 0, 55)));
+        at(50, () -> { glog("chao: faces=" + com.lanterna.client.aura.ClienteLuzAura.faces); shot("luz_chao_parcial"); });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.12: poderes de controle dos chefes, faróis do Morrow, lendários (nível 50), construtos da Morte e do Branco. */
     private static void sceneV4812() {
         Minecraft mc = Minecraft.getInstance();
@@ -5694,6 +5765,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("aguaanel")) sceneAguaAnel();
         else if (ENABLED && SCENE.equals("v4812")) sceneV4812();
+        else if (ENABLED && SCENE.equals("luzagua")) sceneLuzAgua();
+        else if (ENABLED && SCENE.equals("guia")) sceneGuia();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

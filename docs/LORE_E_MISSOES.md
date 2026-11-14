@@ -1463,3 +1463,21 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - **Arenas com muro:** as arenas dos chefes nas cidades ganharam muro em volta (com portão para a estrada), e a estrada até elas ganhou muretas. Em mundos já gerados o muro sobe sozinho quando alguém chega perto da arena e a água que tinha entrado sai. O tanque de dentro da arena de Odym continua (é do Morrow).
 - **Voz:** falar com o anel pela voz foi desligado; agora é só pelo chat. O anel continua respondendo em voz alta.
 - **PvP:** o laser confere o acerto a cada tick (antes só de 4 em 4) e leva em conta onde o outro jogador esteve nos últimos 0,4 s, como nos jogos de tiro. O dano por segundo é o mesmo.
+
+## 0.49.0 — Guia do Portador
+
+- **Guia do Portador** (tecla **F9**, ou **/guia** / **/guide**): um tutorial que se folheia dentro do jogo, em português ou inglês conforme o idioma do jogo.
+  - **14 capítulos:** Bem-vindo · O Anel e a Bateria · Voo, Espaço e Planetas · Construtos · As Nove Tropas · Missões, Nível e Contratos · Chefes e a Forja · Os Lendários · Receitas · Naves e Comércio · O Anel Branco · A Tropa da Morte · Prepare-se · Transmissão Interceptada.
+  - As **teclas** aparecem com o nome que o jogador usa de verdade (se ele trocou o V por outra, o guia mostra a nova).
+  - As **receitas** são as do jogo, desenhadas na grade 3x3: ingrediente com várias opções vai trocando, e passar o mouse mostra o nome.
+  - Cada página lida fica marcada; o capítulo completo ganha um ✔, e o guia abre onde o jogador parou. O progresso fica no computador de cada um (`config/lanterna_guia.json`).
+  - Quem ganha o anel e nunca abriu o guia vê um aviso discreto embaixo do painel do anel por alguns segundos.
+  - **Prepare-se** lista o que já existe no mod e vai importar na próxima saga; **Transmissão Interceptada** é um gostinho, com trechos tarjados, do que vem por aí.
+  - O texto fica em `assets/lanterna/guia/guia.json`, fácil de revisar ou ampliar.
+- **Luz do traje no chão:**
+  - debaixo d'água o tom da Tropa cobria só um pedacinho do fundo, porque a conta de "até onde a luz chega" não sabia que a água apaga a luz duas vezes mais rápido. Agora o fundo fica todo tingido, sumindo suave;
+  - a conta parte do bloco de luz de verdade (que às vezes fica nos pés ou acima da cabeça), então a borda do círculo não falha mais;
+  - lajes, caminho de terra, terra arada, neve fina e tapetes agora ganham a cor no tampo;
+  - com alga ou capim marinho na altura da cabeça, a luz procura um lugar livre do lado em vez de não acender.
+- **Voo debaixo d'água:** as bolhas saem só andando e atrás do corpo (antes eram 4 por tick em volta do corpo todo e tapavam a visão).
+- O anel, quando perguntado sobre voz ou sobre os lendários, agora responde com as regras novas (só chat; lendários no nível 60, mínimo 50) e conhece o guia ("anel, como jogar?").

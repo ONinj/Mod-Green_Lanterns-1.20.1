@@ -77,7 +77,9 @@ public final class LuzAura {
     /** Onde pôr a luz: na cabeça, senão nos pés; só em ar ou água parada (nunca troca um bloco do mundo). */
     private static BlockPos alvo(ServerPlayer p, ServerLevel l) {
         BlockPos cabeca = BlockPos.containing(p.getEyePosition());
-        for (BlockPos b : new BlockPos[]{cabeca, p.blockPosition(), cabeca.above()}) {
+        // 0.49: alga ou capim marinho na cabeça e nos pés (comum debaixo d'água) deixavam o jogador sem luz; agora
+        // também tenta os blocos do lado da cabeça e o de cima
+        for (BlockPos b : new BlockPos[]{cabeca, p.blockPosition(), cabeca.above(), cabeca.north(), cabeca.south(), cabeca.east(), cabeca.west(), cabeca.above(2)}) {
             if (b.getY() < l.getMinBuildHeight() || b.getY() >= l.getMaxBuildHeight()) continue;
             BlockState s = l.getBlockState(b);
             if (s.is(Blocks.LIGHT) && !minha(p, b)) continue; // a luz de outro jogador

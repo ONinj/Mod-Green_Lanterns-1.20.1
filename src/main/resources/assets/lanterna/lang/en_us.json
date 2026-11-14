@@ -2981,7 +2981,7 @@
   "anel.ia.precisa_ligar": "Power me on first (G).",
   "anel.ia.voar": "Flight on.",
   "anel.ia.pousar": "Going down. Flight off.",
-  "anel.ia.ajuda": "I can: take you to a planet (\"take me to Zamaron\", \"take me home\"), stop the trip (\"stop\"), tell your charge, level, mission, where we are, the distance to a place, scan for danger, power on/off, fly/land and recite the oath. I also answer questions about the mod: \"how do I make the chiseled battery\", \"empty ring recipe\", \"how do I do this mission\", \"how do I get the green ring\", \"how do I recharge\". Type \"ring, ...\" in chat or hold ; to speak.",
+  "anel.ia.ajuda": "I can: take you to a planet (\"take me to Zamaron\", \"take me home\"), stop the trip (\"stop\"), tell your charge, level, mission, where we are, the distance to a place, scan for danger, power on/off, fly/land and recite the oath. I also answer questions about the mod: \"how do I make the chiseled battery\", \"empty ring recipe\", \"how do I do this mission\", \"how do I get the green ring\", \"how do I recharge\". Type \"ring, ...\" in chat. For the full tutorial, press F9 (Bearer's Guide).",
   "anel.ia.como_vai": "I am at %s%% charge and ready for anything.",
   "anel.ia.piada.1": "Why does a Green Lantern never win hide-and-seek? Because he always shines.",
   "anel.ia.piada.2": "What is a lazy Lantern's favorite construct? A chair.",
@@ -3156,5 +3156,14 @@
   "construct.lanterna.tumulo": "Tomb",
   "construct.lanterna.tumulo.desc": "Black Ring only. Seals the target in a crypt of black light that withers it while trapped.",
   "construct.lanterna.pagina_branco": "◀ %s (%s/%s) ▶",
-  "construct.lanterna.pagina_dica": "mouse wheel or arrows switch Corps"
+  "construct.lanterna.pagina_dica": "mouse wheel or arrows switch Corps",
+  "key.lanterna.guia": "Bearer's Guide",
+  "guia.lanterna.titulo": "Bearer's Guide",
+  "guia.lanterna.titulo_curto": "Bearer's Guide",
+  "guia.lanterna.progresso": "%s of %s pages read",
+  "guia.lanterna.capitulo": "CHAPTER %s OF %s",
+  "guia.lanterna.dica": "TIP",
+  "guia.lanterna.controles": "←/→ pages · ↑/↓ chapters · wheel scrolls",
+  "guia.lanterna.aviso_titulo": "Bearer's Guide",
+  "guia.lanterna.aviso": "New here? Press %s to open the guide."
 }
