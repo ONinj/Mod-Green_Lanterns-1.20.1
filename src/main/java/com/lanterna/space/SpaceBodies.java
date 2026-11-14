@@ -66,7 +66,11 @@ public final class SpaceBodies {
         return ResourceKey.create(Registries.DIMENSION, LanternaMod.id(id));
     }
 
-    public static final Body EARTH = new Body("earth", new Vec3(0, -1000, 0), 600, 0x6FB5FF, true, Level.OVERWORLD, true);
+    /**
+     * A Terra (0.49.4: subiu de y = -1000 para y = 150). Antes a metade de baixo dela ficava abaixo do "chão" do espaço
+     * (-500) e aparecia cortada; agora ela fica inteira acima (de -450 a 750).
+     */
+    public static final Body EARTH = new Body("earth", new Vec3(0, 150, 0), 600, 0x6FB5FF, true, Level.OVERWORLD, true);
 
     public static final List<Body> BODIES = List.of(
             EARTH,
@@ -108,7 +112,8 @@ public final class SpaceBodies {
 
     /** Onde você aparece ao subir da Terra (o ponto bate com onde você estava no mundo normal). */
     public static Vec3 arrivalFromEarth(double overworldX, double overworldZ) {
-        return new Vec3(overworldX / 64.0, -300, overworldZ / 64.0);
+        // acima da Terra e um pouco de lado (por cima do polo só se veria o gelo): os continentes ficam à vista
+        return new Vec3(overworldX / 64.0 + EARTH.radius() * 0.7, EARTH.center().y + EARTH.radius() + 60, overworldZ / 64.0);
     }
 
     /** Corpos fixos + planetas gerados em volta da posição (raio em setores de 8.000 blocos). */

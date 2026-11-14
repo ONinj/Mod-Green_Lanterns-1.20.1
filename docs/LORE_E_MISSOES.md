@@ -1524,3 +1524,10 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - **não** é imune como o Arauto, não forja o Anel Preto e não converte ninguém.
   - Quem tinha virado "Lanterna Negro" na 0.49.1 volta sozinho para a própria Tropa, já como Portador Negro.
 - **/lantern converter <jogador>** (operador): transforma o jogador em Portador Negro na hora (precisa estar usando um anel; Branco e Preto não podem ser tingidos). **/lantern corrupcao 2** faz o mesmo em você.
+
+## 0.49.4 — A Terra inteira no espaço
+
+- A Terra ficava com o centro em y = −1000 (raio 600): a metade de baixo passava do "chão" do espaço (−500) e ela aparecia cortada. Agora o centro está em **y = 150**: ela vai de −450 a 750, inteira acima do chão.
+- Quem sai da Terra chega **acima dela e um pouco de lado** (y ≈ 810), olhando para os mares e continentes, e não mais por baixo.
+- As calotas polares eram uma faixa lisa, que de cima parecia um disco cinza: agora são gelo com borda irregular, algumas fendas e o mar continuando até elas.
+- Nada muda no resto: entrar na Terra voando para dentro dela continua levando ao mundo normal (testado).

@@ -3505,6 +3505,27 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.4: a Terra inteira acima do chão do espaço; sair e voltar. */
+    private static void sceneTerraEspaco() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode creative"); cmd("lantern ring green"); cmd("lantern corrupcao 0"); });
+        at(30, () -> { cmd("lantern full"); server(sp -> { com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            sp.teleportTo(sp.server.overworld(), 0.5, com.lanterna.space.SpaceTravel.EXIT_HEIGHT + 5, 0.5, 0, 0); }); });
+        at(80, () -> server(sp -> { var e = com.lanterna.space.SpaceBodies.EARTH;
+            glog("no espaco: mundo=" + sp.level().dimension().location() + " pos=" + sp.blockPosition().toShortString() + " distancia ao centro da Terra=" + Math.round(sp.position().distanceTo(e.center()))
+                    + " (raio " + e.radius() + ") fundo da Terra y=" + (e.center().y - e.radius()));
+            sp.connection.teleport(sp.getX() + 900, e.center().y + 120, sp.getZ() + 900, 135, 8); }));
+        at(80, () -> { mc.options.hideGui = true; shot("terra_espaco_lado"); });
+        at(5, () -> server(sp -> { var a = com.lanterna.space.SpaceBodies.arrivalFromEarth(0, 0); sp.connection.teleport(a.x, a.y, a.z, 90, 55); }));
+        at(60, () -> shot("terra_espaco_cima"));
+        at(5, () -> { mc.options.hideGui = false; server(sp -> sp.connection.teleport(0.5, 760, 0.5, 0, 90)); });
+        at(10, () -> server(sp -> sp.connection.teleport(0.5, 740, 0.5, 0, 90)));
+        at(60, () -> server(sp -> glog("desceu na Terra: mundo=" + sp.level().dimension().location() + " pos=" + sp.blockPosition().toShortString())));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.3: Portador Negro (convertido pelo Arauto) e o Anel Preto único. */
     private static void scenePortador() {
         Minecraft mc = Minecraft.getInstance();
@@ -5975,6 +5996,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("conversao")) sceneConversao();
         else if (ENABLED && SCENE.equals("pvpnivel")) scenePvpNivel();
         else if (ENABLED && SCENE.equals("portador")) scenePortador();
+        else if (ENABLED && SCENE.equals("terraespaco")) sceneTerraEspaco();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
