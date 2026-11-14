@@ -9,7 +9,8 @@
     "ServerGamePacketListenerImplMixin",
     "ChunkMapMixin",
     "EntityChunkLoadMixin",
-    "MinecraftServerMixin"
+    "MinecraftServerMixin",
+    "PlayerSwimMixin"
   ],
   "client": [
     "HumanoidModelMixin",

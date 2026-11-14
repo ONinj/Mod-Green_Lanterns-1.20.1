@@ -82,6 +82,7 @@ public final class RingPowers {
 
         if (data.hasRing()) {
             tickFlight(player, data);
+            tickSustento(player, data);
             if (data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) && data.charge() < data.maxCharge()) {
                 setCharge(player, data, data.maxCharge());
             }
@@ -93,6 +94,25 @@ public final class RingPowers {
         tickRecharge(player, data);
         if (data.isDirty()) sync(player, data);
         syncVisibleRing(player, data, false);
+    }
+
+    /**
+     * Com o anel no dedo:
+     *  - a fome e a saturação ficam sempre cheias (o anel sustenta o corpo);
+     *  - ligado, embaixo d'água o anel dá o ar (como no espaço): o fôlego não acaba e gasta 1 de carga a cada segundo
+     *    submerso, além do gasto do voo. Sem carga, volta a afogar como qualquer um.
+     */
+    private static void tickSustento(ServerPlayer player, RingData data) {
+        var fome = player.getFoodData();
+        if (fome.getFoodLevel() < 20) fome.setFoodLevel(20);
+        if (fome.getSaturationLevel() < 20f) fome.setSaturation(20f);
+        fome.setExhaustion(0f);
+
+        if (player.isCreative() || player.isSpectator() || !data.powerActive() || data.charge() <= 0) return;
+        if (player.isEyeInFluid(net.minecraft.tags.FluidTags.WATER)) {
+            player.setAirSupply(player.getMaxAirSupply());
+            if (player.tickCount % 20 == 0 && !homing(player)) setCharge(player, data, data.charge() - 1);
+        }
     }
 
     /** Carga máxima: a bateria melhorada com o drop do boss da Tropa dá 50% a mais. */

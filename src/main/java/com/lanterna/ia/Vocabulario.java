@@ -56,9 +56,30 @@ public final class Vocabulario {
             {"take me home", "take me to home"}, {"bring me home", "take me to home"},
     };
 
+    /** Como o Vosk costuma ouvir os nomes curtos, logo depois de "para/pra/em..." (sem acento). */
+    private static final Map<String, String> CURTOS = Map.ofEntries(
+            Map.entry("um", "oa"), Map.entry("uma", "oa"), Map.entry("boa", "oa"), Map.entry("voa", "oa"), Map.entry("hoa", "oa"),
+            Map.entry("ora", "oa"), Map.entry("hora", "oa"), Map.entry("oi", "oa"), Map.entry("no", "nok"), Map.entry("nos", "nok"),
+            Map.entry("noc", "nok"), Map.entry("nock", "nok"), Map.entry("noque", "nok"), Map.entry("nocs", "nok"), Map.entry("noqui", "nok"),
+            Map.entry("nokia", "nok"), Map.entry("roque", "nok"));
+
+    /** Frases inteiras que o Vosk junta errado. */
+    private static final String[][] JUNTOS = {{"leve piora", "leve para oa"}, {"leva piora", "leve para oa"}, {"leve proa", "leve para oa"},
+            {"leve para o a", "leve para oa"}, {"leve pra o a", "leve para oa"}, {"leve para ou a", "leve para oa"}, {"leve pro a", "leve para oa"},
+            {"leve para o noque", "leve para nok"}, {"leve para o no", "leve para nok"}, {"leve para o nos", "leve para nok"}};
+
+    /** Cor da Tropa -> planeta dela ("me leve para o planeta dos lanternas azuis" = Odym). */
+    private static final String[][] CORES = {{"verdes?", "oa"}, {"azu(?:l|is)", "odym"}, {"laranjas?", "okaara"},
+            {"vermelh[oa]s?", "ysmault"}, {"violetas?", "zamaron"}, {"rox[oa]s?", "zamaron"}, {"lilas", "zamaron"}, {"purple", "zamaron"}, {"amarel[oa]s?", "korugar"}, {"(?:indigo|anil)s?", "nok"},
+            {"(?:negr|pret)[oa]s?", "ryut"}, {"branc[oa]s?", "genese"},
+            {"green", "oa"}, {"blue", "odym"}, {"orange", "okaara"}, {"red", "ysmault"}, {"violet", "zamaron"}, {"yellow", "korugar"},
+            {"indigo", "nok"}, {"black", "ryut"}, {"white", "genese"}};
+
     /** O texto (já limpo pelo {@link Texto#limpo}) com nomes consertados e sinônimos trocados. */
     public static String consertar(String limpo) {
-        List<String> ws = new ArrayList<>(Texto.palavras(limpo));
+        String pre = " " + limpo + " ";
+        for (String[] j : JUNTOS) pre = pre.replace(" " + j[0] + " ", " " + j[1] + " ");
+        List<String> ws = new ArrayList<>(Texto.palavras(pre.trim()));
         if (ws.isEmpty()) return limpo;
         List<String> saida = new ArrayList<>();
         int i = 0;
@@ -66,6 +87,13 @@ public final class Vocabulario {
             boolean lugar = i > 0 && ANTES_DE_LUGAR.contains(ws.get(i - 1));
             String achou = null;
             int usou = 0;
+            // logo depois de "para/pra/pro/em" (e não de "no/na/de..."), os jeitos comuns de ouvir Oa e Nok
+            if (i > 0 && Arrays.asList("para", "pra", "pro", "ate", "em", "planeta", "to").contains(ws.get(i - 1)) && CURTOS.containsKey(ws.get(i))
+                    && (i + 1 == ws.size() || !Arrays.asList("de", "do", "da", "dos", "das").contains(ws.get(i + 1)))) {
+                saida.add(CURTOS.get(ws.get(i)));
+                i++;
+                continue;
+            }
             // tenta juntar 3, 2 e 1 palavras ("no que" -> nok, "sama rom" -> zamaron, "coro gar" -> korugar)
             for (int n = Math.min(3, ws.size() - i); n >= 1 && achou == null; n--) {
                 String pedaco = String.join(" ", ws.subList(i, i + n));
@@ -77,6 +105,14 @@ public final class Vocabulario {
             else { saida.add(ws.get(i)); i++; }
         }
         String t = " " + String.join(" ", saida) + " ";
+        t = t.replace(" nok que ", " nok ");
+        // num pedido de viagem, "o planeta dos lanternas azuis" / "da tropa vermelha" é o planeta daquela Tropa
+        // (antes dos sinônimos, senão "planeta da tropa" virava "casa")
+        if (Texto.tem(t.trim(), "leve", "leva", "levar", "take", "bora", "vamos", "vamo", "manda", "volta", "voltar", "volte", "teleporta", "go", "send")) {
+            for (String[] c : CORES)
+                t = t.replaceAll(" (?:o |a |os |as )?(?:planeta |planet )?(?:dos |das |da |do |of the |the )?(?:lanternas? |tropa |corps |lanterns? )?" + c[0]
+                        + "(?: lanterns?| corps| lantern planet| planet)?(?= )", " " + c[1]);
+        }
         for (String[] s : SINONIMOS) t = t.replace(" " + s[0] + " ", " " + s[1] + " ");
         return t.trim().replaceAll("\\s+", " ");
     }

@@ -18,6 +18,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -94,16 +96,18 @@ public final class VozVosk {
             long inicio = System.currentTimeMillis();
             // grava enquanto a tecla está apertada (no máximo 15 s), e mais um pouquinho depois de soltar
             long fimDepoisDeSoltar = -1;
+            List<List<String>> trechos = new ArrayList<>();
             while (System.currentTimeMillis() - inicio < 15000) {
                 int n = line.read(buf, 0, buf.length);
-                if (n > 0 && rec.acceptWaveForm(buf, n)) {
-                    // frase completa no meio: continua acumulando
-                }
-                if (soltou && fimDepoisDeSoltar < 0) fimDepoisDeSoltar = System.currentTimeMillis() + 250;
+                // o Vosk fecha um trecho a cada pausa (quem fala devagar faz várias): guarda cada um, senão só a
+                // última parte da frase chegava ao anel
+                if (n > 0 && rec.acceptWaveForm(buf, n)) trecho(trechos, rec.getResult());
+                if (soltou && fimDepoisDeSoltar < 0) fimDepoisDeSoltar = System.currentTimeMillis() + 450;
                 if (fimDepoisDeSoltar > 0 && System.currentTimeMillis() > fimDepoisDeSoltar) break;
             }
             line.stop();
-            texto = escolher(rec.getFinalResult());
+            trecho(trechos, rec.getFinalResult());
+            texto = montar(trechos);
         } catch (Throwable e) {
             LanternaMod.LOGGER.warn("Lanterna: Vosk não conseguiu ouvir ({})", e.toString());
             if (e instanceof LinkageError) quebrado = true;
@@ -126,24 +130,71 @@ public final class VozVosk {
      * consertar os nomes do mod); se nenhuma virar, a mais provável.
      */
     static String escolher(String json) {
-        java.util.List<String> alts = new java.util.ArrayList<>();
+        List<List<String>> t = new ArrayList<>();
+        trecho(t, json);
+        return montar(t);
+    }
+
+    /** As frases prováveis de um trecho (com os acentos consertados). */
+    static void trecho(List<List<String>> trechos, String json) {
+        List<String> alts = new ArrayList<>();
         try {
-            var o = com.google.gson.JsonParser.parseString(json).getAsJsonObject();
+            var o = com.google.gson.JsonParser.parseString(acentos(json)).getAsJsonObject();
             if (o.has("alternatives")) for (var e : o.getAsJsonArray("alternatives")) alts.add(e.getAsJsonObject().get("text").getAsString().trim());
             else if (o.has("text")) alts.add(o.get("text").getAsString().trim());
         } catch (Exception e) {
-            alts.add(textoDe(json));
+            alts.add(textoDe(acentos(json)));
         }
         alts.removeIf(String::isBlank);
-        if (alts.isEmpty()) return "";
-        for (String a : alts) {
-            String c = com.lanterna.ia.Vocabulario.consertar(com.lanterna.ia.Texto.limpo(a));
-            if (com.lanterna.ia.Intencao.ler(c).intencao() != com.lanterna.ia.Intencao.NADA) {
-                if (!a.equals(alts.get(0))) LanternaMod.LOGGER.debug("Lanterna: voz '{}' (em vez de '{}')", a, alts.get(0));
-                return a;
+        if (!alts.isEmpty()) trechos.add(alts);
+    }
+
+    /**
+     * Junta os trechos. Primeiro a junção das frases mais prováveis; se ela não vira um pedido que o anel entende,
+     * tenta trocar um trecho de cada vez pelas outras frases prováveis dele.
+     */
+    static String montar(List<List<String>> trechos) {
+        if (trechos.isEmpty()) return "";
+        List<String> base = new ArrayList<>();
+        for (List<String> t : trechos) base.add(t.get(0));
+        String primeira = String.join(" ", base);
+        if (entende(primeira)) return primeira;
+        for (int i = trechos.size() - 1; i >= 0; i--) {
+            for (int j = 1; j < trechos.get(i).size(); j++) {
+                List<String> c = new ArrayList<>(base);
+                c.set(i, trechos.get(i).get(j));
+                String f = String.join(" ", c);
+                if (entende(f)) {
+                    LanternaMod.LOGGER.debug("Lanterna: voz '{}' (em vez de '{}')", f, primeira);
+                    return f;
+                }
             }
         }
-        return alts.get(0);
+        return primeira;
+    }
+
+    private static boolean entende(String frase) {
+        String c = com.lanterna.ia.Vocabulario.consertar(com.lanterna.ia.Texto.limpo(frase));
+        return com.lanterna.ia.Intencao.ler(c).intencao() != com.lanterna.ia.Intencao.NADA;
+    }
+
+    /**
+     * O Vosk devolve UTF-8, mas no Windows a ponte com a biblioteca nativa lê o texto como se fosse a codificação do
+     * sistema (cp1252): "faço" chegava como "faÃ§o" e "nó" como "nÃ³", e o anel não entendia mais nada com acento.
+     * Desfaz: volta aos bytes originais e lê como UTF-8.
+     */
+    static String acentos(String s) {
+        if (s == null || (s.indexOf('Ã') < 0 && s.indexOf('Â') < 0)) return s;
+        try {
+            java.nio.charset.Charset cs;
+            try { cs = java.nio.charset.Charset.forName(com.sun.jna.Native.getDefaultStringEncoding()); }
+            catch (Throwable t) { cs = java.nio.charset.Charset.forName("windows-1252"); }
+            if (cs.equals(java.nio.charset.StandardCharsets.UTF_8)) cs = java.nio.charset.Charset.forName("windows-1252");
+            String r = new String(s.getBytes(cs), java.nio.charset.StandardCharsets.UTF_8);
+            return r.indexOf('\uFFFD') >= 0 ? s : r;
+        } catch (Exception e) {
+            return s;
+        }
     }
 
     /** {"text" : "me leve para zamaron"} -> me leve para zamaron */
@@ -244,8 +295,11 @@ public final class VozVosk {
             byte[] buf = new byte[4096];
             int n;
             rec.setMaxAlternatives(6);
-            while ((n = ais.read(buf)) >= 0) rec.acceptWaveForm(buf, n);
-            return escolher(rec.getFinalResult());
+            List<List<String>> trechos = new ArrayList<>();
+            while ((n = ais.read(buf)) >= 0) if (rec.acceptWaveForm(buf, n)) trecho(trechos, rec.getResult());
+            trecho(trechos, rec.getFinalResult());
+            LanternaMod.LOGGER.info("Lanterna: trechos ouvidos: {}", trechos);
+            return montar(trechos);
         }
     }
 

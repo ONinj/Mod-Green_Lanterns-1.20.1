@@ -351,7 +351,9 @@ public final class AnelIA {
                 .append(r.copy().withStyle(s -> s.withColor(0xE8F0F4).withBold(false))), false);
         if (som) p.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 0.5f, 1.6f);
         ultimaResposta = r.getString();
-        VozAnel.falar(ultimaResposta);
+        // na voz, a receita sem a arrumação em letras ("PPP / P-P / PPP"): só se lê no chat
+        String dita = ultimaResposta.replaceAll(" (Arrumação|Layout): [^.]*\\.", "");
+        VozAnel.falar(dita);
     }
 
     private AnelIA() {}

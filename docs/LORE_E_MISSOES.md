@@ -1401,3 +1401,22 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - Depois de todas as peças de um pedaço do mundo, os lampiões são conferidos de novo, porque uma peça vizinha podia apagar o apoio de outra. A limpeza das árvores não apaga mais troncos descascados, que são os das construções.
 - **Mercado da Cidade Aurora:** postes de tronco, toldo listrado (cor e branco) caído para a frente, balcão de laje, caixotes e lampião pendurado.
 - **`/lantern acabar [raio]`** (operador, raio padrão de 64 e máximo de 128) conserta o que já foi gerado em volta de quem chamou. Na Cidade Aurora antiga, os lampiões soltos caíram de 226 para 8 e os vidros ficaram ligados.
+
+## 0.48.8 — Voz consertada, água, fome, Terra e mira
+
+- **Voz do anel** (vídeo de teste do jogador):
+  - **Pausas:** o Vosk fecha um trecho a cada pausa, e só o último trecho chegava ao anel. Por isso, falando devagar, o começo da frase sumia ("antes", "desarmar o"...). Agora todos os trechos são guardados e juntados. Se a junção não vira um pedido que o anel entende, ele tenta as outras frases prováveis de cada trecho.
+  - **Acentos no Windows:** a biblioteca do Vosk entrega UTF-8, mas no Windows o texto era lido como cp1252, e "faço" virava "faÃ§o" e "nó" virava "nÃ³". Agora o texto volta aos bytes originais e é lido como UTF-8.
+  - **Nomes curtos:** depois de "para/pra/pro/em", Oa também é reconhecido como "um", "boa", "ora" e "piora", e Nok como "nó", "nós", "noque" e "nock".
+  - **Cores:** "o planeta dos lanternas azuis", "da tropa vermelha", "dos roxos" e "the blue lantern planet" viram o planeta daquela Tropa.
+  - **Receitas no chat:** a arrumação aparece curta, como `PPP / P-P / PPP (P = Pedregulho)`. Na voz, o anel fala só os ingredientes.
+  - Soltar a tecla espera 0,45 s (antes, 0,25 s) para não cortar a última palavra.
+- **Anel na água:**
+  - ligado, ele dá o ar: o fôlego não acaba e gasta 1 de carga por segundo submerso, como no espaço;
+  - voando com o anel não se "nada" mais: o Ctrl acelera de verdade (cerca de 26 blocos/s no teste) e o corpo não fica de cabeça para baixo;
+  - a água freia menos o voo.
+- **Fome:** com o anel no dedo, a fome e a saturação ficam sempre cheias.
+- **Entrar na Terra:** a metade de baixo da Terra fica abaixo do chão do espaço (−500). Quem descia por ali era puxado de volta pelo servidor a cada tick, e servidor e cliente se desencontravam: o jogador ficava preso, aparecendo parado em outro lugar para os outros. Agora:
+  - descendo dentro do contorno da Terra, o jogador entra nela;
+  - fora dele, o cliente para de descer antes do chão.
+- **Mira da câmera (F5):** só um ponto na cor da Tropa, sem tracinhos e sem contorno.

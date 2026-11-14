@@ -228,6 +228,12 @@ public final class ClientFlight {
 
         // Teto do espaço: não deixa subir para sempre
         if (inSpace && player.getY() > 1500 && v.y > 0) v = new Vec3(v.x, v.y * 0.5, v.z);
+        // Chão do espaço (-500): o cliente para de descer antes, em vez de brigar com o servidor (que puxa de volta).
+        // Em cima da Terra o servidor já faz entrar nela antes de chegar aqui.
+        if (inSpace && v.y < 0 && player.getY() + v.y < -497) {
+            v = new Vec3(v.x, Math.max(v.y, -497 - player.getY()), v.z);
+            if (hyperOn && player.getY() < -490) dropHyper();
+        }
 
         // A gravidade do Minecraft só é aplicada depois do movimento deste tick,
         // e no próximo tick a gente recomeça da velocidade guardada, então ela não puxa para baixo
@@ -302,9 +308,9 @@ public final class ClientFlight {
         if (inSpace) {
             v = v.add(gravityWell(player.position(), anyInput));
         } else {
-            // Água: o voo fica pesado
+            // Água: o voo fica um pouco mais pesado, mas dá para voar e acelerar (Ctrl) livremente
             if (player.isInWater()) {
-                v = v.scale(0.86);
+                v = v.scale(0.95);
                 if (player.tickCount % 2 == 0) bubbles(player);
             } else if (wasInWater && speed > 0.35) {
                 waterBurst(player, v);
@@ -352,7 +358,7 @@ public final class ClientFlight {
         if (up && !down) want = want.add(0, 0.85, 0);
         if (down && !up) want = want.add(0, -0.85, 0);
         Vec3 target = want.lengthSqr() > 1.0E-4 ? want.normalize().scale(cruise * Math.min(1, want.length())) : Vec3.ZERO;
-        if (player.isInWater()) target = target.scale(0.45);
+        if (player.isInWater()) target = target.scale(0.8);
         double speed = v.length();
         // Acelera e para rápido; vindo do impulso (Ctrl), perde o excesso de velocidade aos poucos
         double k = speed > cruise * 1.15 && target.lengthSqr() > 0 ? 0.08 : target.lengthSqr() > 0 ? 0.24 : 0.2;

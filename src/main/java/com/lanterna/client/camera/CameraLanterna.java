@@ -149,18 +149,9 @@ public final class CameraLanterna {
         double fov = mc.options.fov().get() * Mth.lerp(pt, 1f, mc.player.getFieldOfViewModifier());
         double esc = (h / 2.0) / Math.tan(Math.toRadians(fov / 2));
         int cx = (int) Math.round(w / 2.0 - x / z * esc), cy = (int) Math.round(h / 2.0 - y / z * esc);
-        int cor = ClientRingData.hasRing ? ClientRingData.color : 0xFFFFFF;
-        boolean ent = mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY;
-        int c = ent ? 0xFFFF5050 : 0xF0FFFFFF, sombra = 0xA0000000;
-        int centro = Hud.argb(ent ? 0xFF5050 : cor, 255);
-        // retícula: ponto + quatro tracinhos
-        g.fill(cx - 1, cy - 1, cx + 2, cy + 2, sombra);
-        g.fill(cx, cy, cx + 1, cy + 1, centro);
-        int a = ent ? 3 : 4;
-        for (int[] s : new int[][]{{-a - 4, 0, -a, 1}, {a + 1, 0, a + 5, 1}, {0, -a - 4, 1, -a}, {0, a + 1, 1, a + 5}}) {
-            g.fill(cx + s[0] - 1, cy + s[1] - 1, cx + s[2] + 1, cy + s[3] + 1, sombra);
-            g.fill(cx + s[0], cy + s[1], cx + s[2], cy + s[3], c);
-        }
+        // só um ponto, na cor da Tropa (sem tracinhos e sem contorno)
+        int cor = Hud.argb(ClientRingData.hasRing ? ClientRingData.color : 0xFFFFFF, 255);
+        g.fill(cx - 1, cy - 1, cx + 1, cy + 1, cor);
     }
 
     // ===================== Preferências =====================

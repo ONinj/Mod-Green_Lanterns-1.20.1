@@ -2259,7 +2259,7 @@ public final class DevAutoTest {
         at(10, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
-    private static void sceneAgua() {
+    private static void sceneAguaVelha() {
         Minecraft mc = Minecraft.getInstance();
         at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
         at(40, () -> { cmd("gamemode spectator"); cmd("execute in lanterna:oa run tp @s 0 190 -440"); });
@@ -3468,6 +3468,38 @@ public final class DevAutoTest {
         at(200, contar.apply("antes"));
         at(10, () -> cmd("lantern acabar 80"));
         at(40, contar.apply("depois"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.48.8: com o anel, respira e voa livre embaixo d'água (Ctrl acelera, sem pose de nado); fome cheia; mira de ponto. */
+    private static void sceneAguaAnel() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode survival"); cmd("gamerule doMobSpawning false");
+            cmd("lantern reset"); cmd("execute in minecraft:overworld run tp @s 800 120 800"); });
+        at(40, () -> server(sp -> { var l = sp.serverLevel();
+            for (int x = 770; x <= 830; x++) for (int z = 770; z <= 830; z++) for (int y = 100; y < 130; y++)
+                l.setBlock(new net.minecraft.core.BlockPos(x, y, z), (x == 770 || x == 830 || z == 770 || z == 830 || y == 100) ? net.minecraft.world.level.block.Blocks.STONE.defaultBlockState()
+                        : net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 2); }));
+        at(20, () -> cmd("lantern ring green"));
+        at(60, () -> { cmd("lantern full"); server(sp -> { sp.getFoodData().setFoodLevel(6); sp.getFoodData().setSaturation(0); }); });
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })));
+        at(20, () -> server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); })));
+        at(10, () -> { server(sp -> sp.teleportTo(800.5, 110, 790.5)); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); mc.player.setXRot(10); mc.player.setYRot(0); });
+        long[] carga0 = {0};
+        at(20, () -> { carga0[0] = com.lanterna.client.ClientRingData.charge;
+            net.minecraft.client.KeyMapping.set(mc.options.keyUp.getKey(), true); net.minecraft.client.KeyMapping.set(mc.options.keySprint.getKey(), true); });
+        at(30, () -> glog("agua: nadando=" + mc.player.isSwimming() + " pose=" + mc.player.getPose() + " sprint=" + mc.player.isSprinting()
+                + " vel=" + String.format("%.2f", mc.player.getDeltaMovement().length() * 20) + " b/s"));
+        at(5, () -> shot("agua_voo"));
+        at(10, () -> { net.minecraft.client.KeyMapping.set(mc.options.keyUp.getKey(), false); net.minecraft.client.KeyMapping.set(mc.options.keySprint.getKey(), false);
+            server(sp -> sp.teleportTo(800.5, 110, 800.5)); });
+        at(20 * 25, () -> server(sp -> glog("agua 25s: ar=" + sp.getAirSupply() + "/" + sp.getMaxAirSupply() + " vida=" + sp.getHealth()
+                + " fome=" + sp.getFoodData().getFoodLevel() + " sat=" + sp.getFoodData().getSaturationLevel()
+                + " carga " + carga0[0] + " -> " + com.lanterna.client.ClientRingData.charge)));
+        at(10, () -> { mc.options.hideGui = false; server(sp -> sp.teleportTo(800.5, 135, 800.5)); });
+        at(40, () -> shot("mira_ponto"));
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
@@ -5482,6 +5514,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
         else if (ENABLED && SCENE.equals("choose")) sceneChoose();
         else if (ENABLED && SCENE.equals("praca")) scenePraca();
+        else if (ENABLED && SCENE.equals("agua")) sceneAguaVelha();
         else if (ENABLED && SCENE.equals("acabar")) sceneAcabar();
         else if (ENABLED && SCENE.equals("pracamp")) scenePracaMp();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
@@ -5526,7 +5559,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("nokferidos")) sceneNokFeridos();
         else if (ENABLED && SCENE.equals("construtos2")) sceneConstrutos2();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
-        else if (ENABLED && SCENE.equals("agua")) sceneAgua();
+        else if (ENABLED && SCENE.equals("aguaanel")) sceneAguaAnel();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
         else if (ENABLED && SCENE.equals("v23")) sceneV23();

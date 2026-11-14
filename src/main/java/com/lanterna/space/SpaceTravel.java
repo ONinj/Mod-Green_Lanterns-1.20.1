@@ -93,7 +93,22 @@ public final class SpaceTravel {
 
         // Limites do espaço: não deixa cair no "fundo do mundo"
         // (o espaço só tem blocos bem lá embaixo, de -512 a -449; acima disso é vazio e leve para o servidor)
-        if (player.getY() < -500) player.teleportTo(player.getX(), -480, player.getZ());
+        // Embaixo da Terra (o "chão" do espaço corta a metade de baixo dela): quem desce ali queria entrar na Terra.
+        // Antes o servidor só puxava de volta para cima a cada tick e, voando rápido, o jogador ficava preso embaixo do
+        // limite, com o servidor e o cliente discordando de onde ele estava.
+        if (player.getY() < -495) {
+            Vec3 e = SpaceBodies.EARTH.center();
+            double dx = player.getX() - e.x, dz = player.getZ() - e.z;
+            if (dx * dx + dz * dz < SpaceBodies.EARTH.radius() * SpaceBodies.EARTH.radius()) {
+                land(player, SpaceBodies.EARTH);
+                return;
+            }
+            if (player.getY() < -500) {
+                player.teleportTo(player.getX(), -480, player.getZ());
+                player.setDeltaMovement(Vec3.ZERO);
+                player.hurtMarked = true;
+            }
+        }
 
         // Oxigênio: só o anel ligado protege
         if (player.tickCount % 20 == 0 && !player.isCreative()) {

@@ -281,13 +281,30 @@ public final class Duvidas {
         Component quanto = qtd > 1 ? Component.translatable("anel.ia.duvida.faz", qtd) : Component.empty();
         Component outras = rs.size() > 1 ? Component.translatable("anel.ia.duvida.outras", rs.size() - 1) : Component.empty();
         if (r instanceof ShapedRecipe sh) {
+            // arrumação curta: "PPP / P-P / PPP (P = Pedregulho)", uma letra por ingrediente
+            Map<String, Character> letra = new LinkedHashMap<>();
             List<String> linhas = new ArrayList<>();
             for (int y = 0; y < sh.getHeight(); y++) {
-                List<String> l = new ArrayList<>();
-                for (int x = 0; x < sh.getWidth(); x++) l.add(nomeDe(sh.getIngredients().get(y * sh.getWidth() + x)));
-                linhas.add("[" + String.join(", ", l) + "]");
+                StringBuilder l = new StringBuilder();
+                for (int x = 0; x < sh.getWidth(); x++) {
+                    Ingredient ing = sh.getIngredients().get(y * sh.getWidth() + x);
+                    if (ing.isEmpty()) { l.append('-'); continue; }
+                    String n = nomeCurto(ing);
+                    Character c = letra.get(n);
+                    if (c == null) {
+                        c = '?';
+                        for (char k : (n.toUpperCase(Locale.ROOT) + "ABCDEFGHIJKLMNOPQRSTUVWXYZ").toCharArray())
+                            if (Character.isLetter(k) && k < 128 && !letra.containsValue(k)) { c = k; break; }
+                        letra.put(n, c);
+                    }
+                    l.append(c);
+                }
+                linhas.add(l.toString());
             }
-            return Component.translatable("anel.ia.duvida.bancada", nome, quanto, total(sh.getIngredients()), String.join(" ", linhas), outras);
+            List<String> legenda = new ArrayList<>();
+            letra.forEach((n, c) -> legenda.add(c + " = " + n));
+            String arrumacao = String.join(" / ", linhas) + " (" + String.join(", ", legenda) + ")";
+            return Component.translatable("anel.ia.duvida.bancada", nome, quanto, total(sh.getIngredients()), arrumacao, outras);
         }
         if (r instanceof CraftingRecipe c)
             return Component.translatable("anel.ia.duvida.bancada_livre", nome, quanto, total(c.getIngredients()), outras);
@@ -323,6 +340,12 @@ public final class Duvidas {
         if (partes.size() <= 1) return String.join("", partes);
         String e = " " + I18n.get("anel.ia.duvida.e") + " ";
         return String.join(", ", partes.subList(0, partes.size() - 1)) + e + partes.get(partes.size() - 1);
+    }
+
+    /** O nome do ingrediente sem o "(ou parecido)". */
+    private static String nomeCurto(Ingredient i) {
+        ItemStack[] its = i.getItems();
+        return its.length == 0 ? "?" : its[0].getHoverName().getString();
     }
 
     private static String nomeDe(Ingredient i) {

@@ -61,6 +61,7 @@ public final class ClientModEvents {
     /** Liga a tela da aba "Lanterna". */
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
+        com.lanterna.power.VooNaAgua.CLIENTE = com.lanterna.client.flight.ClientFlight::isFlying;
         com.lanterna.client.naves.ClientNaves.init();
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenus.LANTERN.get(), LanternScreen::new);
