@@ -65,7 +65,7 @@ public final class AnelIA {
             if (!low.startsWith(p)) continue;
             String resto = msg.trim().substring(p.length()).trim();
             // "anel" no começo de uma frase comum ("anel verde é demais") só conta se for um pedido que o anel entende
-            if (p.endsWith(" ") && (!ClientRingData.hasRing || !PEDIDOS.contains(Intencao.ler(Texto.limpo(resto)).intencao()))) return;
+            if (p.endsWith(" ") && (!ClientRingData.hasRing || !PEDIDOS.contains(Intencao.ler(com.lanterna.ia.Vocabulario.consertar(Texto.limpo(resto))).intencao()))) return;
             e.setCanceled(true);
             Minecraft.getInstance().gui.getChat().addRecentChat(msg);
             ouvir(resto, false);
@@ -83,7 +83,8 @@ public final class AnelIA {
             responder(Component.translatable("anel.ia.sem_anel"), false);
             return;
         }
-        String limpo = Texto.limpo(texto);
+        // nomes do mod ouvidos errado ("noque" -> nok) e sinônimos ("meu planeta" -> casa)
+        String limpo = com.lanterna.ia.Vocabulario.consertar(Texto.limpo(texto));
         Intencao.Lida lida = Intencao.ler(limpo);
         Component r;
         try {

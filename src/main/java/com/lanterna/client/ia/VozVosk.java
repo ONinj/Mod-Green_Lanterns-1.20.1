@@ -87,6 +87,7 @@ public final class VozVosk {
         AudioFormat fmt = new AudioFormat(16000f, 16, 1, true, false);
         try (org.vosk.Recognizer rec = new org.vosk.Recognizer(modelo, 16000f);
              TargetDataLine line = (TargetDataLine) AudioSystem.getLine(new DataLine.Info(TargetDataLine.class, fmt))) {
+            rec.setMaxAlternatives(6);
             line.open(fmt, 8000);
             line.start();
             byte[] buf = new byte[3200];
@@ -102,7 +103,7 @@ public final class VozVosk {
                 if (fimDepoisDeSoltar > 0 && System.currentTimeMillis() > fimDepoisDeSoltar) break;
             }
             line.stop();
-            texto = textoDe(rec.getFinalResult());
+            texto = escolher(rec.getFinalResult());
         } catch (Throwable e) {
             LanternaMod.LOGGER.warn("Lanterna: Vosk não conseguiu ouvir ({})", e.toString());
             if (e instanceof LinkageError) quebrado = true;
@@ -118,6 +119,31 @@ public final class VozVosk {
             if (fim.isBlank()) mc.player.displayClientMessage(Component.translatable("anel.ia.voz.nao_ouvi"), true);
             else AnelIA.ouvir(fim, true);
         });
+    }
+
+    /**
+     * O Vosk devolve as frases mais prováveis. Fica com a primeira que vira um pedido que o anel entende (depois de
+     * consertar os nomes do mod); se nenhuma virar, a mais provável.
+     */
+    static String escolher(String json) {
+        java.util.List<String> alts = new java.util.ArrayList<>();
+        try {
+            var o = com.google.gson.JsonParser.parseString(json).getAsJsonObject();
+            if (o.has("alternatives")) for (var e : o.getAsJsonArray("alternatives")) alts.add(e.getAsJsonObject().get("text").getAsString().trim());
+            else if (o.has("text")) alts.add(o.get("text").getAsString().trim());
+        } catch (Exception e) {
+            alts.add(textoDe(json));
+        }
+        alts.removeIf(String::isBlank);
+        if (alts.isEmpty()) return "";
+        for (String a : alts) {
+            String c = com.lanterna.ia.Vocabulario.consertar(com.lanterna.ia.Texto.limpo(a));
+            if (com.lanterna.ia.Intencao.ler(c).intencao() != com.lanterna.ia.Intencao.NADA) {
+                if (!a.equals(alts.get(0))) LanternaMod.LOGGER.debug("Lanterna: voz '{}' (em vez de '{}')", a, alts.get(0));
+                return a;
+            }
+        }
+        return alts.get(0);
     }
 
     /** {"text" : "me leve para zamaron"} -> me leve para zamaron */
@@ -217,8 +243,9 @@ public final class VozVosk {
              var ais = AudioSystem.getAudioInputStream(wav.toFile())) {
             byte[] buf = new byte[4096];
             int n;
+            rec.setMaxAlternatives(6);
             while ((n = ais.read(buf)) >= 0) rec.acceptWaveForm(buf, n);
-            return textoDe(rec.getFinalResult());
+            return escolher(rec.getFinalResult());
         }
     }
 

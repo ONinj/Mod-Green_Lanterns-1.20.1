@@ -424,14 +424,6 @@
    "arena",
    "drop do chefe",
    "derrotar o chefe",
-   "vigia partido",
-   "vorgath",
-   "nyrielle",
-   "thessara",
-   "mammok",
-   "morrow",
-   "penitente",
-   "devorador",
    "boss",
    "bosses",
    "chefe",
@@ -1031,5 +1023,127 @@
   ],
   "pt": "Cada planeta das Tropas tem o seu minério: Jade Estelar em Oa, Pérola do Amanhã em Odym, Âmbar da Posse em Okaara, Ira Bruta em Ysmault, Cristal Devoto em Zamaron, Fragmento de Pavor em Korugar, Lágrima Índigo em Nok e Obsidiana do Fim em Ryut. Eles servem para forjar os anéis (4 por anel) e para chamar os Bosses das Tropas (8).",
   "en": "Each Corps planet has its own ore: Star Jade on Oa, Pearl of Tomorrow on Odym, Amber of Possession on Okaara, Raw Wrath on Ysmault, Devoted Crystal on Zamaron, Dread Shard on Korugar, Indigo Tear on Nok and End Obsidian on Ryut. They are used to forge rings (4 per ring) and to summon the Corps Bosses (8)."
+ },
+ {
+  "id": "planeta_oa",
+  "chaves": [
+   "oa",
+   "planeta oa",
+   "veltari",
+   "vigia partido",
+   "nucleo de vontade",
+   "the broken sentinel",
+   "core of will"
+  ],
+  "pt": "Oa: planeta da Tropa Verde (vontade). Povo: Veltari e os Guardiões do Universo. Chefe: Vigia Partido, que dropa Núcleo de Vontade. Minério: Jade Estelar. O anel de Oa se forja a partir do nível 8. Ritual da Vontade: só quem venceu o Vigia Partido forja o anel verde. Fique firme 10 segundos.",
+  "en": "Oa: planet of the Green Corps (will). People: Veltari and the Guardians of the Universe. Boss: The Broken Sentinel, who drops Core of Will. Ore: Star Jade. The Oa ring can be forged from level 8. Ritual of Will: only whoever defeated the Broken Sentinel forges the green ring. Stand firm for 10 seconds."
+ },
+ {
+  "id": "planeta_odym",
+  "chaves": [
+   "odym",
+   "planeta odym",
+   "aelinos",
+   "morrow",
+   "lagrima de aurora",
+   "aurora tear"
+  ],
+  "pt": "Odym: planeta da Tropa Azul (esperança). Povo: Aelínos. Chefe: Morrow, que dropa Lágrima de Aurora. Minério: Pérola do Amanhã. O anel de Odym se forja a partir do nível 5. Ritual da Esperança: céu aberto, de noite ou na chuva, com a vida cheia.",
+  "en": "Odym: planet of the Blue Corps (hope). People: Aelinos. Boss: Morrow, who drops Aurora Tear. Ore: Pearl of Tomorrow. The Odym ring can be forged from level 5. Ritual of Hope: open sky, at night or in the rain, with full health."
+ },
+ {
+  "id": "planeta_okaara",
+  "chaves": [
+   "okaara",
+   "planeta okaara",
+   "ghallos",
+   "mammok",
+   "ambar primordial",
+   "primordial amber"
+  ],
+  "pt": "Okaara: planeta da Tropa Laranja (avareza). Povo: Ghallos. Chefe: Mammok, que dropa Âmbar Primordial. Minério: Âmbar da Posse. O anel de Okaara se forja a partir do nível 12. Ritual da Avareza: 16 lingotes de ouro de tributo, e ninguém num raio de 32 blocos para dividir.",
+  "en": "Okaara: planet of the Orange Corps (avarice). People: Ghallos. Boss: Mammok, who drops Primordial Amber. Ore: Amber of Possession. The Okaara ring can be forged from level 12. Ritual of Avarice: 16 gold ingots as tribute, and no one within 32 blocks to share with."
+ },
+ {
+  "id": "planeta_ysmault",
+  "chaves": [
+   "ysmault",
+   "planeta ysmault",
+   "brakkari",
+   "vorgath",
+   "coracao de vorgath",
+   "heart of vorgath"
+  ],
+  "pt": "Ysmault: planeta da Tropa Vermelha (fúria). Povo: Brakkari. Chefe: Vorgath, que dropa Coração de Vorgath. Minério: Ira Bruta. O anel de Ysmault se forja a partir do nível 16. Ritual da Fúria: só forja em quem sangra (vida pela metade ou menos).",
+  "en": "Ysmault: planet of the Red Corps (rage). People: Brakkari. Boss: Vorgath, who drops Heart of Vorgath. Ore: Raw Wrath. The Ysmault ring can be forged from level 16. Ritual of Rage: it only forges for those who bleed (half health or less)."
+ },
+ {
+  "id": "planeta_zamaron",
+  "chaves": [
+   "zamaron",
+   "planeta zamaron",
+   "zaelith",
+   "nyrielle",
+   "coracao de nyrielle",
+   "heart of nyrielle"
+  ],
+  "pt": "Zamaron: planeta da Tropa Violeta (amor). Povo: Zaëlith. Chefe: Nyrielle, que dropa Coração de Nyrielle. Minério: Cristal Devoto. O anel de Zamaron se forja a partir do nível 20. Ritual do Amor: outro jogador ou um bicho domado seu a até 8 blocos.",
+  "en": "Zamaron: planet of the Violet Corps (love). People: Zaëlith. Boss: Nyrielle, who drops Heart of Nyrielle. Ore: Devoted Crystal. The Zamaron ring can be forged from level 20. Ritual of Love: another player or a pet of yours within 8 blocks."
+ },
+ {
+  "id": "planeta_korugar",
+  "chaves": [
+   "korugar",
+   "planeta korugar",
+   "skrell vath",
+   "thessara",
+   "coroa de pavor",
+   "crown of dread"
+  ],
+  "pt": "Korugar: planeta da Tropa Amarela (medo). Povo: Skrell'Vath. Chefe: Thessara, que dropa Coroa de Pavor. Minério: Fragmento de Pavor. O anel de Korugar se forja a partir do nível 25. Ritual do Medo: 10 segundos dentro da escuridão, sem fugir.",
+  "en": "Korugar: planet of the Yellow Corps (fear). People: Skrell'Vath. Boss: Thessara, who drops Crown of Dread. Ore: Dread Shard. The Korugar ring can be forged from level 25. Ritual of Fear: 10 seconds in darkness, without running away."
+ },
+ {
+  "id": "planeta_nok",
+  "chaves": [
+   "nok",
+   "planeta nok",
+   "ves kai",
+   "penitente sem rosto",
+   "coracao do penitente",
+   "the faceless penitent",
+   "heart of the penitent"
+  ],
+  "pt": "Nok: planeta da Tropa Índigo (compaixão). Povo: Ves'Kai. Chefe: Penitente Sem Rosto, que dropa Coração do Penitente. Minério: Lágrima Índigo. O anel de Nok se forja a partir do nível 30. Ritual da Compaixão: nenhum animal pacífico morto por você nos últimos 3 dias do jogo.",
+  "en": "Nok: planet of the Indigo Corps (compassion). People: Ves'Kai. Boss: The Faceless Penitent, who drops Heart of the Penitent. Ore: Indigo Tear. The Nok ring can be forged from level 30. Ritual of Compassion: no peaceful animal killed by you in the last 3 game days."
+ },
+ {
+  "id": "planeta_ryut",
+  "chaves": [
+   "ryut",
+   "planeta ryut",
+   "silentes",
+   "devorador de ecos",
+   "nucleo do fim",
+   "echo devourer",
+   "core of the end",
+   "silent ones"
+  ],
+  "pt": "Ryut: planeta da Tropa Negra (morte). Povo: Silentes e o Coletor. Chefe: Devorador de Ecos, que dropa Núcleo do Fim. Minério: Obsidiana do Fim. O anel de Ryut se forja a partir do nível 32. Ritual da Morte: à beira da morte (2 corações ou menos).",
+  "en": "Ryut: planet of the Black Corps (death). People: Silent Ones and the Collector. Boss: Echo Devourer, who drops Core of the End. Ore: End Obsidian. The Ryut ring can be forged from level 32. Ritual of Death: at death's door (2 hearts or less)."
+ },
+ {
+  "id": "planeta_genese",
+  "chaves": [
+   "genese",
+   "genesis",
+   "nulo",
+   "the null",
+   "altar da vida",
+   "altar of life",
+   "brotos"
+  ],
+  "pt": "Gênese é o planeta escondido da Vida. Ele só aparece quando você junta os sete anéis e os sete drops dos chefes. Lá ficam o Altar da Vida, onde se funde o Anel Branco, e a rachadura do Nulo, o chefe final da linha principal.",
+  "en": "Genesis is the hidden planet of Life. It only appears when you gather the seven rings and the seven boss drops. There you find the Altar of Life, where the White Ring is fused, and the rift of the Null, the final boss of the main line."
  }
 ]

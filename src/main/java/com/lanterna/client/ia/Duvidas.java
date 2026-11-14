@@ -190,6 +190,7 @@ public final class Duvidas {
             }
             if (n > nota) { nota = n; melhor = t; }
         }
+        ultimaNota = nota;
         return nota >= 1 ? melhor : null;
     }
 

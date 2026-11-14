@@ -3403,6 +3403,30 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.6: o mesmo da "praca", mas conectado a um servidor dedicado (-Pmp=1): tudo conferido pelo cliente. */
+    private static void scenePracaMp() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        String pl = System.getProperty("lanterna.lugar", "zamaron");
+        waitFor(() -> mc.player != null && mc.level != null, 20 * 120);
+        at(60, () -> { glog("conectado: layout novo=" + com.lanterna.cidade.Layout.novo() + " hub=" + com.lanterna.lore.PlanetLore.HUB);
+            cmd("gamemode creative"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false");
+            cmd("execute in lanterna:" + pl + " run tp @s 0 200 112 0 60"); });
+        at(60, () -> { mc.player.getAbilities().flying = true; });
+        at(20 * 60, () -> {
+            var l = mc.level; int fy = -999;
+            for (int y = 250; y > -60; y--) if (l.getBlockState(new net.minecraft.core.BlockPos(-13, y, 128)).is(com.lanterna.lore.LoreBlocks.FORJA.get())) { fy = y; break; }
+            int by = -999;
+            for (int y = 250; y > -60; y--) if (l.getBlockState(new net.minecraft.core.BlockPos(-13, y, 132)).is(com.lanterna.registry.ModBlocks.POWER_BATTERY.get())) { by = y; break; }
+            int alvos = l.getEntities(com.lanterna.lore.LoreEntities.ALVO_TREINO.get(), mc.player.getBoundingBox().inflate(300), e -> e.distanceToSqr(13, e.getY(), 130) < 400).size();
+            int nativos = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, mc.player.getBoundingBox().inflate(250), e -> true).size();
+            glog("MP " + pl + ": forja y=" + fy + " bateria y=" + by + " alvos=" + alvos + " moradores=" + nativos);
+            var m = com.lanterna.mission.Missions.get("juramento_green");
+            if (m != null) glog("MP marcador juramento -> " + m.objectives().get(0).pos());
+        });
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.3: /lantern choose funciona (o argumento se chama "corps"). */
     private static void sceneChoose() {
         Minecraft mc = Minecraft.getInstance();
@@ -5414,6 +5438,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("duvidas")) sceneDuvidas();
         else if (ENABLED && SCENE.equals("choose")) sceneChoose();
         else if (ENABLED && SCENE.equals("praca")) scenePraca();
+        else if (ENABLED && SCENE.equals("pracamp")) scenePracaMp();
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();

@@ -27,7 +27,10 @@ public enum Intencao {
             "matar", "libero", "liberar", "desbloqueio", "desbloquear", "subo", "subir", "escolho", "escolher", "entro", "entrar",
             "viro", "virar", "forjo", "forjar", "monto", "montar", "coloco", "colocar", "voo", "troco", "trocar", "compro", "comprar",
             "crio", "criar", "jogo", "jogar", "comeco", "comecar", "ativo", "ativar", "melhoro", "melhorar", "invoco", "invocar", "acesso",
-            "acessar", "sobrevivo", "sobreviver", "respiro", "respirar", "pilota", "pilotar", "piloto", "evoluo", "evoluir", "funciona"};
+            "acessar", "sobrevivo", "sobreviver", "respiro", "respirar", "pilota", "pilotar", "piloto", "evoluo", "evoluir", "funciona",
+            "arrumo", "arrumar", "arranjo", "arranjar", "descolo", "adquiro", "adquirir", "tenho", "ter", "tiro", "tirar", "boto", "botar",
+            "ponho", "por", "vou", "ir", "volto", "voltar", "salvo", "salvar", "conserto", "consertar", "curo", "curar", "mudo", "mudar",
+            "troca", "upo", "upar", "farmo", "farmar", "acho", "descubro", "descobrir", "domo", "domar", "falo", "falar", "chamo"};
     private static final String[] ONDE_PT = {"acho", "encontro", "fica", "ficam", "consigo", "pego", "compro", "mora", "moram", "nasce", "nascem", "tem"};
 
     /** "como eu faço...", "onde acho...", "receita de...", "how do I...", "where can I find..." */

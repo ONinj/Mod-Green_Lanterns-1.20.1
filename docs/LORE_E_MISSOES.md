@@ -1354,3 +1354,35 @@ Pergunte ao anel pelo chat (`anel, ...`) ou pela voz (segure Ç ou ;). Ele enten
 - **Nativos nas cidades:**
   - em servidores com distância de simulação pequena, quase nenhuma casa contava e a cidade ficava vazia; agora contam todas as casas carregadas;
   - uma obra em andamento em outro lugar (a Cidade Aurora num mundo plano, por exemplo) não segura mais a chegada dos moradores.
+
+## 0.48.6 — O anel entende melhor a fala
+
+- **Nomes do mod na voz:** o reconhecimento de fala só conhece palavras comuns, então os nomes do mod chegavam errados. Agora cada pedaço da frase é comparado pelo **som** com os nomes do mod (`ia/Vocabulario`), e o nome certo entra no lugar. Exemplos:
+
+  | O Vosk ouviu | Vira |
+  |---|---|
+  | "noque", "no que", "nock" | Nok |
+  | "zamarão", "sama rom" | Zamaron |
+  | "coro gar" | Korugar |
+  | "is malte" | Ysmault |
+  | "o cara" | Okaara |
+  | "o dim" | Odym |
+  | "riute" | Ryut |
+  | "ranks" | Hanks |
+  | "jeneses" | Gênese |
+
+  - Depois de "para", "pra", "em" ou "sobre", a comparação aceita mais diferença, porque o que vem depois é quase sempre um lugar.
+  - Nomes curtos (Oa, Nok) só trocam com o mesmo som: "de novo" e "nó" continuam como estão.
+- **Várias tentativas do Vosk:** ele devolve as 6 frases mais prováveis, e o anel fica com a primeira que vira um pedido que ele entende.
+- **Sinônimos** viram uma forma só:
+  - "meu planeta", "seu planeta", "planeta natal", "minha base" e "o quartel" viram **casa**;
+  - "me manda pra", "bora pra", "vamos pra", "quero voltar pra", "volta pra" e "me teleporta pra" viram **me leve para**;
+  - em inglês, "go home", "go back to", "send me to" e "take us to" também funcionam.
+- **Um assunto por planeta:** a Tropa e a emoção, o povo, o chefe e o drop, o minério, o nível para forjar e o ritual da forja, além de Gênese. "O que dropa o Vigia Partido" agora responde com Oa.
+- Mais verbos de pergunta: "como arrumo", "como arranjo", "como tenho", "como volto", "como curo"...
+- Conferido num **servidor dedicado** com um jogador conectado, num mundo novo:
+  - a forja e a bateria estão na praça da Bateria Central;
+  - os 3 alvos de treino ficam a leste;
+  - os moradores chegam;
+  - o marcador do juramento aponta para a Bateria Central do quartel.
+- Teste: `-Pmp=1` conecta o cliente de teste a um servidor em `localhost:25565` (cena `pracamp`).

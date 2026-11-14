@@ -42,7 +42,8 @@ minecraft {
             if (project.findProperty('lugar')) property 'lanterna.lugar', project.findProperty('lugar')
             if (project.findProperty('forma')) property 'lanterna.forma', project.findProperty('forma')
             if (project.findProperty('dbgbroca')) property 'lanterna.dbgbroca', 'true'
-            args '--quickPlaySingleplayer', (project.findProperty('mundo') ?: 'test'), '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
+            args(project.findProperty('mp') ? ['--quickPlayMultiplayer', 'localhost:25565'] : ['--quickPlaySingleplayer', (project.findProperty('mundo') ?: 'test')])
+            args '--width', (project.findProperty('largura') ?: '960'), '--height', (project.findProperty('altura') ?: '540')
         }
         server {
             workingDirectory project.file('run')
