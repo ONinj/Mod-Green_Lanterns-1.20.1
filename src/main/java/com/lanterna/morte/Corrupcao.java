@@ -92,27 +92,34 @@ public final class Corrupcao {
 
     private static final String CONVERSAO = "lanterna_conversao_negra", CONVERTER_EM = "lanterna_converter_em";
 
+    /** Estado da linha da Morte de quem virou Portador Negro (não é o Arauto, não forja o Anel Preto). */
+    public static final int PORTADOR = 4;
+    /** A luz do Portador Negro: um preto que ainda aparece no escuro. */
+    public static final int COR_PORTADOR = 0x2C2C34;
+
     /**
-     * Morto por um Lanterna Negro: ergue-se como Lanterna Negro. O anel da Tropa de antes fica preto, com rachaduras
-     * brancas e o símbolo antigo; o traje continua o da Tropa de antes, em preto e branco. Os poderes são os da Morte.
+     * Corrompido pelo Arauto da Morte (ou por um Lanterna Negro de Ryut): vira Portador Negro (0.49.3). Continua da
+     * própria Tropa, com os mesmos poderes, mas tudo fica preto (anel rachado, traje, construtos), ganha só os dois dons
+     * menores da Morte (Farejar e Drenar Vida) e um pouco mais de força, bem menos que o Arauto.
      */
     public static void converter(ServerPlayer p, LoreData d) {
         RingData r = ModCapabilities.get(p).orElse(null);
         ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
-        ResourceLocation origem = !anel.isEmpty() ? com.lanterna.item.PowerRingItem.getCorpsVisual(anel)
+        ResourceLocation tropa = !anel.isEmpty() ? com.lanterna.item.PowerRingItem.getCorpsVisual(anel)
                 : r != null && r.hasRing() ? r.corps() : com.lanterna.corps.BuiltinCorps.GREEN.id();
-        if (Supremos.preto(origem) || Supremos.supremo(origem)) origem = com.lanterna.corps.BuiltinCorps.GREEN.id();
-        var negra = com.lanterna.corps.BuiltinCorps.BLACK;
+        if (Supremos.supremo(tropa)) {
+            p.sendSystemMessage(Component.translatable("morte.lanterna.portador_recusa").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            return;
+        }
         if (anel.isEmpty()) {
-            anel = com.lanterna.item.PowerRingItem.create(negra.id(), negra.color(), -1);
+            anel = com.lanterna.item.PowerRingItem.create(tropa, com.lanterna.corps.BuiltinCorps.colorOf(tropa), -1);
             com.lanterna.item.PowerRingItem.setOwner(anel, p);
             com.lanterna.power.EquipmentHelper.equipOrGive(p, RingData.RING_SLOT, anel);
         } else {
-            anel.getOrCreateTag().putString("Corps", negra.id().toString());
-            anel.getOrCreateTag().putInt("Color", negra.color());
+            anel.getOrCreateTag().putString("Corps", tropa.toString());
         }
-        com.lanterna.item.PowerRingItem.setCorrupcao(anel, 2, origem);
-        d.setMorte(3);
+        com.lanterna.item.PowerRingItem.setCorrupcao(anel, 2, tropa);
+        d.setMorte(PORTADOR);
         d.setUltimaCeifa(System.currentTimeMillis());
         p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 8, 0, false, false));
         p.level().playSound(null, p.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 1f, 0.5f);
@@ -122,7 +129,7 @@ public final class Corrupcao {
         p.sendSystemMessage(Component.translatable("morte.lanterna.convertido_2").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         for (ServerPlayer o : p.server.getPlayerList().getPlayers())
             if (o != p) o.sendSystemMessage(Component.translatable("morte.lanterna.convertido_servidor", p.getDisplayName()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
-        LanternaMod.LOGGER.info("Lanterna: {} foi convertido em Lanterna Negro (era {})", p.getGameProfile().getName(), origem);
+        LanternaMod.LOGGER.info("Lanterna: {} virou Portador Negro ({})", p.getGameProfile().getName(), tropa);
     }
 
     /** Marca (ou limpa) a corrupção do anel que o jogador está usando. Comando de teste e linha da Morte. */
@@ -136,8 +143,8 @@ public final class Corrupcao {
         }
         ResourceLocation origem = com.lanterna.item.PowerRingItem.getOrigem(anel);
         if (nivel == 0 && com.lanterna.item.PowerRingItem.getCorrupcao(anel) > 0) LoreCapability.get(p).ifPresent(d -> d.setMorte(0));
-        if (nivel == 0 && origem != null && com.lanterna.item.PowerRingItem.getCorrupcao(anel) == 2) {
-            // desfaz a conversão: volta a ser o anel da Tropa de antes
+        if (nivel == 0 && origem != null && Supremos.preto(com.lanterna.item.PowerRingItem.getCorps(anel))) {
+            // anel convertido da 0.49.1 (que virava preto): volta a ser o anel da Tropa de antes
             anel.getOrCreateTag().putString("Corps", origem.toString());
             anel.getOrCreateTag().putInt("Color", com.lanterna.corps.BuiltinCorps.colorOf(origem));
         }
@@ -176,7 +183,8 @@ public final class Corrupcao {
     /** Pode forjar o Anel Preto agora? (só no último passo da linha da Morte) */
     public static boolean podeForjar(ServerPlayer p) {
         LoreData d = LoreCapability.get(p).orElse(null);
-        return d != null && (d.isActive("morte_8") || d.morte() >= 3);
+        // o Anel Preto é um só por mundo: se já tem dono, ninguém mais forja (ForgeRituals avisa quem é)
+        return d != null && (d.isActive("morte_8") || d.morte() == 3) && AnelPreto.livre(p);
     }
 
     /** Quem está corrompido (ou já é Lanterna Negro) recolhe almas ao matar, mesmo sem o Anel Preto. */
@@ -198,6 +206,16 @@ public final class Corrupcao {
         }
         // o anel de quem está corrompido mostra a corrupção (também em mundos de antes desta versão)
         if (p.tickCount % 40 == 7) {
+            ItemStack an = com.lanterna.power.EquipmentHelper.ring(p);
+            // 0.49.1 deixava o convertido com o anel da Tropa Negra: agora ele é Portador Negro da própria Tropa
+            ResourceLocation org = com.lanterna.item.PowerRingItem.getOrigem(an);
+            if (!an.isEmpty() && com.lanterna.item.PowerRingItem.getCorrupcao(an) == 2 && org != null && Supremos.preto(com.lanterna.item.PowerRingItem.getCorps(an))) {
+                an.getOrCreateTag().putString("Corps", org.toString());
+                an.getOrCreateTag().putInt("Color", com.lanterna.corps.BuiltinCorps.colorOf(org));
+                LoreCapability.get(p).ifPresent(dd -> { if (dd.morte() == 3) dd.setMorte(PORTADOR); });
+            }
+            // mundo de antes desta versão: o primeiro com o Anel Preto de verdade fica como o dono dele
+            if (AnelPreto.dono(p.server) == null && AnelPreto.arauto(p)) AnelPreto.registrar(p);
             LoreData dm = LoreCapability.get(p).orElse(null);
             ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
             if (dm != null && dm.morte() == 2 && !anel.isEmpty() && com.lanterna.item.PowerRingItem.getCorrupcao(anel) == 0

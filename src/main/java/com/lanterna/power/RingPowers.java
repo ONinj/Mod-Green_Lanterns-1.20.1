@@ -73,8 +73,10 @@ public final class RingPowers {
                 charge = charge < 0 ? max : max; // -1 = anel novo, vem cheio
                 PowerRingItem.setStoredCharge(ring, charge);
             }
-            data.refresh(def.id(), def.color(), charge, max);
-            data.espelharCorrupcao(PowerRingItem.getCorrupcao(ring), PowerRingItem.getOrigem(ring));
+            int corrup = PowerRingItem.getCorrupcao(ring);
+            // Portador Negro: os mesmos poderes da Tropa, mas a luz é preta (construtos, aura, painel)
+            data.refresh(def.id(), corrup == 2 ? com.lanterna.morte.Corrupcao.COR_PORTADOR : def.color(), charge, max);
+            data.espelharCorrupcao(corrup, PowerRingItem.getOrigem(ring));
             data.setEverChosen(true);
         } else if (data.hasRing()) {
             data.unequip();

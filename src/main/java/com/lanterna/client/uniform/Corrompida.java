@@ -62,7 +62,8 @@ public final class Corrompida {
             float nr, ng, nb;
             if (nivel >= 2) {
                 // preto e branco, com contraste: o escuro vira preto e o claro vira branco
-                float v = brilho ? Math.min(1f, l * 1.25f + 0.1f) : clamp((l - 0.5f) * 1.7f + 0.5f);
+                // 0.49.3: traje preto (do Portador Negro), com os detalhes claros em cinza e branco
+                float v = brilho ? Math.min(1f, l * 1.25f + 0.1f) : clamp((l - 0.5f) * 1.7f + 0.36f);
                 v = v * v * (3 - 2 * v);
                 nr = ng = nb = v;
             } else {

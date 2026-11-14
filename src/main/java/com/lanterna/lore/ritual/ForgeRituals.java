@@ -1,5 +1,7 @@
 package com.lanterna.lore.ritual;
 
+import net.minecraft.ChatFormatting;
+
 import com.lanterna.LanternaMod;
 import com.lanterna.block.PowerBatteryBlock;
 import com.lanterna.capability.ModCapabilities;
@@ -89,6 +91,11 @@ public final class ForgeRituals {
             }
         }
 
+        if (planet == PlanetLore.RYUT && !com.lanterna.morte.AnelPreto.livre(player)) {
+            player.sendSystemMessage(Component.translatable("morte.lanterna.anel_unico", com.lanterna.morte.AnelPreto.nomeDono(player.server))
+                    .withStyle(s -> s.withColor(planet.color()).withItalic(true)));
+            return;
+        }
         if (planet == PlanetLore.RYUT && !player.isCreative() && !com.lanterna.morte.Corrupcao.podeForjar(player)) {
             player.sendSystemMessage(Component.translatable("morte.lanterna.forja_recusa").withStyle(s -> s.withColor(planet.color()).withItalic(true)));
             return;
@@ -195,6 +202,12 @@ public final class ForgeRituals {
         CorpsDefinition def = CorpsManager.get(planet.corps.id());
         ItemStack ring = PowerRingItem.create(def.id(), def.color(), def.maxCharge());
         PowerRingItem.setOwner(ring, player);
+        if (planet == PlanetLore.RYUT) {
+            // nasce o Arauto da Morte: o Anel Preto é um só por mundo
+            com.lanterna.morte.AnelPreto.registrar(player);
+            for (ServerPlayer o : player.server.getPlayerList().getPlayers())
+                o.sendSystemMessage(Component.translatable("morte.lanterna.arauto_nasceu", player.getDisplayName()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+        }
         give(player, ring);
         ItemStack battery = BatteryItems.create(def.id(), def.color());
         if (!battery.isEmpty()) give(player, battery);

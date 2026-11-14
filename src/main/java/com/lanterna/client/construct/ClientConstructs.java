@@ -74,7 +74,7 @@ public final class ClientConstructs {
             return;
         }
         if (cooldown(type) > 0) return;
-        if (!type.disponivel(ClientRingData.corps)) return;
+        if (!type.disponivel(ClientRingData.corps, com.lanterna.client.uniform.Corrompida.nivel(mc.player) == 2)) return;
         // Segurando a tecla, o teclado "repete" o clique: o construto contínuo já está ligado, não reinicia
         if (type.hold && holding == type) return;
         ModNetwork.sendToServer(new ConstructCastPacket(type.id, true));

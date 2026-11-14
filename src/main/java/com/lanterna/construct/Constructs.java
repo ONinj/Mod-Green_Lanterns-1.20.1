@@ -112,7 +112,7 @@ public final class Constructs {
             player.displayClientMessage(Component.translatable("message.lanterna.power_needed"), true);
             return;
         }
-        if (!type.disponivel(ring.corps())) return;
+        if (!type.disponivel(ring.corps(), ring.corrupcao() == 2)) return;
         if (!com.lanterna.construct.fonte.ArvoreDaLuz.liberado(player, type)) {
             player.displayClientMessage(Component.translatable("arvore.lanterna.bloqueado", type.displayName()), true);
             return;

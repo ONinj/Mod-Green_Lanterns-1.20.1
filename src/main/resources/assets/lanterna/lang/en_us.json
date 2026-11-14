@@ -3167,8 +3167,18 @@
   "guia.lanterna.aviso_titulo": "Bearer's Guide",
   "guia.lanterna.aviso": "New here? Press %s to open the guide.",
   "morte.lanterna.convertido_1": "The ring goes dark... and lights again, black.",
-  "morte.lanterna.convertido_2": "You rose as a Black Lantern. Your Corps' color still lives in the symbol, but the light now belongs to Death. Bring it to other bearers.",
-  "morte.lanterna.convertido_servidor": "%s fell to a Black Lantern... and rose as one of them.",
-  "command.lanterna.corrupcao": "Ring corruption: %s (0 clean, 1 corrupted, 2 converted into a Black Lantern).",
-  "morte.lanterna.imune": "The Black Lantern doesn't feel your blow. Only the White Ring or a bearer of level %s or higher can hurt him."
+  "morte.lanterna.convertido_2": "You are now a Black Bearer. Your powers are still your Corps', but the light belongs to Death, and it gave you two gifts: Scent and Drain Life. Whoever carries the Black Ring is the Herald: you serve him.",
+  "morte.lanterna.convertido_servidor": "%s fell to Death... and rose as a Black Bearer.",
+  "command.lanterna.corrupcao": "Ring corruption: %s (0 clean, 1 corrupted, 2 Black Bearer).",
+  "morte.lanterna.imune": "The Black Lantern doesn't feel your blow. Only the White Ring or a bearer of level %s or higher can hurt him.",
+  "morte.lanterna.portador_recusa": "Your ring is too strong for Death to stain.",
+  "morte.lanterna.anel_unico": "Ryut's forge is cold. There is only one Black Ring, and it already has an owner: %s, the Herald of Death.",
+  "morte.lanterna.anel_unico_teste": "(test) This world already has a Herald of Death: %s. This black ring is only for testing.",
+  "morte.lanterna.arauto_nasceu": "The Black Ring has been forged. %s is now the Herald of Death.",
+  "command.lanterna.converter": "%s is now a Black Bearer.",
+  "command.lanterna.converter_sem_anel": "%s isn't wearing a ring.",
+  "command.lanterna.converter_supremo": "%s wears a supreme ring (White or Black): Death can't stain it.",
+  "command.lanterna.anelpreto_livre": "The Black Ring hasn't been forged in this world yet.",
+  "command.lanterna.anelpreto_dono": "The Black Ring belongs to %s (Herald of Death).",
+  "command.lanterna.anelpreto_liberado": "The Black Ring was released: Ryut's forge accepts a new Herald."
 }

@@ -3167,8 +3167,18 @@
   "guia.lanterna.aviso_titulo": "Guia do Portador",
   "guia.lanterna.aviso": "Novo por aqui? Aperte %s e abra o guia.",
   "morte.lanterna.convertido_1": "O anel apaga... e acende de novo, preto.",
-  "morte.lanterna.convertido_2": "Você se ergueu como Lanterna Negro. A cor da sua Tropa ainda está no símbolo, mas a luz agora é da Morte. Leve-a a outros portadores.",
-  "morte.lanterna.convertido_servidor": "%s caiu para um Lanterna Negro... e se ergueu como um deles.",
-  "command.lanterna.corrupcao": "Corrupção do anel: %s (0 limpo, 1 corrompido, 2 convertido em Lanterna Negro).",
-  "morte.lanterna.imune": "O Lanterna Negro não sente o seu golpe. Só o Anel Branco ou um portador de nível %s ou mais o fere."
+  "morte.lanterna.convertido_2": "Você agora é um Portador Negro. Os poderes ainda são os da sua Tropa, mas a luz é da Morte, e ela te deu dois dons: Farejar e Drenar Vida. Quem carrega o Anel Preto é o Arauto: você serve a ele.",
+  "morte.lanterna.convertido_servidor": "%s caiu para a Morte... e se ergueu como Portador Negro.",
+  "command.lanterna.corrupcao": "Corrupção do anel: %s (0 limpo, 1 corrompido, 2 Portador Negro).",
+  "morte.lanterna.imune": "O Lanterna Negro não sente o seu golpe. Só o Anel Branco ou um portador de nível %s ou mais o fere.",
+  "morte.lanterna.portador_recusa": "O seu anel é forte demais para a Morte tingir.",
+  "morte.lanterna.anel_unico": "A forja de Ryut está fria. O Anel Preto é um só, e ele já tem dono: %s, o Arauto da Morte.",
+  "morte.lanterna.anel_unico_teste": "(teste) Este mundo já tem um Arauto da Morte: %s. Este anel preto é só para teste.",
+  "morte.lanterna.arauto_nasceu": "O Anel Preto foi forjado. %s é agora o Arauto da Morte.",
+  "command.lanterna.converter": "%s agora é um Portador Negro.",
+  "command.lanterna.converter_sem_anel": "%s não está usando um anel.",
+  "command.lanterna.converter_supremo": "%s usa um anel supremo (Branco ou Preto): a Morte não o tinge.",
+  "command.lanterna.anelpreto_livre": "O Anel Preto ainda não foi forjado neste mundo.",
+  "command.lanterna.anelpreto_dono": "O Anel Preto pertence a %s (Arauto da Morte).",
+  "command.lanterna.anelpreto_liberado": "O Anel Preto foi liberado: a forja de Ryut aceita um novo Arauto."
 }

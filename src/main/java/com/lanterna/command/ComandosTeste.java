@@ -311,6 +311,11 @@ public final class ComandosTeste {
             dd.setMorte(3);
             dd.setUltimaCeifa(System.currentTimeMillis());
         }
+        if (t == BuiltinCorps.BLACK) {
+            if (com.lanterna.morte.AnelPreto.dono(p.server) == null) com.lanterna.morte.AnelPreto.registrar(p);
+            else if (!com.lanterna.morte.AnelPreto.livre(p))
+                p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("morte.lanterna.anel_unico_teste", com.lanterna.morte.AnelPreto.nomeDono(p.server)));
+        }
         return ok(c, velho.isEmpty() ? "anel" : "anel_troca", id);
     }
 

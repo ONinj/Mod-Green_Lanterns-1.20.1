@@ -104,9 +104,11 @@ public class ConstructWheelScreen extends Screen {
         java.util.List<ConstructType> comuns = new java.util.ArrayList<>(), tropa = new java.util.ArrayList<>();
         boolean branco = ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white");
         String pagina = branco ? ConstructType.PAGINAS_BRANCO[Math.floorMod(paginaBranco, ConstructType.PAGINAS_BRANCO.length)] : null;
-        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
+        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps, minecraft.player != null && com.lanterna.client.uniform.Corrompida.nivel(minecraft.player) == 2)) {
             if (branco) {
                 if (t.corps != null && !t.corps.equals(pagina)) continue;
+            } else if (t.domDoPortador() && !t.disponivel(ClientRingData.corps)) {
+                // dons da Morte do Portador Negro: aparecem junto com os da Tropa
             } else if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)) continue;
             (t.corps == null ? comuns : tropa).add(t);
         }

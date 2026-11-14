@@ -52,6 +52,7 @@ public final class Supremos {
 
     /** Multiplicador de dano dos poderes (o Preto faminto perde força). */
     public static float dano(ResourceLocation corps, @Nullable Player p) {
+        if (p != null && !preto(corps) && com.lanterna.morte.AnelPreto.portador(p)) return 1.15f;
         // 0.49.2: o Preto é o mais forte de todos (faminto não enfraquece: entra em frenesi, morte/Frenesi)
         if (preto(corps)) return 2.0f;
         if (branco(corps)) return 1.7f;
@@ -91,7 +92,8 @@ public final class Supremos {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 20 != 13) return;
         ResourceLocation c = anel(p);
         boolean b = branco(c), pr = preto(c);
-        mod(p, Attributes.MAX_HEALTH, VIDA, pr ? VIDA_PRETO : b ? 20 : 0);
+        boolean portador = !pr && !b && com.lanterna.morte.AnelPreto.portador(p);
+        mod(p, Attributes.MAX_HEALTH, VIDA, pr ? VIDA_PRETO : b ? 20 : portador ? 8 : 0);
         mod(p, Attributes.ARMOR, ARMADURA, armaduraDe(c));
         mod(p, Attributes.ARMOR_TOUGHNESS, DUREZA, pr ? 5 : b ? 4 : 0);
         if (p.getHealth() > p.getMaxHealth()) p.setHealth(p.getMaxHealth());
@@ -180,8 +182,9 @@ public final class Supremos {
         Player atk = Equilibrio.atacante(event.getSource());
         if (atk == null || atk == event.getEntity()) return;
         RingData r = ModCapabilities.get(atk).orElse(null);
-        if (r == null || !r.hasRing() || !r.powerActive() || !preto(r.corps())) return;
-        atk.heal(Math.min(4f, event.getAmount() * 0.15f));
+        if (r == null || !r.hasRing() || !r.powerActive()) return;
+        if (preto(r.corps())) atk.heal(Math.min(4f, event.getAmount() * 0.15f));
+        else if (r.corrupcao() == 2) atk.heal(Math.min(1.5f, event.getAmount() * 0.06f)); // Portador Negro: um pouco
     }
 
     private Supremos() {}

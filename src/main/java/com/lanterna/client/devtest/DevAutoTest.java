@@ -3505,6 +3505,66 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.3: Portador Negro (convertido pelo Arauto) e o Anel Preto único. */
+    private static void scenePortador() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN);
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lantern corrupcao 0"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(40, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setMorte(0); d.setXp(com.lanterna.tropa.Nivel.total(60)); });
+            com.lanterna.tropa.Nivel.aplicar(sp);
+        }));
+        at(10, () -> cmd("lantern ring red"));
+        at(30, () -> server(sp -> { var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null); if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+            glog("antes: vida max " + sp.getMaxHealth() + " cor " + Integer.toHexString(r.color()) + " roda=" + com.lanterna.construct.ConstructType.daRoda(r.corps(), r.corrupcao() == 2).size()); }));
+        at(10, () -> cmd("lantern converter Dev"));
+        at(60, () -> server(sp -> {
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            var anel = com.lanterna.power.EquipmentHelper.ring(sp);
+            var roda = com.lanterna.construct.ConstructType.daRoda(r.corps(), r.corrupcao() == 2);
+            glog("portador: tropa=" + r.corps() + " corrupcao=" + r.corrupcao() + " cor=" + Integer.toHexString(r.color()) + " morte=" + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.morte()).orElse(-1)
+                    + " vida max " + sp.getMaxHealth() + " dano x" + com.lanterna.combate.Supremos.dano(r.corps(), sp) + " roda=" + roda.size()
+                    + " farejar=" + roda.contains(com.lanterna.construct.ConstructType.FAREJAR) + " drenar=" + roda.contains(com.lanterna.construct.ConstructType.DRENAR)
+                    + " ceifa=" + roda.contains(com.lanterna.construct.ConstructType.CEIFA) + " mortalha=" + roda.contains(com.lanterna.construct.ConstructType.MORTALHA)
+                    + " napalm(vermelho)=" + roda.contains(com.lanterna.construct.ConstructType.NAPALM) + " arauto=" + com.lanterna.morte.AnelPreto.arauto(sp) + " portador=" + com.lanterna.morte.AnelPreto.portador(sp));
+        }));
+        // anel único: outro dono registrado bloqueia a forja
+        at(10, () -> server(sp -> {
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"), "Arauto"));
+            com.lanterna.morte.AnelPreto.registrar(fake);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(3));
+            glog("anel unico: dono=" + com.lanterna.morte.AnelPreto.nomeDono(sp.server) + " eu posso forjar? " + com.lanterna.morte.Corrupcao.podeForjar(sp));
+            com.lanterna.morte.AnelPreto.liberar(sp.server);
+            glog("liberado: dono=" + com.lanterna.morte.AnelPreto.nomeDono(sp.server) + " eu posso forjar? " + com.lanterna.morte.Corrupcao.podeForjar(sp));
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(com.lanterna.morte.Corrupcao.PORTADOR));
+        }));
+        // visual: traje preto, construto preto, roda
+        at(10, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
+        at(40, () -> shot("portador_traje"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(10, () -> server(sp -> { sp.setYRot(0); sp.setXRot(-10); sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), 0, -10); }));
+        at(10, () -> { cmd("lantern affinity 3000"); cmd("lantern full"); });
+        at(20, () -> server(sp -> { com.lanterna.construct.Constructs.cast(sp, "martelo"); }));
+        at(4, () -> server(sp -> glog("construtos: " + sp.serverLevel().getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(20)).stream()
+                .map(e -> Integer.toHexString(e.color())).toList())));
+        at(2, () -> shot("portador_construto"));
+        at(10, () -> server(sp -> com.lanterna.construct.Constructs.cast(sp, "drenar")));
+        at(30, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+            com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+        at(20, () -> shot("portador_roda"));
+        at(5, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(null); });
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.2: PvP medido com um rival simulado (FakePlayer): golpes para matar em cada nível e a imunidade do Negro. */
     private static void scenePvpNivel() {
         Minecraft mc = Minecraft.getInstance();
@@ -5914,6 +5974,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("corrupcao")) sceneCorrupcao();
         else if (ENABLED && SCENE.equals("conversao")) sceneConversao();
         else if (ENABLED && SCENE.equals("pvpnivel")) scenePvpNivel();
+        else if (ENABLED && SCENE.equals("portador")) scenePortador();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

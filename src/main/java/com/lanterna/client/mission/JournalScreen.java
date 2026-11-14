@@ -209,7 +209,7 @@ public class JournalScreen extends Screen {
                 Affinity.foodSeconds(lvl), Affinity.regenSeconds(lvl), String.format("%.1f", Affinity.punchBonus(lvl)),
                 String.format("%.1f", Affinity.power(pts)))), left + 10, y, W - 20, Hud.argb(ClientRingData.color, 255), 10) + 4;
         int idx = 0;
-        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps)) {
+        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps, minecraft != null && minecraft.player != null && com.lanterna.client.uniform.Corrompida.nivel(minecraft.player) == 2)) {
             if (t.arvore) continue;   // os da Árvore da Luz aparecem na tela da árvore
             boolean ok = lvl >= t.unlockLevel;
             Component line = Component.literal(ok ? "◆ " : "◇ ").append(t.displayName())

@@ -168,6 +168,22 @@ public enum ConstructType {
      * Este anel (Tropa) pode fazer o construto? O anel Branco (0.48.12) faz os de todas as Tropas, menos os da Tropa da
      * Morte.
      */
+    /** Os dois dons menores da Morte que o Portador Negro recebe (0.49.3). */
+    public boolean domDoPortador() {
+        return this == FAREJAR || this == DRENAR;
+    }
+
+    /** Com o anel de um Portador Negro (corrompido pelo Arauto), também os dois dons da Morte. */
+    public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador) {
+        return disponivel(ringCorps) || portador && domDoPortador();
+    }
+
+    public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador) {
+        java.util.List<ConstructType> l = new java.util.ArrayList<>();
+        for (ConstructType t : values()) if (t.disponivel(ringCorps, portador)) l.add(t);
+        return l;
+    }
+
     public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
         if (corps == null) return true;
         if (ringCorps == null) return false;

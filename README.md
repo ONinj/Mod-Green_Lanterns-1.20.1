@@ -108,6 +108,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.57.0 ✅ (0.49.0) Guia do Portador (F9 ou /guia): tutorial interativo com 14 capítulos, teclas reais, receitas de verdade na grade, progresso salvo e uma transmissão interceptada da próxima saga; luz do traje no chão sem falhas debaixo d'água e em lajes/caminhos; menos bolhas no voo submerso
 1.57.1 ✅ (0.49.1) Anel corrompido (rachaduras brancas, manchas cinzas) e traje manchado; morto por Lanterna Negro e corrompido vira Lanterna Negro na hora: anel preto rachado com o símbolo da Tropa antiga e traje antigo em preto e branco; /lantern corrupcao 0|1|2 para testar
 1.57.2 ✅ (0.49.2) PvP refeito: uma defesa só (sem empilhar armadura do anel + defesa de nível + resistência por nível), dano acompanha o nível (14 golpes para derrubar no nível 30 ou 150); Lanterna Negro o mais forte do jogo e imune a portadores, menos o Anel Branco ou quem tem nível igual ou maior
+1.57.3 ✅ (0.49.3) Anel Preto único por mundo (o dono é o Arauto da Morte); quem o Arauto corrompe vira Portador Negro: poderes da própria Tropa em preto, só Farejar e Drenar Vida da Morte, força menor; /lantern converter <jogador> e /lantern anelpreto [liberar]
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

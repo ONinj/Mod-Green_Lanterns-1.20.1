@@ -1509,3 +1509,18 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - o mais forte do jogo em tudo: **dano ×2,0** (Branco ×1,7), **+20 corações** (Branco +10), armadura +7 e dureza +5 (Branco +6/+4), voo ×1,45 (Branco ×1,4), defesa contra jogadores +25% (Branco +20%), e continua roubando vida a cada golpe;
   - **nenhum portador de anel o fere**, a não ser o **Anel Branco** ou um portador de **nível igual ou maior** que o dele. Quem tenta vê: "O Lanterna Negro não sente o seu golpe". Lanternas NPC também não o ferem (os lendários, que lutam no nível 60, ferem quem está até o nível 60). Monstros, chefes e quem não tem anel ferem normalmente.
   - Medido: nível 150 Negro contra nível 100 Verde: imune; contra 150 Verde: 16 golpes; contra Branco: fere em qualquer nível.
+
+## 0.49.3 — O Arauto e os Portadores Negros
+
+- **O Anel Preto é um só por mundo/servidor.** Ele é forjado uma única vez, em Ryut, e quem o forja vira o **Arauto da Morte** (o servidor inteiro recebe o aviso). Depois disso a forja de Ryut recusa qualquer outro: "O Anel Preto é um só, e ele já tem dono".
+  - Em mundos de antes desta versão, o primeiro jogador visto com o Anel Preto de verdade fica registrado como o dono.
+  - **/lantern anelpreto** mostra o dono; **/lantern anelpreto liberar** libera a forja (por exemplo, se o anel se perdeu).
+- **O Arauto da Morte** continua com tudo o que a 0.49.2 deu ao Anel Preto: dano ×2,0, +20 corações, armadura +7, dureza +5, voo ×1,45, roubo de vida, e só o Anel Branco ou um portador de nível igual ou maior o fere.
+- **Portadores Negros:** quem é corrompido ao ser morto pelo Arauto (ou por um Lanterna Negro de Ryut) não vira um segundo Anel Preto:
+  - continua **da própria Tropa, com os mesmos poderes**;
+  - o anel fica **todo preto**, rachado, com o símbolo da Tropa; o **traje da Tropa fica preto** (detalhes em cinza e branco); os **construtos, a aura e o painel ficam pretos**;
+  - ganha só os **dois dons menores da Morte: Farejar e Drenar Vida** (Ceifa, Mortalha e Túmulo são só do Arauto);
+  - fica um pouco mais forte, bem abaixo do Arauto: **+4 corações**, dano dos poderes **×1,15** e rouba um pouco de vida (6%);
+  - **não** é imune como o Arauto, não forja o Anel Preto e não converte ninguém.
+  - Quem tinha virado "Lanterna Negro" na 0.49.1 volta sozinho para a própria Tropa, já como Portador Negro.
+- **/lantern converter <jogador>** (operador): transforma o jogador em Portador Negro na hora (precisa estar usando um anel; Branco e Preto não podem ser tingidos). **/lantern corrupcao 2** faz o mesmo em você.

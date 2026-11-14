@@ -60,6 +60,10 @@ public class LoreWorldData extends SavedData {
         setDirty();
     }
 
+    public Set<String> sites() {
+        return java.util.Collections.unmodifiableSet(new LinkedHashSet<>(sites));
+    }
+
     public boolean siteBuilt(String id) {
         return sites.contains(id);
     }
