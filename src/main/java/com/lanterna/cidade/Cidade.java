@@ -101,7 +101,7 @@ public final class Cidade {
         if (planet == null) return;
         Kit k = new Kit(level, Paleta.of(planet));
         for (int x0 = -R - 12; x0 <= R + 12; x0 += 16) { int f = x0; Obra.etapa(level, l -> selar(l, c, f, Math.min(R + 12, f + 15))); }
-        Obra.etapa(level, l -> fontes(k, c));
+        // (as fontes das diagonais saíram na 0.48.9)
     }
 
     static void fontes(Kit k, BlockPos c) {
@@ -183,18 +183,7 @@ public final class Cidade {
             BlockState s = d > 13.5 ? k.p.faixa() : d > 12.5 ? k.p.destaque() : ((dx + dz) % 2 == 0 ? k.p.chao() : k.p.parede());
             k.s(c.offset(dx, -1, dz), s);
         }
-        // fontes nas diagonais
-        for (int[] f : new int[][]{{9, 9}, {-9, 9}, {9, -9}, {-9, -9}}) {
-            BlockPos fc = c.offset(f[0], 0, f[1]);
-            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
-                boolean borda = Math.abs(dx) == 2 || Math.abs(dz) == 2;
-                k.s(fc.offset(dx, -1, dz), borda ? k.p.faixa() : k.p.luz());
-                // borda de bloco inteiro: laje deixava a água vazar
-                k.s(fc.offset(dx, 0, dz), borda ? k.p.faixa() : b(Blocks.WATER));
-            }
-            k.s(fc.above(), k.p.pilar());
-            k.s(fc.above(2), k.p.destaque());
-        }
+        // (0.48.9: sem as fontes de água nas diagonais; a praça fica limpa em volta da Bateria Central)
         // bancos e vasos em volta
         for (int i = 0; i < 12; i++) {
             double a = Math.PI * 2 * i / 12 + Math.PI / 12;

@@ -1420,3 +1420,9 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - descendo dentro do contorno da Terra, o jogador entra nela;
   - fora dele, o cliente para de descer antes do chão.
 - **Mira da câmera (F5):** só um ponto na cor da Tropa, sem tracinhos e sem contorno.
+
+## 0.48.9 — Praça da Bateria sem as fontes
+
+- As quatro fontes de água nas diagonais da praça da Bateria Central saíram, em todos os planetas das Tropas.
+- Em mundos já gerados, elas somem sozinhas quando alguém chega perto da Bateria Central: a água vira chão da praça (no mesmo xadrez) e a coluna do meio sai.
+- Só água e os blocos da própria fonte são mexidos, e a água que tinha escorrido pela praça também é limpa.

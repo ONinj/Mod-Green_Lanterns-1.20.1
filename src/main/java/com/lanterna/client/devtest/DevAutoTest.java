@@ -3408,13 +3408,15 @@ public final class DevAutoTest {
         at(40, () -> { mc.options.hideGui = true; cmd("gamemode creative"); cmd("time set 6000"); cmd("gamerule doDaylightCycle false"); });
         at(20, () -> server(sp -> { var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(pl).dimension());
             int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
-            sp.teleportTo(l, 0.5, y + 14, 112.5, 0, 35); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }));
+            sp.teleportTo(l, 0.5, y + 22, 108.5, 0, 50); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }));
         at(20 * 50, () -> server(sp -> { var l = sp.serverLevel(); var h = com.lanterna.lore.PlanetLore.HUB;
             int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.byPlanet(pl)).y;
             glog("forja=" + l.getBlockState(new net.minecraft.core.BlockPos(h.getX() - 13, y, h.getZ() - 2)).getBlock()
                 + " bateria=" + l.getBlockState(new net.minecraft.core.BlockPos(h.getX() - 13, y, h.getZ() + 2)).getBlock()
                 + " alvos=" + l.getEntities(com.lanterna.lore.LoreEntities.ALVO_TREINO.get(), sp.getBoundingBox().inflate(60), e -> true).size()
-                + " nativos=" + l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(300), e -> e.role().isEmpty()).size());
+                + " nativos=" + l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(300), e -> e.role().isEmpty()).size()
+                + " agua na praca=" + net.minecraft.core.BlockPos.betweenClosedStream(new net.minecraft.core.BlockPos(h.getX() - 14, y - 1, h.getZ() - 14), new net.minecraft.core.BlockPos(h.getX() + 14, y + 1, h.getZ() + 14))
+                        .filter(q -> l.getFluidState(q).is(net.minecraft.tags.FluidTags.WATER)).count());
             for (String id : new String[]{"inicio_" + "green" + "_1", "fonte_verde_2", "juramento_green"}) {
                 var m = com.lanterna.mission.Missions.get(id);
                 if (m != null) for (var o : m.objectives()) glog("missao " + id + " " + o.type() + " -> " + o.pos());

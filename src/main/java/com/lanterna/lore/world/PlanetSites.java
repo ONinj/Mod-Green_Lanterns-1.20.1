@@ -266,6 +266,7 @@ public final class PlanetSites {
             battery(level, bat, planet);
             n++;
         }
+        n += semFontes(level, planet, c, y);
         BlockPos alvos = new BlockPos(c.getX() + 13, y, c.getZ());
         if (level.isLoaded(alvos)) {
             int tem = level.getEntities(LoreEntities.ALVO_TREINO.get(), new net.minecraft.world.phys.AABB(alvos).inflate(10, 6, 10), e -> e.isAlive()).size();
@@ -277,6 +278,39 @@ public final class PlanetSites {
                 n++;
             }
         }
+        return n;
+    }
+
+    /**
+     * 0.48.9: tira as fontes de água das quatro diagonais da praça da Bateria Central (mundos já gerados): a água vira
+     * chão da praça, e a coluna do meio sai. Só mexe em água e nos blocos da própria fonte.
+     */
+    private static int semFontes(ServerLevel level, PlanetLore planet, BlockPos c, int y) {
+        int n = 0;
+        com.lanterna.cidade.Paleta pal = com.lanterna.cidade.Paleta.of(planet);
+        for (int[] f : new int[][]{{9, 9}, {-9, 9}, {9, -9}, {-9, -9}}) {
+            BlockPos fc = new BlockPos(c.getX() + f[0], y, c.getZ() + f[1]);
+            if (!level.isLoaded(fc)) continue;
+            boolean tem = false;
+            for (int dx = -1; dx <= 1 && !tem; dx++) for (int dz = -1; dz <= 1; dz++)
+                if (level.getFluidState(fc.offset(dx, 0, dz)).is(net.minecraft.tags.FluidTags.WATER)) { tem = true; break; }
+            if (!tem) continue;
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
+                BlockPos q = fc.offset(dx, 0, dz);
+                BlockState piso = (Math.floorMod(q.getX() - c.getX() + q.getZ() - c.getZ(), 2) == 0) ? pal.chao() : pal.parede();
+                BlockState embaixo = level.getBlockState(q.below());
+                if (embaixo.equals(pal.luz()) || embaixo.equals(pal.faixa())) set(level, q.below(), piso);
+                BlockState aqui = level.getBlockState(q);
+                if (aqui.getFluidState().is(net.minecraft.tags.FluidTags.WATER) || aqui.equals(pal.faixa())) set(level, q, Blocks.AIR.defaultBlockState());
+            }
+            if (level.getBlockState(fc.above()).equals(pal.pilar())) set(level, fc.above(), Blocks.AIR.defaultBlockState());
+            if (level.getBlockState(fc.above(2)).equals(pal.destaque())) set(level, fc.above(2), Blocks.AIR.defaultBlockState());
+            n++;
+        }
+        // água que escorreu pela praça
+        for (BlockPos q : BlockPos.betweenClosed(c.offset(-14, y - c.getY(), -14), c.offset(14, y - c.getY() + 1, 14)))
+            if (level.getFluidState(q).is(net.minecraft.tags.FluidTags.WATER) && level.getBlockState(q).getBlock() instanceof net.minecraft.world.level.block.LiquidBlock)
+                set(level, q.immutable(), Blocks.AIR.defaultBlockState());
         return n;
     }
 
