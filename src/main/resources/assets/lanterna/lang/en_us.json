@@ -1220,7 +1220,7 @@
   "key.lanterna.tecnica_2": "Technique 2",
   "key.lanterna.tecnica_3": "Technique 3",
   "missao.lanterna.alvos_perto": "Targets for your mission showed up nearby.",
-  "nivel.lanterna.defesa": "Health +%s ❤ · Ring defense %s%% (stacks with any armor) · Resistance vs players %s%%",
+  "nivel.lanterna.defesa": "Health +%s ❤ · Ring defense %s%% (stacks with any armor) · Defense against players %s%%",
   "block.lanterna.bandeira_guilda": "Guild Banner",
   "item.lanterna.bandeira_guilda.desc": "Plant it on an unclaimed generated planet to conquer it. Builds the guild base around it.",
   "item.lanterna.essencia_poder": "Power Essence",
@@ -3169,5 +3169,6 @@
   "morte.lanterna.convertido_1": "The ring goes dark... and lights again, black.",
   "morte.lanterna.convertido_2": "You rose as a Black Lantern. Your Corps' color still lives in the symbol, but the light now belongs to Death. Bring it to other bearers.",
   "morte.lanterna.convertido_servidor": "%s fell to a Black Lantern... and rose as one of them.",
-  "command.lanterna.corrupcao": "Ring corruption: %s (0 clean, 1 corrupted, 2 converted into a Black Lantern)."
+  "command.lanterna.corrupcao": "Ring corruption: %s (0 clean, 1 corrupted, 2 converted into a Black Lantern).",
+  "morte.lanterna.imune": "The Black Lantern doesn't feel your blow. Only the White Ring or a bearer of level %s or higher can hurt him."
 }

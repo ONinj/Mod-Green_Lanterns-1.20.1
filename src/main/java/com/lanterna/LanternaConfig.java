@@ -27,6 +27,8 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.DoubleValue PVP_RESISTENCIA_POR_NIVEL;
     public static final ForgeConfigSpec.DoubleValue PVP_DIFERENCA_NIVEL;
     public static final ForgeConfigSpec.DoubleValue PVP_TETO_GOLPE;
+    public static final ForgeConfigSpec.DoubleValue PVP_DEFESA_ANEL;
+    public static final ForgeConfigSpec.BooleanValue PVP_IGUALAR;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_TROPA;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_GUILDA;
 
@@ -132,7 +134,7 @@ public final class LanternaConfig {
                 .comment("Player vs player: fraction of damage that goes through (ring powers are made to take down big monsters)", "Jogador contra jogador: fração do dano que passa (os poderes do anel são feitos para derrubar monstros grandes)")
                 .defineInRange("pvp_dano", 0.4, 0.0, 1.0);
         PVP_RESISTENCIA_POR_NIVEL = b
-                .comment("Player vs player: extra resistance per level of the one being hit. At level 50 with 0.005: 25% less", "Jogador contra jogador: resistência a mais por nível de quem apanha. No nível 50 com 0.005: 25% a menos")
+                .comment("(No longer used since 0.49.2: see pvp_defesa_anel)", "(Não é mais usado desde a 0.49.2: veja pvp_defesa_anel)")
                 .defineInRange("pvp_resistencia_por_nivel", 0.005, 0.0, 0.02);
         PVP_DIFERENCA_NIVEL = b
                 .comment("Player vs player: how much each level of difference changes damage (0.015 = 1.5% per level; capped between -40% and +25%)", "Jogador contra jogador: quanto cada nível de diferença muda o dano (0.015 = 1,5% por nível; limitado entre -40% e +25%)")
@@ -140,6 +142,14 @@ public final class LanternaConfig {
         PVP_TETO_GOLPE = b
                 .comment("Player vs player: one hit takes at most this fraction of max health (0.3 = 30%; prevents one-hit kills)", "Jogador contra jogador: um golpe tira no máximo esta fração da vida máxima (0.3 = 30%; acaba com o hit kill)")
                 .defineInRange("pvp_teto_golpe", 0.3, 0.05, 1.0);
+        PVP_DEFESA_ANEL = b
+                .comment("Player vs player: how much of a hit the ring blocks (replaces the ring's armor and the level defense, which together blocked over 98% at level 150)",
+                        "Jogador contra jogador: quanto do golpe o anel segura (no lugar da armadura do anel e da defesa do nível, que juntas seguravam mais de 98% no nível 150)")
+                .defineInRange("pvp_defesa_anel", 0.4, 0.0, 0.9);
+        PVP_IGUALAR = b
+                .comment("Player vs player: scale damage with the target's level so high-level fights last about as long as level-30 fights",
+                        "Jogador contra jogador: o dano acompanha o nível de quem apanha, para a luta no nível alto durar parecido com a do nível 30")
+                .define("pvp_igualar_nivel", true);
         PVP_MESMA_TROPA = b
                 .comment("Can players of the same Corps hurt each other? (server pvp must also be on)", "Jogadores da mesma Tropa podem se ferir? (o pvp do servidor também precisa estar ligado)")
                 .define("pvp_mesma_tropa", true);

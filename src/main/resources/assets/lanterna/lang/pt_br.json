@@ -1220,7 +1220,7 @@
   "key.lanterna.tecnica_2": "Técnica 2",
   "key.lanterna.tecnica_3": "Técnica 3",
   "missao.lanterna.alvos_perto": "Alvos da sua missão apareceram por perto.",
-  "nivel.lanterna.defesa": "Vida +%s ❤ · Defesa do anel %s%% (soma com qualquer armadura) · Resistência contra jogadores %s%%",
+  "nivel.lanterna.defesa": "Vida +%s ❤ · Defesa do anel %s%% (soma com qualquer armadura) · Defesa contra jogadores %s%%",
   "block.lanterna.bandeira_guilda": "Bandeira da Guilda",
   "item.lanterna.bandeira_guilda.desc": "Finque num planeta gerado (sem dono) para conquistá-lo. Monta a base da guilda em volta.",
   "item.lanterna.essencia_poder": "Essência de Poder",
@@ -3169,5 +3169,6 @@
   "morte.lanterna.convertido_1": "O anel apaga... e acende de novo, preto.",
   "morte.lanterna.convertido_2": "Você se ergueu como Lanterna Negro. A cor da sua Tropa ainda está no símbolo, mas a luz agora é da Morte. Leve-a a outros portadores.",
   "morte.lanterna.convertido_servidor": "%s caiu para um Lanterna Negro... e se ergueu como um deles.",
-  "command.lanterna.corrupcao": "Corrupção do anel: %s (0 limpo, 1 corrompido, 2 convertido em Lanterna Negro)."
+  "command.lanterna.corrupcao": "Corrupção do anel: %s (0 limpo, 1 corrompido, 2 convertido em Lanterna Negro).",
+  "morte.lanterna.imune": "O Lanterna Negro não sente o seu golpe. Só o Anel Branco ou um portador de nível %s ou mais o fere."
 }

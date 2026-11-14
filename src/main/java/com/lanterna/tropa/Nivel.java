@@ -122,7 +122,7 @@ public final class Nivel {
         if (after > before) {
             player.sendSystemMessage(Component.translatable("nivel.lanterna.subiu", after).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
             player.sendSystemMessage(Component.translatable("nivel.lanterna.defesa", vidaExtra(after) / 2, Math.round(defesa(after) * 100),
-                    Math.round(Math.min(0.5, (after - 1) * com.lanterna.LanternaConfig.PVP_RESISTENCIA_POR_NIVEL.get()) * 100)).withStyle(ChatFormatting.GRAY));
+                    Math.round(com.lanterna.LanternaConfig.PVP_DEFESA_ANEL.get() * 100)).withStyle(ChatFormatting.GRAY));
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 0.8f);
             aplicar(player);
             promover(player, data, after);
@@ -160,6 +160,8 @@ public final class Nivel {
         if (!(e.getEntity() instanceof ServerPlayer p)) return;
         var s = e.getSource();
         if (s.is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR) || s.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
+        // contra jogadores a defesa já entra no equilíbrio do PvP (não conta duas vezes)
+        if (com.lanterna.combate.Equilibrio.pvp(s, p)) return;
         double d = defesa(nivel(p));
         if (d > 0) e.setAmount((float) (e.getAmount() * (1 - d)));
     }

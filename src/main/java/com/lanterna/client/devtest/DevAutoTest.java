@@ -3505,6 +3505,55 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.2: PvP medido com um rival simulado (FakePlayer): golpes para matar em cada nível e a imunidade do Negro. */
+    private static void scenePvpNivel() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        Object[] rival = {null};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(20, () -> { cmd("gamemode survival"); cmd("lantern corrupcao 0"); cmd("effect clear @s"); });
+        at(20, () -> server(sp -> {
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("11111111-2222-3333-4444-555555555555"), "Rival"));
+            fake.setPos(sp.getX() + 2, sp.getY(), sp.getZ());
+            rival[0] = fake;
+            glog("rival: anel cap=" + com.lanterna.capability.ModCapabilities.get(fake).isPresent() + " lore cap=" + com.lanterna.mission.LoreCapability.get(fake).isPresent());
+        }));
+        // {nível do rival, Tropa do rival, nível meu, minha Tropa, dano cru}
+        Object[][] casos = {
+                {30, "red", 30, "green", 13f}, {150, "red", 150, "green", 25f}, {150, "red", 30, "green", 25f}, {30, "red", 150, "green", 13f},
+                {60, "red", 60, "green", 16f}, {100, "red", 100, "green", 20f},
+                {150, "green", 150, "black", 25f}, {100, "green", 150, "black", 20f}, {10, "white", 150, "black", 11f}, {150, "white", 150, "black", 25f}};
+        for (Object[] c : casos) {
+            at(10, () -> cmd("lantern ring " + c[3]));
+            at(30, () -> server(sp -> {
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total((int) c[2])));
+                com.lanterna.tropa.Nivel.aplicar(sp);
+                var fake = (net.minecraft.server.level.ServerPlayer) rival[0];
+                com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total((int) c[0])));
+                var corps = com.lanterna.corps.BuiltinCorps.valueOf(((String) c[1]).toUpperCase());
+                com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(corps.id(), corps.color(), -1)); r.refresh(corps.id(), corps.color(), 1000, 1000); });
+            }));
+            at(30, () -> server(sp -> {
+                sp.setHealth(sp.getMaxHealth());
+                float antes = sp.getHealth();
+                float soma = 0; int n = 0;
+                for (int i = 0; i < 5; i++) {
+                    sp.invulnerableTime = 0;
+                    float h0 = sp.getHealth();
+                    com.lanterna.combate.Equilibrio.ferirComPoder(sp, sp.damageSources().playerAttack((net.minecraft.world.entity.player.Player) rival[0]), (float) c[4]);
+                    soma += h0 - sp.getHealth(); n++;
+                    sp.setHealth(sp.getMaxHealth());
+                }
+                float media = soma / n;
+                glog(String.format("PVP rival nv%s %s -> eu nv%s %s | dano cru %.0f | tira %.2f de %.0f (%.1f%%) | golpes p/ matar %s",
+                        c[0], c[1], c[2], c[3], (float) c[4], media, sp.getMaxHealth(), 100 * media / sp.getMaxHealth(), media <= 0 ? "IMUNE" : String.valueOf((int) Math.ceil(sp.getMaxHealth() / media))));
+            }));
+        }
+        at(10, () -> server(sp -> glog("perfil: dano preto x" + com.lanterna.combate.Supremos.dano(com.lanterna.corps.BuiltinCorps.BLACK.id(), sp) + " branco x" + com.lanterna.combate.Supremos.dano(com.lanterna.corps.BuiltinCorps.WHITE.id(), sp)
+                + " vida max agora " + sp.getMaxHealth() + " armadura " + sp.getArmorValue())));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.1: morto por um Lanterna Negro (NPC) com chance 100%: renasce convertido. */
     private static void sceneConversao() {
         Minecraft mc = Minecraft.getInstance();
@@ -5864,6 +5913,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("guia")) sceneGuia();
         else if (ENABLED && SCENE.equals("corrupcao")) sceneCorrupcao();
         else if (ENABLED && SCENE.equals("conversao")) sceneConversao();
+        else if (ENABLED && SCENE.equals("pvpnivel")) scenePvpNivel();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

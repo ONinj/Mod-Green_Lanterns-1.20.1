@@ -155,9 +155,9 @@ public final class Visual {
         l.add(new VisualPackets.Linha(s, k("armadura"), Component.literal(num(p.getAttributeValue(Attributes.ARMOR))), -1, 0xC8D0D8));
         l.add(new VisualPackets.Linha(s, k("dureza"), Component.literal(num(p.getAttributeValue(Attributes.ARMOR_TOUGHNESS))), -1, 0xC8D0D8));
         l.add(new VisualPackets.Linha(s, k("defesa_nivel"), Component.literal(Math.round(Nivel.defesa(nivel) * 100) + "%"), (float) (Nivel.defesa(nivel) / 0.35), 0x9AC8FF));
-        float pvp = 1f - com.lanterna.combate.Equilibrio.multiplicador(nivel, nivel, true) / Math.max(0.01f, com.lanterna.LanternaConfig.PVP_DANO.get().floatValue());
+        float pvp = anel ? com.lanterna.combate.Equilibrio.defesaPvp(p) : 0f;
         float sup = anel ? com.lanterna.combate.Supremos.resistenciaPvp(r.corps()) : 0f;
-        l.add(new VisualPackets.Linha(s, k("resist_pvp"), Component.literal(Math.round((pvp + sup) * 100) + "%"), -1, 0xC8D0D8));
+        l.add(new VisualPackets.Linha(s, k("resist_pvp"), Component.literal(Math.round((1 - (1 - pvp) * (1 - sup)) * 100) + "%"), -1, 0xC8D0D8));
 
         // ---- Anel ----
         s = "anel";

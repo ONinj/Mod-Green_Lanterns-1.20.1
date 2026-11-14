@@ -1493,3 +1493,19 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - Quando o Anel Preto de verdade é forjado em Ryut (fim da linha da Morte), as marcas do anel antigo somem.
 - Teste (operador): **/lantern corrupcao 0|1|2** — limpa, corrompe ou converte o próprio anel.
 - As texturas do traje são feitas na hora a partir das originais, inclusive dos trajes personalizados e das peças 3D; os anéis têm modelos próprios (`models/item/ring/corrompido/` e `.../negro/`).
+
+## 0.49.2 — PvP de nível alto e a Morte intocável
+
+- **Por que ninguém morria no nível 150:** quatro reduções se empilhavam em cada golpe entre jogadores: o corte dos poderes (60%), a resistência por nível de quem apanha (50%), a armadura de netherite do anel (~77% em golpes pequenos) e a defesa do nível (60%). Sobravam menos de 2% do golpe (um golpe de 25 virava ~0,5 de vida, contra 138 de vida e a regeneração do anel).
+- **PvP agora** (só entre jogadores; contra monstros nada muda):
+  - os poderes do anel passam com 40% da força (`pvp_dano`), armas comuns passam inteiras;
+  - a diferença de nível pesa de −40% a +25% (`pvp_diferenca_nivel`);
+  - o dano acompanha o nível de quem apanha (`pvp_igualar_nivel`), porque a vida cresce mais que a força dos poderes;
+  - quem tem anel segura **40%** do golpe (`pvp_defesa_anel`), mais até 15% pela armadura de verdade vestida por cima; a armadura do anel e a defesa do nível não contam de novo;
+  - um golpe nunca tira mais que 30% da vida (`pvp_teto_golpe`).
+  - Medido no jogo: mesmo nível, **14 golpes** para derrubar, no 30, 60, 100 ou 150. Nível 150 contra 30: 6 golpes; 30 contra 150: 42.
+  - `pvp_resistencia_por_nivel` não é mais usado.
+- **Lanterna Negro:**
+  - o mais forte do jogo em tudo: **dano ×2,0** (Branco ×1,7), **+20 corações** (Branco +10), armadura +7 e dureza +5 (Branco +6/+4), voo ×1,45 (Branco ×1,4), defesa contra jogadores +25% (Branco +20%), e continua roubando vida a cada golpe;
+  - **nenhum portador de anel o fere**, a não ser o **Anel Branco** ou um portador de **nível igual ou maior** que o dele. Quem tenta vê: "O Lanterna Negro não sente o seu golpe". Lanternas NPC também não o ferem (os lendários, que lutam no nível 60, ferem quem está até o nível 60). Monstros, chefes e quem não tem anel ferem normalmente.
+  - Medido: nível 150 Negro contra nível 100 Verde: imune; contra 150 Verde: 16 golpes; contra Branco: fere em qualquer nível.
