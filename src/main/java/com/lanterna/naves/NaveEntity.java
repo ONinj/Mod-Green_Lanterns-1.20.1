@@ -626,6 +626,14 @@ public class NaveEntity extends Entity implements GeoEntity, TemNave {
             return InteractionResult.CONSUME;
         }
         if (!ia().isEmpty()) {
+            // cargueiro mercador: qualquer um entra para negociar com o mercador lá dentro
+            if (ia().equals("cargueiro") && t.interior() != null) {
+                if (aiLife > 0 && aiLife < 20 * 60 * 10) aiLife = 20 * 60 * 10; // espera quem entrou
+                abrirPorta(true);
+                NaveInterior.entrar(sp, this);
+                NaveInterior.mercadorABordo(sp, this);
+                return InteractionResult.CONSUME;
+            }
             sp.displayClientMessage(Component.translatable("nave.lanterna.nao_e_sua"), true);
             return InteractionResult.CONSUME;
         }

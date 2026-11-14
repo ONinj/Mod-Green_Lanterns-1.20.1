@@ -102,6 +102,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.56.7 ✅ (0.48.7) Acabamento das construções: vidros finos, grades, cercas, muros e escadas se ligam aos vizinhos; lampiões pendurados no teto ou de pé num poste (nada solto no ar); barracas do mercado com toldo listrado; /lantern acabar [raio] conserta o que já foi gerado
 1.56.8 ✅ (0.48.8) Voz: guarda cada trecho entre pausas (antes só a última parte chegava) e conserta os acentos no Windows; "o planeta dos lanternas azuis/roxos" vira o planeta da Tropa; receita com arrumação curta. Anel: respira embaixo d'água (gasta carga), voo livre e Ctrl acelera na água sem pose de nado, fome e saturação sempre cheias. Espaço: não fica mais preso embaixo do chão do espaço perto da Terra. Mira da câmera: só um ponto na cor da Tropa
 1.56.9 ✅ (0.48.9) Sem as fontes de água nas quatro diagonais da praça da Bateria Central (cidades novas e mundos já gerados)
+1.56.10 ✅ (0.48.10) Cargueiro mercador: clique na nave para entrar; o mercador espera no porão para negociar (Shift + clique direito) e a nave espera quem entrou
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

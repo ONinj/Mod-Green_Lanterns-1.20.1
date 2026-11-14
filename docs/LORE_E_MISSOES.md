@@ -1426,3 +1426,9 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - As quatro fontes de água nas diagonais da praça da Bateria Central saíram, em todos os planetas das Tropas.
 - Em mundos já gerados, elas somem sozinhas quando alguém chega perto da Bateria Central: a água vira chão da praça (no mesmo xadrez) e a coluna do meio sai.
 - Só água e os blocos da própria fonte são mexidos, e a água que tinha escorrido pela praça também é limpa.
+
+## 0.48.10 — Entrar no cargueiro mercador
+
+- Antes, o cargueiro mercador dos encontros no espaço dizia "essa nave não é sua" e não deixava entrar.
+- Agora, clicando na nave, qualquer jogador entra no porão. O mercador espera lá dentro, num lugar livre perto da entrada (um por nave), e negocia com Shift + clique direito. A porta leva de volta para onde a nave estava.
+- Quem entra faz o cargueiro esperar até 10 minutos antes de ir embora.

@@ -3505,6 +3505,24 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.48.10: dá para entrar no cargueiro mercador e negociar com o mercador lá dentro. */
+    private static void sceneCargueiro() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamemode survival"); cmd("lantern ring green"); cmd("execute in lanterna:space run tp @s 5000 0 5000"); });
+        at(60, () -> cmd("lantern encounter cargueiro"));
+        at(100, () -> server(sp -> {
+            var naves = sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(200), n -> n.ia().equals("cargueiro"));
+            glog("cargueiros perto: " + naves.size());
+            if (!naves.isEmpty()) glog("clique: " + naves.get(0).interact(sp, net.minecraft.world.InteractionHand.MAIN_HAND));
+        }));
+        at(60, () -> server(sp -> glog("depois: dim=" + sp.level().dimension().location() + " mercadores a bordo="
+                + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(30), e -> e.getPersistentData().getBoolean("lanterna_mercador_nave")).size())));
+        at(40, () -> shot("cargueiro_dentro"));
+        at(20, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.48.3: /lantern choose funciona (o argumento se chama "corps"). */
     private static void sceneChoose() {
         Minecraft mc = Minecraft.getInstance();
@@ -5562,6 +5580,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("construtos2")) sceneConstrutos2();
         else if (ENABLED && SCENE.equals("integra")) sceneIntegra();
         else if (ENABLED && SCENE.equals("aguaanel")) sceneAguaAnel();
+        else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();
         else if (ENABLED && SCENE.equals("v24b")) sceneV24b();
         else if (ENABLED && SCENE.equals("v23")) sceneV23();

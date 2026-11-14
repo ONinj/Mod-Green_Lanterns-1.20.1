@@ -107,6 +107,39 @@ public final class NaveInterior {
         CHEGANDO.put(player.getUUID(), new long[]{player.server.getTickCount() + 5, sala.origem.asLong(), sala.tamanho.asLong(), 0});
     }
 
+    /**
+     * Cargueiro mercador: o mercador espera dentro da nave, num lugar livre perto da entrada (um por nave). Negocia com
+     * Shift + clique direito, como os outros mercadores.
+     */
+    public static void mercadorABordo(ServerPlayer player, NaveEntity nave) {
+        ServerLevel dim = player.server.getLevel(DIM);
+        String struct = nave.tipo().interior();
+        if (dim == null || struct == null) return;
+        Sala sala = Dados.get(player.server).sala(nave, struct);
+        if (!sala.built) return;
+        net.minecraft.world.phys.AABB caixa = new net.minecraft.world.phys.AABB(sala.origem, sala.origem.offset(sala.tamanho)).inflate(1);
+        if (!dim.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, caixa, e -> e.getPersistentData().getBoolean("lanterna_mercador_nave")).isEmpty()) return;
+        BlockPos melhor = null;
+        double nota = Double.MAX_VALUE;
+        for (BlockPos q : BlockPos.betweenClosed(sala.origem, sala.origem.offset(sala.tamanho))) {
+            double d = q.distSqr(sala.dentro);
+            if (d < 9 || d > 64 || d >= nota) continue;
+            if (!dim.getBlockState(q).isAir() || !dim.getBlockState(q.above()).isAir()) continue;
+            if (!dim.getBlockState(q.below()).isFaceSturdy(dim, q.below(), net.minecraft.core.Direction.UP)) continue;
+            nota = d;
+            melhor = q.immutable();
+        }
+        if (melhor == null) melhor = sala.dentro;
+        com.lanterna.especies.LanternaEntity m = com.lanterna.especies.LanternaEntity.mercador(dim);
+        float olhar = (float) Math.toDegrees(Math.atan2(-(sala.dentro.getX() - melhor.getX()), sala.dentro.getZ() - melhor.getZ()));
+        m.moveTo(melhor.getX() + 0.5, melhor.getY(), melhor.getZ() + 0.5, olhar, 0);
+        m.setYHeadRot(olhar);
+        m.getPersistentData().putBoolean("lanterna_mercador_nave", true);
+        m.setPersistenceRequired();
+        dim.addFreshEntity(m);
+        player.sendSystemMessage(Component.translatable("encontro.lanterna.mercador_a_bordo").withStyle(st -> st.withColor(0xFFB040)));
+    }
+
     private static final Map<UUID, long[]> CHEGANDO = new HashMap<>();
 
     @SubscribeEvent
