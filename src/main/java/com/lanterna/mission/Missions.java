@@ -125,6 +125,21 @@ public final class Missions {
         add("ryut_4", "ryut", black, List.of(talk("lider:ryut", "ryut")),
                 items(() -> new ItemStack(LoreItems.RELIQUIA.get()), () -> new ItemStack(LoreItems.MERITO.get(), 6)), 400, null);
 
+        // ---------------- Purificação (0.49.6): quem teve o anel corrompido pode limpá-lo antes que a Morte o tome ----------------
+        int luz = 0xCFE8FF;
+        PlanetLore odym = PlanetLore.ODYM;
+        add("purif_1", "purificacao", luz, List.of(goTo("odym"), talk("lider:odym", "odym")), items(), 150, "purif_2");
+        add("purif_2", "purificacao", luz, List.of(
+                Objective.of(Type.COLLECT, "lanterna:perola_do_amanha", 8, null, null),
+                Objective.of(Type.COLLECT, "lanterna:lagrima_indigo", 8, null, null)), items(() -> new ItemStack(LoreItems.MERITO.get(), 2)), 250, "purif_3");
+        add("purif_3", "purificacao", luz, List.of(
+                Objective.of(Type.KILL, "lanterna:eco_cinzento", 12, null, null),
+                Objective.of(Type.REP, "aelinos", 4, "odym", PlanetLore.HUB)), items(() -> new ItemStack(LoreItems.MERITO.get(), 3)), 300, "purif_4");
+        add("purif_4", "purificacao", luz, List.of(Objective.of(Type.BOSS, odym.boss, 1, "odym", PlanetLore.arena(odym))),
+                items(() -> new ItemStack(LoreItems.MERITO.get(), 4)), 400, "purif_5");
+        add("purif_5", "purificacao", luz, List.of(goTo("oa"), talk("lider:oa", "oa")),
+                items(() -> new ItemStack(LoreItems.MERITO.get(), 6), () -> new ItemStack(LoreItems.FRAGMENTO_LENDARIO.get(), 2)), 600, null);
+
         // ---------------- A Morte (só para quem teve o anel corrompido ao morrer) ----------------
         add("morte_1", "morte", black, List.of(goTo("ryut"), talk("lider:ryut", "ryut")), items(), 200, "morte_2");
         add("morte_2", "morte", black, List.of(

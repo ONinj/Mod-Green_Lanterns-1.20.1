@@ -111,6 +111,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.57.3 ✅ (0.49.3) Anel Preto único por mundo (o dono é o Arauto da Morte); quem o Arauto corrompe vira Portador Negro: poderes da própria Tropa em preto, só Farejar e Drenar Vida da Morte, força menor; /lantern converter <jogador> e /lantern anelpreto [liberar]
 1.57.4 ✅ (0.49.4) A Terra subiu no espaço (centro de y -1000 para 150): fica inteira acima do chão; quem sai dela chega por cima, de lado; calotas polares com gelo de verdade
 1.57.5 ✅ (0.49.5) Hanks, "Os Três Núcleos": o marcador da missão aponta o núcleo apagado mais perto (e pula para o próximo) e cada núcleo apagado solta uma coluna de luz alta, visível por cima dos prédios
+1.57.6 ✅ (0.49.6) Linha da Purificação (5 missões, Odym → Oa) com prazo de 6 h de jogo, senão vira Portador Negro; o Arauto corrompe 100% de quem mata; Arauto imune a qualquer jogador de nível menor (com ou sem anel) e segura 60% do golpe dos outros (30% contra o Branco)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

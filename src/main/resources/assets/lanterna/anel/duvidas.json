@@ -132,8 +132,8 @@
    "black corps",
    "corrupt"
   ],
-  "pt": "Anel Negro: morra sob o efeito Wither, ou seja corrompido ao morrer com outro anel. A chance de corromper sobe um pouco a cada morte. O anel corrompido ganha rachaduras brancas e o traje fica com manchas cinzas. O Anel Preto é um só por mundo: forjado uma vez em Ryut, faz de quem o carrega o Arauto da Morte, o mais forte do jogo, que só o Anel Branco ou quem tem nível igual ou maior consegue ferir. Quem é corrompido ao ser morto pelo Arauto (ou por um Lanterna Negro de Ryut) vira Portador Negro: continua com os poderes da própria Tropa, mas o anel fica preto e rachado, o traje e os construtos ficam pretos, ganha só Farejar e Drenar Vida da Morte e um pouco mais de força.",
-  "en": "Black Ring: die under the Wither effect, or get corrupted when dying with another ring. The corruption chance rises a little with each death. A corrupted ring shows white cracks and your suit gets gray stains. There is only one Black Ring per world: forged once on Ryut, it makes its wearer the Herald of Death, the strongest in the game, hurt only by the White Ring or someone of equal or higher level. Whoever is corrupted while killed by the Herald (or by a Black Lantern from Ryut) becomes a Black Bearer: they keep their own Corps' powers, but the ring turns black and cracked, the suit and constructs turn black, they get only Scent and Drain Life from Death and a little more strength."
+  "pt": "Anel Negro: morra sob o efeito Wither, ou seja corrompido ao morrer com outro anel. A chance de corromper sobe um pouco a cada morte. O anel corrompido ganha rachaduras brancas e o traje fica com manchas cinzas. O Anel Preto é um só por mundo: forjado uma vez em Ryut, faz de quem o carrega o Arauto da Morte, o mais forte do jogo, que só o Anel Branco ou quem tem nível igual ou maior consegue ferir. Corrompido, você tem um prazo (6 horas de jogo) para terminar a linha da Purificação (começa em Odym): ela limpa o anel e protege as próximas 10 mortes. Se não terminar, a Morte o toma e você vira Portador Negro. Morto pelo Arauto, o anel se corrompe sempre (100%) e você volta já como Portador Negro. Quem é corrompido ao ser morto por um Lanterna Negro de Ryut também vira Portador Negro: continua com os poderes da própria Tropa, mas o anel fica preto e rachado, o traje e os construtos ficam pretos, ganha só Farejar e Drenar Vida da Morte e um pouco mais de força.",
+  "en": "Black Ring: die under the Wither effect, or get corrupted when dying with another ring. The corruption chance rises a little with each death. A corrupted ring shows white cracks and your suit gets gray stains. There is only one Black Ring per world: forged once on Ryut, it makes its wearer the Herald of Death, the strongest in the game, hurt only by the White Ring or someone of equal or higher level. Once corrupted, you have a deadline (6 hours of play) to finish the Purification line (it starts on Odym): it cleanses the ring and protects your next 10 deaths. If you don't, Death takes you and you become a Black Bearer. Killed by the Herald, the ring is always corrupted (100%) and you come back as a Black Bearer. Whoever is corrupted while killed by a Black Lantern from Ryut also becomes a Black Bearer: they keep their own Corps' powers, but the ring turns black and cracked, the suit and constructs turn black, they get only Scent and Drain Life from Death and a little more strength."
  },
  {
   "id": "anel_branco",
@@ -923,6 +923,26 @@
   ],
   "pt": "Entre jogadores, o anel segura 40% do golpe (mais um pouco com armadura vestida por cima), os poderes passam com 40% da força e a diferença de nível pesa até -40% ou +25%. O dano acompanha o nível de quem apanha: dois jogadores do mesmo nível precisam de uns 14 golpes para se derrubar, seja no nível 30 ou no 150. Um golpe nunca tira mais que 30% da vida. O Arauto da Morte (dono do Anel Preto) só é ferido pelo Anel Branco ou por quem tem nível igual ou maior.",
   "en": "Between players, the ring blocks 40% of a hit (a bit more with armor worn on top), powers go through at 40% strength and the level difference weighs from -40% to +25%. Damage follows the target's level: two players of the same level need about 14 hits to take each other down, at level 30 or 150. A single hit never takes more than 30% of health. The Herald of Death (Black Ring owner) can only be hurt by the White Ring or by someone of equal or higher level."
+ },
+ {
+  "id": "purificacao",
+  "chaves": [
+   "purificacao",
+   "purificação",
+   "purificar",
+   "limpar o anel",
+   "anel corrompido",
+   "curar o anel",
+   "tirar a corrupção",
+   "purification",
+   "purify",
+   "cleanse the ring",
+   "corrupted ring",
+   "cure the ring",
+   "remove corruption"
+  ],
+  "pt": "Com o anel corrompido, a linha da Purificação começa sozinha: 1) vá a Odym e fale com o líder; 2) junte 8 Pérolas do Amanhã e 8 Lágrimas Índigo; 3) desfaça 12 Ecos Cinzentos e ganhe respeito dos Aelinos; 4) vença o chefe de Odym; 5) fale com os Guardiões em Oa. O prazo é de 6 horas de jogo (só conta com você jogando); o anel avisa quando estiver acabando. Se o prazo acabar, você vira Portador Negro.",
+  "en": "With a corrupted ring, the Purification line starts by itself: 1) go to Odym and talk to the leader; 2) gather 8 Pearls of Tomorrow and 8 Indigo Tears; 3) undo 12 Gray Echoes and earn the Aelinos' respect; 4) defeat Odym's boss; 5) talk to the Guardians on Oa. The deadline is 6 hours of play (it only counts while you play); the ring warns you when it's running out. If it runs out, you become a Black Bearer."
  },
  {
   "id": "comandos",

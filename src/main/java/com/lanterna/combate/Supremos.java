@@ -68,7 +68,8 @@ public final class Supremos {
 
     /** Resistência extra contra jogadores (fração). */
     public static float resistenciaPvp(@Nullable ResourceLocation corps) {
-        return preto(corps) ? 0.25f : branco(corps) ? 0.2f : 0f;
+        // 0.49.6: o Arauto da Morte sempre leva a melhor contra jogadores (só o Branco o enfrenta de igual)
+        return preto(corps) ? RESIST_ARAUTO : branco(corps) ? 0.2f : 0f;
     }
 
     /** O Lanterna Negro passou tempo demais sem ceifar? */
@@ -113,8 +114,18 @@ public final class Supremos {
         if (valor > 0) inst.addTransientModifier(new AttributeModifier(id, "lanterna_supremo", valor, AttributeModifier.Operation.ADDITION));
     }
 
+    /** Quanto do golpe de um jogador o Arauto segura (contra o Anel Branco, só RESIST_ARAUTO_BRANCO). */
+    public static final float RESIST_ARAUTO = 0.6f, RESIST_ARAUTO_BRANCO = 0.3f;
+
     /** Vida a mais do Lanterna Negro (20 corações): a maior do jogo. */
     public static final int VIDA_PRETO = 40;
+
+    /** A vida a mais que o anel supremo (ou o de Portador Negro) dá. */
+    public static double vidaExtra(Player p) {
+        var inst = p.getAttribute(Attributes.MAX_HEALTH);
+        var m = inst == null ? null : inst.getModifier(VIDA);
+        return m == null ? 0 : m.getAmount();
+    }
 
     private static double armaduraDe(@Nullable ResourceLocation c) {
         return preto(c) ? 7 : branco(c) ? 6 : 0;
@@ -138,8 +149,9 @@ public final class Supremos {
         int nivelAlvo = com.lanterna.tropa.Nivel.nivel(alvo);
         Player atk = Equilibrio.atacante(src);
         if (atk != null && atk != alvo) {
+            // 0.49.6: vale para qualquer jogador (antes, quem tirava o anel ou nem tinha um batia à vontade)
             ResourceLocation ca = anel(atk);
-            if (ca == null || branco(ca)) return null;
+            if (ca != null && branco(ca)) return null;
             if (com.lanterna.tropa.Nivel.nivel(atk) >= nivelAlvo) return null;
             return Component.translatable("morte.lanterna.imune", nivelAlvo);
         }

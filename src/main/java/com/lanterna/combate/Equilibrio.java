@@ -76,7 +76,9 @@ public final class Equilibrio {
      */
     public static float igualador(Player alvo) {
         if (!LanternaConfig.PVP_IGUALAR.get()) return 1f;
-        float vida = alvo.getMaxHealth() / 42f;
+        // a vida a mais dos anéis supremos não entra: senão quem tem mais vida levaria mais dano
+        float bonus = (float) Supremos.vidaExtra(alvo);
+        float vida = (alvo.getMaxHealth() - bonus) / 42f;
         float forca = Nivel.forca(alvo) / 1.3f;
         return Math.max(1f, vida / Math.max(1f, forca));
     }
@@ -131,6 +133,10 @@ public final class Equilibrio {
             return;
         }
         float alvoFinal = event.getAmount() * fracao(Nivel.nivel(atk), alvo, anel);
+        // o Anel Branco enfrenta o Arauto de igual para igual (o Arauto segura menos contra ele)
+        var rAtk = com.lanterna.capability.ModCapabilities.get(atk).orElse(null);
+        if (Supremos.preto(ra.corps()) && rAtk != null && rAtk.hasRing() && Supremos.branco(rAtk.corps()))
+            alvoFinal *= (1f - Supremos.RESIST_ARAUTO_BRANCO) / (1f - Supremos.RESIST_ARAUTO);
         // A armadura do Minecraft ainda vai cortar depois deste evento: compensa, para valer só a defesa de cima
         if (!event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR)) alvoFinal = antesDaArmadura(alvoFinal, alvo);
         event.setAmount(alvoFinal);

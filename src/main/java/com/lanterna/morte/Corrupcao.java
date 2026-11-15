@@ -12,6 +12,7 @@ import com.lanterna.mission.MissionManager;
 import com.lanterna.tropa.Nivel;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +53,23 @@ public final class Corrupcao {
             dk.setUltimaCeifa(System.currentTimeMillis());
             ceifador.sendSystemMessage(Component.translatable("morte.lanterna.ceifou", vitima.getDisplayName()).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }
+        // 0.49.6: morto pelo Arauto da Morte (dono do Anel Preto), o anel se corrompe sempre (100%), em qualquer nível,
+        // mesmo recém-purificado ou já corrompido: volta como Portador Negro
+        if (ceifador != null && AnelPreto.arauto(ceifador) && !Supremos.supremo(ring.corps()) && (d.morte() == 0 || d.morte() == 2)) {
+            CompoundTag tg = persist(vitima);
+            tg.putInt("lanterna_mortes_sem_corrupcao", 0);
+            tg.putBoolean(CONVERSAO, true);
+            d.setMorte(1);
+            LanternaMod.LOGGER.info("Lanterna: {} foi ceifado pelo Arauto da Morte", vitima.getGameProfile().getName());
+            return;
+        }
         if (d.morte() != 0 || Supremos.supremo(ring.corps()) || Nivel.nivel(vitima) < LanternaConfig.MORTE_NIVEL_MIN.get()) return;
+        // recém-purificado: as próximas mortes não corrompem
+        CompoundTag prot = vitima.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        if (prot.getInt(PROTEGIDO) > 0) {
+            prot.putInt(PROTEGIDO, prot.getInt(PROTEGIDO) - 1);
+            return;
+        }
         // Lanternas Negros do mod (NPCs, como os de Ryut) também ceifam: assim dá para ter o Anel Preto jogando sozinho
         boolean negroNpc = event.getSource().getEntity() instanceof com.lanterna.especies.LanternaEntity le && le.tropa() == com.lanterna.corps.BuiltinCorps.BLACK;
         double chance = negro || negroNpc ? LanternaConfig.MORTE_CHANCE_CEIFADOR.get() : LanternaConfig.MORTE_CHANCE.get();
@@ -119,6 +136,10 @@ public final class Corrupcao {
             anel.getOrCreateTag().putString("Corps", tropa.toString());
         }
         com.lanterna.item.PowerRingItem.setCorrupcao(anel, 2, tropa);
+        // as linhas da Purificação e da Morte acabam aqui
+        for (String k : new java.util.ArrayList<>(d.active().keySet()))
+            if (k.startsWith("purif_") || k.startsWith("morte_")) MissionManager.abandon(p, k);
+        persist(p).remove(TEMPO);
         d.setMorte(PORTADOR);
         d.setUltimaCeifa(System.currentTimeMillis());
         p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 8, 0, false, false));
@@ -163,10 +184,109 @@ public final class Corrupcao {
         for (ServerPlayer o : p.server.getPlayerList().getPlayers())
             if (o != p) o.sendSystemMessage(Component.translatable("morte.lanterna.aviso_servidor").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         if (!d.isDone("morte_1")) MissionManager.start(p, "morte_1");
+        comecarPurificacao(p, d);
+    }
+
+    // ===================== Purificação (0.49.6) =====================
+
+    private static final String TEMPO = "lanterna_corrupcao_tempo", AVISOS = "lanterna_corrupcao_avisos", PROTEGIDO = "lanterna_purificado";
+
+    /** Começa a linha da Purificação e o prazo (só conta enquanto o jogador está jogando). */
+    static void comecarPurificacao(ServerPlayer p, LoreData d) {
+        CompoundTag t = persist(p);
+        t.putLong(TEMPO, 0);
+        t.putInt(AVISOS, 0);
+        if (!d.isActive("purif_1") && !algumaAtiva(d, "purif_")) {
+            d.completed().removeIf(k -> k.startsWith("purif_"));
+            MissionManager.start(p, "purif_1");
+        }
+        double h = LanternaConfig.PURIFICACAO_HORAS.get();
+        if (h > 0) p.sendSystemMessage(Component.translatable("morte.lanterna.purif_escolha", horas(h)).withStyle(s -> s.withColor(0xCFE8FF)));
+    }
+
+    private static boolean algumaAtiva(LoreData d, String prefixo) {
+        return d.active().keySet().stream().anyMatch(k -> k.startsWith(prefixo));
+    }
+
+    private static CompoundTag persist(ServerPlayer p) {
+        CompoundTag raiz = p.getPersistentData();
+        if (!raiz.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) raiz.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new CompoundTag());
+        return raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+    }
+
+    private static String horas(double h) {
+        long min = Math.max(0, Math.round(h * 60));
+        return min >= 60 ? (min / 60) + "h" + (min % 60 == 0 ? "" : String.format("%02d", min % 60)) : min + " min";
+    }
+
+    /** Fim da linha da Purificação: o anel volta a ser limpo e fica protegido por um tempo. */
+    public static void purificar(ServerPlayer p, LoreData d) {
+        d.setMorte(0);
+        for (String k : new java.util.ArrayList<>(d.active().keySet())) if (k.startsWith("morte_") || k.startsWith("purif_")) MissionManager.abandon(p, k);
+        ItemStack anel = com.lanterna.power.EquipmentHelper.ring(p);
+        if (!anel.isEmpty()) com.lanterna.item.PowerRingItem.setCorrupcao(anel, 0, null);
+        CompoundTag t = persist(p);
+        t.remove(TEMPO);
+        t.remove(AVISOS);
+        t.putInt(PROTEGIDO, 10);   // as próximas 10 mortes não corrompem
+        t.putInt("lanterna_mortes_sem_corrupcao", 0);
+        p.removeEffect(MobEffects.DARKNESS);
+        p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 20, 1));
+        p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2f, 1.2f);
+        p.level().playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5f, 1.4f);
+        p.serverLevel().sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 120, 0.6, 1.2, 0.6, 0.08);
+        p.sendSystemMessage(Component.translatable("morte.lanterna.purificado_1").withStyle(s -> s.withColor(0xCFE8FF).withBold(true)));
+        p.sendSystemMessage(Component.translatable("morte.lanterna.purificado_2").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        for (ServerPlayer o : p.server.getPlayerList().getPlayers())
+            if (o != p) o.sendSystemMessage(Component.translatable("morte.lanterna.purificado_servidor", p.getDisplayName()).withStyle(s -> s.withColor(0xCFE8FF).withItalic(true)));
+    }
+
+    /** O prazo acabou (ou desistiu): a Morte o toma de vez. */
+    static void tomado(ServerPlayer p, LoreData d) {
+        p.sendSystemMessage(Component.translatable("morte.lanterna.tomado").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.BOLD));
+        converter(p, d);
+    }
+
+    /** A cada segundo, para quem está corrompido: conta o prazo, avisa e, no fim, a Morte o toma. */
+    private static void prazo(ServerPlayer p, LoreData d) {
+        // quem já seguia a linha da Morte e ficou sem o Anel Preto (outro é o Arauto) vira Portador Negro
+        if (d.isActive("morte_8") && !AnelPreto.livre(p)) {
+            p.sendSystemMessage(Component.translatable("morte.lanterna.anel_unico", AnelPreto.nomeDono(p.server)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+            tomado(p, d);
+            return;
+        }
+        double h = LanternaConfig.PURIFICACAO_HORAS.get();
+        if (h <= 0) return;
+        // quem abraçou a Morte de verdade (já perto de forjar o Anel Preto livre) não é tomado pelo prazo
+        if ((d.isActive("morte_6") || d.isActive("morte_7") || d.isActive("morte_8")) && AnelPreto.dono(p.server) == null) return;
+        // mundo de antes desta versão: quem já estava corrompido ganha a linha e o prazo agora
+        if (!algumaAtiva(d, "purif_") && !persist(p).contains(TEMPO)) { comecarPurificacao(p, d); return; }
+        CompoundTag t = persist(p);
+        long limite = (long) (h * 3600 * 20);
+        long agora = t.getLong(TEMPO) + 20;
+        t.putLong(TEMPO, agora);
+        int avisos = t.getInt(AVISOS);
+        double[] marcas = {0.5, 0.75, 0.9, 0.97};
+        for (int i = 0; i < marcas.length; i++) {
+            if ((avisos & (1 << i)) == 0 && agora >= limite * marcas[i]) {
+                t.putInt(AVISOS, avisos | (1 << i));
+                p.sendSystemMessage(Component.translatable("morte.lanterna.purif_prazo", horas((limite - agora) / 72000.0)).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1f, 0.5f);
+            }
+        }
+        if (agora >= limite) tomado(p, d);
+    }
+
+    /** Quanto falta (em horas) para a Morte tomar o jogador, ou -1. */
+    public static double horasRestantes(ServerPlayer p) {
+        CompoundTag t = persist(p);
+        if (!t.contains(TEMPO)) return -1;
+        return Math.max(0, LanternaConfig.PURIFICACAO_HORAS.get() - t.getLong(TEMPO) / 72000.0);
     }
 
     /** Ganchos de fim de missão da linha da Morte. */
     public static void aoConcluir(ServerPlayer p, LoreData d, Mission m) {
+        if (m.id().equals("purif_5") && d.morte() == 2) purificar(p, d);
         if (m.id().equals("morte_8")) {
             d.setMorte(3);
             // o Anel Preto de verdade nasceu: o anel antigo deixa de mostrar a corrupção
@@ -203,6 +323,10 @@ public final class Corrupcao {
             raiz.remove(CONVERTER_EM);
             LoreData dc = LoreCapability.get(p).orElse(null);
             if (dc != null) converter(p, dc);
+        }
+        if (p.tickCount % 20 == 11) {
+            LoreData dp = LoreCapability.get(p).orElse(null);
+            if (dp != null && dp.morte() == 2) prazo(p, dp);
         }
         // o anel de quem está corrompido mostra a corrupção (também em mundos de antes desta versão)
         if (p.tickCount % 40 == 7) {

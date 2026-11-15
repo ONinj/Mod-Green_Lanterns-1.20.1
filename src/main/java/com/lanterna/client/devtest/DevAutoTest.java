@@ -3505,6 +3505,82 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.6: linha da Purificação, prazo, Arauto ceifa 100%, Arauto no PvP. */
+    private static void scenePurificacao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        Object[] arauto = {null};
+        java.util.function.Function<net.minecraft.server.level.ServerPlayer, String> estado = sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            var anel = com.lanterna.power.EquipmentHelper.ring(sp);
+            return "morte=" + d.morte() + " anel=" + com.lanterna.item.PowerRingItem.getCorps(anel).getPath() + " corrupcao=" + com.lanterna.item.PowerRingItem.getCorrupcao(anel)
+                    + " purif_1=" + d.isActive("purif_1") + " morte_1=" + d.isActive("morte_1") + " restam=" + String.format("%.4f", com.lanterna.morte.Corrupcao.horasRestantes(sp)) + "h";
+        };
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(20, () -> { cmd("gamemode survival"); cmd("lantern ring green"); cmd("effect clear @s"); });
+        // 1) corrompido: as duas linhas e o prazo; prazo curtinho para ver a Morte tomar
+        at(30, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.setMorte(0); d.completed().removeIf(k -> k.startsWith("purif_") || k.startsWith("morte_"));
+            com.lanterna.LanternaConfig.PURIFICACAO_HORAS.set(0.004);   // ~14 s
+            com.lanterna.morte.Corrupcao.corromper(sp, d);
+        }));
+        at(60, () -> server(sp -> glog("corrompido: " + estado.apply(sp))));
+        at(400, () -> server(sp -> glog("prazo acabou: " + estado.apply(sp))));
+        // 2) de novo, agora purificando
+        at(10, () -> cmd("lantern corrupcao 0"));
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.setMorte(0); d.completed().removeIf(k -> k.startsWith("purif_") || k.startsWith("morte_"));
+            com.lanterna.LanternaConfig.PURIFICACAO_HORAS.set(6.0);
+            com.lanterna.morte.Corrupcao.corromper(sp, d);
+        }));
+        at(60, () -> server(sp -> { glog("corrompido de novo: " + estado.apply(sp)); com.lanterna.morte.Corrupcao.purificar(sp, com.lanterna.mission.LoreCapability.get(sp).orElse(null)); }));
+        at(60, () -> server(sp -> glog("purificado: " + estado.apply(sp) + " protecao=" + sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).getInt("lanterna_purificado"))));
+        // 3) o Arauto mata: 100%, mesmo protegido e de nível baixo
+        at(10, () -> server(sp -> {
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(5)));
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("22222222-2222-3333-4444-555555555555"), "Arauto"));
+            fake.setPos(sp.getX() + 2, sp.getY(), sp.getZ());
+            var negra = com.lanterna.corps.BuiltinCorps.BLACK;
+            com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(negra.id(), negra.color(), -1)); r.refresh(negra.id(), negra.color(), 1000, 1000); });
+            com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> { d.setMorte(3); d.setXp(com.lanterna.tropa.Nivel.total(150)); });
+            arauto[0] = fake;
+            glog("arauto? " + com.lanterna.morte.AnelPreto.arauto(fake));
+            for (int i = 0; i < 8 && sp.isAlive(); i++) { sp.invulnerableTime = 0; sp.hurt(sp.damageSources().playerAttack(fake), 99999f); }
+            glog("morreu? " + !sp.isAlive());
+        }));
+        at(40, () -> { mc.player.respawn(); mc.setScreen(null); });
+        at(80, () -> server(sp -> glog("ceifado pelo Arauto: " + estado.apply(sp))));
+        // 4) PvP contra o Arauto: sem anel e de nível menor não fere; de nível igual fere pouco; o Branco fere mais
+        at(10, () -> cmd("lantern ring black"));
+        at(10, () -> cmd("lantern corrupcao 0"));
+        Object[][] casos = {{100, null, 150}, {149, "green", 150}, {150, "green", 150}, {150, "white", 150}, {150, "green", 150, "alvoVerde"}};
+        for (Object[] c : casos) {
+            at(30, () -> server(sp -> {
+                if (c.length > 3) sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total((int) c[2])));
+                com.lanterna.tropa.Nivel.aplicar(sp);
+                var fake = (net.minecraft.server.level.ServerPlayer) arauto[0];
+                com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> { d.setMorte(0); d.setXp(com.lanterna.tropa.Nivel.total((int) c[0])); });
+                com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> {
+                    if (c[1] == null) { r.equipment().setStackInSlot(0, net.minecraft.world.item.ItemStack.EMPTY); r.unequip(); }
+                    else { var co = com.lanterna.corps.BuiltinCorps.valueOf(((String) c[1]).toUpperCase()); r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(co.id(), co.color(), -1)); r.refresh(co.id(), co.color(), 1000, 1000); }
+                });
+            }));
+            at(30, () -> server(sp -> {
+                sp.setHealth(sp.getMaxHealth());
+                sp.invulnerableTime = 0;
+                float h0 = sp.getHealth();
+                com.lanterna.combate.Equilibrio.ferirComPoder(sp, sp.damageSources().playerAttack((net.minecraft.world.entity.player.Player) arauto[0]), 25f);
+                float tirou = h0 - sp.getHealth();
+                glog(String.format("PVP %s nv%s -> %s nv%s | tira %.2f de %.0f | golpes %s", c[1] == null ? "sem anel" : c[1], c[0], c.length > 3 ? "verde" : "ARAUTO", c[2],
+                        tirou, sp.getMaxHealth(), tirou <= 0 ? "IMUNE" : String.valueOf((int) Math.ceil(sp.getMaxHealth() / tirou))));
+            }));
+        }
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.5: marcador e colunas de luz dos três núcleos de Hanks. */
     private static void sceneHanksNucleos() {
         Minecraft mc = Minecraft.getInstance();
@@ -6027,6 +6103,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("portador")) scenePortador();
         else if (ENABLED && SCENE.equals("terraespaco")) sceneTerraEspaco();
         else if (ENABLED && SCENE.equals("hanksnucleos")) sceneHanksNucleos();
+        else if (ENABLED && SCENE.equals("purificacao")) scenePurificacao();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

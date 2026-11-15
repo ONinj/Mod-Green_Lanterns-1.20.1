@@ -1537,3 +1537,22 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - Na missão **Os Três Núcleos** (Hanks), a cidade sem fim e toda parecida deixava os núcleos quase impossíveis de achar.
   - O **marcador da missão** (o losango na tela e a distância no painel) agora aponta o **núcleo apagado mais perto**, com o número dele e quantos já foram ligados. Ao ligar um, ele pula sozinho para o próximo.
   - Cada **núcleo apagado** solta uma **coluna de luz dourada** de 90 blocos, a cada 2 segundos, visível de longe por cima dos prédios. Só quem está nessa missão vê.
+
+## 0.49.6 — Purificação, e o Arauto sempre por cima
+
+- **Linha da Purificação** (começa sozinha quando o anel se corrompe, junto com a linha da Morte):
+  1. **A Luz que Resta:** ir a Odym e falar com o líder dos Aelinos.
+  2. **Lágrimas e Pérolas:** 8 Pérolas do Amanhã e 8 Lágrimas Índigo.
+  3. **Os Ecos do que Foi:** desfazer 12 Ecos Cinzentos e ter respeito 4 com os Aelinos.
+  4. **A Prova da Esperança:** vencer o chefe de Odym.
+  5. **Renovar o Juramento:** ir a Oa e falar com os Guardiões.
+  - Ao terminar: o anel fica limpo (sem rachaduras), a linha da Morte é cancelada e as **próximas 10 mortes não corrompem** (menos pelas mãos do Arauto).
+  - **Prazo:** 6 horas **de jogo** (`horas_purificacao`, só conta com o jogador online). O anel avisa com 50%, 75%, 90% e 97% do prazo. Se acabar, **a Morte toma o jogador de vez: vira Portador Negro**.
+  - Quem já estava fundo na linha da Morte (missões 6 a 8) com o Anel Preto ainda sem dono não perde pelo prazo. Se o Anel Preto já tiver dono quando ele chegar à última missão da Morte, vira Portador Negro (antes ficava travado).
+  - Quem já estava corrompido antes desta versão ganha a linha e o prazo ao entrar.
+- **Morto pelo Arauto da Morte: corrupção 100%**, em qualquer nível, mesmo recém-purificado ou já corrompido: volta como Portador Negro. (Lanternas Negros de Ryut continuam com a chance da config.)
+- **O Arauto não apanhava como devia:**
+  - a proteção só valia contra quem estava com o anel no dedo: quem tirava o anel (ou nem tinha) batia à vontade. Agora **nenhum jogador de nível menor o fere**, com ou sem anel; só o Anel Branco, ou quem tem nível igual ou maior;
+  - o igualador de nível do PvP olhava a vida total, e os +20 corações do Arauto faziam ele levar **mais** dano. Agora a vida a mais dos anéis supremos não entra na conta;
+  - o Arauto segura **60%** do golpe de jogadores (antes 25%) e **30%** contra o Anel Branco.
+  - Medido (nível 150, golpe de 25): sem anel nível 100 → imune; Verde 149 → imune; Verde 150 → 38 golpes para derrubar o Arauto; Branco 150 → 20 golpes. (Verde contra Verde no 150: 14.)
