@@ -313,6 +313,22 @@ public class StarMapScreen extends Screen {
         // Você (dentro da sala da nave a posição não é a do espaço: não mostra)
         if (naSala()) { g.disableScissor(); return; }
         int px = sx(here.x), py = sy(here.z);
+        // 0.52.3: a rota do piloto automático (tracejada, contornando planetas, sóis e buracos negros)
+        var rota = Autopilot.rota();
+        double ax = here.x, az = here.z;
+        int cor = 0xCC000000 | (com.lanterna.client.ClientRingData.color & 0xFFFFFF);
+        for (var w : rota) {
+            double len = Math.hypot(w.x - ax, w.z - az) / zoom;
+            int n = (int) Math.min(1500, len);
+            for (int i = 0; i < n; i++) {
+                if ((i / 4) % 2 == 1) continue;
+                double t = i / (double) n;
+                int x = sx(ax + (w.x - ax) * t), y = sy(az + (w.z - az) * t);
+                g.fill(x, y, x + 2, y + 2, cor);
+            }
+            if (w != rota.get(rota.size() - 1)) g.fill(sx(w.x) - 2, sy(w.z) - 2, sx(w.x) + 3, sy(w.z) + 3, 0xFFFFFFFF);
+            ax = w.x; az = w.z;
+        }
         float yaw = minecraft != null && minecraft.player != null ? minecraft.player.getYRot() : 0;
         double fx = -Math.sin(Math.toRadians(yaw)), fz = Math.cos(Math.toRadians(yaw));
         for (int i = 0; i < 7; i++) {

@@ -34,6 +34,16 @@ public final class Autopilot {
     private static int phaseTicks;
     private static int stuckTicks;
     private static double lastY;
+    /** 0.52.3: a rota traçada no espaço (pontos que faltam; o último é o destino). */
+    private static java.util.List<Vec3> rota = java.util.List.of();
+    private static int rotaIdade;
+    /** Só para os testes: desliga a rota (piloto antigo, reto). */
+    public static boolean semRota;
+
+    /** Os pontos da rota que faltam (para o mapa estelar). */
+    public static java.util.List<Vec3> rota() {
+        return target != null && phase == Phase.CRUISE ? rota : java.util.List.of();
+    }
 
     public static boolean active() {
         return target != null;
@@ -57,6 +67,7 @@ public final class Autopilot {
         if (Destinations.isHere(player, dest)) return Component.translatable("autopilot.lanterna.error.here");
 
         target = dest;
+        rota = java.util.List.of();
         phaseTicks = 0;
         stuckTicks = 0;
         phase = Phase.WAIT_FLIGHT;
@@ -70,6 +81,7 @@ public final class Autopilot {
         if (target == null) return;
         target = null;
         phase = null;
+        rota = java.util.List.of();
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && message != null) {
             player.displayClientMessage(message, true);
@@ -96,6 +108,7 @@ public final class Autopilot {
         Phase now = nextPhase(player);
         if (now != phase) {
             phase = now;
+            rota = java.util.List.of();
             phaseTicks = 0;
             stuckTicks = 0;
         }
@@ -141,6 +154,23 @@ public final class Autopilot {
         double dist = dir.length() - target.radius();
         dir = dir.normalize();
 
+        // 0.52.3: segue a rota que contorna planetas, sóis e buracos negros longe o bastante para a hiperpropulsão
+        // não frear. Ela é refeita a cada 4 s (o caminho muda pouco, mas o embalo e os puxões tiram um pouco do lugar).
+        if (semRota) rota = new java.util.ArrayList<>(java.util.List.of(target.center()));
+        else if (rota.isEmpty() || ++rotaIdade > 80) {
+            rota = new java.util.ArrayList<>(Rota.tracar(pos, target.center(), target.id(), ClientFlight.hyperMax()));
+            rotaIdade = 0;
+        }
+        // passa para o próximo ponto um pouco antes de chegar (cortar demais a curva entraria na zona dos freios)
+        double antecipa = Math.max(300, ClientFlight.localSpeed() * 5);
+        while (rota.size() > 1) {
+            Vec3 w = rota.get(0), prox = rota.get(1);
+            boolean passou = prox.subtract(w).dot(pos.subtract(w)) > 0;
+            if (pos.distanceTo(w) < antecipa || passou) rota.remove(0); else break;
+        }
+        boolean desvio = rota.size() > 1;
+        if (desvio) dir = rota.get(0).subtract(pos).normalize();
+
         // Desvia de planetas no caminho (senão pousaria no planeta errado)
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 3)) {
             if (!b.landable() || b.id().equals(target.id())) continue;
@@ -171,7 +201,9 @@ public final class Autopilot {
 
         // Só entra em hiperpropulsão com o nariz alinhado e longe do destino
         Vec3 look = player.getLookAngle();
-        boolean aligned = look.dot(dir) > 0.985;
+        // nas curvas da rota a hiperpropulsão continua (ela mesma vira aos poucos)
+        // (a própria hiperpropulsão vira aos poucos para onde o anel olha; antes, a cada curva ela se apagava)
+        boolean aligned = !semRota && ClientFlight.hyperOn() ? look.dot(dir) > 0.2 : look.dot(dir) > 0.985;
         // Já dentro do planeta: segura a posição até o pouso acontecer
         if (dist < 0) return new Control(-1, false, false, false, false);
         // Chegando: sem impulso, para entrar devagar
@@ -235,6 +267,7 @@ public final class Autopilot {
     }
 
     public static void clear() {
+        rota = java.util.List.of();
         target = null;
         phase = null;
     }

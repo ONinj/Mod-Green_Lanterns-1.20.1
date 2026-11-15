@@ -468,6 +468,9 @@ public final class ClientFlight {
     }
 
     /** Velocidade máxima segura perto dos planetas: freia sozinho ao se aproximar. */
+    /** Para os testes: o limite dos freios automáticos aqui (blocos/s). */
+    public static double freioAqui(Vec3 pos) { return brakeLimit(pos) * 20; }
+
     private static double brakeLimit(Vec3 pos) {
         double limit = com.lanterna.space.Perigos.limiteHiper(pos, hyperMax(), SPACE_BOOST * 1.4);
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {

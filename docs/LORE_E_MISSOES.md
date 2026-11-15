@@ -1694,3 +1694,12 @@ A linha agora tem seis passos: 1) Odym, falar com o líder; 2) 8 Pérolas do Ama
 | Branco | 1.800 blocos/s | 4.500 blocos/s | 100 blocos/s |
 
 A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a ~2.430). Medido em voo: 1.890, 2.555 e 3.150 blocos/s (níveis 1, 40 e 75, com o embalo), Preto 4.000 e Branco 4.496. Os freios automáticos perto de planetas, sóis e buracos negros continuam iguais.
+
+
+## 0.52.3 — Rota do piloto automático
+
+- No espaço, o piloto automático traça uma **rota** antes de partir: em vez de ir reto e frear perto de cada planeta, sol ou buraco negro no caminho, ele contorna cada um pelo lado, com a folga exata em que os freios automáticos começariam (a folga cresce com a velocidade do anel). A rota é refeita a cada 4 s.
+- Nas curvas da rota a hiperpropulsão continua ligada (antes ela se apagava a cada mudança de direção).
+- O **mapa estelar** mostra a rota tracejada na cor do anel, com os pontos de desvio em branco.
+- Medido numa viagem de 67 km (Tropa comum, nível 75): **28 s com a rota, 36 s indo reto**. O que sobra de freada é a chegada ao planeta (que é de propósito, para pousar) e um ou outro desvio muito apertado entre dois planetas vizinhos.
+- Tudo é calculado no jogo de quem voa: não pesa no servidor.

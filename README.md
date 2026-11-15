@@ -120,6 +120,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.60.0 ✅ (0.52.0) Anel da Vida com todos os construtos de todas as Tropas (inclusive os da Morte), já liberados, e o dom Purificar (purifica outro jogador numa cena conjunta, recarga de 10 min); o Nulo gigante, com cinco fases, golpes que tiram uma parte da vida e os poderes de controle em dobro; Altar da Purificação refeito (texturas) e o portador fica deitado na laje durante todo o ritual
 1.60.1 ✅ (0.52.1) Fim do travamento ao criar o mundo (escolha do lugar da Cidade Aurora: de ~20 s para ~1 s); Cápsula Estelar no Anel Caído (cada jogador acha o próprio Anel Apagado, também em servidor; crateras antigas viram cápsula); anel da Vida sem os construtos da Morte; Nulo com 5x a vida, menos dano, ataques mais espaçados e 90 s mínimos por fase; o convite do Mogo e de Hanks não se repete
 1.60.2 ✅ (0.52.2) Hiperpropulsão no espaço cresce com o nível (1.800 b/s no nível 1 até 3.000 no nível 75; anel Preto 4.000, Branco 4.500); nos planetas, Branco e Preto a 100 b/s
+1.60.3 ✅ (0.52.3) Piloto automático traça uma rota que contorna planetas, sóis e buracos negros sem frear (mostrada tracejada no mapa estelar): numa viagem de 67 km, 28 s em vez de 36 s
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

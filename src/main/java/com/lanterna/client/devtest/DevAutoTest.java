@@ -3944,6 +3944,61 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.52.3: piloto automático com e sem rota (mesma viagem, mede a velocidade média e quantas vezes freou). */
+    private static void sceneRota() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        String[] destino = new String[1];
+        for (int caso = 0; caso < 2; caso++) {
+            final boolean sem = caso == 0;
+            at(20, () -> server(sp -> {
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(75)); com.lanterna.mission.MissionManager.sync(sp, d); });
+                sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+                sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), -14000, 100, -14000, 0, 0);
+            }));
+            at(60, () -> {
+                com.lanterna.client.flight.Autopilot.semRota = sem;
+                if (destino[0] == null) {
+                    // o destino mais longe que o mapa mostra (a linha reta passa por vários planetas)
+                    var l = com.lanterna.client.flight.Destinations.all(4);
+                    var best = l.get(0); double bd = 0;
+                    for (var d : l) { double dd = d.center().distanceTo(mc.player.position()); if (dd > bd && d.dimension() != null) { bd = dd; best = d; } }
+                    destino[0] = best.id();
+                    glog("destino " + best.id() + " a " + Math.round(bd) + " blocos");
+                }
+                var rota = com.lanterna.client.flight.Rota.tracar(mc.player.position(), com.lanterna.client.flight.Destinations.byId(destino[0]).center(), destino[0], com.lanterna.client.flight.ClientFlight.hyperMax());
+                glog((sem ? "SEM" : "COM") + " rota: pontos=" + rota.size());
+                net.minecraft.world.phys.Vec3 ant = mc.player.position(); double tot = 0;
+                for (var w : rota) { tot += ant.distanceTo(w); glog("   ponto " + Math.round(w.x) + " " + Math.round(w.y) + " " + Math.round(w.z) + " trecho " + Math.round(ant.distanceTo(w))); ant = w; }
+                glog("   total da rota " + Math.round(tot) + " (reto " + Math.round(mc.player.position().distanceTo(rota.get(rota.size() - 1))) + ")");
+                glog("inicio " + com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId(destino[0])));
+            });
+            double[] st = new double[6];
+            at(1, () -> { st[0] = com.lanterna.client.flight.Autopilot.remaining(mc.player); });
+            for (int k = 0; k < 90; k++) at(10, () -> {
+                if (st[5] > 0) return;
+                if (!sem && st[2] == 16) mc.setScreen(new com.lanterna.client.screen.StarMapScreen());
+                if (!sem && st[2] == 18) shot("rota_mapa");
+                if (!sem && st[2] == 19) mc.setScreen(null);
+                if (!mc.player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)) { st[5] = st[2] / 2.0; glog((sem ? "SEM" : "COM") + " rota: CHEGOU em " + st[5] + " s"); return; }
+                double f = com.lanterna.client.flight.ClientFlight.hyperFraction();
+                st[1] += f; st[2]++; if (f < 0.9) st[3]++;
+                if (!sem && f < 0.97) glog("   t pos " + Math.round(mc.player.getX()) + " " + Math.round(mc.player.getY()) + " " + Math.round(mc.player.getZ()) + " prop " + Math.round(f * 100) + "% hyper " + com.lanterna.client.flight.ClientFlight.hyperOn() + " vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " pontos " + com.lanterna.client.flight.Autopilot.rota().size() + " freio " + Math.round(com.lanterna.client.flight.ClientFlight.freioAqui(mc.player.position())));
+            });
+            at(1, () -> {
+                double feito = st[0] - com.lanterna.client.flight.Autopilot.remaining(mc.player);
+                glog((sem ? "SEM" : "COM") + " rota: avançou " + Math.round(feito) + " blocos em 30 s (" + Math.round(feito / 30) + " b/s rumo ao destino), propulsão média "
+                        + Math.round(100 * st[1] / st[2]) + "%, meios segundos abaixo de 90%: " + (int) st[3] + ", piloto " + com.lanterna.client.flight.Autopilot.phase());
+            });
+            at(5, () -> { mc.setScreen(null); com.lanterna.client.flight.Autopilot.clear(); });
+        }
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.52.1: Cápsula Estelar (cada jogador com o seu Anel Apagado) e a cratera de mundo antigo. */
     private static void sceneCapsula() {
         Minecraft mc = Minecraft.getInstance();
@@ -6880,6 +6935,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("rev0521")) sceneRev0521();
         else if (ENABLED && SCENE.equals("capsula")) sceneCapsula();
         else if (ENABLED && SCENE.equals("hiper")) sceneHiper();
+        else if (ENABLED && SCENE.equals("rota")) sceneRota();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

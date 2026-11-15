@@ -516,8 +516,8 @@
    "planets",
    "leave earth"
   ],
-  "pt": "Voe bem alto para sair para o espaço. Aperte J para abrir o mapa estelar e escolher um destino, ou só me peça: 'me leve para Zamaron'. No espaço não há ar: você só respira com o anel. Cuidado com sóis e buracos negros, que puxam e matam.",
-  "en": "Fly very high to leave for space. Press J to open the star map and pick a destination, or just ask me: 'take me to Zamaron'. There is no air in space: you only breathe with the ring. Beware of suns and black holes, which pull you in and kill."
+  "pt": "Voe bem alto para sair para o espaço. Aperte J para abrir o mapa estelar e escolher um destino, ou só me peça: 'me leve para Zamaron'. O piloto automático traça uma rota que contorna planetas, sóis e buracos negros sem frear (a linha tracejada no mapa). No espaço não há ar: você só respira com o anel. Cuidado com sóis e buracos negros, que puxam e matam.",
+  "en": "Fly very high to leave for space. Press J to open the star map and pick a destination, or just ask me: 'take me to Zamaron'. The autopilot plots a route around planets, suns and black holes without braking (the dashed line on the map). There is no air in space: you only breathe with the ring. Beware of suns and black holes, which pull you in and kill."
  },
  {
   "id": "sois",
