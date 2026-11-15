@@ -75,8 +75,9 @@ public final class RingPowers {
             }
             int corrup = PowerRingItem.getCorrupcao(ring);
             // Portador Negro: os mesmos poderes da Tropa, mas a luz é preta (construtos, aura, painel)
-            data.refresh(def.id(), corrup == 2 ? com.lanterna.morte.Corrupcao.COR_PORTADOR : def.color(), charge, max);
-            data.espelharCorrupcao(corrup, PowerRingItem.getOrigem(ring));
+            int estagio = PowerRingItem.getEstagio(ring);
+            data.refresh(def.id(), corrup == 2 ? com.lanterna.morte.Corrupcao.COR_PORTADOR : estagio == 2 ? com.lanterna.morte.Corrupcao.corCinza(def.color(), 0.65f) : def.color(), charge, max);
+            data.espelharCorrupcao(PowerRingItem.getEstagio(ring), PowerRingItem.getOrigem(ring)); // 0.51: o estágio vai junto
             data.setEverChosen(true);
         } else if (data.hasRing()) {
             data.unequip();

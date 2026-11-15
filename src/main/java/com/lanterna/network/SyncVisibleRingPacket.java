@@ -18,7 +18,7 @@ public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps,
                 data.hasRing() && data.powerActive(), data.hasRing() && data.flightEnabled(),
                 data.hasRing() && data.hyper(), data.hasRing() && data.autopilot(), staff,
                 data.hasRing() && data.charge() <= 0 && !com.lanterna.corps.BuiltinCorps.WHITE.id().equals(data.corps()),
-                data.hasRing() ? data.corrupcao() : 0, data.hasRing() ? data.origem() : "");
+                data.hasRing() ? data.estagio() : 0, data.hasRing() ? data.origem() : "");
     }
 
     public static void encode(SyncVisibleRingPacket msg, FriendlyByteBuf buf) {

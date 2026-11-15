@@ -1629,3 +1629,25 @@ No `/lantern summon`, os chefes agora têm nome em inglês. A barra do chefe, qu
 | Verdan, o Arquiteto | `boss_verdan_the_architect` |
 
 As mensagens de confirmação no chat (invocar, nave, técnica) também mostram os nomes em inglês que você digitou.
+
+
+## 0.51.0 — Os estágios da corrupção e o Ritual da Purificação
+
+### Três estágios
+| Estágio | Anel | Traje | Quando |
+|---|---|---|---|
+| 1 | rachaduras brancas, poucas manchas cinzas | algumas manchas cinzas | ao renascer com o anel corrompido |
+| 2 | bem mais escuro, manchas pretas, ainda manchas da cor da Tropa, rachaduras brancas por toda parte | mais cinza que colorido; a luz do anel (aura, contorno, construtos) também perde a cor | na metade do prazo, ou morto de novo pelo Arauto |
+| 3 | Portador Negro: preto com rachaduras brancas e o símbolo da Tropa | preto e branco | o prazo acabou |
+
+- **Prazo**: 30 minutos de jogo (`minutos_purificacao`, padrão 30; só conta com o jogador jogando).
+- **Morto pelo Arauto da Morte**: o anel se corrompe na hora (100%, em qualquer nível, mesmo recém-purificado), mas o jogador recebe a mesma linha da Purificação e o mesmo prazo. Quem já estava corrompido pula para o estágio 2. Morto por um Lanterna Negro de Ryut ou por um Portador Negro (na chance de corromper), também tem a linha.
+- `/lantern corruption <0|1|2|3>`: 0 limpo, 1 e 2 os estágios (com a linha da Purificação), 3 Portador Negro.
+
+### O Ritual da Purificação
+A linha agora tem seis passos: 1) Odym, falar com o líder; 2) 8 Pérolas do Amanhã e 8 Lágrimas Índigo; 3) 12 Ecos Cinzentos e respeito dos Aelinos; 4) o chefe de Odym; 5) Oa, falar com os Guardiões, que entregam o **Altar da Purificação**; 6) **O Ritual da Purificação**.
+
+- **O altar**: um dais de mármore com quatro cristais nos cantos, a laje de pedra com runas onde o portador se deita (a cabeceira fica para o lado em que você olha ao colocar) e, na cabeceira, o pedestal do anel. Dá para fabricar outro: Pérola do Amanhã em cima; ametista, Lágrima Índigo e ametista no meio; três blocos de quartzo embaixo.
+- **O que pede**: 2 Pérolas do Amanhã, 2 Lágrimas Índigo e 1 Maçã Dourada.
+- **A cena** (10 s): o anel sai do dedo e flutua sobre o pedestal, brilhando na cor da Tropa; o portador se deita na laje; a câmera gira em volta do altar (sem a interface, só os títulos); os cristais e o anel lançam luz sobre o corpo, uma espiral da cor da Tropa desce, a fumaça da Morte sai; "A Morte resiste"; e, num clarão, "Purificado". O anel volta limpo e ligado, e as próximas 10 mortes não corrompem (a não ser pelo Arauto).
+- Interrompido (sair do jogo, morrer, quebrar o altar), o altar devolve o que foi oferecido.

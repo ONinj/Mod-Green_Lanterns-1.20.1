@@ -24,7 +24,7 @@ public final class ClientVisibleRings {
         } else {
             ItemStack ring = msg.hasRing() && corps != null ? PowerRingItem.create(corps, msg.color(), -1) : ItemStack.EMPTY;
             if (!ring.isEmpty() && msg.corrupcao() > 0)
-                PowerRingItem.setCorrupcao(ring, msg.corrupcao(), msg.origem().isEmpty() ? null : ResourceLocation.tryParse(msg.origem()));
+                PowerRingItem.setEstagio(ring, msg.corrupcao(), msg.origem().isEmpty() ? null : ResourceLocation.tryParse(msg.origem())); // 0.51: vem o estágio
             RINGS.put(msg.entityId(), new Visible(ring, msg.color(), msg.hasRing() && msg.active(), msg.hasRing() && msg.flying(),
                     msg.hyper(), msg.autopilot(), msg.staff(), msg.vazio()));
         }

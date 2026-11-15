@@ -1,5 +1,6 @@
 package com.lanterna.mission;
 
+import com.lanterna.lore.LoreBlocks;
 import com.lanterna.lore.LoreItems;
 import com.lanterna.lore.PlanetLore;
 import com.lanterna.mission.Objective.Type;
@@ -137,7 +138,10 @@ public final class Missions {
                 Objective.of(Type.REP, "aelinos", 4, "odym", PlanetLore.HUB)), items(() -> new ItemStack(LoreItems.MERITO.get(), 3)), 300, "purif_4");
         add("purif_4", "purificacao", luz, List.of(Objective.of(Type.BOSS, odym.boss, 1, "odym", PlanetLore.arena(odym))),
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 4)), 400, "purif_5");
+        // 0.51: os Guardiões entregam o Altar da Purificação; o último passo é o ritual nele
         add("purif_5", "purificacao", luz, List.of(goTo("oa"), talk("lider:oa", "oa")),
+                items(() -> new ItemStack(LoreBlocks.ALTAR_PURIFICACAO.get())), 300, "purif_6");
+        add("purif_6", "purificacao", luz, List.of(Objective.of(Type.FONTE, com.lanterna.morte.RitualPurificacao.FLAG, 1, null, null)),
                 items(() -> new ItemStack(LoreItems.MERITO.get(), 6), () -> new ItemStack(LoreItems.FRAGMENTO_LENDARIO.get(), 2)), 600, null);
 
         // ---------------- A Morte (só para quem teve o anel corrompido ao morrer) ----------------

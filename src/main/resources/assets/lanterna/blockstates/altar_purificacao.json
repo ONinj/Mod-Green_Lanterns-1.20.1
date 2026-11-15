@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "lanterna:block/altar_purificacao"
+  },
+  "facing=east": {
+   "model": "lanterna:block/altar_purificacao",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "lanterna:block/altar_purificacao",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "lanterna:block/altar_purificacao",
+   "y": 270
+  }
+ }
+}

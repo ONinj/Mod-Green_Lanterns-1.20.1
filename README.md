@@ -116,6 +116,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.58.1 ✅ (0.50.1) Jogador resiste 40% mais aos construtos de outros jogadores; defesa com 1,5 s de recarga; prova da Bateria Central no lugar certo (não falha mais com "você se afastou"); linha principal retoma sozinha e a missão da Gênese (Anel Branco e o Nulo) chega para quem completou os anéis
 1.58.2 ✅ (0.50.2) Todos os comandos em inglês: /lantern repair, convert, blackring [free], corruption e /guide; opções de summon, ship e technique em inglês
 1.58.3 ✅ (0.50.3) Chefes com nome em inglês no /lantern summon (boss_echo_devourer, boss_the_null...); a barra do chefe continua na língua do jogo; confirmações do chat com os nomes em inglês
+1.59.0 ✅ (0.51.0) Corrupção em três estágios (o 2: traje mais cinza que colorido, anel escuro com manchas pretas e rachaduras; o 3: Portador Negro); prazo de 30 minutos (estágio 2 na metade); morto pelo Arauto, corrompido na hora mas ainda pode se purificar; Altar da Purificação com o Ritual da Purificação (cena de cinema: o anel no pedestal, o portador deitado na laje, a luz e o clarão)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

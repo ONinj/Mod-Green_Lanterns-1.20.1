@@ -55,7 +55,7 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.DoubleValue MORTE_CHANCE_CEIFADOR;
     public static final ForgeConfigSpec.IntValue MORTE_NIVEL_MIN;
     public static final ForgeConfigSpec.IntValue MORTE_DIAS_FOME;
-    public static final ForgeConfigSpec.DoubleValue PURIFICACAO_HORAS;
+    public static final ForgeConfigSpec.DoubleValue PURIFICACAO_MINUTOS;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -195,9 +195,9 @@ public final class LanternaConfig {
         MORTE_CHANCE = b.comment("Chance the ring gets corrupted when its bearer dies (0.004 = 0.4%)", "Chance de o anel se corromper quando o portador morre (0.004 = 0,4%)").defineInRange("chance_corrupcao", 0.004, 0.0, 1.0);
         MORTE_CHANCE_CEIFADOR = b.comment("Chance when the killer was a Black Lantern (player)", "Chance quando quem matou foi um Lanterna Negro (jogador)").defineInRange("chance_corrupcao_ceifador", 0.08, 0.0, 1.0);
         MORTE_NIVEL_MIN = b.comment("Minimum level for the ring to be able to get corrupted", "Nível mínimo para o anel poder se corromper").defineInRange("nivel_minimo", 15, 1, 50);
-        PURIFICACAO_HORAS = b.comment("Hours of play a corrupted bearer has to finish the Purification line before being fully taken by Death (becoming a Black Bearer). 0 turns it off",
-                        "Horas de jogo que o portador corrompido tem para terminar a linha da Purificação antes de a Morte o tomar de vez (vira Portador Negro). 0 desliga")
-                .defineInRange("horas_purificacao", 6.0, 0.0, 200.0);
+        PURIFICACAO_MINUTOS = b.comment("Minutes of play a corrupted bearer has to finish the Purification line. Halfway through, the corruption reaches stage 2; at the end, Death takes them (stage 3, Black Bearer). 0 turns it off",
+                        "Minutos de jogo que o portador corrompido tem para terminar a linha da Purificação. Na metade, a corrupção chega ao estágio 2; no fim, a Morte o toma (estágio 3, Portador Negro). 0 desliga")
+                .defineInRange("minutos_purificacao", 30.0, 0.0, 12000.0);
         MORTE_DIAS_FOME = b.comment("Days (real time) the Black Lantern lasts without reaping a ring bearer before going into a frenzy (0 turns it off)", "Dias (tempo real) que o Lanterna Negro aguenta sem ceifar um portador de anel antes de entrar em frenesi (0 desliga)")
                 .defineInRange("dias_fome", 3, 0, 365);
         b.pop();

@@ -48,6 +48,7 @@ public abstract class CameraMixin {
         // cerimônia de escolha do anel: câmera de cinema
         double[] cine = com.lanterna.client.escolha.Cerimonias.camera(entity, partialTick, position, getYRot(), getXRot());
         if (cine == null) cine = com.lanterna.client.mogo.ClienteChamado.camera(entity, partialTick);
+        if (cine == null) cine = com.lanterna.client.combate.RitualCliente.camera(entity, partialTick);
         if (cine != null) {
             this.detached = true;
             setRotation((float) cine[3], (float) cine[4]);

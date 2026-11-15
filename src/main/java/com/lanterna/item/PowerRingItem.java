@@ -82,7 +82,26 @@ public class PowerRingItem extends Item {
     public static void setCorrupcao(ItemStack stack, int nivel, @Nullable ResourceLocation origem) {
         CompoundTag tag = stack.getOrCreateTag();
         if (nivel <= 0) tag.remove("Corrupcao"); else tag.putInt("Corrupcao", nivel);
+        if (nivel != 1) tag.remove("Estagio");
         if (origem == null) tag.remove("Origem"); else tag.putString("Origem", origem.toString());
+    }
+
+    /**
+     * Estágio da corrupção que aparece (0.51): 0 limpo; 1 corrompido (rachaduras brancas, manchas cinzas); 2 corroído
+     * (anel escuro, manchas pretas e da Tropa, mais rachaduras; traje mais cinza que colorido); 3 Portador Negro.
+     */
+    public static int getEstagio(ItemStack stack) {
+        int c = getCorrupcao(stack);
+        if (c == 2) return 3;
+        if (c == 1) return stack.getTag() != null && stack.getTag().getInt("Estagio") == 2 ? 2 : 1;
+        return 0;
+    }
+
+    /** Põe o estágio 0, 1 ou 2 (o 3 é a conversão em Portador Negro, ver Corrupcao.converter). */
+    public static void setEstagio(ItemStack stack, int estagio, @Nullable ResourceLocation origem) {
+        if (estagio >= 3) { setCorrupcao(stack, 2, origem); return; }
+        setCorrupcao(stack, estagio <= 0 ? 0 : 1, origem);
+        if (estagio == 2) stack.getOrCreateTag().putInt("Estagio", 2);
     }
 
     /** A Tropa cujo símbolo e traje aparecem: a de origem no anel convertido, senão a do anel. */

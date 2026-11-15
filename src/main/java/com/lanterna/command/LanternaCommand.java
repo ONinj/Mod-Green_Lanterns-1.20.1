@@ -240,11 +240,12 @@ public final class LanternaCommand {
                             return 1;
                         })))
                 .then(Commands.literal("corruption").requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("level", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
+                        .then(Commands.argument("level", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 3))
                                 .executes(c -> {
                                     var sp = c.getSource().getPlayerOrException();
                                     int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "level");
-                                    if (n == 1) com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { if (d.morte() < 2) d.setMorte(2); });
+                                    // 0.51: 1 e 2 são os estágios da corrupção (com a linha da Purificação), 3 é o Portador Negro
+                                    if (n == 1 || n == 2) com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { if (d.morte() < 2) com.lanterna.morte.Corrupcao.corromper(sp, d); });
                                     com.lanterna.morte.Corrupcao.marcarAnel(sp, n);
                                     c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("command.lanterna.corrupcao", n), false);
                                     return 1;

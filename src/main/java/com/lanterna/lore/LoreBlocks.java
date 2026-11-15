@@ -71,6 +71,9 @@ public final class LoreBlocks {
     public static final RegistryObject<Block> FORJA = reg("forja_espectral", () -> new RitualBlocks.Forja(sacred(MapColor.METAL, 10)));
     public static final RegistryObject<Block> ALTAR_DESAFIO = reg("altar_desafio", () -> new RitualBlocks.AltarDesafio(sacred(MapColor.COLOR_BLACK, 8)));
     public static final RegistryObject<Block> ALTAR_VIDA = reg("altar_vida", () -> new RitualBlocks.AltarVida(sacred(MapColor.SNOW, 15)));
+    /** 0.51: o Altar da Purificação (dos Guardiões, para o ritual que limpa o anel corrompido). */
+    public static final RegistryObject<Block> ALTAR_PURIFICACAO = reg("altar_purificacao", () -> new com.lanterna.lore.block.AltarPurificacao(
+            BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).strength(2.5f, 12f).noOcclusion().lightLevel(s -> 9).sound(SoundType.CALCITE)));
     public static final RegistryObject<Block> FAROL_PEROLA = reg("farol_perola", () -> new RitualBlocks.FarolPerola(BlockBehaviour.Properties.of()
             .mapColor(MapColor.COLOR_LIGHT_BLUE).strength(-1f, 3600000f).noLootTable().sound(SoundType.GLASS)
             .lightLevel(s -> s.getValue(RitualBlocks.FarolPerola.ACESO) ? 15 : 0)));

@@ -3829,6 +3829,137 @@ public final class DevAutoTest {
         at(10, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });
     }
 
+    private static void palco(Minecraft mc) {
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN); mc.options.hideGui = true;
+            cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("execute in minecraft:overworld run weather clear 100000"); cmd("gamemode creative"); cmd("kill @e[type=!player]"); });
+        at(10, () -> cmd("execute in minecraft:overworld run tp @s 0 200 0"));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int x = -12; x <= 12; x++) for (int z = -12; z <= 12; z++) {
+                l.setBlockAndUpdate(new net.minecraft.core.BlockPos(x, 199, z), net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                for (int y = 200; y < 210; y++) l.setBlock(new net.minecraft.core.BlockPos(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 2);
+            }
+            sp.teleportTo(l, 0.5, 200, 0.5, 0, 0);
+        }));
+    }
+
+    /** 0.51: os três estágios da corrupção (anéis e traje) e o prazo de 30 min passando pelo estágio 2; Arauto. */
+    private static void sceneEstagios051() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(10, () -> mc.setScreen(new net.minecraft.client.gui.screens.Screen(net.minecraft.network.chat.Component.literal("aneis")) {
+            @Override public void render(net.minecraft.client.gui.GuiGraphics g, int mx, int my, float pt) {
+                g.fill(0, 0, width, height, 0xFF30343A);
+                String[] cs = {"green", "yellow", "red", "blue", "violet", "indigo", "orange"};
+                for (int i = 0; i < cs.length; i++) for (int e = 0; e < 4; e++) {
+                    var c = com.lanterna.corps.BuiltinCorps.valueOf(cs[i].toUpperCase());
+                    var st = com.lanterna.item.PowerRingItem.create(c.id(), c.color(), -1);
+                    com.lanterna.item.PowerRingItem.setEstagio(st, e, e == 3 ? c.id() : null);
+                    g.pose().pushPose();
+                    g.pose().translate(14 + i * 88, 8 + e * 88, 0);
+                    g.pose().scale(4.5f, 4.5f, 1f);
+                    g.renderItem(st, 0, 0);
+                    g.pose().popPose();
+                }
+            }
+        }));
+        at(20, () -> { mc.options.guiScale().set(1); mc.resizeDisplay(); });
+        at(20, () -> shot("estagios_aneis"));
+        at(5, () -> { mc.options.guiScale().set(0); mc.resizeDisplay(); mc.setScreen(null); });
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); mc.options.fov().set(40); });
+        for (String tropa : new String[]{"green", "red"}) {
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + tropa);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); }); }));
+            for (int nivel = 0; nivel <= 3; nivel++) {
+                int nv = nivel;
+                at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corruption " + nv);
+                    sp.removeAllEffects(); }));
+                at(30, () -> server(sp -> { sp.removeAllEffects(); com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+                    glog("traje " + tropa + " estagio " + nv + ": estagio=" + r.estagio() + " corrupcao=" + r.corrupcao()); }); }));
+                at(40, () -> shot("estagio_" + tropa + "_" + nv));
+            }
+            at(10, () -> server(sp -> { sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corruption 0");
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setMorte(0); for (String k : new java.util.ArrayList<>(d.active().keySet())) if (k.startsWith("purif_") || k.startsWith("morte_")) d.active().remove(k); }); }));
+        }
+        // o prazo: 0,2 min (12 s) -> estágio 2 em ~6 s, Portador em ~12 s
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+            com.lanterna.LanternaConfig.PURIFICACAO_MINUTOS.set(0.2);
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corruption 1");
+        }));
+        for (int i = 0; i < 8; i++) at(40, () -> server(sp -> glog("prazo: estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp))
+                + " morte=" + com.lanterna.mission.LoreCapability.get(sp).map(com.lanterna.mission.LoreData::morte).orElse(-1)
+                + " restam=" + String.format("%.1f s", com.lanterna.morte.Corrupcao.horasRestantes(sp) * 3600))));
+        at(10, () -> server(sp -> {
+            com.lanterna.LanternaConfig.PURIFICACAO_MINUTOS.set(30.0);
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern corruption 0");
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setMorte(0); d.active().keySet().removeIf(k -> k.startsWith("purif_") || k.startsWith("morte_")); });
+        }));
+        // morto pelo Arauto: corrompido na hora, com a linha da Purificação
+        at(10, () -> server(sp -> {
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(5)));
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("66666666-2222-3333-4444-555555555555"), "Arauto"));
+            var b = com.lanterna.corps.BuiltinCorps.BLACK;
+            com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(b.id(), b.color(), -1)); r.refresh(b.id(), b.color(), 1000, 1000); });
+            com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(150)); d.setMorte(3); });
+            glog("arauto? " + com.lanterna.morte.AnelPreto.arauto(fake));
+            sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).putInt("lanterna_purificado", 5);
+            for (int k = 0; k < 12 && sp.isAlive(); k++) { sp.invulnerableTime = 0; sp.hurt(sp.damageSources().playerAttack(fake), 1000f); }
+            glog("morreu? " + !sp.isAlive() + " morte=" + com.lanterna.mission.LoreCapability.get(sp).map(com.lanterna.mission.LoreData::morte).orElse(-1));
+        }));
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(60, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("depois do Arauto: morte=" + d.morte() + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp)) + " purif ativas=" + d.active().keySet().stream().filter(k -> k.startsWith("purif_")).toList()); }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.51: o Ritual da Purificação no altar. */
+    private static void sceneRitual051() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival");
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.setMorte(0);
+            com.lanterna.morte.Corrupcao.corromper(sp, d);
+            com.lanterna.morte.Corrupcao.marcarAnel(sp, 1);
+            com.lanterna.morte.Corrupcao.marcarAnel(sp, 2);
+            for (String k : new java.util.ArrayList<>(d.active().keySet())) if (k.startsWith("purif_")) d.active().remove(k);
+            d.completed().remove("purif_6");
+            com.lanterna.mission.MissionManager.start(sp, "purif_6");
+            sp.removeAllEffects();
+            sp.getInventory().clearContent();
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.PEROLA_DO_AMANHA.get(), 3));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.LAGRIMA_INDIGO.get(), 2));
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLDEN_APPLE, 1));
+            var l = sp.serverLevel();
+            l.setBlockAndUpdate(new net.minecraft.core.BlockPos(0, 200, -3), com.lanterna.lore.LoreBlocks.ALTAR_PURIFICACAO.get().defaultBlockState()
+                    .setValue(com.lanterna.lore.block.AltarPurificacao.FACING, net.minecraft.core.Direction.NORTH));
+            sp.connection.teleport(4.5, 201, 3.5, 135, 25);
+            glog("antes: morte=" + d.morte() + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp)) + " purif_6 ativa=" + d.isActive("purif_6"));
+        }));
+        at(40, () -> shot("altar_purificacao"));
+        at(5, () -> server(sp -> sp.connection.teleport(-5.5, 203.5, -3.5, -90, 25)));
+        at(30, () -> shot("altar_lado"));
+        at(5, () -> server(sp -> { sp.connection.teleport(0.5, 200, 0.5, 180, 10);
+            com.lanterna.morte.RitualPurificacao.usar(sp, new net.minecraft.core.BlockPos(0, 200, -3), net.minecraft.core.Direction.NORTH); }));
+        at(10, () -> { mc.options.hideGui = false; mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.FULL); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(40, () -> { glog("t~50: deitado=" + mc.player.isSleeping() + " tela=" + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())); shot("ritual_1"); });
+        at(55, () -> shot("ritual_2_resiste"));
+        at(57, () -> shot("ritual_3_clarao"));
+        at(40, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            int sobrou = 0; for (var it : sp.getInventory().items) sobrou += it.getCount();
+            glog("depois: morte=" + d.morte() + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp)) + " purif_6 feita=" + d.isDone("purif_6")
+                + " deitado=" + sp.isSleeping() + " itens no inventario=" + sobrou + " anel ligado=" + com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::powerActive).orElse(false)); }));
+        at(10, () -> shot("ritual_4_fim"));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.50: Ryut só com o Santuário da Forja e o Coletor. */
     private static void sceneRyut() {
         Minecraft mc = Minecraft.getInstance();
@@ -3891,7 +4022,7 @@ public final class DevAutoTest {
         at(30, () -> server(sp -> {
             var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
             d.setMorte(0); d.completed().removeIf(k -> k.startsWith("purif_") || k.startsWith("morte_"));
-            com.lanterna.LanternaConfig.PURIFICACAO_HORAS.set(0.004);   // ~14 s
+            com.lanterna.LanternaConfig.PURIFICACAO_MINUTOS.set(0.24);   // ~14 s
             com.lanterna.morte.Corrupcao.corromper(sp, d);
         }));
         at(60, () -> server(sp -> glog("corrompido: " + estado.apply(sp))));
@@ -3901,7 +4032,7 @@ public final class DevAutoTest {
         at(20, () -> server(sp -> {
             var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
             d.setMorte(0); d.completed().removeIf(k -> k.startsWith("purif_") || k.startsWith("morte_"));
-            com.lanterna.LanternaConfig.PURIFICACAO_HORAS.set(6.0);
+            com.lanterna.LanternaConfig.PURIFICACAO_MINUTOS.set(30.0);
             com.lanterna.morte.Corrupcao.corromper(sp, d);
         }));
         at(60, () -> server(sp -> { glog("corrompido de novo: " + estado.apply(sp)); com.lanterna.morte.Corrupcao.purificar(sp, com.lanterna.mission.LoreCapability.get(sp).orElse(null)); }));
@@ -6476,6 +6607,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("purificacao")) scenePurificacao();
         else if (ENABLED && SCENE.equals("mogosair")) sceneMogoSair();
         else if (ENABLED && SCENE.equals("ryut")) sceneRyut();
+        else if (ENABLED && SCENE.equals("estagios051")) sceneEstagios051();
+        else if (ENABLED && SCENE.equals("ritual051")) sceneRitual051();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
         else if (ENABLED && SCENE.equals("combate050")) sceneCombate050();

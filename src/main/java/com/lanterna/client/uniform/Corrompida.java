@@ -26,7 +26,7 @@ public final class Corrompida {
     /** Corrupção do anel que o jogador está usando (0, 1 ou 2). */
     public static int nivel(Player p) {
         var ring = ClientVisibleRings.of(p.getId()).ring();
-        return ring.isEmpty() ? 0 : PowerRingItem.getCorrupcao(ring);
+        return ring.isEmpty() ? 0 : PowerRingItem.getEstagio(ring); // 0.51: estágio 0..3
     }
 
     /** Uma cópia da textura com a corrupção aplicada (ou a própria, se nível 0 ou se não der para ler). */
@@ -60,7 +60,16 @@ public final class Corrompida {
             int r = c & 255, g = (c >> 8) & 255, b = (c >> 16) & 255;
             float l = (0.299f * r + 0.587f * g + 0.114f * b) / 255f;
             float nr, ng, nb;
-            if (nivel >= 2) {
+            if (nivel == 2) {
+                // 0.51, estágio 2: o traje fica mais cinza que colorido (a cor da Tropa só aparece fraca), com manchas
+                // cinzas maiores por cima
+                float m = Math.min(1f, mancha(x / (float) esc, y / (float) esc) * 1.2f + 0.2f);
+                float sat = 0.22f * (1f - m);   // quanto da cor sobra
+                float cinza = l * 0.8f + 0.05f;
+                nr = cinza + (r / 255f - cinza) * sat;
+                ng = cinza + (g / 255f - cinza) * sat;
+                nb = cinza + (b / 255f - cinza) * sat;
+            } else if (nivel >= 3) {
                 // preto e branco, com contraste: o escuro vira preto e o claro vira branco
                 // 0.49.3: traje preto (do Portador Negro), com os detalhes claros em cinza e branco
                 float v = brilho ? Math.min(1f, l * 1.25f + 0.1f) : clamp((l - 0.5f) * 1.7f + 0.36f);
