@@ -1683,3 +1683,14 @@ A linha agora tem seis passos: 1) Odym, falar com o líder; 2) 8 Pérolas do Ama
 - **Anel da Vida**: sem os construtos da Morte (Vida e Morte não se misturam); continua com todos os das outras Tropas, já liberados.
 - **Nulo**: cinco vezes a vida de antes (pela resistência: o jogo limita a vida em 1024), golpe menor (6% a 11% da vida de quem apanha, até 14), golpes, ecos, cópias e ondas mais espaçados, poderes de controle em dobro só na fase 5, e pelo menos 90 s em cada fase (a vida não passa do ponto da próxima fase antes disso).
 - **Mogo e Hanks**: tirar e pôr o anel (ou morrer) não oferece de novo a missão. A marca de "já oferecida" agora fica guardada de verdade, e quem já tem ou já fez qualquer missão da linha nunca recebe o convite outra vez.
+
+
+## 0.52.2 — Hiperpropulsão por nível
+
+| Anel | Espaço, nível 1 | Espaço, nível 75 (máximo) | Planetas |
+|---|---|---|---|
+| Tropas comuns | 1.800 blocos/s | 3.000 blocos/s | 70 blocos/s |
+| Preto | 1.800 blocos/s | 4.000 blocos/s | 100 blocos/s |
+| Branco | 1.800 blocos/s | 4.500 blocos/s | 100 blocos/s |
+
+A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a ~2.430). Medido em voo: 1.890, 2.555 e 3.150 blocos/s (níveis 1, 40 e 75, com o embalo), Preto 4.000 e Branco 4.496. Os freios automáticos perto de planetas, sóis e buracos negros continuam iguais.

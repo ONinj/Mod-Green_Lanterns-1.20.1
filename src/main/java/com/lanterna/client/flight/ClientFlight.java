@@ -48,7 +48,20 @@ public final class ClientFlight {
     private static final double MAX_BOOST = 2.4;     // 48 blocos/s (Ctrl)
     private static final double SPACE_CRUISE = 3.0;  // 60 blocos/s
     private static final double SPACE_BOOST = 6.4;   // 128 blocos/s
-    public static final double HYPER_MAX = 90.0;     // 1.800 blocos/s
+    public static final double HYPER_MAX = 90.0;     // 1.800 blocos/s (o mínimo; ver hyperMax)
+
+    /**
+     * 0.52.2: a velocidade máxima da propulsão no espaço cresce com o nível: de 1.800 blocos/s (nível 1) a 3.000
+     * (nível 75). O anel Preto chega a 4.000 e o Branco a 4.500, na mesma progressão. Em blocos por tick (÷20).
+     */
+    public static double hyperMax() {
+        int lvl = com.lanterna.tropa.Nivel.nivel(com.lanterna.client.mission.ClientLoreData.DATA.xp());
+        double f = Mth.clamp((lvl - 1) / 74.0, 0, 1);
+        double topo = 150.0;
+        if (ClientRingData.hasRing && com.lanterna.corps.BuiltinCorps.WHITE.id().equals(ClientRingData.corps)) topo = 225.0;
+        else if (ClientRingData.hasRing && com.lanterna.corps.BuiltinCorps.BLACK.id().equals(ClientRingData.corps)) topo = 200.0;
+        return HYPER_MAX + (topo - HYPER_MAX) * f;
+    }
     private static final double THRUST = 0.045;
     private static final double THRUST_BOOST = 0.14;
     private static final double STRAFE = 0.03;
@@ -399,7 +412,7 @@ public final class ClientFlight {
         if (!inSpaceNow(player)) return hyperPlaneta(player, v, look, left, strafe, up, down, want);
         double brake = brakeLimit(player.position());
         if (want) {
-            double target = Math.min(HYPER_MAX, brake);
+            double target = Math.min(hyperMax(), brake);
             double rate = target > hyperSpeed ? 0.035 : 0.3;
             hyperSpeed += (target - hyperSpeed) * rate + (target > hyperSpeed ? 0.15 : 0);
         } else {
@@ -409,7 +422,7 @@ public final class ClientFlight {
 
         // Curvas bem abertas: a direção vai virando aos poucos para onde você olha
         Vec3 dir = v.lengthSqr() > 1.0E-4 ? v.normalize() : look;
-        double turn = Mth.lerp(Mth.clamp(hyperSpeed / HYPER_MAX, 0, 1), 0.12, 0.045);
+        double turn = Mth.lerp(Mth.clamp(hyperSpeed / hyperMax(), 0, 1), 0.12, 0.045);
         dir = dir.lerp(look, turn).normalize();
         Vec3 out = dir.scale(hyperSpeed);
         if (strafe != 0) out = out.add(left.scale(strafe * 0.6));
@@ -427,7 +440,8 @@ public final class ClientFlight {
 
     private static Vec3 hyperPlaneta(LocalPlayer player, Vec3 v, Vec3 look, Vec3 left, float strafe,
                                      boolean up, boolean down, boolean want) {
-        double max = HYPER_PLANETA * (ClientRingData.hasRing ? com.lanterna.combate.Supremos.voo(ClientRingData.corps) : 1.0);
+        // 0.52.2: nos planetas, o Branco e o Preto chegam a 100 blocos/s; os outros, 70
+        double max = ClientRingData.hasRing && com.lanterna.combate.Supremos.supremo(ClientRingData.corps) ? 5.0 : HYPER_PLANETA;
         if (want) hyperSpeed += (max - hyperSpeed) * 0.08;
         else hyperSpeed *= 0.8;
         Vec3 dir = v.lengthSqr() > 1.0E-4 ? v.normalize() : look;
@@ -455,7 +469,7 @@ public final class ClientFlight {
 
     /** Velocidade máxima segura perto dos planetas: freia sozinho ao se aproximar. */
     private static double brakeLimit(Vec3 pos) {
-        double limit = com.lanterna.space.Perigos.limiteHiper(pos, HYPER_MAX, SPACE_BOOST * 1.4);
+        double limit = com.lanterna.space.Perigos.limiteHiper(pos, hyperMax(), SPACE_BOOST * 1.4);
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
             if (!b.landable()) continue;
             double surface = pos.distanceTo(b.center()) - b.radius();
@@ -548,7 +562,7 @@ public final class ClientFlight {
         return wasFlying && (hyperOn || velocity.length() > 2.0);
     }
     public static float hyperCharge() { return hyperCharge; }
-    public static double hyperFraction() { return hyperOn ? Mth.clamp(hyperSpeed / HYPER_MAX, 0, 1) : 0; }
+    public static double hyperFraction() { return hyperOn ? Mth.clamp(hyperSpeed / hyperMax(), 0, 1) : 0; }
 
     private static void sendMode() {
         boolean auto = Autopilot.active();

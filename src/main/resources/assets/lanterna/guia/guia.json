@@ -163,8 +163,8 @@
       "en": "Flying"
      },
      "texto": {
-      "pt": "Com o anel ligado, {tecla:key.lanterna.toggle_flight} liga o voo; **Shift** pousa. **Ctrl** acelera.\n\nNo espaço e nos planetas existe a **hiperpropulsão**, muito rápida, que freia sozinha perto de perigos.\n\nDebaixo d'água o anel também voa (e você respira), mas a água freia um pouco.",
-      "en": "With the ring powered, {tecla:key.lanterna.toggle_flight} toggles flight; **Shift** lands. **Ctrl** boosts.\n\nIn space and on planets there's **hyperpropulsion**, very fast, which brakes by itself near hazards.\n\nUnderwater the ring also flies (and you breathe), but water slows you a little."
+      "pt": "Com o anel ligado, {tecla:key.lanterna.toggle_flight} liga o voo; **Shift** pousa. **Ctrl** acelera.\n\nNo espaço e nos planetas existe a **hiperpropulsão**, muito rápida, que freia sozinha perto de perigos. No espaço ela vai de **1.800 blocos/s** (nível 1) a **3.000** (nível 75); o anel Preto chega a **4.000** e o Branco a **4.500**.\n\nDebaixo d'água o anel também voa (e você respira), mas a água freia um pouco.",
+      "en": "With the ring powered, {tecla:key.lanterna.toggle_flight} toggles flight; **Shift** lands. **Ctrl** boosts.\n\nIn space and on planets there's **hyperpropulsion**, very fast, which brakes by itself near hazards. In space it goes from **1,800 blocks/s** (level 1) to **3,000** (level 75); the Black ring reaches **4,000** and the White **4,500**.\n\nUnderwater the ring also flies (and you breathe), but water slows you a little."
      },
      "teclas": [
       "key.lanterna.toggle_flight",

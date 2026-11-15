@@ -3916,6 +3916,34 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.52.2: velocidade máxima da propulsão por nível e por anel (espaço e planeta). */
+    private static void sceneHiper() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        String[][] casos = {{"green", "1"}, {"green", "40"}, {"green", "75"}, {"green", "150"}, {"black", "75"}, {"white", "75"}};
+        for (String[] c : casos) {
+            at(20, () -> server(sp -> {
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + c[0]);
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(Integer.parseInt(c[1]))); com.lanterna.mission.MissionManager.sync(sp, d); });
+                sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+                // espaço vazio, longe dos planetas
+                sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), 600000, 100, 600000, 0, 0);
+            }));
+            at(40, () -> { mc.player.setYRot(0); mc.player.setXRot(0); mc.options.keyUp.setDown(true); mc.options.keySprint.setDown(true); });
+            double[] p0 = new double[3];
+            for (int k = 0; k < 8; k++) at(50, () -> glog("   " + c[0] + " propulsão " + Math.round(com.lanterna.client.flight.ClientFlight.hyperFraction() * com.lanterna.client.flight.ClientFlight.hyperMax() * 20) + " b/s em " + Math.round(mc.player.getZ())));
+            at(1, () -> { p0[0] = mc.player.getX(); p0[1] = mc.player.getZ(); });
+            at(20, () -> { double d = Math.hypot(mc.player.getX() - p0[0], mc.player.getZ() - p0[1]);
+                glog(c[0] + " nivel " + c[1] + ": " + Math.round(d) + " blocos/s no espaço (máximo calculado " + Math.round(com.lanterna.client.flight.ClientFlight.hyperMax() * 20)
+                    + ", propulsão agora " + Math.round(com.lanterna.client.flight.ClientFlight.hyperFraction() * com.lanterna.client.flight.ClientFlight.hyperMax() * 20) + ")"); });
+            at(1, () -> { mc.options.keyUp.setDown(false); mc.options.keySprint.setDown(false); });
+        }
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.52.1: Cápsula Estelar (cada jogador com o seu Anel Apagado) e a cratera de mundo antigo. */
     private static void sceneCapsula() {
         Minecraft mc = Minecraft.getInstance();
@@ -6851,6 +6879,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("mspt")) sceneMspt();
         else if (ENABLED && SCENE.equals("rev0521")) sceneRev0521();
         else if (ENABLED && SCENE.equals("capsula")) sceneCapsula();
+        else if (ENABLED && SCENE.equals("hiper")) sceneHiper();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

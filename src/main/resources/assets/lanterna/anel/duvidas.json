@@ -263,8 +263,8 @@
    "hyperdrive",
    "boost"
   ],
-  "pt": "Com o anel ligado (G), aperte V para voar; Shift pousa. Voar gasta carga. No espaço e nos planetas há a hiperpropulsão para ir muito rápido, e ela freia sozinha perto de perigos.",
-  "en": "With the ring on (G), press V to fly; Shift lands. Flying uses charge. In space and on planets there is the hyperdrive to go very fast, and it brakes by itself near dangers."
+  "pt": "Com o anel ligado (G), aperte V para voar; Shift pousa. Voar gasta carga. No espaço e nos planetas há a hiperpropulsão para ir muito rápido, e ela freia sozinha perto de perigos. No espaço, a velocidade máxima cresce com o nível: de 1.800 blocos por segundo (nível 1) a 3.000 (nível 75); o anel Preto chega a 4.000 e o Branco a 4.500. Nos planetas, 70 blocos por segundo (100 para o Branco e o Preto).",
+  "en": "With the ring on (G), press V to fly; Shift lands. Flying uses charge. In space and on planets there is the hyperdrive to go very fast, and it brakes by itself near dangers. In space, top speed grows with your level: from 1,800 blocks per second (level 1) to 3,000 (level 75); the Black ring reaches 4,000 and the White 4,500. On planets, 70 blocks per second (100 for White and Black)."
  },
  {
   "id": "teclas",
