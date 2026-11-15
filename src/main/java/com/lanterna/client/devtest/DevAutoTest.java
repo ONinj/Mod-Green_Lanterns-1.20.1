@@ -3702,6 +3702,82 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.50.1: resistência a construtos, recarga da defesa, prova da Bateria no lugar certo, missão da Gênese. */
+    private static void sceneRev0501() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode survival"); cmd("lantern ring green"); cmd("lantern corrupcao 0"); cmd("lantern full"); cmd("effect clear @s"); });
+        // 1) quantos golpes de construto (25) um nível 60 aguenta de outro nível 60
+        at(20, () -> server(sp -> {
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(60)); d.setMorte(0); });
+            com.lanterna.tropa.Nivel.aplicar(sp);
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("55555555-2222-3333-4444-555555555555"), "Rival"));
+            var g = com.lanterna.corps.BuiltinCorps.RED;
+            com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(g.id(), g.color(), -1)); r.refresh(g.id(), g.color(), 1000, 1000); });
+            com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(60)));
+            for (double res : new double[]{0.0, 0.4}) { com.lanterna.LanternaConfig.PVP_RESIST_CONSTRUTOS.set(res); boolean poder = true;
+                sp.setHealth(sp.getMaxHealth());
+                int n = 0;
+                while (sp.isAlive() && sp.getHealth() > 0.5f && n < 200) {
+                    sp.invulnerableTime = 0;
+                    if (poder) com.lanterna.combate.Equilibrio.ferirComPoder(sp, sp.damageSources().playerAttack(fake), 25f);
+                    else sp.hurt(sp.damageSources().generic(), 0); // só conta
+                    n++;
+                    if (!poder) break;
+                }
+                if (poder) glog("resistencia " + res + ": construto 25 (rival 60 -> eu 60, vida " + sp.getMaxHealth() + "): " + n + " golpes");
+            }
+            sp.setHealth(sp.getMaxHealth());
+        }));
+        // 2) defesa: soltar e apertar de novo na hora não liga; depois de 1,5 s liga
+        at(10, () -> { mc.player.getInventory().selected = 8; mc.player.getInventory().setItem(8, net.minecraft.world.item.ItemStack.EMPTY);
+            server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); })); });
+        at(10, () -> { mc.options.keyUse.setDown(true); net.minecraft.client.KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(10, () -> { server(sp -> glog("defesa 1: " + com.lanterna.construct.Constructs.defendendo(sp))); mc.options.keyUse.setDown(false); });
+        at(4, () -> { mc.options.keyUse.setDown(true); net.minecraft.client.KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(6, () -> { server(sp -> glog("defesa logo depois de soltar (0,5 s): " + com.lanterna.construct.Constructs.defendendo(sp))); mc.options.keyUse.setDown(false); });
+        at(36, () -> { mc.options.keyUse.setDown(true); net.minecraft.client.KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(6, () -> { server(sp -> glog("defesa depois de 1,5 s: " + com.lanterna.construct.Constructs.defendendo(sp))); mc.options.keyUse.setDown(false); });
+        // 3) prova da Bateria (Verde, em Oa): começa e continua ativa
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.completed().remove("fonte_verde_2"); d.active().remove("fonte_verde_2");
+            com.lanterna.fonte.FonteDados.chamado(sp, "verde:prova", 0);
+            com.lanterna.mission.MissionManager.start(sp, "fonte_verde_2");
+            var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+            var b = com.lanterna.fonte.FonteChamado.praca();
+            oa.getChunkAt(b.offset(0, 0, -14));
+            int y = oa.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 14);
+            sp.teleportTo(oa, b.getX() + 0.5, y, b.getZ() - 14.5, 180, 0);
+            glog("bateria em " + b.toShortString() + " ativa fonte_verde_2? " + d.isActive("fonte_verde_2"));
+        }));
+        at(100, () -> server(sp -> {
+            var b = com.lanterna.fonte.FonteChamado.praca();
+            boolean ok = com.lanterna.fonte.FonteChamado.usarBateria(sp, b);
+            glog("clicou na Bateria: " + ok + " prova ativa? " + com.lanterna.fonte.ProvaFonte.ativa(sp));
+        }));
+        at(100, () -> server(sp -> glog("5 s depois: prova ativa? " + com.lanterna.fonte.ProvaFonte.ativa(sp) + " pos=" + sp.blockPosition().toShortString())));
+        // 4) completou os anéis e ficou sem missão: a linha da Gênese começa sozinha
+        at(10, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            for (String k : new java.util.ArrayList<>(d.active().keySet())) com.lanterna.mission.MissionManager.abandon(sp, k);
+            d.completed().removeIf(k -> k.startsWith("main_genese") || k.startsWith("main_"));
+            d.completed().add("inicio_green_4"); d.completed().add("main_oa_1"); d.completed().add("main_oa_2"); d.completed().add("main_oa_4");
+            d.setXp(com.lanterna.tropa.Nivel.total(60));
+            for (var c : new String[]{"yellow", "red", "orange", "blue", "indigo", "violet"}) {
+                var bc = java.util.Arrays.stream(com.lanterna.corps.BuiltinCorps.values()).filter(x -> x.id().getPath().equals(c)).findFirst().get();
+                sp.getInventory().add(com.lanterna.item.PowerRingItem.create(bc.id(), bc.color(), -1));
+            }
+            glog("sem missao: ativas=" + d.active().keySet() + " proximo=" + com.lanterna.mission.MissionManager.nextPlanetLine(sp, d, com.lanterna.corps.BuiltinCorps.GREEN.id()));
+        }));
+        at(220, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("10 s depois: ativas=" + d.active().keySet());
+            d.completed().add("main_genese_0"); d.completed().add("main_genese_1"); d.completed().add("main_genese_2");
+            d.active().keySet().removeIf(k -> k.startsWith("main_")); }));
+        at(220, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null); glog("parou na genese_2: ativas=" + d.active().keySet()); }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.50: Ryut só com o Santuário da Forja e o Coletor. */
     private static void sceneRyut() {
         Minecraft mc = Minecraft.getInstance();
@@ -6349,6 +6425,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("purificacao")) scenePurificacao();
         else if (ENABLED && SCENE.equals("mogosair")) sceneMogoSair();
         else if (ENABLED && SCENE.equals("ryut")) sceneRyut();
+        else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
         else if (ENABLED && SCENE.equals("combate050")) sceneCombate050();
         else if (ENABLED && SCENE.equals("hanksvisita")) sceneHanksVisita();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();

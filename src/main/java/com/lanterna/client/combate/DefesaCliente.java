@@ -26,6 +26,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class DefesaCliente {
     private static boolean defendendo;
+    /** 0.50.1: quando a defesa pode voltar (1,5 s depois de soltar). */
+    private static long liberaEm;
 
     public static boolean defendendo() {
         return defendendo;
@@ -37,6 +39,12 @@ public final class DefesaCliente {
         if (!podeDefender()) return;
         e.setCanceled(true);
         e.setSwingHand(false);
+        if (!defendendo && System.currentTimeMillis() < liberaEm) {
+            var mc = Minecraft.getInstance();
+            if (mc.player != null) mc.player.displayClientMessage(net.minecraft.network.chat.Component.translatable("defesa.lanterna.recarga",
+                    String.format(java.util.Locale.ROOT, "%.1f", (liberaEm - System.currentTimeMillis()) / 1000.0)), true);
+            return;
+        }
         if (!defendendo) {
             defendendo = true;
             ModNetwork.sendToServer(new ConstructCastPacket("defesa", true));
@@ -49,6 +57,7 @@ public final class DefesaCliente {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !mc.options.keyUse.isDown() || mc.screen != null || !ClientRingData.active || !mc.player.getMainHandItem().isEmpty()) {
             defendendo = false;
+            liberaEm = System.currentTimeMillis() + com.lanterna.construct.Constructs.DEFESA_RECARGA * 50L;
             if (mc.player != null) ModNetwork.sendToServer(new ConstructCastPacket("defesa", false));
         }
     }

@@ -44,6 +44,14 @@ public final class FonteChamado {
     /** Praça da Bateria na megacidade (para o marcador da missão). */
     public static final BlockPos PRACA = new BlockPos(-388, 0, 38);
 
+    /**
+     * 0.50.1: onde a Bateria Central está NESTE mundo. Nos mundos da cidade única (0.48+) ela fica no quartel, não na
+     * praça antiga; a prova e o ataque à Bateria usavam a praça antiga e acabavam na hora com "você se afastou".
+     */
+    public static BlockPos praca() {
+        return com.lanterna.cidade.Layout.novo() ? com.lanterna.cidade.Layout.CIDADE_NOVA : PRACA;
+    }
+
     /** Tropa da Bateria do anel que o jogador usa (null: sem anel ou Tropa sem Bateria). */
     @Nullable
     public static Tropa tropaDoAnel(ServerPlayer p) {

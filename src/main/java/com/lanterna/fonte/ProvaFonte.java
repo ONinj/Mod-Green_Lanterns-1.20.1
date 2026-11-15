@@ -139,9 +139,9 @@ public final class ProvaFonte {
         }
     }
 
-    private static int PRACAx() { return FonteChamado.PRACA.getX(); }
+    private static int PRACAx() { return FonteChamado.praca().getX(); }
     /** O centro da prova é a frente da Bateria (lado norte da praça, onde fica a entrada). */
-    private static int PRACAz() { return FonteChamado.PRACA.getZ() - 13; }
+    private static int PRACAz() { return FonteChamado.praca().getZ() - 13; }
 
     /** Onde fica a Bateria Central em relação ao centro da prova (13 blocos ao sul). */
     private static BlockPos bateria(Estado e) {

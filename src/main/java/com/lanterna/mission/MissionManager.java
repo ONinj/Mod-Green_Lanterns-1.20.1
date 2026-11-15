@@ -38,7 +38,8 @@ public final class MissionManager {
         LoreData data = data(player);
         Mission m = Missions.get(id);
         if (data == null || m == null || data.isActive(id)) return;
-        if (data.isDone(id) && !m.line().equals("patrulha")) return;
+        // 0.50.1: o treino até um nível pode voltar a ser pedido (antes, um treino já feito travava a linha principal)
+        if (data.isDone(id) && !m.line().equals("patrulha") && !id.startsWith("treino_")) return;
         data.start(m);
         toast(player, MissionToastPacket.Kind.STARTED, m);
         player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 0.8f);
@@ -70,6 +71,7 @@ public final class MissionManager {
             data.setAffinity(aff);
             evaluate(player, data);
         }
+        if (player.tickCount % 200 == 117) retomarPrincipal(player, data);
         if (data.isDirty() && player.tickCount % 5 == 0) sync(player, data);
     }
 
@@ -297,8 +299,8 @@ public final class MissionManager {
     private static String routeNext(ServerPlayer player, LoreData data, Mission m) {
         String id = m.id();
         ResourceLocation corps = ModCapabilities.get(player).map(r -> r.hasRing() ? r.corps() : null).orElse(null);
-        if (id.startsWith("inicio_") && id.endsWith("_4")) return nextPlanetLine(data, corps);
-        if (id.startsWith("treino_")) return nextPlanetLine(data, corps);
+        if (id.startsWith("inicio_") && id.endsWith("_4")) return nextPlanetLine(player, data, corps);
+        if (id.startsWith("treino_")) return nextPlanetLine(player, data, corps);
         if (id.startsWith("main_") && !id.startsWith("main_genese")) {
             String[] parts = id.split("_");
             if (parts.length != 3) return m.next();
@@ -309,7 +311,7 @@ public final class MissionManager {
             // Ordem dos passos: chegar, respeito, rastro (outro planeta), minério, provação (nível), boss, forja
             int[] ordem = own ? new int[]{1, 2, 6, 4} : new int[]{1, 2, 6, 3, 7, 4, 5};
             for (int k = 0; k < ordem.length - 1; k++) if (ordem[k] == step) return "main_" + planet + "_" + ordem[k + 1];
-            return nextPlanetLine(data, corps);
+            return nextPlanetLine(player, data, corps);
         }
         return m.next();
     }
@@ -329,6 +331,58 @@ public final class MissionManager {
      * (Também dá para escolher outro planeta liberado falando com o Guardião ou o líder dele.)
      */
     public static String nextPlanetLine(LoreData data, ResourceLocation corps) {
+        return nextPlanetLine(null, data, corps);
+    }
+
+    /**
+     * 0.50.1: o planeta conta como feito também se o jogador já tem o anel dele (forjou fora da ordem da missão) ou se
+     * já juntou os anéis da fusão do Anel Branco. Antes, quem forjava os anéis por conta própria ficava sem missão:
+     * a linha pedia de novo um planeta já concluído e nada começava.
+     */
+    private static boolean planetaFeito(@org.jetbrains.annotations.Nullable ServerPlayer player, LoreData data, PlanetLore p, ResourceLocation corps) {
+        if (lineDone(data, p.planet, corps)) return true;
+        if (player == null) return false;
+        if (data.isDone("main_genese_0") || data.isActive("main_genese_1") || data.isDone("main_genese_1") || fusionCount(player) >= 14) return true;
+        // o planeta da própria Tropa continua pedindo o boss (o drop entra na fusão)
+        return !isOwnPlanet(p.planet, corps) && hasRing(player, p.corps.id().getPath());
+    }
+
+    /**
+     * 0.50.1: sem nenhuma missão da linha principal ativa (e a linha não terminou), começa a próxima. Roda a cada 10 s:
+     * conserta quem ficou parado depois de completar os anéis sem receber a missão da Gênese (Anel Branco e o Nulo).
+     */
+    public static void retomarPrincipal(ServerPlayer player, LoreData data) {
+        if (data.isDone("main_genese_4")) return;
+        for (String a : data.active().keySet()) {
+            Mission am = Missions.get(a);
+            if (am != null && am.line().equals("principal")) return;
+        }
+        // só quem já começou a linha principal
+        boolean comecou = data.completed().stream().anyMatch(k -> k.startsWith("main_") || (k.startsWith("inicio_") && k.endsWith("_4")) || k.startsWith("treino_"));
+        if (!comecou) return;
+        // linha da Gênese no meio: retoma do passo seguinte ao último feito
+        for (int i = 4; i >= 0; i--) {
+            if (data.isDone("main_genese_" + i)) {
+                if (i < 4) start(player, "main_genese_" + (i + 1));
+                return;
+            }
+        }
+        ResourceLocation corps = ModCapabilities.get(player).map(r -> r.hasRing() ? r.corps() : null).orElse(null);
+        String next = nextPlanetLine(player, data, corps);
+        if (next == null) return;
+        Mission nm = Missions.get(next);
+        if (nm == null) return;
+        if (data.isDone(next) && !next.startsWith("treino_")) {
+            // a linha desse planeta foi feita por outro caminho: pula para o passo que falta
+            String planeta = next.split("_")[1];
+            for (int s : new int[]{2, 6, 3, 7, 4, 5}) if (!data.isDone("main_" + planeta + "_" + s) && Missions.get("main_" + planeta + "_" + s) != null) { start(player, "main_" + planeta + "_" + s); return; }
+            return;
+        }
+        com.lanterna.LanternaMod.LOGGER.info("Lanterna: linha principal de {} retomada em {}", player.getName().getString(), next);
+        start(player, next);
+    }
+
+    public static String nextPlanetLine(@org.jetbrains.annotations.Nullable ServerPlayer player, LoreData data, ResourceLocation corps) {
         PlanetLore[] order = Missions.MAIN_ORDER;
         int start = 0;
         for (int i = 0; i < order.length; i++) if (corps != null && order[i].corps.id().equals(corps)) start = i;
@@ -337,7 +391,7 @@ public final class MissionManager {
         int needed = Integer.MAX_VALUE;
         for (int k = 0; k < order.length; k++) {
             PlanetLore p = order[(start + k) % order.length];
-            if (lineDone(data, p.planet, corps)) continue;
+            if (planetaFeito(player, data, p, corps)) continue;
             for (int s = 1; s <= 7; s++) if (data.isActive("main_" + p.planet + "_" + s)) return null;
             int req = com.lanterna.tropa.Nivel.nivelDoPlaneta(p, own);
             if (lvl >= req) return "main_" + p.planet + "_1";

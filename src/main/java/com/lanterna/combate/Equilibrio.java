@@ -148,10 +148,12 @@ public final class Equilibrio {
         boolean anel = doAnel(event.getSource(), atk);
         if (!alvoComAnel) {
             // sem anel: só o corte dos poderes e a diferença de nível; a armadura comum faz o resto
-            event.setAmount(event.getAmount() * (anel ? LanternaConfig.PVP_DANO.get().floatValue() : 1f) * diferenca(Nivel.nivel(atk), Nivel.nivel(alvo)));
+            event.setAmount(event.getAmount() * (anel ? LanternaConfig.PVP_DANO.get().floatValue() * (1f - LanternaConfig.PVP_RESIST_CONSTRUTOS.get().floatValue()) : 1f) * diferenca(Nivel.nivel(atk), Nivel.nivel(alvo)));
             return;
         }
         float alvoFinal = event.getAmount() * fracao(Nivel.nivel(atk), alvo, anel);
+        // 0.50.1: contra os construtos e poderes de outros jogadores, o jogador resiste mais (o dano deles não muda)
+        if (anel) alvoFinal *= 1f - LanternaConfig.PVP_RESIST_CONSTRUTOS.get().floatValue();
         // o Anel Branco enfrenta o Arauto de igual para igual (o Arauto segura menos contra ele)
         var rAtk = com.lanterna.capability.ModCapabilities.get(atk).orElse(null);
         if (Supremos.preto(ra.corps()) && rAtk != null && rAtk.hasRing() && Supremos.branco(rAtk.corps()))

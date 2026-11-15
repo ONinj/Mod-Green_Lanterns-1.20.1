@@ -3204,5 +3204,6 @@
   "nave.lanterna.auto.em_viagem_porta": "The ship is traveling: the door opens when it arrives (about %s s).",
   "defesa.lanterna.dica": "The shield is now your guard: hold right click with an empty hand.",
   "defesa.lanterna.quebrado": "Your shield broke: wait a moment.",
-  "defesa.lanterna.quebrou": "Out of charge: your shield broke!"
+  "defesa.lanterna.quebrou": "Out of charge: your shield broke!",
+  "defesa.lanterna.recarga": "Guard recharging: %s s"
 }

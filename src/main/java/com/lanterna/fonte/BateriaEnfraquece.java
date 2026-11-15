@@ -100,7 +100,7 @@ public final class BateriaEnfraquece {
         if (opcoes.isEmpty()) return false;
         ServerLevel l = opcoes.get(l0(server).random.nextInt(opcoes.size()));
         Tropa t = Tropa.doPlaneta(PlanetLore.byDimension(l.dimension()));
-        BlockPos p = FonteChamado.PRACA;
+        BlockPos p = FonteChamado.praca();
         l.getChunkAt(p);
         int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ() - 13);
         atual = new Ataque(t, l, new BlockPos(p.getX(), y, p.getZ() - 13));

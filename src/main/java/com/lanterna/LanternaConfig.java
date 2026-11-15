@@ -28,6 +28,7 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.DoubleValue PVP_DIFERENCA_NIVEL;
     public static final ForgeConfigSpec.DoubleValue PVP_TETO_GOLPE;
     public static final ForgeConfigSpec.DoubleValue PVP_DEFESA_ANEL;
+    public static final ForgeConfigSpec.DoubleValue PVP_RESIST_CONSTRUTOS;
     public static final ForgeConfigSpec.BooleanValue PVP_IGUALAR;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_TROPA;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_GUILDA;
@@ -147,6 +148,10 @@ public final class LanternaConfig {
                 .comment("Player vs player: how much of a hit the ring blocks (replaces the ring's armor and the level defense, which together blocked over 98% at level 150)",
                         "Jogador contra jogador: quanto do golpe o anel segura (no lugar da armadura do anel e da defesa do nível, que juntas seguravam mais de 98% no nível 150)")
                 .defineInRange("pvp_defesa_anel", 0.4, 0.0, 0.9);
+        PVP_RESIST_CONSTRUTOS = b
+                .comment("Player vs player: extra resistance against other players' ring powers (constructs, techniques, shots); 0.4 = 40% less damage. Weapons are not affected",
+                        "Jogador contra jogador: resistência a mais contra os poderes do anel de outros jogadores (construtos, técnicas, tiros); 0.4 = 40% menos dano. Armas comuns não mudam")
+                .defineInRange("pvp_resistencia_construtos", 0.4, 0.0, 0.9);
         PVP_IGUALAR = b
                 .comment("Player vs player: scale damage with the target's level so high-level fights last about as long as level-30 fights",
                         "Jogador contra jogador: o dano acompanha o nível de quem apanha, para a luta no nível alto durar parecido com a do nível 30")

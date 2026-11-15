@@ -299,8 +299,8 @@
    "right click",
    "block"
   ],
-  "pt": "Com o anel ligado e a mão vazia, segure o botão direito: o escudo do anel aparece em volta de você e cada golpe gasta carga do anel (3 de carga por ponto de dano) em vez de vida. Manter o escudo gasta 1 de carga por segundo; soltou, ele some. Sem carga, ele quebra e demora um instante para voltar. Olhando para uma porta, baú ou alavanca, o botão direito continua usando o bloco.",
-  "en": "With your ring on and an empty hand, hold right click: the ring's shield wraps around you and every hit drains ring charge (3 charge per point of damage) instead of health. Holding it costs 1 charge per second; let go and it fades. Out of charge, it breaks and takes a moment to come back. Looking at a door, chest or lever, right click still uses the block."
+  "pt": "Com o anel ligado e a mão vazia, segure o botão direito: o escudo do anel aparece em volta de você e cada golpe gasta carga do anel (3 de carga por ponto de dano) em vez de vida. Manter o escudo gasta 1 de carga por segundo; soltou, ele some e só volta depois de 1,5 s. Sem carga, ele quebra e demora um instante para voltar. Olhando para uma porta, baú ou alavanca, o botão direito continua usando o bloco.",
+  "en": "With your ring on and an empty hand, hold right click: the ring's shield wraps around you and every hit drains ring charge (3 charge per point of damage) instead of health. Holding it costs 1 charge per second; let go and it fades, coming back only after 1.5 s. Out of charge, it breaks and takes a moment to come back. Looking at a door, chest or lever, right click still uses the block."
  },
  {
   "id": "construtos",

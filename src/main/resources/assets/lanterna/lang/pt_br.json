@@ -3204,5 +3204,6 @@
   "nave.lanterna.auto.em_viagem_porta": "A nave está em viagem: a porta abre quando ela chegar (uns %s s).",
   "defesa.lanterna.dica": "O escudo agora é a defesa: segure o botão direito com a mão vazia.",
   "defesa.lanterna.quebrado": "O escudo quebrou: espere um instante.",
-  "defesa.lanterna.quebrou": "Sem carga: o escudo quebrou!"
+  "defesa.lanterna.quebrou": "Sem carga: o escudo quebrou!",
+  "defesa.lanterna.recarga": "Defesa recarregando: %s s"
 }

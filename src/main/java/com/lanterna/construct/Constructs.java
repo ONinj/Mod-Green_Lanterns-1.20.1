@@ -769,7 +769,7 @@ public final class Constructs {
         if (ring == null || !ring.hasRing() || !ring.powerActive()) return;
         if (com.lanterna.lore.entity.boss.Controle.silenciado(player)) return;
         long agora = player.level().getGameTime();
-        if (agora - player.getPersistentData().getLong(DEFESA_SOLTOU) < 6) return; // não dá para "piscar" o escudo
+        if (agora - player.getPersistentData().getLong(DEFESA_SOLTOU) < DEFESA_RECARGA - 2) return; // 0.50.1: 1,5 s entre uma defesa e outra
         if (agora < player.getPersistentData().getLong(DEFESA_QUEBROU)) {
             player.displayClientMessage(Component.translatable("defesa.lanterna.quebrado"), true);
             return;
@@ -793,6 +793,8 @@ public final class Constructs {
     }
 
     private static final String DEFESA_SOLTOU = "lanterna_defesa_soltou", DEFESA_QUEBROU = "lanterna_defesa_quebrou";
+    /** 0.50.1: recarga da defesa depois de soltar (1,5 s), para ninguém ficar "piscando" o escudo. */
+    public static final int DEFESA_RECARGA = 30;
 
     /** Manter a defesa: 1 de carga por segundo; anel desligado ou sem carga, ela cai. */
     @SubscribeEvent

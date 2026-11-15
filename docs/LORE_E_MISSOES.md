@@ -1573,3 +1573,14 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - **Mogo** ataca, não deixa pousar e não atende o Chamado de quem a Morte tocou (anel corrompido, Portador Negro ou Arauto), mesmo sendo Verde.
 - **Ryut** não tem mais cidade nem Tropa: só o **Santuário da Forja** (a Forja do Espectro e o Coletor) e o altar do Devorador de Ecos. Mundos antigos: na primeira vez que abrem nesta versão, o planeta antigo é guardado em `dimensions/lanterna/ryut_cidade_antiga` (nada é apagado) e Ryut nasce de novo.
 - **Hanks** revisado: o piloto automático e a saída de Hanks não mandam mais para outro planeta, os núcleos e o marcador conferidos, e a criação dos Lanternas do Núcleo e das sentinelas protegida contra falhas.
+
+
+## 0.50.1 — Ajustes
+
+- **Resistência a construtos (PvP)**: contra os poderes do anel de outros jogadores (construtos, técnicas, tiros), o jogador resiste 40% a mais (`pvp_resistencia_construtos`, padrão 0.4). O dano dos construtos não mudou e armas comuns não são afetadas. Medido (nível 60 contra nível 60, golpe de 25): de 9 para 15 golpes.
+- **Defesa do botão direito**: depois de soltar, 1,5 s de recarga (o aviso mostra quanto falta).
+- **Prova da Bateria Central** (Chamado da Fonte, etapa 2): a prova e o ataque à Bateria ainda usavam a praça antiga do mapa (-388, 38). Nos mundos da cidade única a Bateria fica no quartel (0, 130); a prova começava e acabava na hora com "você se afastou". Agora usam o lugar da Bateria deste mundo.
+- **Missão da Gênese que não chegava**: quem forjava os anéis fora da ordem das missões, ou já tinha feito o treino de nível pedido, ficava sem missão nenhuma (a linha pedia um planeta já concluído ou um treino já feito e nada começava). Agora:
+  - um planeta conta como feito também se você já tem o anel dele (menos o da sua Tropa, que ainda pede o boss), ou se já juntou os anéis da fusão;
+  - o treino de nível pode ser pedido de novo;
+  - a cada 10 s, quem está sem nenhuma missão da linha principal recebe a próxima (a Gênese continua do passo em que parou: Juramento da Vida, fusão, ir à Gênese, forjar o Anel Branco, vencer o Nulo).
