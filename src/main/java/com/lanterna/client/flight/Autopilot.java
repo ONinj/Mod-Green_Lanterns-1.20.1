@@ -142,8 +142,14 @@ public final class Autopilot {
         dir = dir.normalize();
 
         // Desvia de planetas no caminho (senão pousaria no planeta errado)
-        for (SpaceBodies.Body b : SpaceBodies.near(pos, 2)) {
+        for (SpaceBodies.Body b : SpaceBodies.near(pos, 3)) {
             if (!b.landable() || b.id().equals(target.id())) continue;
+            // 0.50: já perto demais de outro planeta (por exemplo, logo depois de sair da Terra): afasta primeiro
+            Vec3 de = pos.subtract(b.center());
+            if (de.length() < b.radius() + 200) {
+                dir = dir.add(de.normalize().scale(2.0)).normalize();
+                continue;
+            }
             Vec3 to = b.center().subtract(pos);
             double along = to.dot(dir);
             if (along <= 0 || along > dist + target.radius()) continue;

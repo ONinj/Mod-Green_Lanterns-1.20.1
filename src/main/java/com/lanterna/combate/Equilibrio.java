@@ -35,6 +35,25 @@ public final class Equilibrio {
     /** Ligado enquanto um poder do anel está ferindo alguém (construtos, técnicas, tiros de plasma). */
     private static final ThreadLocal<Boolean> PODER = ThreadLocal.withInitial(() -> false);
 
+    /** Teto de dano (depois da armadura) para o golpe em andamento contra jogadores (o laser, 0.50). */
+    private static final ThreadLocal<Float> TETO = ThreadLocal.withInitial(() -> -1f);
+
+    /**
+     * 0.50: o laser contra jogadores. O feixe acerta muitas vezes por segundo; com o dano cheio ele tirava 10 a 15 de
+     * vida por segundo. Contra jogador, cada acerto tira no máximo 3,5% da vida máxima (entre 1 e 2,5) — com dois
+     * acertos por segundo, no máximo 5 de vida por segundo.
+     */
+    public static boolean ferirComLaser(Entity alvo, DamageSource src, float dano) {
+        if (!(alvo instanceof Player p)) return ferirComPoder(alvo, src, dano);
+        float antes = TETO.get();
+        TETO.set(Math.max(1f, Math.min(2.5f, p.getMaxHealth() * 0.035f)));
+        try {
+            return ferirComPoder(alvo, src, dano);
+        } finally {
+            TETO.set(antes);
+        }
+    }
+
     /** Fere com um poder do anel (para o equilíbrio saber que não é uma arma comum). */
     public static boolean ferirComPoder(Entity alvo, DamageSource src, float dano) {
         boolean antes = PODER.get();
@@ -163,6 +182,7 @@ public final class Equilibrio {
         Player atk = atacante(event.getSource());
         if (atk == null || atk == alvo) return;
         float teto = alvo.getMaxHealth() * LanternaConfig.PVP_TETO_GOLPE.get().floatValue();
+        if (TETO.get() > 0) teto = Math.min(teto, TETO.get());
         if (event.getAmount() > teto) event.setAmount(teto);
     }
 

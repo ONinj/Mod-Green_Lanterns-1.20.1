@@ -1014,8 +1014,10 @@ public final class DevAutoTest {
             com.lanterna.naves.NaveInterior.entrar(sp, n); }));
         waitFor(() -> mc.level.dimension().location().getPath().equals("interior_naves") && mc.screen == null, 400);
         at(30, () -> mc.setScreen(new com.lanterna.client.screen.StarMapScreen()));
-        at(20, () -> { try { var f = com.lanterna.client.screen.StarMapScreen.class.getDeclaredField("selected"); f.setAccessible(true); f.set(mc.screen, "oa");
+        at(20, () -> { try { var f = com.lanterna.client.screen.StarMapScreen.class.getDeclaredField("selected"); f.setAccessible(true); f.set(mc.screen, System.getProperty("lanterna.lugar", "oa"));
             var g = com.lanterna.client.screen.StarMapScreen.class.getDeclaredMethod("go"); g.setAccessible(true); shot("n5_holomapa"); g.invoke(mc.screen); } catch (Exception e) { LanternaMod.LOGGER.error("x", e); } });
+        at(100, () -> server(com.lanterna.naves.NaveInterior::sair));   // no meio da viagem: a porta não pode abrir
+        at(20, () -> LanternaMod.LOGGER.info("AUTOTEST tentou sair no meio: mundo={}", mc.level.dimension().location()));
         for (int k = 0; k < 14; k++) at(40, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST viagem emViagem={} volta={}", com.lanterna.naves.NaveInterior.emViagem(sp),
                 sp.getPersistentData().getCompound("lanterna_interior_volta").getString("Dim"))));
         at(20, () -> server(com.lanterna.naves.NaveInterior::sair));
@@ -1024,6 +1026,13 @@ public final class DevAutoTest {
             server(sp -> LanternaMod.LOGGER.info("AUTOTEST nave perto={}", sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(30)).size()));
             mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
         at(20, () -> shot("n4_chegou"));
+        // volta para a nave e sai de novo (era aqui que o jogador ia parar no planeta de antes)
+        at(20, () -> server(sp -> { var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(40)).stream().findFirst().orElse(null);
+            LanternaMod.LOGGER.info("AUTOTEST reentrar nave={}", n); if (n != null) com.lanterna.naves.NaveInterior.entrar(sp, n); }));
+        at(80, () -> server(com.lanterna.naves.NaveInterior::sair));
+        at(80, () -> LanternaMod.LOGGER.info("AUTOTEST saiu de novo em {} pos={}", mc.level.dimension().location(), mc.player.position()));
+        for (int k = 0; k < 4; k++) at(60, () -> server(sp -> LanternaMod.LOGGER.info("AUTOTEST depois mundo={} pos={} naves perto={}", sp.level().dimension().location(), sp.blockPosition(),
+                sp.serverLevel().getEntitiesOfClass(com.lanterna.naves.NaveEntity.class, sp.getBoundingBox().inflate(60)).size())));
         at(20, () -> { LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
@@ -3505,6 +3514,239 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.50: sair do Mogo (vai-e-volta com a Terra). */
+    private static void sceneMogoSair() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode survival"); cmd("lantern ring green"); cmd("lantern corrupcao 0"); cmd("effect give @s resistance 1000 4 true"); });
+        at(30, () -> { cmd("lantern full"); server(sp -> {
+            sp.getPersistentData().putBoolean("lanterna_mogo_oferecida", true);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var mogo = com.lanterna.space.SpaceBodies.byId("mogo");
+            var l = sp.server.getLevel(mogo.dimension());
+            sp.teleportTo(l, 0.5, 300, 0.5, 0, -60);
+        }); });
+        for (int i = 0; i < 30; i++) at(10, () -> {
+            mc.options.keyJump.setDown(true);
+            server(sp -> glog("t: mundo=" + sp.level().dimension().location() + " pos=" + sp.blockPosition().toShortString() + " vel=" + String.format("%.2f", sp.getDeltaMovement().y)));
+        });
+        at(5, () -> mc.options.keyJump.setDown(false));
+        for (int i = 0; i < 10; i++) at(20, () -> server(sp -> glog("solto: mundo=" + sp.level().dimension().location() + " pos=" + sp.blockPosition().toShortString())));
+        // 0.50: do lado do Mogo, piloto automático para a Terra (antes ficava entrando e saindo da Terra sem parar)
+        at(20, () -> glog("piloto: " + com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId("earth"))));
+        int[] trocas = {0}; String[] ult = {""};
+        for (int i = 0; i < 90; i++) at(20, () -> server(sp -> {
+            String m = sp.level().dimension().location().toString();
+            if (!m.equals(ult[0])) { trocas[0]++; ult[0] = m; }
+            glog("auto: mundo=" + m + " pos=" + sp.blockPosition().toShortString() + " fase=" + com.lanterna.client.flight.Autopilot.phase() + " trocas=" + trocas[0]);
+        }));
+        at(10, () -> { glog("FIM trocas=" + trocas[0]); mc.stop(); });
+    }
+
+    /** 0.50: revisão de Hanks — chegar pelo espaço, andar, descer ao Núcleo, sair; conta seres e erros. */
+    private static void sceneHanksVisita() {
+        System.setProperty("lanterna.debugPouso", "true");
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        java.util.function.Consumer<String> estado = tag -> server(sp -> {
+            var l = sp.serverLevel();
+            java.util.Map<String, Integer> n = new java.util.TreeMap<>();
+            for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, sp.getBoundingBox().inflate(200), x -> !(x instanceof net.minecraft.world.entity.player.Player)))
+                n.merge(e.getType().builtInRegistryHolder().key().location().getPath(), 1, Integer::sum);
+            glog(tag + ": mundo=" + l.dimension().location() + " pos=" + sp.blockPosition().toShortString() + " vida=" + sp.getHealth() + " seres=" + n
+                    + " tps_ms=" + String.format("%.1f", sp.server.getAverageTickTime()));
+        });
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode survival"); cmd("lantern ring yellow"); cmd("lantern corrupcao 0"); cmd("effect give @s resistance 1000 4 true"); cmd("lantern full"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var h = com.lanterna.space.SpaceBodies.byId("hanks");
+            var c = h.center().add(h.radius() + 40, 0, 0);
+            sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), c.x, c.y, c.z, 90, 0);
+        }));
+        at(40, () -> estado.accept("espaco"));
+        at(5, () -> server(sp -> { var h = com.lanterna.space.SpaceBodies.byId("hanks"); var c = h.center().add(h.radius() - 20, 0, 0); sp.connection.teleport(c.x, c.y, c.z, 90, 0); }));
+        for (int i = 0; i < 6; i++) at(100, () -> estado.accept("hanks"));
+        at(10, () -> shot("hanks_visita"));
+        at(10, () -> server(sp -> sp.teleportTo(0.5, com.lanterna.hanks.HanksGeracao.CHAO + 2, 30.5)));
+        for (int i = 0; i < 4; i++) at(120, () -> estado.accept("nucleo"));
+        at(10, () -> shot("hanks_nucleo"));
+        at(10, () -> server(sp -> sp.teleportTo(0.5, com.lanterna.space.SpaceTravel.EXIT_HEIGHT + 3, 0.5)));
+        for (int i = 0; i < 20; i++) at(2, () -> server(sp -> glog("t: " + sp.level().dimension().location() + " " + sp.blockPosition().toShortString() + " hanks=" + com.lanterna.space.SpaceBodies.byId("hanks").center())));
+        for (int i = 0; i < 3; i++) at(40, () -> estado.accept("saida"));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.50: defesa no botão direito, laser no PvP, arremessáveis teleguiados, jaula fechada e corrente que puxa. */
+    private static void sceneCombate050() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        Object[] o = new Object[4];
+        java.util.function.Function<net.minecraft.server.level.ServerPlayer, Integer> carga = sp -> com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::charge).orElse(-1);
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode survival"); cmd("gamerule doMobSpawning false"); cmd("time set day"); cmd("lantern ring green"); cmd("lantern corrupcao 0"); cmd("lantern full"); cmd("lantern max"); cmd("kill @e[type=!player]"); });
+        at(20, () -> server(sp -> {
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(60)); d.setMorte(0); });
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            var l = sp.serverLevel();
+            int y = 150;
+            for (int x = -12; x <= 12; x++) for (int z = -4; z <= 30; z++) { l.setBlock(new net.minecraft.core.BlockPos(2000 + x, y - 1, 2000 + z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+                for (int h = 0; h < 12; h++) l.setBlock(new net.minecraft.core.BlockPos(2000 + x, y + h, 2000 + z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3); }
+            sp.teleportTo(2000.5, y, 2000.5); sp.setYRot(0); sp.setXRot(0); sp.setYHeadRot(0);
+            o[0] = y;
+        }));
+        // 1) defesa: botão direito de verdade (mão vazia), apanha de um zumbi e gasta carga
+        at(20, () -> { mc.player.setYRot(0); mc.player.setXRot(0); mc.player.getInventory().selected = 8; mc.player.getInventory().setItem(8, net.minecraft.world.item.ItemStack.EMPTY); });
+        at(5, () -> { mc.options.keyUse.setDown(true); net.minecraft.client.KeyMapping.click(mc.options.keyUse.getKey()); });
+        at(10, () -> server(sp -> {
+            glog("defesa ligada? " + com.lanterna.construct.Constructs.defendendo(sp) + " cliente=" + com.lanterna.client.combate.DefesaCliente.defendendo());
+            float v = sp.getHealth(); int c = carga.apply(sp);
+            var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel());
+            z.setPos(sp.getX(), sp.getY(), sp.getZ() + 2); sp.serverLevel().addFreshEntity(z);
+            sp.invulnerableTime = 0; sp.hurt(sp.damageSources().mobAttack(z), 6f);
+            glog("golpe de 6 com defesa: vida " + v + " -> " + sp.getHealth() + " carga " + c + " -> " + carga.apply(sp));
+            z.discard();
+        }));
+        at(5, () -> mc.options.keyUse.setDown(false));
+        at(10, () -> server(sp -> {
+            glog("soltou: defesa? " + com.lanterna.construct.Constructs.defendendo(sp));
+            float v = sp.getHealth(); sp.invulnerableTime = 0; sp.hurt(sp.damageSources().generic(), 3f);
+            glog("golpe de 3 sem defesa: vida " + v + " -> " + sp.getHealth());
+            sp.setHealth(sp.getMaxHealth());
+            var pr = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("presets: " + pr.preset(0) + "," + pr.preset(1) + "," + pr.preset(2) + "," + pr.preset(3) + " escudo na roda? " + com.lanterna.construct.ConstructType.daRoda(com.lanterna.corps.BuiltinCorps.GREEN.id(), false).contains(com.lanterna.construct.ConstructType.ESCUDO));
+        }));
+        // 2) laser no PvP: no ritmo do feixe contra jogador (1 acerto a cada 10 ticks), 3 s
+        at(10, () -> server(sp -> {
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("33333333-2222-3333-4444-555555555555"), "Alvo"));
+            var g = com.lanterna.corps.BuiltinCorps.RED;
+            com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, com.lanterna.item.PowerRingItem.create(g.id(), g.color(), -1)); r.refresh(g.id(), g.color(), 1000, 1000); });
+            com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(60)));
+            for (int nivel : new int[]{1, 60, 150}) {
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(nivel)));
+                com.lanterna.tropa.Nivel.aplicar(sp);
+                sp.setHealth(sp.getMaxHealth());
+                float antes = sp.getHealth();
+                for (int k = 0; k < 6; k++) { sp.invulnerableTime = 0; com.lanterna.combate.Equilibrio.ferirComLaser(sp, sp.damageSources().playerAttack(fake), 18f); }
+                glog("laser 3 s (rival nivel 60) em mim nivel " + nivel + " (vida max " + sp.getMaxHealth() + "): perdeu " + String.format("%.1f", antes - sp.getHealth()) + " = " + String.format("%.2f", (antes - sp.getHealth()) / 3f) + "/s");
+            }
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(60)));
+            com.lanterna.tropa.Nivel.aplicar(sp);
+            sp.setHealth(sp.getMaxHealth());
+        }));
+        // 3) teleguiado: zumbi 25° fora da mira, soco lançado reto
+        at(10, () -> server(sp -> {
+            var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel());
+            z.setPos(sp.getX() + 6, sp.getY(), sp.getZ() + 14); z.setNoAi(true); sp.serverLevel().addFreshEntity(z);
+            o[1] = z; o[2] = z.getHealth();
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), 0, 0);
+            com.lanterna.construct.ConstructEntity.spawnProjectile(sp, com.lanterna.construct.ConstructEntity.Kind.FIST, new net.minecraft.world.phys.Vec3(0, 0, 1), 1.5, 0x2BFF4A, 6f, 1f);
+        }));
+        at(40, () -> server(sp -> { var z = (net.minecraft.world.entity.LivingEntity) o[1]; glog("teleguiado: zumbi fora da mira " + o[2] + " -> " + z.getHealth() + " vivo=" + z.isAlive()); z.discard(); }));
+        // 4) jaula: zumbi ao lado (sem mira), jaula fechada
+        at(10, () -> server(sp -> {
+            var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel());
+            z.setPos(sp.getX() + 4, sp.getY(), sp.getZ() + 8); z.setNoAi(true); sp.serverLevel().addFreshEntity(z);
+            o[1] = z;
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), -35, 0); sp.setYRot(-35); sp.setYHeadRot(-35); sp.setXRot(0);
+            com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+            glog("alvo da jaula (sem mirar): " + com.lanterna.construct.Constructs.lookedEntity(sp, 24));
+            com.lanterna.construct.Constructs.cast(sp, "jaula");
+        }));
+        at(60, () -> server(sp -> {
+            var z = (net.minecraft.world.entity.LivingEntity) o[1];
+            var l = sp.serverLevel(); int grade = 0, buraco = 0;
+            var b = z.getBoundingBox();
+            int x0 = (int) Math.floor(b.minX) - 1, x1 = (int) Math.floor(b.maxX) + 1, y0 = (int) Math.floor(b.minY) - 1, y1 = (int) Math.floor(b.maxY) + 1, z0 = (int) Math.floor(b.minZ) - 1, z1 = (int) Math.floor(b.maxZ) + 1;
+            for (int x = x0; x <= x1; x++) for (int y = y0 + 1; y <= y1; y++) for (int zz = z0; zz <= z1; zz++) {
+                boolean casca = x == x0 || x == x1 || y == y1 || zz == z0 || zz == z1;
+                if (!casca) continue;
+                var st = l.getBlockState(new net.minecraft.core.BlockPos(x, y, zz));
+                if (st.is(com.lanterna.construct.ConstructRegistry.CONSTRUCT_BLOCK.get()) && st.getValue(com.lanterna.construct.ConstructBlock.GRADE)) grade++; else buraco++;
+            }
+            glog("jaula sem mirar: grades=" + grade + " buracos=" + buraco);
+            sp.setYRot(-35); sp.setXRot(10); sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), -35, 10);
+        }));
+        at(20, () -> shot("jaula_grade"));
+        // 5) corrente (gancho) num jogador voando: puxa, corta o voo e devolve
+        at(10, () -> server(sp -> {
+            var z = (net.minecraft.world.entity.LivingEntity) o[1]; z.discard();
+            var ph = net.minecraft.world.entity.EntityType.PHANTOM.create(sp.serverLevel());
+            ph.setPos(sp.getX(), sp.getY() + 6, sp.getZ() + 16); ph.setNoGravity(true); sp.serverLevel().addFreshEntity(ph); cmd("time set night");
+            o[1] = ph;
+            sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), 0, -20); sp.setYRot(0); sp.setYHeadRot(0); sp.setXRot(-20);
+            com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+            glog("alvo da corrente: " + com.lanterna.construct.Constructs.lookedEntity(sp, 30));
+            com.lanterna.construct.Constructs.cast(sp, "gancho");
+        }));
+        for (int i = 0; i < 4; i++) at(10, () -> server(sp -> { var ph = (net.minecraft.world.entity.LivingEntity) o[1]; glog("corrente no fantasma: dist=" + String.format("%.1f", ph.distanceTo(sp)) + " semGravidade=" + ph.isNoGravity()); }));
+        at(60, () -> server(sp -> { var ph = (net.minecraft.world.entity.LivingEntity) o[1]; glog("fim da corrente: dist=" + String.format("%.1f", ph.distanceTo(sp)) + " semGravidade(de volta)=" + ph.isNoGravity()); ph.discard(); }));
+        // jogador voando puxado pela corrente da árvore (r_corrente) de um rival
+        at(10, () -> server(sp -> {
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+            sp.connection.teleport(sp.getX(), sp.getY() + 5, sp.getZ(), 0, 0);
+        }));
+        at(20, () -> server(sp -> {
+            var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(sp.serverLevel());
+            z.setPos(sp.getX(), (int) o[0], sp.getZ() + 18); z.setNoAi(true); sp.serverLevel().addFreshEntity(z);
+            o[3] = z;
+            boolean voa = com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::flightEnabled).orElse(false);
+            glog("antes: voando=" + voa + " dist=" + String.format("%.1f", z.distanceTo(sp)));
+            var ch = com.lanterna.construct.ConstructEntity.create(z, com.lanterna.construct.ConstructEntity.Kind.GRAPPLE, 0xFF2020, 70, 0, 1f);
+            ch.setTarget(sp); ch.setEnd(sp.position()); sp.serverLevel().addFreshEntity(ch);
+        }));
+        for (int i = 0; i < 4; i++) at(10, () -> server(sp -> { var f = (net.minecraft.world.entity.LivingEntity) o[3];
+            glog("puxado: dist=" + String.format("%.1f", f.distanceTo(sp)) + " voando=" + com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::flightEnabled).orElse(false)); }));
+        at(80, () -> server(sp -> glog("depois: voando=" + com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::flightEnabled).orElse(false))));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.50: Ryut só com o Santuário da Forja e o Coletor. */
+    private static void sceneRyut() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(30, () -> { cmd("gamemode creative"); cmd("lantern ring green"); cmd("effect give @s night_vision 1000 0 true"); });
+        at(30, () -> server(sp -> {
+            var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("ryut").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(l, h.getX() + 0.5, 200, h.getZ() + 40.5, 180, 35);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities();
+        }));
+        at(400, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.RYUT).y;
+            sp.teleportTo(h.getX() + 0.5, y + 22, h.getZ() + 30.5);
+            glog("ryut chao=" + y + " hub=" + h.toShortString());
+        }));
+        at(300, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            var area = new net.minecraft.world.phys.AABB(h).inflate(300, 200, 300);
+            java.util.Map<String, Integer> n = new java.util.TreeMap<>();
+            for (var e : l.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area, x -> !(x instanceof net.minecraft.world.entity.player.Player)))
+                n.merge(e.getType().builtInRegistryHolder().key().location().getPath() + (e instanceof com.lanterna.lore.entity.RaceEntity re ? ":" + re.role() : ""), 1, Integer::sum);
+            glog("seres: " + n);
+            int forjas = 0, tijolos = 0;
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.RYUT).y;
+            var m = new net.minecraft.core.BlockPos.MutableBlockPos();
+            for (int x = -230; x <= 230; x += 1) for (int z = -100; z <= 360; z += 1) for (int dy = -1; dy <= 3; dy++) {
+                m.set(x, y + dy, z);
+                if (!l.isLoaded(m)) continue;
+                var st = l.getBlockState(m);
+                if (st.is(com.lanterna.lore.LoreBlocks.FORJA.get())) forjas++;
+                if (st.is(net.minecraft.world.level.block.Blocks.POLISHED_BLACKSTONE_BRICKS) && Math.hypot(x - h.getX(), z - h.getZ()) > 40) tijolos++;
+            }
+            glog("forjas=" + forjas + " tijolos_fora_do_santuario=" + tijolos);
+        }));
+        at(20, () -> shot("ryut_santuario"));
+        at(10, () -> server(sp -> { var h = com.lanterna.lore.PlanetLore.HUB; sp.teleportTo(h.getX() + 0.5, sp.getY() + 80, h.getZ() + 120.5); sp.setXRot(40); }));
+        at(120, () -> shot("ryut_longe"));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.6: linha da Purificação, prazo, Arauto ceifa 100%, Arauto no PvP. */
     private static void scenePurificacao() {
         Minecraft mc = Minecraft.getInstance();
@@ -3605,7 +3847,8 @@ public final class DevAutoTest {
         at(5, () -> shot("hanks_nucleos_marcador"));
         // liga o núcleo apontado e vê o marcador pular para o próximo
         at(5, () -> server(sp -> { var t = com.lanterna.client.mission.Waypoints.current(); if (t != null) sp.teleportTo(t.pos().x, t.pos().y - 1, t.pos().z); }));
-        at(120, () -> { var t = com.lanterna.client.mission.Waypoints.current();
+        at(200, () -> { var t = com.lanterna.client.mission.Waypoints.current();
+            server(sp -> glog("servidor: nucleos=" + sp.getPersistentData().getInt("lanterna_hanks_nucleos") + " pos=" + sp.blockPosition().toShortString()));
             glog("depois de ligar um: " + (t == null ? "nenhum" : t.hint().getString() + " a " + Math.round(t.distance()) + " blocos")); });
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
@@ -6104,6 +6347,10 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("terraespaco")) sceneTerraEspaco();
         else if (ENABLED && SCENE.equals("hanksnucleos")) sceneHanksNucleos();
         else if (ENABLED && SCENE.equals("purificacao")) scenePurificacao();
+        else if (ENABLED && SCENE.equals("mogosair")) sceneMogoSair();
+        else if (ENABLED && SCENE.equals("ryut")) sceneRyut();
+        else if (ENABLED && SCENE.equals("combate050")) sceneCombate050();
+        else if (ENABLED && SCENE.equals("hanksvisita")) sceneHanksVisita();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

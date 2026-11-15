@@ -3200,5 +3200,9 @@
   "mission.lanterna.purif_4.desc": "Defeat Odym's boss in the arena. Only those who don't yield to the fear of dying prove the light is still theirs.",
   "mission.lanterna.purif_5.title": "Renew the Oath",
   "mission.lanterna.purif_5.desc": "Go to Oa and talk to the Guardians. They will seal your ring's light and drive Death out for good.",
-  "mission.lanterna.purif_5.talk": "The light is yours again, Lantern. Close your eyes. There: Death has nothing left to hold on to."
+  "mission.lanterna.purif_5.talk": "The light is yours again, Lantern. Close your eyes. There: Death has nothing left to hold on to.",
+  "nave.lanterna.auto.em_viagem_porta": "The ship is traveling: the door opens when it arrives (about %s s).",
+  "defesa.lanterna.dica": "The shield is now your guard: hold right click with an empty hand.",
+  "defesa.lanterna.quebrado": "Your shield broke: wait a moment.",
+  "defesa.lanterna.quebrou": "Out of charge: your shield broke!"
 }

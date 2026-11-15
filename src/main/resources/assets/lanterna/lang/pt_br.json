@@ -3200,5 +3200,9 @@
   "mission.lanterna.purif_4.desc": "Vença o chefe de Odym na arena. Só quem não se rende ao medo de morrer prova que a luz ainda é sua.",
   "mission.lanterna.purif_5.title": "Renovar o Juramento",
   "mission.lanterna.purif_5.desc": "Vá até Oa e fale com os Guardiões. Eles vão selar a luz do seu anel e expulsar a Morte de vez.",
-  "mission.lanterna.purif_5.talk": "A luz voltou a ser sua, Lanterna. Feche os olhos. Pronto: a Morte não tem mais onde se segurar."
+  "mission.lanterna.purif_5.talk": "A luz voltou a ser sua, Lanterna. Feche os olhos. Pronto: a Morte não tem mais onde se segurar.",
+  "nave.lanterna.auto.em_viagem_porta": "A nave está em viagem: a porta abre quando ela chegar (uns %s s).",
+  "defesa.lanterna.dica": "O escudo agora é a defesa: segure o botão direito com a mão vazia.",
+  "defesa.lanterna.quebrado": "O escudo quebrou: espere um instante.",
+  "defesa.lanterna.quebrou": "Sem carga: o escudo quebrou!"
 }

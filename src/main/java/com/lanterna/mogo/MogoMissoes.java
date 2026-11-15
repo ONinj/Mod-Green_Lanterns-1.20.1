@@ -156,8 +156,17 @@ public final class MogoMissoes {
         if (p.isCreative() || p.isSpectator()) return true;
         RingData r = ModCapabilities.get(p).orElse(null);
         if (r == null || !r.hasRing()) return true;
+        if (corrompido(p)) return false; // 0.50: a Morte não pisa no Mogo
         var c = r.corps();
         return !(BuiltinCorps.YELLOW.id().equals(c) || BuiltinCorps.RED.id().equals(c) || BuiltinCorps.ORANGE.id().equals(c) || BuiltinCorps.BLACK.id().equals(c));
+    }
+
+    /** 0.50: anel tocado pela Morte (corrompido ou de Portador Negro), ou a linha da Morte em andamento. */
+    public static boolean corrompido(ServerPlayer p) {
+        RingData r = ModCapabilities.get(p).orElse(null);
+        if (r != null && r.hasRing() && r.corrupcao() > 0) return true;
+        int m = com.lanterna.mission.LoreCapability.get(p).map(com.lanterna.mission.LoreData::morte).orElse(0);
+        return m == 2 || m == 3 || m == 4;
     }
 
     /** Empurra para longe do Mogo (no espaço). */

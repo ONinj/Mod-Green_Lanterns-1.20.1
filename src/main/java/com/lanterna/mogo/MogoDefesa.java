@@ -59,14 +59,16 @@ public final class MogoDefesa {
         long agora = l.getGameTime();
         var r = ModCapabilities.get(p).orElse(null);
         String corps = r != null && r.hasRing() && r.corps() != null ? r.corps().getPath() : "";
-        if ("green".equals(corps)) return; // os seus ele não ataca
+        // 0.50: quem a Morte tocou (anel corrompido, Portador Negro, Arauto) ele ataca, mesmo sendo Verde
+        boolean corrompido = MogoMissoes.corrompido(p);
+        if ("green".equals(corps) && !corrompido) return; // os seus ele não ataca
 
         // alguém da Tropa atirou no planeta?
         if (atirou(p, l, c, mogo.radius())) {
             if (!PROVOCOU.containsKey(p.getUUID()) || agora - PROVOCOU.get(p.getUUID()) > BRAVO) MogoMissoes.falar(p, "revida", true);
             PROVOCOU.put(p.getUUID(), agora);
         }
-        boolean morte = BuiltinCorps.BLACK.id().getPath().equals(corps);
+        boolean morte = BuiltinCorps.BLACK.id().getPath().equals(corps) || corrompido;
         boolean bravo = PROVOCOU.containsKey(p.getUUID()) && agora - PROVOCOU.get(p.getUUID()) <= BRAVO;
         if (!morte && !bravo) return;
         if (agora - ULTIMO.getOrDefault(p.getUUID(), 0L) < RITMO) return;

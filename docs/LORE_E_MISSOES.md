@@ -1556,3 +1556,20 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - o igualador de nível do PvP olhava a vida total, e os +20 corações do Arauto faziam ele levar **mais** dano. Agora a vida a mais dos anéis supremos não entra na conta;
   - o Arauto segura **60%** do golpe de jogadores (antes 25%) e **30%** contra o Anel Branco.
   - Medido (nível 150, golpe de 25): sem anel nível 100 → imune; Verde 149 → imune; Verde 150 → 38 golpes para derrubar o Arauto; Branco 150 → 20 golpes. (Verde contra Verde no 150: 14.)
+
+
+## 0.50.0 — Combate novo e trocas de mundo
+
+- **Trocas de mundo (o "quica-quica")**: ao sair de um planeta pelo alto, o servidor às vezes ainda via o jogador na posição antiga (perto de x=0 z=0). Desde que a Terra subiu no espaço (0.49.4), esse ponto fica **dentro da Terra**, então o jogador "pousava" na Terra; e, ao sair dela, o embalo do voo e a gravidade o devolviam, num entra-e-sai sem fim. Agora:
+  - nos primeiros segundos no espaço ninguém pousa, e quem aparece dentro de um planeta longe do ponto de chegada volta para o lugar certo;
+  - ninguém cai de novo, por 15 s, no planeta de onde acabou de sair;
+  - o embalo do voo não passa de um mundo para outro, e a gravidade dos planetas não puxa nos primeiros 20 s;
+  - a Terra devolve o jogador 45 blocos abaixo do teto (antes 20).
+- **Defesa no botão direito**: com a mão vazia e o anel ligado, segurar o botão direito levanta o escudo do anel (o antigo Alt+4). Cada golpe gasta carga (3 por ponto de dano) e manter custa 1 de carga por segundo. Soltou, some; sem carga, quebra por 2 s. Portas, baús e alavancas continuam funcionando com o botão direito. O escudo saiu da roda e dos atalhos (presets antigos com o escudo viram outro construto).
+- **Laser no PvP**: contra jogadores, o laser fere 2 vezes por segundo e cada acerto tira no máximo 3,5% da vida máxima (entre 1 e 2,5). Medido: 2,0/s em nível 1, 4,5/s em nível 60 e 3,6/s em nível 150.
+- **Teleguiados**: todo construto arremessado trava no alvo mais perto da mira (jogador, Lanterna, monstro ou chefe) e vai virando até acertar.
+- **Jaulas, correntes e afins** pegam o inimigo mais perto da mira mesmo sem mirar exatamente; a jaula agora é fechada, com grades finas.
+- **Correntes**: o gancho com alguém na mira agarra e puxa o alvo; as correntes da Árvore da Luz também puxam. Quem voa perde o voo enquanto é puxado e recebe o voo de volta sozinho quando a corrente acaba (criaturas voadoras caem e voltam a voar).
+- **Mogo** ataca, não deixa pousar e não atende o Chamado de quem a Morte tocou (anel corrompido, Portador Negro ou Arauto), mesmo sendo Verde.
+- **Ryut** não tem mais cidade nem Tropa: só o **Santuário da Forja** (a Forja do Espectro e o Coletor) e o altar do Devorador de Ecos. Mundos antigos: na primeira vez que abrem nesta versão, o planeta antigo é guardado em `dimensions/lanterna/ryut_cidade_antiga` (nada é apagado) e Ryut nasce de novo.
+- **Hanks** revisado: o piloto automático e a saída de Hanks não mandam mais para outro planeta, os núcleos e o marcador conferidos, e a criação dos Lanternas do Núcleo e das sentinelas protegida contra falhas.

@@ -226,8 +226,8 @@
       "en": "The construct wheel"
      },
      "texto": {
-      "pt": "Segure {tecla:key.lanterna.construct_wheel} para abrir a roda, escolha um construto e use com {tecla:key.lanterna.construct_use}.\n\nNa roda, passe o mouse num construto e aperte **1 a 4** para gravar nos atalhos **Alt+1 a Alt+4**.\n\nO anel interno tem os construtos de todos; o externo, os **da sua Tropa**.",
-      "en": "Hold {tecla:key.lanterna.construct_wheel} to open the wheel, pick a construct and use it with {tecla:key.lanterna.construct_use}.\n\nIn the wheel, hover a construct and press **1 to 4** to save it to **Alt+1 to Alt+4**.\n\nThe inner ring has everyone's constructs; the outer ring, **your Corps'**."
+      "pt": "Segure {tecla:key.lanterna.construct_wheel} para abrir a roda, escolha um construto e use com {tecla:key.lanterna.construct_use}.\n\nNa roda, passe o mouse num construto e aperte **1 a 4** para gravar nos atalhos **Alt+1 a Alt+4**.\n\nO anel interno tem os construtos de todos; o externo, os **da sua Tropa**.\n\n**Defesa**: com a mão vazia, **segure o botão direito** para levantar o escudo do anel. Cada golpe gasta carga em vez de vida; soltou, ele some. Os arremessáveis são **teleguiados**, e jaulas e correntes pegam quem estiver perto da mira (a corrente puxa e derruba quem voa).",
+      "en": "Hold {tecla:key.lanterna.construct_wheel} to open the wheel, pick a construct and use it with {tecla:key.lanterna.construct_use}.\n\nIn the wheel, hover a construct and press **1 to 4** to save it to **Alt+1 to Alt+4**.\n\nThe inner ring has everyone's constructs; the outer ring, **your Corps'**.\n\n**Guard**: with an empty hand, **hold right click** to raise the ring's shield. Every hit drains charge instead of health; let go and it fades. Thrown constructs are **homing**, and cages and chains grab whoever is near your aim (chains pull targets in and knock flyers out of the air)."
      },
      "teclas": [
       "key.lanterna.construct_wheel",

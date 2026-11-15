@@ -24,7 +24,7 @@ public class LoreData implements INBTSerializable<CompoundTag> {
     private final Set<String> completed = new LinkedHashSet<>();
     private String tracked = "";
     private final Map<String, Integer> rep = new HashMap<>();
-    private final String[] presets = {"laser", "parede", "martelo", "escudo"};
+    private final String[] presets = {"laser", "parede", "martelo", "rajada"};
     private String selected = "laser";
     private final Set<String> bossKills = new LinkedHashSet<>();
     private long lastPassiveKill = -1_000_000L;
@@ -310,6 +310,8 @@ public class LoreData implements INBTSerializable<CompoundTag> {
         for (String k : r.getAllKeys()) rep.put(k, r.getInt(k));
         ListTag pr = tag.getList("Presets", Tag.TAG_STRING);
         for (int i = 0; i < Math.min(PRESETS, pr.size()); i++) presets[i] = pr.getString(i);
+        // 0.50: o escudo saiu dos presets (agora é segurar o botão direito)
+        for (int i = 0; i < presets.length; i++) if ("escudo".equals(presets[i])) presets[i] = i == 3 ? "rajada" : "punho";
         if (tag.contains("Selected")) selected = tag.getString("Selected");
         bossKills.clear();
         tag.getList("Bosses", Tag.TAG_STRING).forEach(t -> bossKills.add(t.getAsString()));

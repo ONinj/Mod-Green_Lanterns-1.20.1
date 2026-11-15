@@ -22,7 +22,8 @@ public record ConstructCastPacket(String construct, boolean start) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
-            if (msg.start) com.lanterna.construct.Constructs.cast(player, msg.construct);
+            if ("defesa".equals(msg.construct)) com.lanterna.construct.Constructs.defesa(player, msg.start); // 0.50: botão direito
+            else if (msg.start) com.lanterna.construct.Constructs.cast(player, msg.construct);
             else com.lanterna.construct.Constructs.release(player, msg.construct);
         });
         ctx.get().setPacketHandled(true);

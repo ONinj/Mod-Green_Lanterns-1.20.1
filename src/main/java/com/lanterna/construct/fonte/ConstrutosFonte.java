@@ -698,17 +698,44 @@ public final class ConstrutosFonte {
     }
 
     private static void correnteTick(ConstructEntity e, @Nullable LivingEntity dono, Def d, ServerLevel l) {
-        if (!(e.target() instanceof LivingEntity t) || !t.isAlive() || dono == null) { e.discard(); return; }
-        e.setPos(t.getX(), t.getY(), t.getZ());
-        if (d.tem("puxa")) {
-            Vec3 n = dono.position().subtract(t.position());
-            if (n.length() > 2) { n = n.normalize().scale(0.55); t.setDeltaMovement(n.x, Math.max(0.05, n.y), n.z); t.hurtMarked = true; t.fallDistance = 0; }
+        if (!(e.target() instanceof LivingEntity t) || !t.isAlive() || dono == null) {
+            if (e.target() instanceof LivingEntity t0) soltarDaCorrente(t0);
+            e.discard();
+            return;
         }
+        e.setPos(t.getX(), t.getY(), t.getZ());
         if (e.age() % 20 == 10) {
             for (DefsFonte.Ef ef : d.inimigos()) efeito(t, ef, dono);
             if (d.tem("roubo") && Equilibrio.ferirComPoder(t, fonte(t, dono), e.dano() * 0.5f)) dono.heal(e.dano() * 0.3f);
             if (d.tem("fogo")) t.setSecondsOnFire(3);
             if (d.tem("rouba_carga") && t instanceof ServerPlayer vp && dono instanceof ServerPlayer op) roubarCarga(vp, op, 25);
+        }
+        // 0.50: toda corrente prende e PUXA o alvo até quem lançou. Quem está voando perde o voo enquanto é puxado
+        // (jogador: o anel apaga o voo e devolve sozinho quando a corrente some; criatura voadora: cai na gravidade).
+        if (t instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 12, e.color(), false);
+        else if (t.isNoGravity() && !(t instanceof com.lanterna.lore.entity.boss.LoreBoss)) {
+            t.setNoGravity(false);
+            t.getPersistentData().putBoolean(SEM_GRAVIDADE, true);
+        }
+        Vec3 n = dono.position().add(0, dono.getBbHeight() * 0.3, 0).subtract(t.position());
+        double dist = n.length();
+        if (dist > 2.8) {
+            double v = Math.min(0.9, 0.35 + dist * 0.03);
+            n = n.normalize().scale(v);
+            t.setDeltaMovement(n.x, n.y + 0.04, n.z);
+        } else t.setDeltaMovement(0, Math.min(0, t.getDeltaMovement().y), 0);
+        t.hurtMarked = true;
+        t.fallDistance = 0;
+        if (e.age() >= e.life() - 1) soltarDaCorrente(t);
+    }
+
+    private static final String SEM_GRAVIDADE = "lanterna_corrente_sem_gravidade";
+
+    /** Fim da corrente: a criatura voadora volta a voar (o jogador recebe o voo de volta pelo Controle). */
+    private static void soltarDaCorrente(LivingEntity t) {
+        if (t.getPersistentData().getBoolean(SEM_GRAVIDADE)) {
+            t.getPersistentData().remove(SEM_GRAVIDADE);
+            t.setNoGravity(true);
         }
     }
 

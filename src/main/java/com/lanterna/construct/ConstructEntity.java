@@ -562,10 +562,13 @@ public class ConstructEntity extends Entity {
         // 0.48.12: confere o acerto a cada tick (antes só de 4 em 4: em PvP o alvo tinha que estar na mira justo naquele
         // tick); o dano continua no mesmo ritmo, de 4 em 4 ticks, por alvo.
         if (hit != null) {
-            if (tickCount - ultimoDano >= 4 || hit.getId() != ultimoAlvo) {
+            // contra jogador o laser fere de 10 em 10 ticks (e pouco, ver Equilibrio.ferirComLaser)
+            int ritmo = hit instanceof Player && owner instanceof Player ? 10 : 4;
+            if (tickCount - ultimoDano >= ritmo || hit.getId() != ultimoAlvo) {
                 ultimoDano = tickCount;
                 ultimoAlvo = hit.getId();
-                com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
+                if (owner instanceof Player) com.lanterna.combate.Equilibrio.ferirComLaser(hit, source(owner), damage);
+                else com.lanterna.combate.Equilibrio.ferirComPoder(hit, source(owner), damage);
                 hit.invulnerableTime = 0;
                 sl.sendParticles(ParticleTypes.CRIT, stop.x, stop.y, stop.z, 3, 0.2, 0.2, 0.2, 0.1);
             }
@@ -617,7 +620,50 @@ public class ConstructEntity extends Entity {
 
     // ---- Punho e rajada ----
 
+    /** 0.50: alvo que o arremessável persegue (só no servidor). */
+    private int guiado = -1;
+
+    /**
+     * 0.50: todo construto arremessado é teleguiado. Ele trava no alvo mais perto da mira (jogador, Lanterna, monstro
+     * ou boss num cone de ~35°; qualquer outro ser só se estiver bem na mira) e vai virando até acertar.
+     */
+    private void guiar(@Nullable LivingEntity owner) {
+        double vel = velocity.length();
+        if (vel < 1e-3) return;
+        Entity alvo = guiado >= 0 ? level().getEntity(guiado) : null;
+        if (!(alvo instanceof LivingEntity la) || !la.isAlive() || la.distanceToSqr(this) > 64 * 64) {
+            alvo = null;
+            guiado = -1;
+            Vec3 dir = velocity.normalize();
+            double melhor = Double.MAX_VALUE;
+            for (LivingEntity e : level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(36), x -> inimigo(owner, x))) {
+                Vec3 to = e.position().add(0, e.getBbHeight() * 0.5, 0).subtract(position());
+                double d = to.length();
+                if (d < 0.5) continue;
+                double cos = to.normalize().dot(dir);
+                boolean forte = e instanceof Player || e instanceof net.minecraft.world.entity.monster.Enemy
+                        || e instanceof com.lanterna.especies.LanternaEntity || e instanceof com.lanterna.lore.entity.boss.LoreBoss
+                        || (e instanceof net.minecraft.world.entity.Mob m && m.getTarget() == owner);
+                if (cos < (forte ? 0.82 : 0.985)) continue;
+                double nota = d * (2.0 - cos);
+                if (nota < melhor) { melhor = nota; alvo = e; }
+            }
+            if (alvo != null) guiado = alvo.getId();
+        }
+        if (alvo == null) return;
+        Vec3 to = alvo.position().add(0, alvo.getBbHeight() * 0.55, 0).subtract(position()).normalize();
+        Vec3 nova = velocity.normalize().scale(0.65).add(to.scale(0.35)).normalize().scale(vel);
+        velocity = nova;
+        setDeltaMovement(nova);
+        hasImpulse = true;
+        setYRot((float) Math.toDegrees(Math.atan2(-nova.x, nova.z)));
+        setXRot((float) -Math.toDegrees(Math.asin(Mth.clamp(nova.normalize().y, -1, 1))));
+        // perseguindo: não some antes de chegar (até 6 s)
+        if (tickCount >= life() - 2 && tickCount < 120) entityData.set(LIFE, life() + 2);
+    }
+
     private void moveProjectile(@Nullable LivingEntity owner) {
+        guiar(owner);
         Vec3 from = position();
         Vec3 to = from.add(velocity);
         BlockHitResult block = level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
@@ -711,6 +757,10 @@ public class ConstructEntity extends Entity {
     // ---- Gancho ----
 
     private void grapplePull(LivingEntity owner) {
+        if (target() instanceof LivingEntity alvo) {
+            puxarAlvo(owner, alvo);
+            return;
+        }
         Vec3 target = end();
         Vec3 d = target.subtract(owner.position().add(0, 1, 0));
         if (d.length() < 2.0 || tickCount > 40) {
@@ -721,6 +771,44 @@ public class ConstructEntity extends Entity {
         owner.setDeltaMovement(v);
         owner.hurtMarked = true;
         owner.fallDistance = 0;
+    }
+
+    /**
+     * 0.50: a corrente agarrou alguém: puxa até o dono. Quem voa perde o voo enquanto é puxado (jogador: o anel devolve
+     * o voo sozinho quando a corrente acaba; criatura voadora: cai na gravidade e volta a voar no fim).
+     */
+    private void puxarAlvo(LivingEntity owner, LivingEntity alvo) {
+        if (!alvo.isAlive() || tickCount >= life() - 1 || alvo.distanceToSqr(owner) > 48 * 48) {
+            soltar(alvo);
+            discard();
+            return;
+        }
+        setEnd(alvo.position().add(0, alvo.getBbHeight() * 0.5, 0));
+        if (alvo instanceof net.minecraft.server.level.ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 12, color(), false);
+        else if (alvo.isNoGravity() && !(alvo instanceof com.lanterna.lore.entity.boss.LoreBoss)) {
+            alvo.setNoGravity(false);
+            alvo.getPersistentData().putBoolean("lanterna_corrente_sem_gravidade", true);
+        }
+        Vec3 n = owner.position().add(0, owner.getBbHeight() * 0.3, 0).subtract(alvo.position());
+        double dist = n.length();
+        if (dist < 2.6) {
+            // chegou: segura um instante e solta
+            alvo.setDeltaMovement(Vec3.ZERO);
+            alvo.hurtMarked = true;
+            if (tickCount > 8) { soltar(alvo); discard(); }
+            return;
+        }
+        Vec3 v = n.normalize().scale(Math.min(1.3, 0.5 + tickCount * 0.06));
+        alvo.setDeltaMovement(v.x, v.y + 0.05, v.z);
+        alvo.hurtMarked = true;
+        alvo.fallDistance = 0;
+    }
+
+    private static void soltar(LivingEntity alvo) {
+        if (alvo.getPersistentData().getBoolean("lanterna_corrente_sem_gravidade")) {
+            alvo.getPersistentData().remove("lanterna_corrente_sem_gravidade");
+            alvo.setNoGravity(true);
+        }
     }
 
     // ---- Mão ----

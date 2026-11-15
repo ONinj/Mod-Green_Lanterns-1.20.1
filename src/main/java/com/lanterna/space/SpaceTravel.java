@@ -38,6 +38,8 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class SpaceTravel {
     public static final int EXIT_HEIGHT = 330;
+    private static final String SAIU_DE = "lanterna_saiu_de", CHEGOU_EM = "lanterna_chegou_em",
+            CHEGOU_X = "lanterna_chegou_x", CHEGOU_Y = "lanterna_chegou_y", CHEGOU_Z = "lanterna_chegou_z";
     private static final String RETURN_TAG = "lanterna_space_return";
     private static final UUID LOW_GRAVITY = UUID.fromString("6f0c5d2a-3c1e-4a8e-9a51-7d7a1e0b1a01");
 
@@ -54,6 +56,7 @@ public final class SpaceTravel {
             back.putDouble("z", player.getZ());
             player.getPersistentData().put(RETURN_TAG, back);
             Vec3 arrive = SpaceBodies.arrivalFromEarth(player.getX(), player.getZ());
+            player.getPersistentData().putString(SAIU_DE, "earth");
             travel(player, SpaceBodies.SPACE, arrive, player.getYRot(), 20f, "space.lanterna.enter");
             return;
         }
@@ -64,6 +67,7 @@ public final class SpaceTravel {
             // Sai ao lado do planeta (olhando para fora dele), sem passar do teto do espaço
             Vec3 out = here != null ? here.center().add(here.radius() + 60, 0, 0)
                     : ProceduralPlanets.spacePointForRegion(player.getX(), player.getZ());
+            player.getPersistentData().putString(SAIU_DE, here != null ? here.id() : "");
             travel(player, SpaceBodies.SPACE, out, -90f, 0f, "space.lanterna.leave_planet");
             return;
         }
@@ -74,6 +78,21 @@ public final class SpaceTravel {
         // pararia esperando carregar cada chunk vazio pelo caminho, travando o jogo em alta velocidade.
         RingData flyer = ModCapabilities.get(player).orElse(null);
         if (flyer != null && flyer.hasRing() && flyer.flightEnabled()) player.noPhysics = true;
+
+        // 0.50: logo depois de chegar ao espaço, o servidor às vezes ainda recebia a posição antiga do jogador (a do
+        // planeta de onde ele saiu, perto de x=0 z=0). Desde que a Terra subiu (0.49.4), esse ponto fica DENTRO da
+        // Terra no espaço: o jogador "pousava" na Terra e ficava entrando e saindo dela. Agora, nos primeiros segundos,
+        // quem aparece longe de onde foi posto volta para o lugar certo, e ninguém pousa.
+        CompoundTag pd = player.getPersistentData();
+        long agora = player.server.overworld().getGameTime(), desde = agora - pd.getLong(CHEGOU_EM);
+        if (pd.contains(CHEGOU_EM) && desde < 60) {
+            Vec3 certo = new Vec3(pd.getDouble(CHEGOU_X), pd.getDouble(CHEGOU_Y), pd.getDouble(CHEGOU_Z));
+            if (player.position().distanceTo(certo) > 100 && SpaceBodies.inside(player.position()) != null) {
+                player.connection.teleport(certo.x, certo.y, certo.z, player.getYRot(), player.getXRot());
+                player.setDeltaMovement(Vec3.ZERO);
+            }
+            return;
+        }
 
         // Dentro do espaço: chegou num planeta (ou na Terra)?
         SpaceBodies.Body body = SpaceBodies.inside(player.position());
@@ -86,6 +105,8 @@ public final class SpaceTravel {
             com.lanterna.mogo.MogoMissoes.repelir(player, null);
             return;
         }
+        // 0.50: quem acabou de sair de um planeta não cai nele de novo logo em seguida (a gravidade puxava de volta)
+        if (body != null && desde < 20 * 15 && body.id().equals(pd.getString(SAIU_DE))) body = null;
         if (body != null) {
             land(player, body);
             return;
@@ -142,7 +163,9 @@ public final class SpaceTravel {
             BlockPos spawn = target.getSharedSpawnPos();
             x = back.contains("x") ? back.getDouble("x") : spawn.getX();
             z = back.contains("z") ? back.getDouble("z") : spawn.getZ();
-            travel(player, target.dimension(), new Vec3(x, EXIT_HEIGHT - 20, z), player.getYRot(), 30f, "space.lanterna.back_to_earth");
+            travel(player, target.dimension(), new Vec3(x, EXIT_HEIGHT - 45, z), player.getYRot(), 30f, "space.lanterna.back_to_earth");
+            player.setDeltaMovement(Vec3.ZERO);
+            player.hurtMarked = true;
             return;
         }
 
@@ -193,7 +216,7 @@ public final class SpaceTravel {
     public static Vec3 earthReturn(@org.jetbrains.annotations.Nullable ServerPlayer player, ServerLevel earth) {
         CompoundTag back = player != null ? player.getPersistentData().getCompound(RETURN_TAG) : new CompoundTag();
         BlockPos spawn = earth.getSharedSpawnPos();
-        return new Vec3(back.contains("x") ? back.getDouble("x") : spawn.getX(), EXIT_HEIGHT - 20,
+        return new Vec3(back.contains("x") ? back.getDouble("x") : spawn.getX(), EXIT_HEIGHT - 45,
                 back.contains("z") ? back.getDouble("z") : spawn.getZ());
     }
 
@@ -204,6 +227,11 @@ public final class SpaceTravel {
         LanternaMod.LOGGER.debug("Lanterna: {} viajou para {} em {}", player.getName().getString(), dimension.location(), pos);
         player.teleportTo(level, pos.x, pos.y, pos.z, yaw, pitch);
         player.fallDistance = 0;
+        if (dimension.equals(SpaceBodies.SPACE)) {
+            CompoundTag pd = player.getPersistentData();
+            pd.putLong(CHEGOU_EM, player.server.overworld().getGameTime());
+            pd.putDouble(CHEGOU_X, pos.x); pd.putDouble(CHEGOU_Y, pos.y); pd.putDouble(CHEGOU_Z, pos.z);
+        } else player.getPersistentData().remove(SAIU_DE);
         level.playSound(null, player.blockPosition(), SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.25f, 1.6f);
         SpaceBodies.Body body = SpaceBodies.bodyAt(dimension, pos.x, pos.z);
         Component name = body != null ? body.displayName() : Component.translatable("planet.lanterna.space");

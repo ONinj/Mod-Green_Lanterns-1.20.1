@@ -61,6 +61,8 @@ public final class ClientFlight {
 
     /** Velocidade que o anel está dando (guardada aqui para a gravidade não interferir). */
     private static Vec3 velocity = Vec3.ZERO;
+    private static net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> ultimaDim;
+    private static int chegouEm = -100000;
     private static boolean wasFlying;
     private static int landTicks;
     private static double lastLocalSpeed;
@@ -171,6 +173,18 @@ public final class ClientFlight {
         Vec3 look = player.getLookAngle();
         float yaw = player.getYRot() * Mth.DEG_TO_RAD;
         Vec3 left = new Vec3(Mth.cos(yaw), 0, Mth.sin(yaw));
+
+        // 0.50: trocou de mundo (saiu do Mogo, entrou na Terra...): o embalo de lá não vem junto. Antes a velocidade
+        // do espaço continuava na Terra, o jogador passava do teto e voltava para o espaço sem parar.
+        var dimAgora = player.level().dimension();
+        if (ultimaDim != null && !ultimaDim.equals(dimAgora)) {
+            chegouEm = player.tickCount;
+            velocity = Vec3.ZERO;
+            hyperOn = false;
+            hyperCharge = 0;
+            hyperSpeed = 0;
+        }
+        ultimaDim = dimAgora;
 
         Vec3 v = velocity;
         double speedBefore = v.length();
@@ -453,6 +467,9 @@ public final class ClientFlight {
     /** Puxão leve dos planetas no espaço (só quando você não está acelerando). */
     private static Vec3 gravityWell(Vec3 pos, boolean thrusting) {
         if (thrusting) return Vec3.ZERO;
+        // 0.50: nos primeiros 20 s depois de sair de um planeta ele não puxa de volta (era o "quica-quica")
+        var mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.tickCount - chegouEm < 400) return Vec3.ZERO;
         Vec3 pull = Vec3.ZERO;
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 1)) {
             if (!b.landable()) continue;

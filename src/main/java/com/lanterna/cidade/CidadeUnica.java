@@ -130,16 +130,30 @@ public final class CidadeUnica {
         var src = l.getChunkSource();
         long fundo = 0, sup = 0;
         int n = 0;
-        for (int dx = -R; dx <= R; dx += 40) for (int dz = -R; dz <= R; dz += 40) {
-            if (dx * dx + dz * dz > R * R) continue;
-            fundo += src.getGenerator().getBaseHeight(dx, dz, Heightmap.Types.OCEAN_FLOOR_WG, l, src.randomState());
-            sup += src.getGenerator().getBaseHeight(dx, dz, Heightmap.Types.WORLD_SURFACE_WG, l, src.randomState());
+        // Ryut (0.50): o chão é o do lugar do santuário, não o da cidade inteira
+        int raio = p == PlanetLore.RYUT ? 40 : R, passo = p == PlanetLore.RYUT ? 10 : 40;
+        int ox = p == PlanetLore.RYUT ? QUARTEL.getX() : 0, oz = p == PlanetLore.RYUT ? QUARTEL.getZ() : 0;
+        for (int dx = -raio; dx <= raio; dx += passo) for (int dz = -raio; dz <= raio; dz += passo) {
+            if (dx * dx + dz * dz > raio * raio) continue;
+            fundo += src.getGenerator().getBaseHeight(ox + dx, oz + dz, Heightmap.Types.OCEAN_FLOOR_WG, l, src.randomState());
+            sup += src.getGenerator().getBaseHeight(ox + dx, oz + dz, Heightmap.Types.WORLD_SURFACE_WG, l, src.randomState());
             n++;
         }
         int y = CidadesPovos.chaoDe(l, p, (int) (fundo / n), (int) (sup / n));
         Planta pl = new Planta(p, y, chave);
         BlockPos c = pl.c;
         Estilo e = pl.e;
+
+        // 0.50: Ryut não tem mais cidade nem Tropa. Só o Santuário da Forja (a Forja do Espectro e o Coletor) e o
+        // altar do Devorador de Ecos, no meio do planeta morto.
+        if (p == PlanetLore.RYUT) {
+            BlockPos sq = QUARTEL.atY(y);
+            pl.pecas.add(peca("santuario", sq, SANTUARIO_R + 4, k -> santuarioRyut(k, sq)));
+            BlockPos ac = ARENA.atY(y);
+            pl.pecas.add(peca("arena", ac, ARENA_R + 6, k -> arena(k, ac, p)));
+            LanternaMod.LOGGER.info("Lanterna: Ryut: só o Santuário da Forja e o altar (chão {})", y);
+            return pl;
+        }
 
         // ---- o centro: monumento do povo (Oa: o Palácio) ----
         if (p == PlanetLore.OA) palacio(pl);
@@ -230,6 +244,48 @@ public final class CidadeUnica {
         pl.pecas.add(peca("arena", ac, ARENA_R + 6, k -> arena(k, ac, p)));
         LanternaMod.LOGGER.info("Lanterna: planta da cidade de {}: chão {}, {} peças, {} casas", p.planet, y, pl.pecas.size(), pl.casas.size());
         return pl;
+    }
+
+    static final int SANTUARIO_R = 18;
+
+    /** Ryut (0.50): a área aplainada é só o santuário e a arena. */
+    static boolean noSantuario(int x, int z) {
+        double dx = x - QUARTEL.getX(), dz = z - QUARTEL.getZ();
+        return dx * dx + dz * dz <= (SANTUARIO_R + 1) * (SANTUARIO_R + 1);
+    }
+
+    /** O que a cidade aplaina neste planeta. */
+    static boolean aplainado(PlanetLore p, int x, int z) {
+        if (p == PlanetLore.RYUT) return noSantuario(x, z) || naArena(x, z);
+        return dist(x, z) <= R + 1 || naArena(x, z) || naEstrada(x, z);
+    }
+
+    /**
+     * O Santuário da Forja de Ryut: um disco de pedra negra com oito pilares de lanternas de alma em volta e um degrau
+     * no meio. A Forja do Espectro e o Coletor são postos pelo servidor (PlanetSites.vigiarBase), no lugar de sempre.
+     */
+    static void santuarioRyut(Kit k, BlockPos c) {
+        BlockState piso = b(Blocks.POLISHED_BLACKSTONE_BRICKS), borda = b(Blocks.POLISHED_BLACKSTONE), veio = b(Blocks.CRYING_OBSIDIAN),
+                pilar = b(Blocks.POLISHED_BASALT), luz = b(Blocks.SOUL_LANTERN), degrau = b(Blocks.POLISHED_BLACKSTONE_SLAB), ar = b(Blocks.AIR);
+        for (int dx = -SANTUARIO_R; dx <= SANTUARIO_R; dx++) for (int dz = -SANTUARIO_R; dz <= SANTUARIO_R; dz++) {
+            double d = Math.sqrt(dx * dx + dz * dz);
+            if (d > SANTUARIO_R + 0.5) continue;
+            BlockState st = d > SANTUARIO_R - 1.5 ? borda : (Math.abs(dx) == Math.abs(dz) && d > 5 && d < SANTUARIO_R - 3) ? veio : piso;
+            k.s(c.offset(dx, -1, dz), st);
+            for (int h = 0; h < 8; h++) k.s(c.offset(dx, h, dz), ar);
+        }
+        // degrau do meio
+        for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++)
+            if (dx * dx + dz * dz <= 16 && (Math.abs(dx) > 1 || Math.abs(dz) > 1)) k.s(c.offset(dx, 0, dz), degrau);
+        k.s(c, b(Blocks.SCULK_CATALYST));
+        // oito pilares com lanternas de alma
+        for (int i = 0; i < 8; i++) {
+            double a = Math.PI * 2 * i / 8 + Math.PI / 8;
+            BlockPos q = c.offset((int) Math.round(Math.cos(a) * (SANTUARIO_R - 3)), 0, (int) Math.round(Math.sin(a) * (SANTUARIO_R - 3)));
+            for (int h = 0; h < 5; h++) k.s(q.above(h), pilar);
+            k.s(q.above(5), b(Blocks.CHISELED_POLISHED_BLACKSTONE));
+            k.s(q.above(6), luz);
+        }
     }
 
     private static Peca peca(String id, BlockPos c, int r, Consumer<Kit> obra) {
@@ -512,7 +568,7 @@ public final class CidadeUnica {
             var m = new BlockPos.MutableBlockPos();
             BlockState ar = b(Blocks.AIR);
             for (int x = cx << 4; x < (cx << 4) + 16; x++) for (int z = cz << 4; z < (cz << 4) + 16; z++) {
-                if (!(dist(x, z) <= R + 1 || naArena(x, z) || naEstrada(x, z))) continue;
+                if (!aplainado(p, x, z)) continue;
                 boolean arvore = false;
                 for (int y = pl.y + 40; y >= pl.y; y--) {
                     m.set(x, y, z);
@@ -572,7 +628,7 @@ public final class CidadeUnica {
 
     /** O chão onde a cidade está (dentro dela, plano; fora, o do terreno). */
     static int chao(ServerLevel l, Planta pl, int x, int z) {
-        if (x * x + z * z <= (R + 1) * (R + 1) || naArena(x, z) || naEstrada(x, z)) return pl.y;
+        if (aplainado(pl.planeta, x, z)) return pl.y;
         return Mundo.alturaGerador(l, x, z);
     }
 
@@ -584,7 +640,8 @@ public final class CidadeUnica {
         var m = new BlockPos.MutableBlockPos();
         for (int x = cx << 4; x < (cx << 4) + 16; x++) for (int z = cz << 4; z < (cz << 4) + 16; z++) {
             double d = dist(x, z);
-            boolean disco = d <= R + 1, arena = naArena(x, z), estrada = naEstrada(x, z), quartel = noQuartel(x, z);
+            boolean ryut = pl.planeta == PlanetLore.RYUT;
+            boolean disco = ryut ? noSantuario(x, z) : d <= R + 1, arena = naArena(x, z), estrada = !ryut && naEstrada(x, z), quartel = ryut ? disco : noQuartel(x, z);
             int topo = k.altura(x, z);
             if (disco || arena || estrada) {
                 for (int h = y; h < Math.max(topo, y + 1) + 2; h++) { m.set(x, h, z); if (!k.get(m).isAir()) k.s(m, ar); }
@@ -606,7 +663,7 @@ public final class CidadeUnica {
                     if (!quartel && !arena && !estrada && t == 0 && d > PRACA + 2 && d < R - 6 && !reservado(pl.planeta, x, z, 0))
                         e.enfeite(k, new BlockPos(x, y, z), x, z, t);
                 }
-            } else if (d <= R + 12 && e.aterro()) {
+            } else if (!ryut && d <= R + 12 && e.aterro()) {
                 for (int i = -16; i <= 40; i++) {
                     m.set(x, y + i, z);
                     BlockState s = k.get(m);

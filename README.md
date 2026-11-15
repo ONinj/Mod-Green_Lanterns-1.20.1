@@ -112,6 +112,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.57.4 ✅ (0.49.4) A Terra subiu no espaço (centro de y -1000 para 150): fica inteira acima do chão; quem sai dela chega por cima, de lado; calotas polares com gelo de verdade
 1.57.5 ✅ (0.49.5) Hanks, "Os Três Núcleos": o marcador da missão aponta o núcleo apagado mais perto (e pula para o próximo) e cada núcleo apagado solta uma coluna de luz alta, visível por cima dos prédios
 1.57.6 ✅ (0.49.6) Linha da Purificação (5 missões, Odym → Oa) com prazo de 6 h de jogo, senão vira Portador Negro; o Arauto corrompe 100% de quem mata; Arauto imune a qualquer jogador de nível menor (com ou sem anel) e segura 60% do golpe dos outros (30% contra o Branco)
+1.58.0 ✅ (0.50.0) Trocas de mundo consertadas (sair de planetas não manda mais para a Terra; fim do entra-e-sai da Terra); defesa no botão direito (escudo do anel); laser no PvP no máximo ~5 de vida por segundo; arremessáveis teleguiados; jaulas e correntes pegam quem está perto da mira; jaula fechada com grades finas; corrente puxa e derruba quem voa; Mogo ataca os corrompidos; Ryut só com o Santuário da Forja e o Coletor; revisão de Hanks
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

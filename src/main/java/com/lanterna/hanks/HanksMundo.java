@@ -250,6 +250,7 @@ public final class HanksMundo {
             BlockPos at = new BlockPos((int) (Math.cos(a) * r), HanksGeracao.CHAO, (int) (Math.sin(a) * r));
             if (!l.isLoaded(at) || !l.getBlockState(at).isAir()) continue;
             LanternaEntity s = LanternaEntity.lanterna(l, BuiltinCorps.YELLOW, i % 5 == 0);
+            if (s == null) break;
             s.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, l.random.nextFloat() * 360, 0);
             s.getPersistentData().putBoolean("lanterna_nucleo", true);
             s.restrictTo(new BlockPos(0, HanksGeracao.CHAO, 0), 75);
@@ -273,6 +274,7 @@ public final class HanksMundo {
         if (perto >= 3) return;
         for (int i = 0; i < 2; i++) {
             LanternaEntity s = LanternaEntity.lanterna(l, BuiltinCorps.YELLOW, i == 0);
+            if (s == null) break;
             double a = p.getRandom().nextDouble() * Math.PI * 2;
             s.moveTo(p.getX() + Math.cos(a) * 18, p.getY() + 6, p.getZ() + Math.sin(a) * 18, 0, 0);
             s.getPersistentData().putBoolean("lanterna_encontro", true);

@@ -73,7 +73,7 @@ public final class Moradores {
             }
             if (perto(p, CidadeUnica.ARENA, 90) && !LoreWorldData.get(level.getServer()).siteBuilt("arena_muro:" + planet.planet))
                 CidadeUnica.repararArena(level, planet);
-            if (perto(p, CidadeNativa.CENTRO, 250)) {
+            if (planet != PlanetLore.RYUT && perto(p, CidadeNativa.CENTRO, 250)) {
                 String chave = level.dimension().location() + "|nativa";
                 if (level.getGameTime() - ULTIMA.getOrDefault(chave, -100000L) >= 600) {
                     ULTIMA.put(chave, level.getGameTime());
@@ -81,7 +81,7 @@ public final class Moradores {
                     if (n > 0) LanternaMod.LOGGER.info("Lanterna: {} nativo(s) chegaram à cidade de {}", n, planet.planet);
                 }
             }
-            if (perto(p, Cidade.CENTRO, 110)) conferir(level, planet.planet + ":cidade2", () -> Cidade.censo(level, planet));
+            if (planet != PlanetLore.RYUT && perto(p, Cidade.CENTRO, 110)) conferir(level, planet.planet + ":cidade2", () -> Cidade.censo(level, planet));
             return;
         }
         if (planet == PlanetLore.OA && data.siteBuilt("oa:palacio") && perto(p, Palacio.CENTRO, 110)) {

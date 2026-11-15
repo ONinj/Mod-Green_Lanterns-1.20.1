@@ -67,6 +67,10 @@ public final class ChamadoMogo {
             p.displayClientMessage(Component.translatable("mogo.lanterna.chamado.so_verde").withStyle(ChatFormatting.GRAY), true);
             return true;
         }
+        if (MogoMissoes.corrompido(p)) { // 0.50: o Mogo não atende quem a Morte tocou
+            MogoMissoes.falar(p, "morte", true);
+            return true;
+        }
         LivingEntity alvo = mirar(p);
         if (alvo == null) {
             p.displayClientMessage(Component.translatable("mogo.lanterna.chamado.sem_alvo").withStyle(ChatFormatting.GRAY), true);

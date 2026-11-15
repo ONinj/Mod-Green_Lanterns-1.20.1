@@ -1,6 +1,16 @@
 {
   "variants": {
-    "formando=false": { "model": "lanterna:block/construct_block" },
-    "formando=true": { "model": "lanterna:block/construct_block" }
+    "formando=false,grade=false": {
+      "model": "lanterna:block/construct_block"
+    },
+    "formando=false,grade=true": {
+      "model": "lanterna:block/construct_grade"
+    },
+    "formando=true,grade=false": {
+      "model": "lanterna:block/construct_block"
+    },
+    "formando=true,grade=true": {
+      "model": "lanterna:block/construct_grade"
+    }
   }
 }

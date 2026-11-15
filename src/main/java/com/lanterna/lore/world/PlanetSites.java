@@ -48,6 +48,11 @@ public final class PlanetSites {
         LoreWorldData data = LoreWorldData.get(level.getServer());
         // mundos da 0.48: a cidade única nasce com o terreno (CidadeUnica); nada é construído aqui
         if (com.lanterna.cidade.Layout.novo() && planet != PlanetLore.GENESE) return;
+        // Ryut (0.50), desenho antigo: só a base (com a Forja e o Coletor) e a arena; nada de cidade nem Tropa
+        if (planet == PlanetLore.RYUT) {
+            if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220)) tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140);
+            return;
+        }
         // Uma construção por vez (a cada segundo), para não travar o servidor
         if (!tryBuild(level, data, planet, "hub", PlanetLore.HUB, player, 220)
                 && !tryBuild(level, data, planet, "arena", PlanetLore.arena(planet), player, 140)
@@ -268,7 +273,7 @@ public final class PlanetSites {
         }
         n += semFontes(level, planet, c, y);
         BlockPos alvos = new BlockPos(c.getX() + 13, y, c.getZ());
-        if (level.isLoaded(alvos)) {
+        if (planet != PlanetLore.RYUT && level.isLoaded(alvos)) { // Ryut (0.50): só a Forja e o Coletor
             int tem = level.getEntities(LoreEntities.ALVO_TREINO.get(), new net.minecraft.world.phys.AABB(alvos).inflate(10, 6, 10), e -> e.isAlive()).size();
             for (int i = tem; i < 3; i++) {
                 Entity d = LoreEntities.ALVO_TREINO.get().create(level);
@@ -387,7 +392,7 @@ public final class PlanetSites {
         // Limpa repetidos (a 0.23 criava um novo a cada 30 s): fica só a quantidade certa de cada um
         java.util.Map<String, Integer> limite = new java.util.HashMap<>();
         if (planet == PlanetLore.OA) { limite.put("guardiao", 3); limite.put("instrutor", 1); }
-        else { limite.put("guardiao", 1); limite.put("lider", planet == PlanetLore.ZAMARON ? 2 : 1); }
+        else { limite.put("guardiao", planet == PlanetLore.RYUT ? 0 : 1); limite.put("lider", planet == PlanetLore.ZAMARON ? 2 : 1); }
         for (var en : limite.entrySet()) {
             java.util.List<RaceEntity> l = level.getEntitiesOfClass(RaceEntity.class, area, e -> e.isAlive() && e.role().equals(en.getKey()));
             l.sort(java.util.Comparator.comparingInt(net.minecraft.world.entity.Entity::getId));
@@ -415,7 +420,7 @@ public final class PlanetSites {
                 Race race = planet == PlanetLore.RYUT ? Race.COLETOR : Race.ofPlanet(planet.planet);
                 if (race != null && quantos.apply("lider") == 0) { npc(level, race, new BlockPos(c.getX() - 5, chao.apply(-5, 12), c.getZ() + 12), "lider", "npc.lanterna.name." + planet.planet); n++; }
                 if (planet == PlanetLore.ZAMARON && quantos.apply("lider") < 2) { npc(level, Race.ZAELITH, new BlockPos(c.getX() - 7, chao.apply(-7, 12), c.getZ() + 12), "lider", "npc.lanterna.name.zamaron_par"); n++; }
-                if (quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 5, chao.apply(5, 12), c.getZ() + 12), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
+                if (planet != PlanetLore.RYUT && quantos.apply("guardiao") == 0) { npc(level, Race.GUARDIAO, new BlockPos(c.getX() + 5, chao.apply(5, 12), c.getZ() + 12), "guardiao", "npc.lanterna.name.guardiao_emissario"); n++; }
             }
             n += baseNaPraca(level, planet, c, yCidade);
             return n;

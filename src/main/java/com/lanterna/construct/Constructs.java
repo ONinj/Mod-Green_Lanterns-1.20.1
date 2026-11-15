@@ -108,6 +108,10 @@ public final class Constructs {
         ConstructType type = ConstructType.byId(id);
         RingData ring = ModCapabilities.get(player).orElse(null);
         if (type == null || ring == null || !ring.hasRing()) return;
+        if (type == ConstructType.ESCUDO) { // 0.50: o escudo é segurar o botão direito (com a mão vazia)
+            player.displayClientMessage(Component.translatable("defesa.lanterna.dica"), true);
+            return;
+        }
         if (!ring.powerActive()) {
             player.displayClientMessage(Component.translatable("message.lanterna.power_needed"), true);
             return;
@@ -249,6 +253,17 @@ public final class Constructs {
                 level.addFreshEntity(hand);
             }
             case GANCHO -> {
+                // 0.50: com alguém na mira (ou perto dela), a corrente agarra o alvo e o puxa até você
+                LivingEntity preso = lookedEntity(player, 24 + 2 * lvl);
+                if (preso != null && ConstructEntity.inimigo(player, preso)) {
+                    ConstructEntity chain = ConstructEntity.create(player, ConstructEntity.Kind.GRAPPLE, color, 70, 0, 1f);
+                    chain.setTarget(preso);
+                    chain.setEnd(preso.position().add(0, preso.getBbHeight() * 0.5, 0));
+                    level.addFreshEntity(chain);
+                    level.playSound(null, player.blockPosition(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 1.2f, 0.9f);
+                    if (preso instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 12, color, true);
+                    return true;
+                }
                 Vec3 far = player.getEyePosition().add(look.scale(32 + 4 * lvl));
                 BlockHitResult hit = level.clip(new ClipContext(player.getEyePosition(), far, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
                 if (hit.getType() == HitResult.Type.MISS) {
@@ -552,9 +567,9 @@ public final class Constructs {
         for (int x = x0; x <= x1; x++) {
             for (int y = y0; y <= y1; y++) {
                 for (int z = z0; z <= z1; z++) {
+                    // 0.50: jaula fechada de verdade: toda a casca, com blocos de grade (barras finas)
                     boolean shell = x == x0 || x == x1 || y == y0 || y == y1 || z == z0 || z == z1;
-                    boolean bars = (x + z) % 2 == 0 || y == y0 || y == y1;
-                    if (shell && bars) ConstructBlock.place(level, new BlockPos(x, y, z), color, life, 3 + (y - y0) * 2 + level.random.nextInt(3));
+                    if (shell) ConstructBlock.place(level, new BlockPos(x, y, z), color, life, 3 + (y - y0) * 2 + level.random.nextInt(3), true);
                 }
             }
         }
@@ -734,6 +749,77 @@ public final class Constructs {
 
     // ===================== Escudo =====================
 
+    /**
+     * 0.50: a defesa do botão direito (como num jogo de luta). Segurando, o escudo do anel fica em volta do jogador:
+     * todo golpe vira gasto de carga (3 de carga por ponto de dano) e manter o escudo gasta um pouco por segundo.
+     * Soltou, o escudo some. Sem carga, ele quebra e só volta depois de um instante.
+     */
+    public static void defesa(ServerPlayer player, boolean ligar) {
+        ConstructEntity atual = SHIELDS.get(player.getUUID());
+        if (!ligar) {
+            if (atual != null) {
+                atual.discard();
+                SHIELDS.remove(player.getUUID());
+                player.getPersistentData().putLong(DEFESA_SOLTOU, player.level().getGameTime());
+            }
+            return;
+        }
+        if (atual != null && atual.isAlive()) return;
+        RingData ring = ModCapabilities.get(player).orElse(null);
+        if (ring == null || !ring.hasRing() || !ring.powerActive()) return;
+        if (com.lanterna.lore.entity.boss.Controle.silenciado(player)) return;
+        long agora = player.level().getGameTime();
+        if (agora - player.getPersistentData().getLong(DEFESA_SOLTOU) < 6) return; // não dá para "piscar" o escudo
+        if (agora < player.getPersistentData().getLong(DEFESA_QUEBROU)) {
+            player.displayClientMessage(Component.translatable("defesa.lanterna.quebrado"), true);
+            return;
+        }
+        int custo = 6;
+        if (ring.charge() < custo && !player.isCreative()) {
+            player.displayClientMessage(Component.translatable("message.lanterna.no_charge"), true);
+            return;
+        }
+        if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - custo);
+        int lvl = level(player);
+        ConstructEntity shield = ConstructEntity.create(player, ConstructEntity.Kind.SHIELD, ring.color(), 20 * 60 * 10, 0, 1f + 0.1f * lvl);
+        player.serverLevel().addFreshEntity(shield);
+        SHIELDS.put(player.getUUID(), shield);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.7f, 1.7f);
+    }
+
+    public static boolean defendendo(ServerPlayer player) {
+        ConstructEntity s = SHIELDS.get(player.getUUID());
+        return s != null && s.isAlive();
+    }
+
+    private static final String DEFESA_SOLTOU = "lanterna_defesa_soltou", DEFESA_QUEBROU = "lanterna_defesa_quebrou";
+
+    /** Manter a defesa: 1 de carga por segundo; anel desligado ou sem carga, ela cai. */
+    @SubscribeEvent
+    public static void manterDefesa(net.minecraftforge.event.TickEvent.PlayerTickEvent e) {
+        if (e.phase != net.minecraftforge.event.TickEvent.Phase.END || !(e.player instanceof ServerPlayer p)) return;
+        ConstructEntity s = SHIELDS.get(p.getUUID());
+        if (s == null) return;
+        RingData ring = ModCapabilities.get(p).orElse(null);
+        if (!s.isAlive() || ring == null || !ring.hasRing() || !ring.powerActive() || !p.isAlive()) {
+            s.discard();
+            SHIELDS.remove(p.getUUID());
+            return;
+        }
+        if (p.tickCount % 20 == 0 && !p.isCreative()) {
+            RingPowers.setCharge(p, ring, ring.charge() - 1);
+            if (ring.charge() <= 0) quebrar(p, s);
+        }
+    }
+
+    private static void quebrar(ServerPlayer p, ConstructEntity s) {
+        s.discard();
+        SHIELDS.remove(p.getUUID());
+        p.getPersistentData().putLong(DEFESA_QUEBROU, p.level().getGameTime() + 40);
+        p.level().playSound(null, p.blockPosition(), SoundEvents.SHIELD_BREAK, SoundSource.PLAYERS, 1f, 0.8f);
+        p.displayClientMessage(Component.translatable("defesa.lanterna.quebrou"), true);
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onAttacked(LivingAttackEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
@@ -755,10 +841,7 @@ public final class Constructs {
         level.sendParticles(new DustParticleOptions(new Vector3f(((c >> 16) & 0xFF) / 255f, ((c >> 8) & 0xFF) / 255f, (c & 0xFF) / 255f), 1.5f),
                 player.getX(), player.getY() + 1, player.getZ(), 20, 0.8, 0.9, 0.8, 0);
         level.playSound(null, player.blockPosition(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8f, 1.4f);
-        if (ring.charge() <= 0) {
-            shield.discard();
-            SHIELDS.remove(player.getUUID());
-        }
+        if (ring.charge() <= 0) quebrar(player, shield);
     }
 
     // ===================== Ajudantes =====================
@@ -793,7 +876,32 @@ public final class Constructs {
                 best = e;
             }
         }
-        return best;
+        return best != null ? best : alvoPerto(player, range);
+    }
+
+    /**
+     * 0.50: jaulas, correntes, cristais e afins não erram mais quando há alguém perto: sem ninguém exatamente na mira,
+     * pega o inimigo mais perto da mira (num cone de ~30°) e, se não houver, o mais perto em 10 blocos.
+     */
+    @Nullable
+    public static LivingEntity alvoPerto(ServerPlayer player, double range) {
+        Vec3 eye = player.getEyePosition(), look = player.getViewVector(1f);
+        LivingEntity best = null, perto = null;
+        double nota = Double.MAX_VALUE, pd = 10 * 10;
+        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
+                x -> ConstructEntity.inimigo(player, x) && player.hasLineOfSight(x))) {
+            boolean forte = e instanceof net.minecraft.world.entity.player.Player || e instanceof net.minecraft.world.entity.monster.Enemy
+                    || e instanceof com.lanterna.especies.LanternaEntity || e instanceof com.lanterna.lore.entity.boss.LoreBoss
+                    || (e instanceof net.minecraft.world.entity.Mob m && m.getTarget() == player);
+            if (!forte) continue;
+            Vec3 to = e.position().add(0, e.getBbHeight() * 0.5, 0).subtract(eye);
+            double d = to.length();
+            if (d > range || d < 0.3) continue;
+            double cos = to.normalize().dot(look);
+            if (cos > 0.86 && d * (2 - cos) < nota) { nota = d * (2 - cos); best = e; }
+            if (e.distanceToSqr(player) < pd) { pd = e.distanceToSqr(player); perto = e; }
+        }
+        return best != null ? best : perto;
     }
 
     private static void spark(ServerPlayer player, int c) {

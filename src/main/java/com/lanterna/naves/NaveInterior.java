@@ -350,7 +350,9 @@ public final class NaveInterior {
             n.discard();
             src.setChunkForced(cx, cz, false);
             double dist = de.distanceTo(body.center());
-            long segundos = (long) Mth.clamp(8 + dist / 1200.0, 8, 120);
+            // 0.50: no máximo 45 s (Hanks e os lendários ficam muito longe: eram 2 min, e quem saía da sala no meio
+            // voltava para o planeta de partida, sem a nave)
+            long segundos = (long) Mth.clamp(8 + dist / 2400.0, 8, 45);
             sala.chegada = now + segundos * 20;
             sala.fase = 1;
             dados.setDirty();
@@ -458,6 +460,15 @@ public final class NaveInterior {
         CompoundTag back = player.getPersistentData().getCompound(RETURN);
         MinecraftServer server = player.server;
         UUID naveId = naveDaSala != null ? naveDaSala : back.hasUUID("Nave") ? back.getUUID("Nave") : null;
+        // a nave está no meio do piloto automático (ainda não chegou): a porta não abre
+        if (naveId != null && player.level().dimension().equals(DIM)) {
+            Sala viajando = Dados.get(server).salas.get(naveId);
+            if (viajando != null && viajando.destino != null) {
+                long falta = Math.max(1, (viajando.chegada - server.overworld().getGameTime()) / 20);
+                player.displayClientMessage(Component.translatable("nave.lanterna.auto.em_viagem_porta", viajando.fase == 0 ? 10 : falta), true);
+                return;
+            }
+        }
         Posicao pos = naveId != null ? posicao(server, naveId) : null;
         ResourceKey<Level> dimKey;
         Vec3 out;

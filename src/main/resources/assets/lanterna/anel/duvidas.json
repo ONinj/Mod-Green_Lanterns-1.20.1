@@ -284,6 +284,25 @@
   "en": "Main keys: K Lantern tab, G turns the ring on and off, V flies, R recharges, hold Z for the construct wheel and X uses it, Alt+Z Workshop, M journal, J star map, N Star Gate, P Tree of Light, O techniques (Y, U, I), H profile, F4 communicator, Tab locks aim and ; talks to me. All can be changed in Controls."
  },
  {
+  "id": "defesa",
+  "chaves": [
+   "defesa",
+   "defender",
+   "escudo",
+   "botao direito",
+   "bloquear",
+   "bloqueio",
+   "guard",
+   "defense",
+   "defend",
+   "shield",
+   "right click",
+   "block"
+  ],
+  "pt": "Com o anel ligado e a mão vazia, segure o botão direito: o escudo do anel aparece em volta de você e cada golpe gasta carga do anel (3 de carga por ponto de dano) em vez de vida. Manter o escudo gasta 1 de carga por segundo; soltou, ele some. Sem carga, ele quebra e demora um instante para voltar. Olhando para uma porta, baú ou alavanca, o botão direito continua usando o bloco.",
+  "en": "With your ring on and an empty hand, hold right click: the ring's shield wraps around you and every hit drains ring charge (3 charge per point of damage) instead of health. Holding it costs 1 charge per second; let go and it fades. Out of charge, it breaks and takes a moment to come back. Looking at a door, chest or lever, right click still uses the block."
+ },
+ {
   "id": "construtos",
   "chaves": [
    "construto",
@@ -291,7 +310,6 @@
    "roda de construtos",
    "laser",
    "martelo",
-   "escudo",
    "jaula",
    "ponte",
    "picareta",
@@ -302,15 +320,14 @@
    "construct wheel",
    "laser",
    "hammer",
-   "shield",
    "cage",
    "bridge",
    "pickaxe",
    "drill",
    "presets"
   ],
-  "pt": "Segure Z para abrir a roda de construtos, escolha um e use com X. Na roda, passe o mouse e aperte 1 a 4 para gravar nos atalhos Alt+1 a Alt+4. Alguns construtos só liberam com mais afinidade, e a força cresce com a afinidade e o nível.",
-  "en": "Hold Z to open the construct wheel, pick one and use it with X. On the wheel, hover and press 1 to 4 to save it to the Alt+1 to Alt+4 shortcuts. Some constructs unlock only with more affinity, and their strength grows with affinity and level."
+  "pt": "Segure Z para abrir a roda de construtos, escolha um e use com X. Na roda, passe o mouse e aperte 1 a 4 para gravar nos atalhos Alt+1 a Alt+4. Alguns construtos só liberam com mais afinidade, e a força cresce com a afinidade e o nível. Os arremessáveis são teleguiados; jaulas, correntes e afins pegam o inimigo mais perto da mira. O escudo saiu da roda: agora é o botão direito.",
+  "en": "Hold Z to open the construct wheel, pick one and use it with X. On the wheel, hover and press 1 to 4 to save it to the Alt+1 to Alt+4 shortcuts. Some constructs unlock only with more affinity, and their strength grows with affinity and level. Thrown constructs are homing; cages, chains and the like grab the enemy closest to your aim. The shield left the wheel: it's now right click."
  },
  {
   "id": "oficina",

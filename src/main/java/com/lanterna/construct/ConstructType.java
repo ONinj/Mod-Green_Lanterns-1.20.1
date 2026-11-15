@@ -180,7 +180,7 @@ public enum ConstructType {
 
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador) {
         java.util.List<ConstructType> l = new java.util.ArrayList<>();
-        for (ConstructType t : values()) if (t.disponivel(ringCorps, portador)) l.add(t);
+        for (ConstructType t : values()) if (t != ESCUDO && t.disponivel(ringCorps, portador)) l.add(t); // 0.50: o escudo é o botão direito
         return l;
     }
 
@@ -197,7 +197,7 @@ public enum ConstructType {
     /** Construtos que este anel mostra na roda: os de todos + o próprio da Tropa. */
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
         java.util.List<ConstructType> l = new java.util.ArrayList<>();
-        for (ConstructType t : values()) if (t.disponivel(ringCorps)) l.add(t);
+        for (ConstructType t : values()) if (t != ESCUDO && t.disponivel(ringCorps)) l.add(t);
         return l;
     }
 

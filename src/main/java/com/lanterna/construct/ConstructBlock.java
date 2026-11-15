@@ -33,17 +33,21 @@ public class ConstructBlock extends BaseEntityBlock {
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty FORMANDO =
             net.minecraft.world.level.block.state.properties.BooleanProperty.create("formando");
 
+    /** 0.50: grade de jaula (barras finas, sem buracos grandes; continua sólida para quem está preso). */
+    public static final net.minecraft.world.level.block.state.properties.BooleanProperty GRADE =
+            net.minecraft.world.level.block.state.properties.BooleanProperty.create("grade");
+
     /** Ticks que cada bloco leva para se formar. */
     public static final int FORMA = Integer.getInteger("lanterna.forma", 10);
 
     public ConstructBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(FORMANDO, false));
+        registerDefaultState(stateDefinition.any().setValue(FORMANDO, false).setValue(GRADE, false));
     }
 
     @Override
     protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> b) {
-        b.add(FORMANDO);
+        b.add(FORMANDO, GRADE);
     }
 
     @Nullable
@@ -70,7 +74,8 @@ public class ConstructBlock extends BaseEntityBlock {
     @Override
     public boolean skipRendering(BlockState state, BlockState other, net.minecraft.core.Direction dir) {
         // a face encostada num bloco ainda se formando continua aparecendo
-        return other.is(this) && !other.getValue(FORMANDO) || super.skipRendering(state, other, dir);
+        if (state.getValue(GRADE)) return false;
+        return other.is(this) && !other.getValue(FORMANDO) && !other.getValue(GRADE) || super.skipRendering(state, other, dir);
     }
 
     @Nullable
@@ -87,11 +92,15 @@ public class ConstructBlock extends BaseEntityBlock {
 
     /** Coloca o bloco já com a animação de formação: começa a aparecer daqui a {@code atraso} ticks (-1 = sem animação). */
     public static boolean place(ServerLevel level, BlockPos pos, int color, int lifeTicks, int atraso) {
+        return place(level, pos, color, lifeTicks, atraso, false);
+    }
+
+    public static boolean place(ServerLevel level, BlockPos pos, int color, int lifeTicks, int atraso, boolean grade) {
         BlockState here = level.getBlockState(pos);
         if (!here.isAir() && !here.canBeReplaced() && !here.is(ConstructRegistry.CONSTRUCT_BLOCK.get())) return false;
         if (level.isOutsideBuildHeight(pos)) return false;
         boolean formar = atraso >= 0 && !here.is(ConstructRegistry.CONSTRUCT_BLOCK.get());
-        level.setBlock(pos, ConstructRegistry.CONSTRUCT_BLOCK.get().defaultBlockState().setValue(FORMANDO, formar), 3);
+        level.setBlock(pos, ConstructRegistry.CONSTRUCT_BLOCK.get().defaultBlockState().setValue(FORMANDO, formar).setValue(GRADE, grade), 3);
         if (level.getBlockEntity(pos) instanceof Entity be) {
             be.color = color;
             be.formaDe = formar ? level.getGameTime() + atraso : 0;
