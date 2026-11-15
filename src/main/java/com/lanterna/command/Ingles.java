@@ -37,15 +37,29 @@ public final class Ingles {
         par("papel", "role"); par("tropa", "corps"); par("roupa", "outfit"); par("pele", "skin"); par("oficial", "officer");
         par("corrompido", "corrupted"); par("lanterna", "lantern"); par("capitao", "captain"); par("mercador", "merchant");
         par("nenhuma", "none");
+        // 0.50.2: técnicas, invocações e naves também em inglês
+        par("olhar", "gaze"); par("bastiao", "bastion"); par("onda", "wave"); par("salto", "leap"); par("armadura", "armor"); par("comando", "command");
+        par("eco", "echo"); par("alvo_treino", "training_dummy"); par("broto", "sprout");
+        par("nave_lanceira", "lancer_ship"); par("nave_pirata", "pirate_ship"); par("nave_patrulha", "patrol_ship");
+        par("nave_cargueiro", "freighter_ship"); par("nave_pirata_capitania", "pirate_flagship");
     }
 
     /** O que o jogador digitou (inglês) para o nome interno (português). Sem tradução, devolve igual. */
     public static String pt(String en) {
-        return EN_PT.getOrDefault(en, en);
+        String v = EN_PT.get(en);
+        if (v != null) return v;
+        // nomes compostos ("lantern_green", "officer_red"): traduz só a primeira parte
+        int i = en.indexOf('_');
+        if (i > 0 && EN_PT.containsKey(en.substring(0, i))) return EN_PT.get(en.substring(0, i)) + en.substring(i);
+        return en;
     }
 
     public static String en(String pt) {
-        return PT_EN.getOrDefault(pt, pt);
+        String v = PT_EN.get(pt);
+        if (v != null) return v;
+        int i = pt.indexOf('_');
+        if (i > 0 && PT_EN.containsKey(pt.substring(0, i))) return PT_EN.get(pt.substring(0, i)) + pt.substring(i);
+        return pt;
     }
 
     public static String[] en(String... pts) {

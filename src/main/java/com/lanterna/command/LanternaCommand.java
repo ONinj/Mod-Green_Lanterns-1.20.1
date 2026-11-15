@@ -39,10 +39,10 @@ public final class LanternaCommand {
         dispatcher.register(Commands.literal("lantern")
 
                 // Qualquer jogador: lista dos rituais
-                .then(Commands.literal("acabar").requires(src -> src.hasPermission(2))
+                .then(Commands.literal("repair").requires(src -> src.hasPermission(2))
                         .executes(ctx -> acabar(ctx.getSource(), 64))
-                        .then(Commands.argument("raio", IntegerArgumentType.integer(8, 128))
-                                .executes(ctx -> acabar(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "raio")))))
+                        .then(Commands.argument("radius", IntegerArgumentType.integer(8, 128))
+                                .executes(ctx -> acabar(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "radius")))))
                 .then(Commands.literal("rituals")
                         .executes(LanternaCommand::rituals))
 
@@ -209,10 +209,10 @@ public final class LanternaCommand {
                                             com.mojang.brigadier.arguments.StringArgumentType.getString(c, "id"));
                                     return 1;
                                 })))
-                .then(Commands.literal("converter").requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("jogador", net.minecraft.commands.arguments.EntityArgument.player())
+                .then(Commands.literal("convert").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player())
                                 .executes(c -> {
-                                    var alvo = net.minecraft.commands.arguments.EntityArgument.getPlayer(c, "jogador");
+                                    var alvo = net.minecraft.commands.arguments.EntityArgument.getPlayer(c, "player");
                                     var d = com.lanterna.mission.LoreCapability.get(alvo).orElse(null);
                                     var r = com.lanterna.capability.ModCapabilities.get(alvo).orElse(null);
                                     if (d == null || r == null || !r.hasRing()) {
@@ -227,23 +227,23 @@ public final class LanternaCommand {
                                     c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("command.lanterna.converter", alvo.getDisplayName()), true);
                                     return 1;
                                 })))
-                .then(Commands.literal("anelpreto").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("blackring").requires(source -> source.hasPermission(2))
                         .executes(c -> {
                             String dono = com.lanterna.morte.AnelPreto.nomeDono(c.getSource().getServer());
                             c.getSource().sendSuccess(() -> dono == null ? net.minecraft.network.chat.Component.translatable("command.lanterna.anelpreto_livre")
                                     : net.minecraft.network.chat.Component.translatable("command.lanterna.anelpreto_dono", dono), false);
                             return 1;
                         })
-                        .then(Commands.literal("liberar").executes(c -> {
+                        .then(Commands.literal("free").executes(c -> {
                             com.lanterna.morte.AnelPreto.liberar(c.getSource().getServer());
                             c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("command.lanterna.anelpreto_liberado"), true);
                             return 1;
                         })))
-                .then(Commands.literal("corrupcao").requires(source -> source.hasPermission(2))
-                        .then(Commands.argument("nivel", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
+                .then(Commands.literal("corruption").requires(source -> source.hasPermission(2))
+                        .then(Commands.argument("level", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 2))
                                 .executes(c -> {
                                     var sp = c.getSource().getPlayerOrException();
-                                    int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "nivel");
+                                    int n = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "level");
                                     if (n == 1) com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { if (d.morte() < 2) d.setMorte(2); });
                                     com.lanterna.morte.Corrupcao.marcarAnel(sp, n);
                                     c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.translatable("command.lanterna.corrupcao", n), false);

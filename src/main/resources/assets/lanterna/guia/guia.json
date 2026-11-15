@@ -39,7 +39,7 @@
       "en": "How to use this guide"
      },
      "texto": {
-      "pt": "Use as **setas** (ou A/D) para virar a página e **W/S** para trocar de capítulo. A **rodinha do mouse** rola o texto quando ele é longo.\n\nPasse o mouse em cima de itens e ingredientes para ver o nome. As receitas são as **de verdade** do jogo: se um ingrediente aceita várias opções, ele vai trocando.\n\nCapítulo lido ganha um **✔**. Abra o guia quando quiser com {tecla:key.lanterna.guia} ou com o comando **/guia**.",
+      "pt": "Use as **setas** (ou A/D) para virar a página e **W/S** para trocar de capítulo. A **rodinha do mouse** rola o texto quando ele é longo.\n\nPasse o mouse em cima de itens e ingredientes para ver o nome. As receitas são as **de verdade** do jogo: se um ingrediente aceita várias opções, ele vai trocando.\n\nCapítulo lido ganha um **✔**. Abra o guia quando quiser com {tecla:key.lanterna.guia} ou com o comando **/guide**.",
       "en": "Use the **arrows** (or A/D) to turn pages and **W/S** to switch chapters. The **mouse wheel** scrolls long text.\n\nHover items and ingredients to see their names. Recipes are the game's **real** ones: if an ingredient accepts several options, it cycles.\n\nRead chapters get a **✔**. Open the guide anytime with {tecla:key.lanterna.guia} or the **/guide** command."
      },
      "teclas": [

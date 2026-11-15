@@ -175,7 +175,7 @@ public final class ComandosTeste {
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(CidadeMissoes.TECNICAS, "todas")), b))
                         .executes(c -> {
                             ServerPlayer p = eu(c);
-                            String id = StringArgumentType.getString(c, "id");
+                            String id = Ingles.pt(StringArgumentType.getString(c, "id"));
                             LoreData dd = dados(p);
                             List<String> l = Ingles.todos(id) ? CidadeMissoes.TECNICAS : List.of(id);
                             for (String t : l) {
@@ -250,12 +250,12 @@ public final class ComandosTeste {
 
                 // ---------- invocar ----------
                 .then(op("summon").then(Commands.argument("what", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(invocaveis(), b))
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(invocaveis()), b))
                         .executes(c -> invocar(c, Ingles.pt(StringArgumentType.getString(c, "what")), 1))
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1, 50))
                                 .executes(c -> invocar(c, Ingles.pt(StringArgumentType.getString(c, "what")), IntegerArgumentType.getInteger(c, "amount"))))))
                 .then(op("ship").then(Commands.argument("type", StringArgumentType.word())
-                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(NaveTipo.values()).map(t -> t.id), b))
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(NaveTipo.values()).map(t -> Ingles.en(t.id)), b))
                         .executes(c -> nave(c, Ingles.pt(StringArgumentType.getString(c, "type")), "green"))
                         .then(Commands.argument("paint", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Ingles.en(lista(Arrays.asList(TROPAS), "1", "2")), b))
@@ -509,6 +509,7 @@ public final class ComandosTeste {
                 {"/lantern summon <what> [amount]", "ajuda.20"},
                 {"/lantern ship <type> [paint]", "ajuda.21"},
                 {"/lantern kit <rings|materials|relics|guild|ships|all>", ""},
+                {"/lantern corruption <0|1|2> | convert <player> | blackring [free] | repair [radius]", ""},
                 {"/guild admin troops <n> | defense <n> | no_shield", "ajuda.23"},
         };
         for (String[] l : linhas) {

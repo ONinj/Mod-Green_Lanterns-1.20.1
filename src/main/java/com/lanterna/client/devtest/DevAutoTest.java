@@ -3778,6 +3778,29 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.50.2: comandos em inglês. */
+    private static void sceneCmdsEn() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(20, () -> { cmd("gamemode creative"); cmd("kill @e[type=!player]"); cmd("lantern ring green"); });
+        at(20, () -> { cmd("lantern summon lantern_green"); cmd("lantern summon officer_red"); cmd("lantern summon training_dummy"); cmd("lantern summon pirate"); cmd("lantern summon echo"); });
+        at(20, () -> server(sp -> {
+            java.util.Map<String, Integer> n = new java.util.TreeMap<>();
+            for (var e : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, sp.getBoundingBox().inflate(16), x -> x != sp))
+                n.merge(e.getType().builtInRegistryHolder().key().location().getPath(), 1, Integer::sum);
+            glog("summon: " + n);
+        }));
+        at(5, () -> { mc.player.getInventory().clearContent(); cmd("lantern ship pirate_ship"); cmd("lantern technique gaze"); cmd("lantern corruption 0"); });
+        at(20, () -> {
+            glog("ship item: " + mc.player.getInventory().items.stream().filter(i -> !i.isEmpty()).map(i -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(i.getItem()).getPath()).toList());
+            server(sp -> glog("tecnica gaze: " + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.isDone("prov_olhar")).orElse(false)));
+        });
+        at(5, () -> cmd("guide"));
+        at(20, () -> glog("tela depois de /guide: " + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())));
+        at(10, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });
+    }
+
     /** 0.50: Ryut só com o Santuário da Forja e o Coletor. */
     private static void sceneRyut() {
         Minecraft mc = Minecraft.getInstance();
@@ -6425,6 +6448,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("purificacao")) scenePurificacao();
         else if (ENABLED && SCENE.equals("mogosair")) sceneMogoSair();
         else if (ENABLED && SCENE.equals("ryut")) sceneRyut();
+        else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
         else if (ENABLED && SCENE.equals("combate050")) sceneCombate050();
         else if (ENABLED && SCENE.equals("hanksvisita")) sceneHanksVisita();

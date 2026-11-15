@@ -1584,3 +1584,18 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
   - um planeta conta como feito também se você já tem o anel dele (menos o da sua Tropa, que ainda pede o boss), ou se já juntou os anéis da fusão;
   - o treino de nível pode ser pedido de novo;
   - a cada 10 s, quem está sem nenhuma missão da linha principal recebe a próxima (a Gênese continua do passo em que parou: Juramento da Vida, fusão, ir à Gênese, forjar o Anel Branco, vencer o Nulo).
+
+
+## 0.50.2 — Comandos em inglês
+
+Os comandos que ainda estavam em português agora são em inglês (os nomes antigos deixam de existir):
+
+| Antes | Agora |
+|---|---|
+| `/lantern acabar [raio]` | `/lantern repair [radius]` |
+| `/lantern converter <jogador>` | `/lantern convert <player>` |
+| `/lantern anelpreto [liberar]` | `/lantern blackring [free]` |
+| `/lantern corrupcao <0-2>` | `/lantern corruption <0-2>` |
+| `/guia [capitulo]` | `/guide [chapter]` |
+
+Também ficaram em inglês as opções de `/lantern summon` (pirate, captain, merchant, echo, training_dummy, sprout, lantern_<corps>, officer_<corps>), de `/lantern ship` (lancer_ship, pirate_ship, patrol_ship, freighter_ship, pirate_flagship) e de `/lantern technique` (gaze, bastion, wave, leap, armor, command). O `/lantern help` mostra tudo.

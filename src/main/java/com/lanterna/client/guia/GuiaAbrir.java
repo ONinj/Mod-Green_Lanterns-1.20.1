@@ -61,12 +61,12 @@ public final class GuiaAbrir {
 
     @SubscribeEvent
     public static void comandos(RegisterClientCommandsEvent e) {
-        for (String nome : new String[]{"guia", "guide"}) {
+        for (String nome : new String[]{"guide"}) {
             e.getDispatcher().register(Commands.literal(nome)
                     .executes(c -> { capitulo = null; abrirEm = 2; return 1; })
-                    .then(Commands.argument("capitulo", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .then(Commands.argument("chapter", com.mojang.brigadier.arguments.StringArgumentType.word())
                             .suggests((c, b) -> { GuiaDados.capitulos().forEach(x -> b.suggest(x.id())); return b.buildFuture(); })
-                            .executes(c -> { capitulo = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "capitulo"); abrirEm = 2; return 1; })));
+                            .executes(c -> { capitulo = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "chapter"); abrirEm = 2; return 1; })));
         }
     }
 
