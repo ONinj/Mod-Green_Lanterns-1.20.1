@@ -82,13 +82,15 @@ public final class ClientConstructs {
             holding = type;
             holdingKey = key;
         } else {
-            COOLDOWN_UNTIL.put(type, System.currentTimeMillis() + type.cooldown * 50L);
+            // 0.52: o Purificar só entra em recarga se começou de verdade (o servidor avisa quando não há alvo)
+            if (type != ConstructType.PURIFICAR) COOLDOWN_UNTIL.put(type, System.currentTimeMillis() + type.cooldown * 50L);
         }
         // A animação do braço vem do servidor (CastAnim); o balanço normal só nos de toque
         if (!type.hold && CastAnim.estilo(type) == CastAnim.Estilo.ESTOCADA) mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
     }
 
     public static int level() {
+        if (ClientRingData.hasRing && com.lanterna.corps.BuiltinCorps.WHITE.id().equals(ClientRingData.corps)) return Affinity.MAX_LEVEL;
         return Affinity.level(ClientLoreData.DATA.affinity());
     }
 

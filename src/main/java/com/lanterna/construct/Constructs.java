@@ -85,6 +85,8 @@ public final class Constructs {
     }
 
     public static int level(ServerPlayer player) {
+        // 0.52: o anel da Vida já nasce com tudo liberado (os construtos mais fortes de todas as Tropas)
+        if (com.lanterna.corps.BuiltinCorps.WHITE.id().equals(ModCapabilities.get(player).map(r -> r.hasRing() ? r.corps() : null).orElse(null))) return Affinity.MAX_LEVEL;
         return Affinity.level(Affinity.points(EquipmentHelper.ring(player)));
     }
 
@@ -416,6 +418,9 @@ public final class Constructs {
                 level.playSound(null, target.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.5f, 1.4f);
             }
             case RASTRO_MOGO -> com.lanterna.mogo.MogoRastro.usar(player, color);
+            case PURIFICAR -> {
+                return com.lanterna.morte.PurificacaoBranca.comecar(player);
+            }
             case VIDA -> {
                 double r = 12;
                 ConstructEntity nova = ConstructEntity.create(player, ConstructEntity.Kind.NOVA, color, 30, 0, (float) r);

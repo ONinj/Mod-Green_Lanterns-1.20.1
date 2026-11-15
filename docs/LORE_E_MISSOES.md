@@ -1651,3 +1651,26 @@ A linha agora tem seis passos: 1) Odym, falar com o líder; 2) 8 Pérolas do Ama
 - **O que pede**: 2 Pérolas do Amanhã, 2 Lágrimas Índigo e 1 Maçã Dourada.
 - **A cena** (10 s): o anel sai do dedo e flutua sobre o pedestal, brilhando na cor da Tropa; o portador se deita na laje; a câmera gira em volta do altar (sem a interface, só os títulos); os cristais e o anel lançam luz sobre o corpo, uma espiral da cor da Tropa desce, a fumaça da Morte sai; "A Morte resiste"; e, num clarão, "Purificado". O anel volta limpo e ligado, e as próximas 10 mortes não corrompem (a não ser pelo Arauto).
 - Interrompido (sair do jogo, morrer, quebrar o altar), o altar devolve o que foi oferecido.
+
+
+## 0.52.0 — O anel da Vida completo, o Nulo e o altar refeito
+
+### Anel da Vida (Branco)
+- **Todos os construtos de todas as Tropas**, inclusive os da Morte (Ceifa, Farejar, Drenar Vida, Mortalha, Túmulo), já liberados: o anel da Vida conta como afinidade máxima (nada fica trancado na roda) e não precisa das Árvores da Luz. A roda ganhou a página da Morte.
+- **Purificar** (construto só do Branco, recarga de 10 minutos, que não some ao sair do jogo): aponte o anel para um jogador corrompido ou Portador Negro (até 16 blocos; sem ninguém na mira, pega o corrompido mais perto em 6 blocos). Os dois ficam presos numa cena que todos em volta veem: o portador do Branco estende o anel, um fio de luz branca vai até o peito do outro, que é erguido do chão; uma espiral branca sobe em volta dele enquanto a fumaça da Morte sai; e, numa explosão branca, ele volta ao normal (anel limpo, traje e poderes da própria Tropa, proteção das próximas 10 mortes). O Arauto da Morte não pode ser purificado.
+
+### O Nulo
+- **Maior**: cerca de 6 blocos de altura.
+- **Cinco fases** (80%, 55%, 30% e 12% da vida), cada uma anunciada com título:
+  1. ecos sem cor e golpes "sem cor";
+  2. copia os chefes que já caíram; o vazio puxa todos e corta o voo;
+  3. a rachadura se fecha com você dentro; ele come a luz dos anéis (carga);
+  4. eclipse: duas cópias de uma vez, aparece atrás do alvo, fica mais rápido;
+  5. desespero: ondas de vazio sem parar, ninguém voa, ataques mais rápidos.
+- **Poderes de controle** (silêncio, prisão, queda) dos outros chefes, em dobro a partir da fase 3; a cada fase, todos perdem o voo e são empurrados.
+- **Golpe**: além do golpe normal, tira uma parte da vida de quem apanha, sem ligar para armadura (12% na fase 1 até 20% na fase 5, no máximo 22 de uma vez). Medido num Branco nível 60 (86 de vida): 6 a 7 golpes para cair.
+- **Resistência**: só o anel da Vida o fere, e só 60% do golpe (50% na fase 4, 42% na fase 5).
+
+### Altar da Purificação
+- Modelo refeito: as peças maiores que um bloco ganharam texturas certas (antes apareciam pedaços de outras texturas, como listras laranjas).
+- O portador fica deitado **na laje** do começo ao fim (antes ficava no chão onde clicou e, no meio, ia para o lado). O anel flutua em cima do pedestal da cabeceira.

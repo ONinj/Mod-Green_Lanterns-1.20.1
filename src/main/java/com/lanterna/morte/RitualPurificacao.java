@@ -102,7 +102,7 @@ public final class RitualPurificacao {
         // o anel vai para o pedestal (o de verdade continua no dedo, desligado; o do pedestal é a imagem dele)
         if (r.powerActive()) com.lanterna.power.RingPowers.togglePower(p);
         ItemStack copia = com.lanterna.power.EquipmentHelper.ring(p).copy();
-        double[] pd = AltarPurificacao.gira(0, -0.6, cabeceira);
+        double[] pd = AltarPurificacao.gira(0, -1.12, cabeceira);
         Display.ItemDisplay anel = EntityType.ITEM_DISPLAY.create(l);
         UUID id = null;
         if (anel != null) {
@@ -119,7 +119,7 @@ public final class RitualPurificacao {
             t.putInt("glow_color_override", r.color());
             anel.load(t);
             anel.setGlowingTag(true);
-            anel.moveTo(altar.getX() + 0.5 + pd[0], altar.getY() + 1.25, altar.getZ() + 0.5 + pd[1]);
+            anel.moveTo(altar.getX() + 0.5 + pd[0], altar.getY() + 1.4, altar.getZ() + 0.5 + pd[1]);
             l.addFreshEntity(anel);
             id = anel.getUUID();
         }
@@ -128,7 +128,7 @@ public final class RitualPurificacao {
         l.playSound(null, altar, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.2f, 0.8f);
         l.playSound(null, altar, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.5f, 1f);
         // a luz sai da mão até o pedestal
-        Vec3 mao = p.position().add(0, 1.1, 0), ped = new Vec3(altar.getX() + 0.5 + pd[0], altar.getY() + 1.25, altar.getZ() + 0.5 + pd[1]);
+        Vec3 mao = p.position().add(0, 1.1, 0), ped = new Vec3(altar.getX() + 0.5 + pd[0], altar.getY() + 1.4, altar.getZ() + 0.5 + pd[1]);
         for (int i = 0; i <= 16; i++) {
             Vec3 q = mao.lerp(ped, i / 16.0);
             l.sendParticles(new DustParticleOptions(cor(r.color()), 1.2f), q.x, q.y, q.z, 2, 0.03, 0.03, 0.03, 0);
@@ -152,8 +152,8 @@ public final class RitualPurificacao {
         Vec3 corpo = new Vec3(a.getX() + 0.5, a.getY() + 0.85, a.getZ() + 0.5);
         double[] meio = AltarPurificacao.gira(0, 0.55, r.cabeceira);
         corpo = corpo.add(meio[0], 0, meio[1]);
-        double[] pdo = AltarPurificacao.gira(0, -0.6, r.cabeceira);
-        Vec3 ped = new Vec3(a.getX() + 0.5 + pdo[0], a.getY() + 1.25, a.getZ() + 0.5 + pdo[1]);
+        double[] pdo = AltarPurificacao.gira(0, -1.12, r.cabeceira);
+        Vec3 ped = new Vec3(a.getX() + 0.5 + pdo[0], a.getY() + 1.4, a.getZ() + 0.5 + pdo[1]);
         Vector3f cor = cor(r.cor);
 
         // o anel do pedestal sobe e desce de leve
@@ -161,13 +161,15 @@ public final class RitualPurificacao {
             d.moveTo(ped.x, ped.y + 0.12 * Math.sin(t * 0.12) + Math.min(0.5, t * 0.004), ped.z);
 
         if (t == 12) {
-            // deita na laje (o jogo pensa que é uma cama)
-            p.startSleeping(a);
+            // deita na laje (o jogo pensa que é uma cama): primeiro leva o corpo até ela
+            deitar(p, a, r.cabeceira);
             l.playSound(null, a, SoundEvents.ARMOR_EQUIP_GENERIC, SoundSource.PLAYERS, 0.6f, 0.8f);
         }
-        // a Morte não deixa dormir de verdade: o contador de sono volta a zero (não pula a noite)
-        if (t == 95 && p.isSleeping()) { p.stopSleepInBed(true, false); p.startSleeping(a); }
-        if (t > 12 && !p.isSleeping() && t < DURACAO - 8) p.startSleeping(a);
+        // 0.52: o corpo fica na laje do começo ao fim (nada de ficar no chão onde clicou ou escorregar para o lado)
+        if (t > 12 && t < DURACAO - 8) {
+            Vec3 cama = new Vec3(a.getX() + 0.5, a.getY() + 0.6875, a.getZ() + 0.5);
+            if (!p.isSleeping() || p.position().distanceToSqr(cama) > 0.02) deitar(p, a, r.cabeceira);
+        }
 
         if (t >= 20 && t < 160) {
             // os quatro cristais lançam fios de luz até o corpo
@@ -222,6 +224,24 @@ public final class RitualPurificacao {
             titulo(p, "purificacao.lanterna.t3", "purificacao.lanterna.s3", 0xCFE8FF);
         }
         if (t >= DURACAO) terminar(p, r, true);
+    }
+
+    /** Põe o corpo na laje, deitado com a cabeça na cabeceira. */
+    private static void deitar(ServerPlayer p, BlockPos a, Direction cabeceira) {
+        double x = a.getX() + 0.5, y = a.getY() + 0.6875, z = a.getZ() + 0.5;
+        if (p.isSleeping()) p.stopSleeping();
+        p.setDeltaMovement(Vec3.ZERO);
+        p.connection.teleport(x, y, z, cabeceira.getOpposite().toYRot(), 0);
+        p.startSleeping(a);
+        p.setPos(x, y, z);
+        p.connection.teleport(x, y, z, cabeceira.getOpposite().toYRot(), 0);
+    }
+
+    /** Ninguém pula a noite por causa de quem está deitado no altar. */
+    @SubscribeEvent
+    public static void noite(net.minecraftforge.event.level.SleepFinishedTimeEvent e) {
+        if (!(e.getLevel() instanceof ServerLevel l)) return;
+        for (ServerPlayer p : l.players()) if (emRitual(p)) { e.setTimeAddition(l.getDayTime()); return; }
     }
 
     private static void terminar(ServerPlayer p, Ritual r, boolean ok) {

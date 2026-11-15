@@ -900,83 +900,244 @@ public final class Bosses {
     /** O Nulo (Gênese): só o Anel Branco o fere. Fase 1 apaga as cores e chama Ecos; fase 2 copia bosses; fase 3 fecha a rachadura. */
     public static class Nulo extends LoreBoss {
         private UUID copy;
+        private UUID copy2;
         private int closeTimer = 1200;
         private int warn;
         private int nextCopy;
+        private int novaTimer = 100;
 
         public Nulo(EntityType<? extends Monster> type, Level level) {
             super(type, level, BossEvent.BossBarColor.WHITE);
         }
 
+        // 0.52: cinco fases (100-80, 80-55, 55-30, 30-12, 12-0). A base passa da 1 para a 2; o resto é daqui.
         @Override
         protected float phase2At() {
-            return 0.66f;
+            return 0.8f;
         }
 
         @Override
         protected boolean hasPhase3() {
-            return true;
+            return false;
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            if (!level().isClientSide && isAlive() && phase() >= 2) fases();
+        }
+
+        private void fases() {
+            float f = getHealth() / getMaxHealth();
+            int p = phase();
+            int nova = p == 2 && f <= 0.55f ? 3 : p == 3 && f <= 0.30f ? 4 : p == 4 && f <= 0.12f ? 5 : 0;
+            if (nova > 0) {
+                setPhase(nova);
+                onPhaseChange(nova);
+            }
+        }
+
+        @Override
+        protected void onPhaseChange(int phase) {
+            super.onPhaseChange(phase);
+            ServerLevel sl = (ServerLevel) level();
+            sl.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + getBbHeight() * 0.5, getZ(), 3, 1, 1, 1, 0);
+            sl.sendParticles(dust(0xDADADF, 3f), getX(), getY() + getBbHeight() * 0.5, getZ(), 200, 4, 3, 4, 0.1);
+            level().playSound(null, blockPosition(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 3f, 0.5f);
+            for (Player p : playersNear(60)) {
+                if (p instanceof ServerPlayer sp) {
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(5, 40, 10));
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(Component.translatable("boss.lanterna.nulo.phase" + phase).withStyle(st -> st.withColor(0xBFC6D0).withItalic(true))));
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.translatable("boss.lanterna.nulo.fase", phase).withStyle(st -> st.withColor(0xFFFFFF).withBold(true))));
+                }
+            }
+            // a cada fase: todos perdem o voo um instante e o chefe empurra todo mundo para longe
+            for (Player p : playersNear(40)) if (p instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 60, 0xDADADF, true);
+            areaDamage(position(), 12, 6 + phase * 2, 2.0);
+            if (phase >= 4) {
+                // mais rápido no fim
+                var sp = getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+                if (sp != null) sp.setBaseValue(0.30 + 0.04 * (phase - 3));
+            }
         }
 
         @Override
         protected void bossTick(LivingEntity target) {
             ServerLevel sl = (ServerLevel) level();
-            chase(target, 1.0);
-            tryMelee(target, 1.5, 22);
+            fases();
+            int fase = phase();
+            chase(target, fase >= 4 ? 1.25 : 1.0);
+            tryMelee(target, 2.5, fase >= 4 ? 16 : 22);
             if (tickCount % 40 == 0) {
                 for (Player p : playersNear(40)) p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false));
-                sl.sendParticles(dust(0x8C8C90, 2f), getX(), getY() + 1, getZ(), 50, 6, 1, 6, 0);
+                sl.sendParticles(dust(0x8C8C90, 2f), getX(), getY() + 1, getZ(), 70, 7, 1.5, 7, 0);
             }
-            switch (phase()) {
+            switch (fase) {
                 case 1 -> {
+                    // ecos sem cor
                     if (specialCooldown == 0) {
                         specialCooldown = 160;
-                        int near = level().getEntitiesOfClass(LoreCreatures.Eco.class, getBoundingBox().inflate(40)).size();
-                        for (int i = 0; i < 2 && near + i < 6; i++) {
-                            var eco = LoreEntities.ECO_CINZENTO.get().create(sl);
-                            if (eco == null) continue;
-                            eco.moveTo(getX() + random.nextInt(9) - 4, getY(), getZ() + random.nextInt(9) - 4, 0, 0);
-                            eco.setTarget(target);
-                            sl.addFreshEntity(eco);
-                        }
+                        ecos(sl, target, 2, 6);
                         colorless(target);
                     }
                 }
                 case 2 -> {
-                    boolean alive = copy != null && sl.getEntity(copy) instanceof LivingEntity le && le.isAlive();
-                    if (!alive && specialCooldown == 0) {
-                        String boss = Devorador.HEADS[nextCopy++ % Devorador.HEADS.length];
-                        LoreBoss echo = LoreBoss.spawnEcho(sl, boss, position().add(4, 0, 4), target);
-                        copy = echo != null ? echo.getUUID() : null;
-                        specialCooldown = 100;
-                        for (Player p : playersNear(48)) p.displayClientMessage(Component.translatable("boss.lanterna.nulo.copy"), true);
+                    // copia os chefes que já caíram
+                    copiar(sl, target, false);
+                    // o vazio puxa: quem voa cai
+                    if (tickCount % 120 == 0) puxar(target, 0.9);
+                }
+                case 3 -> {
+                    rachadura(sl, 0.012, 16);
+                    if (specialCooldown == 0) {
+                        specialCooldown = 110;
+                        colorless(target);
+                        drenarLuz(0.08f);
+                    }
+                    if (tickCount % 100 == 0) ecos(sl, target, 2, 8);
+                }
+                case 4 -> {
+                    // eclipse: duas cópias de uma vez, some e aparece atrás do alvo
+                    copiar(sl, target, true);
+                    rachadura(sl, 0.016, 18);
+                    if (specialCooldown == 0) {
+                        specialCooldown = 90;
+                        atras(target);
+                        colorless(target);
+                        drenarLuz(0.10f);
                     }
                 }
                 default -> {
-                    // A rachadura tenta se fechar com você dentro
-                    Vec3 rift = home != null ? Vec3.atCenterOf(home) : position();
-                    for (Player p : playersNear(40)) {
-                        Vec3 v = rift.subtract(p.position());
-                        p.push(v.x * 0.012, 0, v.z * 0.012);
-                        p.hurtMarked = true;
-                        if (v.length() < 3 && tickCount % 20 == 0) p.hurt(damageSources().magic(), 4);
+                    // desespero: ondas de vazio sem parar, ninguém voa, tudo mais rápido
+                    rachadura(sl, 0.02, 20);
+                    if (--novaTimer <= 0) {
+                        novaTimer = 90;
+                        nova(sl);
                     }
-                    if (--closeTimer <= 0) {
-                        closeTimer = 1200;
-                        for (Player p : playersNear(48)) {
-                            p.hurt(damageSources().magic(), 16);
-                            p.displayClientMessage(Component.translatable("boss.lanterna.nulo.close"), true);
-                        }
-                        heal(getMaxHealth() * 0.15f);
-                        sl.sendParticles(ParticleTypes.SONIC_BOOM, rift.x, rift.y + 1, rift.z, 1, 0, 0, 0, 0);
-                        level().playSound(null, BlockPos.containing(rift), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 3f, 0.5f);
-                    }
+                    if (tickCount % 60 == 0) for (Player p : playersNear(40)) if (p instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 70, 0xDADADF, false);
                     if (specialCooldown == 0) {
-                        specialCooldown = 120;
-                        colorless(target);
+                        specialCooldown = 70;
+                        if (random.nextBoolean()) atras(target); else colorless(target);
                     }
                 }
             }
+        }
+
+        /**
+         * 0.52: o golpe do Nulo não liga para armadura nem para o tamanho do anel: tira uma parte da vida de quem
+         * apanha (12% na fase 1, até 20% na fase 5). Dói muito, mas não mata em três.
+         */
+        @Override
+        public boolean doHurtTarget(net.minecraft.world.entity.Entity e) {
+            boolean ok = super.doHurtTarget(e);
+            if (e instanceof LivingEntity le && le.isAlive()) {
+                le.invulnerableTime = 0;
+                le.hurt(damageSources().indirectMagic(this, this), golpeVazio(le, 0.10f + 0.02f * phase()));
+            }
+            return ok;
+        }
+
+        /** Uma parte da vida máxima do alvo (sem passar de 22 de uma vez). */
+        private static float golpeVazio(LivingEntity le, float fracao) {
+            return Math.min(22f, le.getMaxHealth() * fracao);
+        }
+
+        /** Os poderes de controle dos outros chefes, mais fortes e mais rápidos aqui. */
+        @Override
+        protected void poderDeControle(LivingEntity target) {
+            super.poderDeControle(target);
+            if (phase() >= 3) super.poderDeControle(target); // o rodízio anda em dobro
+        }
+
+        private void ecos(ServerLevel sl, LivingEntity target, int quantos, int max) {
+            int near = level().getEntitiesOfClass(LoreCreatures.Eco.class, getBoundingBox().inflate(40)).size();
+            for (int i = 0; i < quantos && near + i < max; i++) {
+                var eco = LoreEntities.ECO_CINZENTO.get().create(sl);
+                if (eco == null) continue;
+                eco.moveTo(getX() + random.nextInt(11) - 5, getY(), getZ() + random.nextInt(11) - 5, 0, 0);
+                eco.setTarget(target);
+                sl.addFreshEntity(eco);
+            }
+        }
+
+        private void copiar(ServerLevel sl, LivingEntity target, boolean duas) {
+            boolean a = copy != null && sl.getEntity(copy) instanceof LivingEntity le && le.isAlive();
+            boolean b = copy2 != null && sl.getEntity(copy2) instanceof LivingEntity le2 && le2.isAlive();
+            if (specialCooldown != 0) return;
+            if (!a) {
+                LoreBoss echo = LoreBoss.spawnEcho(sl, Devorador.HEADS[nextCopy++ % Devorador.HEADS.length], position().add(5, 0, 5), target);
+                copy = echo != null ? echo.getUUID() : null;
+                specialCooldown = 100;
+                for (Player p : playersNear(48)) p.displayClientMessage(Component.translatable("boss.lanterna.nulo.copy"), true);
+            } else if (duas && !b) {
+                LoreBoss echo = LoreBoss.spawnEcho(sl, Devorador.HEADS[nextCopy++ % Devorador.HEADS.length], position().add(-5, 0, -5), target);
+                copy2 = echo != null ? echo.getUUID() : null;
+                specialCooldown = 100;
+            }
+        }
+
+        /** A rachadura tenta se fechar com você dentro. */
+        private void rachadura(ServerLevel sl, double forca, float golpe) {
+            Vec3 rift = home != null ? Vec3.atCenterOf(home) : position();
+            for (Player p : playersNear(40)) {
+                Vec3 v = rift.subtract(p.position());
+                p.push(v.x * forca, 0, v.z * forca);
+                p.hurtMarked = true;
+                if (v.length() < 3 && tickCount % 20 == 0) p.hurt(damageSources().magic(), 4);
+            }
+            if (--closeTimer <= 0) {
+                closeTimer = phase() >= 4 ? 700 : 1000;
+                for (Player p : playersNear(48)) {
+                    p.hurt(damageSources().magic(), Math.max(golpe * 0.5f, golpeVazio(p, golpe / 100f)));
+                    p.displayClientMessage(Component.translatable("boss.lanterna.nulo.close"), true);
+                }
+                heal(getMaxHealth() * 0.06f);
+                sl.sendParticles(ParticleTypes.SONIC_BOOM, rift.x, rift.y + 1, rift.z, 1, 0, 0, 0, 0);
+                level().playSound(null, BlockPos.containing(rift), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 3f, 0.5f);
+            }
+        }
+
+        /** O vazio puxa todos para perto e corta o voo. */
+        private void puxar(LivingEntity target, double forca) {
+            for (Player p : playersNear(32)) {
+                Vec3 v = position().subtract(p.position()).normalize().scale(forca);
+                p.push(v.x, 0.1, v.z);
+                p.hurtMarked = true;
+                if (p instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 60, 0xDADADF, false);
+            }
+            ((ServerLevel) level()).sendParticles(ParticleTypes.REVERSE_PORTAL, getX(), getY() + 2, getZ(), 120, 8, 2, 8, 0.4);
+            level().playSound(null, blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 2f, 0.6f);
+        }
+
+        /** O Nulo come a luz dos anéis por perto. */
+        private void drenarLuz(float fracao) {
+            for (Player p : playersNear(30)) {
+                if (!(p instanceof ServerPlayer sp)) continue;
+                ModCapabilities.get(sp).ifPresent(r -> {
+                    if (!r.hasRing()) return;
+                    com.lanterna.power.RingPowers.setCharge(sp, r, r.charge() - Math.max(5, Math.round(r.maxCharge() * fracao)));
+                });
+                sp.displayClientMessage(Component.translatable("boss.lanterna.nulo.drena"), true);
+            }
+            ((ServerLevel) level()).sendParticles(ParticleTypes.SCULK_SOUL, getX(), getY() + 2, getZ(), 40, 6, 1, 6, 0.05);
+        }
+
+        /** Some e aparece atrás do alvo. */
+        private void atras(LivingEntity target) {
+            Vec3 tras = target.position().subtract(target.getLookAngle().multiply(1, 0, 1).normalize().scale(4));
+            ((ServerLevel) level()).sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 2, getZ(), 40, 1, 2, 1, 0.05);
+            teleportTo(tras.x, target.getY(), tras.z);
+            level().playSound(null, blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 2f, 0.4f);
+            ((ServerLevel) level()).sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 2, getZ(), 40, 1, 2, 1, 0.05);
+        }
+
+        /** Onda de vazio em volta (fase 5). */
+        private void nova(ServerLevel sl) {
+            sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY() + 1, getZ(), 1, 0, 0, 0, 0);
+            sl.sendParticles(dust(0xFFFFFF, 3f), getX(), getY() + 1, getZ(), 160, 7, 0.4, 7, 0);
+            level().playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 2f, 0.4f);
+            areaDamage(position(), 9, 14, 2.2);
+            for (Player p : playersNear(9)) { p.invulnerableTime = 0; p.hurt(damageSources().magic(), golpeVazio(p, 0.12f)); }
         }
 
         /** Os poderes de todas as cores, mas sem cor: fúria sem calor, medo sem som, amor sem toque. */
@@ -1009,7 +1170,8 @@ public final class Bosses {
                 }
                 return 0;
             }
-            return amount;
+            // 0.52: o mais difícil do jogo: até o anel da Vida só o arranha (e mais ainda no fim)
+            return amount * (phase() >= 5 ? 0.42f : phase() >= 4 ? 0.5f : 0.6f);
         }
 
         @Override

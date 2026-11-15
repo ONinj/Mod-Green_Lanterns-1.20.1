@@ -3916,6 +3916,107 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.52: anel da Vida com todos os construtos e o dom de Purificar outro jogador. */
+    private static void sceneVida052() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        Object[] o = new Object[2];
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring white");
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.getPersistentData().remove("lanterna_purificar_pronto_em");
+            var roda = com.lanterna.construct.ConstructType.daRoda(com.lanterna.corps.BuiltinCorps.WHITE.id(), false);
+            long pretos = roda.stream().filter(t -> "black".equals(t.corps)).count();
+            glog("roda do Branco: " + roda.size() + " construtos de " + (com.lanterna.construct.ConstructType.values().length - 1) + " (da Morte: " + pretos + ") nivel=" + com.lanterna.construct.Constructs.level(sp)
+                + " liberado mortalha=" + com.lanterna.construct.fonte.ArvoreDaLuz.liberado(sp, com.lanterna.construct.ConstructType.MORTALHA));
+            // o alvo: um jogador com o anel Verde corrompido (estágio 2)
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(sp.serverLevel(), new com.mojang.authlib.GameProfile(java.util.UUID.fromString("77777777-2222-3333-4444-555555555555"), "Corrompido"));
+            var g = com.lanterna.corps.BuiltinCorps.GREEN;
+            var anel = com.lanterna.item.PowerRingItem.create(g.id(), g.color(), -1);
+            com.lanterna.item.PowerRingItem.setEstagio(anel, 2, null);
+            com.lanterna.capability.ModCapabilities.get(fake).ifPresent(r -> { r.equipment().setStackInSlot(0, anel); r.refresh(g.id(), g.color(), 1000, 1000); });
+            com.lanterna.mission.LoreCapability.get(fake).ifPresent(d -> d.setMorte(2));
+            fake.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.serverLevel().addFreshEntity(fake);
+            fake.moveTo(0.5, 200, 7.5, 180, 0);
+            o[0] = fake;
+            sp.connection.teleport(0.5, 200, 0.5, 0, 5);
+        }));
+        at(20, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(10, () -> server(sp -> { var f = (net.minecraft.server.level.ServerPlayer) o[0];
+            glog("alvo em " + f.blockPosition().toShortString() + " morte=" + com.lanterna.mission.LoreCapability.get(f).map(com.lanterna.mission.LoreData::morte).orElse(-1));
+            com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+            com.lanterna.construct.Constructs.cast(sp, "purificar");
+            glog("purificando? " + com.lanterna.morte.PurificacaoBranca.emCena(sp)); }));
+        at(45, () -> { server(sp -> { var f = (net.minecraft.server.level.ServerPlayer) o[0]; glog("meio: alvo y=" + String.format("%.2f", f.getY())); }); shot("purificar_1"); });
+        at(52, () -> shot("purificar_2_explosao"));
+        at(30, () -> server(sp -> { var f = (net.minecraft.server.level.ServerPlayer) o[0];
+            glog("depois: alvo morte=" + com.lanterna.mission.LoreCapability.get(f).map(com.lanterna.mission.LoreData::morte).orElse(-1)
+                + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(f)) + " em cena=" + com.lanterna.morte.PurificacaoBranca.emCena(sp));
+            com.lanterna.mission.LoreCapability.get(f).ifPresent(d -> d.setMorte(2));
+            com.lanterna.construct.Constructs.zerarRecargas(sp.getUUID());
+            com.lanterna.construct.Constructs.cast(sp, "purificar");
+            glog("de novo logo depois (recarga de 10 min): comecou=" + com.lanterna.morte.PurificacaoBranca.emCena(sp)
+                + " falta=" + (sp.getPersistentData().getLong("lanterna_purificar_pronto_em") - sp.server.overworld().getGameTime()) / 20 + " s");
+            // construto da Morte no anel Branco
+            float c0 = com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::charge).orElse(0);
+            com.lanterna.construct.Constructs.cast(sp, "drenar");
+            float c1 = com.lanterna.capability.ModCapabilities.get(sp).map(com.lanterna.capability.RingData::charge).orElse(0);
+            glog("Drenar Vida no Branco: carga " + c0 + " -> " + c1);
+            f.discard();
+        }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.52: o Nulo maior, com cinco fases. */
+    private static void sceneNulo052() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        Object[] o = new Object[1];
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring white");
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(60)));
+            com.lanterna.tropa.Nivel.aplicar(sp);
+            sp.setHealth(sp.getMaxHealth());
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            var n = com.lanterna.lore.LoreEntities.NULO.get().create(sp.serverLevel());
+            n.moveTo(0.5, 200, 9.5, 180, 0);
+            sp.serverLevel().addFreshEntity(n);
+            o[0] = n;
+            sp.connection.teleport(0.5, 200, -3.5, 0, -8);
+            glog("Nulo: tamanho " + n.getBbWidth() + " x " + n.getBbHeight() + " vida " + n.getMaxHealth());
+        }));
+        at(30, () -> { mc.options.hideGui = false; shot("nulo_tamanho"); });
+        // golpes do Nulo num Branco nível 60 (vida cheia)
+        at(5, () -> server(sp -> {
+            var n = (com.lanterna.lore.entity.boss.LoreBoss) o[0];
+            float v0 = sp.getHealth();
+            sp.invulnerableTime = 0; n.doHurtTarget(sp);
+            glog("golpe do Nulo no Branco 60: " + v0 + " -> " + sp.getHealth() + " (vida max " + sp.getMaxHealth() + ")");
+            sp.setHealth(sp.getMaxHealth());
+            // quanto o anel da Vida tira por golpe de 30
+            float h0 = n.getHealth();
+            n.invulnerableTime = 0; n.hurt(sp.damageSources().playerAttack(sp), 30f);
+            glog("golpe de 30 do Branco: Nulo " + h0 + " -> " + n.getHealth());
+        }));
+        for (float f : new float[]{0.79f, 0.54f, 0.29f, 0.11f}) {
+            at(20, () -> server(sp -> { var n = (com.lanterna.lore.entity.boss.LoreBoss) o[0]; n.setHealth(n.getMaxHealth() * f); sp.setHealth(sp.getMaxHealth()); }));
+            at(30, () -> server(sp -> { var n = (com.lanterna.lore.entity.boss.LoreBoss) o[0];
+                sp.setHealth(sp.getMaxHealth()); float v0 = sp.getHealth(); sp.invulnerableTime = 0; n.doHurtTarget(sp);
+                int golpes = 1; float por = v0 - sp.getHealth();
+                glog("vida " + Math.round(f * 100) + "%: fase=" + n.phase() + " semVoo=" + com.lanterna.lore.entity.boss.Controle.semVoo(sp) + " golpe tira " + String.format("%.1f", por) + " de " + sp.getMaxHealth()
+                    + " (~" + (int) Math.ceil(sp.getMaxHealth() / Math.max(0.1f, por)) + " golpes para cair)"); sp.setHealth(sp.getMaxHealth()); }));
+        }
+        at(5, () -> shot("nulo_fase5"));
+        at(200, () -> server(sp -> { var n = (com.lanterna.lore.entity.boss.LoreBoss) o[0];
+            glog("10 s na fase 5: vida jogador=" + sp.getHealth() + "/" + sp.getMaxHealth() + " vivo=" + sp.isAlive() + " fase=" + n.phase()); n.discard(); }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.51: o Ritual da Purificação no altar. */
     private static void sceneRitual051() {
         Minecraft mc = Minecraft.getInstance();
@@ -3943,15 +4044,17 @@ public final class DevAutoTest {
             sp.connection.teleport(4.5, 201, 3.5, 135, 25);
             glog("antes: morte=" + d.morte() + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp)) + " purif_6 ativa=" + d.isActive("purif_6"));
         }));
+        at(5, () -> server(sp -> sp.connection.teleport(2.5, 201.6, 1.8, 150, 32)));
         at(40, () -> shot("altar_purificacao"));
-        at(5, () -> server(sp -> sp.connection.teleport(-5.5, 203.5, -3.5, -90, 25)));
+        at(5, () -> server(sp -> sp.connection.teleport(-3.5, 202.2, -3.5, -90, 30)));
         at(30, () -> shot("altar_lado"));
         at(5, () -> server(sp -> { sp.connection.teleport(0.5, 200, 0.5, 180, 10);
             com.lanterna.morte.RitualPurificacao.usar(sp, new net.minecraft.core.BlockPos(0, 200, -3), net.minecraft.core.Direction.NORTH); }));
         at(10, () -> { mc.options.hideGui = false; mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.FULL); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
-        at(40, () -> { glog("t~50: deitado=" + mc.player.isSleeping() + " tela=" + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())); shot("ritual_1"); });
-        at(55, () -> shot("ritual_2_resiste"));
-        at(57, () -> shot("ritual_3_clarao"));
+        for (int i = 0; i < 9; i++) { int ii = i; at(20, () -> { if (ii == 2) shot("ritual_1"); if (ii == 4) shot("ritual_2b"); if (ii == 7) shot("ritual_3_clarao"); }); at(0, () -> server(sp -> glog("pos: " + String.format("%.2f %.2f %.2f", sp.getX(), sp.getY(), sp.getZ()) + " cliente=" + String.format("%.2f %.2f %.2f", mc.player.getX(), mc.player.getY(), mc.player.getZ()) + " deitado=" + sp.isSleeping() + " pose=" + mc.player.getPose()))); }
+        at(1, () -> { glog("tela=" + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())); });
+        at(1, () -> shot("ritual_2_resiste"));
+        at(1, () -> {});
         at(40, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
             int sobrou = 0; for (var it : sp.getInventory().items) sobrou += it.getCount();
             glog("depois: morte=" + d.morte() + " estagio=" + com.lanterna.item.PowerRingItem.getEstagio(com.lanterna.power.EquipmentHelper.ring(sp)) + " purif_6 feita=" + d.isDone("purif_6")
@@ -6609,6 +6712,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("ryut")) sceneRyut();
         else if (ENABLED && SCENE.equals("estagios051")) sceneEstagios051();
         else if (ENABLED && SCENE.equals("ritual051")) sceneRitual051();
+        else if (ENABLED && SCENE.equals("vida052")) sceneVida052();
+        else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
         else if (ENABLED && SCENE.equals("combate050")) sceneCombate050();

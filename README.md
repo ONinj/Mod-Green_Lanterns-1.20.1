@@ -117,6 +117,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.58.2 ✅ (0.50.2) Todos os comandos em inglês: /lantern repair, convert, blackring [free], corruption e /guide; opções de summon, ship e technique em inglês
 1.58.3 ✅ (0.50.3) Chefes com nome em inglês no /lantern summon (boss_echo_devourer, boss_the_null...); a barra do chefe continua na língua do jogo; confirmações do chat com os nomes em inglês
 1.59.0 ✅ (0.51.0) Corrupção em três estágios (o 2: traje mais cinza que colorido, anel escuro com manchas pretas e rachaduras; o 3: Portador Negro); prazo de 30 minutos (estágio 2 na metade); morto pelo Arauto, corrompido na hora mas ainda pode se purificar; Altar da Purificação com o Ritual da Purificação (cena de cinema: o anel no pedestal, o portador deitado na laje, a luz e o clarão)
+1.60.0 ✅ (0.52.0) Anel da Vida com todos os construtos de todas as Tropas (inclusive os da Morte), já liberados, e o dom Purificar (purifica outro jogador numa cena conjunta, recarga de 10 min); o Nulo gigante, com cinco fases, golpes que tiram uma parte da vida e os poderes de controle em dobro; Altar da Purificação refeito (texturas) e o portador fica deitado na laje durante todo o ritual
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

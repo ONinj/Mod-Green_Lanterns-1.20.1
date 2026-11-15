@@ -44,6 +44,8 @@ public enum ConstructType {
     MORTALHA("mortalha", Category.CONTROL, 110, false, 2, 220, "black"),
     TUMULO("tumulo", Category.CONTROL, 120, false, 3, 260, "black"),
     VIDA("vida", Category.DEFENSE, 150, false, 1, 300, "white"),
+    /** 0.52: o anel da Vida purifica outro jogador corrompido (recarga de 10 minutos). */
+    PURIFICAR("purificar", Category.UTILITY, 200, false, 1, 20 * 60 * 10, "white"),
     /** Rastro do Mogo: mostra onde o planeta-Lanterna está agora (ele anda pelo espaço). */
     RASTRO_MOGO("rastro_mogo", Category.UTILITY, 40, false, 2, 400, "green"),
 
@@ -187,12 +189,13 @@ public enum ConstructType {
     public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
         if (corps == null) return true;
         if (ringCorps == null) return false;
-        if (ringCorps.getPath().equals("white")) return !corps.equals("black");
+        // 0.52: o anel da Vida tem TODOS os construtos de todas as Tropas, inclusive os da Morte
+        if (ringCorps.getPath().equals("white")) return true;
         return ringCorps.getPath().equals(corps);
     }
 
     /** As Tropas que o anel Branco percorre na roda (uma página por Tropa). */
-    public static final String[] PAGINAS_BRANCO = {"white", "green", "yellow", "red", "orange", "blue", "indigo", "violet"};
+    public static final String[] PAGINAS_BRANCO = {"white", "green", "yellow", "red", "orange", "blue", "indigo", "violet", "black"};
 
     /** Construtos que este anel mostra na roda: os de todos + o próprio da Tropa. */
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {

@@ -69,7 +69,7 @@ public final class LoreEntities {
     public static final RegistryObject<EntityType<Bosses.Penitente>> PENITENTE = boss("penitente", Bosses.Penitente::new, 2.2f, 3.9f, false);
     public static final RegistryObject<EntityType<Bosses.Nyrielle>> NYRIELLE = boss("nyrielle", Bosses.Nyrielle::new, 2.2f, 3.6f, false);
     public static final RegistryObject<EntityType<Bosses.Devorador>> DEVORADOR_DE_ECOS = boss("devorador_de_ecos", Bosses.Devorador::new, 2.4f, 8.0f, true);
-    public static final RegistryObject<EntityType<Bosses.Nulo>> NULO = boss("nulo", Bosses.Nulo::new, 0.8f, 2.1f, true);
+    public static final RegistryObject<EntityType<Bosses.Nulo>> NULO = boss("nulo", Bosses.Nulo::new, 2.2f, 6.0f, true); // 0.52: bem maior
     // Corações das Emoções (chefes das Fontes)
     public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> COLOSSO_DE_JADE = boss("colosso_de_jade", com.lanterna.lore.entity.boss.ChefeFonte::new, 3.2f, 5.2f, false);
     public static final RegistryObject<EntityType<com.lanterna.lore.entity.boss.ChefeFonte>> MAE_DAS_SOMBRAS = boss("mae_das_sombras", com.lanterna.lore.entity.boss.ChefeFonte::new, 2.6f, 4.0f, false);
@@ -164,7 +164,7 @@ public final class LoreEntities {
             event.put(PENITENTE.get(), LoreBoss.attributes(380, 12, 0.24).build());
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());
-            event.put(NULO.get(), LoreBoss.attributes(800, 14, 0.30).build());
+            event.put(NULO.get(), LoreBoss.attributes(800, 11, 0.30).build()); // 0.52: golpe forte, mas não mata em três
             // Bosses das Tropas: um pouco acima do boss do planeta de cada um
             event.put(VERDAN.get(), LoreBoss.attributes(480, 13, 0.24).add(Attributes.ARMOR, 12).build());          // Oa
             event.put(SERAPHEL.get(), LoreBoss.attributes(560, 12, 0.26).add(Attributes.ARMOR, 6).build());         // Odym
