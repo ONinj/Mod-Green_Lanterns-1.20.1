@@ -42,6 +42,26 @@ public final class Ingles {
         par("eco", "echo"); par("alvo_treino", "training_dummy"); par("broto", "sprout");
         par("nave_lanceira", "lancer_ship"); par("nave_pirata", "pirate_ship"); par("nave_patrulha", "patrol_ship");
         par("nave_cargueiro", "freighter_ship"); par("nave_pirata_capitania", "pirate_flagship");
+        // 0.50.3: chefes em inglês no /lantern summon (o nome na barra do chefe segue a língua do jogo)
+        par("boss_vigia_partido", "boss_broken_sentinel");
+        par("boss_penitente", "boss_faceless_penitent");
+        par("boss_devorador_de_ecos", "boss_echo_devourer");
+        par("boss_nulo", "boss_the_null");
+        par("boss_colosso_de_jade", "boss_jade_colossus");
+        par("boss_mae_das_sombras", "boss_mother_of_shadows");
+        par("boss_serpente_escarlate", "boss_scarlet_serpent");
+        par("boss_rei_faminto", "boss_starving_king");
+        par("boss_arcanjo_da_aurora", "boss_archangel_of_dawn");
+        par("boss_cervo_sereno", "boss_serene_stag");
+        par("boss_rainha_de_cristal", "boss_crystal_queen");
+        par("boss_karvhul_forjador_rubro", "boss_karvhul_crimson_forger");
+        par("boss_vesk_morrath_carcereiro", "boss_vesk_morrath_jailer");
+        par("boss_ghormaddu_arca_viva", "boss_ghormaddu_living_hoard");
+        par("boss_seraphel_do_vitral", "boss_seraphel_stained_glass");
+        par("boss_gemeos_velados", "boss_veiled_twins");
+        par("boss_calithe_rainha_do_espelho", "boss_calithe_mirror_queen");
+        par("boss_morthaal_coletor_de_lanternas", "boss_morthaal_lantern_collector");
+        par("boss_verdan_o_arquiteto", "boss_verdan_the_architect");
     }
 
     /** O que o jogador digitou (inglês) para o nome interno (português). Sem tradução, devolve igual. */

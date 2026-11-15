@@ -115,6 +115,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.58.0 ✅ (0.50.0) Trocas de mundo consertadas (sair de planetas não manda mais para a Terra; fim do entra-e-sai da Terra); defesa no botão direito (escudo do anel); laser no PvP no máximo ~5 de vida por segundo; arremessáveis teleguiados; jaulas e correntes pegam quem está perto da mira; jaula fechada com grades finas; corrente puxa e derruba quem voa; Mogo ataca os corrompidos; Ryut só com o Santuário da Forja e o Coletor; revisão de Hanks
 1.58.1 ✅ (0.50.1) Jogador resiste 40% mais aos construtos de outros jogadores; defesa com 1,5 s de recarga; prova da Bateria Central no lugar certo (não falha mais com "você se afastou"); linha principal retoma sozinha e a missão da Gênese (Anel Branco e o Nulo) chega para quem completou os anéis
 1.58.2 ✅ (0.50.2) Todos os comandos em inglês: /lantern repair, convert, blackring [free], corruption e /guide; opções de summon, ship e technique em inglês
+1.58.3 ✅ (0.50.3) Chefes com nome em inglês no /lantern summon (boss_echo_devourer, boss_the_null...); a barra do chefe continua na língua do jogo; confirmações do chat com os nomes em inglês
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

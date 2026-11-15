@@ -2674,7 +2674,7 @@
   "cmd.lanterna.ajuda.16": "marca planetas como visitados (Porta Estelar)",
   "cmd.lanterna.ajuda.17": "inimizade com uma Tropa",
   "cmd.lanterna.ajuda.t19": "INVOCAR E ITENS",
-  "cmd.lanterna.ajuda.20": "pirate, captain, merchant, echo, training_dummy, sprout, lantern_<tropa>, officer_<tropa>, boss_<nome>",
+  "cmd.lanterna.ajuda.20": "pirate, captain, merchant, echo, training_dummy, sprout, lantern_<tropa>, officer_<tropa>, boss_<chefe> (ex.: boss_echo_devourer, boss_the_null)",
   "cmd.lanterna.ajuda.21": "item de nave",
   "cmd.lanterna.ajuda.23": "guildas",
   "guilda.lanterna.conselho": "Conselho da Tropa",

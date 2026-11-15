@@ -3778,6 +3778,23 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** Lê os nomes das barras de chefe na tela (teste). */
+    interface Barras {
+        net.minecraft.client.gui.components.BossHealthOverlay o();
+        default java.util.List<String> textos() {
+            try {
+                var f = net.minecraft.client.gui.components.BossHealthOverlay.class.getDeclaredFields();
+                for (var x : f) if (java.util.Map.class.isAssignableFrom(x.getType())) {
+                    x.setAccessible(true);
+                    java.util.List<String> l = new java.util.ArrayList<>();
+                    for (Object ev : ((java.util.Map<?, ?>) x.get(o())).values()) l.add(((net.minecraft.world.BossEvent) ev).getName().getString());
+                    return l;
+                }
+            } catch (Exception e) { return java.util.List.of("erro " + e); }
+            return java.util.List.of();
+        }
+    }
+
     /** 0.50.2: comandos em inglês. */
     private static void sceneCmdsEn() {
         Minecraft mc = Minecraft.getInstance();
@@ -3796,6 +3813,17 @@ public final class DevAutoTest {
             glog("ship item: " + mc.player.getInventory().items.stream().filter(i -> !i.isEmpty()).map(i -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(i.getItem()).getPath()).toList());
             server(sp -> glog("tecnica gaze: " + com.lanterna.mission.LoreCapability.get(sp).map(d -> d.isDone("prov_olhar")).orElse(false)));
         });
+        at(5, () -> { cmd("kill @e[type=!player]"); cmd("lantern summon boss_echo_devourer"); });
+        at(60, () -> {
+            server(sp -> {
+                java.util.List<String> n = new java.util.ArrayList<>();
+                for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.lore.entity.boss.LoreBoss.class, sp.getBoundingBox().inflate(16))) n.add(e.getType().builtInRegistryHolder().key().location().getPath());
+                glog("boss invocado: " + n);
+            });
+            var barras = ((com.lanterna.client.devtest.DevAutoTest.Barras) () -> mc.gui.getBossOverlay());
+            glog("barra do chefe: " + barras.textos());
+        });
+        at(5, () -> shot("boss_barra"));
         at(5, () -> cmd("guide"));
         at(20, () -> glog("tela depois de /guide: " + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())));
         at(10, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });

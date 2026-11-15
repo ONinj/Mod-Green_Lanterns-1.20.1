@@ -179,12 +179,12 @@ public final class ComandosTeste {
                             LoreData dd = dados(p);
                             List<String> l = Ingles.todos(id) ? CidadeMissoes.TECNICAS : List.of(id);
                             for (String t : l) {
-                                if (!CidadeMissoes.TECNICAS.contains(t)) return erro(c, "tecnica_desconhecida", t);
+                                if (!CidadeMissoes.TECNICAS.contains(t)) return erro(c, "tecnica_desconhecida", Ingles.en(t));
                                 Tecnicas.desbloquear(p, dd, t);
                                 dd.completed().add("prov_" + t);
                             }
                             sync(p);
-                            return ok(c, "tecnicas", String.join(", ", l));
+                            return ok(c, "tecnicas", String.join(", ", Ingles.en(l)));
                         })))
                 // ---------- a Fonte (Baterias Centrais) ----------
                 .then(op("source").then(Commands.argument("action", StringArgumentType.word())
@@ -398,7 +398,7 @@ public final class ComandosTeste {
         int feitos = 0;
         for (int i = 0; i < qtd; i++) {
             Entity e = criar(level, oQue);
-            if (e == null) return erro(c, "invocar_desconhecido", oQue);
+            if (e == null) return erro(c, "invocar_desconhecido", Ingles.en(oQue));
             double a = i * 2.4;
             e.moveTo(frente.x + Math.cos(a) * (i == 0 ? 0 : 1.5), frente.y, frente.z + Math.sin(a) * (i == 0 ? 0 : 1.5), p.getYRot() + 180, 0);
             if (e instanceof Mob m && !(e instanceof LanternaEntity))
@@ -406,7 +406,7 @@ public final class ComandosTeste {
             level.addFreshEntity(e);
             feitos++;
         }
-        return ok(c, "invocado", oQue, feitos);
+        return ok(c, "invocado", Ingles.en(oQue), feitos);
     }
 
     private static Entity criar(ServerLevel level, String oQue) {
@@ -434,7 +434,7 @@ public final class ComandosTeste {
         for (NaveTipo t : NaveTipo.values()) {
             if (t.id.equals(tipo)) {
                 dar(eu(c), NaveItem.of(t, pintura));
-                return ok(c, "nave", tipo, pintura);
+                return ok(c, "nave", Ingles.en(tipo), pintura);
             }
         }
         return erro(c, "nave_desconhecida", tipo);

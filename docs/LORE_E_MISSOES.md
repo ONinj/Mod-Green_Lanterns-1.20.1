@@ -1599,3 +1599,33 @@ Os comandos que ainda estavam em português agora são em inglês (os nomes anti
 | `/guia [capitulo]` | `/guide [chapter]` |
 
 Também ficaram em inglês as opções de `/lantern summon` (pirate, captain, merchant, echo, training_dummy, sprout, lantern_<corps>, officer_<corps>), de `/lantern ship` (lancer_ship, pirate_ship, patrol_ship, freighter_ship, pirate_flagship) e de `/lantern technique` (gaze, bastion, wave, leap, armor, command). O `/lantern help` mostra tudo.
+
+
+## 0.50.3 — Chefes em inglês nos comandos
+
+No `/lantern summon`, os chefes agora têm nome em inglês. A barra do chefe, que aparece quando você chega perto, continua na língua do jogo (em português: "Devorador de Ecos").
+
+| Chefe | Comando |
+|---|---|
+| Vorgath, Mammok, Thessara, Morrow, Nyrielle | `boss_vorgath`, `boss_mammok`, `boss_thessara`, `boss_morrow`, `boss_nyrielle` |
+| Vigia Partido | `boss_broken_sentinel` |
+| O Penitente Sem Rosto | `boss_faceless_penitent` |
+| Devorador de Ecos | `boss_echo_devourer` |
+| O Nulo | `boss_the_null` |
+| Colosso de Jade | `boss_jade_colossus` |
+| Mãe das Sombras | `boss_mother_of_shadows` |
+| Serpente Escarlate | `boss_scarlet_serpent` |
+| Rei Faminto | `boss_starving_king` |
+| Arcanjo da Aurora | `boss_archangel_of_dawn` |
+| Cervo Sereno | `boss_serene_stag` |
+| Rainha de Cristal | `boss_crystal_queen` |
+| Karvhul, o Forjador Rubro | `boss_karvhul_crimson_forger` |
+| Vesk Morrath, o Carcereiro | `boss_vesk_morrath_jailer` |
+| Ghor'Maddu, a Arca Viva | `boss_ghormaddu_living_hoard` |
+| Seraphel do Vitral | `boss_seraphel_stained_glass` |
+| Os Gêmeos Velados | `boss_veiled_twins` |
+| Rainha Calithe do Espelho | `boss_calithe_mirror_queen` |
+| Morthaal, o Coletor de Lanternas | `boss_morthaal_lantern_collector` |
+| Verdan, o Arquiteto | `boss_verdan_the_architect` |
+
+As mensagens de confirmação no chat (invocar, nave, técnica) também mostram os nomes em inglês que você digitou.
