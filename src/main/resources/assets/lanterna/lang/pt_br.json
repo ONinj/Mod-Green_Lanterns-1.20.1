@@ -3240,5 +3240,6 @@
   "boss.lanterna.nulo.fase": "Fase %s de 5",
   "boss.lanterna.nulo.phase4": "Eclipse: duas cópias de uma vez, e ele aparece atrás de você",
   "boss.lanterna.nulo.phase5": "Desespero: ondas de vazio sem parar, e ninguém voa",
-  "boss.lanterna.nulo.drena": "O Nulo come a luz do seu anel!"
+  "boss.lanterna.nulo.drena": "O Nulo come a luz do seu anel!",
+  "block.lanterna.capsula_estelar": "Cápsula Estelar"
 }

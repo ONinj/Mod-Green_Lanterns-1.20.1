@@ -16,6 +16,8 @@ public final class ModItems {
     public static final RegistryObject<Item> POWER_RING = ITEMS.register("power_ring",
             () -> new PowerRingItem(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant()));
 
+    public static final RegistryObject<Item> CAPSULA_ESTELAR = ITEMS.register("capsula_estelar",
+            () -> new net.minecraft.world.item.BlockItem(ModBlocks.CAPSULA_ESTELAR.get(), new Item.Properties().rarity(Rarity.RARE)));
     public static final RegistryObject<Item> POWER_BATTERY = ITEMS.register("power_battery",
             () -> new PowerBatteryItem(ModBlocks.POWER_BATTERY.get(),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE).fireResistant()));

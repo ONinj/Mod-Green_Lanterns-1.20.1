@@ -168,6 +168,34 @@ public final class TerraHistoria {
         if (e.phase != TickEvent.Phase.END || !(e.player instanceof ServerPlayer p) || p.tickCount % 20 != 7) return;
         if (FonteDados.chamado(p, "terra:anel") >= 1) return;
         if (MissionManager.countItem(p, ModItems.DORMANT_RING.get()) > 0) FonteDados.chamado(p, "terra:anel", 1);
+        else if (p.tickCount % 40 == 7 && MissionManager.data(p) != null && MissionManager.data(p).isActive("terra_4")) converterBau(p);
+    }
+
+    private static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.levelgen.structure.Structure> ANEL_CAIDO =
+            net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.STRUCTURE, com.lanterna.LanternaMod.id("anel_caido"));
+
+    /**
+     * 0.52.1: crateras de mundos antigos ainda têm o baú comum (o primeiro jogador leva o anel e os outros ficam sem).
+     * Perto dele, quem está em "O Sinal" vê o baú virar a Cápsula Estelar, em que cada jogador tem o próprio conteúdo.
+     */
+    private static void converterBau(ServerPlayer p) {
+        var l = p.serverLevel();
+        var reg = l.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE);
+        var est = reg.get(ANEL_CAIDO);
+        if (est == null) return;
+        BlockPos c = p.blockPosition();
+        for (BlockPos b : BlockPos.betweenClosed(c.offset(-6, -4, -6), c.offset(6, 3, 6))) {
+            var st = l.getBlockState(b);
+            if (!st.is(net.minecraft.world.level.block.Blocks.CHEST)) continue;
+            if (!l.structureManager().getStructureWithPieceAt(b, est).isValid()) continue;
+            var face = st.getValue(net.minecraft.world.level.block.ChestBlock.FACING);
+            BlockPos pos = b.immutable();
+            if (l.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity ch) ch.clearContent();
+            l.setBlock(pos, com.lanterna.registry.ModBlocks.CAPSULA_ESTELAR.get().defaultBlockState().setValue(com.lanterna.block.CapsulaEstelarBlock.FACING, face), 3);
+            l.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 30, 0.3, 0.3, 0.3, 0.05);
+            com.lanterna.LanternaMod.LOGGER.info("Lanterna: baú da cratera em {} virou Cápsula Estelar", pos);
+            return;
+        }
     }
 
     private TerraHistoria() {}

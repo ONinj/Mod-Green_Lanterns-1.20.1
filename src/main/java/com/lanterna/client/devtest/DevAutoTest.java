@@ -3916,6 +3916,141 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.52.1: Cápsula Estelar (cada jogador com o seu Anel Apagado) e a cratera de mundo antigo. */
+    private static void sceneCapsula() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        Object[] o = new Object[2];
+        java.util.function.Function<net.minecraft.world.inventory.AbstractContainerMenu, String> lista = m -> {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 27; i++) { var it = m.getSlot(i).getItem(); if (!it.isEmpty()) sb.append(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(it.getItem()).getPath()).append("x").append(it.getCount()).append(" "); }
+            return sb.toString();
+        };
+        at(10, () -> server(sp -> {
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            var l = sp.serverLevel();
+            var pos = new net.minecraft.core.BlockPos(0, 200, 3);
+            l.setBlockAndUpdate(pos, com.lanterna.registry.ModBlocks.CAPSULA_ESTELAR.get().defaultBlockState());
+            var be = (com.lanterna.block.CapsulaEstelarBlockEntity) l.getBlockEntity(pos);
+            be.abrir(sp);
+            glog("jogador 1 abre: " + lista.apply(sp.containerMenu));
+            // pega o anel (tira do baú)
+            for (int i = 0; i < 27; i++) if (sp.containerMenu.getSlot(i).getItem().is(com.lanterna.registry.ModItems.DORMANT_RING.get())) { sp.getInventory().add(sp.containerMenu.getSlot(i).getItem().copy()); sp.containerMenu.getSlot(i).set(net.minecraft.world.item.ItemStack.EMPTY); }
+            sp.closeContainer();
+            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(l, new com.mojang.authlib.GameProfile(java.util.UUID.fromString("88888888-2222-3333-4444-555555555555"), "Amigo"));
+            fake.moveTo(0.5, 200, 1.5);
+            be.abrir(fake);
+            glog("jogador 2 abre a mesma cápsula: " + lista.apply(fake.containerMenu));
+            fake.closeContainer();
+            be.abrir(sp);
+            glog("jogador 1 de novo (já pegou o anel): " + lista.apply(sp.containerMenu));
+            sp.closeContainer();
+            o[0] = pos;
+        }));
+        at(5, () -> server(sp -> sp.connection.teleport(2.5, 201, 5.5, 140, 35)));
+        at(30, () -> { mc.options.hideGui = true; shot("capsula"); });
+        // cratera de mundo antigo: o baú comum vira cápsula para quem está em "O Sinal"
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var alvo = l.findNearestMapStructure(com.lanterna.worldgen.FallenRingTrades.MAP_TAG, sp.blockPosition(), 300, false);
+            glog("cratera mais perto: " + alvo);
+            if (alvo == null) return;
+            l.getChunk(alvo);
+            var est = l.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE).get(com.lanterna.LanternaMod.id("anel_caido"));
+            var start = l.structureManager().getStructureWithPieceAt(alvo.atY(l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, alvo.getX(), alvo.getZ()) - 2), est);
+            net.minecraft.core.BlockPos cap = null;
+            var bb = start.isValid() ? start.getBoundingBox() : null;
+            if (bb != null) for (var b : net.minecraft.core.BlockPos.betweenClosed(bb.minX(), bb.minY(), bb.minZ(), bb.maxX(), bb.maxY(), bb.maxZ()))
+                if (l.getBlockState(b).is(com.lanterna.registry.ModBlocks.CAPSULA_ESTELAR.get()) || l.getBlockState(b).is(net.minecraft.world.level.block.Blocks.CHEST)) { cap = b.immutable(); break; }
+            glog("na cratera: " + (cap == null ? "nada" : l.getBlockState(cap).getBlock().getDescriptionId() + " em " + cap.toShortString()));
+            if (cap == null) return;
+            // simula a cratera antiga: põe um baú comum no lugar
+            l.setBlockAndUpdate(cap, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            for (var it : sp.getInventory().items) if (it.is(com.lanterna.registry.ModItems.DORMANT_RING.get())) it.setCount(0);
+            com.lanterna.fonte.FonteDados.chamado(sp, "terra:anel", 0);
+            d.completed().remove("terra_4"); d.active().remove("terra_4");
+            com.lanterna.mission.MissionManager.start(sp, "terra_4");
+            sp.teleportTo(cap.getX() + 2.5, cap.getY() + 1, cap.getZ() + 0.5);
+            o[1] = cap;
+        }));
+        at(60, () -> server(sp -> { var cap = (net.minecraft.core.BlockPos) o[1]; if (cap == null) return;
+            glog("depois de chegar perto (terra_4 ativa): " + sp.serverLevel().getBlockState(cap).getBlock().getDescriptionId()); }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.52.1: Nulo mais longo e mais leve; o convite do Mogo e de Hanks não volta. */
+    private static void sceneRev0521() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        Object[] o = new Object[1];
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring white");
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(60)));
+            com.lanterna.tropa.Nivel.aplicar(sp);
+            sp.setHealth(sp.getMaxHealth());
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            var n = com.lanterna.lore.LoreEntities.NULO.get().create(sp.serverLevel());
+            n.moveTo(0.5, 200, 9.5, 180, 0); n.setNoAi(true);
+            sp.serverLevel().addFreshEntity(n);
+            o[0] = n;
+            glog("roda do Branco tem construtos da Morte? " + com.lanterna.construct.ConstructType.daRoda(com.lanterna.corps.BuiltinCorps.WHITE.id(), false).stream().anyMatch(t -> "black".equals(t.corps)));
+        }));
+        at(10, () -> server(sp -> {
+            var n = (com.lanterna.lore.entity.boss.LoreBoss) o[0];
+            for (int fase = 1; fase <= 5; fase++) {
+                sp.setHealth(sp.getMaxHealth()); float v0 = sp.getHealth(); sp.invulnerableTime = 0; n.doHurtTarget(sp);
+                float por = v0 - sp.getHealth();
+                glog("fase " + n.phase() + ": golpe tira " + String.format("%.1f", por) + " de " + sp.getMaxHealth() + " (~" + (int) Math.ceil(sp.getMaxHealth() / Math.max(0.1f, por)) + " golpes)");
+                float h0 = n.getHealth(); n.invulnerableTime = 0; n.hurt(sp.damageSources().playerAttack(sp), 30f);
+                glog("   golpe de 30 do Branco tira " + String.format("%.2f", h0 - n.getHealth()) + " (~" + Math.round(n.getMaxHealth() / Math.max(0.01f, h0 - n.getHealth())) + " golpes para a vida toda)");
+                // tenta passar de fase na hora: um golpe enorme
+                n.invulnerableTime = 0; n.hurt(sp.damageSources().playerAttack(sp), 100000f);
+                glog("   golpe enorme logo no começo da fase: vida " + String.format("%.0f%%", n.getHealth() / n.getMaxHealth() * 100) + " fase=" + n.phase() + " vivo=" + n.isAlive());
+                if (fase < 5) { float[] lim = {0.79f, 0.54f, 0.29f, 0.11f}; n.setHealth(n.getMaxHealth() * lim[fase - 1]); n.tick(); }
+            }
+            sp.setHealth(sp.getMaxHealth());
+            n.discard();
+        }));
+        // Mogo: já fez a linha; a marca antiga some (como ao morrer ou trocar de anel): o convite não volta
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.completed().add("mogo_1"); d.completed().add("hanks_1");
+            d.active().keySet().removeIf(k -> k.startsWith("mogo_") || k.startsWith("hanks_"));
+            sp.getPersistentData().remove("lanterna_mogo_oferecida");
+            sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).remove("lanterna_mogo_oferecida");
+            d.setXp(com.lanterna.tropa.Nivel.total(150));
+        }));
+        at(260, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("Mogo depois de 13 s: ativas mogo=" + d.active().keySet().stream().filter(k -> k.startsWith("mogo_")).toList()); }));
+        at(10, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring yellow");
+            sp.getPersistentData().remove("lanterna_hanks_oferecida");
+            sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).remove("lanterna_hanks_oferecida");
+        }));
+        at(260, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("Hanks depois de 13 s: ativas hanks=" + d.active().keySet().stream().filter(k -> k.startsWith("hanks_")).toList()); }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
+    /** 0.52.1: mundo recém-criado: o servidor trava no primeiro minuto? (tempo de cada tick, segundo a segundo) */
+    private static void sceneMspt() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        long[] t0 = {0};
+        at(1, () -> { t0[0] = System.currentTimeMillis(); });
+        for (int i = 0; i < 60; i++) at(20, () -> server(sp -> {
+            long[] ts = sp.server.tickTimes;
+            long max = 0; for (long x : ts) max = Math.max(max, x);
+            glog(String.format("t=%3ds media=%.1fms pior=%.0fms chunks=%d", (System.currentTimeMillis() - t0[0]) / 1000, sp.server.getAverageTickTime(), max / 1e6,
+                    sp.serverLevel().getChunkSource().getLoadedChunksCount()));
+        }));
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.52: anel da Vida com todos os construtos e o dom de Purificar outro jogador. */
     private static void sceneVida052() {
         Minecraft mc = Minecraft.getInstance();
@@ -6713,6 +6848,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("estagios051")) sceneEstagios051();
         else if (ENABLED && SCENE.equals("ritual051")) sceneRitual051();
         else if (ENABLED && SCENE.equals("vida052")) sceneVida052();
+        else if (ENABLED && SCENE.equals("mspt")) sceneMspt();
+        else if (ENABLED && SCENE.equals("rev0521")) sceneRev0521();
+        else if (ENABLED && SCENE.equals("capsula")) sceneCapsula();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

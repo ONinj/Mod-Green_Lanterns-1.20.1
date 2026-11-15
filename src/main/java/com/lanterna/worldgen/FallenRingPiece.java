@@ -125,8 +125,9 @@ public class FallenRingPiece extends StructurePiece {
         set(level, box, core.below(), Blocks.CRYING_OBSIDIAN.defaultBlockState());
         BlockPos chest = core;
         if (box.isInside(chest)) {
-            level.setBlock(chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, door), 2);
-            RandomizableContainerBlockEntity.setLootTable(level, random, chest, LOOT);
+            // 0.52.1: a Cápsula Estelar (cada jogador acha o seu Anel Apagado, também em servidor)
+            level.setBlock(chest, com.lanterna.registry.ModBlocks.CAPSULA_ESTELAR.get().defaultBlockState().setValue(com.lanterna.block.CapsulaEstelarBlock.FACING, door), 2);
+            if (level.getBlockEntity(chest) instanceof com.lanterna.block.CapsulaEstelarBlockEntity cap) cap.setSaque(LOOT);
         }
         set(level, box, core.above(2), Blocks.SOUL_LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
 

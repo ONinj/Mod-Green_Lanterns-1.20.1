@@ -17,5 +17,10 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(PowerBatteryBlockEntity::new, ModBlocks.POWER_BATTERY.get())
                             .build(null));
 
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<com.lanterna.block.CapsulaEstelarBlockEntity>> CAPSULA_ESTELAR =
+            BLOCK_ENTITIES.register("capsula_estelar",
+                    () -> BlockEntityType.Builder.of(com.lanterna.block.CapsulaEstelarBlockEntity::new, ModBlocks.CAPSULA_ESTELAR.get()).build(null));
+
     private ModBlockEntities() {}
 }

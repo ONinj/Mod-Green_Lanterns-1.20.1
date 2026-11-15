@@ -92,10 +92,33 @@ public final class HanksMissoes {
         FonteDados.chamado(p, flag, 1);
     }
 
+    /**
+     * 0.52.1: a linha já foi oferecida? Antes a marca ficava num lugar que se perde (morte, trocar o anel...) e o convite
+     * voltava, repetindo a missão. Agora a marca fica guardada de verdade, e quem já tem ou já fez qualquer missão da
+     * linha nunca recebe o convite de novo.
+     */
+    static boolean jaOferecida(ServerPlayer p) {
+        var raiz = p.getPersistentData();
+        var pers = raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        if (pers.getBoolean(OFERECIDA)) return true;
+        LoreData d = MissionManager.data(p);
+        boolean temLinha = raiz.getBoolean(OFERECIDA) || d != null && (d.active().keySet().stream().anyMatch(k -> k.startsWith("hanks_"))
+                || d.completed().stream().anyMatch(k -> k.startsWith("hanks_")));
+        if (temLinha) marcarOferecida(p);
+        return temLinha;
+    }
+
+    static void marcarOferecida(ServerPlayer p) {
+        var raiz = p.getPersistentData();
+        if (!raiz.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) raiz.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+        raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).putBoolean(OFERECIDA, true);
+        raiz.putBoolean(OFERECIDA, true);
+    }
+
     /** Teste/admin: marca as anteriores como feitas e começa a missão n. */
     public static void pular(ServerPlayer p, int n) {
         String[] flags = {"hanks:pouso", "hanks:nucleos", "hanks:sinestro"};
-        p.getPersistentData().putBoolean(OFERECIDA, true);
+        marcarOferecida(p);
         LoreData d = MissionManager.data(p);
         for (int i = 1; i <= 3; i++) if (d != null && d.isActive("hanks_" + i)) MissionManager.abandon(p, "hanks_" + i);
         for (int i = 0; i < n - 1; i++) FonteDados.chamado(p, flags[i], 1);
@@ -114,8 +137,8 @@ public final class HanksMissoes {
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent e) {
         if (e.phase != TickEvent.Phase.END || !(e.player instanceof ServerPlayer p)) return;
-        if (p.tickCount % 200 == 61 && !p.getPersistentData().getBoolean(OFERECIDA) && amarelo(p) && com.lanterna.tropa.Nivel.nivel(p) >= NIVEL) {
-            p.getPersistentData().putBoolean(OFERECIDA, true);
+        if (p.tickCount % 200 == 61 && !jaOferecida(p) && amarelo(p) && com.lanterna.tropa.Nivel.nivel(p) >= NIVEL) {
+            marcarOferecida(p);
             MissionManager.start(p, "hanks_1");
             titulo(p, "hanks.lanterna.convite.titulo", "hanks.lanterna.convite.sub");
             p.sendSystemMessage(Component.translatable("hanks.lanterna.convite").withStyle(s -> s.withColor(COR)));

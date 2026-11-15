@@ -3240,5 +3240,6 @@
   "boss.lanterna.nulo.fase": "Phase %s of 5",
   "boss.lanterna.nulo.phase4": "Eclipse: two copies at once, and it appears behind you",
   "boss.lanterna.nulo.phase5": "Despair: endless void waves, and no one flies",
-  "boss.lanterna.nulo.drena": "The Null devours your ring's light!"
+  "boss.lanterna.nulo.drena": "The Null devours your ring's light!",
+  "block.lanterna.capsula_estelar": "Stellar Capsule"
 }

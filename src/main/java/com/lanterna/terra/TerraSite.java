@@ -126,10 +126,15 @@ public final class TerraSite {
             for (int k = 0; k < 16; k++) {
                 double a = k * Math.PI / 8 + raio * 0.01;
                 int x = spawn.getX() + (int) (Math.cos(a) * raio), z = spawn.getZ() + (int) (Math.sin(a) * raio);
-                if (l.getBiome(new BlockPos(x, 64, z)).is(BiomeTags.IS_OCEAN) || l.getBiome(new BlockPos(x, 64, z)).is(BiomeTags.IS_RIVER)) continue;
+                // 0.52.1: o bioma vem do gerador, sem carregar o pedaço do mundo (antes eram dezenas de pedaços distantes
+                // carregados de uma vez ao criar o mundo: o jogo ficava quase um minuto travado)
+                var bioma = gen.getBiomeSource().getNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(64),
+                        net.minecraft.core.QuartPos.fromBlock(z), rs.sampler());
+                if (bioma.is(BiomeTags.IS_OCEAN) || bioma.is(BiomeTags.IS_RIVER)) continue;
                 int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
                 boolean agua = false;
-                for (int dx = -R; dx <= R; dx += 8) for (int dz = -R; dz <= R; dz += 8) {
+                // 0.52.1: 9 pontos por lugar (antes 81): a escolha levava ~20 s com o servidor parado ao criar o mundo
+                for (int dx = -R; dx <= R; dx += R) for (int dz = -R; dz <= R; dz += R) {
                     int sup = gen.getBaseHeight(x + dx, z + dz, Heightmap.Types.WORLD_SURFACE_WG, l, rs);
                     int fundo = gen.getBaseHeight(x + dx, z + dz, Heightmap.Types.OCEAN_FLOOR_WG, l, rs);
                     if (sup > fundo + 1) agua = true;
@@ -158,7 +163,9 @@ public final class TerraSite {
         // só o gerador normal põe decorações (num mundo plano a cidade é construída ao entrar, como antes)
         if (d.c == null && !(ow.getChunkSource().getGenerator() instanceof net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator)) return;
         if (d.c == null) {
+            long t0 = System.nanoTime();
             BlockPos esc = escolher(ow);
+            LanternaMod.LOGGER.info("Lanterna: lugar da Cidade Aurora escolhido em {} ms", (System.nanoTime() - t0) / 1_000_000);
             int y = Math.max(com.lanterna.cidade.Mundo.alturaGerador(ow, esc.getX(), esc.getZ()), ow.getMinBuildHeight() + 24);
             d.c = new BlockPos(esc.getX(), y, esc.getZ());
             d.pronto = true;

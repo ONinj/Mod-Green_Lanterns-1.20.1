@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "lanterna:block/capsula_estelar"
+  },
+  "facing=east": {
+   "model": "lanterna:block/capsula_estelar",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "lanterna:block/capsula_estelar",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "lanterna:block/capsula_estelar",
+   "y": 270
+  }
+ }
+}

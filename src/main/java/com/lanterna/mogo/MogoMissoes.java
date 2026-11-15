@@ -100,10 +100,33 @@ public final class MogoMissoes {
         }, 80, next, null);
     }
 
+    /**
+     * 0.52.1: a linha já foi oferecida? Antes a marca ficava num lugar que se perde (morte, trocar o anel...) e o convite
+     * voltava, repetindo a missão. Agora a marca fica guardada de verdade, e quem já tem ou já fez qualquer missão da
+     * linha nunca recebe o convite de novo.
+     */
+    static boolean jaOferecida(ServerPlayer p) {
+        var raiz = p.getPersistentData();
+        var pers = raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        if (pers.getBoolean(OFERECIDA)) return true;
+        LoreData d = MissionManager.data(p);
+        boolean temLinha = raiz.getBoolean(OFERECIDA) || d != null && (d.active().keySet().stream().anyMatch(k -> k.startsWith("mogo_"))
+                || d.completed().stream().anyMatch(k -> k.startsWith("mogo_")));
+        if (temLinha) marcarOferecida(p);
+        return temLinha;
+    }
+
+    static void marcarOferecida(ServerPlayer p) {
+        var raiz = p.getPersistentData();
+        if (!raiz.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) raiz.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+        raiz.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).putBoolean(OFERECIDA, true);
+        raiz.putBoolean(OFERECIDA, true);
+    }
+
     /** Teste/admin: marca as anteriores como feitas e começa a missão n. */
     public static void pular(ServerPlayer p, int n) {
         String[] flags = {"mogo:cinturao", "mogo:corrida", "mogo:ponte", "mogo:prova", "mogo:cerco", "mogo:nucleo"};
-        p.getPersistentData().putBoolean(OFERECIDA, true);
+        marcarOferecida(p);
         LoreData d = MissionManager.data(p);
         for (int i = 1; i <= 6; i++) if (d != null && d.isActive("mogo_" + i)) MissionManager.abandon(p, "mogo_" + i);
         for (int i = 0; i < n - 1; i++) FonteDados.chamado(p, flags[i], 1);
@@ -191,8 +214,8 @@ public final class MogoMissoes {
     public static void tick(TickEvent.PlayerTickEvent e) {
         if (e.phase != TickEvent.Phase.END || !(e.player instanceof ServerPlayer p)) return;
         // convite
-        if (p.tickCount % 200 == 31 && !p.getPersistentData().getBoolean(OFERECIDA) && verde(p) && com.lanterna.tropa.Nivel.nivel(p) >= NIVEL) {
-            p.getPersistentData().putBoolean(OFERECIDA, true);
+        if (p.tickCount % 200 == 31 && !jaOferecida(p) && verde(p) && com.lanterna.tropa.Nivel.nivel(p) >= NIVEL) {
+            marcarOferecida(p);
             MissionManager.start(p, "mogo_1");
             titulo(p, "mogo.lanterna.convite.titulo", COR);
             p.sendSystemMessage(Component.translatable("mogo.lanterna.convite").withStyle(ChatFormatting.GREEN));

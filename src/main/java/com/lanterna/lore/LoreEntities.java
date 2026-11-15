@@ -164,7 +164,7 @@ public final class LoreEntities {
             event.put(PENITENTE.get(), LoreBoss.attributes(380, 12, 0.24).build());
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());
-            event.put(NULO.get(), LoreBoss.attributes(800, 11, 0.30).build()); // 0.52: golpe forte, mas não mata em três
+            event.put(NULO.get(), LoreBoss.attributes(800, 8, 0.30).build()); // 0.52.1: golpe menor
             // Bosses das Tropas: um pouco acima do boss do planeta de cada um
             event.put(VERDAN.get(), LoreBoss.attributes(480, 13, 0.24).add(Attributes.ARMOR, 12).build());          // Oa
             event.put(SERAPHEL.get(), LoreBoss.attributes(560, 12, 0.26).add(Attributes.ARMOR, 6).build());         // Odym

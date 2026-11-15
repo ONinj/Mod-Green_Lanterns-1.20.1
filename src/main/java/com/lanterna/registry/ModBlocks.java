@@ -33,6 +33,11 @@ public final class ModBlocks {
                     .noOcclusion()));
 
     /** Rocha Estelar: o que sobra de uma estrela cadente que caiu na Terra. Dá Fragmentos Estelares. */
+    /** 0.52.1: o baú do meteoro do Anel Caído (cada jogador tem o próprio conteúdo). */
+    public static final RegistryObject<Block> CAPSULA_ESTELAR = BLOCKS.register("capsula_estelar",
+            () -> new com.lanterna.block.CapsulaEstelarBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK).strength(-1f, 3600000f).noLootTable().noOcclusion()
+                    .lightLevel(s -> 7).sound(net.minecraft.world.level.block.SoundType.NETHERITE_BLOCK)));
     public static final RegistryObject<Block> ROCHA_ESTELAR = BLOCKS.register("rocha_estelar",
             () -> new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_BLACK)

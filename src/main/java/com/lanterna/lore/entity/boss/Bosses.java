@@ -904,7 +904,20 @@ public final class Bosses {
         private int closeTimer = 1200;
         private int warn;
         private int nextCopy;
-        private int novaTimer = 100;
+        private int novaTimer = 150;
+        private int faseDesde;
+        private static final int MIN_FASE = 20 * 90;
+
+        /** A fração de vida em que a próxima fase começa (0 = não há próxima). */
+        private float proximoLimite() {
+            return switch (phase()) {
+                case 1 -> 0.8f;
+                case 2 -> 0.55f;
+                case 3 -> 0.30f;
+                case 4 -> 0.12f;
+                default -> 0f;
+            };
+        }
 
         public Nulo(EntityType<? extends Monster> type, Level level) {
             super(type, level, BossEvent.BossBarColor.WHITE);
@@ -940,6 +953,7 @@ public final class Bosses {
         @Override
         protected void onPhaseChange(int phase) {
             super.onPhaseChange(phase);
+            faseDesde = tickCount;
             ServerLevel sl = (ServerLevel) level();
             sl.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + getBbHeight() * 0.5, getZ(), 3, 1, 1, 1, 0);
             sl.sendParticles(dust(0xDADADF, 3f), getX(), getY() + getBbHeight() * 0.5, getZ(), 200, 4, 3, 4, 0.1);
@@ -966,8 +980,8 @@ public final class Bosses {
             ServerLevel sl = (ServerLevel) level();
             fases();
             int fase = phase();
-            chase(target, fase >= 4 ? 1.25 : 1.0);
-            tryMelee(target, 2.5, fase >= 4 ? 16 : 22);
+            chase(target, fase >= 4 ? 1.15 : 1.0);
+            tryMelee(target, 2.5, fase >= 4 ? 28 : 36); // 0.52.1: golpes mais espaçados
             if (tickCount % 40 == 0) {
                 for (Player p : playersNear(40)) p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, false));
                 sl.sendParticles(dust(0x8C8C90, 2f), getX(), getY() + 1, getZ(), 70, 7, 1.5, 7, 0);
@@ -976,7 +990,7 @@ public final class Bosses {
                 case 1 -> {
                     // ecos sem cor
                     if (specialCooldown == 0) {
-                        specialCooldown = 160;
+                        specialCooldown = 260;
                         ecos(sl, target, 2, 6);
                         colorless(target);
                     }
@@ -985,38 +999,38 @@ public final class Bosses {
                     // copia os chefes que já caíram
                     copiar(sl, target, false);
                     // o vazio puxa: quem voa cai
-                    if (tickCount % 120 == 0) puxar(target, 0.9);
+                    if (tickCount % 220 == 0) puxar(target, 0.9);
                 }
                 case 3 -> {
                     rachadura(sl, 0.012, 16);
                     if (specialCooldown == 0) {
-                        specialCooldown = 110;
+                        specialCooldown = 200;
                         colorless(target);
-                        drenarLuz(0.08f);
+                        drenarLuz(0.06f);
                     }
-                    if (tickCount % 100 == 0) ecos(sl, target, 2, 8);
+                    if (tickCount % 300 == 0) ecos(sl, target, 2, 8);
                 }
                 case 4 -> {
                     // eclipse: duas cópias de uma vez, some e aparece atrás do alvo
                     copiar(sl, target, true);
                     rachadura(sl, 0.016, 18);
                     if (specialCooldown == 0) {
-                        specialCooldown = 90;
+                        specialCooldown = 180;
                         atras(target);
                         colorless(target);
-                        drenarLuz(0.10f);
+                        drenarLuz(0.07f);
                     }
                 }
                 default -> {
                     // desespero: ondas de vazio sem parar, ninguém voa, tudo mais rápido
                     rachadura(sl, 0.02, 20);
                     if (--novaTimer <= 0) {
-                        novaTimer = 90;
+                        novaTimer = 160;
                         nova(sl);
                     }
-                    if (tickCount % 60 == 0) for (Player p : playersNear(40)) if (p instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 70, 0xDADADF, false);
+                    if (tickCount % 140 == 0) for (Player p : playersNear(40)) if (p instanceof ServerPlayer sp) com.lanterna.lore.entity.boss.Controle.derrubar(sp, 90, 0xDADADF, false);
                     if (specialCooldown == 0) {
-                        specialCooldown = 70;
+                        specialCooldown = 140;
                         if (random.nextBoolean()) atras(target); else colorless(target);
                     }
                 }
@@ -1032,21 +1046,21 @@ public final class Bosses {
             boolean ok = super.doHurtTarget(e);
             if (e instanceof LivingEntity le && le.isAlive()) {
                 le.invulnerableTime = 0;
-                le.hurt(damageSources().indirectMagic(this, this), golpeVazio(le, 0.10f + 0.02f * phase()));
+                le.hurt(damageSources().indirectMagic(this, this), golpeVazio(le, 0.05f + 0.012f * phase())); // 0.52.1: menos dano
             }
             return ok;
         }
 
         /** Uma parte da vida máxima do alvo (sem passar de 22 de uma vez). */
         private static float golpeVazio(LivingEntity le, float fracao) {
-            return Math.min(22f, le.getMaxHealth() * fracao);
+            return Math.min(14f, le.getMaxHealth() * fracao);
         }
 
         /** Os poderes de controle dos outros chefes, mais fortes e mais rápidos aqui. */
         @Override
         protected void poderDeControle(LivingEntity target) {
             super.poderDeControle(target);
-            if (phase() >= 3) super.poderDeControle(target); // o rodízio anda em dobro
+            if (phase() >= 5) super.poderDeControle(target); // 0.52.1: em dobro só no desespero
         }
 
         private void ecos(ServerLevel sl, LivingEntity target, int quantos, int max) {
@@ -1067,12 +1081,12 @@ public final class Bosses {
             if (!a) {
                 LoreBoss echo = LoreBoss.spawnEcho(sl, Devorador.HEADS[nextCopy++ % Devorador.HEADS.length], position().add(5, 0, 5), target);
                 copy = echo != null ? echo.getUUID() : null;
-                specialCooldown = 100;
+                specialCooldown = 400; // 0.52.1: bem mais tempo até a próxima cópia
                 for (Player p : playersNear(48)) p.displayClientMessage(Component.translatable("boss.lanterna.nulo.copy"), true);
             } else if (duas && !b) {
                 LoreBoss echo = LoreBoss.spawnEcho(sl, Devorador.HEADS[nextCopy++ % Devorador.HEADS.length], position().add(-5, 0, -5), target);
                 copy2 = echo != null ? echo.getUUID() : null;
-                specialCooldown = 100;
+                specialCooldown = 400;
             }
         }
 
@@ -1086,7 +1100,7 @@ public final class Bosses {
                 if (v.length() < 3 && tickCount % 20 == 0) p.hurt(damageSources().magic(), 4);
             }
             if (--closeTimer <= 0) {
-                closeTimer = phase() >= 4 ? 700 : 1000;
+                closeTimer = phase() >= 4 ? 1100 : 1500;
                 for (Player p : playersNear(48)) {
                     p.hurt(damageSources().magic(), Math.max(golpe * 0.5f, golpeVazio(p, golpe / 100f)));
                     p.displayClientMessage(Component.translatable("boss.lanterna.nulo.close"), true);
@@ -1137,7 +1151,7 @@ public final class Bosses {
             sl.sendParticles(dust(0xFFFFFF, 3f), getX(), getY() + 1, getZ(), 160, 7, 0.4, 7, 0);
             level().playSound(null, blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 2f, 0.4f);
             areaDamage(position(), 9, 14, 2.2);
-            for (Player p : playersNear(9)) { p.invulnerableTime = 0; p.hurt(damageSources().magic(), golpeVazio(p, 0.12f)); }
+            for (Player p : playersNear(9)) { p.invulnerableTime = 0; p.hurt(damageSources().magic(), golpeVazio(p, 0.07f)); }
         }
 
         /** Os poderes de todas as cores, mas sem cor: fúria sem calor, medo sem som, amor sem toque. */
@@ -1170,8 +1184,13 @@ public final class Bosses {
                 }
                 return 0;
             }
-            // 0.52: o mais difícil do jogo: até o anel da Vida só o arranha (e mais ainda no fim)
-            return amount * (phase() >= 5 ? 0.42f : phase() >= 4 ? 0.5f : 0.6f);
+            // 0.52.1: luta longa: cinco vezes a vida de antes (o jogo limita a vida em 1024, então é pela resistência)
+            float a = amount * (phase() >= 5 ? 0.084f : phase() >= 4 ? 0.10f : 0.12f);
+            // e pelo menos 90 s em cada fase: a vida não passa do ponto da próxima fase antes disso
+            float limite = proximoLimite();
+            if (limite > 0 && tickCount - faseDesde < MIN_FASE && getHealth() - a < getMaxHealth() * limite + 1)
+                a = Math.max(0, getHealth() - (getMaxHealth() * limite + 1));
+            return a;
         }
 
         @Override

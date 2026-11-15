@@ -189,13 +189,13 @@ public enum ConstructType {
     public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {
         if (corps == null) return true;
         if (ringCorps == null) return false;
-        // 0.52: o anel da Vida tem TODOS os construtos de todas as Tropas, inclusive os da Morte
-        if (ringCorps.getPath().equals("white")) return true;
+        // o anel da Vida tem os construtos de todas as Tropas, menos os da Morte (Vida e Morte não se misturam)
+        if (ringCorps.getPath().equals("white")) return !corps.equals("black");
         return ringCorps.getPath().equals(corps);
     }
 
     /** As Tropas que o anel Branco percorre na roda (uma página por Tropa). */
-    public static final String[] PAGINAS_BRANCO = {"white", "green", "yellow", "red", "orange", "blue", "indigo", "violet", "black"};
+    public static final String[] PAGINAS_BRANCO = {"white", "green", "yellow", "red", "orange", "blue", "indigo", "violet"};
 
     /** Construtos que este anel mostra na roda: os de todos + o próprio da Tropa. */
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps) {

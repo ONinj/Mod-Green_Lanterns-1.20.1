@@ -1674,3 +1674,12 @@ A linha agora tem seis passos: 1) Odym, falar com o líder; 2) 8 Pérolas do Ama
 ### Altar da Purificação
 - Modelo refeito: as peças maiores que um bloco ganharam texturas certas (antes apareciam pedaços de outras texturas, como listras laranjas).
 - O portador fica deitado **na laje** do começo ao fim (antes ficava no chão onde clicou e, no meio, ia para o lado). O anel flutua em cima do pedestal da cabeceira.
+
+
+## 0.52.1 — Ajustes
+
+- **Travamento ao criar o mundo**: o lugar da Cidade Aurora é escolhido quando o mundo nasce, testando até 80 lugares entre 330 e 560 blocos do spawn. Cada teste calculava a altura do terreno em 81 pontos (e o bioma carregando o pedaço do mundo), com o servidor parado: ~19,5 s numa máquina de teste (até um minuto em outras). Agora são 9 pontos por lugar e o bioma vem do gerador, sem carregar nada: ~1,2 s. A cidade continua nascendo com o terreno, só quando alguém chega perto.
+- **Cápsula Estelar** (Anel Caído): o baú do meteoro virou um baú do mod em que cada jogador vê o próprio conteúdo (sorteado para ele na primeira vez que abre), como o baú do Ender. Em servidor, todos que vão à mesma cratera acham o seu Anel Apagado. Não quebra no modo sobrevivência. Crateras de mundos antigos: quem está em "O Sinal" e chega perto do baú comum da cratera vê o baú virar Cápsula Estelar.
+- **Anel da Vida**: sem os construtos da Morte (Vida e Morte não se misturam); continua com todos os das outras Tropas, já liberados.
+- **Nulo**: cinco vezes a vida de antes (pela resistência: o jogo limita a vida em 1024), golpe menor (6% a 11% da vida de quem apanha, até 14), golpes, ecos, cópias e ondas mais espaçados, poderes de controle em dobro só na fase 5, e pelo menos 90 s em cada fase (a vida não passa do ponto da próxima fase antes disso).
+- **Mogo e Hanks**: tirar e pôr o anel (ou morrer) não oferece de novo a missão. A marca de "já oferecida" agora fica guardada de verdade, e quem já tem ou já fez qualquer missão da linha nunca recebe o convite outra vez.
