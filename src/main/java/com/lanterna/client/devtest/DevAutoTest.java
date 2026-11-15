@@ -3505,6 +3505,35 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.49.5: marcador e colunas de luz dos três núcleos de Hanks. */
+    private static void sceneHanksNucleos() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { mc.options.renderDistance().set(12); cmd("gamemode creative"); cmd("gamerule doMobSpawning false"); cmd("lantern ring yellow"); });
+        at(20, () -> server(sp -> {
+            sp.getPersistentData().putInt("lanterna_hanks_nucleos", 0);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.completed().remove("hanks_2"); d.completed().remove("hanks_3"); });
+            com.lanterna.fonte.FonteDados.chamado(sp, "hanks:nucleos", 0);
+            com.lanterna.mission.MissionManager.start(sp, "hanks_2");
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setTracked("hanks_2"); com.lanterna.mission.MissionManager.sync(sp, d); });
+            var l = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("hanks").dimension());
+            sp.teleportTo(l, -40.5, 60, -60.5, 0, 10); sp.getAbilities().flying = true; sp.onUpdateAbilities();
+        }));
+        at(300, () -> {
+            glog("mundo=" + mc.level.dimension().location() + " ativa hanks_2? " + com.lanterna.client.mission.ClientLoreData.DATA.isActive("hanks_2") + " acompanhada=" + com.lanterna.client.mission.ClientLoreData.DATA.tracked()
+                    + " missao=" + com.lanterna.mission.Missions.get("hanks_2"));
+            var t = com.lanterna.client.mission.Waypoints.current();
+            glog("marcador: " + (t == null ? "nenhum" : t.hint().getString() + " em " + t.pos() + " a " + Math.round(t.distance()) + " blocos"));
+        });
+        at(5, () -> shot("hanks_nucleos_marcador"));
+        // liga o núcleo apontado e vê o marcador pular para o próximo
+        at(5, () -> server(sp -> { var t = com.lanterna.client.mission.Waypoints.current(); if (t != null) sp.teleportTo(t.pos().x, t.pos().y - 1, t.pos().z); }));
+        at(120, () -> { var t = com.lanterna.client.mission.Waypoints.current();
+            glog("depois de ligar um: " + (t == null ? "nenhum" : t.hint().getString() + " a " + Math.round(t.distance()) + " blocos")); });
+        at(10, () -> { glog("FIM"); mc.stop(); });
+    }
+
     /** 0.49.4: a Terra inteira acima do chão do espaço; sair e voltar. */
     private static void sceneTerraEspaco() {
         Minecraft mc = Minecraft.getInstance();
@@ -5997,6 +6026,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("pvpnivel")) scenePvpNivel();
         else if (ENABLED && SCENE.equals("portador")) scenePortador();
         else if (ENABLED && SCENE.equals("terraespaco")) sceneTerraEspaco();
+        else if (ENABLED && SCENE.equals("hanksnucleos")) sceneHanksNucleos();
         else if (ENABLED && SCENE.equals("arenamuro")) sceneArenaMuro();
         else if (ENABLED && SCENE.equals("cargueiro")) sceneCargueiro();
         else if (ENABLED && SCENE.equals("v24c")) sceneV24c();

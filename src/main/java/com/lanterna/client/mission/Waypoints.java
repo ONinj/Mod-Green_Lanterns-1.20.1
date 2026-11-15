@@ -102,6 +102,15 @@ public final class Waypoints {
                 Vec3 at = alvo.position().add(0, alvo.getBbHeight() + 0.7, 0);
                 return new Target(at, at.distanceTo(player.position()), Component.translatable(o.type() == Objective.Type.TALK ? "waypoint.lanterna.alvo" : "waypoint.lanterna.alvo_luta", alvo.getDisplayName()), label, color, o.planet());
             }
+            // Hanks, "Os Três Núcleos": aponta o núcleo apagado mais perto
+            if ("hanks:nucleos".equals(o.target())) {
+                int i = ClienteHanks.maisPerto(player.position());
+                if (i >= 0) {
+                    Vec3 at = ClienteHanks.ponto(i);
+                    return new Target(at, at.distanceTo(player.position()),
+                            Component.translatable("waypoint.lanterna.nucleo", i + 1, ClienteHanks.ligados()), label, color, o.planet());
+                }
+            }
             if (o.pos() == null) {
                 return null;
             }

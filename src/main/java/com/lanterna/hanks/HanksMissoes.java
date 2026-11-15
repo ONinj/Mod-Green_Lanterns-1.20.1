@@ -121,6 +121,46 @@ public final class HanksMissoes {
             p.sendSystemMessage(Component.translatable("hanks.lanterna.convite").withStyle(s -> s.withColor(COR)));
         }
         if (p.tickCount % 5 == 0 && p.level().dimension().equals(HanksMundo.DIM) && ativa(p, "hanks_2")) nucleos(p);
+        if (p.tickCount % 40 == 13 && p.level().dimension().equals(HanksMundo.DIM) && ativa(p, "hanks_2")) guiarNucleos(p);
+    }
+
+    /**
+     * 0.49.5: a cidade de Hanks não acaba e é toda parecida: achar os núcleos era muito difícil. Agora o cliente recebe
+     * onde estão os que faltam (o marcador da missão aponta o mais perto) e cada núcleo apagado solta uma coluna de luz
+     * alta, visível de longe por cima dos prédios (só para quem está nessa missão).
+     */
+    private static void guiarNucleos(ServerPlayer p) {
+        ServerLevel l = p.serverLevel();
+        HanksMundo.Dados d = HanksMundo.dados(l);
+        if (!d.pronto) return;
+        int feitos = p.getPersistentData().getInt(NUCLEOS);
+        com.lanterna.network.ModNetwork.sendTo(p, new NucleosSync(d.y, feitos));
+        var luz = new DustParticleOptions(new Vector3f(1f, 0.82f, 0.25f), 2.2f);
+        for (int i = 0; i < 3; i++) {
+            if ((feitos & (1 << i)) != 0) continue;
+            BlockPos c = HanksMundo.nucleo(d, i);
+            for (int k = 0; k < 90; k += 2)
+                l.sendParticles(p, luz, true, c.getX() + 0.5, c.getY() + 2 + k, c.getZ() + 0.5, 1, 0.15, 0.4, 0.15, 0);
+            l.sendParticles(p, net.minecraft.core.particles.ParticleTypes.END_ROD, true, c.getX() + 0.5, c.getY() + 92, c.getZ() + 0.5, 6, 0.6, 0.6, 0.6, 0.02);
+        }
+    }
+
+    /** Onde estão os núcleos (altura) e quais já foram ligados (bits 1, 2, 4). */
+    public record NucleosSync(int y, int feitos) {
+        public static void encode(NucleosSync m, net.minecraft.network.FriendlyByteBuf b) {
+            b.writeVarInt(m.y);
+            b.writeByte(m.feitos);
+        }
+
+        public static NucleosSync decode(net.minecraft.network.FriendlyByteBuf b) {
+            return new NucleosSync(b.readVarInt(), b.readByte());
+        }
+
+        public static void handle(NucleosSync m, java.util.function.Supplier<net.minecraftforge.network.NetworkEvent.Context> ctx) {
+            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> com.lanterna.client.mission.ClienteHanks.receber(m.y, m.feitos));
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     /** Chegou em Hanks. */

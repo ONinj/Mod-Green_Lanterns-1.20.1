@@ -3180,5 +3180,6 @@
   "command.lanterna.converter_supremo": "%s usa um anel supremo (Branco ou Preto): a Morte não o tinge.",
   "command.lanterna.anelpreto_livre": "O Anel Preto ainda não foi forjado neste mundo.",
   "command.lanterna.anelpreto_dono": "O Anel Preto pertence a %s (Arauto da Morte).",
-  "command.lanterna.anelpreto_liberado": "O Anel Preto foi liberado: a forja de Ryut aceita um novo Arauto."
+  "command.lanterna.anelpreto_liberado": "O Anel Preto foi liberado: a forja de Ryut aceita um novo Arauto.",
+  "waypoint.lanterna.nucleo": "Núcleo %s · %s de 3 ligados (siga a coluna de luz)"
 }

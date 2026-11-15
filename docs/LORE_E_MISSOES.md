@@ -1531,3 +1531,9 @@ As construções eram desenhadas bloco a bloco sem olhar os vizinhos, e por isso
 - Quem sai da Terra chega **acima dela e um pouco de lado** (y ≈ 810), olhando para os mares e continentes, e não mais por baixo.
 - As calotas polares eram uma faixa lisa, que de cima parecia um disco cinza: agora são gelo com borda irregular, algumas fendas e o mar continuando até elas.
 - Nada muda no resto: entrar na Terra voando para dentro dela continua levando ao mundo normal (testado).
+
+## 0.49.5 — Os núcleos de Hanks à vista
+
+- Na missão **Os Três Núcleos** (Hanks), a cidade sem fim e toda parecida deixava os núcleos quase impossíveis de achar.
+  - O **marcador da missão** (o losango na tela e a distância no painel) agora aponta o **núcleo apagado mais perto**, com o número dele e quantos já foram ligados. Ao ligar um, ele pula sozinho para o próximo.
+  - Cada **núcleo apagado** solta uma **coluna de luz dourada** de 90 blocos, a cada 2 segundos, visível de longe por cima dos prédios. Só quem está nessa missão vê.
