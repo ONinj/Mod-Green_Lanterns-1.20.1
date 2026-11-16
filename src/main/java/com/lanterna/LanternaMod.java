@@ -65,7 +65,6 @@ public class LanternaMod {
         modBus.addListener(com.lanterna.mission.LoreCapability::register);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LanternaConfig.SPEC);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, com.lanterna.ia.ConfigCliente.SPEC, "lanterna-client.toml");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

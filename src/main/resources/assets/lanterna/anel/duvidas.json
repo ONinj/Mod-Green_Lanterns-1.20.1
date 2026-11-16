@@ -897,8 +897,8 @@
    "voice commands",
    "speech"
   ],
-  "pt": "Para falar comigo, escreva no chat começando com 'anel,' (por exemplo: anel, como faço a bateria?). Eu respondo em voz alta; a voz pode ser mudada no config/lanterna-client.toml.",
-  "en": "To talk to me, type in chat starting with 'ring,' (for example: ring, how do I make the battery?). I answer out loud; the voice can be changed in config/lanterna-client.toml."
+  "pt": "Para falar comigo, escreva no chat começando com 'anel,' (por exemplo: anel, como faço a bateria?). Eu respondo no próprio chat.",
+  "en": "To talk to me, type in chat starting with 'ring,' (for example: ring, how do I make the battery?). I answer right in the chat."
  },
  {
   "id": "guia",

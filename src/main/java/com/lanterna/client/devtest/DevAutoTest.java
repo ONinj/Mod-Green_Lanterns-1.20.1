@@ -3310,51 +3310,6 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM"); mc.stop(); });
     }
 
-    /** 0.48: a voz neural (Piper) baixa e gera fala. */
-    private static void scenePiper() {
-        Minecraft mc = Minecraft.getInstance();
-        String idi = System.getProperty("lanterna.lugar", "pt-BR");
-        long[] t0 = {0};
-        at(40, () -> { t0[0] = System.currentTimeMillis(); com.lanterna.client.ia.VozPiper.preparar(idi); });
-        waitFor(() -> com.lanterna.client.ia.VozPiper.pronto(idi) || com.lanterna.client.ia.VozPiper.quebrado, 20 * 400);
-        at(20, () -> {
-            glog("piper pronto=" + com.lanterna.client.ia.VozPiper.pronto(idi) + " quebrado=" + com.lanterna.client.ia.VozPiper.quebrado + " em " + (System.currentTimeMillis() - t0[0]) / 1000 + "s");
-            try {
-                long t = System.currentTimeMillis();
-                boolean ok = com.lanterna.client.ia.VozPiper.gerarArquivo(idi.startsWith("pt") ? "Eu sou o anel da Tropa dos Lanternas Verdes. Vamos para Zamaron, Lanterna."
-                        : "I am the ring of the Green Lantern Corps. Setting course for Zamaron, Lantern.", idi, java.nio.file.Path.of("piper_teste.wav"));
-                glog("piper wav ok=" + ok + " em " + (System.currentTimeMillis() - t) + " ms");
-            } catch (Exception e) { glog("piper erro " + e); }
-        });
-        at(20, () -> { glog("FIM"); mc.stop(); });
-    }
-
-    /** 0.48: o Vosk embutido carrega, baixa o modelo e reconhece (um .wav de teste, se existir; senão silêncio). */
-    private static void sceneVosk() {
-        Minecraft mc = Minecraft.getInstance();
-        com.lanterna.client.ia.VozAnel.mudo = true;
-        long[] t0 = {0};
-        at(40, () -> { t0[0] = System.currentTimeMillis(); com.lanterna.client.ia.VozVosk.prepararModelo(System.getProperty("lanterna.lugar", "pt-BR")); });
-        waitFor(() -> com.lanterna.client.ia.VozVosk.pronto(System.getProperty("lanterna.lugar", "pt-BR")) || com.lanterna.client.ia.VozVosk.quebrado, 20 * 240);
-        at(10, () -> {
-            glog("vosk pronto=" + com.lanterna.client.ia.VozVosk.pronto("pt-BR") + " quebrado=" + com.lanterna.client.ia.VozVosk.quebrado
-                    + " em " + (System.currentTimeMillis() - t0[0]) / 1000 + "s");
-            try {
-                java.nio.file.Path wav = java.nio.file.Path.of(System.getProperty("lanterna.lugar", "pt").startsWith("en") ? "vosk_teste_en.wav" : "vosk_teste.wav");
-                if (!java.nio.file.Files.exists(wav)) {
-                    byte[] silencio = new byte[16000 * 2];
-                    java.util.Random r = new java.util.Random(1);
-                    for (int i = 0; i < silencio.length; i += 2) { short v = (short) (r.nextGaussian() * 30); silencio[i] = (byte) v; silencio[i + 1] = (byte) (v >> 8); }
-                    var fmt = new javax.sound.sampled.AudioFormat(16000f, 16, 1, true, false);
-                    javax.sound.sampled.AudioSystem.write(new javax.sound.sampled.AudioInputStream(new java.io.ByteArrayInputStream(silencio), fmt, silencio.length / 2),
-                            javax.sound.sampled.AudioFileFormat.Type.WAVE, wav.toFile());
-                }
-                glog("vosk ouviu: [" + com.lanterna.client.ia.VozVosk.reconhecerArquivo(wav) + "]");
-            } catch (Throwable t) { glog("vosk erro: " + t); }
-        });
-        at(20, () -> { glog("FIM"); mc.stop(); });
-    }
-
     private static void sceneBases() {
         Minecraft mc = Minecraft.getInstance();
         com.lanterna.client.ia.VozAnel.mudo = true;
@@ -6877,9 +6832,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
         else if (ENABLED && SCENE.equals("aurora")) sceneAurora();
-        else if (ENABLED && SCENE.equals("piper")) scenePiper();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
-        else if (ENABLED && SCENE.equals("vosk")) sceneVosk();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
         else if (ENABLED && SCENE.equals("inclina2")) sceneInclina2();

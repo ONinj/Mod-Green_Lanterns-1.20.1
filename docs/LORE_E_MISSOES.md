@@ -1703,3 +1703,11 @@ A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a
 - O **mapa estelar** mostra a rota tracejada na cor do anel, com os pontos de desvio em branco.
 - Medido numa viagem de 67 km (Tropa comum, nível 75): **28 s com a rota, 36 s indo reto**. O que sobra de freada é a chegada ao planeta (que é de propósito, para pousar) e um ou outro desvio muito apertado entre dois planetas vizinhos.
 - Tudo é calculado no jogo de quem voa: não pesa no servidor.
+
+
+## 0.52.4 — Sem a voz do anel
+
+- A voz do anel saiu do mod: o reconhecimento pelo microfone (Vosk, que vinha embutido com bibliotecas nativas para Windows, Mac e Linux e baixava um modelo na primeira vez) e a fala das respostas (Piper, baixado na primeira vez, ou as vozes do sistema). Desde a 0.48.12 só a fala das respostas ainda funcionava.
+- O anel continua conversando pelo chat ("anel, ..."), com as mesmas respostas, receitas e piloto automático.
+- O Juramento continua igual (o microfone só mede se você está falando; dá para escrever com TAB).
+- O arquivo do mod ficou bem menor e não baixa nem executa nada fora do jogo. O config/lanterna-client.toml de versões antigas pode ser apagado.

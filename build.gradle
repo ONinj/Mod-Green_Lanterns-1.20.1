@@ -75,16 +75,12 @@ repositories {
 }
 
 configurations {
-    // bibliotecas que vão dentro do .jar do mod (o Vosk: reconhecimento de fala offline)
+    // bibliotecas que vão dentro do .jar do mod (0.52.4: nenhuma; o Vosk saiu junto com a voz)
     embutir
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    // Vosk (fala -> texto, offline). O JNA já vem com o Minecraft.
-    implementation('com.alphacephei:vosk:0.3.45') { transitive = false }
-    minecraftLibrary('com.alphacephei:vosk:0.3.45') { transitive = false }
-    embutir('com.alphacephei:vosk:0.3.45') { transitive = false }
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
     compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.5.0'
