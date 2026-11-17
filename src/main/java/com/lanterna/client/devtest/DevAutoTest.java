@@ -7201,7 +7201,8 @@ public final class DevAutoTest {
             }
         }
         // Máquina nova sem o mundo "test" (o quickPlay não acha e para no menu): cria um superplano com comandos
-        if (!criouMundo && mc.level == null && mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
+        if (!criouMundo && mc.level == null && mc.getOverlay() == null && mc.getSingleplayerServer() == null
+                && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen)
                 && !mc.getLevelSource().levelExists("test")) {
             criouMundo = true;
             var settings = new net.minecraft.world.level.LevelSettings("test", net.minecraft.world.level.GameType.CREATIVE, false,
