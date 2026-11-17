@@ -6816,12 +6816,15 @@ public final class DevAutoTest {
         at(60, () -> server(sp -> {
             var l = sp.serverLevel();
             var b = com.lanterna.fonte.FonteChamado.praca();
+            l.getChunkAt(b.offset(0, 0, -20));
             int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 20);
             sp.teleportTo(l, b.getX() + 0.5, h, b.getZ() - 20.5, 0f, 0f);
             sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
             sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 20 * 600, 4, false, false));
             com.lanterna.fonte.ProvaFonte.comecar(sp, com.lanterna.baterias.Tropa.INDIGO, b);
-            var f = l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), x -> x.isPirata() && com.lanterna.fonte.ProvaFonte.protegido(x)).stream().findFirst().orElse(null);
+            var f = l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, new net.minecraft.world.phys.AABB(b).inflate(60, 400, 60), com.lanterna.fonte.ProvaFonte::protegido).stream().findFirst().orElse(null);
+            glog("nok: jogador em " + sp.blockPosition().toShortString() + " praca=" + b.toShortString());
+            if (f != null) sp.teleportTo(l, f.getX(), f.getY(), f.getZ() - 8, 0f, 0f);
             ref[0] = f;
             glog("nok: pirata ferido=" + (f != null) + " vida=" + (f == null ? -1 : f.getHealth()));
             if (f == null) return;
