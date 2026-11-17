@@ -122,6 +122,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.60.2 ✅ (0.52.2) Hiperpropulsão no espaço cresce com o nível (1.800 b/s no nível 1 até 3.000 no nível 75; anel Preto 4.000, Branco 4.500); nos planetas, Branco e Preto a 100 b/s
 1.60.3 ✅ (0.52.3) Piloto automático traça uma rota que contorna planetas, sóis e buracos negros sem frear (mostrada tracejada no mapa estelar): numa viagem de 67 km, 28 s em vez de 36 s
 1.60.4 ✅ (0.52.4) Voz do anel removida (reconhecimento pelo microfone com Vosk e fala com Piper/vozes do sistema): o anel conversa só pelo chat; o .jar caiu de ~57 MB para ~31 MB, sem bibliotecas nativas, sem downloads e sem abrir programas do sistema
+1.60.5 ✅ (0.52.5) Prova da Compaixão (Nok): os guardas não matam mais o pirata ferido; faróis do Morrow (Odym) todos dentro da arena e fora da água (o 5º caía atrás do muro); Zamaron com lobos, gatos e papagaios para domar perto da base e o Ritual do Amor aceita o papagaio no ombro (raio 12)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

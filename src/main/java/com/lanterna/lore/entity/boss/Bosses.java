@@ -544,7 +544,8 @@ public final class Bosses {
         protected void bossTick(LivingEntity target) {
             // Nada livremente (na água ou rente a ela), sem sair da arena
             Vec3 goal = target.position().add(0, 0.5, 0);
-            if (home != null && goal.distanceTo(Vec3.atCenterOf(home)) > 22) goal = Vec3.atCenterOf(home).add(0, 1, 0);
+            BlockPos meio = centroArena();
+            if (home != null && goal.distanceTo(Vec3.atCenterOf(meio)) > 20) goal = Vec3.atCenterOf(meio).add(0, 1, 0);
             Vec3 d = goal.subtract(position());
             setDeltaMovement(d.length() > 4 ? d.normalize().scale(0.3) : getDeltaMovement().scale(0.7));
             setYRot((float) Math.toDegrees(Math.atan2(-d.x, d.z)));
@@ -563,21 +564,37 @@ public final class Bosses {
             }
         }
 
+        /**
+         * O centro da arena. Na arena de Odym o altar fica na beira do lago, 15 blocos ao sul do meio; até a 0.52.4 os
+         * faróis eram postos em volta do altar e um deles caía fora do muro da arena (0.52.5).
+         */
+        private BlockPos centroArena() {
+            if (home == null) return blockPosition();
+            BlockPos lago = home.offset(0, 0, -15);
+            for (int h = 1; h <= 7; h++) if (level().getFluidState(lago.below(h)).is(net.minecraft.tags.FluidTags.WATER)) return lago;
+            return home;
+        }
+
         @Override
         protected void onPhaseChange(int phase) {
             super.onPhaseChange(phase);
-            BlockPos c = home != null ? home : blockPosition();
+            BlockPos c = centroArena();
+            boolean arenaOdym = home != null && !c.equals(home);
+            if (arenaOdym) tirarFarol(home.offset(0, 0, 15));
             beacons.clear();
             for (BlockPos p : BlockPos.betweenClosed(c.offset(-26, -8, -26), c.offset(26, 8, 26))) {
                 var s = level().getBlockState(p);
                 if (s.is(LoreBlocks.FAROL_PEROLA.get())) {
+                    // na arena de Odym os faróis são sempre os cinco do pentágono: os de antes (na água, atrás do altar) saem
+                    if (arenaOdym) { tirarFarol(p.immutable()); continue; }
                     beacons.add(p.immutable());
                     level().setBlockAndUpdate(p, s.setValue(RitualBlocks.FarolPerola.ACESO, false));
                 }
             }
             // a arena da cidade única não tinha os faróis: cinco deles sobem do chão, em pentágono, já apagados
+            // começa no sudoeste e pula o sul (onde fica o altar): nenhum farol em cima do altar nem fora do muro
             for (int i = beacons.size(); i < 5; i++) {
-                double a = Math.PI * 2 * i / 5 + Math.PI / 10;
+                double a = Math.PI * 2 * i / 5 + Math.PI * 0.7;
                 int x = c.getX() + (int) Math.round(Math.cos(a) * 15), z = c.getZ() + (int) Math.round(Math.sin(a) * 15);
                 int y = c.getY() + 8;
                 while (y > c.getY() - 10 && !level().getBlockState(new BlockPos(x, y - 1, z)).isFaceSturdy(level(), new BlockPos(x, y - 1, z), net.minecraft.core.Direction.UP)) y--;
@@ -590,6 +607,23 @@ public final class Bosses {
             }
             for (Player pl : playersNear(40)) pl.displayClientMessage(Component.translatable("boss.lanterna.morrow.beacons"), false);
             level().playSound(null, blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3f, 0.4f);
+        }
+
+        /** Desmonta um farol posto pelo Morrow (o farol e os 2 tijolos de prismarinho embaixo), na coluna de {@code col}. */
+        private void tirarFarol(BlockPos col) {
+            for (int y = 10; y >= -10; y--) {
+                BlockPos f = col.above(y);
+                if (!level().getBlockState(f).is(LoreBlocks.FAROL_PEROLA.get())) continue;
+                for (int k = 0; k <= 2; k++) {
+                    BlockPos q = f.below(k);
+                    if (k > 0 && !level().getBlockState(q).is(net.minecraft.world.level.block.Blocks.PRISMARINE_BRICKS)) break;
+                    // no lago volta a ser água; fora dele, ar
+                    boolean agua = false;
+                    for (var d : net.minecraft.core.Direction.Plane.HORIZONTAL) agua |= level().getFluidState(q.relative(d)).is(net.minecraft.tags.FluidTags.WATER);
+                    level().setBlockAndUpdate(q, (agua ? net.minecraft.world.level.block.Blocks.WATER : net.minecraft.world.level.block.Blocks.AIR).defaultBlockState());
+                }
+                return;
+            }
         }
 
         private boolean beaconsLit() {

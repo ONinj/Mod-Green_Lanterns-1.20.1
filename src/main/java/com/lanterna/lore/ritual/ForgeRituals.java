@@ -130,6 +130,21 @@ public final class ForgeRituals {
         player.level().playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.5f, 0.7f);
     }
 
+    /**
+     * Zamaron: outro jogador, ou um bicho seu (lobo, gato, papagaio, cavalo...), perto de você. O papagaio no ombro
+     * conta (no ombro ele sai do mundo e não seria achado), e o raio é de 12 blocos: o pet que segue o dono anda até
+     * uns 10 blocos atrás e não pode derrubar o ritual no meio.
+     */
+    public static boolean amadoPerto(ServerPlayer p) {
+        ServerLevel level = p.serverLevel();
+        var area = p.getBoundingBox().inflate(12);
+        if (!level.getEntitiesOfClass(Player.class, area, o -> o != p && !o.isSpectator()).isEmpty()) return true;
+        if (!p.getShoulderEntityLeft().isEmpty() || !p.getShoulderEntityRight().isEmpty()) return true;
+        if (!level.getEntitiesOfClass(TamableAnimal.class, area, t -> t.isAlive() && t.isTame() && p.getUUID().equals(t.getOwnerUUID())).isEmpty()) return true;
+        return !level.getEntitiesOfClass(net.minecraft.world.entity.animal.horse.AbstractHorse.class, area,
+                h -> h.isAlive() && h.isTamed() && p.getUUID().equals(h.getOwnerUUID())).isEmpty();
+    }
+
     /** Condição do ritual (null = ok). */
     private static Component check(ServerPlayer p, PlanetLore planet) {
         ServerLevel level = p.serverLevel();
@@ -141,8 +156,7 @@ public final class ForgeRituals {
             case OA -> MissionManager.data(p) != null && MissionManager.data(p).bossKills().contains("vigia_partido");
             case OKAARA -> level.getEntitiesOfClass(Player.class, p.getBoundingBox().inflate(32), o -> o != p && !o.isSpectator()).isEmpty();
             case YSMAULT -> p.getHealth() <= p.getMaxHealth() * 0.5f;
-            case ZAMARON -> !level.getEntitiesOfClass(Player.class, p.getBoundingBox().inflate(8), o -> o != p && !o.isSpectator()).isEmpty()
-                    || !level.getEntitiesOfClass(TamableAnimal.class, p.getBoundingBox().inflate(8), t -> t.isTame() && p.getUUID().equals(t.getOwnerUUID())).isEmpty();
+            case ZAMARON -> amadoPerto(p);
             case KORUGAR -> true;
             case NOK -> {
                 LoreData d = MissionManager.data(p);

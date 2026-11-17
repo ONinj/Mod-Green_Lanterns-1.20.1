@@ -6803,8 +6803,123 @@ public final class DevAutoTest {
         at(60, () -> { for (String l : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", l); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** 0.52.5: guardas de Nok x pirata ferido, faróis do Morrow dentro da arena, bichos e ritual de Zamaron. */
+    private static void sceneV0525() {
+        Minecraft mc = Minecraft.getInstance();
+        Object[] ref = {null};
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("weather clear"); cmd("gamemode creative"); cmd("lantern ring indigo"); });
+        // ---- 1) Nok: prova Índigo com guardas em volta ----
+        at(20, () -> cmd("execute in lanterna:nok run tp @s 0 150 100"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var b = com.lanterna.fonte.FonteChamado.praca();
+            int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 20);
+            sp.teleportTo(l, b.getX() + 0.5, h, b.getZ() - 20.5, 0f, 0f);
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 20 * 600, 4, false, false));
+            com.lanterna.fonte.ProvaFonte.comecar(sp, com.lanterna.baterias.Tropa.INDIGO, b);
+            var f = l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), x -> x.isPirata() && com.lanterna.fonte.ProvaFonte.protegido(x)).stream().findFirst().orElse(null);
+            ref[0] = f;
+            glog("nok: pirata ferido=" + (f != null) + " vida=" + (f == null ? -1 : f.getHealth()));
+            if (f == null) return;
+            for (int i = 0; i < 4; i++) {
+                var g = com.lanterna.especies.LanternaEntity.lanterna(l, com.lanterna.corps.BuiltinCorps.INDIGO, false);
+                g.moveTo(f.getX() + 3 - i * 2, f.getY(), f.getZ() + 3, 0, 0);
+                g.finalizeSpawn(l, l.getCurrentDifficultyAt(g.blockPosition()), net.minecraft.world.entity.MobSpawnType.EVENT, null, null);
+                l.addFreshEntity(g);
+                if (i == 0) g.setTarget(f); // um guarda "já mirando" o pirata: tem que largar
+            }
+            glog("nok: guarda hostil ao pirata? " + l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, f.getBoundingBox().inflate(10), x -> !x.isPirata()).stream().anyMatch(x -> x.hostilA(f)));
+        }));
+        for (int i = 0; i < 6; i++) at(50, () -> { cmd("kill @e[type=lanterna:eco_cinzento,distance=..80]"); server(sp -> {
+            var f = (net.minecraft.world.entity.LivingEntity) ref[0];
+            if (f == null) return;
+            long mirando = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, f.getBoundingBox().inflate(48), m -> m.getTarget() == f).size();
+            glog("nok: pirata vivo=" + f.isAlive() + " vida=" + f.getHealth() + " mirando nele=" + mirando + " prova=" + com.lanterna.fonte.ProvaFonte.ativa(sp));
+        }); });
+        at(10, () -> shot("v0525_nok"));
+        at(10, () -> server(sp -> { var f = (net.minecraft.world.entity.LivingEntity) ref[0]; if (f != null && f.isAlive()) f.heal(100); }));
+        at(20, () -> server(sp -> glog("nok: prova ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "indigo:prova"))));
+        // ---- 2) Odym: faróis do Morrow ----
+        at(20, () -> { cmd("gamemode creative"); cmd("execute in lanterna:odym run tp @s 250 150 0"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("odym") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(80, () -> server(sp -> {
+            var l = sp.serverLevel();
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.ODYM).y;
+            var c = com.lanterna.cidade.Layout.ARENA_NOVA.atY(y);
+            var altar = c.offset(0, 0, 15);
+            glog("odym: altar=" + l.getBlockState(altar).getBlock() + " agua no lago=" + l.getFluidState(c.below(3)).isSource());
+            // um farol "velho" (0.52.4) fora da arena, e um na água: têm que sumir
+            var velho = altar.offset(0, 1, 15);
+            l.setBlockAndUpdate(velho, net.minecraft.world.level.block.Blocks.PRISMARINE_BRICKS.defaultBlockState());
+            l.setBlockAndUpdate(velho.above(), net.minecraft.world.level.block.Blocks.PRISMARINE_BRICKS.defaultBlockState());
+            l.setBlockAndUpdate(velho.above(2), com.lanterna.lore.LoreBlocks.FAROL_PEROLA.get().defaultBlockState());
+            l.setBlockAndUpdate(c.offset(5, -5, 0), com.lanterna.lore.LoreBlocks.FAROL_PEROLA.get().defaultBlockState());
+            var b = com.lanterna.lore.entity.boss.Bosses.summon(l, com.lanterna.lore.LoreEntities.MORROW.get(), net.minecraft.world.phys.Vec3.atCenterOf(altar).add(0, 0, -9), altar);
+            ref[0] = b;
+            sp.teleportTo(l, c.getX() + 0.5, y + 30, c.getZ() + 0.5, 0f, 90f);
+        }));
+        at(40, () -> server(sp -> { if (ref[0] instanceof net.minecraft.world.entity.LivingEntity b) b.setHealth(b.getMaxHealth() * 0.45f); }));
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            int y = com.lanterna.cidade.CidadeUnica.planta(l, com.lanterna.lore.PlanetLore.ODYM).y;
+            var c = com.lanterna.cidade.Layout.ARENA_NOVA.atY(y);
+            StringBuilder sb = new StringBuilder();
+            int n = 0, fora = 0, agua = 0;
+            for (var q : net.minecraft.core.BlockPos.betweenClosed(c.offset(-40, -12, -40), c.offset(40, 14, 40))) {
+                if (!l.getBlockState(q).is(com.lanterna.lore.LoreBlocks.FAROL_PEROLA.get())) continue;
+                double d = Math.sqrt(Math.pow(q.getX() - c.getX(), 2) + Math.pow(q.getZ() - c.getZ(), 2));
+                n++; if (d > 25.5) fora++; if (!l.getFluidState(q.above()).isEmpty()) agua++;
+                sb.append(" (").append(q.getX() - c.getX()).append(",").append(q.getY() - y).append(",").append(q.getZ() - c.getZ()).append(")");
+            }
+            glog("odym: farois=" + n + " fora do muro=" + fora + " na agua=" + agua + " posicoes(rel. centro)=" + sb);
+            if (ref[0] instanceof net.minecraft.world.entity.LivingEntity b) glog("odym: morrow dist do centro=" + Math.round(Math.sqrt(b.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(c)))));
+        }));
+        at(10, () -> { mc.options.hideGui = true; mc.player.setXRot(90); });
+        at(30, () -> shot("v0525_odym"));
+        at(10, () -> { mc.options.hideGui = false; server(sp -> { if (ref[0] instanceof net.minecraft.world.entity.Entity b) b.discard(); }); });
+        // ---- 3) Zamaron: bichos para domar e o ritual ----
+        at(20, () -> cmd("execute in lanterna:zamaron run tp @s 0 150 130"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("zamaron") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(80, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var c = com.lanterna.lore.PlanetLore.HUB;
+            int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.getX(), c.getZ() - 8);
+            sp.teleportTo(l, c.getX() + 0.5, h, c.getZ() - 7.5, 0f, 0f);
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            int n = com.lanterna.lore.world.PlanetSites.vigiarBase(l, com.lanterna.lore.PlanetLore.ZAMARON);
+            var area = new net.minecraft.world.phys.AABB(c).inflate(48, 200, 48);
+            glog("zamaron: vigia=" + n + " lobos=" + l.getEntities(net.minecraft.world.entity.EntityType.WOLF, area, x -> true).size()
+                    + " gatos=" + l.getEntities(net.minecraft.world.entity.EntityType.CAT, area, x -> true).size()
+                    + " papagaios=" + l.getEntities(net.minecraft.world.entity.EntityType.PARROT, area, x -> true).size());
+            glog("zamaron: segunda vigia (nao repete)=" + com.lanterna.lore.world.PlanetSites.vigiarBase(l, com.lanterna.lore.PlanetLore.ZAMARON));
+            glog("zamaron: ritual sozinho=" + com.lanterna.lore.ritual.ForgeRituals.amadoPerto(sp));
+            var lobo = l.getEntities(net.minecraft.world.entity.EntityType.WOLF, area, x -> !x.isTame()).stream().findFirst().orElse(null);
+            if (lobo != null) { lobo.tame(sp); lobo.setOrderedToSit(true); lobo.teleportTo(sp.getX() + 10, sp.getY(), sp.getZ()); ref[0] = lobo; }
+        }));
+        at(10, () -> server(sp -> {
+            glog("zamaron: ritual com lobo a 10 blocos=" + com.lanterna.lore.ritual.ForgeRituals.amadoPerto(sp));
+            if (ref[0] instanceof net.minecraft.world.entity.Entity lobo) lobo.teleportTo(sp.getX() + 20, sp.getY(), sp.getZ());
+        }));
+        at(10, () -> server(sp -> {
+            glog("zamaron: ritual com lobo a 20 blocos=" + com.lanterna.lore.ritual.ForgeRituals.amadoPerto(sp));
+            var area = new net.minecraft.world.phys.AABB(com.lanterna.lore.PlanetLore.HUB).inflate(48, 200, 48);
+            var pap = sp.serverLevel().getEntities(net.minecraft.world.entity.EntityType.PARROT, area, x -> !x.isTame()).stream().findFirst().orElse(null);
+            if (pap != null) { pap.tame(sp); pap.teleportTo(sp.getX(), sp.getY() + 1, sp.getZ()); glog("zamaron: papagaio no ombro=" + pap.setEntityOnShoulder(sp)); }
+        }));
+        at(10, () -> server(sp -> glog("zamaron: ritual com papagaio no ombro=" + com.lanterna.lore.ritual.ForgeRituals.amadoPerto(sp))));
+        at(20, () -> shot("v0525_zamaron"));
+        at(20, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
         if (ENABLED && SCENE.equals("portal")) scenePortal();
+        else if (ENABLED && SCENE.equals("v0525")) sceneV0525();
         else if (ENABLED && SCENE.equals("comandos")) sceneComandos();
         else if (ENABLED && SCENE.equals("receber")) sceneReceber();
         else if (ENABLED && SCENE.equals("v22")) sceneV22();
