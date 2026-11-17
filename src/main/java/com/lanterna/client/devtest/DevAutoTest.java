@@ -7184,6 +7184,8 @@ public final class DevAutoTest {
         com.lanterna.construct.Affinity.add(sp, 30000);
     }
 
+    private static boolean criouMundo;
+
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event) {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
@@ -7197,6 +7199,17 @@ public final class DevAutoTest {
                     return;
                 }
             }
+        }
+        // Máquina nova sem o mundo "test" (o quickPlay não acha e para no menu): cria um superplano com comandos
+        if (!criouMundo && mc.level == null && mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
+                && !mc.getLevelSource().levelExists("test")) {
+            criouMundo = true;
+            var settings = new net.minecraft.world.level.LevelSettings("test", net.minecraft.world.level.GameType.CREATIVE, false,
+                    net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.GameRules(), net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
+            mc.createWorldOpenFlows().createFreshLevel("test", settings, new net.minecraft.world.level.levelgen.WorldOptions(12345L, false, false),
+                    reg -> reg.registryOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
+                            .getHolderOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT).value().createWorldDimensions());
+            return;
         }
         if (mc.player == null || mc.level == null) return;
         tick++;
