@@ -123,6 +123,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.60.3 ✅ (0.52.3) Piloto automático traça uma rota que contorna planetas, sóis e buracos negros sem frear (mostrada tracejada no mapa estelar): numa viagem de 67 km, 28 s em vez de 36 s
 1.60.4 ✅ (0.52.4) Voz do anel removida (reconhecimento pelo microfone com Vosk e fala com Piper/vozes do sistema): o anel conversa só pelo chat; o .jar caiu de ~57 MB para ~31 MB, sem bibliotecas nativas, sem downloads e sem abrir programas do sistema
 1.61.0 ✅ (0.53.0) Árvore das Emoções do Anel da Vida (7 aspectos, despertos com a Insígnia do lendário e fortalecidos até o nível 6 com Fragmentos Lendários; começam com 3 construtos e abrem mais a cada nível; treinar veste o traje e a luz da Tropa com o anel branco) e Dois Anéis (segundo slot, construtos de defesa/cura/ajuda da outra Tropa, metade do traje na cor dela)
+1.61.1 ✅ (0.53.1) Segundo anel aparece no dedo da outra mão; cena ao colocar o segundo anel (faíscas da cor dele se juntam na mão, clarão, o anel surge, metade do traje se refaz e as duas luzes sobem trançadas) e cena ao trocar o treino do Anel da Vida (clarão, espiral da nova cor e o traje se refazendo na cor da Tropa), com câmera de cinema para quem passa por ela e efeitos visíveis para quem está perto
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

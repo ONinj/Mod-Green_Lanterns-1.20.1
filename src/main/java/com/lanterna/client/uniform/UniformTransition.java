@@ -49,6 +49,12 @@ public final class UniformTransition {
         spawnFront(player, next, ring.color());
     }
 
+    /** 0.53.1: o traje se refaz do zero (a frente acesa escorrendo de novo), nas cenas do Anel da Vida. */
+    public static void refazer(int id) {
+        NOW.put(id, 0.001f);
+        OLD.put(id, 0f);
+    }
+
     public static float progress(Player player, float partialTick) {
         Float now = NOW.get(player.getId());
         if (now == null) return 0f;

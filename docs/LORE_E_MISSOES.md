@@ -1730,3 +1730,11 @@ A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a
 - Metade do traje (o lado esquerdo: braço, perna, metade do tronco e da máscara) toma a cor do 2º anel.
 
 Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis, fica só o da Tropa do jogador e os outros 6 partem para o espaço; o despertar do Ser da Morte; os chefes da Noite Mais Densa.
+
+
+## 0.53.1 — Cenas do Anel da Vida e o segundo anel na mão
+
+- O **segundo anel** aparece no dedo da outra mão (a que não é a principal), para todos verem.
+- **Cena do segundo anel** (~5 s, qualquer cor): faíscas da cor do anel vêm de todos os lados e se juntam num núcleo na outra mão; um clarão, e o anel surge no dedo crescendo; a metade do traje se refaz na cor dele (o líquido escorrendo); as duas luzes sobem trançadas em volta do corpo e fecham numa onda dupla no chão.
+- **Cena do treino** (~4 s, igual para todos os aspectos): um clarão desfaz o traje, uma espiral dupla da nova cor sobe pelo corpo enquanto o traje novo escorre na cor da Tropa, e uma onda no chão fecha a cena. Vale também para voltar ao branco.
+- Quem passa pela cena fica parado, sem painéis, com câmera de cinema girando em volta; quem está perto vê os efeitos e ouve os sons.

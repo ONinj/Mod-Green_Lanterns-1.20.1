@@ -184,6 +184,12 @@ public final class PeleTraje {
                 }
     }
 
+    /** A cor da metade do traje (só depois que o segundo anel aparece no dedo, na cena). */
+    private static int fusao(AbstractClientPlayer player) {
+        if (com.lanterna.client.vida.CenaEmocoes.escondeSegundo(player.getId())) return 0;
+        return ClientVisibleRings.of(player.getId()).segundoCor();
+    }
+
     private static int px(float v) {
         return Math.max(0, Math.min(255, Math.round(v * 255f)));
     }
@@ -220,7 +226,7 @@ public final class PeleTraje {
     public static boolean corpo(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, PlayerModel<AbstractClientPlayer> m, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), ClientVisibleRings.of(player.getId()).segundoCor());
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), fusao(player));
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
@@ -281,7 +287,7 @@ public final class PeleTraje {
     public static boolean braco(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, ModelPart braco, ModelPart manga, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), ClientVisibleRings.of(player.getId()).segundoCor());
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), fusao(player));
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f, pp = Math.max(0.0005f, p);

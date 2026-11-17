@@ -38,7 +38,7 @@ public final class RitualCliente {
     /** Os painéis do mod (anel, missão) também somem durante a cena. */
     public static boolean emCena() {
         var mc = Minecraft.getInstance();
-        return inicio >= 0 && mc.player != null && mc.player.isSleeping();
+        return inicio >= 0 && mc.player != null && mc.player.isSleeping() || com.lanterna.client.vida.CenaEmocoes.ativa();
     }
 
     /**

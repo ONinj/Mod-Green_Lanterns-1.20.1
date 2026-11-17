@@ -37,6 +37,11 @@ public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         ItemStack ring = ClientVisibleRings.get(player.getId());
         if (ring.isEmpty()) ring = com.lanterna.power.EquipmentHelper.ring(player);
         if (ring.isEmpty()) return;
+        // 0.53.1: na outra mão, o segundo anel (Dois Anéis)
+        if (right != (player.getMainArm() == HumanoidArm.RIGHT)) {
+            ring = segundo(player);
+            if (ring.isEmpty() || com.lanterna.client.vida.CenaEmocoes.escondeSegundo(player.getId())) return;
+        }
         poseStack.pushPose();
         arm.translateAndRotate(poseStack);
         // em primeira pessoa (com a virada do braço do Minecraft) a ponta da mão fica no começo do braço (y = -2)
@@ -75,5 +80,33 @@ public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
                 LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, poseStack, buffer, player.level(), 0);
 
         poseStack.popPose();
+
+        // 0.53.1: o segundo anel, no mesmo lugar da outra mão
+        ItemStack seg = segundo(player);
+        ModelPart outro = right ? getParentModel().leftArm : getParentModel().rightArm;
+        if (seg.isEmpty() || !outro.visible || com.lanterna.client.vida.CenaEmocoes.escondeSegundo(player.getId())) return;
+        float esc = com.lanterna.client.vida.CenaEmocoes.escalaSegundo(player.getId(), partialTick);
+        poseStack.pushPose();
+        outro.translateAndRotate(poseStack);
+        poseStack.translate(right ? 1f / 16f : -1f / 16f, POSITION / 16f, 0);
+        poseStack.scale(SCALE * esc, SCALE * esc, SCALE * esc);
+        Minecraft.getInstance().getItemRenderer().renderStatic(seg, ItemDisplayContext.FIXED,
+                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, poseStack, buffer, player.level(), 0);
+        poseStack.popPose();
+    }
+
+    private static final java.util.Map<Integer, ItemStack> SEGUNDOS = new java.util.HashMap<>();
+
+    /** O item do segundo anel deste jogador (feito uma vez por Tropa). */
+    public static ItemStack segundo(AbstractClientPlayer player) {
+        var v = ClientVisibleRings.of(player.getId());
+        if (v.segundo().isEmpty() || v.ring().isEmpty()) return ItemStack.EMPTY;
+        ItemStack s = SEGUNDOS.get(player.getId());
+        var id = com.lanterna.LanternaMod.id(v.segundo());
+        if (s == null || !com.lanterna.item.PowerRingItem.getCorps(s).equals(id)) {
+            s = com.lanterna.item.PowerRingItem.create(id, v.segundoCor(), -1);
+            SEGUNDOS.put(player.getId(), s);
+        }
+        return s;
     }
 }

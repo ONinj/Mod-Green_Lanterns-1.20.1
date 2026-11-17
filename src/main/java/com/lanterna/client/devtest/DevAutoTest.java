@@ -3937,6 +3937,9 @@ public final class DevAutoTest {
                     + " forca x" + com.lanterna.vida.Emocoes.bonusForca(sp, com.lanterna.capability.ModCapabilities.get(sp).orElse(null)));
             com.lanterna.vida.Emocoes.treinar(sp, "red");
         }));
+        at(14, () -> shot("cena_treino_1"));
+        at(16, () -> shot("cena_treino_2"));
+        at(14, () -> shot("cena_treino_3"));
         at(60, () -> {
             glog("roda depois (verde 6, vermelho 3, resto 1): " + roda.get());
             glog("treino cliente=" + com.lanterna.client.vida.ClientEmocoes.treino() + " cor anel(hud)=" + Integer.toHexString(com.lanterna.client.ClientRingData.color)
@@ -3957,6 +3960,9 @@ public final class DevAutoTest {
                 if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
             });
         }));
+        at(28, () -> shot("cena_segundo_1"));
+        at(20, () -> shot("cena_segundo_2"));
+        at(26, () -> shot("cena_segundo_3"));
         at(60, () -> {
             server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> glog("servidor: primario=" + r.corps() + " segundo=" + r.segundo() + " cor2=" + Integer.toHexString(r.segundoCor()))));
             StringBuilder b = new StringBuilder();
@@ -3967,6 +3973,8 @@ public final class DevAutoTest {
         at(40, () -> shot("dois_aneis_frente"));
         at(5, () -> mc.player.setYRot(mc.player.getYRot() + 180));
         at(30, () -> shot("dois_aneis_costas"));
+        at(5, () -> { mc.player.setYRot(mc.player.getYRot() + 90); mc.player.yBodyRot = mc.player.getYRot(); });
+        at(30, () -> shot("dois_aneis_lado"));
         at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = false; com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.OpenLanternMenuPacket()); });
         at(40, () -> shot("dois_aneis_slot"));
         at(5, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });
