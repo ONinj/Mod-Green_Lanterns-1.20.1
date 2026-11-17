@@ -7197,7 +7197,7 @@ public final class DevAutoTest {
         if (mc.screen instanceof net.minecraft.client.gui.screens.ConfirmScreen confirm) {
             for (var child : confirm.children()) {
                 if (child instanceof net.minecraft.client.gui.components.Button button
-                        && button.getMessage().getString().equals("Proceed")) {
+                        && (button.getMessage().getString().equals("Proceed") || button.getMessage().getString().equals("Continuar"))) {
                     button.onPress();
                     return;
                 }
