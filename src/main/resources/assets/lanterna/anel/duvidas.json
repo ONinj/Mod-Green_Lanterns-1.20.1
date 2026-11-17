@@ -884,6 +884,27 @@
   "en": "The Lantern camera sits over your shoulder: F6 toggles it, F7 switches shoulders and Alt + mouse wheel adjusts the distance. Tab locks your aim on the enemy closest to the center of the screen."
  },
  {
+  "id": "emocoes",
+  "chaves": [
+   "arvore das emocoes",
+   "árvore das emoções",
+   "aspectos emocionais",
+   "treinar aspecto",
+   "dois aneis",
+   "dois anéis",
+   "segundo anel",
+   "fragmento lendario",
+   "tree of emotions",
+   "emotional aspects",
+   "train aspect",
+   "two rings",
+   "second ring",
+   "legendary fragment"
+  ],
+  "pt": "Com o Anel da Vida, abra a aba Lanterna do inventário e clique em Emoções. Cada um dos 7 aspectos (Raiva, Avareza, Medo, Vontade, Esperança, Compaixão e Amor) começa com 3 construtos; desperte com a Insígnia do Lanterna lendário daquela Tropa e fortaleça até o nível 6 com Fragmentos Lendários (dos lendários e dos Bosses das Tropas): 3, 5, 8, 12 e 16. Cada nível abre mais construtos e deixa o anel mais forte. Treinar um aspecto veste o traje e a luz daquela Tropa (o anel continua branco). Com os 7 despertos, gaste 20 fragmentos em Preparar Dois Anéis: aparece um segundo slot ao lado do anel, para um anel de outra Tropa emocional, mesmo sem o Anel da Vida. Ele empresta só os construtos de defesa, cura e ajuda e pinta metade do traje com a cor dele.",
+  "en": "With the Ring of Life, open the Lantern tab and click Emotions. Each of the 7 aspects (Rage, Avarice, Fear, Will, Hope, Compassion and Love) starts with 3 constructs; awaken it with the Insignia of that Corps' legendary Lantern and strengthen it up to level 6 with Legendary Fragments (from legendaries and Corps Bosses): 3, 5, 8, 12 and 16. Each level opens more constructs and makes the ring stronger. Training an aspect wears that Corps' suit and light (the ring stays white). With all 7 awake, spend 20 fragments on Prepare Two Rings: a second slot appears next to your ring, for a ring of another emotional Corps, even without the Ring of Life. It lends only its defense, healing and support constructs and tints half of your suit with its color."
+ },
+ {
   "id": "voz",
   "chaves": [
    "falar com o anel",

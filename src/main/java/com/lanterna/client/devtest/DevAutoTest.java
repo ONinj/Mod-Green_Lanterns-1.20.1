@@ -3899,6 +3899,79 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM"); mc.stop(); });
     }
 
+    /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    private static void sceneEmocoes() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        java.util.function.Supplier<String> roda = () -> {
+            StringBuilder b = new StringBuilder();
+            for (String a : com.lanterna.vida.Emocoes.ASPECTOS) {
+                int n = 0;
+                for (var t : com.lanterna.construct.ConstructType.daRoda(com.lanterna.client.ClientRingData.corps, false)) if (a.equals(t.corps)) n++;
+                b.append(a).append('=').append(n).append('/').append(com.lanterna.vida.Emocoes.daTropa(a).size()).append(' ');
+            }
+            return b.toString();
+        };
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring white");
+            sp.server.getCommands().performPrefixedCommand(src, "lantern full");
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.getInventory().clearContent();
+            sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).remove("lanterna_emocoes");
+            for (var l : com.lanterna.lendarios.Lendario.values()) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.INSIGNIAS.get(l).get()));
+            for (int i = 0; i < 4; i++) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.FRAGMENTO_LENDARIO.get(), 64));
+        }));
+        at(60, () -> glog("roda antes (anel branco, nada desperto): " + roda.get()));
+        at(5, () -> server(sp -> {
+            com.lanterna.vida.Emocoes.subir(sp, "green"); // sem fragmentos? usa a insígnia
+            for (String a : com.lanterna.vida.Emocoes.ASPECTOS) if (!a.equals("green")) com.lanterna.vida.Emocoes.subir(sp, a);
+            for (int i = 0; i < 5; i++) com.lanterna.vida.Emocoes.subir(sp, "green");
+            for (int i = 0; i < 2; i++) com.lanterna.vida.Emocoes.subir(sp, "red");
+            int frag = 0;
+            for (var st : sp.getInventory().items) if (st.is(com.lanterna.lore.LoreItems.FRAGMENTO_LENDARIO.get())) frag += st.getCount();
+            StringBuilder b = new StringBuilder();
+            for (String a : com.lanterna.vida.Emocoes.ASPECTOS) b.append(a).append('=').append(com.lanterna.vida.Emocoes.nivel(sp, a)).append(' ');
+            glog("niveis " + b + "fragmentos sobrando " + frag + " (256 - 44 - 8 = 204 esperado) treino=" + com.lanterna.vida.Emocoes.treino(sp)
+                    + " forca x" + com.lanterna.vida.Emocoes.bonusForca(sp, com.lanterna.capability.ModCapabilities.get(sp).orElse(null)));
+            com.lanterna.vida.Emocoes.treinar(sp, "red");
+        }));
+        at(60, () -> {
+            glog("roda depois (verde 6, vermelho 3, resto 1): " + roda.get());
+            glog("treino cliente=" + com.lanterna.client.vida.ClientEmocoes.treino() + " cor anel(hud)=" + Integer.toHexString(com.lanterna.client.ClientRingData.color)
+                    + " traje=" + com.lanterna.client.uniform.UniformTransition.corpsOf(mc.player) + " anel visivel=" + Integer.toHexString(com.lanterna.item.PowerRingItem.getColor(com.lanterna.client.ClientVisibleRings.get(mc.player.getId()))));
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+        });
+        at(60, () -> shot("emocoes_treino_raiva"));
+        at(5, () -> { mc.options.hideGui = false; mc.setScreen(new com.lanterna.client.vida.EmocoesScreen(null)); });
+        at(30, () -> shot("emocoes_arvore"));
+        at(5, () -> { mc.setScreen(null); server(sp -> { com.lanterna.vida.Emocoes.treinar(sp, ""); com.lanterna.vida.Emocoes.prepararDois(sp); glog("dois aneis=" + com.lanterna.vida.Emocoes.doisAneis(sp)); }); });
+        // agora com o anel verde de Tropa e o azul no segundo slot
+        at(20, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> {
+                var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+                com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+                r.segundoSlot().setStackInSlot(0, azul);
+                if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp);
+            });
+        }));
+        at(60, () -> {
+            server(sp -> com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> glog("servidor: primario=" + r.corps() + " segundo=" + r.segundo() + " cor2=" + Integer.toHexString(r.segundoCor()))));
+            StringBuilder b = new StringBuilder();
+            for (var t : com.lanterna.construct.ConstructType.daRoda(com.lanterna.client.ClientRingData.corps, false)) if ("blue".equals(t.corps)) b.append(t.id).append('(').append(t.category).append(") ");
+            glog("cliente: segundo=" + com.lanterna.client.vida.ClientEmocoes.segundo() + " construtos azuis na roda: " + b);
+            mc.options.hideGui = true;
+        });
+        at(40, () -> shot("dois_aneis_frente"));
+        at(5, () -> mc.player.setYRot(mc.player.getYRot() + 180));
+        at(30, () -> shot("dois_aneis_costas"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = false; com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.OpenLanternMenuPacket()); });
+        at(40, () -> shot("dois_aneis_slot"));
+        at(5, () -> { mc.setScreen(null); glog("FIM"); mc.stop(); });
+    }
+
     /** 0.52.3: piloto automático com e sem rota (mesma viagem, mede a velocidade média e quantas vezes freou). */
     private static void sceneRota() {
         Minecraft mc = Minecraft.getInstance();
@@ -6889,6 +6962,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("capsula")) sceneCapsula();
         else if (ENABLED && SCENE.equals("hiper")) sceneHiper();
         else if (ENABLED && SCENE.equals("rota")) sceneRota();
+        else if (ENABLED && SCENE.equals("emocoes")) sceneEmocoes();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

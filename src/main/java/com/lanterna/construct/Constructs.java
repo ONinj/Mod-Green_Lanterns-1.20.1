@@ -81,7 +81,8 @@ public final class Constructs {
 
     public static float power(ServerPlayer player, RingData ring) {
         return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * com.lanterna.combate.Supremos.dano(ring.corps(), player)
-                * com.lanterna.tropa.Nivel.forca(player) * (1f + com.lanterna.construct.fonte.ArvoreDaLuz.bonusDano(player));
+                * com.lanterna.tropa.Nivel.forca(player) * (1f + com.lanterna.construct.fonte.ArvoreDaLuz.bonusDano(player))
+                * com.lanterna.vida.Emocoes.bonusForca(player, ring); // 0.53: aspectos fortalecidos no Anel da Vida
     }
 
     public static int level(ServerPlayer player) {
@@ -118,7 +119,7 @@ public final class Constructs {
             player.displayClientMessage(Component.translatable("message.lanterna.power_needed"), true);
             return;
         }
-        if (!type.disponivel(ring.corps(), ring.corrupcao() == 2)) return;
+        if (!type.disponivel(ring.corps(), ring.corrupcao() == 2, com.lanterna.vida.Emocoes.contexto(player))) return;
         if (!com.lanterna.construct.fonte.ArvoreDaLuz.liberado(player, type)) {
             player.displayClientMessage(Component.translatable("arvore.lanterna.bloqueado", type.displayName()), true);
             return;

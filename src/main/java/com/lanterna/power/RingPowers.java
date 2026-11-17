@@ -76,15 +76,24 @@ public final class RingPowers {
             int corrup = PowerRingItem.getCorrupcao(ring);
             // Portador Negro: os mesmos poderes da Tropa, mas a luz é preta (construtos, aura, painel)
             int estagio = PowerRingItem.getEstagio(ring);
-            data.refresh(def.id(), corrup == 2 ? com.lanterna.morte.Corrupcao.COR_PORTADOR : estagio == 2 ? com.lanterna.morte.Corrupcao.corCinza(def.color(), 0.65f) : def.color(), charge, max);
+            // 0.53: treinando um aspecto no Anel da Vida, a luz (traje e construtos) é a daquela Tropa
+            String treino = com.lanterna.corps.BuiltinCorps.WHITE.id().equals(def.id()) ? com.lanterna.vida.Emocoes.trajeDoTreino(player) : null;
+            int corLuz = treino != null ? com.lanterna.vida.Emocoes.cor(treino) : def.color();
+            data.refresh(def.id(), corrup == 2 ? com.lanterna.morte.Corrupcao.COR_PORTADOR : estagio == 2 ? com.lanterna.morte.Corrupcao.corCinza(corLuz, 0.65f) : corLuz, charge, max);
+            ItemStack seg = data.segundoSlot().getStackInSlot(0);
+            boolean segOk = com.lanterna.vida.Emocoes.segundoValido(player, data, seg);
+            String segCorps = segOk ? PowerRingItem.getCorps(seg).getPath() : "";
+            data.visual(treino, segCorps, segOk ? com.lanterna.vida.Emocoes.cor(segCorps) : 0);
             data.espelharCorrupcao(PowerRingItem.getEstagio(ring), PowerRingItem.getOrigem(ring)); // 0.51: o estágio vai junto
             data.setEverChosen(true);
         } else if (data.hasRing()) {
+            data.visual("", "", 0);
             data.unequip();
             applyFlightAbility(player, data);
         }
 
         com.lanterna.lore.entity.boss.Controle.tick(player);
+        com.lanterna.vida.Emocoes.tick(player);
         if (data.hasRing()) {
             tickFlight(player, data);
             tickSustento(player, data);
@@ -140,7 +149,7 @@ public final class RingPowers {
         boolean staff = com.lanterna.item.BatteryItems.isStaff(EquipmentHelper.battery(player));
         String key = (data.hasRing()
                 ? data.corps() + "|" + data.color() + "|" + data.powerActive() + "|" + data.flightEnabled()
-                + "|" + data.hyper() + "|" + data.autopilot() + "|" + (data.charge() <= 0) + "|" + data.corrupcao() + "|" + data.origem() : "") + "|" + staff;
+                + "|" + data.hyper() + "|" + data.autopilot() + "|" + (data.charge() <= 0) + "|" + data.corrupcao() + "|" + data.origem() + "|" + data.traje() + "|" + data.segundo() : "") + "|" + staff;
         if (!data.visibleRingChanged(key) && !force) return;
         ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
                 SyncVisibleRingPacket.of(player.getId(), data, staff));

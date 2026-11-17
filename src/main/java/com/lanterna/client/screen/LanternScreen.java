@@ -50,12 +50,19 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
         super.init();
         powerButton = addRenderableWidget(new Toggle(leftPos + 80, topPos + 62, 45, 13, () -> ModNetwork.sendToServer(new TogglePowerPacket())));
         flightButton = addRenderableWidget(new Toggle(leftPos + 127, topPos + 62, 44, 13, () -> ModNetwork.sendToServer(new ToggleFlightPacket())));
+        // 0.53: a Árvore das Emoções (com o Anel da Vida, ou já com o corpo preparado para Dois Anéis)
+        emocoesButton = addRenderableWidget(net.minecraft.client.gui.components.Button.builder(
+                Component.translatable("emocoes.lanterna.botao"), b -> minecraft.setScreen(new com.lanterna.client.vida.EmocoesScreen(this)))
+                .bounds(leftPos + 9, topPos + 9, 52, 12).build());
         updateButtons();
     }
+
+    private net.minecraft.client.gui.components.Button emocoesButton;
 
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (emocoesButton != null) emocoesButton.visible = com.lanterna.client.vida.ClientEmocoes.temArvore();
         updateButtons();
     }
 
@@ -130,8 +137,9 @@ public class LanternScreen extends AbstractContainerScreen<LanternMenu> {
         g.fill(l + 7, t + 68, l + 76, t + 69, Hud.argb(c, 200));
         // molduras dos slots
         for (Slot s : menu.slots) {
+            if (!s.isActive()) continue;
             int x = l + s.x - 1, y = t + s.y - 1;
-            boolean equip = s.index < 2;
+            boolean equip = s.index < 3;
             g.fill(x, y, x + 18, y + 18, equip ? Hud.argb(c, 70) : 0x30FFFFFF);
             g.fill(x + 1, y + 1, x + 17, y + 17, equip ? Hud.argb(Hud.mix(c, 0x000000, 0.7f), 230) : 0xC0080B0E);
             if (equip) g.fill(x, y + 17, x + 18, y + 18, Hud.argb(c, 230));

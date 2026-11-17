@@ -29,11 +29,13 @@ import org.jetbrains.annotations.Nullable;
 public class LanternMenu extends AbstractContainerMenu {
     public static final int RING_X = 104, RING_Y = 18;
     public static final int BATTERY_X = 104, BATTERY_Y = 41;
+    /** 0.53: o segundo anel (só aparece com o corpo preparado para Dois Anéis). */
+    public static final int SEGUNDO_X = 83, SEGUNDO_Y = 18;
 
-    private static final int EQUIP_SLOTS = 2;
-    private static final int INV_START = EQUIP_SLOTS;          // 2
-    private static final int HOTBAR_START = INV_START + 27;    // 29
-    private static final int END = HOTBAR_START + 9;           // 38
+    private static final int EQUIP_SLOTS = 3;
+    private static final int INV_START = EQUIP_SLOTS;          // 3
+    private static final int HOTBAR_START = INV_START + 27;    // 30
+    private static final int END = HOTBAR_START + 9;           // 39
 
     private final Player player;
 
@@ -47,6 +49,8 @@ public class LanternMenu extends AbstractContainerMenu {
 
         addSlot(new EquipSlot(equipment, RingData.RING_SLOT, RING_X, RING_Y, true));
         addSlot(new EquipSlot(equipment, RingData.BATTERY_SLOT, BATTERY_X, BATTERY_Y, false));
+        IItemHandler segundo = ModCapabilities.get(player).<IItemHandler>map(RingData::segundoSlot).orElseGet(() -> new ItemStackHandler(1));
+        addSlot(new SegundoSlot(segundo));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -100,6 +104,37 @@ public class LanternMenu extends AbstractContainerMenu {
         if (stack.getCount() == original.getCount()) return ItemStack.EMPTY;
         slot.onTake(player, stack);
         return original;
+    }
+
+    /** 0.53: o slot do segundo anel (Dois Anéis): outro anel emocional, só depois de preparar o corpo. */
+    private class SegundoSlot extends SlotItemHandler {
+        SegundoSlot(IItemHandler handler) {
+            super(handler, 0, SEGUNDO_X, SEGUNDO_Y);
+        }
+
+        @Override
+        public boolean isActive() {
+            return player.level().isClientSide ? com.lanterna.client.vida.ClientEmocoes.doisAneis() : com.lanterna.vida.Emocoes.doisAneis(player);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            if (!isActive() || !(stack.getItem() instanceof PowerRingItem) || !PowerRingItem.canBeWornBy(stack, player)) return false;
+            String c = PowerRingItem.getCorps(stack).getPath();
+            return com.lanterna.vida.Emocoes.aspecto(c);
+        }
+
+        @Override
+        public int getMaxStackSize() { return 1; }
+
+        @Override
+        public int getMaxStackSize(ItemStack stack) { return 1; }
+
+        @Override
+        public void set(ItemStack stack) {
+            if (!stack.isEmpty() && PowerRingItem.getOwner(stack) == null && !player.level().isClientSide) PowerRingItem.setOwner(stack, player);
+            super.set(stack);
+        }
     }
 
     /** Slot que só aceita anel (do dono) ou bateria, um de cada. */

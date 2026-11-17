@@ -110,9 +110,10 @@ public final class PeleTraje {
     }
 
     @Nullable
-    private static Pele pele(String arq, boolean slim, int mascara, int corrupcao) {
+    private static Pele pele(String arq, boolean slim, int mascara, int corrupcao, int fusao) {
         String k0 = arq + "_" + (slim ? "slim" : "wide");
-        String k = k0 + (mascara == 0 ? "" : "_m" + (mascara + 100)) + (corrupcao == 0 ? "" : "_c" + corrupcao);
+        String k = k0 + (mascara == 0 ? "" : "_m" + (mascara + 100)) + (corrupcao == 0 ? "" : "_c" + corrupcao)
+                + (fusao == 0 ? "" : "_f" + Integer.toHexString(fusao & 0xFFFFFF));
         if (PELES.containsKey(k)) return PELES.get(k);
         Pele pl = null;
         try (InputStream in = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + ".png"))) {
@@ -129,15 +130,17 @@ public final class PeleTraje {
             }
             // 0.49.1: traje de quem a Morte tocou (manchas cinzas, ou preto e branco)
             if (corrupcao > 0) Corrompida.aplicar(img, corrupcao, esc, false);
+            if (fusao != 0) fundir(img, esc, fusao, slim);
             ResourceLocation tex = LanternaMod.id("dynamic/pele_" + k);
             Minecraft.getInstance().getTextureManager().register(tex, new DynamicTexture(img));
             ResourceLocation brilho = null;
             if (existe(k0 + "_glow")) {
-                if (mascara == 0 && corrupcao == 0) brilho = LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png");
+                if (mascara == 0 && corrupcao == 0 && fusao == 0) brilho = LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png");
                 else try (InputStream gin = Minecraft.getInstance().getResourceManager().open(LanternaMod.id("textures/skin_traje/" + k0 + "_glow.png"))) {
                     NativeImage gl = NativeImage.read(gin);
                     subirMascara(gl, esc, mascara);
                     if (corrupcao > 0) Corrompida.aplicar(gl, corrupcao, esc, true);
+                    if (fusao != 0) fundir(gl, esc, fusao, slim);
                     brilho = LanternaMod.id("dynamic/pele_" + k + "_glow");
                     Minecraft.getInstance().getTextureManager().register(brilho, new DynamicTexture(gl));
                 }
@@ -148,6 +151,41 @@ public final class PeleTraje {
         }
         PELES.put(k, pl);
         return pl;
+    }
+
+    /**
+     * 0.53, Dois Anéis: o lado esquerdo do corpo (braço, perna e a metade do tronco e da cabeça) toma a cor do segundo
+     * anel, como se as duas luzes se fundissem no meio. O que é colorido no traje muda de cor; o preto, o branco e o
+     * cinza ficam como estão. Coordenadas no layout de skin 64x64.
+     */
+    private static void fundir(NativeImage img, int esc, int cor, boolean slim) {
+        int[][] areas = {
+                {16, 48, 32, 64}, {0, 48, 16, 64},                         // perna esquerda (e a segunda camada)
+                {32, 48, slim ? 46 : 48, 64}, {48, 48, slim ? 62 : 64, 64}, // braço esquerdo
+                {24, 20, 32, 32}, {32, 20, 36, 32}, {24, 16, 28, 20}, {32, 16, 36, 20}, // metade do tronco + lado esquerdo
+                {12, 8, 24, 16}, {24, 8, 28, 16}, {12, 0, 16, 8}, {20, 0, 24, 8},       // metade da cabeça + lado esquerdo
+                {44, 8, 56, 16}, {56, 8, 60, 16}, {44, 0, 48, 8}, {52, 0, 56, 8},       // a máscara (segunda camada da cabeça)
+                {24, 36, 32, 48}, {32, 36, 36, 48}, {24, 32, 28, 36}, {32, 32, 36, 36}}; // segunda camada do tronco
+        float tr = ((cor >> 16) & 255) / 255f, tg = ((cor >> 8) & 255) / 255f, tb = (cor & 255) / 255f;
+        for (int[] a : areas)
+            for (int y = a[1] * esc; y < a[3] * esc && y < img.getHeight(); y++)
+                for (int x = a[0] * esc; x < a[2] * esc && x < img.getWidth(); x++) {
+                    int c = img.getPixelRGBA(x, y);
+                    int al = (c >>> 24) & 255;
+                    if (al == 0) continue;
+                    float r = (c & 255) / 255f, g = ((c >> 8) & 255) / 255f, b = ((c >> 16) & 255) / 255f;
+                    float mx = Math.max(r, Math.max(g, b)), mn = Math.min(r, Math.min(g, b));
+                    float sat = mx <= 0 ? 0 : (mx - mn) / mx;
+                    float f = Math.min(1f, sat * 2.2f);   // só o que tem cor
+                    if (f <= 0.02f) continue;
+                    float l = mx;                         // o brilho do pixel original
+                    float nr = r + (tr * l * 1.08f - r) * f, ng = g + (tg * l * 1.08f - g) * f, nb = b + (tb * l * 1.08f - b) * f;
+                    img.setPixelRGBA(x, y, (al << 24) | (px(nb) << 16) | (px(ng) << 8) | px(nr));
+                }
+    }
+
+    private static int px(float v) {
+        return Math.max(0, Math.min(255, Math.round(v * 255f)));
     }
 
     /**
@@ -182,7 +220,7 @@ public final class PeleTraje {
     public static boolean corpo(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, PlayerModel<AbstractClientPlayer> m, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player));
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), ClientVisibleRings.of(player.getId()).segundoCor());
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f;
@@ -243,7 +281,7 @@ public final class PeleTraje {
     public static boolean braco(PoseStack ps, MultiBufferSource buf, int luz, AbstractClientPlayer player, ModelPart braco, ModelPart manga, float p) {
         String arq = arquivo(player);
         if (arq == null) return false;
-        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player));
+        Pele pl = pele(arq, slim(player), com.lanterna.client.visual.ClientVisual.of(player.getId()).mascara(), Corrompida.nivel(player), ClientVisibleRings.of(player.getId()).segundoCor());
         if (pl == null) return false;
         int cor = ClientVisibleRings.of(player.getId()).color();
         float r = ((cor >> 16) & 255) / 255f, g = ((cor >> 8) & 255) / 255f, b = (cor & 255) / 255f, pp = Math.max(0.0005f, p);

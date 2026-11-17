@@ -1711,3 +1711,22 @@ A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a
 - O anel continua conversando pelo chat ("anel, ..."), com as mesmas respostas, receitas e piloto automático.
 - O Juramento continua igual (o microfone só mede se você está falando; dá para escrever com TAB).
 - O arquivo do mod ficou bem menor e não baixa nem executa nada fora do jogo. O config/lanterna-client.toml de versões antigas pode ser apagado.
+
+
+## 0.53.0 — Árvore das Emoções e Dois Anéis (começo do caminho para a Noite Mais Densa)
+
+**Árvore das Emoções (Anel da Vida)** — botão "Emoções" na aba Lanterna.
+- Os 7 aspectos: Raiva, Avareza, Medo, Vontade, Esperança, Compaixão e Amor. Cada um começa com 3 construtos daquela Tropa no Anel da Vida.
+- **Despertar** (nível 1): a Insígnia do Lanterna lendário daquela Tropa (é gasta).
+- **Fortalecer** (níveis 2 a 6): 3, 5, 8, 12 e 16 Fragmentos Lendários (44 por aspecto). Os fragmentos caem dos lendários e dos Bosses das Tropas. Não há missões de ir e voltar: é o farm dos chefes.
+- Cada nível abre mais construtos daquela Tropa (no 6, todos) e dá +1,5% de força ao Anel da Vida (até +63%).
+- **Treinar** um aspecto: o anel continua branco, mas o traje vira o daquela Tropa e a luz (construtos, aura, painel) fica na cor dela. Treinar de novo o mesmo aspecto volta ao branco.
+- Os 7 aspectos no 6: "A Vida responde a todas as emoções" — e algo que dormia desde a queda do Nulo abre os olhos (o gancho da Noite Mais Densa, que vem depois).
+
+**Dois Anéis**
+- Com os 7 aspectos despertos, 20 fragmentos preparam o corpo. Fica para sempre, mesmo sem o Anel da Vida.
+- Aparece um 2º slot de anel na aba Lanterna, ao lado do anel. Vale um anel de outra Tropa emocional (do próprio jogador, sem corrupção).
+- O 2º anel empresta só os construtos de **defesa, cura e ajuda** da Tropa dele (os de ataque continuam só os da sua Tropa).
+- Metade do traje (o lado esquerdo: braço, perna, metade do tronco e da máscara) toma a cor do 2º anel.
+
+Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis, fica só o da Tropa do jogador e os outros 6 partem para o espaço; o despertar do Ser da Morte; os chefes da Noite Mais Densa.

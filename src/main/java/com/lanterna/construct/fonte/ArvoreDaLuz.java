@@ -48,6 +48,9 @@ public final class ArvoreDaLuz {
     /** O construto da árvore está liberado para o anel que o jogador usa? */
     public static boolean liberado(Player p, ConstructType t) {
         if (!t.arvore) return true;
+        // 0.53: os de suporte da Tropa do segundo anel (Dois Anéis) vêm prontos
+        RingData r = ModCapabilities.get(p).orElse(null);
+        if (r != null && t.suporte() && t.corps != null && t.corps.equals(r.segundo())) return true;
         // o anel Branco tem todos os construtos das outras Tropas (menos os da Morte) sem precisar da árvore
         if ("white".equals(corps(p))) return !"black".equals(t.corps);
         return tem(p, t.id);

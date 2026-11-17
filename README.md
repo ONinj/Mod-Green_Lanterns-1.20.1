@@ -122,6 +122,7 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.60.2 ✅ (0.52.2) Hiperpropulsão no espaço cresce com o nível (1.800 b/s no nível 1 até 3.000 no nível 75; anel Preto 4.000, Branco 4.500); nos planetas, Branco e Preto a 100 b/s
 1.60.3 ✅ (0.52.3) Piloto automático traça uma rota que contorna planetas, sóis e buracos negros sem frear (mostrada tracejada no mapa estelar): numa viagem de 67 km, 28 s em vez de 36 s
 1.60.4 ✅ (0.52.4) Voz do anel removida (reconhecimento pelo microfone com Vosk e fala com Piper/vozes do sistema): o anel conversa só pelo chat; o .jar caiu de ~57 MB para ~31 MB, sem bibliotecas nativas, sem downloads e sem abrir programas do sistema
+1.61.0 ✅ (0.53.0) Árvore das Emoções do Anel da Vida (7 aspectos, despertos com a Insígnia do lendário e fortalecidos até o nível 6 com Fragmentos Lendários; começam com 3 construtos e abrem mais a cada nível; treinar veste o traje e a luz da Tropa com o anel branco) e Dois Anéis (segundo slot, construtos de defesa/cura/ajuda da outra Tropa, metade do traje na cor dela)
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

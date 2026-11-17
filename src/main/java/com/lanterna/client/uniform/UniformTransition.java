@@ -85,7 +85,10 @@ public final class UniformTransition {
     }
 
     public static String corpsOf(Player player) {
-        var ring = ClientVisibleRings.of(player.getId()).ring();
+        var vis = ClientVisibleRings.of(player.getId());
+        // 0.53: treinando um aspecto no Anel da Vida, veste o uniforme daquela Tropa
+        if (!vis.traje().isEmpty() && !vis.ring().isEmpty()) return vis.traje();
+        var ring = vis.ring();
         // convertido em Lanterna Negro: veste o uniforme da Tropa de antes (em preto e branco)
         return ring.isEmpty() ? "green" : PowerRingItem.getCorpsVisual(ring).getPath();
     }

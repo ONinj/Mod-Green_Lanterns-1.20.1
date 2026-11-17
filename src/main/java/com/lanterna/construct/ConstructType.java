@@ -175,6 +175,34 @@ public enum ConstructType {
         return this == FAREJAR || this == DRENAR;
     }
 
+    /**
+     * 0.53: o que o jogador destravou além do anel: o nível de cada aspecto emocional no Anel da Vida (os construtos de
+     * cada Tropa vão abrindo aos poucos) e a Tropa do segundo anel (os construtos de suporte dela entram na roda).
+     */
+    public interface Contexto {
+        int nivel(String aspecto);
+        @Nullable String segundo();
+    }
+
+    /** O contexto do jogador deste cliente (preenchido pelo lado do cliente). */
+    @Nullable public static Contexto CLIENTE;
+
+    /** Com o contexto: o Anel da Vida só tem os construtos dos aspectos já fortalecidos; o segundo anel soma o suporte. */
+    public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador, @Nullable Contexto ctx) {
+        boolean base = disponivel(ringCorps, portador);
+        if (ctx == null) return base;
+        if (base && corps != null && ringCorps != null && ringCorps.getPath().equals("white") && !corps.equals("white"))
+            return com.lanterna.vida.Emocoes.dentroDoLimite(this, ctx.nivel(corps));
+        String seg = ctx.segundo();
+        if (!base && seg != null && seg.equals(corps) && suporte()) return true;
+        return base;
+    }
+
+    /** Construto de defesa, cura ou ajuda (o segundo anel empresta só estes). */
+    public boolean suporte() {
+        return category == Category.DEFENSE || category == Category.UTILITY;
+    }
+
     /** Com o anel de um Portador Negro (corrompido pelo Arauto), também os dois dons da Morte. */
     public boolean disponivel(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador) {
         return disponivel(ringCorps) || portador && domDoPortador();
@@ -182,7 +210,7 @@ public enum ConstructType {
 
     public static java.util.List<ConstructType> daRoda(@Nullable net.minecraft.resources.ResourceLocation ringCorps, boolean portador) {
         java.util.List<ConstructType> l = new java.util.ArrayList<>();
-        for (ConstructType t : values()) if (t != ESCUDO && t.disponivel(ringCorps, portador)) l.add(t); // 0.50: o escudo é o botão direito
+        for (ConstructType t : values()) if (t != ESCUDO && t.disponivel(ringCorps, portador, CLIENTE)) l.add(t); // 0.50: o escudo é o botão direito
         return l;
     }
 

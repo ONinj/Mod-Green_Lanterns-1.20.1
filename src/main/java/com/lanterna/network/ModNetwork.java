@@ -250,6 +250,12 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.fonte.FontePackets.Estado.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.fonte.FontePackets.Estado::encode).decoder(com.lanterna.fonte.FontePackets.Estado::decode)
                 .consumerMainThread(com.lanterna.fonte.FontePackets.Estado::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.vida.Emocoes.Estado.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.vida.Emocoes.Estado::encode).decoder(com.lanterna.vida.Emocoes.Estado::decode)
+                .consumerMainThread(com.lanterna.vida.Emocoes.Estado::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.vida.Emocoes.Acao.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.vida.Emocoes.Acao::encode).decoder(com.lanterna.vida.Emocoes.Acao::decode)
+                .consumerMainThread(com.lanterna.vida.Emocoes.Acao::handle).add();
         CHANNEL.messageBuilder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::encode).decoder(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::decode)
                 .consumerMainThread(com.lanterna.construct.fonte.ArvoreDaLuz.Comprar::handle).add();

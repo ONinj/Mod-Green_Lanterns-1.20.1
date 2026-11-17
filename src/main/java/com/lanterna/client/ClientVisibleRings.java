@@ -12,9 +12,9 @@ import java.util.Map;
 public final class ClientVisibleRings {
 
     public record Visible(ItemStack ring, int color, boolean active, boolean flying, boolean hyper, boolean autopilot,
-                          boolean staff, boolean vazio) {}
+                          boolean staff, boolean vazio, String traje, String segundo, int segundoCor) {}
 
-    private static final Visible NONE = new Visible(ItemStack.EMPTY, 0, false, false, false, false, false, false);
+    private static final Visible NONE = new Visible(ItemStack.EMPTY, 0, false, false, false, false, false, false, "", "", 0);
     private static final Map<Integer, Visible> RINGS = new HashMap<>();
 
     public static void update(SyncVisibleRingPacket msg) {
@@ -22,11 +22,13 @@ public final class ClientVisibleRings {
         if ((!msg.hasRing() || corps == null) && !msg.staff()) {
             RINGS.remove(msg.entityId());
         } else {
-            ItemStack ring = msg.hasRing() && corps != null ? PowerRingItem.create(corps, msg.color(), -1) : ItemStack.EMPTY;
+            // 0.53: treinando um aspecto, o Anel da Vida continua branco (só a luz e o traje mudam)
+            int corAnel = !msg.traje().isEmpty() ? com.lanterna.corps.BuiltinCorps.WHITE.color() : msg.color();
+            ItemStack ring = msg.hasRing() && corps != null ? PowerRingItem.create(corps, corAnel, -1) : ItemStack.EMPTY;
             if (!ring.isEmpty() && msg.corrupcao() > 0)
                 PowerRingItem.setEstagio(ring, msg.corrupcao(), msg.origem().isEmpty() ? null : ResourceLocation.tryParse(msg.origem())); // 0.51: vem o estágio
             RINGS.put(msg.entityId(), new Visible(ring, msg.color(), msg.hasRing() && msg.active(), msg.hasRing() && msg.flying(),
-                    msg.hyper(), msg.autopilot(), msg.staff(), msg.vazio()));
+                    msg.hyper(), msg.autopilot(), msg.staff(), msg.vazio(), msg.traje(), msg.segundo(), msg.segundoCor()));
         }
     }
 

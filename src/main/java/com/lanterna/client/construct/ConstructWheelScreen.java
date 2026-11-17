@@ -109,7 +109,8 @@ public class ConstructWheelScreen extends Screen {
                 if (t.corps != null && !t.corps.equals(pagina)) continue;
             } else if (t.domDoPortador() && !t.disponivel(ClientRingData.corps)) {
                 // dons da Morte do Portador Negro: aparecem junto com os da Tropa
-            } else if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)) continue;
+            } else if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)
+                    && !(t.corps != null && t.corps.equals(com.lanterna.client.vida.ClientEmocoes.segundo()))) continue; // 0.53: suporte do 2º anel
             (t.corps == null ? comuns : tropa).add(t);
         }
         if (branco) {

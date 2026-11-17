@@ -11,14 +11,16 @@ import java.util.function.Supplier;
 
 /** Servidor -> clientes: qual anel desenhar na mão de um jogador (ou nenhum). */
 public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps, int color, boolean active, boolean flying,
-                                    boolean hyper, boolean autopilot, boolean staff, boolean vazio, int corrupcao, String origem) {
+                                    boolean hyper, boolean autopilot, boolean staff, boolean vazio, int corrupcao, String origem,
+                                    String traje, String segundo, int segundoCor) {
 
     public static SyncVisibleRingPacket of(int entityId, RingData data, boolean staff) {
         return new SyncVisibleRingPacket(entityId, data.hasRing(), data.corps().toString(), data.color(),
                 data.hasRing() && data.powerActive(), data.hasRing() && data.flightEnabled(),
                 data.hasRing() && data.hyper(), data.hasRing() && data.autopilot(), staff,
                 data.hasRing() && data.charge() <= 0 && !com.lanterna.corps.BuiltinCorps.WHITE.id().equals(data.corps()),
-                data.hasRing() ? data.estagio() : 0, data.hasRing() ? data.origem() : "");
+                data.hasRing() ? data.estagio() : 0, data.hasRing() ? data.origem() : "",
+                data.hasRing() ? data.traje() : "", data.hasRing() ? data.segundo() : "", data.hasRing() ? data.segundoCor() : 0);
     }
 
     public static void encode(SyncVisibleRingPacket msg, FriendlyByteBuf buf) {
@@ -34,12 +36,15 @@ public record SyncVisibleRingPacket(int entityId, boolean hasRing, String corps,
         buf.writeBoolean(msg.vazio);
         buf.writeByte(msg.corrupcao);
         buf.writeUtf(msg.origem);
+        buf.writeUtf(msg.traje);
+        buf.writeUtf(msg.segundo);
+        buf.writeInt(msg.segundoCor);
     }
 
     public static SyncVisibleRingPacket decode(FriendlyByteBuf buf) {
         return new SyncVisibleRingPacket(buf.readVarInt(), buf.readBoolean(), buf.readUtf(), buf.readInt(),
                 buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(),
-                buf.readByte(), buf.readUtf());
+                buf.readByte(), buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readInt());
     }
 
     public static void handle(SyncVisibleRingPacket msg, Supplier<NetworkEvent.Context> ctx) {

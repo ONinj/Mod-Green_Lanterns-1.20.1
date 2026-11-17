@@ -24,6 +24,29 @@ public class RingData implements INBTSerializable<CompoundTag> {
 
     public ItemStackHandler equipment() { return equipment; }
 
+    // --- 0.53: o segundo anel (Dois Anéis) e o traje do treino do Anel da Vida ---
+    private final ItemStackHandler segundoSlot = new ItemStackHandler(1) {
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
+    };
+    private transient String traje = "", segundo = "";
+    private transient int segundoCor;
+
+    public ItemStackHandler segundoSlot() { return segundoSlot; }
+    /** A Tropa do traje do treino (Anel da Vida), ou "". */
+    public String traje() { return traje; }
+    /** A Tropa do segundo anel valendo, ou "". */
+    public String segundo() { return segundo; }
+    public int segundoCor() { return segundoCor; }
+
+    public void visual(String traje, String segundo, int segundoCor) {
+        this.traje = traje == null ? "" : traje;
+        this.segundo = segundo == null ? "" : segundo;
+        this.segundoCor = segundoCor;
+    }
+
     // --- O que os outros jogadores veem (anel na mão) ---
     private transient String lastVisibleRing = "";
 
@@ -272,6 +295,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
         tag.putInt("RageKills", rageKills);
         tag.putLong("RageStart", rageWindowStart);
         tag.put("Equipment", equipment.serializeNBT());
+        tag.put("Segundo", segundoSlot.serializeNBT());
         tag.putInt("FearTicks", fearTicks);
         tag.putInt("LoveBreeds", loveBreeds);
         tag.putBoolean("DiedWithering", diedWithering);
@@ -299,6 +323,7 @@ public class RingData implements INBTSerializable<CompoundTag> {
         if (tag.contains("Equipment")) {
             equipment.deserializeNBT(tag.getCompound("Equipment"));
         }
+        if (tag.contains("Segundo")) segundoSlot.deserializeNBT(tag.getCompound("Segundo"));
         lastVisibleRing = "";
         dirty = true;
     }
