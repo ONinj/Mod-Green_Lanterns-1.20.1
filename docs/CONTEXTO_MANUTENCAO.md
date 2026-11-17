@@ -34,7 +34,7 @@ Leia este arquivo inteiro antes de mexer em qualquer coisa.
 1. `gradle.properties` → `mod_version`; linha 7 do `src/main/resources/META-INF/mods.toml`.
 2. README: uma linha nova depois da última (`1.60.x ✅ (0.52.x) ...`).
 3. `docs/LORE_E_MISSOES.md`: uma seção nova no fim, explicando a mudança para jogadores.
-4. Se mudar algo que o anel explica no chat, atualizar o FAQ (`ia/` — o texto do FAQ fica nos arquivos de idioma `faq.*`).
+4. Se mudar algo que o anel explica no chat, atualizar as dúvidas do anel em `src/main/resources/assets/lanterna/anel/duvidas.json` (pt e en), e os textos em `assets/lanterna/lang/pt_br.json` e `en_us.json` (sempre os dois idiomas).
 5. Build, testar, commit com os trailers abaixo, `git push origin estavel`, zip do jar e entregar.
 
 Trailers dos commits:
