@@ -3900,6 +3900,65 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.54.1: o chamado de Ryut (piloto travado), a cena ao chegar, e Ryut partida e fechada depois. */
+    private static void sceneChamado() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring white");
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.getInventory().clearContent();
+            var pers = sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+            pers.remove("lanterna_emocoes");
+            pers.remove("lanterna_saga_necron");
+            sp.getPersistentData().put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, pers);
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite("saga:ryut_partida");
+            for (var l : com.lanterna.lendarios.Lendario.values()) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.INSIGNIAS.get(l).get()));
+            for (int i = 0; i < 6; i++) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.FRAGMENTO_LENDARIO.get(), 64));
+            com.lanterna.necron.SagaNecron.tag(sp).putString("origem", "green");
+        }));
+        at(10, () -> server(sp -> {
+            for (String a : com.lanterna.vida.Emocoes.ASPECTOS) for (int i = 0; i < 6; i++) com.lanterna.vida.Emocoes.subir(sp, a);
+            glog("dominada=" + com.lanterna.vida.Emocoes.dominada(sp));
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK);
+        }));
+        at(140, () -> mc.options.hideGui = false);
+        at(10, () -> shot("chamado_painel"));
+        at(2, () -> mc.options.hideGui = true);
+        at(5, () -> server(sp -> com.lanterna.power.RingPowers.toggleFlight(sp)));   // tenta desligar o voo (não pode)
+        at(80, () -> { glog("piloto ativo=" + com.lanterna.client.flight.Autopilot.active() + " travado=" + com.lanterna.client.flight.Autopilot.travado()
+                + " alvo=" + (com.lanterna.client.flight.Autopilot.target() == null ? null : com.lanterna.client.flight.Autopilot.target().id()));
+            com.lanterna.client.flight.Autopilot.stop(net.minecraft.network.chat.Component.literal("teste: cancelar"));
+            glog("depois de tentar cancelar: ativo=" + com.lanterna.client.flight.Autopilot.active()); });
+        at(200, () -> { shot("chamado_viagem"); glog("dim=" + mc.player.level().dimension().location() + " pos=" + mc.player.position()); });
+        waitFor(com.lanterna.client.necron.CinemaNecron::ativa, 20 * 240);
+        at(1, () -> glog("cena aberta? " + com.lanterna.client.necron.CinemaNecron.ativa() + " dim=" + mc.player.level().dimension().location() + " pos=" + mc.player.position()));
+        at(1000, () -> shot("chamado_rosto"));
+        at(40, () -> shot("chamado_rosto2"));
+        waitFor(() -> !com.lanterna.client.necron.CinemaNecron.ativa(), 20 * 40);
+        at(60, () -> server(sp -> {
+            glog("ryut partida=" + com.lanterna.necron.SagaNecron.ryutPartida(sp.server) + " cliente=" + com.lanterna.client.necron.ClientSaga.ryutPartida
+                    + " anel=" + com.lanterna.item.PowerRingItem.getCorps(com.lanterna.power.EquipmentHelper.ring(sp)) + " chamado=" + com.lanterna.necron.SagaNecron.noChamado(sp));
+            var ryut = com.lanterna.space.SpaceBodies.byId("ryut");
+            var c = ryut.center();
+            sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), c.x + 260, c.y + 90, c.z + 330, 140f, 12f);
+        }));
+        at(80, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(20, () -> { var c = com.lanterna.space.SpaceBodies.byId("ryut").center(); var p = mc.player.position();
+            look((float) Math.toDegrees(Math.atan2(-(c.x - p.x), c.z - p.z)), 12f); });
+        at(20, () -> shot("ryut_partida"));
+        // tenta pousar: entra no raio de Ryut
+        at(5, () -> server(sp -> { var c = com.lanterna.space.SpaceBodies.byId("ryut").center(); sp.teleportTo(c.x + 100, c.y, c.z); }));
+        at(30, () -> server(sp -> glog("depois de tentar pousar: dim=" + sp.level().dimension().location() + " dist=" + (int) sp.position().distanceTo(com.lanterna.space.SpaceBodies.byId("ryut").center()))));
+        // entra no mundo de Ryut por fora (comando): é expulso
+        at(5, () -> cmd("execute in lanterna:ryut run tp @s 0 120 0"));
+        at(200, () -> server(sp -> glog("depois de entrar em Ryut: dim=" + sp.level().dimension().location())));
+        at(20, () -> { glog("FIM chamado"); mc.stop(); });
+    }
+
     /** 0.54: a cutscene do Necron (a divisão do Anel da Vida) do começo ao fim, com fotos de cada plano. */
     private static void sceneNecron() {
         Minecraft mc = Minecraft.getInstance();
@@ -7139,6 +7198,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("rota")) sceneRota();
         else if (ENABLED && SCENE.equals("emocoes")) sceneEmocoes();
         else if (ENABLED && SCENE.equals("necron")) sceneNecron();
+        else if (ENABLED && SCENE.equals("chamado")) sceneChamado();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

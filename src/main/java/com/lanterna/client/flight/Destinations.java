@@ -32,6 +32,7 @@ public final class Destinations {
         for (SpaceBodies.Body b : SpaceBodies.near(here, sectors)) {
             if (!b.landable() || b.dimension() == null) continue;
             if (SpaceBodies.isHidden(b.id()) && !com.lanterna.client.mission.ClientLoreData.geneseRevealed()) continue;
+            if ("ryut".equals(b.id()) && com.lanterna.client.necron.ClientSaga.ryutPartida) continue;   // partida: não dá para ir
             list.add(new Destination(b.id(), b.displayName(), b.dimension(), b.center(), b.radius(), b.atmosphere()));
         }
         return list;

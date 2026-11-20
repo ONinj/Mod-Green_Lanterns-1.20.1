@@ -122,7 +122,7 @@ public final class ClientFlight {
         Autopilot.Control auto = null;
         if (Autopilot.active()) {
             // S cancela em qualquer fase (inclusive a viagem automática do anel novo)
-            if (player.input.forwardImpulse < 0) {
+            if (player.input.forwardImpulse < 0 && !Autopilot.travado()) {
                 Autopilot.stop(Component.translatable("autopilot.lanterna.cancelled"));
             } else if (!flying && Autopilot.phase() != Autopilot.Phase.WAIT_FLIGHT) {
                 // desligou o voo (V): o piloto também desliga, e o mouse volta a virar o jogador

@@ -45,6 +45,20 @@ public final class Autopilot {
         return target != null && phase == Phase.CRUISE ? rota : java.util.List.of();
     }
 
+    /** 0.54.1: o chamado de Ryut trava o piloto (não dá para cancelar nem mudar o destino). */
+    private static boolean travado;
+
+    public static void travar() { travado = true; }
+
+    public static boolean travado() { return travado && target != null; }
+
+    /** Solta o piloto travado (o chamado acabou). */
+    public static void destravar() {
+        if (!travado) return;
+        travado = false;
+        stop(null);
+    }
+
     public static boolean active() {
         return target != null;
     }
@@ -65,6 +79,7 @@ public final class Autopilot {
         if (!ClientRingData.hasRing || !ClientRingData.active) return Component.translatable("autopilot.lanterna.error.no_ring");
         if (ClientRingData.charge <= 0) return Component.translatable("autopilot.lanterna.error.no_charge");
         if (Destinations.isHere(player, dest)) return Component.translatable("autopilot.lanterna.error.here");
+        if (travado && target != null && !target.id().equals(dest.id())) return Component.translatable("necron.lanterna.anel_nao_obedece");
 
         target = dest;
         rota = java.util.List.of();
@@ -79,6 +94,13 @@ public final class Autopilot {
 
     public static void stop(Component message) {
         if (target == null) return;
+        if (travado) {
+            // o anel não obedece: se o voo foi desligado, ele liga de novo
+            if (!ClientRingData.flight) ModNetwork.sendToServer(new ToggleFlightPacket());
+            LocalPlayer pl = Minecraft.getInstance().player;
+            if (pl != null && message != null) pl.displayClientMessage(Component.translatable("necron.lanterna.anel_nao_obedece"), true);
+            return;
+        }
         target = null;
         phase = null;
         rota = java.util.List.of();

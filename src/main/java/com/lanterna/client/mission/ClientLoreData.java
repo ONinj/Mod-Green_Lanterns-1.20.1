@@ -50,6 +50,13 @@ public final class ClientLoreData {
     // ===================== Piloto automático pedido pelo servidor =====================
 
     public static void scheduleAutopilot(String planet, int delay) {
+        // 0.54.1: "!" na frente = piloto travado (o chamado de Ryut)
+        if (planet.startsWith("!")) {
+            planet = planet.substring(1);
+            com.lanterna.client.flight.Autopilot.travar();
+            var at = com.lanterna.client.flight.Autopilot.target();
+            if (com.lanterna.client.flight.Autopilot.active() && at != null && at.id().equals(planet)) return;
+        }
         autopilotTarget = planet;
         autopilotDelay = delay;
         autopilotTries = 0;

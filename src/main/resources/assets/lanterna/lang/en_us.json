@@ -3302,5 +3302,14 @@
   "cmd.lanterna.saga_ainda_nao": "The Necron saga hasn't started for you yet.",
   "cmd.lanterna.saga_sem_vida": "Put the Ring of Life on your finger first.",
   "cmd.lanterna.saga_comecou": "The Necron scene is about to begin.",
-  "cmd.lanterna.saga_zerada": "The Necron saga was reset for you."
+  "cmd.lanterna.saga_zerada": "The Necron saga was reset for you.",
+  "necron.lanterna.chamado_1": "The Ring of Life trembles on your finger. From very far away, a cold voice calls: Ryut.",
+  "necron.lanterna.chamado_2": "The ring no longer obeys you. It will take you there.",
+  "necron.lanterna.chamado_puxa": "The Ring of Life pulls you toward Ryut...",
+  "necron.lanterna.chamado_titulo": "A CALL FROM RYUT",
+  "necron.lanterna.chamado_painel_1": "Something woke up on the planet of Death.",
+  "necron.lanterna.chamado_painel_2": "Your ring follows the call. There is no turning back.",
+  "necron.lanterna.anel_nao_obedece": "The Ring of Life won't obey: it follows the call from Ryut.",
+  "necron.lanterna.ryut_expulso": "Ryut has split in half! The ground vanishes beneath you and the ring pulls you into space.",
+  "necron.lanterna.ryut_fechada": "Ryut is split in half. There is nowhere left to land."
 }

@@ -101,6 +101,11 @@ public final class SpaceTravel {
                 && !player.isCreative()) {
             body = null; // Gênese ainda escondido: não dá para pousar
         }
+        // 0.54.1: Ryut partida ao meio: não dá mais para pousar nela
+        if (body != null && "ryut".equals(body.id()) && com.lanterna.necron.SagaNecron.ryutPartida(player.server)) {
+            com.lanterna.necron.SagaNecron.repelirDeRyut(player);
+            return;
+        }
         if (body != null && "mogo".equals(body.id()) && !com.lanterna.mogo.MogoMissoes.podePousar(player)) {
             com.lanterna.mogo.MogoMissoes.repelir(player, null);
             return;

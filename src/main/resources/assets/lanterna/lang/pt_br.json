@@ -3302,5 +3302,14 @@
   "cmd.lanterna.saga_ainda_nao": "A saga do Necron ainda não começou para você.",
   "cmd.lanterna.saga_sem_vida": "Coloque o Anel da Vida no dedo primeiro.",
   "cmd.lanterna.saga_comecou": "A cena do Necron vai começar.",
-  "cmd.lanterna.saga_zerada": "A saga do Necron foi zerada para você."
+  "cmd.lanterna.saga_zerada": "A saga do Necron foi zerada para você.",
+  "necron.lanterna.chamado_1": "O Anel da Vida estremece no seu dedo. De muito longe, uma voz fria chama: Ryut.",
+  "necron.lanterna.chamado_2": "O anel não obedece mais a você. Ele vai levar você até lá.",
+  "necron.lanterna.chamado_puxa": "O Anel da Vida puxa você na direção de Ryut...",
+  "necron.lanterna.chamado_titulo": "UM CHAMADO DE RYUT",
+  "necron.lanterna.chamado_painel_1": "Algo acordou no planeta da Morte.",
+  "necron.lanterna.chamado_painel_2": "O seu anel segue o chamado. Não dá para voltar.",
+  "necron.lanterna.anel_nao_obedece": "O Anel da Vida não obedece: ele segue o chamado de Ryut.",
+  "necron.lanterna.ryut_expulso": "Ryut se partiu ao meio! O chão some debaixo de você e o anel puxa você para o espaço.",
+  "necron.lanterna.ryut_fechada": "Ryut está partida ao meio. Não há mais onde pousar."
 }

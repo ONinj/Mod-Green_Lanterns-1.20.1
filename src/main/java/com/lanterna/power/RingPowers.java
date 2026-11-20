@@ -272,6 +272,10 @@ public final class RingPowers {
         if (data == null || !data.hasRing()) return;
 
         boolean enable = !data.powerActive();
+        if (!enable && com.lanterna.necron.SagaNecron.noChamado(player)) {
+            player.displayClientMessage(Component.translatable("necron.lanterna.anel_nao_obedece").withStyle(net.minecraft.ChatFormatting.DARK_PURPLE), true);
+            return;
+        }
         if (enable && data.charge() <= 0) {
             player.displayClientMessage(Component.translatable("message.lanterna.no_charge"), true);
             return;
@@ -306,6 +310,10 @@ public final class RingPowers {
         }
 
         boolean enable = !data.flightEnabled();
+        if (!enable && com.lanterna.necron.SagaNecron.noChamado(player)) {
+            player.displayClientMessage(Component.translatable("necron.lanterna.anel_nao_obedece").withStyle(net.minecraft.ChatFormatting.DARK_PURPLE), true);
+            return;
+        }
         if (enable && com.lanterna.lore.entity.boss.Controle.semVoo(player)) {
             player.displayClientMessage(Component.translatable("boss.lanterna.controle.sem_voo"), true);
             return;

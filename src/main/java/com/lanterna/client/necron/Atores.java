@@ -35,7 +35,7 @@ final class Atores {
     private final Rend necron = new Rend("necron", (m, t) -> {
         // farrapos e capa balançando (mais forte voando)
         float vento = Atores.vento;
-        for (int i = 1; i <= 10; i++) osso(m, "farrapo_" + i, (0.18f + 0.6f * vento) * Mth.sin(t * (0.12f + 0.2f * vento) + i * 1.3f) + 0.9f * vento, 0,
+        for (int i = 1; i <= 12; i++) osso(m, "farrapo_" + i, (0.18f + 0.6f * vento) * Mth.sin(t * (0.12f + 0.2f * vento) + i * 1.3f) + 0.9f * vento, 0,
                 0.1f * Mth.sin(t * 0.09f + i));
         osso(m, "saia", 0.05f * Mth.sin(t * 0.07f) + 0.35f * vento, 0, 0);
         osso(m, "cabeca", 0.05f * Mth.sin(t * 0.05f) - 0.15f * vento, 0.08f * Mth.sin(t * 0.03f), 0);

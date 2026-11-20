@@ -50,6 +50,11 @@ import java.util.function.Supplier;
 public final class SagaNecron {
     /** Duração da cutscene (em ticks) e quando o anel da Tropa volta para o dedo. */
     public static final int DURACAO = 1520, TROCA = 618;
+    /** Quando Ryut se parte na cena (o mundo guarda isso: Ryut fica partida para todos). */
+    public static final int RACHA = 880;
+    /** 0.54.1: depois do chamado, o piloto automático liga sozinho (e não dá para desligar) até chegar perto de Ryut. */
+    private static final int CHAMADO_PILOTO = 140, PERTO_DE_RYUT = 300;
+    private static final String RYUT_PARTIDA = "saga:ryut_partida";
     /** Espera depois do título "Vida dominada" até a cena começar. */
     private static final int ESPERA = 120;
 
@@ -58,6 +63,7 @@ public final class SagaNecron {
     private static final Map<UUID, Integer> CENA = new HashMap<>();
     /** Quem está só revendo (sem troca do anel). */
     private static final Map<UUID, Boolean> REVENDO = new HashMap<>();
+    private static final Map<UUID, net.minecraft.world.phys.Vec3> PARADO = new HashMap<>();
 
     // ===================== dados =====================
 
@@ -103,8 +109,12 @@ public final class SagaNecron {
     public static void tick(ServerPlayer p) {
         Integer t = CENA.get(p.getUUID());
         if (t == null) {
-            if (p.tickCount % 20 == 7 && !dividido(p) && Emocoes.dominada(p) && Emocoes.comAnelDaVida(p) && p.isAlive()) {
-                CENA.put(p.getUUID(), -ESPERA);
+            // Ryut já partida: quem estiver lá dentro é jogado para o espaço
+            if (p.tickCount % 20 == 3 && ryutPartida(p.server) && naRyut(p)) expulsarDeRyut(p);
+            if (!dividido(p) && Emocoes.dominada(p) && Emocoes.comAnelDaVida(p) && p.isAlive()) chamado(p);
+            else if (tag(p).getBoolean("chamado") && p.tickCount % 20 == 5) {
+                tag(p).remove("chamado");   // tirou o Anel da Vida no meio do caminho: o chamado espera ele voltar
+                ModNetwork.sendTo(p, new Chamado(2));
             }
             return;
         }
@@ -119,12 +129,127 @@ public final class SagaNecron {
             ModNetwork.sendTo(p, new Cinema(tropa, revendo));
             LanternaMod.LOGGER.info("Lanterna: começa a cena do Necron para {} (fica a Tropa {})", p.getGameProfile().getName(), tropa);
         }
+        // parado no lugar enquanto assiste (no espaço ele continuava deslizando e podia pousar num planeta,
+        // e a troca de mundo fechava a cena)
+        if (t == 0) PARADO.put(p.getUUID(), p.position());
+        net.minecraft.world.phys.Vec3 fixo = PARADO.get(p.getUUID());
+        if (fixo != null && t > 0 && p.position().distanceToSqr(fixo) > 2.25) {
+            p.connection.teleport(fixo.x, fixo.y, fixo.z, p.getYRot(), p.getXRot());
+        }
+        if (t >= 0) { p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); p.fallDistance = 0; }
         if (t == TROCA && !revendo) dividir(p);
+        if (t == RACHA) partirRyut(p.server);
         if (t >= DURACAO + 10) {
             boolean primeira = !revendo;
             parar(p);
             if (primeira) fim(p);
         }
+    }
+
+    // ===================== o chamado (0.54.1) =====================
+
+    /**
+     * A Vida foi dominada: algo em Ryut chama o anel. Aparece o chamado; depois o piloto automático leva o jogador até
+     * Ryut (sem dar para desligar). Chegando perto, a cena começa. Se Ryut já se partiu (outro jogador), a cena começa
+     * onde ele estiver, como uma visão.
+     */
+    private static void chamado(ServerPlayer p) {
+        CompoundTag tg = tag(p);
+        long agora = p.serverLevel().getGameTime();
+        if (ryutPartida(p.server) || naRyut(p)) {
+            if (p.tickCount % 20 == 7) {
+                if (tg.getBoolean("chamado")) ModNetwork.sendTo(p, new Chamado(2));
+                tg.remove("chamado");
+                CENA.put(p.getUUID(), -40);
+            }
+            return;
+        }
+        if (!tg.getBoolean("chamado")) {
+            if (p.tickCount % 20 != 7) return;
+            tg.putBoolean("chamado", true);
+            tg.putLong("chamadoEm", agora + ESPERA);
+            return;
+        }
+        long desde = agora - tg.getLong("chamadoEm");
+        if (desde < 0) return;
+        if (desde == 0) {
+            ModNetwork.sendTo(p, new Chamado(0));
+            p.sendSystemMessage(Component.translatable("necron.lanterna.chamado_1").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            p.sendSystemMessage(Component.translatable("necron.lanterna.chamado_2").withStyle(ChatFormatting.DARK_PURPLE));
+            p.level().playSound(null, p.blockPosition(), net.minecraft.sounds.SoundEvents.SCULK_SHRIEKER_SHRIEK, net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.5f);
+        }
+        // o piloto liga (e religa a cada 10 s, se algo o tirou do caminho)
+        if (desde >= CHAMADO_PILOTO && (desde - CHAMADO_PILOTO) % 200 == 0) {
+            RingData data = ModCapabilities.get(p).orElse(null);
+            if (data != null && !data.powerActive()) { data.setPowerActive(true); RingPowers.sync(p, data); }
+            ModNetwork.sendTo(p, new com.lanterna.network.lore.StartAutopilotPacket("!ryut", 0));
+            if (desde > CHAMADO_PILOTO) p.displayClientMessage(Component.translatable("necron.lanterna.chamado_puxa").withStyle(ChatFormatting.DARK_PURPLE), true);
+        }
+        // chegou perto de Ryut: a cena
+        com.lanterna.space.SpaceBodies.Body ryut = com.lanterna.space.SpaceBodies.byId("ryut");
+        if (ryut != null && p.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)
+                && p.position().distanceTo(ryut.center()) < ryut.radius() + PERTO_DE_RYUT) {
+            tg.remove("chamado");
+            ModNetwork.sendTo(p, new Chamado(2));
+            p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            p.hurtMarked = true;
+            CENA.put(p.getUUID(), -1);
+        }
+    }
+
+    /** Durante o chamado o anel não obedece: não dá para desligar o voo nem o anel. */
+    public static boolean noChamado(Player p) {
+        return tag(p).getBoolean("chamado") && !dividido(p);
+    }
+
+    // ===================== Ryut partida =====================
+
+    public static boolean ryutPartida(net.minecraft.server.MinecraftServer s) {
+        return com.lanterna.lore.LoreWorldData.get(s).siteBuilt(RYUT_PARTIDA);
+    }
+
+    private static boolean naRyut(ServerPlayer p) {
+        return com.lanterna.lore.PlanetLore.byDimension(p.level().dimension()) == com.lanterna.lore.PlanetLore.RYUT;
+    }
+
+    /** Ryut se parte (para o mundo todo): fica no espaço rachada ao meio, sem atmosfera, e não dá mais para entrar. */
+    public static void partirRyut(net.minecraft.server.MinecraftServer s) {
+        if (ryutPartida(s)) return;
+        com.lanterna.lore.LoreWorldData.get(s).markSite(RYUT_PARTIDA);
+        LanternaMod.LOGGER.info("Lanterna: Ryut se partiu ao meio");
+        for (ServerPlayer q : s.getPlayerList().getPlayers()) {
+            ModNetwork.sendTo(q, new Mundo(true));
+            if (naRyut(q) && !CENA.containsKey(q.getUUID())) expulsarDeRyut(q);   // quem está vendo a cena sai depois
+        }
+    }
+
+    /** Quem estava em Ryut é jogado para o espaço, ao lado do planeta partido. */
+    public static void expulsarDeRyut(ServerPlayer p) {
+        com.lanterna.space.SpaceBodies.Body ryut = com.lanterna.space.SpaceBodies.byId("ryut");
+        net.minecraft.server.level.ServerLevel espaco = p.server.getLevel(com.lanterna.space.SpaceBodies.SPACE);
+        if (ryut == null || espaco == null) return;
+        net.minecraft.world.phys.Vec3 fora = ryut.center().add(ryut.radius() + 140, 0, 0);
+        p.teleportTo(espaco, fora.x, fora.y, fora.z, 90f, 0f);
+        p.displayClientMessage(Component.translatable("necron.lanterna.ryut_expulso").withStyle(ChatFormatting.DARK_PURPLE), false);
+    }
+
+    /** Chegando perto de Ryut partida pelo espaço: não há onde pousar (empurra para fora). */
+    public static void repelirDeRyut(ServerPlayer p) {
+        com.lanterna.space.SpaceBodies.Body ryut = com.lanterna.space.SpaceBodies.byId("ryut");
+        if (ryut == null) return;
+        net.minecraft.world.phys.Vec3 d = p.position().subtract(ryut.center());
+        if (d.lengthSqr() < 1e-3) d = new net.minecraft.world.phys.Vec3(1, 0, 0);
+        d = d.normalize();
+        net.minecraft.world.phys.Vec3 fora = ryut.center().add(d.scale(ryut.radius() + 50));
+        p.teleportTo(fora.x, fora.y, fora.z);
+        p.setDeltaMovement(d.scale(1.5));
+        p.hurtMarked = true;
+        if (p.tickCount % 40 == 0) p.displayClientMessage(Component.translatable("necron.lanterna.ryut_fechada").withStyle(ChatFormatting.DARK_PURPLE), true);
+    }
+
+    @SubscribeEvent
+    public static void entrou(PlayerEvent.PlayerLoggedInEvent e) {
+        if (e.getEntity() instanceof ServerPlayer p) ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server)));
     }
 
     /** Começa a cena agora (comando / testes). revendo = só assistir de novo, sem mexer no anel. */
@@ -139,6 +264,7 @@ public final class SagaNecron {
 
     private static void parar(ServerPlayer p) {
         CENA.remove(p.getUUID());
+        PARADO.remove(p.getUUID());
         REVENDO.remove(p.getUUID());
     }
 
@@ -225,6 +351,28 @@ public final class SagaNecron {
     }
 
     // ===================== rede =====================
+
+    /** Servidor → cliente: o estado da saga no mundo (Ryut partida). */
+    public record Mundo(boolean ryutPartida) {
+        public static void encode(Mundo m, FriendlyByteBuf b) { b.writeBoolean(m.ryutPartida); }
+        public static Mundo decode(FriendlyByteBuf b) { return new Mundo(b.readBoolean()); }
+        public static void handle(Mundo m, Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> com.lanterna.client.necron.ClientSaga.ryutPartida = m.ryutPartida));
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
+    /** Servidor → cliente: o chamado de Ryut (0 = aparece; 2 = acabou, solta o piloto). */
+    public record Chamado(int fase) {
+        public static void encode(Chamado m, FriendlyByteBuf b) { b.writeVarInt(m.fase); }
+        public static Chamado decode(FriendlyByteBuf b) { return new Chamado(b.readVarInt()); }
+        public static void handle(Chamado m, Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> com.lanterna.client.necron.ClientSaga.chamado(m.fase)));
+            ctx.get().setPacketHandled(true);
+        }
+    }
 
     /** Servidor → cliente: abre a cutscene. */
     public record Cinema(String tropa, boolean revendo) {

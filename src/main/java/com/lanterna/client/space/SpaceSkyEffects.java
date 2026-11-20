@@ -172,6 +172,11 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             Vec3 sunDir = SpaceBodies.SUN.center().subtract(body.center()).normalize();
             float spin = isSun ? 0f : time * 0.00012f * (float) (300.0 / body.radius());
 
+            // 0.54.1: Ryut partida ao meio, sem atmosfera
+            if ("ryut".equals(body.id()) && com.lanterna.client.necron.ClientSaga.ryutPartida) {
+                RyutPartida.desenhar(pose, pos, radius, sunDir, time);
+                continue;
+            }
             // Planeta (os gerados ganham textura na hora, a partir da semente deles)
             if (body.procedural() != null) PlanetTextures.ensure(body);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);

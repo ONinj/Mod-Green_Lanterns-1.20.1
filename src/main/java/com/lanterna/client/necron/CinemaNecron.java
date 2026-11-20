@@ -116,6 +116,8 @@ public final class CinemaNecron extends Screen {
     public static void abrir(String tropa, boolean revendo) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
+        com.lanterna.client.flight.Autopilot.destravar();
+        com.lanterna.client.flight.Autopilot.stop(null);
         mc.setScreen(new CinemaNecron(tropa, revendo));
     }
 
@@ -281,7 +283,7 @@ public final class CinemaNecron extends Screen {
             float k = faixa(t, D1, E1);
             double a = Math.toRadians(-20 + 30 * k);
             double r = 3.0 - 0.8 * k;
-            c = new Camera(new Vec3(Math.sin(a) * r, 2.15 + 0.1 * k, Math.cos(a) * r), new Vec3(0, 2.0, 0), up, 48);
+            c = new Camera(new Vec3(Math.sin(a) * r, 2.75 + 0.1 * k, Math.cos(a) * r), new Vec3(0, 2.6, 0), up, 48);
         } else if (t < F1) {
             // voando: câmera de lado, girando para trás dele
             float k = faixa(t, E1, F1);
@@ -674,7 +676,7 @@ public final class CinemaNecron extends Screen {
             }
         } else if (t >= D1 && t < E1) {
             // uma luz roxa fraca atrás dele
-            sprite(b, m, dir, cima, 0, 2.0, -1.5, 2.2f, 0.35f, 0.1f, 0.55f, 0.35f * faixa(t, D1 + 30, D1 + 70));
+            sprite(b, m, dir, cima, 0, 2.6, -1.5, 2.4f, 0.35f, 0.1f, 0.55f, 0.35f * faixa(t, D1 + 30, D1 + 70));
         } else if (t >= E1 && t < F1) {
             sprite(b, m, dir, cima, 0, 1.2, 0, 2.8f, 0.3f, 0.08f, 0.45f, 0.35f);
         } else if (t >= F1 && t < G1) {
