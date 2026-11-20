@@ -177,12 +177,20 @@ public final class Ruinas {
         return false;
     }
 
+    private static final Map<String, Integer> ALTURAS = new HashMap<>();
+
     public static BlockPos centro(ServerLevel l, PlanetLore pl, int i) {
         BlockPos b = ponto(i);
         String pre = chave(pl, "monte:" + i) + ":y";
+        Integer c = ALTURAS.get(pre);
+        if (c != null) return new BlockPos(b.getX(), c, b.getZ());
         // a altura salva quando o monte foi feito
         for (String k : LoreWorldData.get(l.getServer()).sites())
-            if (k.startsWith(pre)) try { return new BlockPos(b.getX(), Integer.parseInt(k.substring(pre.length())), b.getZ()); } catch (NumberFormatException ignored) {}
+            if (k.startsWith(pre)) try {
+                int y = Integer.parseInt(k.substring(pre.length()));
+                ALTURAS.put(pre, y);
+                return new BlockPos(b.getX(), y, b.getZ());
+            } catch (NumberFormatException ignored) {}
         return chao(l, b);
     }
 
@@ -443,6 +451,7 @@ public final class Ruinas {
             String pre = chave(p, "monte:" + i) + ":y";
             for (String k : new ArrayList<>(w.sites())) if (k.startsWith(pre)) w.resetSite(k);
         }
+        ALTURAS.clear();
         w.resetSite(chave(p, "carcereiro"));
         w.resetSite(chave(p, "carcereiro") + ":fim");
         w.resetSite("saga:nucleo:" + p.corps.id().getPath());

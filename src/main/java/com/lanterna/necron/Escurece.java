@@ -87,11 +87,20 @@ public final class Escurece {
 
     /** Altura salva de um lugar construído (o chão muda depois: a terra morta, os blocos quebrados...). */
     private static int altura(MinecraftServer s, String k, int padrao) {
+        Integer c = ALTURAS.get(k);
+        if (c != null) return c;
         String pre = k + ":y";
         for (String id : LoreWorldData.get(s).sites())
-            if (id.startsWith(pre)) try { return Integer.parseInt(id.substring(pre.length())); } catch (NumberFormatException ignored) {}
+            if (id.startsWith(pre)) try {
+                int v = Integer.parseInt(id.substring(pre.length()));
+                ALTURAS.put(k, v);
+                return v;
+            } catch (NumberFormatException ignored) {}
         return padrao;
     }
+
+    /** As alturas já achadas (a lista de marcas do mundo é grande; não vale varrer a cada tick). */
+    private static final Map<String, Integer> ALTURAS = new HashMap<>();
 
     /** Centro da câmara do Santuário (onde o Embrião flutua), se já foi cavada. */
     @Nullable
@@ -552,6 +561,7 @@ public final class Escurece {
             if (k.startsWith("saga:terra_fenda:") || k.startsWith("saga:cerco:") || k.startsWith("saga:pulso:")) w.resetSite(k);
         for (Cerco c : CERCOS.values()) c.barra.removeAllPlayers();
         CERCOS.clear();
+        ALTURAS.clear();
     }
 
     public static void zerar(ServerPlayer p) {
