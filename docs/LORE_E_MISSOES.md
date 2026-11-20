@@ -1765,3 +1765,22 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - Em servidor, cada jogador vê a própria cena.
 
 **Comandos:** `/lantern saga replay` (rever a cena, dá para sair com Esc) · `/lantern saga start` e `/lantern saga reset` (operador, para testes).
+
+
+## 0.54.1 — O chamado de Ryut
+
+- Quando os 7 aspectos chegam ao nível 6, aparece o **chamado de Ryut** na tela (uma transmissão roxa e chiada). Uns segundos depois o Anel da Vida liga o **piloto automático até Ryut**, sozinho. Não dá para cancelar (S, J, mapa), nem desligar o voo ou o anel: o anel segue o chamado.
+- Chegando perto de Ryut, a cutscene começa (o jogador fica parado no espaço enquanto assiste).
+- Se Ryut já se partiu (outro jogador do servidor já viu a cena), a cena começa onde você estiver, como uma visão.
+- **Ryut partida:** no espaço, Ryut aparece rachada ao meio, sem atmosfera, com a fenda roxa e pedaços de rocha boiando. Não dá mais para pousar (o planeta empurra você para fora) e ela some do mapa estelar. Quem estava lá dentro é jogado para o espaço.
+- O Necron foi refeito com muito mais detalhe.
+
+## 0.54.2 — A cratera do Necron
+
+- Onde o Necron caiu (longe do spawn da Terra; as coordenadas aparecem no chat e a missão "A Queda do Necron" mostra o caminho) há uma região enorme de **terra morta**: chão de cinza e terra das almas, túmulos, árvores secas, espinhos de basalto, teias, fogo das almas, cinza caindo e uma névoa cinza-roxa.
+- No meio, a **cratera do impacto** e, no fundo dela, a **Bateria Central da Tropa da Morte**: uma lanterna gigante de pedra negra, vidro escuro e núcleo roxo, com a alça e a pérola negra no topo.
+- O **Necron** flutua na frente da bateria. Quem chega perto é atacado (foice e raio da Morte, que seca a vida). Ninguém consegue feri-lo por enquanto.
+- **Servos do Necron** aparecem em volta: Lanternas Negros corrompidos e mortos-vivos carregando anéis da Morte.
+- **A regra da saga:** a luz de um anel só é engolida pelos servos do Necron. Só quem usa **dois anéis ao mesmo tempo** (o segundo no punho, pelos Dois Anéis) consegue machucá-los.
+- Missões: "A Queda do Necron" (chegar à terra morta) e "O Ser da Morte" (enfrentá-lo; continua na próxima versão).
+- Comandos de operador: `/lantern saga impact` (ir até a cratera).

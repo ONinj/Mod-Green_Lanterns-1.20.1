@@ -96,7 +96,8 @@ public final class Cratera {
         // a altura do fundo da cratera é decidida quando o pedaço do centro for gerado
         terra.getChunk(escolhido.getX() >> 4, escolhido.getZ() >> 4);
         int h = chao(terra, escolhido.getX(), escolhido.getZ());
-        int fundo = h - profundidade(0);
+        // o fundo nunca passa do fundo do mundo (mundos planos ou muito baixos: a cratera fica rasa)
+        int fundo = Math.max(h - profundidade(0), terra.getMinBuildHeight() + 4);
         LoreWorldData.get(s).markSite(SITE + escolhido.getX() + ":" + fundo + ":" + escolhido.getZ());
         cache = null;
         filaMontada = false;
@@ -233,6 +234,7 @@ public final class Cratera {
                 double r = ruido(x, z, 11);
                 if (d < CRATERA) {
                     int fundo = c.getY() + (int) Math.round(11 * ((d / CRATERA) * (d / CRATERA)));
+                    fundo = Math.max(fundo, l.getMinBuildHeight() + 4);
                     fundo = Math.min(fundo, h);
                     for (int y = fundo + 1; y <= h + 1; y++) por(l, m.set(x, y, z), Blocks.AIR.defaultBlockState());
                     BlockState chao = r < 0.06 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : r < 0.22 ? Blocks.OBSIDIAN.defaultBlockState()

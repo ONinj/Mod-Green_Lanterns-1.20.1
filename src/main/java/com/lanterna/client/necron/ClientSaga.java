@@ -83,8 +83,10 @@ public final class ClientSaga {
         if (k > 0 && !Minecraft.getInstance().isPaused()) {
             var mc = Minecraft.getInstance();
             var r = mc.level.random;
-            for (int i = 0; i < (int) (6 * k); i++) {
-                double x = mc.player.getX() + (r.nextDouble() - 0.5) * 24, y = mc.player.getY() + r.nextDouble() * 10, z = mc.player.getZ() + (r.nextDouble() - 0.5) * 24;
+            for (int i = 0; i < (int) (4 * k); i++) {
+                // longe da câmera (perto demais a cinza vira um borrão na tela)
+                double ang = r.nextDouble() * Math.PI * 2, dist = 5 + r.nextDouble() * 14;
+                double x = mc.player.getX() + Math.cos(ang) * dist, y = mc.player.getY() + r.nextDouble() * 10, z = mc.player.getZ() + Math.sin(ang) * dist;
                 mc.level.addParticle(r.nextInt(3) == 0 ? net.minecraft.core.particles.ParticleTypes.WHITE_ASH : net.minecraft.core.particles.ParticleTypes.ASH, x, y, z, 0, -0.02, 0);
             }
             if (r.nextInt(6) == 0) mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL, mc.player.getX() + (r.nextDouble() - 0.5) * 16,
