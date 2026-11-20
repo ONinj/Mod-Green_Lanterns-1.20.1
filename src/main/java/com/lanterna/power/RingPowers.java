@@ -94,6 +94,7 @@ public final class RingPowers {
 
         com.lanterna.lore.entity.boss.Controle.tick(player);
         com.lanterna.vida.Emocoes.tick(player);
+        com.lanterna.necron.SagaNecron.tick(player);
         if (data.hasRing()) {
             tickFlight(player, data);
             tickSustento(player, data);

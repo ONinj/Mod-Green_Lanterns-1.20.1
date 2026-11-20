@@ -286,6 +286,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.hanks.HanksMissoes.NucleosSync.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.hanks.HanksMissoes.NucleosSync::encode).decoder(com.lanterna.hanks.HanksMissoes.NucleosSync::decode)
                 .consumerMainThread(com.lanterna.hanks.HanksMissoes.NucleosSync::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.necron.SagaNecron.Cinema.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.necron.SagaNecron.Cinema::encode).decoder(com.lanterna.necron.SagaNecron.Cinema::decode)
+                .consumerMainThread(com.lanterna.necron.SagaNecron.Cinema::handle).add();
         CHANNEL.messageBuilder(com.lanterna.voz.Ligacoes.Estado.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.voz.Ligacoes.Estado::encode).decoder(com.lanterna.voz.Ligacoes.Estado::decode)
                 .consumerMainThread(com.lanterna.voz.Ligacoes.Estado::handle).add();

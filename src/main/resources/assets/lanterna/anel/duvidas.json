@@ -905,6 +905,27 @@
   "en": "With the Ring of Life, open the Lantern tab and click Emotions. Each of the 7 aspects (Rage, Avarice, Fear, Will, Hope, Compassion and Love) starts with 3 constructs; awaken it with the Insignia of that Corps' legendary Lantern and strengthen it up to level 6 with Legendary Fragments (from legendaries and Corps Bosses): 3, 5, 8, 12 and 16. Each level opens more constructs and makes the ring stronger. Training an aspect wears that Corps' suit and light (the ring stays white). With all 7 awake, spend 20 fragments on Prepare Two Rings: a second slot appears next to your ring, for a ring of another emotional Corps, even without the Ring of Life. It lends only its defense, healing and support constructs and tints half of your suit with its color."
  },
  {
+  "id": "necron",
+  "chaves": [
+   "necron",
+   "saga do necron",
+   "anel da vida sumiu",
+   "perdi o anel da vida",
+   "ryut partida",
+   "embriao da vida",
+   "rever cena",
+   "necron",
+   "necron saga",
+   "lost ring of life",
+   "ring of life gone",
+   "ryut split",
+   "embryo of life",
+   "replay scene"
+  ],
+  "pt": "Quando os 7 aspectos da Árvore das Emoções chegam ao nível 6, a Vida percebe que algo acordou: o Embrião da Vida escurece, o Anel da Vida se desfaz em sete anéis e só o anel da sua primeira Tropa volta para o dedo, com a mesma afinidade. Ryut se partiu e o Necron, o Ser da Morte, caiu na Terra. A Árvore e os Dois Anéis continuam valendo. Para rever a cena: /lantern saga replay.",
+  "en": "When all 7 aspects of the Tree of Emotions reach level 6, Life senses that something has woken: the Embryo of Life darkens, the Ring of Life splits into seven rings and only the ring of your first Corps returns to your finger, with the same affinity. Ryut was split apart and Necron, the Being of Death, fell on Earth. The Tree and Two Rings still work. To watch the scene again: /lantern saga replay."
+ },
+ {
   "id": "voz",
   "chaves": [
    "falar com o anel",
@@ -1186,8 +1207,8 @@
    "coracao de nyrielle",
    "heart of nyrielle"
   ],
-  "pt": "Zamaron: planeta da Tropa Violeta (amor). Povo: Zaëlith. Chefe: Nyrielle, que dropa Coração de Nyrielle. Minério: Cristal Devoto. O anel de Zamaron se forja a partir do nível 20. Ritual do Amor: outro jogador ou um bicho domado seu (lobo, gato, papagaio, até no ombro) a até 12 blocos. Os bichos não viajam pelo espaço, mas em volta da base de Zamaron há lobos, gatos e papagaios selvagens para domar (osso, peixe cru, sementes).",
-  "en": "Zamaron: planet of the Violet Corps (love). People: Zaëlith. Boss: Nyrielle, who drops Heart of Nyrielle. Ore: Devoted Crystal. The Zamaron ring can be forged from level 20. Ritual of Love: another player or a pet of yours (wolf, cat, parrot, even on your shoulder) within 12 blocks. Pets do not travel through space, but wild wolves, cats and parrots roam around Zamaron's base, ready to be tamed (bone, raw fish, seeds)."
+  "pt": "Zamaron: planeta da Tropa Violeta (amor). Povo: Zaëlith. Chefe: Nyrielle, que dropa Coração de Nyrielle. Minério: Cristal Devoto. O anel de Zamaron se forja a partir do nível 20. Ritual do Amor: outro jogador ou um bicho domado seu (lobo, gato, papagaio, até no ombro) a até 12 blocos. Em volta da base de Zamaron há lobos, gatos e papagaios selvagens para domar.",
+  "en": "Zamaron: planet of the Violet Corps (love). People: Zaëlith. Boss: Nyrielle, who drops Heart of Nyrielle. Ore: Devoted Crystal. The Zamaron ring can be forged from level 20. Ritual of Love: another player or a pet of yours (wolf, cat, parrot, even on your shoulder) within 12 blocks. Wild wolves, cats and parrots roam around Zamaron's base, ready to be tamed."
  },
  {
   "id": "planeta_korugar",

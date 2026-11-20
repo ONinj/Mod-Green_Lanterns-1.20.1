@@ -112,6 +112,23 @@ public final class ComandosTeste {
                 .then(op("ring").then(Commands.argument("corps", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(TROPAS, b))
                         .executes(c -> anel(c, Ingles.pt(StringArgumentType.getString(c, "corps"))))))
+                // ---------- saga do Necron ----------
+                .then(Commands.literal("saga")
+                        .then(Commands.literal("replay").executes(c -> {
+                            ServerPlayer p = eu(c);
+                            if (!com.lanterna.necron.SagaNecron.dividido(p)) return erro(c, "saga_ainda_nao");
+                            return com.lanterna.necron.SagaNecron.comecar(p, true) ? 1 : 0;
+                        }))
+                        .then(op("start").executes(c -> {
+                            ServerPlayer p = eu(c);
+                            if (!com.lanterna.vida.Emocoes.comAnelDaVida(p)) return erro(c, "saga_sem_vida");
+                            com.lanterna.necron.SagaNecron.zerar(p);
+                            return com.lanterna.necron.SagaNecron.comecar(p, false) ? ok(c, "saga_comecou") : 0;
+                        }))
+                        .then(op("reset").executes(c -> {
+                            com.lanterna.necron.SagaNecron.zerar(eu(c));
+                            return ok(c, "saga_zerada");
+                        })))
                 .then(op("full").executes(c -> {
                     ServerPlayer p = eu(c);
                     RingData r = ModCapabilities.get(p).orElse(null);

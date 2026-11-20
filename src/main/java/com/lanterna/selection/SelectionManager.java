@@ -224,6 +224,8 @@ public final class SelectionManager {
         data.clearPending();
         data.resetRage();
         data.resetRituals();
+        // 0.54: a Tropa do primeiro anel fica guardada (é o anel que volta quando o Anel da Vida se divide)
+        if (!data.everChosen()) com.lanterna.necron.SagaNecron.lembrarTropa(player, def.id().getPath());
         data.setEverChosen(true);
         data.setPowerActive(true);
 

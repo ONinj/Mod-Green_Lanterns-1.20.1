@@ -59,6 +59,7 @@ public class RingHandLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
                        float netHeadYaw, float headPitch) {
         ItemStack ring = ClientVisibleRings.get(player.getId());
         if (ring.isEmpty() || player.isInvisible()) return;
+        if (com.lanterna.client.necron.CinemaNecron.escondeAnel(player)) return;
 
         boolean right = player.getMainArm() == HumanoidArm.RIGHT;
         ModelPart arm = right ? getParentModel().rightArm : getParentModel().leftArm;

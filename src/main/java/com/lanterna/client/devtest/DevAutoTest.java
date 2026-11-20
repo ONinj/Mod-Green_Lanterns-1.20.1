@@ -3900,6 +3900,55 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.54: a cutscene do Necron (a divisão do Anel da Vida) do começo ao fim, com fotos de cada plano. */
+    private static void sceneNecron() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring white");
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); });
+            sp.getInventory().clearContent();
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.equipment().setStackInSlot(com.lanterna.capability.RingData.BATTERY_SLOT, net.minecraft.world.item.ItemStack.EMPTY));
+            var pers = sp.getPersistentData().getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+            pers.remove("lanterna_emocoes");
+            pers.remove("lanterna_saga_necron");
+            sp.getPersistentData().put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, pers);
+            // a Árvore inteira no 6 (o farm feito) e a Tropa do começo: azul
+            for (var l : com.lanterna.lendarios.Lendario.values()) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.INSIGNIAS.get(l).get()));
+            for (int i = 0; i < 6; i++) sp.getInventory().add(new net.minecraft.world.item.ItemStack(com.lanterna.lore.LoreItems.FRAGMENTO_LENDARIO.get(), 64));
+            com.lanterna.necron.SagaNecron.tag(sp).putString("origem", "blue");
+        }));
+        at(10, () -> server(sp -> {
+            for (String a : com.lanterna.vida.Emocoes.ASPECTOS) for (int i = 0; i < 6; i++) com.lanterna.vida.Emocoes.subir(sp, a);
+            glog("dominada=" + com.lanterna.vida.Emocoes.dominada(sp) + " anel=" + com.lanterna.power.EquipmentHelper.ring(sp).getTag());
+            mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
+        }));
+        // a cena começa sozinha 6 segundos depois do título
+        waitFor(com.lanterna.client.necron.CinemaNecron::ativa, 400);
+        at(1, () -> glog("cena aberta? " + com.lanterna.client.necron.CinemaNecron.ativa() + " t=" + com.lanterna.client.necron.CinemaNecron.tempoAtual()));
+        int[] fotos = {50, 150, 205, 300, 340, 356, 400, 470, 496, 520, 590, 622, 660, 720, 830, 884, 905, 935, 1000, 1045, 1120, 1220, 1320, 1386, 1398, 1430, 1480};
+        int antes = 1;
+        for (int f : fotos) {
+            int ff = f;
+            at(f - antes, () -> { glog("foto " + ff + " t=" + com.lanterna.client.necron.CinemaNecron.tempoAtual()); shot(String.format("necron_%04d", ff)); });
+            antes = f;
+        }
+        at(80, () -> server(sp -> {
+            var anel = com.lanterna.power.EquipmentHelper.ring(sp);
+            glog("depois: aberta=" + com.lanterna.client.necron.CinemaNecron.ativa() + " dividido=" + com.lanterna.necron.SagaNecron.dividido(sp)
+                    + " anel=" + com.lanterna.item.PowerRingItem.getCorps(anel) + " afinidade=" + com.lanterna.construct.Affinity.points(anel)
+                    + " bateria=" + com.lanterna.power.EquipmentHelper.battery(sp).getItem() + " vida? " + com.lanterna.vida.Emocoes.comAnelDaVida(sp)
+                    + " tropa=" + com.lanterna.necron.SagaNecron.tag(sp));
+        }));
+        at(40, () -> shot("necron_depois"));
+        at(5, () -> cmd("lantern saga replay"));
+        at(60, () -> glog("replay aberto=" + com.lanterna.client.necron.CinemaNecron.ativa()));
+        at(5, () -> { if (mc.screen != null) mc.screen.onClose(); });
+        at(20, () -> { glog("FIM necron"); mc.stop(); });
+    }
+
     private static void sceneEmocoes() {
         Minecraft mc = Minecraft.getInstance();
         com.lanterna.client.ia.VozAnel.mudo = true;
@@ -7089,6 +7138,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("hiper")) sceneHiper();
         else if (ENABLED && SCENE.equals("rota")) sceneRota();
         else if (ENABLED && SCENE.equals("emocoes")) sceneEmocoes();
+        else if (ENABLED && SCENE.equals("necron")) sceneNecron();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

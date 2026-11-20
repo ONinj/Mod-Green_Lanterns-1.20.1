@@ -45,6 +45,11 @@ public final class WhiteAltar {
                     com.lanterna.tropa.Nivel.nivelParaForjar(com.lanterna.lore.PlanetLore.GENESE)), true);
             return;
         }
+        // 0.54: depois da divisão a Vida dorme; o altar não responde mais
+        if (com.lanterna.necron.SagaNecron.dividido(player)) {
+            player.displayClientMessage(Component.translatable("necron.lanterna.altar_dorme"), true);
+            return;
+        }
         if (MissionManager.hasRing(player, "white")) {
             player.displayClientMessage(Component.translatable("message.lanterna.altar_already_white"), true);
             return;

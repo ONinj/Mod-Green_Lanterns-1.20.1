@@ -1744,3 +1744,24 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - **Cena do segundo anel** (~5 s, qualquer cor): faíscas da cor do anel vêm de todos os lados e se juntam num núcleo na outra mão; um clarão, e o anel surge no dedo crescendo; a metade do traje se refaz na cor dele (o líquido escorrendo); as duas luzes sobem trançadas em volta do corpo e fecham numa onda dupla no chão.
 - **Cena do treino** (~4 s, igual para todos os aspectos): um clarão desfaz o traje, uma espiral dupla da nova cor sobe pelo corpo enquanto o traje novo escorre na cor da Tropa, e uma onda no chão fecha a cena. Vale também para voltar ao branco.
 - Quem passa pela cena fica parado, sem painéis, com câmera de cinema girando em volta; quem está perto vê os efeitos e ouve os sons.
+
+
+## 0.54.0 — O começo da saga do Necron
+
+**Quando começa:** assim que você termina a Árvore das Emoções (os 7 aspectos no nível 6) com o Anel da Vida no dedo. Uns 6 segundos depois do título "A Vida responde a todas as emoções", a cena começa sozinha. Quem já tinha terminado a Árvore antes desta versão vê a cena ao entrar no mundo com o Anel da Vida.
+
+**A cutscene (~76 s, não dá para pular na primeira vez):**
+1. No espaço, o **Embrião da Vida** brilha e bate como um coração; fios escuros são puxados para dentro dele e a luz se apaga.
+2. Você aparece no espaço, com a Terra lá embaixo. Você estende a mão; o Anel da Vida trinca e se desfaz em **sete anéis** (as sete Tropas) que giram em volta de você... e partem para o espaço.
+3. Só o anel da **sua Tropa** (a do seu primeiro anel) volta para o dedo.
+4. **Ryut** racha, brilha roxo pelas fendas e se parte ao meio. De dentro sai o **Necron**: rosto de caveira com restos de carne, túnica rasgada, uma foice com uma **pérola negra** (a bateria da Morte).
+5. Ele voa pelo espaço até a **Terra** e cai como um cometa negro.
+
+**O que muda no jogo:**
+- O Anel da Vida some. No lugar dele fica o anel da sua Tropa de origem, **com a mesma afinidade** que o Anel da Vida tinha, e a bateria daquela Tropa (se o slot estava vazio).
+- A Árvore das Emoções, os níveis e os **Dois Anéis** continuam (o corpo preparado é para sempre). Se o seu segundo anel era da mesma Tropa do anel que voltou, ele vai para o inventário.
+- O Altar da Vida (Gênese) não responde mais a você: a Vida dorme.
+- Enquanto assiste, você não leva dano. Se sair do jogo no meio, a divisão acontece mesmo assim.
+- Em servidor, cada jogador vê a própria cena.
+
+**Comandos:** `/lantern saga replay` (rever a cena, dá para sair com Esc) · `/lantern saga start` e `/lantern saga reset` (operador, para testes).
