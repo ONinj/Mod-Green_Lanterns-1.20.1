@@ -108,7 +108,7 @@ public class NecronEntity extends Monster implements GeoEntity {
         }
         Player alvo = l.getNearestPlayer(this, 30);
         if (alvo != null && (alvo.isCreative() || alvo.isSpectator())) alvo = null;
-        if (alvo == null || SagaNecron.assistindo(alvo)) return;
+        if (alvo == null || SagaNecron.assistindo(alvo) || Fuga.emFuga(alvo)) return;
         getLookControl().setLookAt(alvo, 30, 30);
         if (--recarga > 0) return;
         double d = distanceTo(alvo);

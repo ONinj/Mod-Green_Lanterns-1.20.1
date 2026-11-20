@@ -289,6 +289,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.necron.SagaNecron.Cinema.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.SagaNecron.Cinema::encode).decoder(com.lanterna.necron.SagaNecron.Cinema::decode)
                 .consumerMainThread(com.lanterna.necron.SagaNecron.Cinema::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.necron.Fuga.Cena.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.necron.Fuga.Cena::encode).decoder(com.lanterna.necron.Fuga.Cena::decode)
+                .consumerMainThread(com.lanterna.necron.Fuga.Cena::handle).add();
         CHANNEL.messageBuilder(com.lanterna.necron.SagaNecron.Mundo.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.SagaNecron.Mundo::encode).decoder(com.lanterna.necron.SagaNecron.Mundo::decode)
                 .consumerMainThread(com.lanterna.necron.SagaNecron.Mundo::handle).add();

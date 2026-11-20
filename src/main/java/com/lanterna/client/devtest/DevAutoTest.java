@@ -3900,6 +3900,52 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.54.3: o Necron derruba o jogador; a fuga com o Lanterna da Tropa; a conversa no planeta; a missão do 2º anel. */
+    private static void sceneFuga() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putString("origem", "green");
+            com.lanterna.necron.SagaNecron.partirRyut(sp.server);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, net.minecraft.world.item.ItemStack.EMPTY));
+        }));
+        waitFor(() -> { var s = mc.getSingleplayerServer(); return s != null && com.lanterna.necron.Cratera.pronta(s); }, 20 * 120);
+        at(5, () -> server(sp -> {
+            com.lanterna.mission.MissionManager.start(sp, "necron_2");
+            var n = com.lanterna.necron.Cratera.lugarDoNecron(com.lanterna.necron.Cratera.centro(sp.server));
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival");
+            sp.teleportTo(sp.serverLevel(), n.getX() + 0.5, n.getY() - 2, n.getZ() - 4.5, 0, 0);
+            sp.setHealth(sp.getMaxHealth());
+        }));
+        waitFor(com.lanterna.client.necron.CenaFuga::ativa, 20 * 60);
+        at(1, () -> { mc.options.hideGui = false; server(sp -> glog("fuga comecou: vida=" + sp.getHealth() + " emFuga=" + com.lanterna.necron.Fuga.emFuga(sp))); });
+        at(20, () -> shot("fuga_caido"));
+        at(35, () -> shot("fuga_escudo"));
+        at(40, () -> shot("fuga_sobe"));
+        at(60, () -> server(sp -> glog("subindo: y=" + (int) sp.getY() + " vida=" + sp.getHealth())));
+        at(80, () -> server(sp -> glog("em casa? dim=" + sp.level().dimension().location() + " pos=" + sp.blockPosition() + " vida=" + sp.getHealth())));
+        at(60, () -> shot("fuga_conversa_1"));
+        at(240, () -> shot("fuga_conversa_2"));
+        waitFor(() -> !com.lanterna.client.necron.CenaFuga.ativa(), 20 * 60);
+        at(40, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("depois: fugiu=" + com.lanterna.necron.Fuga.fugiu(sp) + " necron_2 feita=" + d.completed().contains("necron_2") + " necron_3 ativa=" + d.active().containsKey("necron_3")
+                    + " aliados por perto=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(16)).size());
+            // segundo anel: a missão Duas Luzes
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+        }));
+        at(60, () -> server(sp -> glog("duas luzes: necron_3 feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_3"))));
+        at(20, () -> { glog("FIM fuga"); mc.stop(); });
+    }
+
     /** 0.54.2: a cratera do Necron na Terra (terra morta, Bateria Central da Morte, Necron, servos e a imunidade). */
     private static void sceneCratera() {
         Minecraft mc = Minecraft.getInstance();
@@ -7268,6 +7314,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necron")) sceneNecron();
         else if (ENABLED && SCENE.equals("chamado")) sceneChamado();
         else if (ENABLED && SCENE.equals("cratera")) sceneCratera();
+        else if (ENABLED && SCENE.equals("fuga")) sceneFuga();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

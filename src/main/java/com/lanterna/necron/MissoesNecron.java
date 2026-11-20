@@ -13,6 +13,7 @@ import java.util.List;
  *
  *  necron_1  A Queda do Necron   ir até onde o Necron caiu na Terra (a cratera da Bateria Central da Morte)
  *  necron_2  O Ser da Morte      enfrentar o Necron (ele derruba o portador; a fuga vem numa cena)
+ *  necron_3  Duas Luzes          forjar um segundo anel (de qualquer Tropa) e usar os dois ao mesmo tempo
  */
 public final class MissoesNecron {
     public static final String LINHA = "necron";
@@ -32,6 +33,7 @@ public final class MissoesNecron {
         return switch (id) {
             case "necron_1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:cratera", 1, "earth", chao)), "necron_2");
             case "necron_2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:enfrentou", 1, "earth", chao)), null);
+            case "necron_3" -> m(id, List.of(Objective.of(Type.FONTE, "necron:dois", 1, null, null)), null);
             default -> null;
         };
     }

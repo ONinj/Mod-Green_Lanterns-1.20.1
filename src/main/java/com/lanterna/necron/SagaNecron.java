@@ -280,6 +280,7 @@ public final class SagaNecron {
     /** Zera a saga do jogador (comando de teste). */
     public static void zerar(ServerPlayer p) {
         parar(p);
+        Fuga.zerar(p);
         CompoundTag t = tag(p);
         String origem = t.getString("origem");
         for (String k : t.getAllKeys().toArray(new String[0])) t.remove(k);
@@ -347,6 +348,11 @@ public final class SagaNecron {
 
     /** A cada segundo: chegou à terra morta (missão). */
     private static void missao(ServerPlayer p) {
+        // 0.54.3: usando dois anéis ao mesmo tempo (missão "Duas Luzes")
+        if (Fuga.fugiu(p) && com.lanterna.fonte.FonteDados.chamado(p, "necron:dois") < 1 && Cratera.doisAneis(p)) {
+            com.lanterna.fonte.FonteDados.chamado(p, "necron:dois", 1);
+            p.sendSystemMessage(Component.translatable("necron.lanterna.dois_pronto").withStyle(ChatFormatting.LIGHT_PURPLE));
+        }
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         if (c == null || !Cratera.dentro(p.level(), c, p.getX(), p.getZ(), -20)) return;
         if (com.lanterna.fonte.FonteDados.chamado(p, "necron:cratera") >= 1) return;

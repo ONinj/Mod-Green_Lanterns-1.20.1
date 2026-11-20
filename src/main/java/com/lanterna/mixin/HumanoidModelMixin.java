@@ -27,5 +27,6 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> {
         com.lanterna.client.construct.CastAnim.apply((HumanoidModel<?>) (Object) this, entity,
                 net.minecraft.client.Minecraft.getInstance().getFrameTime());
         com.lanterna.client.necron.CinemaNecron.bracos((HumanoidModel<?>) (Object) this, entity);
+        com.lanterna.client.necron.CenaFuga.bracos((HumanoidModel<?>) (Object) this, entity);
     }
 }

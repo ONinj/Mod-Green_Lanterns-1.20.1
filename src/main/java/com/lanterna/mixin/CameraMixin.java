@@ -50,6 +50,7 @@ public abstract class CameraMixin {
         if (cine == null) cine = com.lanterna.client.mogo.ClienteChamado.camera(entity, partialTick);
         if (cine == null) cine = com.lanterna.client.combate.RitualCliente.camera(entity, partialTick);
         if (cine == null) cine = com.lanterna.client.vida.CenaEmocoes.camera(entity, partialTick);
+        if (cine == null) cine = com.lanterna.client.necron.CenaFuga.camera(entity, partialTick);
         if (cine != null) {
             this.detached = true;
             setRotation((float) cine[3], (float) cine[4]);
