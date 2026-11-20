@@ -4280,6 +4280,41 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM cap5c"); mc.stop(); });
     }
 
+    /** 0.57.3: o anel da Morte não gasta carga (Anel Preto e Portador Negro); um anel comum continua gastando. */
+    private static void sceneMorteCarga() {
+        Minecraft mc = Minecraft.getInstance();
+        palco(mc);
+        String[] casos = {"green", "black", "portador"};
+        for (String caso : casos) {
+            at(30, () -> server(sp -> {
+                var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+                sp.server.getCommands().performPrefixedCommand(src, "lantern ring " + (caso.equals("black") ? "black" : "green"));
+                sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            }));
+            at(20, () -> server(sp -> {
+                if (caso.equals("portador")) com.lanterna.morte.Corrupcao.marcarAnel(sp, 3);
+                var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                com.lanterna.power.RingPowers.setCharge(sp, r, r.maxCharge() / 2);
+            }));
+            at(20, () -> server(sp -> {
+                var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+                int antes = r.charge();
+                for (int k = 0; k < 5; k++) { com.lanterna.construct.Constructs.cast(sp, "punho"); }
+                com.lanterna.power.RingPowers.setCharge(sp, r, r.charge() - 30);
+                glog(caso + ": corps=" + r.corps() + " corrupcao=" + com.lanterna.item.PowerRingItem.getCorrupcao(com.lanterna.power.EquipmentHelper.ring(sp))
+                        + " carga depois de metade=" + antes + " depois de gastar=" + r.charge() + " max=" + r.maxCharge());
+            }));
+        }
+        at(20, () -> server(sp -> {
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+        }));
+        at(20, () -> { glog("FIM mortecarga"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8301,6 +8336,7 @@ public final class DevAutoTest {
         else if (ENABLED && (SCENE.equals("cap89") || SCENE.equals("cap9voo"))) sceneCap89();
         else if (ENABLED && SCENE.equals("tentacao")) sceneTentacao();
         else if (ENABLED && SCENE.equals("cap5c")) sceneCap5c();
+        else if (ENABLED && SCENE.equals("mortecarga")) sceneMorteCarga();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

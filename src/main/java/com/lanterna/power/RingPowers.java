@@ -69,8 +69,9 @@ public final class RingPowers {
 
             int max = maxCharge(player, def);
             int charge = PowerRingItem.getStoredCharge(ring);
-            if (charge < 0 || charge > max) {
-                charge = charge < 0 ? max : max; // -1 = anel novo, vem cheio
+            // 0.57.3: o anel da Morte (Arauto ou Portador Negro) não tem bateria: está sempre cheio
+            if (charge < 0 || charge > max || (daMorte(ring) && charge < max)) {
+                charge = max; // -1 = anel novo, vem cheio
                 PowerRingItem.setStoredCharge(ring, charge);
             }
             int corrup = PowerRingItem.getCorrupcao(ring);
@@ -159,11 +160,20 @@ public final class RingPowers {
     // ===================== Carga =====================
 
     /** Muda a carga gravando no anel do slot. */
+    /**
+     * 0.57.3: um anel da Morte não tem bateria e nunca precisa recarregar: o Anel Preto do Arauto da Morte e o anel do
+     * Portador Negro (o anel da Tropa corrompido, inclusive o de quem aceitou a Morte na saga do Necron).
+     */
+    public static boolean daMorte(ItemStack ring) {
+        return com.lanterna.combate.Supremos.preto(PowerRingItem.getCorps(ring)) || PowerRingItem.getCorrupcao(ring) == 2;
+    }
+
     public static void setCharge(ServerPlayer player, RingData data, int value) {
         // O anel da Vida (branco) não descarrega: fica sempre cheio
         // a sobrecarga do Banho de Luz é gasta antes da carga normal
         if (value < data.charge()) value += com.lanterna.fonte.Fonte.gastarSobrecarga(player, data.charge() - value);
-        int wanted = data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) ? data.maxCharge() : value;
+        int wanted = data.corps().equals(com.lanterna.corps.BuiltinCorps.WHITE.id()) || wornRing(player).map(RingPowers::daMorte).orElse(false)
+                ? data.maxCharge() : value;
         wornRing(player).ifPresent(ring -> {
             int clamped = Math.max(0, Math.min(wanted, data.maxCharge()));
             PowerRingItem.setStoredCharge(ring, clamped);

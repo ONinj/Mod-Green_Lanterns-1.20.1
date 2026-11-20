@@ -1991,3 +1991,7 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 
 - No socorro com moradores cercados (Tropas Laranja e Azul), o resgate às vezes não andava depois do clique. Agora: basta ficar ao lado do morador (ou pairar perto dele com o anel) um instante para a bolha de luz começar, sem precisar clicar; a luz só se solta se você se afastar mais de 6 blocos na horizontal ou 4 na altura; e o resgate anda mesmo se a missão estiver em outro estado.
 
+## 0.57.3 — A Morte não tem bateria
+
+- O Anel Preto do **Arauto da Morte** e o anel do **Portador Negro** (inclusive o de quem aceitou a Morte na saga do Necron) não gastam carga: estão sempre cheios e nunca precisam recarregar, como o Anel Branco. A Morte não tem bateria.
+
