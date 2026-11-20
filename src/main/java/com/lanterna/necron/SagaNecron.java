@@ -269,6 +269,8 @@ public final class SagaNecron {
             if (e != null) f = (f.isEmpty() ? "" : f + ";") + "earth:" + e.getX() + ":" + e.getY() + ":" + e.getZ();
         }
         String esc = Escurece.paraCliente(p);
+        String pur = Purificacao.paraCliente(p.server);
+        if (!pur.isEmpty()) esc = esc.isEmpty() ? pur : esc + ";" + pur;
         if (!esc.isEmpty()) f = (f.isEmpty() ? "" : f + ";") + esc;
         return f;
     }
@@ -309,6 +311,8 @@ public final class SagaNecron {
             com.lanterna.fonte.FonteDados.chamado(p, "necron:nucleo_" + t, 0);
         }
         Escurece.zerar(p);
+        UltimaLuz.zerar(p);
+        Purificacao.zerar(p);
         Treino.zerar(p);
         Aurora.zerar(p);
         Fuga.zerar(p);

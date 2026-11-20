@@ -760,6 +760,94 @@
    ],
    "cor": "7A5AB0",
    "spoiler": true
+  },
+  {
+   "id": "necron",
+   "icone": "lanterna:nucleo_bateria",
+   "titulo": {
+    "pt": "A Saga do Necron",
+    "en": "The Necron Saga"
+   },
+   "resumo": {
+    "pt": "O caminho inteiro, do chamado à purificação.",
+    "en": "The whole path, from the call to the purification."
+   },
+   "paginas": [
+    {
+     "titulo": {
+      "pt": "O chamado e as duas luzes",
+      "en": "The call and the two lights"
+     },
+     "texto": {
+      "pt": "Quando os 7 aspectos da Árvore das Emoções chegam ao nível 6, o Embrião da Vida escurece, o Anel da Vida se divide e o **Necron** cai na Terra. A luz de **um anel só** não fere os servos dele.\n\nForje um **segundo anel** de outra Tropa e coloque-o no **punho** (aba Lanterna). Com os dois:\n**· os servos sentem os golpes**\n**· o laser sai das duas mãos**, um feixe de cada cor\n**· a roda de construtos ganha uma aba** com os construtos do segundo anel (rodinha, setas ou Tab).",
+      "en": "When the 7 aspects of the Tree of Emotions reach level 6, the Embryo of Life darkens, the Ring of Life splits and the **Necron** falls on Earth. The light of **a single ring** can't hurt his servants.\n\nForge a **second ring** of another Corps and wear it on your **wrist** (Lantern tab). With both:\n**· servants feel your blows**\n**· the laser fires from both hands**, one beam of each color\n**· the construct wheel gets a tab** with the second ring's constructs (wheel, arrows or Tab)."
+     },
+     "dica": {
+      "pt": "Durante a guerra contra o Necron, os Lanternas de todas as Tropas fazem trégua e atacam os servos com você.",
+      "en": "During the war against the Necron, Lanterns of every Corps call a truce and fight the servants with you."
+     }
+    },
+    {
+     "titulo": {
+      "pt": "Defender as Tropas",
+      "en": "Defending the Corps"
+     },
+     "texto": {
+      "pt": "**Âncoras:** antes da defesa da sua Tropa, destrua as três âncoras da Morte (derrote os 5 guardas, quebre o núcleo).\n\n**A defesa:** uma fenda abre sobre a Bateria Central; aguente 3 ondas sem deixar os servos sugarem a bateria.\n\n**Os pedidos:** outras Tropas pedem socorro. Antes de cada defesa há uma missão própria: **soltar presos** das jaulas, **caçar os ladrões** de fragmentos da bateria ou **resgatar moradores** cercados numa bolha de luz.",
+      "en": "**Anchors:** before your Corps' defense, destroy the three anchors of Death (defeat the 5 guards, break the core).\n\n**The defense:** a rift opens above the Central Battery; hold 3 waves without letting the servants drain the battery.\n\n**The calls:** other Corps ask for help. Before each defense there's a mission of its own: **free prisoners** from cages, **hunt the thieves** of battery fragments or **rescue residents** surrounded, in a bubble of light."
+     }
+    },
+    {
+     "titulo": {
+      "pt": "As quedas e as ruínas",
+      "en": "The falls and the ruins"
+     },
+     "texto": {
+      "pt": "O Amor, o Índigo e a Esperança **caem** (menos a sua Tropa). A forja continua, mas a terra morre e os servos rondam.\n\nNo planeta caído: **cave os montes de escombros** para soltar 3 Lanternas feridos, derrote o **Carcereiro** (Velkara, Ossuth ou Grenmor) e leve o **Núcleo da Bateria** até a Bateria Central da sua Tropa. Ele fica guardado lá até a purificação.",
+      "en": "Love, Indigo and Hope **fall** (except your own Corps). The forge still works, but the land dies and servants roam.\n\nOn the fallen world: **dig through the rubble mounds** to free 3 wounded Lanterns, defeat the **Jailer** (Velkara, Ossuth or Grenmor) and carry the **Battery Core** to your Corps' Central Battery. It is kept there until the purification."
+     },
+     "itens": [
+      "lanterna:nucleo_bateria",
+      "lanterna:fragmento_bateria"
+     ]
+    },
+    {
+     "titulo": {
+      "pt": "A Terra escurece",
+      "en": "Earth darkens"
+     },
+     "texto": {
+      "pt": "Cada etapa é uma missão, e a cada uma a terra morta cresce:\n\n**1.** Feche as **três fendas** sobre a Terra (6 servos cada).\n**2.** Defenda o **escudo de luz de Aurora** em 3 ondas (se cair, recomeça).\n**3.** Siga o **Pulso da Vida**: fique perto dos canteiros de flores até o anel escutar, e desça o poço até o **Santuário**.\n**4.** Proteja o **Embrião da Vida** dos servos que saem das paredes.",
+      "en": "Each stage is a mission, and with each one the dead land grows:\n\n**1.** Close the **three rifts** over Earth (6 servants each).\n**2.** Defend **Aurora's shield of light** through 3 waves (if it falls, it starts over).\n**3.** Follow the **Pulse of Life**: stay near the flower patches until the ring hears it, then go down the shaft to the **Sanctuary**.\n**4.** Protect the **Embryo of Life** from the servants coming out of the walls."
+     }
+    },
+    {
+     "titulo": {
+      "pt": "A Última Luz",
+      "en": "The Last Light"
+     },
+     "texto": {
+      "pt": "Antes da batalha, **chame as Tropas que resistem**: fique perto da Bateria Central de cada planeta até ela responder. **Três bastam**, mas cada Tropa a mais traz **3 Lanternas** para a luta (e as Tropas caídas cujo núcleo você salvou mandam mais 2).\n\nNa cratera, o Necron luta em **quatro fases**: Amor, Índigo, Esperança e Morte. Quem cai na batalha não morre: os Lanternas puxam você para a borda. Ele só sente golpes de verdade a partir do **nível 200**.",
+      "en": "Before the battle, **call the Corps still standing**: stay near each planet's Central Battery until it answers. **Three are enough**, but every extra Corps brings **3 Lanterns** to the fight (and fallen Corps whose core you saved send 2 more).\n\nAt the crater, the Necron fights in **four phases**: Love, Indigo, Hope and Death. Falling in the battle doesn't kill you: the Lanterns pull you to the rim. He only really feels blows from **level 200** on."
+     }
+    },
+    {
+     "titulo": {
+      "pt": "A Purificação",
+      "en": "The Purification"
+     },
+     "texto": {
+      "pt": "Com o Necron derrotado:\n\n**O Despertar:** volte ao Santuário. O Embrião acorda, voa até o céu da cratera e uma **onda de luz** cura a Terra; a bateria da Morte vira a **Bateria Branca**.\n**Os corrompidos:** nos planetas caídos, derrote os 6 Lanternas corrompidos (eles são purificados, não morrem) e o líder (**Aelira**, **Tovrek** ou **Irmã Calyx**). A Tropa volta e o núcleo guardado reacende a bateria.\n**O Ritual da Terra:** na Bateria Branca, as sete luzes libertam o Embrião.",
+      "en": "With the Necron defeated:\n\n**The Awakening:** return to the Sanctuary. The Embryo wakes, flies to the sky over the crater and a **wave of light** heals the Earth; the Battery of Death becomes the **White Battery**.\n**The corrupted:** on the fallen worlds, defeat the 6 corrupted Lanterns (they are purified, not killed) and the leader (**Aelira**, **Tovrek** or **Sister Calyx**). The Corps returns and the kept core rekindles the battery.\n**The Ritual of Earth:** at the White Battery, the seven lights set the Embryo free."
+     },
+     "dica": {
+      "pt": "Tudo da saga é do mundo: no multiplayer, o que um jogador faz conta para todos.",
+      "en": "Everything in the saga belongs to the world: in multiplayer, what one player does counts for everyone."
+     }
+    }
+   ],
+   "cor": "5A4A7A",
+   "spoiler": true
   }
  ]
 }

@@ -57,12 +57,21 @@ public final class ClientSaga {
         var mc = Minecraft.getInstance();
         if (noPlanetaCaido()) return 0.55f;
         if (cratera == null || mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return 0;
+        // 0.56.9: a luz do Embrião curou a Terra
+        if (fendas.containsKey("purificada")) return 0;
         double dx = mc.player.getX() - cratera.getX(), dz = mc.player.getZ() - cratera.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);
         float perto = Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + com.lanterna.necron.Cratera.CRESCE * estagio + 10 - d) / 40.0), 0, 1);
         // 0.56.0: a Terra Escurece: o céu da Terra inteira vai ficando cinza-roxo a cada etapa (até o Necron cair)
         float ceu = vencido ? 0 : 0.12f * estagio;
-        return Math.max(perto, ceu);
+        // 0.56.9: quando o Embrião acorda e sobe, a névoa se desfaz aos poucos (antes mesmo de a terra acabar de curar)
+        var t = fendas.get("embriaot");
+        float some = 1;
+        if (t != null) {
+            float u = mc.level.getGameTime() - t.getX() - com.lanterna.necron.Purificacao.VOO;
+            some = 1 - Mth.clamp(u / (com.lanterna.necron.Purificacao.CHEGA + 200f - com.lanterna.necron.Purificacao.VOO), 0, 1);
+        }
+        return Math.max(perto, ceu) * some;
     }
 
     /** A etapa da Terra Escurece (0..3) e se o Necron já caiu. */

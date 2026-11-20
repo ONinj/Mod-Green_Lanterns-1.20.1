@@ -4006,6 +4006,120 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM cap5"); mc.stop(); });
     }
 
+    /** 0.56.9: Capítulos 8 e 9 (chamar as Tropas, o Despertar, os corrompidos de Zamaron, o Ritual da Terra). */
+    private static void sceneCap89() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        final com.lanterna.lore.PlanetLore[] VI = {null};
+        for (var x : com.lanterna.lore.PlanetLore.values()) if (x.corps.id().getPath().equals("violet")) VI[0] = x;
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.server.getCommands().performPrefixedCommand(src, "time set day");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            com.lanterna.necron.Purificacao.zerar(sp.server);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            for (String m : new String[]{"necron_6a", "necron_6", "necron_7", "necron_8", "necron_9"}) { d.completed().remove(m); d.active().remove(m); }
+            com.lanterna.mission.MissionManager.start(sp, "necron_6a");
+            glog("6a ativa=" + d.isActive("necron_6a") + " caidas=" + com.lanterna.necron.Queda.caidas(sp.server));
+        }));
+        String[][] chamar = {{"red", "ysmault"}, {"yellow", "korugar"}, {"green", "oa"}, {"orange", "okaara"}};
+        for (int i = 0; i < chamar.length; i++) {
+            String pl = chamar[i][1]; int ii = i;
+            at(20, () -> server(sp -> { var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(pl).dimension()); var h = com.lanterna.lore.PlanetLore.HUB;
+                lv.getChunk(h.getX() >> 4, h.getZ() >> 4);
+                int y = lv.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, h.getX() + 14, h.getZ() + 4);
+                sp.teleportTo(lv, h.getX() + 14.5, y + 1, h.getZ() + 4.5, 90, -20); }));
+            if (i == 0) { at(60, () -> { mc.options.hideGui = false; shot("cap8_chamando"); }); at(70, () -> shot("cap8_chamado")); }
+            else at(140, () -> {});
+            at(10, () -> server(sp -> glog("chamou " + pl + ": " + com.lanterna.necron.UltimaLuz.chamadas(sp) + " 6 ativa=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_6"))));
+        }
+        at(10, () -> server(sp -> {
+            var ex = com.lanterna.necron.UltimaLuz.exercito(sp.server, java.util.List.of(sp));
+            glog("exercito na batalha=" + ex.size() + " " + ex);
+            // a batalha já foi testada (cena final); aqui o Necron cai direto
+            com.lanterna.lore.LoreWorldData.get(sp.server).markSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            d.active().remove("necron_6"); d.completed().add("necron_6");
+            com.lanterna.mission.MissionManager.start(sp, "necron_7");
+            var c = com.lanterna.necron.Escurece.camara(sp.server);
+            glog("7 ativa=" + d.isActive("necron_7") + " camara=" + c + " cratera=" + com.lanterna.necron.Cratera.centro(sp.server));
+            sp.teleportTo(sp.server.overworld(), c.getX() + 4.5, c.getY() - 4, c.getZ() + 0.5, 90, -10);
+        }));
+        at(80, () -> shot("cap9_desperta"));
+        if (SCENE.equals("cap9voo")) {
+            at(170, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var o = sp.server.overworld(); var cm = com.lanterna.necron.Escurece.camara(sp.server);
+                double dx = cm.getX() - cr.getX(), dz = cm.getZ() - cr.getZ(), n = Math.sqrt(dx * dx + dz * dz);
+                float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+                sp.teleportTo(o, cr.getX() - dx / n * 60 + 0.5, cr.getY() + 40, cr.getZ() - dz / n * 60 + 0.5, yaw, -25); }));
+            at(110, () -> shot("cap9_voo"));
+            at(20, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(cr.getX() + 70.5, cr.getY() + 55, cr.getZ() + 0.5, 90, 22); }));
+            at(50, () -> shot("cap9_onda"));
+            at(60, () -> shot("cap9_onda2"));
+            at(20, () -> { glog("FIM cap9voo"); mc.stop(); });
+            return;
+        }
+        // olhando da borda da cratera para o lado de onde o Embrião vem
+        at(170, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var o = sp.server.overworld(); var cm = com.lanterna.necron.Escurece.camara(sp.server);
+            double dx = cm.getX() - cr.getX(), dz = cm.getZ() - cr.getZ(), n = Math.sqrt(dx * dx + dz * dz);
+            float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+            sp.teleportTo(o, cr.getX() - dx / n * 60 + 0.5, cr.getY() + 40, cr.getZ() - dz / n * 60 + 0.5, yaw, -25); }));
+        at(110, () -> shot("cap9_voo"));
+        at(20, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(cr.getX() + 70.5, cr.getY() + 55, cr.getZ() + 0.5, 90, 22); }));
+        at(70, () -> shot("cap9_onda"));
+        for (int k = 0; k < 30; k++) at(60, () -> {});
+        at(10, () -> server(sp -> glog("purificada=" + com.lanterna.necron.Purificacao.purificada(sp.server) + " 7 feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_7")
+                + " 8 ativa=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_8"))));
+        at(10, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var o = sp.server.overworld();
+            sp.teleportTo(o, cr.getX() + 34.5, cr.getY() + 22, cr.getZ() + 0.5, 90, 20); }));
+        at(40, () -> shot("cap9_terra_curada"));
+        // Zamaron: os corrompidos e a líder
+        at(10, () -> server(sp -> {
+            if (!com.lanterna.necron.Queda.caida(sp.server, VI[0])) com.lanterna.necron.Queda.cair(sp.server, VI[0]);
+            var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(VI[0].planet).dimension()); var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(lv, h.getX() + 20.5, 150, h.getZ() + 0.5, 90, 30);
+            // as outras duas Tropas: dadas como restauradas para o teste
+            com.lanterna.lore.LoreWorldData.get(sp.server).markSite(com.lanterna.necron.Purificacao.RESTAURADA + "nok");
+            com.lanterna.lore.LoreWorldData.get(sp.server).markSite(com.lanterna.necron.Purificacao.RESTAURADA + "odym");
+        }));
+        at(300, () -> server(sp -> glog("zamaron pronta=" + com.lanterna.necron.Queda.pronta(sp.server, VI[0]) + " corrompidos=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 250, 150), x -> x.getTags().contains(com.lanterna.necron.Purificacao.CORR)).size())));
+        at(5, () -> server(sp -> { var c = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 250, 150), x -> x.getTags().contains(com.lanterna.necron.Purificacao.CORR)).stream().findFirst().orElse(null);
+            if (c != null) sp.connection.teleport(c.getX() + 6, c.getY() + 2, c.getZ(), 90, 15); }));
+        at(20, () -> shot("cap9_corrompido"));
+        for (int k = 0; k < 4; k++) at(50, () -> server(sp -> {
+            for (var c : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 250, 150), x -> x.getTags().contains(com.lanterna.necron.Purificacao.CORR))) {
+                c.invulnerableTime = 0; c.hurt(sp.damageSources().playerAttack(sp), 100000); }
+        }));
+        at(80, () -> server(sp -> { var c = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 250, 150), x -> x.getTags().contains(com.lanterna.necron.Purificacao.LIDER)).stream().findFirst().orElse(null);
+            glog("lider=" + (c != null));
+            if (c != null) sp.connection.teleport(c.getX() + 7, c.getY() + 2, c.getZ(), 90, 12); }));
+        at(20, () -> shot("cap9_lider"));
+        at(5, () -> server(sp -> {
+            for (var c : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 250, 150), x -> x.getTags().contains(com.lanterna.necron.Purificacao.LIDER))) {
+                c.invulnerableTime = 0; c.hurt(sp.damageSources().playerAttack(sp), 100000); }
+        }));
+        at(60, () -> server(sp -> glog("zamaron caida=" + com.lanterna.necron.Queda.caida(sp.server, VI[0]) + " 8 feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_8")
+                + " 9 ativa=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_9"))));
+        at(40, () -> shot("cap9_restaurada"));
+        // o Ritual
+        at(10, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var o = sp.server.overworld();
+            sp.teleportTo(o, cr.getX() + 0.5, cr.getY() + 2, cr.getZ() + 14.5, 180, -30); }));
+        at(200, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(cr.getX() + 0.5, cr.getY() + 20, cr.getZ() + 48.5, 180, -32); }));
+        at(60, () -> shot("cap9_ritual"));
+        at(120, () -> shot("cap9_partida"));
+        at(300, () -> shot("cap9_parallax"));
+        at(20, () -> server(sp -> glog("fim=" + com.lanterna.necron.Purificacao.fim(sp.server) + " 9 feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_9"))));
+        at(20, () -> { glog("FIM cap89"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8024,6 +8138,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cap6")) sceneCap6();
         else if (ENABLED && SCENE.equals("cap7")) sceneCap7();
         else if (ENABLED && SCENE.equals("ajustes")) sceneAjustes();
+        else if (ENABLED && (SCENE.equals("cap89") || SCENE.equals("cap9voo"))) sceneCap89();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

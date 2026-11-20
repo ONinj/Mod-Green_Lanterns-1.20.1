@@ -76,15 +76,48 @@ public final class RenderFenda {
         var planeta = com.lanterna.lore.PlanetLore.byDimension(mc.level.dimension());
         boolean terra = mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD;
         java.util.List<BlockPos> fs = new java.util.ArrayList<>();
-        BlockPos embriao = null;
+        BlockPos embriao = null, voo = null;
+        long tDesp = -1, tFim = -1;
         for (var en : ClientSaga.fendas.entrySet()) {
             String k = en.getKey();
             if (planeta != null ? k.equals(planeta.planet) : terra && k.startsWith("earth")) fs.add(en.getValue());
             if (terra && k.equals("embriao")) embriao = en.getValue();
+            if (k.equals("embriaovoo")) voo = en.getValue();
+            if (k.equals("embriaot")) tDesp = en.getValue().getX();
+            if (k.equals("embriaofim")) tFim = en.getValue().getX();
         }
         Vec3 cam0 = e.getCamera().getPosition();
-        if (embriao != null && embriao.distToCenterSqr(cam0) < 96 * 96) desenharEmbriao(e, embriao, cam0, mc.level.getGameTime() + e.getPartialTick());
+        float agora = mc.level.getGameTime() + e.getPartialTick();
+        float onda = -1;
+        Vec3 ondaC = null;
+        if (terra && voo != null && tDesp >= 0 && ClientSaga.cratera != null) {
+            onda = embriaoVoando(e, voo, ClientSaga.cratera, cam0, agora, tDesp, tFim);
+            ondaC = Vec3.atBottomCenterOf(ClientSaga.cratera).add(0, 3, 0);
+        } else if (embriao != null && embriao.distToCenterSqr(cam0) < 96 * 96) desenharEmbriao(e, embriao, cam0, agora);
         boolean escudo = CenaFuga.escudoAtivo();
+        if (onda >= 0) {
+            // a onda de luz branca se espalhando a partir da cratera
+            if (!CinemaNecron.texturaPronta) CinemaNecron.criarBrilho();
+            Matrix4f m0 = e.getPoseStack().last().pose();
+            RenderSystem.enableBlend();
+            RenderSystem.enableDepthTest();
+            RenderSystem.depthMask(false);
+            RenderSystem.disableCull();
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem.setShaderTexture(0, CinemaNecron.BRILHO);
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+            BufferBuilder bb = Tesselator.getInstance().getBuilder();
+            bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            float raio = 8 + onda * 2.4f, alfa = 0.85f * (1 - onda / com.lanterna.necron.Purificacao.ONDA);
+            Vec3 c = ondaC.subtract(cam0);
+            disco(bb, m0, c, raio, 0, 1f, 1f, 0.92f, alfa, 0);
+            disco(bb, m0, c.add(0, 6, 0), raio * 0.8f, 0, 0.9f, 1f, 0.85f, alfa * 0.6f, 0);
+            BufferUploader.drawWithShader(bb.end());
+            RenderSystem.enableCull();
+            RenderSystem.depthMask(true);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableBlend();
+        }
         if (fs.isEmpty() && !escudo) return;
         if (!pronto) texturas();
         if (!CinemaNecron.texturaPronta) CinemaNecron.criarBrilho();
@@ -118,6 +151,54 @@ public final class RenderFenda {
         atores.embriao(ps, buf, t, 0.86f, 0.84f, 0.9f, 1f);
         ps.popPose();
         buf.endBatch();
+    }
+
+    private static float suave(float x) { x = Mth.clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+
+    /**
+     * 0.56.9: o Embrião acorda no Santuário (bate mais forte), sai da Terra voando até o céu sobre a cratera e fica lá,
+     * enorme e aceso; no fim do Ritual da Terra ele sobe para o espaço. Devolve há quanto tempo a onda de luz começou
+     * (ou -1 se ela não está passando agora).
+     */
+    private static float embriaoVoando(RenderLevelStageEvent e, BlockPos camara, BlockPos cratera, Vec3 cam, float agora, long tDesp, long tFim) {
+        if (atores == null) atores = new Atores();
+        float u = agora - tDesp;
+        int voo = com.lanterna.necron.Purificacao.VOO, chega = com.lanterna.necron.Purificacao.CHEGA;
+        Vec3 de = new Vec3(camara.getX() + 0.5, camara.getY() - 1.6, camara.getZ() + 0.5);
+        Vec3 ate = new Vec3(cratera.getX() + 0.5, cratera.getY() + com.lanterna.necron.Purificacao.ALTO, cratera.getZ() + 0.5);
+        Vec3 pos;
+        float esc;
+        if (u < voo) {
+            pos = de;
+            esc = 1.2f * (1 + 0.12f * Mth.sin(u * (u < 50 ? 0.3f : 0.6f)));
+        } else {
+            float k = suave((u - voo) / (chega - voo));
+            pos = de.lerp(ate, k).add(0, Mth.sin(k * Mth.PI) * 40, 0);
+            esc = 1.2f + 4.8f * k;
+        }
+        pos = pos.add(0, 0.6 * Mth.sin(agora * 0.04f), 0);
+        float alfa = 1f;
+        if (tFim >= 0) {
+            float v = agora - tFim;
+            if (v > 280) return -1;
+            pos = pos.add(0, v * v * 0.006, 0);
+            alfa = 1 - suave((v - 180) / 100);
+        }
+        if (pos.distanceToSqr(cam) < 700 * 700 && alfa > 0.02f) {
+            var ps = e.getPoseStack();
+            var buf = Minecraft.getInstance().renderBuffers().bufferSource();
+            float bate = 1 + 0.06f * Mth.sin(agora * 0.15f) * Mth.sin(agora * 0.15f);
+            ps.pushPose();
+            ps.translate(pos.x - cam.x, pos.y - cam.y, pos.z - cam.z);
+            ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(agora * 0.35f));
+            ps.scale(esc * bate, esc * bate, esc * bate);
+            float luz = u < voo ? 0.85f + 0.15f * (u / voo) : 1f;
+            atores.embriao(ps, buf, agora, luz * alfa, luz * alfa, Math.min(1, luz * 1.05f) * alfa, 1f + (u > voo ? 1.5f : 0));
+            ps.popPose();
+            buf.endBatch();
+        }
+        float o = u - chega;
+        return o >= 0 && o < com.lanterna.necron.Purificacao.ONDA ? o : -1;
     }
 
     private static void portal(Matrix4f m, Vec3 c, float tempo) {

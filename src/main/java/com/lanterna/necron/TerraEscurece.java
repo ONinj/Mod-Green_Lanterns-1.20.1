@@ -38,7 +38,7 @@ public final class TerraEscurece {
         LanternaMod.LOGGER.info("Lanterna: a Terra escurece (etapa {} de {})", etapa, ETAPAS);
         if (etapa >= ETAPAS) {
             com.lanterna.fonte.FonteDados.chamado(p, "necron:terra", 1);
-            MissionManager.start(p, "necron_6");
+            MissionManager.start(p, "necron_6a");
             p.sendSystemMessage(Component.translatable("necron.lanterna.ultima_luz_chamado").withStyle(ChatFormatting.LIGHT_PURPLE));
         }
     }

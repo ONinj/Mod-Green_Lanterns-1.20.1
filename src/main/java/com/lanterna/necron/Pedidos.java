@@ -157,7 +157,7 @@ public final class Pedidos {
         LoreData d = MissionManager.data(p);
         if (d == null || d.completed().contains("necron_q_" + tropa) || d.isActive("necron_q_" + tropa)) return;
         MissionManager.start(p, "necron_q_" + tropa);
-        p.sendSystemMessage(Component.translatable("necron.lanterna.ruina_chamado", Component.translatable("corps.lanterna." + tropa), planeta(tropa).planetName())
+        p.sendSystemMessage(Component.translatable("necron.lanterna.ruina_chamado", Component.translatable("necron.lanterna.tropa." + tropa), planeta(tropa).planetName())
                 .withStyle(s -> s.withColor(corps(SagaNecron.tag(p).getString("tropa")).color())));
     }
 
@@ -208,7 +208,7 @@ public final class Pedidos {
             if (c.t == DUR_QUEDA / 2) Queda.cair(p.server, planeta(c.tropa));
             if (c.t >= DUR_QUEDA) {
                 CENAS.remove(p.getUUID());
-                p.sendSystemMessage(Component.translatable("necron.lanterna.queda_msg", Component.translatable("corps.lanterna." + c.tropa),
+                p.sendSystemMessage(Component.translatable("necron.lanterna.queda_msg", Component.translatable("necron.lanterna.tropa." + c.tropa),
                         planeta(c.tropa).planetName()).withStyle(ChatFormatting.DARK_PURPLE));
                 avancar(tag(p), p.server.overworld().getGameTime());
                 ruinas(p, c.tropa);

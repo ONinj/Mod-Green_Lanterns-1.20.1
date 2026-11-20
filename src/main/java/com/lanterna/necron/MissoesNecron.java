@@ -52,8 +52,17 @@ public final class MissoesNecron {
             case "necron_5e" -> m(id, List.of(fonte("necron:pulso_1", Escurece.pulso(1)), fonte("necron:pulso_2", Escurece.pulso(2)),
                     fonte("necron:pulso_3", Escurece.pulso(3)), fonte("necron:santuario", Escurece.santuario())), "necron_5f");
             case "necron_5f" -> m(id, List.of(fonte("necron:embriao_salvo", Escurece.santuario())), null);
+            // Capítulo 8: chamar as Tropas que resistem (cada uma a mais traz mais Lanternas)
+            case "necron_6a" -> m(id, List.of(Objective.of(Type.FONTE, "necron:aliados_1", 1, null, null),
+                    Objective.of(Type.FONTE, "necron:aliados_2", 1, null, null), Objective.of(Type.FONTE, "necron:aliados_3", 1, null, null)), "necron_6");
             case "necron_6" -> m(id, List.of(Objective.of(Type.FONTE, "necron:vitoria", 1, "earth", chao)), "necron_7");
-            case "necron_7" -> m(id, List.of(Objective.of(Type.FONTE, "necron:purificou_terra", 1, "earth", chao)), null);
+            // Capítulo 9: A Purificação
+            case "necron_7" -> m(id, List.of(fonte("necron:despertar", Escurece.santuario()),
+                    Objective.of(Type.FONTE, "necron:purificou_terra", 1, "earth", chao)), "necron_8");
+            case "necron_8" -> m(id, List.of(Objective.of(Type.FONTE, "necron:purificado_violet", 1, planetaDe("violet"), com.lanterna.lore.PlanetLore.HUB),
+                    Objective.of(Type.FONTE, "necron:purificado_indigo", 1, planetaDe("indigo"), com.lanterna.lore.PlanetLore.HUB),
+                    Objective.of(Type.FONTE, "necron:purificado_blue", 1, planetaDe("blue"), com.lanterna.lore.PlanetLore.HUB)), "necron_9");
+            case "necron_9" -> m(id, List.of(Objective.of(Type.FONTE, "necron:ritual", 1, "earth", chao)), null);
             default -> {
                 // necron_3b_<tropa> / necron_3c_<tropa>: o treino e o duelo no planeta da Tropa (Capítulo 3)
                 if (id.startsWith("necron_3b_") || id.startsWith("necron_3c_")) {
@@ -129,6 +138,11 @@ public final class MissoesNecron {
     private static BlockPos primeiraFenda() {
         BlockPos c = com.lanterna.terra.TerraSite.centro;
         return c == null ? null : new BlockPos(c.getX() + 170, 0, c.getZ() + 60);
+    }
+
+    private static String planetaDe(String tropa) {
+        for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values()) if (x.corps.id().getPath().equals(tropa)) return x.planet;
+        return null;
     }
 
     private static Objective fonte(String alvo, @Nullable BlockPos pos) {

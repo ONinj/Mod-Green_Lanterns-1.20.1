@@ -368,7 +368,7 @@ public final class Ruinas {
             if (q.distanceToSqr(c) > 120 * 120) continue;
             FonteDados.chamado(q, "necron:guardiao_" + t, 1);
             q.sendSystemMessage(Component.translatable("necron.lanterna.carcereiro_fala_3").withStyle(ChatFormatting.DARK_PURPLE));
-            q.sendSystemMessage(Component.translatable("necron.lanterna.nucleo_caiu", Component.translatable("corps.lanterna." + t)).withStyle(ChatFormatting.GOLD));
+            q.sendSystemMessage(Component.translatable("necron.lanterna.nucleo_caiu", Component.translatable("necron.lanterna.tropa." + t)).withStyle(ChatFormatting.GOLD));
         }
     }
 
@@ -377,7 +377,7 @@ public final class Ruinas {
     public static ItemStack nucleo(String tropa) {
         ItemStack s = new ItemStack(LoreItems.NUCLEO_BATERIA.get());
         s.getOrCreateTag().putString(NUCLEO_TAG, tropa);
-        s.setHoverName(Component.translatable("item.lanterna.nucleo_bateria_de", Component.translatable("corps.lanterna." + tropa))
+        s.setHoverName(Component.translatable("item.lanterna.nucleo_bateria_de", Component.translatable("necron.lanterna.tropa." + tropa))
                 .withStyle(st -> st.withItalic(false).withColor(ChatFormatting.GOLD)));
         return s;
     }
@@ -428,7 +428,7 @@ public final class Ruinas {
             if (t.isEmpty()) continue;
             marcar(p.server, "saga:nucleo:" + t);
             FonteDados.chamado(p, "necron:nucleo_" + t, 1);
-            p.sendSystemMessage(Component.translatable("necron.lanterna.nucleo_guardado", Component.translatable("corps.lanterna." + t)).withStyle(ChatFormatting.GOLD));
+            p.sendSystemMessage(Component.translatable("necron.lanterna.nucleo_guardado", Component.translatable("necron.lanterna.tropa." + t)).withStyle(ChatFormatting.GOLD));
             ServerLevel l = p.serverLevel();
             l.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 60, 0.6, 1.5, 0.6, 0.1);
             l.playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.2f, 1.1f);

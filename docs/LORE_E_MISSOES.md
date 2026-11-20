@@ -1947,3 +1947,17 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - **Laser com dois anéis:** com o segundo anel no punho, os dois braços se erguem e sai um feixe de cada mão: um na cor da Tropa do anel do dedo e outro na cor do segundo anel, juntos até o alvo. O dano do laser fica 25% maior.
 - **Roda de construtos com abas:** com dois anéis, a roda mostra numa aba os construtos do anel do dedo e na outra os emprestados pelo segundo anel (na cor dele). Rodinha do mouse, setas ou Tab trocam de aba.
 
+## 0.56.9 — Saga do Necron, Capítulos 8 e 9: A Última Luz e A Purificação
+
+**Capítulo 8 — A Última Luz: o Chamado** (missão necron_6a, antes da batalha necron_6)
+- Protegido o Embrião, o jogador precisa chamar as Tropas que ainda resistem. Em cada planeta de pé, uma coluna de luz da cor da Tropa mostra a Bateria Central; ficando perto dela uns 5 segundos, a bateria responde: uma coluna de luz grossa, seis Lanternas sobem para o céu rumo à Terra e o líder daquela Tropa fala (Atros dos Vermelhos, Vosk dos Laranjas, Kael dos Amarelos, os Guardiões de Oa, Irmão Lumo dos Azuis, Munk dos Índigo, Seren das Violetas).
+- Três Tropas bastam para a batalha começar, mas cada Tropa a mais traz mais Lanternas: **3 por Tropa chamada** e **2 por Tropa caída cujo núcleo foi guardado** no Capítulo 6 (os sobreviventes das ruínas).
+
+**Capítulo 9 — A Purificação**
+1. **O Despertar** (necron_7): de volta ao Santuário, o coração do Embrião bate cada vez mais forte. Ele acorda, sai da Terra e voa até o céu sobre a cratera, crescendo e brilhando; a névoa se desfaz. Uma **onda de luz branca** se espalha: a Bateria Central da Morte vira a **Bateria Branca** (quartzo, calcita, vidro claro e o núcleo aceso) e a terra morta se cura pedaço por pedaço, do centro para fora: grama, musgo, flores, mudas, a lama volta a ser água, as árvores secas brotam folhas e os espinhos de basalto se desfazem. Os túmulos ficam, como memória.
+2. **Os Irmãos Corrompidos** (necron_8): nos planetas que caíram, seis Lanternas corrompidos rondam a bateria quebrada. Derrotados, não morrem: a luz do Embrião os purifica e eles voam para a bateria. Depois vem o líder corrompido, com barra de chefe e onda de almas: **Aelira** (Zamaron), **Tovrek** (Nok) e **Irmã Calyx** (Odym). Purificado o líder, ele agradece, o núcleo guardado volta para casa, o vidro da bateria se acende na cor da Tropa, a terra em volta se cura e a Tropa deixa de estar caída.
+3. **O Ritual da Terra** (necron_9): na Bateria Branca, um Lanterna de cada uma das sete Tropas desce do céu em roda, e as sete luzes sobem até o Embrião. Ele sobe para o espaço, livre. Título: "A Última Luz venceu".
+- **Epílogo:** as Tropas voltam para casa. Ninguém percebe que a Bateria Central de Korugar tremeu... e, no fundo dela, uma coisa feita de puro medo abre os olhos (gancho para a próxima saga: Parallax).
+- Tudo é do mundo: o Embrião, a Terra curada, os planetas restaurados e o ritual valem para todos os jogadores.
+- O guia (F9) ganhou o capítulo "A Saga do Necron" (com spoiler) e o anel responde perguntas sobre a purificação, o núcleo e o laser com dois anéis.
+

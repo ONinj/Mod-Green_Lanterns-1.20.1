@@ -126,19 +126,26 @@ public final class BatalhaFinal {
         var vida = n.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         if (vida != null) vida.setBaseValue(1000);
         n.setHealth(n.getMaxHealth());
-        // os Lanternas que restam descem do céu
-        List<BuiltinCorps> tropas = new ArrayList<>();
-        for (BuiltinCorps b : BuiltinCorps.values()) {
-            PlanetLore pl = PlanetLore.byCorps(b.id());
-            if (pl == null || b == BuiltinCorps.BLACK || b == BuiltinCorps.WHITE || Queda.caida(s, pl)) continue;
-            tropas.add(b);
+        // os Lanternas que restam descem do céu. 0.56.9: as Tropas chamadas no Capítulo 8 (3 Lanternas cada) e os
+        // sobreviventes das ruínas cujo núcleo foi guardado (2 cada); sem nenhuma chamada (mundos antigos), 15 como antes
+        List<BuiltinCorps> exercito = UltimaLuz.exercito(s, lutando(l, c));
+        if (exercito.isEmpty()) {
+            List<BuiltinCorps> tropas = new ArrayList<>();
+            for (BuiltinCorps b : BuiltinCorps.values()) {
+                PlanetLore pl = PlanetLore.byCorps(b.id());
+                if (pl == null || b == BuiltinCorps.BLACK || b == BuiltinCorps.WHITE || Queda.caida(s, pl)) continue;
+                tropas.add(b);
+            }
+            if (tropas.isEmpty()) tropas.add(BuiltinCorps.GREEN);
+            for (int i = 0; i < ALIADOS; i++) exercito.add(tropas.get(i % tropas.size()));
         }
-        if (tropas.isEmpty()) tropas.add(BuiltinCorps.GREEN);
-        for (int i = 0; i < ALIADOS; i++) {
-            BuiltinCorps b = tropas.get(i % tropas.size());
+        while (exercito.size() > 24) exercito.remove(exercito.size() - 1);
+        int total = exercito.size();
+        for (int i = 0; i < total; i++) {
+            BuiltinCorps b = exercito.get(i);
             LanternaEntity a = LanternaEntity.lanterna(l, b, i < 3);
             if (a == null) continue;
-            double ang = Math.PI * 2 * i / ALIADOS, r = 14 + (i % 3) * 4;
+            double ang = Math.PI * 2 * i / total, r = 14 + (i % 3) * 4;
             double x = quem.getX() + Math.cos(ang) * r, z = quem.getZ() + Math.sin(ang) * r;
             a.moveTo(x, quem.getY() + 28 + (i % 4) * 3, z, (float) Math.toDegrees(ang) + 90, 0);
             a.addTag(ALIADO);
@@ -152,6 +159,7 @@ public final class BatalhaFinal {
             l.addFreshEntity(a);
             aliados.add(a.getUUID());
         }
+        LanternaMod.LOGGER.info("Lanterna: {} Lanternas descem para a batalha final", total);
         for (ServerPlayer p : lutando(l, c)) {
             titulo(p, "necron.lanterna.final_titulo", "necron.lanterna.final_sub", 0xFFFFFF);
             p.sendSystemMessage(Component.translatable("necron.lanterna.final_fala").withStyle(ChatFormatting.GREEN));
