@@ -4006,6 +4006,97 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM cap5"); mc.stop(); });
     }
 
+    /** 0.56.6: Capítulo 6 (as ruínas da Tropa Violeta caída: escombros, Carcereiro, núcleo). */
+    private static void sceneCap6() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        final com.lanterna.lore.PlanetLore[] VI = {null};
+        for (var x : com.lanterna.lore.PlanetLore.values()) if (x.corps.id().getPath().equals("violet")) VI[0] = x;
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            for (int sl = 9; sl < 36; sl++) sp.getInventory().items.set(sl, net.minecraft.world.item.ItemStack.EMPTY);
+            com.lanterna.necron.Ruinas.zerar(sp.server, VI[0]);
+            if (!com.lanterna.necron.Queda.caida(sp.server, VI[0])) com.lanterna.necron.Queda.cair(sp.server, VI[0]);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            d.completed().remove("necron_q_violet"); d.active().remove("necron_q_violet");
+            com.lanterna.mission.MissionManager.start(sp, "necron_q_violet");
+            var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId(VI[0].planet).dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(lv, h.getX() + 0.5, 150, h.getZ() + 0.5, 0, 30);
+            glog("missao ativa=" + d.isActive("necron_q_violet") + " planeta=" + VI[0].planet);
+        }));
+        at(400, () -> server(sp -> glog("pronta=" + com.lanterna.necron.Queda.pronta(sp.server, VI[0]))));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            at(20, () -> server(sp -> { var b = com.lanterna.necron.Ruinas.ponto(ii); sp.connection.teleport(b.getX() + 8.5, 140, b.getZ() + 0.5, 90, 40); }));
+            at(60, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var c = com.lanterna.necron.Ruinas.centro(l, VI[0], ii);
+                var fer = l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, new net.minecraft.world.phys.AABB(c).inflate(5), x -> x.getTags().contains(com.lanterna.necron.Ruinas.CAIDO + ":" + ii));
+                glog("monte " + ii + ": centro=" + c + " ferido=" + fer.size() + (fer.isEmpty() ? "" : " pose=" + fer.get(0).getPose()));
+                sp.connection.teleport(c.getX() + 6.5, c.getY() + 3, c.getZ() + 0.5, 90, 25);
+            }));
+            if (i == 1) at(10, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); shot("cap6_monte"); });
+            at(10, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var c = com.lanterna.necron.Ruinas.centro(l, VI[0], ii);
+                var m = new java.util.ArrayList<>(com.lanterna.necron.Ruinas.monte(c));
+                m.sort((a, b) -> b.getY() - a.getY());
+                for (int k = 0; k < m.size() * 6 / 10; k++) l.setBlock(m.get(k), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+            }));
+            at(25, () -> server(sp -> glog("  60%: servos perto=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(20), com.lanterna.necron.Cratera::servo).size())));
+            if (i == 1) at(1, () -> server(sp -> { var c = com.lanterna.necron.Ruinas.centro(sp.serverLevel(), VI[0], ii); sp.connection.teleport(c.getX() + 0.5, c.getY() + 4.5, c.getZ() + 3.5, 180, 55); }));
+            if (i == 1) at(6, () -> shot("cap6_ferido"));
+            at(10, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var c = com.lanterna.necron.Ruinas.centro(l, VI[0], ii);
+                for (var q : com.lanterna.necron.Ruinas.monte(c)) l.setBlock(q, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+                for (var mb : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(40), com.lanterna.necron.Cratera::servo)) mb.discard();
+            }));
+            if (i == 1) at(25, () -> shot("cap6_solto"));
+            at(30, () -> server(sp -> glog("  livre=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:caido_violet_" + ii))));
+        }
+        at(20, () -> server(sp -> { var h = com.lanterna.lore.PlanetLore.HUB; sp.connection.teleport(h.getX() + 30.5, sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, h.getX() + 30, h.getZ()) + 3, h.getZ() + 0.5, 90, 10); }));
+        at(80, () -> server(sp -> {
+            var cs = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(100, 200, 100), x -> x.getTags().contains(com.lanterna.necron.Ruinas.CARC));
+            glog("carcereiro=" + cs.size() + (cs.isEmpty() ? "" : " vida=" + cs.get(0).getHealth() + "/" + cs.get(0).getMaxHealth()));
+            if (!cs.isEmpty()) { var c = cs.get(0); sp.connection.teleport(c.getX() + 7, c.getY() + 2, c.getZ(), 90, 12); }
+        }));
+        at(20, () -> shot("cap6_carcereiro"));
+        at(10, () -> server(sp -> {
+            for (var c : sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(100, 200, 100), x -> x.getTags().contains(com.lanterna.necron.Ruinas.CARC))) {
+                c.invulnerableTime = 0; c.hurt(sp.damageSources().playerAttack(sp), 300);
+                glog("  depois de 300: vida=" + c.getHealth());
+                c.invulnerableTime = 0; c.hurt(sp.damageSources().playerAttack(sp), 100000);
+            }
+        }));
+        at(30, () -> server(sp -> {
+            glog("guardiao=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:guardiao_violet"));
+            var its = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(100, 200, 100), x -> x.getItem().is(com.lanterna.lore.LoreItems.NUCLEO_BATERIA.get()));
+            glog("nucleos no chao=" + its.size());
+            for (var it : its) { sp.getInventory().add(it.getItem().copy()); it.discard(); }
+            var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(oa, h.getX() + 8.5, oa.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, h.getX() + 8, h.getZ()) + 2, h.getZ() + 0.5, 0, 0);
+        }));
+        at(80, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("nucleo=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:nucleo_violet") + " guardado=" + com.lanterna.necron.Ruinas.nucleoGuardado(sp.server, "violet")
+                    + " missao feita=" + d.completed().contains("necron_q_violet"));
+        }));
+        at(20, () -> { glog("FIM cap6"); mc.stop(); });
+    }
+
     /** 0.56.4: Capítulo 4 (as três âncoras da Morte antes da defesa). */
     private static void sceneCap4() {
         Minecraft mc = Minecraft.getInstance();
@@ -7792,6 +7883,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cap3")) sceneCap3();
         else if (ENABLED && SCENE.equals("cap4")) sceneCap4();
         else if (ENABLED && (SCENE.equals("cap5") || SCENE.equals("cap5b"))) sceneCap5();
+        else if (ENABLED && SCENE.equals("cap6")) sceneCap6();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

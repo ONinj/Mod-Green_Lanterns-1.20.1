@@ -42,6 +42,11 @@ public final class Queda {
         return LoreWorldData.get(s).siteBuilt(CAIDA + p.planet);
     }
 
+    /** A contaminação daquela Tropa caída terminou (a terra morta e a bateria quebrada estão prontas). */
+    public static boolean pronta(MinecraftServer s, PlanetLore p) {
+        return LoreWorldData.get(s).siteBuilt(PRONTA + p.planet);
+    }
+
     /** As Tropas caídas (para o cliente). */
     public static List<String> caidas(MinecraftServer s) {
         List<String> l = new ArrayList<>();

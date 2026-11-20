@@ -60,6 +60,19 @@ public final class MissoesNecron {
                             Objective.of(Type.DUMMY, "alvo", 4, pl.planet, h)), "necron_3c_" + id.substring(10));
                     yield m(id, List.of(Objective.of(Type.FONTE, "necron:duelo", 1, pl.planet, h)), "necron_3d");
                 }
+                // necron_q_<tropa>: as ruínas de uma Tropa caída (Capítulo 6)
+                if (id.startsWith("necron_q_")) {
+                    String t = id.substring(9);
+                    com.lanterna.lore.PlanetLore pl = null;
+                    for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values()) if (x.corps.id().getPath().equals(t)) pl = x;
+                    if (pl == null) yield null;
+                    String pn = pl.planet;
+                    yield m(id, List.of(Objective.of(Type.FONTE, "necron:caido_" + t + "_1", 1, pn, Ruinas.ponto(1)),
+                            Objective.of(Type.FONTE, "necron:caido_" + t + "_2", 1, pn, Ruinas.ponto(2)),
+                            Objective.of(Type.FONTE, "necron:caido_" + t + "_3", 1, pn, Ruinas.ponto(3)),
+                            Objective.of(Type.FONTE, "necron:guardiao_" + t, 1, pn, com.lanterna.lore.PlanetLore.HUB),
+                            Objective.of(Type.FONTE, "necron:nucleo_" + t, 1, null, null)), null);
+                }
                 // necron_s_<tropa>: o socorro no planeta de outra Tropa antes da defesa (Capítulo 5)
                 if (id.startsWith("necron_s_")) {
                     String t = id.substring(9);

@@ -1920,3 +1920,12 @@ Quando uma Tropa pede ajuda (Capítulo dos Pedidos), o jogador não vai direto p
 - **Sobreviventes** (Laranja, Azul): três moradores (**Orin, Tessa e Kalu**) ficaram presos em postos fora da cidade, cercados por 3 servos cada. Clique no morador e fique ao lado dele uns 3 segundos, aguentando o ataque do cerco (se se afastar, a luz se solta): uma **bolha de luz** o leva voando até a cidade e o cerco daquele posto se desfaz.
 - Os locais do socorro são do mundo (contam para todos). Terminado o socorro, começa **A Defesa da Tropa** daquele planeta.
 
+## 0.56.6 — Saga do Necron, Capítulo 6: As Ruínas
+
+Depois da cena de cada queda (Tropas do Amor/Violeta, Índigo e Esperança/Azul), um Lanterna da sua Tropa avisa que ainda há gente viva no planeta caído. Missão "As Ruínas da Tropa X":
+- **Os escombros:** três Lanternas feridos estão soterrados em montes de pedra negra em volta da bateria quebrada, deitados numa cova. Um feixe da cor da Tropa mostra cada monte. Cave: a barra mostra quanto já saiu. Na metade, **servos saem das sombras**. Tirada quase toda a pedra, o ferido se levanta, agradece e voa para o que sobrou da bateria. O terceiro conta que o Carcereiro arrancou o núcleo da bateria.
+- **O Carcereiro:** soltos os três, um Lanterna Negro maior aparece junto à bateria quebrada, com barra de chefe: **Velkara** (Zamaron), **Ossuth** (Índigo) ou **Grenmor** (Azul). A cada poucos segundos as almas giram em volta dele (aviso) e explodem numa **onda** que fere e empurra quem estiver perto; de tempos em tempos chama servos. Na metade da vida fica mais rápido e a onda vem mais seguido. Só se fere com as duas luzes.
+- **O núcleo:** derrotado, o Carcereiro deixa cair o **Núcleo da Bateria** daquela Tropa. Leve-o até a Bateria Central da **sua** Tropa: ele fica guardado lá (vai servir na purificação). Se o núcleo se perder antes, ele volta a aparecer junto à bateria caída.
+- Tudo é do mundo: montes, Carcereiro e núcleo guardado contam para todos os jogadores.
+- A saga só segue para a Terra (as Tropas que resistem se reúnem) depois das ruínas de todas as Tropas que caíram.
+

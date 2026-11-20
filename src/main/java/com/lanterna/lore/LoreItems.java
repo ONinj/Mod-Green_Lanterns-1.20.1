@@ -63,6 +63,9 @@ public final class LoreItems {
     /** 0.56.5: pedaço de uma Bateria Central roubado pelos Ladrões da Luz (saga do Necron, Capítulo 5). */
     public static final RegistryObject<Item> FRAGMENTO_BATERIA = reg("fragmento_bateria",
             () -> new LoreItem(new Item.Properties().rarity(Rarity.RARE).stacksTo(16), true));
+    /** 0.56.6: o núcleo da Bateria Central de uma Tropa caída, guardado pelo Carcereiro (saga do Necron, Capítulo 6). */
+    public static final RegistryObject<Item> NUCLEO_BATERIA = reg("nucleo_bateria",
+            () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant(), true));
     public static final java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> INSIGNIAS = insignias();
 
     private static java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> insignias() {

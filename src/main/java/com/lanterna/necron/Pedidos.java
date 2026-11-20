@@ -112,6 +112,15 @@ public final class Pedidos {
         int i = t.getInt("etapa");
         if (i >= seq.size()) {
             if (!t.getBoolean("fim")) {
+                // Capítulo 6: antes de seguir, as ruínas de cada Tropa que caiu
+                boolean falta = false;
+                for (String c2 : CONDENADAS) {
+                    if (c2.equals(propria) || !Queda.caida(p.server, planeta(c2))) continue;
+                    if (d.completed().contains("necron_q_" + c2)) continue;
+                    falta = true;
+                    if (!d.isActive("necron_q_" + c2)) MissionManager.start(p, "necron_q_" + c2);
+                }
+                if (falta) return;
                 t.putBoolean("fim", true);
                 p.sendSystemMessage(Component.translatable("necron.lanterna.pedidos_fim").withStyle(ChatFormatting.DARK_PURPLE));
                 MissionManager.start(p, "necron_5");
@@ -128,6 +137,7 @@ public final class Pedidos {
         if (passo.startsWith("Q:")) {
             if (Queda.caida(p.server, planeta(tropa))) {
                 p.sendSystemMessage(Component.translatable("necron.lanterna.queda_ja", planeta(tropa).planetName()).withStyle(ChatFormatting.DARK_GRAY));
+                ruinas(p, tropa);
                 avancar(t, agora);
             } else comecarQueda(p, tropa);
             return;
@@ -140,6 +150,15 @@ public final class Pedidos {
             return;
         }
         comecarPedido(p, tropa);
+    }
+
+    /** Capítulo 6: a Tropa caiu; a própria Tropa pede para buscar os feridos e o núcleo da bateria. */
+    private static void ruinas(ServerPlayer p, String tropa) {
+        LoreData d = MissionManager.data(p);
+        if (d == null || d.completed().contains("necron_q_" + tropa) || d.isActive("necron_q_" + tropa)) return;
+        MissionManager.start(p, "necron_q_" + tropa);
+        p.sendSystemMessage(Component.translatable("necron.lanterna.ruina_chamado", Component.translatable("corps.lanterna." + tropa), planeta(tropa).planetName())
+                .withStyle(s -> s.withColor(corps(SagaNecron.tag(p).getString("tropa")).color())));
     }
 
     private static void avancar(CompoundTag t, long agora) {
@@ -192,6 +211,7 @@ public final class Pedidos {
                 p.sendSystemMessage(Component.translatable("necron.lanterna.queda_msg", Component.translatable("corps.lanterna." + c.tropa),
                         planeta(c.tropa).planetName()).withStyle(ChatFormatting.DARK_PURPLE));
                 avancar(tag(p), p.server.overworld().getGameTime());
+                ruinas(p, c.tropa);
             }
             return;
         }

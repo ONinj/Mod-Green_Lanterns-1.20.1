@@ -93,3 +93,5 @@ Missões da linha `necron` em `necron/MissoesNecron.java` (necron_1 a necron_7; 
 Valores escolhidos pelo Claude que o dono ainda pode mudar: custos dos fragmentos, +1,5% por nível, lado esquerdo do traje para o 2º anel, CONTROL fora do 2º anel; na saga do Necron: falas e legendas, ordem dos pedidos e das quedas, 3 ondas por defesa, vida do Necron (1000) e a curva de dano por nível, corte para o nível 90, mínimos de 6%/15%.
 
 Não testado com dois jogadores reais: Purificar do Anel Branco; cenas vistas por outro player.
+
+**Andamento:** 0.56.4 Cap. 4 (`necron/Ancoras.java`) · 0.56.5 Cap. 5 socorro (`necron/Socorro.java`, missões `necron_s_<tropa>`) · 0.56.6 Cap. 6 ruínas das Tropas caídas (`necron/Ruinas.java`, missões `necron_q_<tropa>`, item `nucleo_bateria`; os núcleos guardados ficam na marca do mundo `saga:nucleo:<tropa>`, para usar na purificação). Próximo: Cap. 7 A Terra Escurece.

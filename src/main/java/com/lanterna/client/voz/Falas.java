@@ -135,15 +135,19 @@ public final class Falas {
     // ===================== falas que chegam pelo chat =====================
 
     /** Quem fala em cada mensagem de chat da saga (o resto do chat não fala). */
-    private static final Map<String, String> CHAT = Map.of(
-            "necron.lanterna.rastro_", "anel",
-            "necron.lanterna.defesa_fala", "lanterna",
-            "necron.lanterna.final_fala", "lanterna",
-            "necron.lanterna.vitoria_fala", "lanterna",
-            "necron.lanterna.mestre_", "lanterna",
-            "necron.lanterna.ancora_fala", "lanterna",
-            "necron.lanterna.socorro_", "lanterna",
-            "necron.lanterna.preso_fala", "lanterna");
+    private static final Map<String, String> CHAT = Map.ofEntries(
+            Map.entry("necron.lanterna.rastro_", "anel"),
+            Map.entry("necron.lanterna.defesa_fala", "lanterna"),
+            Map.entry("necron.lanterna.final_fala", "lanterna"),
+            Map.entry("necron.lanterna.vitoria_fala", "lanterna"),
+            Map.entry("necron.lanterna.mestre_", "lanterna"),
+            Map.entry("necron.lanterna.ancora_fala", "lanterna"),
+            Map.entry("necron.lanterna.socorro_", "lanterna"),
+            Map.entry("necron.lanterna.preso_fala", "lanterna"),
+            Map.entry("necron.lanterna.ruina_chamado", "lanterna"),
+            Map.entry("necron.lanterna.caido_fala", "lanterna"),
+            Map.entry("necron.lanterna.carcereiro_fala", "necron"),
+            Map.entry("necron.lanterna.nucleo_guardado", "lanterna"));
 
     @SubscribeEvent
     public static void chat(ClientChatReceivedEvent e) {
