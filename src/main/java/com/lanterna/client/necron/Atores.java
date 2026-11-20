@@ -49,7 +49,7 @@ final class Atores {
     static float vento;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {
-        embriao.cor(r, g, b, 1f, brilho * 0.35f);
+        embriao.cor(r, g, b, 1f, brilho * 0.3f);
         embriao.desenhar(ps, buf, t, LightTexture.FULL_BRIGHT);
     }
 
@@ -123,8 +123,12 @@ final class Atores {
                                    float pt, int light, int overlay) {
                     if (brilho <= 0.01f) return;
                     RenderType olhos = RenderType.eyes(brilhoTex);
+                    // o reRender centraliza de novo (como um bloco): desfaz para o brilho cair em cima do modelo
+                    ps.pushPose();
+                    ps.translate(-0.5, -0.51, -0.5);
                     getRenderer().reRender(model, ps, bufs, an, olhos, bufs.getBuffer(olhos), pt, LightTexture.FULL_BRIGHT, overlay,
                             brilho, brilho, brilho, 1f);
+                    ps.popPose();
                 }
             });
         }

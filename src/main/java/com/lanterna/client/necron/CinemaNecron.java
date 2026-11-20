@@ -490,11 +490,11 @@ public final class CinemaNecron extends Screen {
             float vida = 1 - faixa(t, 100, 215);
             float bate = 1 + 0.05f * batida(t);
             ps.pushPose();
-            ps.translate(0, 0.7 + 0.06 * Mth.sin(t * 0.05f), 0);
+            ps.translate(0, 0.05 + 0.06 * Mth.sin(t * 0.05f), 0);
             ps.mulPose(Axis.YP.rotationDegrees(t * 0.35f + 200));
             ps.mulPose(Axis.ZP.rotationDegrees(8 * Mth.sin(t * 0.02f)));
             ps.scale(1.3f * bate, 1.3f * bate, 1.3f * bate);
-            atores.embriao(ps, buf, t, esc, esc, Math.min(1, esc * 1.05f), vida);
+            atores.embriao(ps, buf, t, esc * 0.86f, esc * 0.84f, Math.min(1, esc * 0.9f), vida);
             ps.popPose();
         } else if (t < B1 && mc.player != null) {
             jogador(ps, buf, t);
@@ -931,11 +931,11 @@ public final class CinemaNecron extends Screen {
             float a = Math.min(faixa(t, D1 + 50, D1 + 70), 1 - faixa(t, E1 - 22, E1 - 6));
             int alfa = Math.max(4, (int) (a * 255));
             g.pose().pushPose();
-            g.pose().translate(width / 2f, height * 0.62f, 0);
+            g.pose().translate(width / 2f, height * 0.7f, 0);
             g.pose().scale(4f, 4f, 1f);
             g.drawCenteredString(font, Component.translatable("necron.lanterna.nome"), 0, 0, (alfa << 24) | 0xD9C8FF);
             g.pose().popPose();
-            g.drawCenteredString(font, Component.translatable("necron.lanterna.nome_sub"), width / 2, (int) (height * 0.62f) + 40, (alfa << 24) | 0x9A8AAA);
+            g.drawCenteredString(font, Component.translatable("necron.lanterna.nome_sub"), width / 2, (int) (height * 0.7f) + 40, (alfa << 24) | 0x9A8AAA);
         }
         // fim
         if (t > G1 - 10) {

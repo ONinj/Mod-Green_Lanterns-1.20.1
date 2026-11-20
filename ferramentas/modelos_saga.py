@@ -278,7 +278,7 @@ def g_perola(face, x, y, w, h, X, Y):
     cx, cy = (w - 1) / 2.0, (h - 1) / 2.0
     dist = math.hypot((x - cx) / max(1, w / 2), (y - cy) / max(1, h / 2))
     k = max(0.0, 1 - dist)
-    return rgba((int(150 * k + 40), int(90 * k + 10), int(220 * k + 40)))
+    return rgba((int(130 * k + 30), int(25 * k + 5), int(190 * k + 45)))
 
 
 def necron():
