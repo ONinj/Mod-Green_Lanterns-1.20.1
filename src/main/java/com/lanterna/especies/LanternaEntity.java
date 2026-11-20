@@ -347,6 +347,9 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         // fazem trégua entre si e com os jogadores (a não ser com quem os provocar)
         boolean servoEu = com.lanterna.necron.Cratera.servo(this);
         if (servoEu && com.lanterna.necron.Cratera.servo(e)) return false;
+        // 0.57.0: quem aceitou a Morte serve o Necron: os servos o deixam em paz, as Tropas o atacam
+        if (e instanceof Player pc && com.lanterna.necron.Tentacao.corrompido(pc) && !pc.isCreative() && !pc.isSpectator())
+            return !servoEu && papel() == Especie.Papel.LANTERNA && !isPirata() && tropa() != BuiltinCorps.BLACK;
         if (!servoEu && com.lanterna.necron.Cratera.servo(e)) return papel() == Especie.Papel.LANTERNA && !isPirata() && tropa() != BuiltinCorps.BLACK;
         boolean tregua = !servoEu && !isPirata() && tropa() != BuiltinCorps.BLACK && emGuerraComONecron();
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);

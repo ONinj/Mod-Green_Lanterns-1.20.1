@@ -69,6 +69,10 @@ public final class LoreEntities {
     public static final RegistryObject<EntityType<com.lanterna.necron.NecronEntity>> NECRON = ModEntities.ENTITIES.register("necron",
             () -> EntityType.Builder.of(com.lanterna.necron.NecronEntity::new, MobCategory.MONSTER).sized(1.2f, 3.2f).fireImmune()
                     .clientTrackingRange(16).build(LanternaMod.id("necron").toString()));
+    /** 0.57.0: o Espectro (o próprio jogador com o Anel da Morte), na linha da Tentação. */
+    public static final RegistryObject<EntityType<com.lanterna.necron.EspectroEntity>> ESPECTRO = ModEntities.ENTITIES.register("espectro",
+            () -> EntityType.Builder.of(com.lanterna.necron.EspectroEntity::new, MobCategory.MONSTER).sized(0.6f, 1.8f).fireImmune()
+                    .clientTrackingRange(10).build(LanternaMod.id("espectro").toString()));
     public static final RegistryObject<EntityType<Bosses.Morrow>> MORROW = boss("morrow", Bosses.Morrow::new, 4.5f, 2.6f, false);
     public static final RegistryObject<EntityType<Bosses.Penitente>> PENITENTE = boss("penitente", Bosses.Penitente::new, 2.2f, 3.9f, false);
     public static final RegistryObject<EntityType<Bosses.Nyrielle>> NYRIELLE = boss("nyrielle", Bosses.Nyrielle::new, 2.2f, 3.6f, false);
@@ -166,6 +170,7 @@ public final class LoreEntities {
             event.put(VIGIA_PARTIDO.get(), LoreBoss.attributes(300, 10, 0.28).build());
             event.put(MORROW.get(), LoreBoss.attributes(400, 12, 0.30).build());
             event.put(NECRON.get(), com.lanterna.necron.NecronEntity.atributos().build());
+            event.put(ESPECTRO.get(), com.lanterna.necron.EspectroEntity.atributos().build());
             event.put(PENITENTE.get(), LoreBoss.attributes(380, 12, 0.24).build());
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());

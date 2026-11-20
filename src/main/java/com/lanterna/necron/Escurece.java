@@ -139,6 +139,7 @@ public final class Escurece {
         BlockPos c = camara(p.server);
         if (c != null && !feito(p.server, "saga:embriao_partiu"))
             sb.append(sb.length() == 0 ? "" : ";").append("embriao:").append(c.getX()).append(":").append(c.getY()).append(":").append(c.getZ());
+        if (feito(p.server, LinhaCorrompida.PRESO)) sb.append(sb.length() == 0 ? "" : ";").append("embriaopreso:0:0:0");
         return sb.toString();
     }
 
@@ -449,14 +450,7 @@ public final class Escurece {
         if (b == null) return;
         double dx = p.getX() - b.getX(), dz = p.getZ() - b.getZ();
         if (dx * dx + dz * dz > 140 * 140) return;
-        if (!feito(s, "saga:santuario")) {
-            int topo = chao(l, b.getX(), b.getZ());
-            int cy = Math.max(l.getMinBuildHeight() + 12, topo - FUNDO);
-            cavar(l, new BlockPos(b.getX(), cy, b.getZ()), topo);
-            marcar(s, "saga:santuario");
-            marcar(s, "saga:santuario:y" + cy);
-            for (ServerPlayer q : s.getPlayerList().getPlayers()) SagaNecron.mandarMundo(q);
-        }
+        construirSantuario(l);
         BlockPos c = camara(s);
         if (c == null) return;
         // a entrada brilha (todos os pulsos ouvidos)
@@ -471,6 +465,19 @@ public final class Escurece {
             p.sendSystemMessage(Component.translatable("necron.lanterna.santuario_achou").withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
             l.playSound(null, c, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 2f, 0.7f);
         }
+    }
+
+    /** Cava o Santuário, se ainda não existe (a linha corrompida também pode chegar até ele). */
+    public static void construirSantuario(ServerLevel l) {
+        MinecraftServer s = l.getServer();
+        BlockPos b = santuario();
+        if (b == null || feito(s, "saga:santuario")) return;
+        int topo = chao(l, b.getX(), b.getZ());
+        int cy = Math.max(l.getMinBuildHeight() + 12, topo - FUNDO);
+        cavar(l, new BlockPos(b.getX(), cy, b.getZ()), topo);
+        marcar(s, "saga:santuario");
+        marcar(s, "saga:santuario:y" + cy);
+        for (ServerPlayer q : s.getPlayerList().getPlayers()) SagaNecron.mandarMundo(q);
     }
 
     /** A câmara (uma bolha de 8 de raio, musgo, raízes, líquen brilhante) e o poço até a superfície. */

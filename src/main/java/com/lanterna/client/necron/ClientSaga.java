@@ -59,6 +59,9 @@ public final class ClientSaga {
         if (cratera == null || mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return 0;
         // 0.56.9: a luz do Embrião curou a Terra
         if (fendas.containsKey("purificada")) return 0;
+        // 0.57.0: a Noite Eterna (o Necron venceu): a Terra inteira fica escura
+        if (fendas.containsKey("noite")) return Math.max(0.6f, Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + com.lanterna.necron.Cratera.CRESCE * 3 + 10
+                - Math.sqrt(Math.pow(mc.player.getX() - cratera.getX(), 2) + Math.pow(mc.player.getZ() - cratera.getZ(), 2))) / 40.0), 0, 1));
         double dx = mc.player.getX() - cratera.getX(), dz = mc.player.getZ() - cratera.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);
         float perto = Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + com.lanterna.necron.Cratera.CRESCE * estagio + 10 - d) / 40.0), 0, 1);

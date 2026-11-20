@@ -270,6 +270,8 @@ public final class SagaNecron {
         }
         String esc = Escurece.paraCliente(p);
         String pur = Purificacao.paraCliente(p.server);
+        String noite = LinhaCorrompida.paraCliente(p.server);
+        if (!noite.isEmpty()) pur = pur.isEmpty() ? noite : pur + ";" + noite;
         if (!pur.isEmpty()) esc = esc.isEmpty() ? pur : esc + ";" + pur;
         if (!esc.isEmpty()) f = (f.isEmpty() ? "" : f + ";") + esc;
         return f;
@@ -312,6 +314,8 @@ public final class SagaNecron {
         }
         Escurece.zerar(p);
         UltimaLuz.zerar(p);
+        Tentacao.zerar(p);
+        LinhaCorrompida.zerar(p);
         Purificacao.zerar(p);
         Treino.zerar(p);
         Aurora.zerar(p);

@@ -129,6 +129,12 @@ public final class ComandosTeste {
                             com.lanterna.necron.SagaNecron.zerar(eu(c));
                             return ok(c, "saga_zerada");
                         }))
+                        .then(op("tempt").executes(c -> {
+                            ServerPlayer p = eu(c);
+                            if (!com.lanterna.necron.SagaNecron.dividido(p)) return erro(c, "saga_ainda_nao");
+                            com.lanterna.necron.Tentacao.forcar(p);
+                            return 1;
+                        }))
                         .then(op("impact").executes(c -> {
                             ServerPlayer p = eu(c);
                             var cc = com.lanterna.necron.Cratera.centro(p.server);

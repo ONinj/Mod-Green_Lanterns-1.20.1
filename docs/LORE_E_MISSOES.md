@@ -1961,3 +1961,18 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - Tudo é do mundo: o Embrião, a Terra curada, os planetas restaurados e o ritual valem para todos os jogadores.
 - O guia (F9) ganhou o capítulo "A Saga do Necron" (com spoiler) e o anel responde perguntas sobre a purificação, o núcleo e o laser com dois anéis.
 
+## 0.57.0 — Saga do Necron, o segundo final: A Tentação e a linha corrompida
+
+**A Tentação** (onde as duas linhas se separam)
+- Durante a guerra (do Anel da Vida dividido até a derrota do Necron), quem morre para a Morte (o Necron, os servos dele, um Lanterna Negro, um jogador com anel negro ou o próprio Espectro) tem **35%** de chance de ouvir a voz dela. Na batalha final ninguém morre, mas quem cai tem **20%**. Ao renascer (ou na hora, na batalha), a tela escurece e a Morte pergunta, com as palavras dela; não dá para fechar sem responder.
+- **"Não. Eu luto."**: a Morte prende os dois anéis (o do dedo e o do punho) onde o jogador caiu; se ele caiu fora da Terra, na borda da cratera (sem anel não se volta ao espaço). Uma **coluna roxa** e o diário mostram o lugar (missão "A Própria Sombra"). Ele precisa ir embora e voltar: ao pegar os anéis, o **Espectro** se levanta: o próprio jogador (a mesma skin, larga ou fina) com o traje negro da Morte e o **Anel da Morte** na mão, almas saindo do corpo, golpes fortes de perto e o **laser negro** de longe. Só o dono fere o próprio Espectro; a vida dele cresce com o nível do jogador. Se o jogador se afasta, o Espectro volta para a sombra e reaparece quando ele voltar. Vencido, a Morte não tenta aquela alma de novo por **3 mortes**.
+- **"Sim. Eu aceito a Morte."**: o anel vira de **Portador Negro** (traje e luz pretos), as missões da linha do herói acabam para ele e começa a **linha corrompida**.
+
+**A linha corrompida** (o Necron vence)
+1. **O Juramento da Morte**: diante do Necron, na cratera. Ele fala três vezes e o jogador vira o **Arauto do Necron**. Os servos não o atacam mais; os Lanternas das Tropas, sim (a trégua não vale para ele).
+2. **Apagar as Luzes**: em três Tropas que ainda resistem, ficar junto à Bateria Central por 30 segundos enquanto a luz dela escorre até o anel negro, com os **Defensores** da Tropa chegando de dois em dois. Cada bateria apagada **derruba aquela Tropa** para o mundo todo.
+3. **O Coração da Vida**: no Santuário (a oeste de Aurora; uma coluna escura mostra o poço), os **oito últimos guardiões** do Embrião ("Você era um de nós!"). Vencidos, ficar junto ao Embrião até envolvê-lo na escuridão: o coração dele bate uma última vez e para; ele fica apagado, quase só a silhueta.
+4. **A Noite Eterna**: diante do Necron com o Embrião apagado. Ele bebe a luz da Vida: uma **onda escura** sai da cratera, a terra morta chega ao máximo, **todas as Tropas caem** e a Terra fica escura para sempre. Título "O Necron venceu". Epílogo: escondidos, poucos Lanternas ainda guardam uma faísca e juram trazer o Arauto de volta, queira ele ou não (gancho para a próxima saga, em que o jogador será purificado sem escolha).
+- Depois da Noite Eterna, a batalha final da linha do herói não começa mais (o Necron venceu para o mundo todo).
+- Comando de teste: **/lantern saga tempt** (força a pergunta).
+

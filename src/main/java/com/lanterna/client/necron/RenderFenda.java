@@ -86,6 +86,8 @@ public final class RenderFenda {
             if (k.equals("embriaot")) tDesp = en.getValue().getX();
             if (k.equals("embriaofim")) tFim = en.getValue().getX();
         }
+        boolean preso = ClientSaga.fendas.containsKey("embriaopreso");
+        BlockPos noite = ClientSaga.fendas.get("noite");
         Vec3 cam0 = e.getCamera().getPosition();
         float agora = mc.level.getGameTime() + e.getPartialTick();
         float onda = -1;
@@ -93,7 +95,32 @@ public final class RenderFenda {
         if (terra && voo != null && tDesp >= 0 && ClientSaga.cratera != null) {
             onda = embriaoVoando(e, voo, ClientSaga.cratera, cam0, agora, tDesp, tFim);
             ondaC = Vec3.atBottomCenterOf(ClientSaga.cratera).add(0, 3, 0);
-        } else if (embriao != null && embriao.distToCenterSqr(cam0) < 96 * 96) desenharEmbriao(e, embriao, cam0, agora);
+        } else if (embriao != null && embriao.distToCenterSqr(cam0) < 96 * 96) desenharEmbriao(e, embriao, cam0, agora, preso);
+        // 0.57.0: a Noite Eterna (linha corrompida): uma onda escura saindo da cratera
+        if (terra && noite != null && ClientSaga.cratera != null) {
+            float u = agora - noite.getX();
+            if (u >= 0 && u < 260) {
+                if (!CinemaNecron.texturaPronta) CinemaNecron.criarBrilho();
+                Matrix4f m0 = e.getPoseStack().last().pose();
+                RenderSystem.enableBlend();
+                RenderSystem.enableDepthTest();
+                RenderSystem.depthMask(false);
+                RenderSystem.disableCull();
+                RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+                RenderSystem.setShaderTexture(0, CinemaNecron.BRILHO);
+                RenderSystem.defaultBlendFunc();
+                BufferBuilder bb = Tesselator.getInstance().getBuilder();
+                bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+                Vec3 c = Vec3.atBottomCenterOf(ClientSaga.cratera).add(0, 3, 0).subtract(cam0);
+                float raio = 8 + u * 2.6f, alfa = 0.9f * (1 - u / 260f);
+                disco(bb, m0, c, raio, 0, 0.12f, 0.02f, 0.2f, alfa, 0);
+                disco(bb, m0, c.add(0, 8, 0), raio * 0.85f, 0, 0.2f, 0.05f, 0.3f, alfa * 0.7f, 0);
+                BufferUploader.drawWithShader(bb.end());
+                RenderSystem.enableCull();
+                RenderSystem.depthMask(true);
+                RenderSystem.disableBlend();
+            }
+        }
         boolean escudo = CenaFuga.escudoAtivo();
         if (onda >= 0) {
             // a onda de luz branca se espalhando a partir da cratera
@@ -139,7 +166,7 @@ public final class RenderFenda {
     private static Atores atores;
 
     /** 0.56.7: o Embrião da Vida dormindo no Santuário, girando devagar e batendo como um coração. */
-    private static void desenharEmbriao(RenderLevelStageEvent e, BlockPos b, Vec3 cam, float t) {
+    private static void desenharEmbriao(RenderLevelStageEvent e, BlockPos b, Vec3 cam, float t, boolean preso) {
         if (atores == null) atores = new Atores();
         var ps = e.getPoseStack();
         var buf = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -148,7 +175,9 @@ public final class RenderFenda {
         ps.translate(b.getX() + 0.5 - cam.x, b.getY() - 1.6 + 0.15 * Mth.sin(t * 0.05f) - cam.y, b.getZ() + 0.5 - cam.z);
         ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(t * 0.35f));
         ps.scale(1.2f * bate, 1.2f * bate, 1.2f * bate);
-        atores.embriao(ps, buf, t, 0.86f, 0.84f, 0.9f, 1f);
+        // preso pela Morte (linha corrompida): apagado, quase só a silhueta
+        if (preso) atores.embriao(ps, buf, t * 0.3f, 0.16f, 0.1f, 0.22f, 0.05f);
+        else atores.embriao(ps, buf, t, 0.86f, 0.84f, 0.9f, 1f);
         ps.popPose();
         buf.endBatch();
     }

@@ -84,7 +84,7 @@ public final class BatalhaFinal {
         if (c == null) return;
         ServerLevel l = s.overworld();
         if (!ativa) {
-            if (s.getTickCount() % 20 == 3 && !derrotado(s)) tentarComecar(s, l, c);
+            if (s.getTickCount() % 20 == 3 && !derrotado(s) && !LinhaCorrompida.venceu(s)) tentarComecar(s, l, c);
             return;
         }
         passo(s, l, c);
@@ -388,6 +388,7 @@ public final class BatalhaFinal {
         BlockPos c = Cratera.centro(p.server);
         if (c == null || p.blockPosition().distSqr(c) > 80 * 80) return;
         e.setCanceled(true);
+        BlockPos ondeCaiu = p.blockPosition();
         p.setHealth(p.getMaxHealth() * 0.6f);
         p.removeAllEffects();
         Vec3 fora = p.position().subtract(Vec3.atCenterOf(c)).multiply(1, 0, 1);
@@ -398,6 +399,7 @@ public final class BatalhaFinal {
         p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1));
         p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 1));
         p.displayClientMessage(Component.translatable("necron.lanterna.final_resgate").withStyle(ChatFormatting.GREEN), false);
+        Tentacao.caiuNaBatalha(p, ondeCaiu);
     }
 
     // ===================== fim =====================

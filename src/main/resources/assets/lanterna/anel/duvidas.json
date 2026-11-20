@@ -983,6 +983,37 @@
   "en": "After the Necron: return to the Sanctuary (west of Aurora, at the bottom of the shaft) and watch the Embryo wake; it flies to the sky over the crater and its light heals the Earth (the Battery of Death becomes the White Battery). On the fallen worlds, defeat the 6 corrupted Lanterns (they are purified, not killed) and the corrupted leader; the Corps returns and the core you kept in Chapter 6 rekindles their battery. Finally, the Ritual of Earth at the White Battery. The core comes from the Jailer, who appears after you dig out the 3 rubble mounds on the fallen world."
  },
  {
+  "id": "tentacao",
+  "chaves": [
+   "tentacao",
+   "me corromper",
+   "aceitar a morte",
+   "recusar a morte",
+   "espectro",
+   "minha sombra",
+   "meus aneis sumiram",
+   "perdi os aneis",
+   "linha corrompida",
+   "necron venceu",
+   "noite eterna",
+   "apagar as luzes",
+   "juramento da morte",
+   "temptation",
+   "corrupt myself",
+   "accept death",
+   "refuse death",
+   "specter",
+   "my shadow",
+   "lost my rings",
+   "rings gone",
+   "corrupted line",
+   "necron won",
+   "eternal night"
+  ],
+  "pt": "Na guerra contra o Necron, morrer para a Morte às vezes traz uma pergunta. Recusando, os seus anéis ficam presos onde você caiu (ou na borda da cratera, se você caiu fora da Terra; uma coluna roxa mostra o lugar): afaste-se, volte, pegue-os e derrote o seu Espectro (só você o fere). Aceitando, o anel fica negro e começa a linha corrompida: jurar diante do Necron, apagar três Baterias Centrais, prender o Embrião e a Noite Eterna, em que o Necron vence e todas as Tropas caem (para o mundo todo).",
+  "en": "In the war against the Necron, dying to Death sometimes brings a question. If you refuse, your rings are left trapped where you fell (or at the crater's rim, if you fell outside Earth; a purple column marks the spot): walk away, come back, take them and defeat your Specter (only you can hurt it). If you accept, your ring turns black and the corrupted line begins: swear before the Necron, put out three Central Batteries, trap the Embryo and the Eternal Night, when the Necron wins and every Corps falls (for the whole world)."
+ },
+ {
   "id": "dois_aneis_laser",
   "chaves": [
    "laser com dois aneis",

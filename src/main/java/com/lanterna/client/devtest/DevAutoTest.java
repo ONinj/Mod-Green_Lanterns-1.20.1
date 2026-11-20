@@ -4120,6 +4120,112 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM cap89"); mc.stop(); });
     }
 
+    /** 0.57.0: a Tentação (recusar e enfrentar o Espectro; aceitar e seguir a linha corrompida até a Noite Eterna). */
+    private static void sceneTentacao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        java.util.function.Consumer<String> matar = tag -> server(sp -> {
+            for (var m : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 150, 150), x -> x.getTags().contains(tag))) {
+                m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 100000); }
+        });
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.server.getCommands().performPrefixedCommand(src, "time set day");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            com.lanterna.necron.LinhaCorrompida.zerar(sp.server);
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            var dd = com.lanterna.mission.MissionManager.data(sp);
+            for (String m : new String[]{"necron_espectro", "necron_c1", "necron_c2", "necron_c3", "necron_c4"}) { dd.completed().remove(m); dd.active().remove(m); }
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            var cr = com.lanterna.necron.Cratera.centro(sp.server);
+            sp.teleportTo(sp.server.overworld(), cr.getX() + 120.5, sp.server.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cr.getX() + 120, cr.getZ()) + 1, cr.getZ() + 0.5, 90, 0);
+            com.lanterna.necron.Tentacao.forcar(sp);
+        }));
+        at(90, () -> { mc.options.hideGui = false; shot("tent_pergunta"); });
+        at(5, () -> { if (com.lanterna.client.necron.TentacaoScreen.ultima != null) com.lanterna.client.necron.TentacaoScreen.ultima.responder(false); });
+        at(20, () -> server(sp -> {
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            glog("NAO: anel=" + com.lanterna.power.EquipmentHelper.ring(sp).isEmpty() + "(vazio) segundo=" + r.segundoSlot().getStackInSlot(0).isEmpty()
+                    + " presos=" + com.lanterna.necron.SagaNecron.tag(sp).getList("aneis_presos", 10).size() + " lugar=" + com.lanterna.necron.Tentacao.lugar(sp)
+                    + " missao=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_espectro"));
+            sp.connection.teleport(sp.getX() + 40, sp.getY() + 10, sp.getZ(), 90, 10);
+        }));
+        at(40, () -> server(sp -> { var b = com.lanterna.necron.Tentacao.lugar(sp); var l = sp.serverLevel();
+            int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX() + 2, b.getZ());
+            sp.connection.teleport(b.getX() + 2.5, y + 0.1, b.getZ() + 0.5, 90, 0); }));
+        at(40, () -> server(sp -> {
+            var esp = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.EspectroEntity.class, sp.getBoundingBox().inflate(40));
+            glog("devolvidos: anel=" + !com.lanterna.power.EquipmentHelper.ring(sp).isEmpty() + " espectros=" + esp.size() + (esp.isEmpty() ? "" : " vida=" + esp.get(0).getMaxHealth()));
+            if (!esp.isEmpty()) { var e = esp.get(0); e.setNoAi(true); e.moveTo(sp.getX() - 4, sp.getY(), sp.getZ(), -90, 0); e.setYHeadRot(-90); e.yBodyRot = -90; sp.connection.teleport(sp.getX(), sp.getY(), sp.getZ(), 90, 5); }
+            sp.getAbilities().flying = false; sp.onUpdateAbilities();
+        }));
+        at(20, () -> shot("tent_espectro"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(10, () -> shot("tent_espectro_lado"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(5, () -> server(sp -> {
+            for (var e : sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.EspectroEntity.class, sp.getBoundingBox().inflate(40))) {
+                e.hurt(sp.serverLevel().damageSources().generic(), 5); glog("  outro dano (deve ignorar): vida=" + e.getHealth());
+                e.invulnerableTime = 0; e.hurt(sp.damageSources().playerAttack(sp), 100000); }
+        }));
+        at(20, () -> server(sp -> glog("espectro vencido=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_espectro")
+                + " imune=" + com.lanterna.necron.SagaNecron.tag(sp).getInt("tentacao_imune"))));
+        // SIM: a linha corrompida
+        at(10, () -> server(sp -> { com.lanterna.necron.SagaNecron.tag(sp).putInt("tentacao_imune", 0); com.lanterna.necron.Tentacao.forcar(sp); }));
+        at(80, () -> { if (com.lanterna.client.necron.TentacaoScreen.ultima != null) com.lanterna.client.necron.TentacaoScreen.ultima.responder(true); });
+        at(30, () -> server(sp -> {
+            var anel = com.lanterna.power.EquipmentHelper.ring(sp);
+            glog("SIM: corrompido=" + com.lanterna.necron.Tentacao.corrompido(sp) + " anel corrupcao=" + com.lanterna.item.PowerRingItem.getCorrupcao(anel)
+                    + " c1=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_c1"));
+            var cr = com.lanterna.necron.Cratera.centro(sp.server); var n = com.lanterna.necron.Cratera.lugarDoNecron(cr);
+            sp.connection.teleport(n.getX() + 0.5, n.getY(), n.getZ() - 8.5, 0, 0);
+        }));
+        at(40, () -> shot("tent_juramento"));
+        at(240, () -> server(sp -> { var d = com.lanterna.mission.MissionManager.data(sp); glog("c1 feita=" + d.completed().contains("necron_c1") + " c2=" + d.isActive("necron_c2")); }));
+        at(10, () -> server(sp -> { var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("ysmault").dimension()); var h = com.lanterna.lore.PlanetLore.HUB;
+            com.lanterna.necron.Queda.zerar(sp.server, com.lanterna.lore.PlanetLore.byPlanet("ysmault"));
+            lv.getChunk(h.getX() >> 4, h.getZ() >> 4);
+            int y = lv.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, h.getX() + 14, h.getZ() + 4);
+            sp.teleportTo(lv, h.getX() + 14.5, y + 1, h.getZ() + 4.5, 90, -20); }));
+        at(300, () -> { shot("tent_apagando"); server(sp -> glog("defensores=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(50), x -> x.getTags().contains(com.lanterna.necron.LinhaCorrompida.DEFENSOR)).size())); });
+        at(340, () -> server(sp -> {
+            glog("ysmault caida=" + com.lanterna.necron.Queda.caida(sp.server, com.lanterna.lore.PlanetLore.byPlanet("ysmault")) + " apagou1=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:apagou_1"));
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:apagou_2", 1); com.lanterna.fonte.FonteDados.chamado(sp, "necron:apagou_3", 1);
+        }));
+        at(30, () -> server(sp -> {
+            glog("c3=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_c3"));
+            var c = com.lanterna.necron.Escurece.camara(sp.server);
+            sp.teleportTo(sp.server.overworld(), c.getX() + 5.5, c.getY() - 4, c.getZ() + 0.5, 90, 0);
+        }));
+        at(60, () -> { shot("tent_guardioes"); server(sp -> glog("guardioes=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), x -> x.getTags().contains(com.lanterna.necron.LinhaCorrompida.GUARDIAO)).size())); });
+        at(5, () -> matar.accept(com.lanterna.necron.LinhaCorrompida.GUARDIAO));
+        at(40, () -> server(sp -> { glog("guardioes vencidos=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:guardioes")); var c = com.lanterna.necron.Escurece.camara(sp.server); sp.connection.teleport(c.getX() + 3.5, c.getY() - 4, c.getZ() + 0.5, 90, -10); }));
+        at(260, () -> { shot("tent_embriao_preso"); server(sp -> glog("preso=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:embriao_preso") + " c4=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_c4"))); });
+        at(10, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var n = com.lanterna.necron.Cratera.lugarDoNecron(cr);
+            sp.connection.teleport(n.getX() + 0.5, n.getY() + 30, n.getZ() - 60.5, 0, 25); }));
+        at(10, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); var n = com.lanterna.necron.Cratera.lugarDoNecron(cr);
+            sp.connection.teleport(n.getX() + 0.5, n.getY(), n.getZ() - 12.5, 0, 0); }));
+        at(250, () -> server(sp -> { var cr = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(cr.getX() + 70.5, cr.getY() + 55, cr.getZ() + 0.5, 90, 22); }));
+        at(30, () -> shot("tent_noite"));
+        at(400, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            int caidas = com.lanterna.necron.Queda.caidas(sp.server).size();
+            glog("venceu=" + com.lanterna.necron.LinhaCorrompida.venceu(sp.server) + " c4 feita=" + d.completed().contains("necron_c4") + " tropas caidas=" + caidas);
+        }));
+        at(20, () -> shot("tent_depois"));
+        at(10, () -> server(sp -> { com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0)); com.lanterna.necron.Tentacao.zerar(sp); }));
+        at(20, () -> { glog("FIM tentacao"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8139,6 +8245,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cap7")) sceneCap7();
         else if (ENABLED && SCENE.equals("ajustes")) sceneAjustes();
         else if (ENABLED && (SCENE.equals("cap89") || SCENE.equals("cap9voo"))) sceneCap89();
+        else if (ENABLED && SCENE.equals("tentacao")) sceneTentacao();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

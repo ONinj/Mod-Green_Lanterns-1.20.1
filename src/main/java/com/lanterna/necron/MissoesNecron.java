@@ -56,6 +56,13 @@ public final class MissoesNecron {
             case "necron_6a" -> m(id, List.of(Objective.of(Type.FONTE, "necron:aliados_1", 1, null, null),
                     Objective.of(Type.FONTE, "necron:aliados_2", 1, null, null), Objective.of(Type.FONTE, "necron:aliados_3", 1, null, null)), "necron_6");
             case "necron_6" -> m(id, List.of(Objective.of(Type.FONTE, "necron:vitoria", 1, "earth", chao)), "necron_7");
+            // 0.57.0: a Tentação e a linha corrompida (o Necron vence)
+            case "necron_espectro" -> m(id, List.of(Objective.of(Type.FONTE, "necron:espectro", 1, "earth", null)), null);
+            case "necron_c1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:juramento", 1, "earth", chao)), "necron_c2");
+            case "necron_c2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:apagou_1", 1, null, null),
+                    Objective.of(Type.FONTE, "necron:apagou_2", 1, null, null), Objective.of(Type.FONTE, "necron:apagou_3", 1, null, null)), "necron_c3");
+            case "necron_c3" -> m(id, List.of(fonte("necron:guardioes", Escurece.santuario()), fonte("necron:embriao_preso", Escurece.santuario())), "necron_c4");
+            case "necron_c4" -> m(id, List.of(Objective.of(Type.FONTE, "necron:noite", 1, "earth", chao)), null);
             // Capítulo 9: A Purificação
             case "necron_7" -> m(id, List.of(fonte("necron:despertar", Escurece.santuario()),
                     Objective.of(Type.FONTE, "necron:purificou_terra", 1, "earth", chao)), "necron_8");
