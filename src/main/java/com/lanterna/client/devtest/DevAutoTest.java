@@ -3900,6 +3900,77 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.0: a Terra Escurece (uma etapa) e a batalha final contra o Necron (quatro fases e a vitória). */
+    private static void sceneFinal() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.necron.BatalhaFinal.zerar(sp.server);
+            com.lanterna.necron.Cratera.zerarEstagio(sp.server);
+            com.lanterna.necron.SagaNecron.partirRyut(sp.server);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            d.completed().remove("necron_5"); d.completed().remove("necron_6"); d.completed().remove("necron_7");
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:vitoria", 0);
+            com.lanterna.mission.MissionManager.start(sp, "necron_5");
+        }));
+        waitFor(() -> { var s = mc.getSingleplayerServer(); return s != null && com.lanterna.necron.Cratera.pronta(s); }, 20 * 120);
+        // uma etapa da Terra Escurece
+        at(10, () -> server(sp -> { com.lanterna.necron.TerraEscurece.avancar(sp, 1); glog("estagio=" + com.lanterna.necron.Cratera.estagio(sp.server) + " raio=" + com.lanterna.necron.Cratera.raioAtual); }));
+        waitFor(() -> { var s = mc.getSingleplayerServer(); return s != null && com.lanterna.necron.Cratera.pronta(s); }, 20 * 120);
+        at(5, () -> server(sp -> {
+            glog("terra morta cresceu: pronta=" + com.lanterna.necron.Cratera.pronta(sp.server));
+            var c = com.lanterna.necron.Cratera.centro(sp.server);
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode creative");
+            sp.teleportTo(sp.serverLevel(), c.getX() + 0.5, c.getY() + 90, c.getZ() + 200.5, 180, 25);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+        }));
+        at(160, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(40, () -> shot("terra_escurece"));
+        // a batalha final
+        at(5, () -> server(sp -> {
+            for (int e = 2; e <= 3; e++) { com.lanterna.necron.Cratera.crescer(sp.server, e); }
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:terra", 1);
+            com.lanterna.mission.MissionManager.start(sp, "necron_6");
+            var n = com.lanterna.necron.Cratera.lugarDoNecron(com.lanterna.necron.Cratera.centro(sp.server));
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival");
+            sp.teleportTo(sp.serverLevel(), n.getX() + 0.5, n.getY() - 1, n.getZ() - 14.5, 0, -5);
+        }));
+        waitFor(com.lanterna.necron.BatalhaFinal::ativa, 20 * 30);
+        at(1, () -> { mc.options.hideGui = false; glog("batalha ativa=" + com.lanterna.necron.BatalhaFinal.ativa()); });
+        at(50, () -> { shot("final_aliados"); server(sp -> glog("aliados=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(60), x -> x.getTags().contains(com.lanterna.necron.BatalhaFinal.ALIADO)).size())); });
+        for (int f = 1; f <= 4; f++) {
+            int ff = f;
+            at(90, () -> { shot("final_fase" + ff); server(sp -> {
+                var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(60)).stream().findFirst().orElse(null);
+                if (n == null) { glog("sem necron"); return; }
+                glog("fase " + ff + ": necron vida=" + (int) n.getHealth() + "/" + (int) n.getMaxHealth() + " jogador vida=" + sp.getHealth());
+                sp.setHealth(sp.getMaxHealth());
+                n.invulnerableTime = 0;
+                if (ff < 4) n.hurt(sp.damageSources().playerAttack(sp), 160);
+            }); });
+            at(70, () -> {});
+        }
+        at(20, () -> server(sp -> {
+            var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(60)).stream().findFirst().orElse(null);
+            if (n != null) { n.invulnerableTime = 0; n.hurt(sp.damageSources().playerAttack(sp), 1000); }
+        }));
+        at(40, () -> { shot("final_vitoria"); server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("vitoria: derrotado=" + com.lanterna.necron.BatalhaFinal.derrotado(sp.server) + " ativa=" + com.lanterna.necron.BatalhaFinal.ativa()
+                    + " necron_6 feita=" + d.completed().contains("necron_6") + " necron_7 ativa=" + d.active().containsKey("necron_7"));
+        }); });
+        at(20, () -> { glog("FIM final"); mc.stop(); });
+    }
+
     /** 0.55.1: uma Tropa caída (Zamaron) vista de perto. */
     private static void sceneQueda() {
         Minecraft mc = Minecraft.getInstance();
@@ -7446,6 +7517,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("defesa")) sceneDefesa();
         else if (ENABLED && SCENE.equals("pedidos")) scenePedidos();
         else if (ENABLED && SCENE.equals("queda")) sceneQueda();
+        else if (ENABLED && SCENE.equals("final")) sceneFinal();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

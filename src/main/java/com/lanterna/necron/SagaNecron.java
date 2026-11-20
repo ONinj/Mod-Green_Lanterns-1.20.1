@@ -259,7 +259,7 @@ public final class SagaNecron {
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         MissoesNecron.centro = c;
         ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server), c != null, c == null ? 0 : c.getX(), c == null ? 0 : c.getY(), c == null ? 0 : c.getZ(),
-                String.join(",", Queda.caidas(p.server)), Defesa.fendasTexto(p.server)));
+                String.join(",", Queda.caidas(p.server)), Defesa.fendasTexto(p.server), Cratera.estagio(p.server), BatalhaFinal.derrotado(p.server)));
     }
 
     /** Começa a cena agora (comando / testes). revendo = só assistir de novo, sem mexer no anel. */
@@ -400,13 +400,13 @@ public final class SagaNecron {
     // ===================== rede =====================
 
     /** Servidor → cliente: o estado da saga no mundo (Ryut partida). */
-    public record Mundo(boolean ryutPartida, boolean cratera, int x, int y, int z, String caidas, String fendas) {
+    public record Mundo(boolean ryutPartida, boolean cratera, int x, int y, int z, String caidas, String fendas, int estagio, boolean vencido) {
         public static void encode(Mundo m, FriendlyByteBuf b) {
             b.writeBoolean(m.ryutPartida); b.writeBoolean(m.cratera); b.writeInt(m.x); b.writeInt(m.y); b.writeInt(m.z); b.writeUtf(m.caidas, 256);
-            b.writeUtf(m.fendas, 1024);
+            b.writeUtf(m.fendas, 1024); b.writeVarInt(m.estagio); b.writeBoolean(m.vencido);
         }
         public static Mundo decode(FriendlyByteBuf b) {
-            return new Mundo(b.readBoolean(), b.readBoolean(), b.readInt(), b.readInt(), b.readInt(), b.readUtf(256), b.readUtf(1024));
+            return new Mundo(b.readBoolean(), b.readBoolean(), b.readInt(), b.readInt(), b.readInt(), b.readUtf(256), b.readUtf(1024), b.readVarInt(), b.readBoolean());
         }
         public static void handle(Mundo m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,

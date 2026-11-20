@@ -29,6 +29,8 @@ public final class ClientSaga {
         ryutPartida = m.ryutPartida();
         cratera = m.cratera() ? new net.minecraft.core.BlockPos(m.x(), m.y(), m.z()) : null;
         com.lanterna.necron.MissoesNecron.centro = cratera;
+        estagio = m.estagio();
+        vencido = m.vencido();
         caidas.clear();
         for (String s : m.caidas().split(",")) if (!s.isEmpty()) caidas.add(s);
         fendas.clear();
@@ -57,8 +59,15 @@ public final class ClientSaga {
         if (cratera == null || mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return 0;
         double dx = mc.player.getX() - cratera.getX(), dz = mc.player.getZ() - cratera.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);
-        return Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + 10 - d) / 40.0), 0, 1);
+        float perto = Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + com.lanterna.necron.Cratera.CRESCE * estagio + 10 - d) / 40.0), 0, 1);
+        // 0.56.0: a Terra Escurece: o céu da Terra inteira vai ficando cinza-roxo a cada etapa (até o Necron cair)
+        float ceu = vencido ? 0 : 0.12f * estagio;
+        return Math.max(perto, ceu);
     }
+
+    /** A etapa da Terra Escurece (0..3) e se o Necron já caiu. */
+    public static int estagio;
+    public static boolean vencido;
 
     /** Cinza caindo, almas subindo e a névoa cinza-roxa na terra morta. */
     @SubscribeEvent

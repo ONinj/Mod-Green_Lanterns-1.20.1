@@ -76,7 +76,24 @@ public class NecronEntity extends Monster implements GeoEntity {
 
     @Override
     public boolean isInvulnerableTo(DamageSource s) {
+        if (BatalhaFinal.ativa()) return false;   // 0.56.0: na batalha final ele sangra
         return !s.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY);
+    }
+
+    public ServerBossEvent barra() { return barra; }
+
+    /** Onde ele flutua durante a batalha (muda quando ele some e reaparece). */
+    @Nullable private Vec3 posBatalha;
+
+    public void saltarPara(Vec3 p) {
+        posBatalha = new Vec3(p.x, p.y + 0.5, p.z);
+        teleportTo(posBatalha.x, posBatalha.y, posBatalha.z);
+    }
+
+    @Override
+    public void die(DamageSource s) {
+        super.die(s);
+        if (level() instanceof ServerLevel l) BatalhaFinal.vitoria(l, this);
     }
 
     @Override public boolean isPushable() { return false; }
@@ -94,6 +111,24 @@ public class NecronEntity extends Monster implements GeoEntity {
             if (random.nextInt(6) == 0) level().addParticle(ParticleTypes.SOUL, getRandomX(1.0), getY() + random.nextDouble() * 2.5, getRandomZ(1.0), 0, 0.03, 0);
             return;
         }
+        // 0.56.0: a batalha final cuida dos ataques; ele flutua onde a batalha mandou
+        var armadura = getAttribute(Attributes.ARMOR);
+        if (armadura != null) armadura.setBaseValue(BatalhaFinal.ativa() ? 6 : 30);
+        if (BatalhaFinal.ativa()) {
+            Vec3 alvo = (posBatalha != null ? posBatalha : casa != null ? Vec3.atBottomCenterOf(casa) : position()).add(0, 0.25 * Math.sin(tickCount * 0.07), 0);
+            setPos(position().lerp(alvo, 0.25));
+            setDeltaMovement(Vec3.ZERO);
+            barra.setProgress(getHealth() / getMaxHealth());
+            for (ServerPlayer p : l.players()) {
+                boolean perto = p.distanceToSqr(this) < 70 * 70 && !p.isSpectator();
+                if (perto && !barra.getPlayers().contains(p)) barra.addPlayer(p);
+                if (!perto && barra.getPlayers().contains(p)) barra.removePlayer(p);
+            }
+            Player olha = l.getNearestPlayer(this, 40);
+            if (olha != null) getLookControl().setLookAt(olha, 30, 30);
+            return;
+        }
+        posBatalha = null;
         // fica no lugar dele, flutuando
         if (casa != null) {
             Vec3 alvo = Vec3.atBottomCenterOf(casa).add(0, 0.25 * Math.sin(tickCount * 0.05), 0);

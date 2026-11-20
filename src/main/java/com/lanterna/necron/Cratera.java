@@ -114,15 +114,56 @@ public final class Cratera {
         FILA.clear();
     }
 
+    // ===================== 0.56.0: a terra morta cresce (A Terra Escurece) =====================
+
+    private static final String ESTAGIO = "saga:terra:";
+    /** Quanto a terra morta cresce a cada etapa (blocos de raio). */
+    public static final int CRESCE = 70;
+    private static int estagioCache = -1;
+
+    /** A etapa da Terra Escurece (0 = só a cratera; até 3). */
+    public static int estagio(MinecraftServer s) {
+        if (estagioCache >= 0) return estagioCache;
+        int e = 0;
+        for (String id : LoreWorldData.get(s).sites()) if (id.startsWith(ESTAGIO)) e = Math.max(e, Integer.parseInt(id.substring(ESTAGIO.length())));
+        estagioCache = e;
+        raioAtual = RAIO + CRESCE * e;
+        return e;
+    }
+
+    /** O raio da terra morta agora (cresce com as etapas). */
+    public static int raioAtual = RAIO;
+
+    /** Avança uma etapa: a terra morta cresce (gerada aos poucos, como antes). */
+    public static void crescer(MinecraftServer s, int novo) {
+        LoreWorldData.get(s).markSite(ESTAGIO + novo);
+        estagioCache = novo;
+        raioAtual = RAIO + CRESCE * novo;
+        filaMontada = false;
+        FILA.clear();
+    }
+
+    public static void zerarEstagio(MinecraftServer s) {
+        LoreWorldData w = LoreWorldData.get(s);
+        for (String id : w.sites()) if (id.startsWith(ESTAGIO) || id.startsWith(PRONTO + ":") || id.startsWith(CHUNK + "e")) w.resetSite(id);
+        estagioCache = 0;
+        raioAtual = RAIO;
+    }
+
+    private static String prontoKey(MinecraftServer s) {
+        int e = estagio(s);
+        return e == 0 ? PRONTO : PRONTO + ":" + e;
+    }
+
     public static boolean pronta(MinecraftServer s) {
-        return LoreWorldData.get(s).siteBuilt(PRONTO);
+        return LoreWorldData.get(s).siteBuilt(prontoKey(s));
     }
 
     /** Dentro da terra morta? */
     public static boolean dentro(Level l, BlockPos c, double x, double z, double margem) {
         if (c == null || l.dimension() != Level.OVERWORLD) return false;
         double dx = x - c.getX(), dz = z - c.getZ();
-        return dx * dx + dz * dz < (RAIO + margem) * (RAIO + margem);
+        return dx * dx + dz * dz < (raioAtual + margem) * (raioAtual + margem);
     }
 
     // ===================== geração aos poucos =====================
@@ -143,15 +184,18 @@ public final class Cratera {
     private static void montarFila(MinecraftServer s, BlockPos c) {
         FILA.clear();
         LoreWorldData w = LoreWorldData.get(s);
-        int r = (RAIO + 8) >> 4;
+        int e = estagio(s);
+        int raio = RAIO + CRESCE * e, antes = e == 0 ? 0 : RAIO + CRESCE * (e - 1) - 24;
+        int r = (raio + 8) >> 4;
         int cx0 = c.getX() >> 4, cz0 = c.getZ() >> 4;
         List<long[]> l = new ArrayList<>();
         for (int dx = -r - 1; dx <= r + 1; dx++)
             for (int dz = -r - 1; dz <= r + 1; dz++) {
                 int cx = cx0 + dx, cz = cz0 + dz;
                 double mx = (cx << 4) + 8 - c.getX(), mz = (cz << 4) + 8 - c.getZ();
-                if (Math.sqrt(mx * mx + mz * mz) > RAIO + 24) continue;
-                if (w.siteBuilt(CHUNK + cx + ":" + cz)) continue;
+                double dc = Math.sqrt(mx * mx + mz * mz);
+                if (dc > raio + 24 || dc < antes) continue;
+                if (w.siteBuilt(chunkKey(e, cx, cz))) continue;
                 l.add(new long[]{cx, cz, (long) (mx * mx + mz * mz)});
             }
         l.sort((a, b) -> Long.compare(a[2], b[2]));   // do centro para fora
@@ -163,8 +207,8 @@ public final class Cratera {
         if (!filaMontada) montarFila(s, c);
         ServerLevel l = s.overworld();
         if (FILA.isEmpty()) {
-            bateria(l, c);
-            LoreWorldData.get(s).markSite(PRONTO);
+            if (estagio(s) == 0) bateria(l, c);
+            LoreWorldData.get(s).markSite(prontoKey(s));
             LanternaMod.LOGGER.info("Lanterna: a cratera do Necron está pronta");
             return;
         }
@@ -172,7 +216,11 @@ public final class Cratera {
         int cx = (int) k[0], cz = (int) k[1];
         l.getChunk(cx, cz);   // carrega (ou gera) o pedaço
         gerarChunk(l, c, cx, cz);
-        LoreWorldData.get(s).markSite(CHUNK + cx + ":" + cz);
+        LoreWorldData.get(s).markSite(chunkKey(estagio(s), cx, cz));
+    }
+
+    private static String chunkKey(int e, int cx, int cz) {
+        return e == 0 ? CHUNK + cx + ":" + cz : CHUNK + "e" + e + ":" + cx + ":" + cz;
     }
 
     /** A cratera: fundo em tigela; a borda levantada; o resto é terra morta. */
@@ -214,7 +262,7 @@ public final class Cratera {
                 int x = (cx << 4) + ix, z = (cz << 4) + iz;
                 double dx = x - c.getX(), dz = z - c.getZ(), d = Math.sqrt(dx * dx + dz * dz);
                 // borda irregular da terra morta
-                double borda = RAIO - 10 + 14 * ruido(x >> 3, z >> 3, 7);
+                double borda = raioAtual - 10 + 14 * ruido(x >> 3, z >> 3, 7);
                 if (d > borda + 6) continue;
                 boolean morta = d <= borda || ruido(x, z, 3) > (d - borda) / 6.0;
                 if (!morta) continue;
@@ -410,7 +458,8 @@ public final class Cratera {
         for (ServerPlayer p : l.players()) if (!p.isSpectator() && dentro(l, c, p.getX(), p.getZ(), 60)) perto.add(p);
         if (perto.isEmpty()) return;
         if (!l.isLoaded(lugarDoNecron(c))) return;
-        AABB area = new AABB(c).inflate(RAIO + 20, 80, RAIO + 20);
+        AABB area = new AABB(c).inflate(raioAtual + 20, 80, raioAtual + 20);
+        if (BatalhaFinal.derrotado(l.getServer())) return;   // 0.56.0: o Necron caiu; a cratera fica quieta
         if (l.getEntitiesOfClass(NecronEntity.class, area).isEmpty()) {
             NecronEntity n = com.lanterna.lore.LoreEntities.NECRON.get().create(l);
             if (n != null) {
@@ -491,7 +540,7 @@ public final class Cratera {
         if (!necron && !servo(alvo)) return;
         if (e.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         if (!(e.getSource().getEntity() instanceof Player p)) return;
-        if (!necron && doisAneis(p)) return;
+        if (doisAneis(p) && (!necron || BatalhaFinal.ativa())) return;
         e.setCanceled(true);
         if (alvo.level() instanceof ServerLevel l) {
             l.sendParticles(ParticleTypes.SCULK_SOUL, alvo.getX(), alvo.getY() + alvo.getBbHeight() * 0.6, alvo.getZ(), 4, 0.3, 0.3, 0.3, 0.02);
