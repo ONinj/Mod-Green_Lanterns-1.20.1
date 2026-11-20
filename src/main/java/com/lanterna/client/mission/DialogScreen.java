@@ -42,6 +42,20 @@ public class DialogScreen extends Screen {
         super(Component.translatable("race.lanterna." + msg.race()));
         this.msg = msg;
         for (String raw : msg.lines()) lines.add(line(raw));
+        // as falas do NPC (com o áudio gravado, se houver; senão, o falatório no tom dele)
+        String perfil = switch (msg.role()) {
+            case "cientista" -> "mulher";
+            case "guardiao" -> "homem";
+            default -> "pessoa";
+        };
+        float tom = msg.role().equals("guardiao") ? 0.7f : perfil.equals("pessoa") ? com.lanterna.client.voz.Falas.tomDe(msg.entityId()) : 0;
+        com.lanterna.client.voz.Falas.falarFila(msg.lines(), perfil, tom);
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        com.lanterna.client.voz.Falas.parar();
     }
 
     private Component line(String raw) {

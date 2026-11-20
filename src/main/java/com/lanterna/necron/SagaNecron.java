@@ -261,12 +261,22 @@ public final class SagaNecron {
         if (e.getEntity() instanceof ServerPlayer p) mandarMundo(p);
     }
 
+    /** As fendas que este jogador vê: as das Baterias e, no Capítulo 3, a fenda pequena na Terra. */
+    private static String fendasDe(ServerPlayer p) {
+        String f = Defesa.fendasTexto(p.server);
+        if (Treino.fendaAberta(p)) {
+            net.minecraft.core.BlockPos e = Treino.fendaPequena(p.server.overworld());
+            if (e != null) f = (f.isEmpty() ? "" : f + ";") + "earth:" + e.getX() + ":" + e.getY() + ":" + e.getZ();
+        }
+        return f;
+    }
+
     /** Manda ao cliente o estado da saga no mundo (Ryut partida e onde o Necron caiu). */
     public static void mandarMundo(ServerPlayer p) {
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         MissoesNecron.centro = c;
         ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server), c != null, c == null ? 0 : c.getX(), c == null ? 0 : c.getY(), c == null ? 0 : c.getZ(),
-                String.join(",", Queda.caidas(p.server)), Defesa.fendasTexto(p.server), Cratera.estagio(p.server), BatalhaFinal.derrotado(p.server)));
+                String.join(",", Queda.caidas(p.server)), fendasDe(p), Cratera.estagio(p.server), BatalhaFinal.derrotado(p.server)));
     }
 
     /** Começa a cena agora (comando / testes). revendo = só assistir de novo, sem mexer no anel. */
@@ -288,6 +298,7 @@ public final class SagaNecron {
     /** Zera a saga do jogador (comando de teste). */
     public static void zerar(ServerPlayer p) {
         parar(p);
+        Treino.zerar(p);
         Aurora.zerar(p);
         Fuga.zerar(p);
         Pedidos.zerar(p);
@@ -369,7 +380,7 @@ public final class SagaNecron {
         }
         // 0.55.0: com as Duas Luzes, a missão de defender a própria Tropa
         LoreData ld = MissionManager.data(p);
-        if (ld != null && ld.completed().contains("necron_3")) {
+        if (ld != null && ld.completed().contains("necron_3d")) {
             String m4 = "necron_4_" + tag(p).getString("tropa");
             if (Emocoes.aspecto(tag(p).getString("tropa")) && !ld.completed().contains(m4) && !ld.active().containsKey(m4)) {
                 MissionManager.start(p, m4);

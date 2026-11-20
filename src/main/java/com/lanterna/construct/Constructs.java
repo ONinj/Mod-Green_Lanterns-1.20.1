@@ -175,6 +175,7 @@ public final class Constructs {
                 new CastAnimPacket(player.getId(), type.id, ring.color()));
         Affinity.add(player, type.hold ? 1 : 3);
         MissionManager.onConstruct(player, type.id);
+        com.lanterna.necron.Treino.construto(player, type);
         spark(player, ring.color());
     }
 

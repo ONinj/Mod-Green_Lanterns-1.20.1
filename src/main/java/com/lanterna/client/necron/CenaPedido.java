@@ -35,6 +35,7 @@ public final class CenaPedido {
         }
         lanterna = m.lanterna();
         t = 0;
+        ultimaFala = "";
     }
 
     public static boolean ativa() { return t >= 0; }
@@ -93,6 +94,8 @@ public final class CenaPedido {
 
     private static float faixa(float x, float a, float b) { return Mth.clamp((x - a) / (b - a), 0, 1); }
 
+    private static String ultimaFala = "";
+
     private static void textos(GuiGraphics g, float tt) {
         var mc = Minecraft.getInstance();
         int w = g.guiWidth(), h = g.guiHeight(), fx = h / 9;
@@ -103,7 +106,12 @@ public final class CenaPedido {
         float de = FALA + i * POR_FALA, ate = de + POR_FALA;
         int al = Math.max(4, (int) (Math.min(faixa(tt, de, de + 8), 1 - faixa(tt, ate - 8, ate)) * 255));
         String propria = com.lanterna.client.ClientRingData.corps == null ? "green" : com.lanterna.client.ClientRingData.corps.getPath();
-        Component txt = Component.translatable("necron.lanterna.pedido_" + (i + 1), Component.translatable("corps.lanterna." + propria),
+        String chave = "necron.lanterna.pedido_" + (i + 1);
+        if (!chave.equals(ultimaFala) || t < FALA + 2) {
+            if (!chave.equals(ultimaFala)) com.lanterna.client.voz.Falas.falar(chave, "lanterna", com.lanterna.client.voz.Falas.tomDe(lanterna));
+            ultimaFala = chave;
+        }
+        Component txt = Component.translatable(chave, Component.translatable("corps.lanterna." + propria),
                 Component.translatable("planet.lanterna." + planeta));
         int c = com.lanterna.vida.Emocoes.cor(tropa);
         int cr = (c >> 16) & 255, cg = (c >> 8) & 255, cb = c & 255;

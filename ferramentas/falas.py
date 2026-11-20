@@ -1,0 +1,41 @@
+"""
+Lista de todas as falas com voz da saga, para gravar ou gerar: docs/FALAS.csv
+(chave; personagem; texto pt; texto en; arquivo pt; arquivo en). Rodar na raiz:  python3 ferramentas/falas.py
+O arquivo de cada fala é a chave + .ogg, na pasta sounds/voz/<idioma>/ (depois rode ferramentas/vozes.py).
+"""
+import csv, json, os, re
+
+RAIZ = os.path.join("src", "main", "resources", "assets", "lanterna", "lang")
+pt = json.load(open(os.path.join(RAIZ, "pt_br.json"), encoding="utf-8"))
+en = json.load(open(os.path.join(RAIZ, "en_us.json"), encoding="utf-8"))
+
+# (padrão da chave, personagem)
+QUEM = [
+    (r"^necron\.lanterna\.leg\.", "Narrador"),
+    (r"^necron\.lanterna\.(nome|nome_sub|chegou|continua)$", "Narrador"),
+    (r"^necron\.lanterna\.fuga\.(cai|acorda)$", "Narrador"),
+    (r"^necron\.lanterna\.fuga\.(aguenta|segura|fala_\d+)$", "Lanterna da Tropa do jogador"),
+    (r"^necron\.lanterna\.alerta_[12]$", "Necron"),
+    (r"^necron\.lanterna\.alerta_3$", "Lanterna da Tropa do jogador"),
+    (r"^necron\.lanterna\.pedido_\d$", "Lanterna de outra Tropa (pedindo ajuda)"),
+    (r"^necron\.lanterna\.queda_[12]$", "Narrador"),
+    (r"^necron\.lanterna\.rastro_[123]$", "O anel"),
+    (r"^necron\.lanterna\.(defesa_fala|final_fala|vitoria_fala)$", "Lanterna aliado"),
+    (r"^necron\.lanterna\.mestre_(1|apoio|duelo|rende|segura|fenda|fenda_fim)$", "Mestre da Tropa do jogador"),
+    (r"^mission\.lanterna\.necron_a1\.talk$", "Sgt. Rui Tavares (Vila Aurora)"),
+    (r"^mission\.lanterna\.necron_a3\.talk$", "Dra. Lívia Andrade (Vila Aurora)"),
+    (r"^mission\.lanterna\.necron_[a-z0-9_]+\.talk$", "NPC da missão"),
+]
+
+linhas = []
+for k in pt:
+    for padrao, quem in QUEM:
+        if re.match(padrao, k):
+            linhas.append([k, quem, pt[k], en.get(k, ""), "voz/pt_br/%s.ogg" % k, "voz/en_us/%s.ogg" % k])
+            break
+os.makedirs("docs", exist_ok=True)
+with open(os.path.join("docs", "FALAS.csv"), "w", encoding="utf-8", newline="") as f:
+    w = csv.writer(f, delimiter=";")
+    w.writerow(["chave", "personagem", "texto pt", "texto en", "arquivo pt", "arquivo en"])
+    w.writerows(linhas)
+print("falas:", len(linhas))

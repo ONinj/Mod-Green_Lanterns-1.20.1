@@ -37,6 +37,7 @@ public final class CenaFuga {
         aliado = m.aliado();
         tropa = m.tropa();
         Minecraft.getInstance().getToasts().clear();
+        ultimaFala = "";
         if (m.fase() == 0) {
             t = 0; necron = m.necron(); inicio = null;
             Vec3 d = new Vec3(m.fx() / 1000.0, 0, m.fz() / 1000.0);
@@ -279,6 +280,8 @@ public final class CenaFuga {
 
     private static float faixa(float x, float a, float b) { return Mth.clamp((x - a) / (b - a), 0, 1); }
 
+    private static String ultimaFala = "";
+
     private static void textos(GuiGraphics g, float tt) {
         var mc = Minecraft.getInstance();
         int w = g.guiWidth(), h = g.guiHeight();
@@ -316,6 +319,12 @@ public final class CenaFuga {
         float a = Math.min(faixa(tt, de, de + 8), 1 - faixa(tt, ate - 8, ate));
         int al = Math.max(4, (int) (a * 255));
         Component txt = Component.translatable(chave, Component.translatable("corps.lanterna." + tropa));
+        if (!chave.equals(ultimaFala)) {
+            ultimaFala = chave;
+            String quem = chave.endsWith("alerta_1") || chave.endsWith("alerta_2") ? "necron"
+                    : chave.endsWith(".cai") || chave.endsWith(".acorda") ? "narrador" : "lanterna";
+            com.lanterna.client.voz.Falas.falar(chave, quem, quem.equals("lanterna") ? com.lanterna.client.voz.Falas.tomDe(aliado) : 0);
+        }
         // falas longas quebram em duas linhas
         var linhas = mc.font.split(txt, w - 40);
         int y = h - fx / 2 - linhas.size() * (mc.font.lineHeight + 1) / 2;

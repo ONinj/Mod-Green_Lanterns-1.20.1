@@ -191,7 +191,10 @@ public final class Queda {
     private static void servos(ServerLevel l) {
         BlockPos h = PlanetLore.HUB;
         List<ServerPlayer> perto = new ArrayList<>();
-        for (ServerPlayer p : l.players()) if (!p.isSpectator() && p.blockPosition().distSqr(h) < 100 * 100) perto.add(p);
+        for (ServerPlayer p : l.players()) {
+            double dx = p.getX() - h.getX(), dz = p.getZ() - h.getZ();
+            if (!p.isSpectator() && dx * dx + dz * dz < 100 * 100) perto.add(p);
+        }
         if (perto.isEmpty() || l.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) return;
         AABB area = new AABB(h).inflate(110, 80, 110);
         if (l.getEntitiesOfClass(Mob.class, area, Cratera::servo).size() >= MAX_SERVOS) return;

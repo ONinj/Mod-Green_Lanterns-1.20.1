@@ -3900,6 +3900,80 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.3: Capítulo 3 (o treino, o duelo com o Mestre e a primeira fenda na Terra) e os sons de fala. */
+    private static void sceneCap3() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> {
+            glog("sons de fala registrados: voz=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.voz")) != null)
+                    + " anel=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.anel")) != null)
+                    + " morte=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.morte")) != null));
+            com.lanterna.client.voz.Falas.falar("necron.lanterna.mestre_1", "lanterna");
+            server(sp -> {
+                var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+                sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+                sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+                com.lanterna.necron.SagaNecron.zerar(sp);
+                var t = com.lanterna.necron.SagaNecron.tag(sp);
+                t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+                com.lanterna.vida.Emocoes.tag2(sp);
+                var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+                com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+                var d = com.lanterna.mission.MissionManager.data(sp);
+                for (String m : new String[]{"necron_3b_green", "necron_3c_green", "necron_3d", "necron_4_green"}) { d.completed().remove(m); d.active().remove(m); }
+                d.completed().add("necron_3");
+                var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+                var h = com.lanterna.lore.PlanetLore.HUB;
+                sp.teleportTo(oa, h.getX() + 0.5, 90, h.getZ() + 20.5, 180, 0);
+            });
+        });
+        at(80, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("treino ativo=" + d.isActive("necron_3b_green"));
+            for (int i = 0; i < 6; i++) com.lanterna.mission.MissionManager.onConstruct(sp, "parede");
+            var apoio = java.util.Arrays.stream(com.lanterna.construct.ConstructType.values()).filter(x -> "blue".equals(x.corps)).findFirst().orElse(null);
+            if (apoio != null) com.lanterna.necron.Treino.construto(sp, apoio);
+            for (int i = 0; i < 4; i++) com.lanterna.mission.MissionManager.onDummy(sp);
+        }));
+        at(40, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("treino feito=" + d.completed().contains("necron_3b_green") + " duelo ativo=" + d.isActive("necron_3c_green"));
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival");
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, h.getX(), h.getZ() + 22);
+            sp.connection.teleport(h.getX() + 0.5, y, h.getZ() + 22.5, 180, 0);
+        }));
+        at(60, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(20, () -> { shot("cap3_duelo"); server(sp -> {
+            var m = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(30), x -> x.getTags().contains(com.lanterna.necron.Treino.MESTRE)).stream().findFirst().orElse(null);
+            glog("mestre=" + (m != null) + " vida jogador=" + sp.getHealth());
+            if (m != null) { m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 10000); }
+        }); });
+        at(30, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("duelo feito=" + d.completed().contains("necron_3c_green") + " fenda ativa=" + d.isActive("necron_3d"));
+            var f = com.lanterna.necron.Treino.fendaPequena(sp.server.overworld());
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode creative");
+            sp.teleportTo(sp.server.overworld(), f.getX() + 0.5, f.getY() - 10, f.getZ() + 18.5, 180, -25);
+        }));
+        for (int k = 0; k < 14; k++) {
+            int kk = k;
+            at(70, () -> server(sp -> {
+                if (kk == 3) shot("cap3_fenda");
+                for (var m : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(70),
+                        x -> x.getTags().contains(com.lanterna.necron.Treino.PRIMEIRA))) { m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 10000); }
+            }));
+        }
+        at(40, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("primeira fenda: mortos=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:primeira") + " feita=" + d.completed().contains("necron_3d")
+                    + " defesa da tropa ativa=" + d.isActive("necron_4_green"));
+        }));
+        at(20, () -> { glog("FIM cap3"); mc.stop(); });
+    }
+
     /** 0.56.2: Capítulo 2 na Vila Aurora (Rui, os quatro resgates, a Dra. Lívia e o rastro do cometa). */
     private static void sceneAuroraNecron() {
         Minecraft mc = Minecraft.getInstance();
@@ -7553,6 +7627,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
         else if (ENABLED && SCENE.equals("aurora_necron")) sceneAuroraNecron();
+        else if (ENABLED && SCENE.equals("cap3")) sceneCap3();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

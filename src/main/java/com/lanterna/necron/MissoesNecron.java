@@ -42,10 +42,24 @@ public final class MissoesNecron {
             case "necron_1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:cratera", 1, "earth", chao)), "necron_2");
             case "necron_2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:enfrentou", 1, "earth", chao)), null);
             case "necron_3" -> m(id, List.of(Objective.of(Type.FONTE, "necron:dois", 1, null, null)), null);
+            case "necron_3d" -> m(id, List.of(fonte("necron:primeira_fechou", primeiraFenda())), null);
             case "necron_5" -> m(id, List.of(Objective.of(Type.FONTE, "necron:terra", 1, "earth", chao)), null);
             case "necron_6" -> m(id, List.of(Objective.of(Type.FONTE, "necron:vitoria", 1, "earth", chao)), "necron_7");
             case "necron_7" -> m(id, List.of(Objective.of(Type.FONTE, "necron:purificou_terra", 1, "earth", chao)), null);
             default -> {
+                // necron_3b_<tropa> / necron_3c_<tropa>: o treino e o duelo no planeta da Tropa (Capítulo 3)
+                if (id.startsWith("necron_3b_") || id.startsWith("necron_3c_")) {
+                    com.lanterna.lore.PlanetLore pl = null;
+                    for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values())
+                        if (x.corps.id().getPath().equals(id.substring(10))) pl = x;
+                    if (pl == null) yield null;
+                    BlockPos h = com.lanterna.lore.PlanetLore.HUB;
+                    if (id.startsWith("necron_3b_")) yield m(id, List.of(
+                            Objective.of(Type.CONSTRUCT, "any", 6, pl.planet, h),
+                            Objective.of(Type.FONTE, "necron:apoio", 1, pl.planet, h),
+                            Objective.of(Type.DUMMY, "alvo", 4, pl.planet, h)), "necron_3c_" + id.substring(10));
+                    yield m(id, List.of(Objective.of(Type.FONTE, "necron:duelo", 1, pl.planet, h)), "necron_3d");
+                }
                 // necron_4_<tropa>: defender a Bateria Central da própria Tropa
                 if (!id.startsWith("necron_4_")) yield null;
                 com.lanterna.lore.PlanetLore p = null;
@@ -61,6 +75,12 @@ public final class MissoesNecron {
     private static BlockPos aurora() {
         BlockPos c = com.lanterna.terra.TerraSite.centro;
         return c == null ? null : new BlockPos(c.getX(), 0, c.getZ());
+    }
+
+    @Nullable
+    private static BlockPos primeiraFenda() {
+        BlockPos c = com.lanterna.terra.TerraSite.centro;
+        return c == null ? null : new BlockPos(c.getX() + 170, 0, c.getZ() + 60);
     }
 
     private static Objective fonte(String alvo, @Nullable BlockPos pos) {

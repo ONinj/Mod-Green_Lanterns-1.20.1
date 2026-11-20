@@ -74,7 +74,8 @@ public final class RenderFenda {
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
         var planeta = com.lanterna.lore.PlanetLore.byDimension(mc.level.dimension());
-        BlockPos f = planeta == null ? null : ClientSaga.fendas.get(planeta.planet);
+        BlockPos f = planeta != null ? ClientSaga.fendas.get(planeta.planet)
+                : mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD ? ClientSaga.fendas.get("earth") : null;
         boolean escudo = CenaFuga.escudoAtivo();
         if (f == null && !escudo) return;
         if (!pronto) texturas();

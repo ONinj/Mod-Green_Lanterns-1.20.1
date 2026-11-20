@@ -171,10 +171,14 @@ public final class CinemaQueda extends Screen {
         if (t > 15 && t < 105) { c = Component.translatable("necron.lanterna.queda_1", nomePlaneta, nomeTropa); de = 15; ate = 105; }
         else if (t > 110 && t < Pedidos.DUR_QUEDA - 10) { c = Component.translatable("necron.lanterna.queda_2", nomeTropa); de = 110; ate = Pedidos.DUR_QUEDA - 10; }
         if (c != null) {
+            String chave = ((net.minecraft.network.chat.contents.TranslatableContents) c.getContents()).getKey();
+            if (!chave.equals(ultimaFala)) { ultimaFala = chave; com.lanterna.client.voz.Falas.falar(chave, "narrador"); }
             int al = Math.max(4, (int) (Math.min(faixa(t, de, de + 10), 1 - faixa(t, ate - 10, ate)) * 255));
             g.drawCenteredString(font, c, width / 2, height - fx / 2 - font.lineHeight / 2, (al << 24) | 0xE6E0F0);
         }
     }
+
+    private String ultimaFala = "";
 
     private static int mistura(int a, int b, float k) {
         int r = (int) Mth.lerp(k, (a >> 16) & 255, (b >> 16) & 255), g = (int) Mth.lerp(k, (a >> 8) & 255, (b >> 8) & 255), bl = (int) Mth.lerp(k, a & 255, b & 255);

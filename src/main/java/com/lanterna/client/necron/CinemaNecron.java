@@ -895,6 +895,8 @@ public final class CinemaNecron extends Screen {
             new Legenda(1290, 1380, "necron.lanterna.leg.terra"),
     };
 
+    private String ultimaFala = "";
+
     private float preto(float t) {
         // escurecimentos entre os planos
         float a = 1 - faixa(t, 0, 40);
@@ -927,6 +929,7 @@ public final class CinemaNecron extends Screen {
             float a = Math.min(faixa(t, l.de, l.de + 10), 1 - faixa(t, l.ate - 10, l.ate));
             int alfa = Math.max(4, (int) (a * 255));
             Component c = Component.translatable(l.chave);
+            if (!l.chave.equals(ultimaFala)) { ultimaFala = l.chave; com.lanterna.client.voz.Falas.falar(l.chave, "narrador"); }
             int y = height - faixaAlt / 2 - font.lineHeight / 2;
             g.drawCenteredString(font, c, width / 2, y, (alfa << 24) | 0xE6E6EE);
         }

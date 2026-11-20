@@ -1883,3 +1883,20 @@ Depois da cutscene da divisão, antes de ir à cratera:
 5. Depois, **A Queda do Necron** (chegar à terra morta) e **O Ser da Morte**, como antes.
 
 Num mundo sem a Vila Aurora, a saga vai direto para a cratera.
+
+
+## 0.56.3 — Saga do Necron, Capítulo 3: Duas Luzes
+
+Depois da fuga, no planeta da sua Tropa:
+1. **Duas Luzes:** forje um segundo anel, de qualquer Tropa, e coloque-o no punho.
+2. **O Treino das Duas Luzes:** o **Mestre da Tropa** ensina na praça da Bateria Central: use 6 construtos, pelo menos **um de apoio do anel do punho**, e derrube 4 alvos de treino. O Mestre comenta quando você acerta o construto de apoio.
+3. **O Duelo:** um duelo de treino com o Mestre. Quando ele está quase vencido, ele se rende. Se você cair, ele segura o golpe (é treino) e você tenta de novo.
+4. **A Primeira Fenda:** uma fenda pequena do Necron se abre na Terra, perto da Vila Aurora (o portal no céu). Os servos caem dela, até 4 de cada vez. Com as duas luzes eles finalmente sangram: derrote **10** para fechá-la.
+5. Depois começa **A Defesa da Tropa**, como antes.
+
+## As falas e as vozes (preparadas)
+
+- Cada fala de cutscene, de conversa com NPC e do anel tem a sua **chave** (a mesma do texto).
+- **Sem voz gravada:** toca um falatório de sílabas curtinhas no ritmo da fala, no tom de quem fala: homem (grave), mulher (aguda), Lanterna (o tom de cada um), o anel (suave e brilhante) e o Necron (grave, rouco e com eco). O narrador fica em silêncio.
+- **Com voz gravada:** coloque os áudios (.ogg) em `assets/lanterna/sounds/voz/pt_br/` e `.../en_us/`, com o nome igual à chave, e rode `python3 ferramentas/vozes.py`. A fala com áudio toca o áudio no idioma do jogo.
+- A lista de todas as falas (quem fala, texto em português e inglês, nome do arquivo) sai em `docs/FALAS.csv` com `python3 ferramentas/falas.py`.
