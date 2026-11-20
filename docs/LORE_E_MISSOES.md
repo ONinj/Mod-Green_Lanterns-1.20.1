@@ -1987,3 +1987,7 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - O guia: "Prepare-se" agora fala da saga do Necron, e a "Transmissão Interceptada" (com spoiler) vem de Korugar: "O Medo Desperta — em breve".
 - **/lantern saga next** mostra o caminho guardado do jogador e as marcas do mundo.
 
+## 0.57.2 — Correção do resgate dos moradores
+
+- No socorro com moradores cercados (Tropas Laranja e Azul), o resgate às vezes não andava depois do clique. Agora: basta ficar ao lado do morador (ou pairar perto dele com o anel) um instante para a bolha de luz começar, sem precisar clicar; a luz só se solta se você se afastar mais de 6 blocos na horizontal ou 4 na altura; e o resgate anda mesmo se a missão estiver em outro estado.
+

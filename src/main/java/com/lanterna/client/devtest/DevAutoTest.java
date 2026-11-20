@@ -4228,6 +4228,58 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM tentacao"); mc.stop(); });
     }
 
+    /** 0.57.2: o resgate dos moradores de Okaara como um jogador de verdade (sobrevivência, voando, sem clicar). */
+    private static void sceneCap5c() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "time set day");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            com.lanterna.necron.Socorro.zerar(sp.server, com.lanterna.lore.PlanetLore.byPlanet("okaara"));
+            for (String m : new String[]{"necron_s_orange", "necron_4_orange"}) { d.completed().remove(m); d.active().remove(m); }
+            com.lanterna.mission.MissionManager.start(sp, "necron_s_orange");
+            // tira os moradores velhos de outras rodadas
+            var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("okaara").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(lv, h.getX() + 0.5, 140, h.getZ() + 0.5, 0, 0);
+            sp.getAbilities().mayfly = true; sp.getAbilities().flying = true; sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+        }));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            at(30, () -> server(sp -> { var b = com.lanterna.necron.Socorro.ponto(ii); sp.connection.teleport(b.getX() + 0.5, 150, b.getZ() + 0.5, 0, 60); }));
+            at(60, () -> server(sp -> {
+                for (var m : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(60, 300, 60), x -> x.getTags().contains(com.lanterna.necron.Socorro.CERCO))) {
+                    m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 100000); }
+                var vs = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(40, 300, 40),
+                        x -> x.getTags().contains(com.lanterna.necron.Socorro.CIVIL + ":okaara:" + ii));
+                // sobras de rodadas antigas: fica só o mais novo
+                vs.sort(java.util.Comparator.comparingInt(x -> x.tickCount));
+                for (int k = 1; k < vs.size(); k++) vs.get(k).discard();
+                var v = vs.isEmpty() ? null : vs.get(0);
+                glog("posto " + ii + ": civil=" + (v != null) + " (havia " + vs.size() + ")");
+                if (ii == 3) { com.lanterna.mission.MissionManager.data(sp).active().remove("necron_s_orange"); glog("  (missao desligada para o teste)"); }
+                // pairando com o anel: 3 blocos ao lado e 2,5 acima, sem clicar
+                if (v != null) sp.connection.teleport(v.getX() + 3, v.getY() + 2.5, v.getZ(), 90, 30);
+            }));
+            at(30, () -> { if (ii == 1) { mc.options.hideGui = false; shot("cap5c_pairando"); } });
+            at(120, () -> server(sp -> glog("  salvo=" + com.lanterna.lore.LoreWorldData.get(sp.server).siteBuilt("saga:socorro:okaara:posto:" + ii + ":salvo")
+                    + " fonte=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:sobrev_orange_" + ii))));
+        }
+        at(20, () -> server(sp -> { sp.getAbilities().invulnerable = false; sp.onUpdateAbilities(); }));
+        at(20, () -> { glog("FIM cap5c"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8248,6 +8300,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("ajustes")) sceneAjustes();
         else if (ENABLED && (SCENE.equals("cap89") || SCENE.equals("cap9voo"))) sceneCap89();
         else if (ENABLED && SCENE.equals("tentacao")) sceneTentacao();
+        else if (ENABLED && SCENE.equals("cap5c")) sceneCap5c();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

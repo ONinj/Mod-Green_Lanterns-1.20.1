@@ -96,9 +96,10 @@ public final class Socorro {
         PlanetLore aqui = PlanetLore.byDimension(p.level().dimension());
         if (aqui == null) return;
         String t = aqui.corps.id().getPath();
+        ServerLevel l = p.serverLevel();
+        if (tipo(t) == Tipo.SOBREVIVENTES) resgates(l, p, aqui);
         LoreData d = MissionManager.data(p);
         if (d == null || !d.isActive("necron_s_" + t)) return;
-        ServerLevel l = p.serverLevel();
         switch (tipo(t)) {
             case PRISIONEIROS -> { if (p.tickCount % 10 == 1) jaulas(l, p, aqui); }
             case SOBREVIVENTES -> postos(l, p, aqui);
@@ -272,12 +273,26 @@ public final class Socorro {
             }
             marcar(l, k);
         }
+    }
+
+    /**
+     * 0.57.2: o resgate (a bolha de luz e o voo até a cidade) roda sozinho, fora da condição da missão, e é tolerante:
+     * conta a distância na horizontal (até 6 blocos, com até 4 de altura), para quem paira com o anel perto do
+     * morador; e basta ficar ao lado dele um instante para a luz começar (o clique continua valendo).
+     */
+    private static void resgates(ServerLevel l, ServerPlayer p, PlanetLore pl) {
+        String t = pl.corps.id().getPath();
+        if (p.tickCount % 10 == 4 && !BOLHAS.containsKey(p.getUUID()) && !p.isSpectator()) {
+            Mob perto = l.getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(2.5, 3, 2.5),
+                    m -> m.getTags().contains(CIVIL) && !m.isNoGravity()).stream().findFirst().orElse(null);
+            if (perto != null) comecar(p, perto);
+        }
         // envolvendo em luz
         Bolha bo = BOLHAS.get(p.getUUID());
         if (bo != null) {
             Entity ent = l.getEntity(bo.civil);
             if (!(ent instanceof Mob v)) { BOLHAS.remove(p.getUUID()); }
-            else if (p.distanceTo(v) > 4.5) {
+            else if (longe(p, v)) {
                 BOLHAS.remove(p.getUUID());
                 p.displayClientMessage(Component.translatable("necron.lanterna.resgate_soltou").withStyle(ChatFormatting.RED), true);
             } else {
@@ -322,6 +337,18 @@ public final class Socorro {
         }
     }
 
+    private static boolean longe(ServerPlayer p, Mob v) {
+        double dx = p.getX() - v.getX(), dz = p.getZ() - v.getZ();
+        return dx * dx + dz * dz > 6 * 6 || Math.abs(p.getY() - v.getY()) > 4;
+    }
+
+    private static void comecar(ServerPlayer p, Mob v) {
+        Bolha b = new Bolha();
+        b.civil = v.getUUID();
+        BOLHAS.put(p.getUUID(), b);
+        p.displayClientMessage(Component.translatable("necron.lanterna.resgate_comeca").withStyle(ChatFormatting.GREEN), true);
+    }
+
     @SubscribeEvent
     public static void clicou(PlayerInteractEvent.EntityInteract e) {
         if (!(e.getEntity() instanceof ServerPlayer p) || !(e.getTarget() instanceof Mob v) || e.getHand() != InteractionHand.MAIN_HAND) return;
@@ -329,10 +356,7 @@ public final class Socorro {
         e.setCanceled(true);
         e.setCancellationResult(InteractionResult.SUCCESS);
         if (BOLHAS.containsKey(p.getUUID())) return;
-        Bolha b = new Bolha();
-        b.civil = v.getUUID();
-        BOLHAS.put(p.getUUID(), b);
-        p.displayClientMessage(Component.translatable("necron.lanterna.resgate_comeca").withStyle(ChatFormatting.GREEN), true);
+        comecar(p, v);
     }
 
     // ===================== os ladrões =====================
