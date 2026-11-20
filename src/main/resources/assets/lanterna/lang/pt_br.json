@@ -3849,5 +3849,14 @@
   "necron.lanterna.c4_titulo": "O Necron venceu",
   "necron.lanterna.c4_sub": "Todas as Tropas caíram",
   "necron.lanterna.c4_epilogo_1": "Uma onda escura cobre a Terra. Em cada planeta, as Baterias Centrais se apagam uma a uma.",
-  "necron.lanterna.c4_epilogo_2": "Mas, escondidos, poucos Lanternas ainda guardam uma faísca. Eles não esqueceram o seu nome... e juraram trazer você de volta, queira você ou não. (Continua na próxima saga.)"
+  "necron.lanterna.c4_epilogo_2": "Mas, escondidos, poucos Lanternas ainda guardam uma faísca. Eles não esqueceram o seu nome... e juraram trazer você de volta, queira você ou não. (Continua na próxima saga.)",
+  "necron.lanterna.c4_epilogo_3": "Por um instante, no fundo do seu anel negro, alguma coisa brilha amarelo. E sorri.",
+  "necron.lanterna.pressagio_1": "O anel negro zumbe baixinho. Por um instante, a luz dele parece amarela.",
+  "necron.lanterna.pressagio_2": "Uma voz que não é a do Necron sussurra: \"Você tem medo de quê, Arauto?\"",
+  "necron.lanterna.pressagio_3": "Você sente que alguém, muito longe, está procurando por você. Mais de um alguém.",
+  "necron.lanterna.pressagio_korugar": "Ao chegar em Korugar, você sente: a Bateria Central treme. Só um pouco. Como se alguma coisa lá dentro estivesse acordada.",
+  "cmd.lanterna.saga_proxima": "Próxima saga · seu caminho: %s · Parallax desperto: %s · Lanternas juraram purificar o Arauto: %s",
+  "cmd.lanterna.saga_caminho_nenhum": "a saga do Necron ainda não terminou",
+  "cmd.lanterna.saga_caminho_heroi": "herói (fez o Ritual da Terra)",
+  "cmd.lanterna.saga_caminho_corrompido": "corrompido (o Necron venceu; destino: Parallax)"
 }

@@ -128,7 +128,7 @@ public final class Purificacao {
                 corrompidos(p.serverLevel(), p, aqui);
         }
         if (d.isActive("necron_9")) {
-            if (fim(s) && FonteDados.chamado(p, "necron:ritual") < 1) FonteDados.chamado(p, "necron:ritual", 1);
+            if (fim(s) && FonteDados.chamado(p, "necron:ritual") < 1) { FonteDados.chamado(p, "necron:ritual", 1); ProximaSaga.heroi(p); }
             BlockPos c = Cratera.centro(s);
             if (c != null && purificada(s) && ritualT < 0 && !fim(s) && p.level().dimension() == Level.OVERWORLD) {
                 double dx = p.getX() - c.getX(), dz = p.getZ() - c.getZ();
@@ -683,7 +683,7 @@ public final class Purificacao {
             marcar(s, FIM);
             for (ServerPlayer q : s.getPlayerList().getPlayers()) {
                 LoreData d = MissionManager.data(q);
-                if (d != null && d.isActive("necron_9")) FonteDados.chamado(q, "necron:ritual", 1);
+                if (d != null && d.isActive("necron_9")) { FonteDados.chamado(q, "necron:ritual", 1); ProximaSaga.heroi(q); }
             }
             ritualT = -1;
             LanternaMod.LOGGER.info("Lanterna: fim da saga do Necron (linha do herói)");

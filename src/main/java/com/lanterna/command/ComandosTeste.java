@@ -129,6 +129,15 @@ public final class ComandosTeste {
                             com.lanterna.necron.SagaNecron.zerar(eu(c));
                             return ok(c, "saga_zerada");
                         }))
+                        .then(Commands.literal("next").executes(c -> {
+                            ServerPlayer p = eu(c);
+                            String cam = com.lanterna.necron.ProximaSaga.caminho(p);
+                            p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("cmd.lanterna.saga_proxima",
+                                    net.minecraft.network.chat.Component.translatable("cmd.lanterna.saga_caminho_" + (cam.isEmpty() ? "nenhum" : cam)),
+                                    net.minecraft.network.chat.Component.translatable(com.lanterna.necron.ProximaSaga.parallaxDesperto(p.server) ? "gui.yes" : "gui.no"),
+                                    net.minecraft.network.chat.Component.translatable(com.lanterna.necron.ProximaSaga.purificadoresJuraram(p.server) ? "gui.yes" : "gui.no")));
+                            return 1;
+                        }))
                         .then(op("tempt").executes(c -> {
                             ServerPlayer p = eu(c);
                             if (!com.lanterna.necron.SagaNecron.dividido(p)) return erro(c, "saga_ainda_nao");

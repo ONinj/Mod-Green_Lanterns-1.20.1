@@ -4219,7 +4219,9 @@ public final class DevAutoTest {
         at(400, () -> server(sp -> {
             var d = com.lanterna.mission.MissionManager.data(sp);
             int caidas = com.lanterna.necron.Queda.caidas(sp.server).size();
-            glog("venceu=" + com.lanterna.necron.LinhaCorrompida.venceu(sp.server) + " c4 feita=" + d.completed().contains("necron_c4") + " tropas caidas=" + caidas);
+            glog("venceu=" + com.lanterna.necron.LinhaCorrompida.venceu(sp.server) + " c4 feita=" + d.completed().contains("necron_c4") + " tropas caidas=" + caidas
+                    + " caminho=" + com.lanterna.necron.ProximaSaga.caminho(sp) + " parallax=" + com.lanterna.necron.ProximaSaga.parallaxDesperto(sp.server)
+                    + " purificadores=" + com.lanterna.necron.ProximaSaga.purificadoresJuraram(sp.server));
         }));
         at(20, () -> shot("tent_depois"));
         at(10, () -> server(sp -> { com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0)); com.lanterna.necron.Tentacao.zerar(sp); }));

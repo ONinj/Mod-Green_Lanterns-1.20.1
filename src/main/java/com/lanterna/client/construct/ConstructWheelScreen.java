@@ -134,8 +134,6 @@ public class ConstructWheelScreen extends Screen {
             g.fill(x0 + w1 + 6, ty - 3, x0 + w1 + 6 + w2, ty + 11, Hud.argb(abaSegundo ? c2 : 0x101418, abaSegundo ? 170 : 200));
             g.drawString(font, nome1, x0 + 6, ty, abaSegundo ? 0xFF8A949C : 0xFFFFFFFF, true);
             g.drawString(font, nome2, x0 + w1 + 12, ty, abaSegundo ? 0xFFFFFFFF : 0xFF8A949C, true);
-            Component dica = Component.translatable("construct.lanterna.aba_dica");
-            g.drawString(font, dica, cx - font.width(dica) / 2, ty + 14, 0xFFA0A8B0, true);
         }
         if (branco) {
             Component pg = Component.translatable("construct.lanterna.pagina_branco",
@@ -219,7 +217,10 @@ public class ConstructWheelScreen extends Screen {
     private int ficha(GuiGraphics g, int x, int y, int w, ConstructType info, int color) {
         int tw = w - 16;
         java.util.List<net.minecraft.util.FormattedCharSequence> desc = info == null ? java.util.List.of() : font.split(Hud.body(info.description()), tw);
-        java.util.List<net.minecraft.util.FormattedCharSequence> ajuda = font.split(Hud.body(Component.translatable("construct.lanterna.wheel_help")), tw);
+        // 0.57.1: a dica das abas fica junto da ajuda (em cima da roda ela encostava no painel da Tropa em telas pequenas)
+        Component textoAjuda = temSegundo() ? Component.translatable("construct.lanterna.wheel_help").append(" · ").append(Component.translatable("construct.lanterna.aba_dica"))
+                : Component.translatable("construct.lanterna.wheel_help");
+        java.util.List<net.minecraft.util.FormattedCharSequence> ajuda = font.split(Hud.body(textoAjuda), tw);
         boolean duas = tw >= 200; // presets em 2 colunas se houver espaço
         int linhasPreset = duas ? 2 : 4;
         int h = 6 + desc.size() * 10 + 4 + linhasPreset * 10 + 2 + ajuda.size() * 9 + 4;

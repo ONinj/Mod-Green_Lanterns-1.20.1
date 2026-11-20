@@ -210,19 +210,19 @@ cap("morte","anel:black","A Tropa da Morte","The Death Corps",
 ])
 
 cap("prepare","lanterna:pergaminho_segredo","Prepare-se","Get Ready",
- "O que já existe no mod e vai importar na próxima saga.","What's already in the mod and will matter in the next saga.",[
- pag("Antes da noite","Before the night",
-  "A próxima saga vai cobrar tudo o que você construiu até aqui. O que vale preparar desde já:\n\n**Nível 50 ou mais** · é o mínimo para encarar os lendários, e não vai ficar mais fácil.\n**Os anéis forjados** · guarde-os e cuide da afinidade de cada um.\n**O Anel Branco** · quem tiver um vai sentir a diferença.\n**Ryut e a Tropa Negra** · conheça o planeta, o povo e o Farejar.\n**Insígnias e Fragmentos Lendários** · não jogue nada fora.",
-  "The next saga will call on everything you've built so far. Worth preparing now:\n\n**Level 50 or higher** · the minimum to face the legendaries, and it won't get easier.\n**Your forged rings** · keep them and tend each one's affinity.\n**The White Ring** · whoever has one will feel the difference.\n**Ryut and the Black Corps** · know the planet, its people and Scent.\n**Insignias and Legendary Fragments** · don't throw anything away.",
-  itens=["anel:white","lanterna:fragmento_lendario","lanterna:obsidiana_do_fim","lanterna:essencia_poder"]),
+ "O que vale preparar para a saga do Necron.","What's worth preparing for the Necron saga.",[
+ pag("Antes da Morte","Before Death",
+  "A saga do Necron começa quando os 7 aspectos da Árvore das Emoções chegam ao nível 6, e cobra tudo o que você construiu:\n\n**Os anéis forjados** · você vai precisar de um **segundo anel** no punho para ferir os servos da Morte.\n**Nível** · ao perder o Anel da Vida o nível cai para no máximo 90; o máximo vai a **250**, e o Necron só sente golpes de verdade a partir do **200**.\n**As Tropas** · quanto mais Tropas você ajudar e chamar, mais Lanternas lutam com você no fim.\n**Insígnias e Fragmentos Lendários** · não jogue nada fora.",
+  "The Necron saga begins when the 7 aspects of the Tree of Emotions reach level 6, and it calls on everything you've built:\n\n**Your forged rings** · you'll need a **second ring** on your wrist to hurt Death's servants.\n**Level** · losing the Ring of Life drops your level to at most 90; the cap goes up to **250**, and the Necron only really feels blows from **200** on.\n**The Corps** · the more Corps you help and call, the more Lanterns fight beside you at the end.\n**Insignias and Legendary Fragments** · don't throw anything away.",
+  itens=["anel:white","lanterna:nucleo_bateria","lanterna:fragmento_lendario","lanterna:essencia_poder"]),
 ], cor="B8A060")
 
-cap("noite","anel:black","Transmissão Interceptada","Intercepted Transmission",
+cap("noite","anel:yellow","Transmissão Interceptada","Intercepted Transmission",
  "...","...",[
  pag("[sinal fraco]","[weak signal]",
-  "...os anéis de Ryut não estão mais em silêncio.\n\nAlgo está ||farejando|| quem carrega luz, em todos os mundos ao mesmo tempo. Os Silentes pararam de ||sussurrar||.\n\nGuarde bem o seu anel.\nNem toda luz que se apaga volta da mesma cor.\n\n**— A Noite Mais Densa —**\n||em breve||",
-  "...the rings of Ryut are no longer silent.\n\nSomething is ||smelling out|| those who carry light, on every world at once. The Silent Ones stopped ||whispering||.\n\nKeep your ring close.\nNot every light that goes out comes back the same color.\n\n**— The Darkest Night —**\n||coming soon||"),
-], cor="7A5AB0", spoiler=True)
+  "...a Bateria Central de Korugar ||tremeu|| durante a guerra contra a Morte.\n\nNo fundo dela, alguma coisa feita de ||puro medo|| abriu os olhos. Ela sentiu a Morte cair... ou vencer. Para ela, ||tanto faz||.\n\nQuem caiu na escuridão do Necron vai ser trazido de volta à luz.\nMas nem toda alma purificada volta ||vazia||.\n\n**— O Medo Desperta —**\n||em breve||",
+  "...Korugar's Central Battery ||trembled|| during the war against Death.\n\nDeep inside it, something made of ||pure fear|| opened its eyes. It felt Death fall... or win. To it, ||it makes no difference||.\n\nWhoever fell into the Necron's darkness will be brought back to the light.\nBut not every purified soul comes back ||empty||.\n\n**— Fear Awakens —**\n||coming soon||"),
+], cor="C9A227", spoiler=True)
 
 cap("necron","lanterna:nucleo_bateria","A Saga do Necron","The Necron Saga",
  "O caminho inteiro, do chamado à purificação.","The whole path, from the call to the purification.",[

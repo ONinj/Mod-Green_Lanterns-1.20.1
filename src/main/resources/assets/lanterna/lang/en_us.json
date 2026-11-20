@@ -3849,5 +3849,14 @@
   "necron.lanterna.c4_titulo": "The Necron has won",
   "necron.lanterna.c4_sub": "Every Corps has fallen",
   "necron.lanterna.c4_epilogo_1": "A dark wave covers the Earth. On every world, the Central Batteries go out one by one.",
-  "necron.lanterna.c4_epilogo_2": "But, in hiding, a few Lanterns still keep a spark. They haven't forgotten your name... and they swore to bring you back, whether you want it or not. (To be continued in the next saga.)"
+  "necron.lanterna.c4_epilogo_2": "But, in hiding, a few Lanterns still keep a spark. They haven't forgotten your name... and they swore to bring you back, whether you want it or not. (To be continued in the next saga.)",
+  "necron.lanterna.c4_epilogo_3": "For an instant, deep inside your black ring, something glows yellow. And smiles.",
+  "necron.lanterna.pressagio_1": "The black ring hums softly. For an instant, its light looks yellow.",
+  "necron.lanterna.pressagio_2": "A voice that isn't the Necron's whispers: \"What are you afraid of, Herald?\"",
+  "necron.lanterna.pressagio_3": "You feel that someone, very far away, is looking for you. More than one someone.",
+  "necron.lanterna.pressagio_korugar": "As you arrive on Korugar, you feel it: the Central Battery trembles. Just a little. As if something inside were awake.",
+  "cmd.lanterna.saga_proxima": "Next saga · your path: %s · Parallax awake: %s · Lanterns swore to purify the Herald: %s",
+  "cmd.lanterna.saga_caminho_nenhum": "the Necron saga isn't over yet",
+  "cmd.lanterna.saga_caminho_heroi": "hero (performed the Ritual of Earth)",
+  "cmd.lanterna.saga_caminho_corrompido": "corrupted (the Necron won; destiny: Parallax)"
 }

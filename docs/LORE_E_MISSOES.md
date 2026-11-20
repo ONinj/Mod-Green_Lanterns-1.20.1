@@ -1976,3 +1976,14 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - Depois da Noite Eterna, a batalha final da linha do herói não começa mais (o Necron venceu para o mundo todo).
 - Comando de teste: **/lantern saga tempt** (força a pergunta).
 
+## 0.57.1 — O caminho para a próxima saga (Parallax)
+
+- **O que fica guardado:** cada jogador guarda como terminou a saga do Necron: **herói** (fez o Ritual da Terra) ou **corrompido** (aceitou a Morte e o Necron venceu). O mundo guarda que o **Parallax despertou** (nos dois finais) e, no final corrompido, que os **últimos Lanternas juraram purificar o Arauto**.
+- **A ideia da próxima saga (do dono):** quem seguiu o Necron é purificado pelos Lanternas que restaram, sem poder escolher; mas a alma purificada não volta vazia: **ele acaba se tornando o próprio Parallax**. Quem foi herói enfrenta o Parallax que acordou em Korugar.
+- **Presságios até lá:**
+  - no fim da Noite Eterna, por um instante, algo brilha amarelo no fundo do anel negro do Arauto... e sorri;
+  - depois disso, de vez em quando (uns 15 minutos em média), o anel negro dele brilha amarelo e ele ouve sussurros ("Você tem medo de quê, Arauto?");
+  - para o herói, ao chegar em Korugar, às vezes a Bateria Central treme, como se algo lá dentro estivesse acordado.
+- O guia: "Prepare-se" agora fala da saga do Necron, e a "Transmissão Interceptada" (com spoiler) vem de Korugar: "O Medo Desperta — em breve".
+- **/lantern saga next** mostra o caminho guardado do jogador e as marcas do mundo.
+
