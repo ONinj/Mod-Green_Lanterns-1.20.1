@@ -297,7 +297,8 @@ public final class Defesa {
         for (ServerPlayer q : perto) {
             titulo(q, "necron.lanterna.defesa_vitoria", "necron.lanterna.defesa_vitoria_sub", cor);
             q.sendSystemMessage(Component.translatable("necron.lanterna.defesa_fala").withStyle(st -> st.withColor(cor)));
-            com.lanterna.fonte.FonteDados.chamado(q, "necron:defesa", 1);
+            com.lanterna.fonte.FonteDados.chamado(q, "necron:defesa_" + b.planeta.corps.id().getPath(), 1);
+            Pedidos.defendeu(q, b.planeta);
         }
         LanternaMod.LOGGER.info("Lanterna: a Bateria Central de {} foi defendida", b.planeta.planet);
     }

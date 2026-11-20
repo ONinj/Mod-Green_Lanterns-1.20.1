@@ -61,10 +61,10 @@ public final class CinemaNecron extends Screen {
     static final int B0 = 240, ESTENDE = 280, DESFAZ = 352, PUM = 492, VOLTA0 = 568, VOLTA = 618, B1 = 680;
     static final int D0 = 770, RACHA = 880, D1 = 960, E1 = 1070, F1 = 1270, IMPACTO = 1392, G1 = 1450;
 
-    private static final ResourceLocation BRILHO = LanternaMod.id("cinema/brilho");
+    static final ResourceLocation BRILHO = LanternaMod.id("cinema/brilho");
     private static final ResourceLocation TEX_TERRA = LanternaMod.id("textures/space/earth.png");
     private static final ResourceLocation TEX_RYUT = LanternaMod.id("textures/space/ryut.png");
-    private static boolean texturaPronta;
+    static boolean texturaPronta;
 
     private final String tropa;
     private final int indiceTropa, corTropa;
@@ -330,7 +330,7 @@ public final class CinemaNecron extends Screen {
         RenderSystem.defaultBlendFunc();
     }
 
-    private static void sprite(BufferBuilder b, Matrix4f m, Vector3f dir, Vector3f cima, double x, double y, double z, float tam,
+    static void sprite(BufferBuilder b, Matrix4f m, Vector3f dir, Vector3f cima, double x, double y, double z, float tam,
                                float r, float g, float bl, float a) {
         float rx = dir.x * tam, ry = dir.y * tam, rz = dir.z * tam;
         float ux = cima.x * tam, uy = cima.y * tam, uz = cima.z * tam;
@@ -418,7 +418,7 @@ public final class CinemaNecron extends Screen {
         b.vertex(m, (float) c.x + p3.x, (float) c.y + p3.y, (float) c.z + p3.z).color(r3, g3, b3, 1f).endVertex();
     }
 
-    private static void esfera(Matrix4f m, Vec3 c, float r, ResourceLocation tex, float giro, int j0, int j1, Quaternionf q,
+    static void esfera(Matrix4f m, Vec3 c, float r, ResourceLocation tex, float giro, int j0, int j1, Quaternionf q,
                                float tr, float tg, float tb, float noite) {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, tex);
@@ -448,7 +448,7 @@ public final class CinemaNecron extends Screen {
                 .uv((float) j / lon + giro, (float) i / lat).color(luz * tr, luz * tg, luz * tb, 1f).endVertex();
     }
 
-    private static void atmosfera(Matrix4f m, Vec3 camPos, Vec3 c, float r, int cor, float forca) {
+    static void atmosfera(Matrix4f m, Vec3 camPos, Vec3 c, float r, int cor, float forca) {
         float cr = ((cor >> 16) & 255) / 255f, cg = ((cor >> 8) & 255) / 255f, cb = (cor & 255) / 255f;
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
@@ -1023,7 +1023,7 @@ public final class CinemaNecron extends Screen {
 
     // ===================== textura do brilho =====================
 
-    private static void criarBrilho() {
+    static void criarBrilho() {
         texturaPronta = true;
         NativeImage img = new NativeImage(128, 128, false);
         for (int y = 0; y < 128; y++)

@@ -42,7 +42,7 @@ public final class GuiaAbrir {
     /** O aviso no alto da tela. */
     @SubscribeEvent
     public static void hud(RenderGuiEvent.Post e) {
-        if (avisoTicks <= 0 || com.lanterna.client.combate.RitualCliente.emCena() || com.lanterna.client.necron.CenaFuga.ativa()) return;
+        if (avisoTicks <= 0 || com.lanterna.client.combate.RitualCliente.emCena() || com.lanterna.client.necron.CenaFuga.ativa() || com.lanterna.client.necron.CenaPedido.ativa()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.options.hideGui || mc.screen != null) return;
         GuiGraphics g = e.getGuiGraphics();

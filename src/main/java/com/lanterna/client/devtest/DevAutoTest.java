@@ -3900,6 +3900,57 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.55.1: o primeiro pedido de ajuda (Tropa Vermelha), a queda de Zamaron e Zamaron caída. */
+    private static void scenePedidos() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.necron.Pedidos.zerar(sp);
+            for (var pl : com.lanterna.lore.PlanetLore.values()) { com.lanterna.necron.Queda.zerar(sp.server, pl); com.lanterna.necron.Defesa.zerar(sp.server, pl); }
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            d.completed().add("necron_3"); d.completed().add("necron_4_green");
+            d.completed().remove("necron_4_red"); d.active().remove("necron_4_red");
+            glog("sequencia=" + com.lanterna.necron.Pedidos.sequencia("green"));
+            var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(oa, h.getX() + 0.5, 90, h.getZ() + 30.5, 180, 0);
+        }));
+        waitFor(com.lanterna.client.necron.CenaPedido::ativa, 20 * 40);
+        at(1, () -> mc.options.hideGui = false);
+        at(40, () -> shot("pedido_chega"));
+        at(110, () -> shot("pedido_fala"));
+        waitFor(() -> !com.lanterna.client.necron.CenaPedido.ativa(), 20 * 30);
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("depois do pedido: necron_4_red ativa=" + d.active().containsKey("necron_4_red")
+                    + " fenda ysmault=" + com.lanterna.necron.Defesa.fendaAberta(sp.server, com.lanterna.lore.PlanetLore.YSMAULT));
+            // a defesa de Ysmault vencida (simulada)
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:defesa_red", 1);
+            com.lanterna.necron.Pedidos.defendeu(sp, com.lanterna.lore.PlanetLore.YSMAULT);
+        }));
+        waitFor(() -> mc.screen instanceof com.lanterna.client.necron.CinemaQueda, 20 * 40);
+        at(60, () -> shot("queda_1"));
+        at(70, () -> shot("queda_2"));
+        waitFor(() -> !(mc.screen instanceof com.lanterna.client.necron.CinemaQueda), 20 * 20);
+        at(20, () -> server(sp -> glog("zamaron caida=" + com.lanterna.necron.Queda.caida(sp.server, com.lanterna.lore.PlanetLore.ZAMARON)
+                + " etapa=" + com.lanterna.necron.SagaNecron.tag(sp).getCompound("pedidos").getInt("etapa"))));
+        at(400, () -> server(sp -> {
+            var z = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("zamaron").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(z, h.getX() + 30.5, 110, h.getZ() + 40.5, 145, 25);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+        }));
+        at(200, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(60, () -> shot("zamaron_caida"));
+        at(20, () -> { glog("FIM pedidos"); mc.stop(); });
+    }
+
     /** 0.55.0: a defesa da Bateria Central da Tropa (três ondas caindo da fenda). */
     private static void sceneDefesa() {
         Minecraft mc = Minecraft.getInstance();
@@ -3915,7 +3966,7 @@ public final class DevAutoTest {
             var d = com.lanterna.mission.MissionManager.data(sp);
             d.completed().add("necron_3");
             d.completed().remove("necron_4_green");
-            com.lanterna.fonte.FonteDados.chamado(sp, "necron:defesa", 0);
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:defesa_green", 0);
             com.lanterna.mission.MissionManager.start(sp, "necron_4_green");
             com.lanterna.vida.Emocoes.tag2(sp);
             var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
@@ -7371,6 +7422,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cratera")) sceneCratera();
         else if (ENABLED && SCENE.equals("fuga")) sceneFuga();
         else if (ENABLED && SCENE.equals("defesa")) sceneDefesa();
+        else if (ENABLED && SCENE.equals("pedidos")) scenePedidos();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

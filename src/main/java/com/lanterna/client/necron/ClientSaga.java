@@ -29,11 +29,24 @@ public final class ClientSaga {
         ryutPartida = m.ryutPartida();
         cratera = m.cratera() ? new net.minecraft.core.BlockPos(m.x(), m.y(), m.z()) : null;
         com.lanterna.necron.MissoesNecron.centro = cratera;
+        caidas.clear();
+        for (String s : m.caidas().split(",")) if (!s.isEmpty()) caidas.add(s);
+    }
+
+    /** Os planetas das Tropas que caíram diante do Necron (névoa e cinza no planeta todo). */
+    public static final java.util.Set<String> caidas = new java.util.HashSet<>();
+
+    private static boolean noPlanetaCaido() {
+        var mc = Minecraft.getInstance();
+        if (mc.level == null || caidas.isEmpty()) return false;
+        var p = com.lanterna.lore.PlanetLore.byDimension(mc.level.dimension());
+        return p != null && caidas.contains(p.planet);
     }
 
     /** Quanto o jogador está "dentro" da terra morta (0 fora, 1 no meio). */
     public static float naTerraMorta() {
         var mc = Minecraft.getInstance();
+        if (noPlanetaCaido()) return 0.55f;
         if (cratera == null || mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return 0;
         double dx = mc.player.getX() - cratera.getX(), dz = mc.player.getZ() - cratera.getZ();
         double d = Math.sqrt(dx * dx + dz * dz);

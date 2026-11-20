@@ -258,7 +258,8 @@ public final class SagaNecron {
     public static void mandarMundo(ServerPlayer p) {
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         MissoesNecron.centro = c;
-        ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server), c != null, c == null ? 0 : c.getX(), c == null ? 0 : c.getY(), c == null ? 0 : c.getZ()));
+        ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server), c != null, c == null ? 0 : c.getX(), c == null ? 0 : c.getY(), c == null ? 0 : c.getZ(),
+                String.join(",", Queda.caidas(p.server))));
     }
 
     /** Começa a cena agora (comando / testes). revendo = só assistir de novo, sem mexer no anel. */
@@ -281,6 +282,7 @@ public final class SagaNecron {
     public static void zerar(ServerPlayer p) {
         parar(p);
         Fuga.zerar(p);
+        Pedidos.zerar(p);
         CompoundTag t = tag(p);
         String origem = t.getString("origem");
         for (String k : t.getAllKeys().toArray(new String[0])) t.remove(k);
@@ -398,11 +400,11 @@ public final class SagaNecron {
     // ===================== rede =====================
 
     /** Servidor → cliente: o estado da saga no mundo (Ryut partida). */
-    public record Mundo(boolean ryutPartida, boolean cratera, int x, int y, int z) {
+    public record Mundo(boolean ryutPartida, boolean cratera, int x, int y, int z, String caidas) {
         public static void encode(Mundo m, FriendlyByteBuf b) {
-            b.writeBoolean(m.ryutPartida); b.writeBoolean(m.cratera); b.writeInt(m.x); b.writeInt(m.y); b.writeInt(m.z);
+            b.writeBoolean(m.ryutPartida); b.writeBoolean(m.cratera); b.writeInt(m.x); b.writeInt(m.y); b.writeInt(m.z); b.writeUtf(m.caidas, 256);
         }
-        public static Mundo decode(FriendlyByteBuf b) { return new Mundo(b.readBoolean(), b.readBoolean(), b.readInt(), b.readInt(), b.readInt()); }
+        public static Mundo decode(FriendlyByteBuf b) { return new Mundo(b.readBoolean(), b.readBoolean(), b.readInt(), b.readInt(), b.readInt(), b.readUtf(256)); }
         public static void handle(Mundo m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
                     () -> () -> com.lanterna.client.necron.ClientSaga.mundo(m)));

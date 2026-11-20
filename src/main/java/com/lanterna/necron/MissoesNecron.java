@@ -35,6 +35,7 @@ public final class MissoesNecron {
             case "necron_1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:cratera", 1, "earth", chao)), "necron_2");
             case "necron_2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:enfrentou", 1, "earth", chao)), null);
             case "necron_3" -> m(id, List.of(Objective.of(Type.FONTE, "necron:dois", 1, null, null)), null);
+            case "necron_5" -> m(id, List.of(Objective.of(Type.FONTE, "necron:terra", 1, "earth", chao)), null);
             default -> {
                 // necron_4_<tropa>: defender a Bateria Central da própria Tropa
                 if (!id.startsWith("necron_4_")) yield null;
@@ -42,7 +43,7 @@ public final class MissoesNecron {
                 for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values())
                     if (x.corps.id().getPath().equals(id.substring(9))) p = x;
                 if (p == null) yield null;
-                yield m(id, List.of(Objective.of(Type.FONTE, "necron:defesa", 1, p.planet, com.lanterna.lore.PlanetLore.HUB)), null);
+                yield m(id, List.of(Objective.of(Type.FONTE, "necron:defesa_" + p.corps.id().getPath(), 1, p.planet, com.lanterna.lore.PlanetLore.HUB)), null);
             }
         };
     }
