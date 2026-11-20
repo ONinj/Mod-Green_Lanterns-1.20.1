@@ -74,10 +74,18 @@ public final class RenderFenda {
         var mc = Minecraft.getInstance();
         if (mc.level == null) return;
         var planeta = com.lanterna.lore.PlanetLore.byDimension(mc.level.dimension());
-        BlockPos f = planeta != null ? ClientSaga.fendas.get(planeta.planet)
-                : mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD ? ClientSaga.fendas.get("earth") : null;
+        boolean terra = mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD;
+        java.util.List<BlockPos> fs = new java.util.ArrayList<>();
+        BlockPos embriao = null;
+        for (var en : ClientSaga.fendas.entrySet()) {
+            String k = en.getKey();
+            if (planeta != null ? k.equals(planeta.planet) : terra && k.startsWith("earth")) fs.add(en.getValue());
+            if (terra && k.equals("embriao")) embriao = en.getValue();
+        }
+        Vec3 cam0 = e.getCamera().getPosition();
+        if (embriao != null && embriao.distToCenterSqr(cam0) < 96 * 96) desenharEmbriao(e, embriao, cam0, mc.level.getGameTime() + e.getPartialTick());
         boolean escudo = CenaFuga.escudoAtivo();
-        if (f == null && !escudo) return;
+        if (fs.isEmpty() && !escudo) return;
         if (!pronto) texturas();
         if (!CinemaNecron.texturaPronta) CinemaNecron.criarBrilho();
         float tempo = mc.level.getGameTime() + e.getPartialTick();
@@ -87,12 +95,29 @@ public final class RenderFenda {
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
-        if (f != null && f.distToCenterSqr(cam) < 400 * 400) portal(m, Vec3.atCenterOf(f).subtract(cam), tempo);
+        for (BlockPos f : fs) if (f.distToCenterSqr(cam) < 400 * 400) portal(m, Vec3.atCenterOf(f).subtract(cam), tempo);
         if (escudo) CenaFuga.desenharEscudo(m, cam, e.getPartialTick());
         RenderSystem.enableCull();
         RenderSystem.depthMask(true);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
+    }
+
+    private static Atores atores;
+
+    /** 0.56.7: o Embrião da Vida dormindo no Santuário, girando devagar e batendo como um coração. */
+    private static void desenharEmbriao(RenderLevelStageEvent e, BlockPos b, Vec3 cam, float t) {
+        if (atores == null) atores = new Atores();
+        var ps = e.getPoseStack();
+        var buf = Minecraft.getInstance().renderBuffers().bufferSource();
+        float bate = 1 + 0.05f * Mth.sin(t * 0.12f) * Mth.sin(t * 0.12f);
+        ps.pushPose();
+        ps.translate(b.getX() + 0.5 - cam.x, b.getY() - 1.6 + 0.15 * Mth.sin(t * 0.05f) - cam.y, b.getZ() + 0.5 - cam.z);
+        ps.mulPose(com.mojang.math.Axis.YP.rotationDegrees(t * 0.35f));
+        ps.scale(1.2f * bate, 1.2f * bate, 1.2f * bate);
+        atores.embriao(ps, buf, t, 0.86f, 0.84f, 0.9f, 1f);
+        ps.popPose();
+        buf.endBatch();
     }
 
     private static void portal(Matrix4f m, Vec3 c, float tempo) {

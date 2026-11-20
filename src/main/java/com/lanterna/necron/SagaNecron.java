@@ -268,6 +268,8 @@ public final class SagaNecron {
             net.minecraft.core.BlockPos e = Treino.fendaPequena(p.server.overworld());
             if (e != null) f = (f.isEmpty() ? "" : f + ";") + "earth:" + e.getX() + ":" + e.getY() + ":" + e.getZ();
         }
+        String esc = Escurece.paraCliente(p);
+        if (!esc.isEmpty()) f = (f.isEmpty() ? "" : f + ";") + esc;
         return f;
     }
 
@@ -306,6 +308,7 @@ public final class SagaNecron {
             com.lanterna.fonte.FonteDados.chamado(p, "necron:guardiao_" + t, 0);
             com.lanterna.fonte.FonteDados.chamado(p, "necron:nucleo_" + t, 0);
         }
+        Escurece.zerar(p);
         Treino.zerar(p);
         Aurora.zerar(p);
         Fuga.zerar(p);

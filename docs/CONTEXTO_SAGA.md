@@ -95,3 +95,4 @@ Valores escolhidos pelo Claude que o dono ainda pode mudar: custos dos fragmento
 Não testado com dois jogadores reais: Purificar do Anel Branco; cenas vistas por outro player.
 
 **Andamento:** 0.56.4 Cap. 4 (`necron/Ancoras.java`) · 0.56.5 Cap. 5 socorro (`necron/Socorro.java`, missões `necron_s_<tropa>`) · 0.56.6 Cap. 6 ruínas das Tropas caídas (`necron/Ruinas.java`, missões `necron_q_<tropa>`, item `nucleo_bateria`; os núcleos guardados ficam na marca do mundo `saga:nucleo:<tropa>`, para usar na purificação). Próximo: Cap. 7 A Terra Escurece.
+0.56.7 Cap. 7 (`necron/Escurece.java`: missões necron_5 → 5b → 5c → 5d → 5e → 5f, depois necron_6; o Santuário do Embrião fica em Aurora + (-320, 170), câmara a 22 blocos de fundo, marca `saga:santuario`; o cliente desenha o Embrião pela entrada "embriao" das fendas). Próximo: Cap. 8 A Última Luz (recrutar aliados antes).

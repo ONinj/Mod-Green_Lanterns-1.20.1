@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 
 /**
  * 0.56.0: a Terra Escurece. Depois das quedas, cada vez que o jogador volta para a Terra (com a missão "A Terra
- * Escurece"), a escuridão avançou: a terra morta em volta da cratera cresce, o céu da Terra fica mais cinza-roxo e
+ * Escurece"), a escuridão avançou. 0.56.7: agora cada etapa é uma missão (ver {@link Escurece}): a terra morta em volta da cratera cresce, o céu da Terra fica mais cinza-roxo e
  * mais servos rondam. Na terceira volta, os Lanternas que restam chamam para a batalha final ("A Última Luz").
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -24,24 +24,10 @@ public final class TerraEscurece {
     /** Tempo mínimo fora da Terra entre uma etapa e outra (ticks). */
     private static final long INTERVALO = 20 * 60 * 2;
 
-    @SubscribeEvent
-    public static void voltou(PlayerEvent.PlayerChangedDimensionEvent e) {
-        if (!(e.getEntity() instanceof ServerPlayer p) || !e.getTo().equals(Level.OVERWORLD)) return;
-        LoreData d = MissionManager.data(p);
-        if (d == null || !d.active().containsKey("necron_5")) return;
-        var s = p.server;
-        int e0 = Cratera.estagio(s);
-        long agora = s.overworld().getGameTime();
-        long ultima = SagaNecron.tag(p).getLong("terra_ultima");
-        if (e0 >= ETAPAS || (ultima > 0 && agora - ultima < INTERVALO)) return;
-        SagaNecron.tag(p).putLong("terra_ultima", agora);
-        avancar(p, e0 + 1);
-    }
-
     /** Uma etapa a mais (também pelo comando de teste). */
     public static void avancar(ServerPlayer p, int etapa) {
         var s = p.server;
-        Cratera.crescer(s, etapa);
+        if (Cratera.estagio(s) < etapa) Cratera.crescer(s, etapa);
         for (ServerPlayer q : s.getPlayerList().getPlayers()) SagaNecron.mandarMundo(q);
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
                 Component.translatable("necron.lanterna.terra_titulo").withStyle(ChatFormatting.DARK_PURPLE)));

@@ -147,7 +147,17 @@ public final class Falas {
             Map.entry("necron.lanterna.ruina_chamado", "lanterna"),
             Map.entry("necron.lanterna.caido_fala", "lanterna"),
             Map.entry("necron.lanterna.carcereiro_fala", "necron"),
-            Map.entry("necron.lanterna.nucleo_guardado", "lanterna"));
+            Map.entry("necron.lanterna.nucleo_guardado", "lanterna"),
+            Map.entry("necron.lanterna.fenda_terra_aviso", "anel"),
+            Map.entry("necron.lanterna.pulso_1", "anel"),
+            Map.entry("necron.lanterna.pulso_2", "anel"),
+            Map.entry("necron.lanterna.pulso_3", "anel"),
+            Map.entry("necron.lanterna.santuario_achou", "anel"),
+            Map.entry("necron.lanterna.cerco_aurora_comeca", "homem"),
+            Map.entry("necron.lanterna.cerco_aurora_fim", "homem"),
+            Map.entry("necron.lanterna.cerco_aurora_arauto", "necron"),
+            Map.entry("necron.lanterna.cerco_embriao_arauto", "necron"),
+            Map.entry("necron.lanterna.cerco_embriao_fim", "anel"));
 
     @SubscribeEvent
     public static void chat(ClientChatReceivedEvent e) {

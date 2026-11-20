@@ -1929,3 +1929,13 @@ Depois da cena de cada queda (Tropas do Amor/Violeta, Índigo e Esperança/Azul)
 - Tudo é do mundo: montes, Carcereiro e núcleo guardado contam para todos os jogadores.
 - A saga só segue para a Terra (as Tropas que resistem se reúnem) depois das ruínas de todas as Tropas que caíram.
 
+## 0.56.7 — Saga do Necron, Capítulo 7: A Terra Escurece
+
+Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Antes era só voltar três vezes à Terra; agora cada etapa é uma missão, e a cada uma terminada a terra morta em volta da cratera cresce e o céu escurece:
+1. **Fendas sobre a Terra:** três fendas no céu (leste, noroeste e sul da Vila Aurora, a uns 250 blocos). Cada uma despeja servos; derrotados 6, ela se fecha.
+2. **Notícias de Aurora → O Cerco de Aurora:** o Sgt. Rui conta que um exército marcha para a vila. A Dra. Lívia ligou um **escudo de luz na praça**. Três ondas de servos chegam pela borda da vila e marcham para o escudo; cada servo que chega perto o enfraquece (barra amarela). Entre as ondas o escudo recupera um pouco. Na última onda vem um **Arauto do Necron**. Se o escudo cair, o cerco recomeça do início.
+3. **O Pulso Embaixo da Terra → O Pulso da Vida:** durante o cerco a Dra. Lívia captou um pulso de vida, como um coração enorme debaixo da terra, vindo do oeste. Lá, três **canteiros de flores** resistem no meio da terra morta (coluna de luz verde). Fique perto de cada um até o anel escutar o pulso. O último mostra um **poço** que desce ao **Santuário**: uma caverna funda de musgo, raízes e líquen, com o **Embrião da Vida** flutuando sobre um pedestal de musgo e azaleias.
+4. **Proteger o Embrião:** o Necron sentiu o Embrião. Os servos saem das paredes do Santuário e andam até o pedestal; cada um que chega perto suga a vida dele (barra verde). Três ondas, com um Arauto na última (o Necron fala pela boca dele). Se a vida acabar, recomeça.
+- Terminada a última etapa, começa **A Última Luz** (a batalha final).
+- As fendas, o cerco, os canteiros, o Santuário e o Embrião são do mundo: contam para todos os jogadores. O Embrião continua dormindo no Santuário até a purificação.
+

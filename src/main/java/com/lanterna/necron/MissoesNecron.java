@@ -43,7 +43,15 @@ public final class MissoesNecron {
             case "necron_2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:enfrentou", 1, "earth", chao)), null);
             case "necron_3" -> m(id, List.of(Objective.of(Type.FONTE, "necron:dois", 1, null, null)), null);
             case "necron_3d" -> m(id, List.of(fonte("necron:primeira_fechou", primeiraFenda())), null);
-            case "necron_5" -> m(id, List.of(Objective.of(Type.FONTE, "necron:terra", 1, "earth", chao)), null);
+            // Capítulo 7: A Terra Escurece, uma missão por etapa
+            case "necron_5" -> m(id, List.of(fonte("necron:fenda_terra_1", Escurece.fenda(1)), fonte("necron:fenda_terra_2", Escurece.fenda(2)),
+                    fonte("necron:fenda_terra_3", Escurece.fenda(3))), "necron_5b");
+            case "necron_5b" -> m(id, List.of(Objective.of(Type.TALK, "seguranca:earth", 1, "earth", aurora())), "necron_5c");
+            case "necron_5c" -> m(id, List.of(fonte("necron:aurora_cerco", aurora())), "necron_5d");
+            case "necron_5d" -> m(id, List.of(Objective.of(Type.TALK, "cientista:earth", 1, "earth", aurora())), "necron_5e");
+            case "necron_5e" -> m(id, List.of(fonte("necron:pulso_1", Escurece.pulso(1)), fonte("necron:pulso_2", Escurece.pulso(2)),
+                    fonte("necron:pulso_3", Escurece.pulso(3)), fonte("necron:santuario", Escurece.santuario())), "necron_5f");
+            case "necron_5f" -> m(id, List.of(fonte("necron:embriao_salvo", Escurece.santuario())), null);
             case "necron_6" -> m(id, List.of(Objective.of(Type.FONTE, "necron:vitoria", 1, "earth", chao)), "necron_7");
             case "necron_7" -> m(id, List.of(Objective.of(Type.FONTE, "necron:purificou_terra", 1, "earth", chao)), null);
             default -> {
