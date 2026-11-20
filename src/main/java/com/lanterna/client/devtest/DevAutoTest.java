@@ -3900,6 +3900,78 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.2: Capítulo 2 na Vila Aurora (Rui, os quatro resgates, a Dra. Lívia e o rastro do cometa). */
+    private static void sceneAuroraNecron() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green");
+            com.lanterna.necron.SagaNecron.partirRyut(sp.server);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            for (String m : new String[]{"necron_a1", "necron_a2", "necron_a3", "necron_a4", "necron_1"}) { d.completed().remove(m); d.active().remove(m); }
+            com.lanterna.mission.MissionManager.start(sp, "necron_a1");
+            glog("aurora=" + com.lanterna.terra.TerraSite.centro + " cratera=" + com.lanterna.necron.MissoesNecron.centro + " a1 ativa=" + d.isActive("necron_a1"));
+            com.lanterna.mission.MissionManager.onTalk(sp, "seguranca", "earth");
+            glog("depois do Rui: a2 ativa=" + d.isActive("necron_a2"));
+            var c = com.lanterna.terra.TerraSite.centro;
+            sp.teleportTo(sp.server.overworld(), c.getX() + 0.5, c.getY() + 40, c.getZ() + 0.5, 0, 30);
+        }));
+        // limpa o que sobrou de testes anteriores (o cerco nasce de novo, sem repetir)
+        at(80, () -> server(sp -> {
+            var area = sp.getBoundingBox().inflate(200, 300, 200);
+            for (var v : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, area,
+                    m -> m.getTags().contains(com.lanterna.necron.Aurora.REFEM) || m.getTags().contains(com.lanterna.necron.Aurora.CERCO))) v.discard();
+        }));
+        at(160, () -> server(sp -> glog("presos=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.npc.Villager.class, sp.getBoundingBox().inflate(150, 200, 150),
+                v -> v.getTags().contains(com.lanterna.necron.Aurora.REFEM)).size()
+                + " cerco=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(150, 200, 150), m -> m.getTags().contains(com.lanterna.necron.Aurora.CERCO)).size())));
+        for (int i = 1; i <= 4; i++) {
+            int ii = i;
+            for (int tent = 0; tent < 3; tent++) {
+                at(10, () -> server(sp -> {
+                    if (com.lanterna.fonte.FonteDados.chamado(sp, "necron:resgate_" + ii) >= 1) return;
+                    var v = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.npc.Villager.class, sp.getBoundingBox().inflate(150, 200, 150),
+                            x -> x.getTags().contains(com.lanterna.necron.Aurora.REFEM + ":" + sp.getUUID() + ":" + ii)).stream().findFirst().orElse(null);
+                    if (v == null) { glog("morador " + ii + " nao achado"); return; }
+                    if (v.isNoGravity()) return;   // já voando
+                    sp.connection.teleport(v.getX() + 2.5, v.getY(), v.getZ(), 90, 10);
+                    sp.interactOn(v, net.minecraft.world.InteractionHand.MAIN_HAND);
+                }));
+                if (ii == 1 && tent == 0) at(30, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); shot("aurora_resgate"); });
+                at(70, () -> {});
+            }
+        }
+        at(100, () -> {});
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("resgates: a2 feita=" + d.completed().contains("necron_a2") + " a3 ativa=" + d.isActive("necron_a3"));
+            com.lanterna.mission.MissionManager.onTalk(sp, "cientista", "earth");
+            glog("depois da Livia: a4 ativa=" + d.isActive("necron_a4"));
+        }));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            at(20, () -> server(sp -> {
+                var m = com.lanterna.necron.Aurora.marca(ii);
+                sp.server.overworld().getChunk(m.getX() >> 4, m.getZ() >> 4);
+                int y = sp.server.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, m.getX(), m.getZ());
+                sp.connection.teleport(m.getX() + 3.5, y + 1, m.getZ() + 0.5, 90, 20);
+            }));
+            if (i == 1) at(40, () -> shot("aurora_marca"));
+            at(i == 1 ? 60 : 100, () -> {});
+        }
+        at(20, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("rastro: a4 feita=" + d.completed().contains("necron_a4") + " necron_1 ativa=" + d.isActive("necron_1"));
+        }));
+        at(20, () -> { glog("FIM aurora"); mc.stop(); });
+    }
+
     /** 0.56.1: o nível cai para 90 na divisão; o servo fere um nível 150 de verdade. */
     private static void sceneNivel() {
         Minecraft mc = Minecraft.getInstance();
@@ -7480,7 +7552,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("estruturas")) sceneEstruturas();
         else if (ENABLED && SCENE.equals("bases")) sceneBases();
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
-        else if (ENABLED && SCENE.equals("aurora")) sceneAurora();
+        else if (ENABLED && SCENE.equals("aurora_necron")) sceneAuroraNecron();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
@@ -7548,6 +7620,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("queda")) sceneQueda();
         else if (ENABLED && SCENE.equals("final")) sceneFinal();
         else if (ENABLED && SCENE.equals("nivel")) sceneNivel();
+        else if (ENABLED && SCENE.equals("aurora")) sceneAurora();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

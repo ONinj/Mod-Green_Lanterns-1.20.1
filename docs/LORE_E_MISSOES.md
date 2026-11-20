@@ -1868,3 +1868,18 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
   - na batalha final, os golpes avisados no chão crescem com a vida máxima de quem leva.
 - **O Necron da batalha final** tem 1000 de vida e é absurdamente forte: o dano que ele recebe depende do nível de quem bate. No nível 90 entra só 12% do golpe; no 200 ou mais, o golpe inteiro. Sempre pela metade, porque ele é a Morte. Os aliados tiram só um quarto. É preciso farmar até o 200–250 para derrubá-lo.
 - A força dos Lanternas lendários não mudou com o nível novo.
+
+
+## 0.56.2 — Saga do Necron, Capítulo 2: A Queda (Vila Aurora)
+
+Depois da cutscene da divisão, antes de ir à cratera:
+1. **Pânico em Aurora:** fale com o **Sgt. Rui** no observatório da Vila Aurora. Ele viu o cometa negro cair, e coisas mortas com anéis pretos cercaram os sítios em volta da vila.
+2. **Cercados:** quatro moradores (Seu Ari, Dona Neide, Lia e Beto) estão presos fora da vila, cada um cercado por três servos. Colunas de luz mostram onde eles estão.
+   - Com um anel só você **não fere** os servos. Chegue até o morador, **clique nele** e fique perto por **3 segundos** (envolvendo-o em luz), mesmo apanhando. Se você se afastar, a luz se desfaz.
+   - A bolha de luz leva o morador voando até a vila, e você já pode ir para o próximo.
+   - O cerco some quando todos estão salvos.
+3. **A Doutora:** fale com a **Dra. Lívia** na Base Vigília. Ela mediu a queda: não foi um meteoro, e o cometa deixou marcas pelo caminho.
+4. **O Rastro do Cometa:** três **marcas de cristal negro** entre a vila e o lugar da queda. Um feixe roxo mostra a próxima. Fique perto de cada uma por 4 segundos para o anel ler; ele comenta cada uma. A última revela a cratera.
+5. Depois, **A Queda do Necron** (chegar à terra morta) e **O Ser da Morte**, como antes.
+
+Num mundo sem a Vila Aurora, a saga vai direto para a cratera.

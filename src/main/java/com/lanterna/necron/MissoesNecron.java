@@ -32,6 +32,13 @@ public final class MissoesNecron {
         BlockPos c = centro;
         BlockPos chao = c == null ? null : new BlockPos(c.getX(), 0, c.getZ());
         return switch (id) {
+            // Capítulo 2: a Vila Aurora
+            case "necron_a1" -> m(id, List.of(Objective.of(Type.TALK, "seguranca:earth", 1, "earth", aurora())), "necron_a2");
+            case "necron_a2" -> m(id, List.of(fonte("necron:resgate_1", Aurora.refem(1)), fonte("necron:resgate_2", Aurora.refem(2)),
+                    fonte("necron:resgate_3", Aurora.refem(3)), fonte("necron:resgate_4", Aurora.refem(4))), "necron_a3");
+            case "necron_a3" -> m(id, List.of(Objective.of(Type.TALK, "cientista:earth", 1, "earth", aurora())), "necron_a4");
+            case "necron_a4" -> m(id, List.of(fonte("necron:rastro_1", Aurora.marca(1)), fonte("necron:rastro_2", Aurora.marca(2)),
+                    fonte("necron:rastro_3", Aurora.marca(3))), "necron_1");
             case "necron_1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:cratera", 1, "earth", chao)), "necron_2");
             case "necron_2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:enfrentou", 1, "earth", chao)), null);
             case "necron_3" -> m(id, List.of(Objective.of(Type.FONTE, "necron:dois", 1, null, null)), null);
@@ -48,6 +55,16 @@ public final class MissoesNecron {
                 yield m(id, List.of(Objective.of(Type.FONTE, "necron:defesa_" + p.corps.id().getPath(), 1, p.planet, com.lanterna.lore.PlanetLore.HUB)), null);
             }
         };
+    }
+
+    @Nullable
+    private static BlockPos aurora() {
+        BlockPos c = com.lanterna.terra.TerraSite.centro;
+        return c == null ? null : new BlockPos(c.getX(), 0, c.getZ());
+    }
+
+    private static Objective fonte(String alvo, @Nullable BlockPos pos) {
+        return Objective.of(Type.FONTE, alvo, 1, pos == null ? null : "earth", pos);
     }
 
     private static Mission m(String id, List<Objective> o, @Nullable String next) {

@@ -288,6 +288,7 @@ public final class SagaNecron {
     /** Zera a saga do jogador (comando de teste). */
     public static void zerar(ServerPlayer p) {
         parar(p);
+        Aurora.zerar(p);
         Fuga.zerar(p);
         Pedidos.zerar(p);
         CompoundTag t = tag(p);
@@ -353,7 +354,8 @@ public final class SagaNecron {
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         if (c != null) {
             mandarMundo(p);
-            MissionManager.start(p, "necron_1");
+            // 0.56.2: primeiro a Vila Aurora (Capítulo 2); sem a vila neste mundo, direto para a cratera
+            MissionManager.start(p, com.lanterna.terra.TerraSite.centro != null ? "necron_a1" : "necron_1");
             p.sendSystemMessage(Component.translatable("necron.lanterna.missao_cratera", c.getX(), c.getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
         }
     }
