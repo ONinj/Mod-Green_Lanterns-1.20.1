@@ -344,8 +344,8 @@
       "en": "Levels and ranks"
      },
      "texto": {
-      "pt": "XP vem de piratas, capitães, Lanternas inimigos, chefes, Ecos, naves destruídas, missões, contratos e da **primeira visita** a cada planeta. O nível vai até **150**.\n\n**Nível 10:** Patrulheiro + nave Lanceira\n**Nível 20:** Oficial + nave Patrulha\n**Nível 30:** Veterano · **40:** Guarda de Honra\n\nA cada 5 níveis você ganha mais um coração, e a defesa sobe até cortar 60% do dano.",
-      "en": "XP comes from pirates, captains, enemy Lanterns, bosses, Echoes, destroyed ships, missions, contracts and your **first visit** to each planet. Level caps at **150**.\n\n**Level 10:** Patroller + Lancer ship\n**Level 20:** Officer + Patrol ship\n**Level 30:** Veteran · **40:** Honor Guard\n\nEvery 5 levels you gain a heart, and defense grows up to 60% damage reduction."
+      "pt": "XP vem de piratas, capitães, Lanternas inimigos, chefes, Ecos, naves destruídas, missões, contratos e da **primeira visita** a cada planeta. O nível vai até **250** (do 150 ao 250 é a saga do Necron, e cada nível custa bem mais).\n\n**Nível 10:** Patrulheiro + nave Lanceira\n**Nível 20:** Oficial + nave Patrulha\n**Nível 30:** Veterano · **40:** Guarda de Honra\n\nA cada 5 níveis você ganha mais um coração, e a defesa sobe até cortar 60% do dano.",
+      "en": "XP comes from pirates, captains, enemy Lanterns, bosses, Echoes, destroyed ships, missions, contracts and your **first visit** to each planet. Level caps at **250** (150 to 250 is the Necron saga, and each level costs much more).\n\n**Level 10:** Patroller + Lancer ship\n**Level 20:** Officer + Patrol ship\n**Level 30:** Veteran · **40:** Honor Guard\n\nEvery 5 levels you gain a heart, and defense grows up to 60% damage reduction."
      },
      "itens": [
       "lanterna:insignia_recruta",

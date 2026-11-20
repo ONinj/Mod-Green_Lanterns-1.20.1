@@ -392,8 +392,8 @@
    "farm xp",
    "grind"
   ],
-  "pt": "XP vem de piratas, capitães, Lanternas inimigos, chefes, Ecos, naves destruídas, missões, contratos e da primeira visita a cada planeta. O nível vai até 150. No nível 10 você vira Patrulheiro e ganha uma nave Lanceira; no 20, Oficial e uma nave Patrulha; depois Veterano (30) e Guarda de Honra (40).",
-  "en": "XP comes from pirates, captains, enemy Lanterns, bosses, Echoes, destroyed ships, missions, contracts and your first visit to each planet. The level goes up to 150. At level 10 you become a Patroller and get a Lancer ship; at 20, an Officer and a Patrol ship; then Veteran (30) and Honor Guard (40)."
+  "pt": "XP vem de piratas, capitães, Lanternas inimigos, chefes, Ecos, naves destruídas, missões, contratos e da primeira visita a cada planeta. O nível vai até 250 (do 150 ao 250 cada nível custa bem mais). No nível 10 você vira Patrulheiro e ganha uma nave Lanceira; no 20, Oficial e uma nave Patrulha; depois Veterano (30) e Guarda de Honra (40).",
+  "en": "XP comes from pirates, captains, enemy Lanterns, bosses, Echoes, destroyed ships, missions, contracts and your first visit to each planet. The level goes up to 250 (from 150 to 250 each level costs much more). At level 10 you become a Patroller and get a Lancer ship; at 20, an Officer and a Patrol ship; then Veteran (30) and Honor Guard (40)."
  },
  {
   "id": "missoes",

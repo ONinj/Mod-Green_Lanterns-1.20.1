@@ -2627,7 +2627,7 @@
   "cmd.lanterna.poder.autorecarga": "O anel agora se recarrega sozinho (recompensa da Prova da Emoção).",
   "cmd.lanterna.poder.honra": "Guarda de Honra: posto e 3º espaço de técnica.",
   "cmd.lanterna.poder.genese": "Gênese revelada no espaço.",
-  "cmd.lanterna.poder.tudo": "Tudo liberado: nível 150, afinidade máxima, todas as técnicas, Guarda de Honra, Porta Estelar, autorrecarga, Gênese e todos os planetas visitados.",
+  "cmd.lanterna.poder.tudo": "Tudo liberado: nível 250, afinidade máxima, todas as técnicas, Guarda de Honra, Porta Estelar, autorrecarga, Gênese e todos os planetas visitados.",
   "cmd.lanterna.uso_morte": "Use: corromper, dominar, faminto, alimentar ou limpar.",
   "cmd.lanterna.morte.corromper": "Anel corrompido: a linha \"A Morte\" começou.",
   "cmd.lanterna.morte.dominar": "Você domina a Morte (pode forjar/usar o Anel Preto; use /lantern ring black para equipar).",
