@@ -140,7 +140,8 @@ public final class Falas {
             "necron.lanterna.defesa_fala", "lanterna",
             "necron.lanterna.final_fala", "lanterna",
             "necron.lanterna.vitoria_fala", "lanterna",
-            "necron.lanterna.mestre_", "lanterna");
+            "necron.lanterna.mestre_", "lanterna",
+            "necron.lanterna.ancora_fala", "lanterna");
 
     @SubscribeEvent
     public static void chat(ClientChatReceivedEvent e) {

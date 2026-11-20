@@ -298,6 +298,8 @@ public final class SagaNecron {
     /** Zera a saga do jogador (comando de teste). */
     public static void zerar(ServerPlayer p) {
         parar(p);
+        for (int i = 1; i <= 3; i++) com.lanterna.fonte.FonteDados.chamado(p, "necron:ancora_" + i, 0);
+        for (String t : Emocoes.ASPECTOS) com.lanterna.fonte.FonteDados.chamado(p, "necron:defesa_" + t, 0);
         Treino.zerar(p);
         Aurora.zerar(p);
         Fuga.zerar(p);
@@ -381,10 +383,13 @@ public final class SagaNecron {
         // 0.55.0: com as Duas Luzes, a missão de defender a própria Tropa
         LoreData ld = MissionManager.data(p);
         if (ld != null && ld.completed().contains("necron_3d")) {
-            String m4 = "necron_4_" + tag(p).getString("tropa");
-            if (Emocoes.aspecto(tag(p).getString("tropa")) && !ld.completed().contains(m4) && !ld.active().containsKey(m4)) {
+            // 0.56.4: antes da defesa, as três âncoras da Morte (necron_4a_<tropa>, que leva à necron_4_<tropa>)
+            String m4 = "necron_4a_" + tag(p).getString("tropa");
+            String m4b = "necron_4_" + tag(p).getString("tropa");
+            if (Emocoes.aspecto(tag(p).getString("tropa")) && !ld.completed().contains(m4) && !ld.active().containsKey(m4)
+                    && !ld.completed().contains(m4b) && !ld.active().containsKey(m4b)) {
                 MissionManager.start(p, m4);
-                p.sendSystemMessage(Component.translatable("necron.lanterna.defesa_missao",
+                p.sendSystemMessage(Component.translatable("necron.lanterna.ancora_missao",
                         Component.translatable("corps.lanterna." + tag(p).getString("tropa"))).withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         }

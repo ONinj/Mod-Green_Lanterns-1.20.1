@@ -60,6 +60,16 @@ public final class MissoesNecron {
                             Objective.of(Type.DUMMY, "alvo", 4, pl.planet, h)), "necron_3c_" + id.substring(10));
                     yield m(id, List.of(Objective.of(Type.FONTE, "necron:duelo", 1, pl.planet, h)), "necron_3d");
                 }
+                // necron_4a_<tropa>: as três âncoras da Morte no planeta da Tropa (Capítulo 4)
+                if (id.startsWith("necron_4a_")) {
+                    com.lanterna.lore.PlanetLore pl = null;
+                    for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values())
+                        if (x.corps.id().getPath().equals(id.substring(10))) pl = x;
+                    if (pl == null) yield null;
+                    yield m(id, List.of(Objective.of(Type.FONTE, "necron:ancora_1", 1, pl.planet, Ancoras.posicao(1)),
+                            Objective.of(Type.FONTE, "necron:ancora_2", 1, pl.planet, Ancoras.posicao(2)),
+                            Objective.of(Type.FONTE, "necron:ancora_3", 1, pl.planet, Ancoras.posicao(3))), "necron_4_" + id.substring(10));
+                }
                 // necron_4_<tropa>: defender a Bateria Central da própria Tropa
                 if (!id.startsWith("necron_4_")) yield null;
                 com.lanterna.lore.PlanetLore p = null;

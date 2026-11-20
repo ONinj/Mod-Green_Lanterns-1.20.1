@@ -3900,6 +3900,62 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.4: Capítulo 4 (as três âncoras da Morte antes da defesa). */
+    private static void sceneCap4() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.necron.Ancoras.zerar(sp.server, com.lanterna.lore.PlanetLore.OA);
+            com.lanterna.necron.Defesa.zerar(sp.server, com.lanterna.lore.PlanetLore.OA);
+            com.lanterna.necron.Defesa.abrirFenda(sp.serverLevel(), com.lanterna.corps.BuiltinCorps.GREEN);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            for (String m : new String[]{"necron_4a_green", "necron_4_green"}) { d.completed().remove(m); d.active().remove(m); }
+            d.completed().add("necron_3d");
+            var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(oa, h.getX() + 0.5, 100, h.getZ() + 0.5, 0, 0);
+        }));
+        at(60, () -> server(sp -> glog("ancoras ativa=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_4a_green"))));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            at(20, () -> server(sp -> { var b = com.lanterna.necron.Ancoras.posicao(ii); sp.connection.teleport(b.getX() + 14.5, 110, b.getZ() + 0.5, 90, 30); }));
+            at(100, () -> server(sp -> {
+                var b = com.lanterna.necron.Ancoras.posicao(ii);
+                int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX() + 4, b.getZ() + 4);
+                var n = new net.minecraft.core.BlockPos(b.getX(), y + 6, b.getZ());
+                var guardas = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(80), m -> m.getTags().contains("lanterna_guarda_ancora:oa:" + ii));
+                glog("ancora " + ii + ": nucleo=" + sp.serverLevel().getBlockState(n).getBlock() + " guardas=" + guardas.size());
+                if (ii == 1) { sp.connection.teleport(n.getX() + 8.5, n.getY(), n.getZ() + 0.5, 90, 10); }
+                sp.gameMode.destroyBlock(n);
+                glog("  com guardas vivos, o nucleo continua: " + sp.serverLevel().getBlockState(n).getBlock());
+                for (var m : guardas) { m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 10000); }
+            }));
+            if (i == 1) at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); shot("cap4_ancora"); });
+            if (i == 2) at(1, () -> server(sp -> { var b = com.lanterna.necron.Ancoras.posicao(2); sp.connection.teleport(b.getX() + 10.5, sp.getY() + 2, b.getZ() + 0.5, 90, 15); }));
+            if (i == 2) at(10, () -> shot("cap4_ancora2"));
+            at(30, () -> server(sp -> {
+                var b = com.lanterna.necron.Ancoras.posicao(ii);
+                int y = sp.serverLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX() + 4, b.getZ() + 4);
+                var n = new net.minecraft.core.BlockPos(b.getX(), y + 6, b.getZ());
+                sp.gameMode.destroyBlock(n);
+                glog("  sem guardas: destruida=" + com.lanterna.necron.Ancoras.destruida(sp.server, com.lanterna.lore.PlanetLore.OA, ii)
+                        + " objetivo=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:ancora_" + ii));
+            }));
+        }
+        at(60, () -> server(sp -> {
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            glog("ancoras feita=" + d.completed().contains("necron_4a_green") + " defesa ativa=" + d.isActive("necron_4_green"));
+        }));
+        at(20, () -> { glog("FIM cap4"); mc.stop(); });
+    }
+
     /** 0.56.3: Capítulo 3 (o treino, o duelo com o Mestre e a primeira fenda na Terra) e os sons de fala. */
     private static void sceneCap3() {
         Minecraft mc = Minecraft.getInstance();
@@ -7628,6 +7684,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("cidade")) sceneCidade();
         else if (ENABLED && SCENE.equals("aurora_necron")) sceneAuroraNecron();
         else if (ENABLED && SCENE.equals("cap3")) sceneCap3();
+        else if (ENABLED && SCENE.equals("cap4")) sceneCap4();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

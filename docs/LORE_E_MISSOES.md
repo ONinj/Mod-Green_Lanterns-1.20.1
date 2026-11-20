@@ -1900,3 +1900,14 @@ Depois da fuga, no planeta da sua Tropa:
 - **Sem voz gravada:** toca um falatório de sílabas curtinhas no ritmo da fala, no tom de quem fala: homem (grave), mulher (aguda), Lanterna (o tom de cada um), o anel (suave e brilhante) e o Necron (grave, rouco e com eco). O narrador fica em silêncio.
 - **Com voz gravada:** coloque os áudios (.ogg) em `assets/lanterna/sounds/voz/pt_br/` e `.../en_us/`, com o nome igual à chave, e rode `python3 ferramentas/vozes.py`. A fala com áudio toca o áudio no idioma do jogo.
 - A lista de todas as falas (quem fala, texto em português e inglês, nome do arquivo) sai em `docs/FALAS.csv` com `python3 ferramentas/falas.py`.
+
+
+## 0.56.4 — Saga do Necron, Capítulo 4: As Âncoras da Morte
+
+Depois da Primeira Fenda, antes da Defesa da Tropa:
+- O Necron cravou **três âncoras** no planeta da sua Tropa, a uns 150 blocos da cidade. Elas prendem a fenda à Bateria Central. Cada uma solta um **feixe roxo** até o céu, visto de longe, e o diário marca onde estão.
+- A âncora é uma coluna de pedra negra com veios de obsidiana chorona, o **núcleo** lá em cima, espinhos inclinados cravados no chão, correntes e lanternas das almas.
+- Ao chegar perto, **5 servos** saem da sombra da âncora para guardá-la. Com algum guarda vivo, o núcleo **não quebra** (e as outras peças da âncora também não).
+- Derrotados os guardas, **quebre o núcleo**: a âncora se parte num clarão.
+- As três destruídas, a fenda fica fraca e começa **A Defesa da Tropa**.
+- As âncoras são do mundo: destruída por um jogador, conta para todos.
