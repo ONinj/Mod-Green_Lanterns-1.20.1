@@ -111,6 +111,7 @@ public final class SagaNecron {
         if (t == null) {
             // Ryut já partida: quem estiver lá dentro é jogado para o espaço
             if (p.tickCount % 20 == 3 && ryutPartida(p.server) && naRyut(p)) expulsarDeRyut(p);
+            if (p.tickCount % 20 == 9 && dividido(p)) missao(p);
             if (!dividido(p) && Emocoes.dominada(p) && Emocoes.comAnelDaVida(p) && p.isAlive()) chamado(p);
             else if (tag(p).getBoolean("chamado") && p.tickCount % 20 == 5) {
                 tag(p).remove("chamado");   // tirou o Anel da Vida no meio do caminho: o chamado espera ele voltar
@@ -217,8 +218,9 @@ public final class SagaNecron {
         if (ryutPartida(s)) return;
         com.lanterna.lore.LoreWorldData.get(s).markSite(RYUT_PARTIDA);
         LanternaMod.LOGGER.info("Lanterna: Ryut se partiu ao meio");
+        Cratera.escolher(s);   // e o Necron cai na Terra
         for (ServerPlayer q : s.getPlayerList().getPlayers()) {
-            ModNetwork.sendTo(q, new Mundo(true));
+            mandarMundo(q);
             if (naRyut(q) && !CENA.containsKey(q.getUUID())) expulsarDeRyut(q);   // quem está vendo a cena sai depois
         }
     }
@@ -249,7 +251,14 @@ public final class SagaNecron {
 
     @SubscribeEvent
     public static void entrou(PlayerEvent.PlayerLoggedInEvent e) {
-        if (e.getEntity() instanceof ServerPlayer p) ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server)));
+        if (e.getEntity() instanceof ServerPlayer p) mandarMundo(p);
+    }
+
+    /** Manda ao cliente o estado da saga no mundo (Ryut partida e onde o Necron caiu). */
+    public static void mandarMundo(ServerPlayer p) {
+        net.minecraft.core.BlockPos c = Cratera.centro(p.server);
+        MissoesNecron.centro = c;
+        ModNetwork.sendTo(p, new Mundo(ryutPartida(p.server), c != null, c == null ? 0 : c.getX(), c == null ? 0 : c.getY(), c == null ? 0 : c.getZ()));
     }
 
     /** Começa a cena agora (comando / testes). revendo = só assistir de novo, sem mexer no anel. */
@@ -327,6 +336,26 @@ public final class SagaNecron {
                 .withStyle(s -> s.withColor(cor)));
         p.sendSystemMessage(Component.translatable("necron.lanterna.fim_3").withStyle(ChatFormatting.DARK_PURPLE));
         p.sendSystemMessage(Component.translatable("necron.lanterna.rever").withStyle(ChatFormatting.DARK_GRAY));
+        // 0.54.2: a missão de ir até onde ele caiu
+        net.minecraft.core.BlockPos c = Cratera.centro(p.server);
+        if (c != null) {
+            mandarMundo(p);
+            MissionManager.start(p, "necron_1");
+            p.sendSystemMessage(Component.translatable("necron.lanterna.missao_cratera", c.getX(), c.getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
+        }
+    }
+
+    /** A cada segundo: chegou à terra morta (missão). */
+    private static void missao(ServerPlayer p) {
+        net.minecraft.core.BlockPos c = Cratera.centro(p.server);
+        if (c == null || !Cratera.dentro(p.level(), c, p.getX(), p.getZ(), -20)) return;
+        if (com.lanterna.fonte.FonteDados.chamado(p, "necron:cratera") >= 1) return;
+        com.lanterna.fonte.FonteDados.chamado(p, "necron:cratera", 1);
+        p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+                Component.translatable("necron.lanterna.cratera_titulo").withStyle(ChatFormatting.DARK_PURPLE)));
+        p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                Component.translatable("necron.lanterna.cratera_sub").withStyle(ChatFormatting.GRAY)));
+        p.sendSystemMessage(Component.translatable("necron.lanterna.cratera_msg").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
     }
 
     // ===================== proteção e saída =====================
@@ -353,12 +382,14 @@ public final class SagaNecron {
     // ===================== rede =====================
 
     /** Servidor → cliente: o estado da saga no mundo (Ryut partida). */
-    public record Mundo(boolean ryutPartida) {
-        public static void encode(Mundo m, FriendlyByteBuf b) { b.writeBoolean(m.ryutPartida); }
-        public static Mundo decode(FriendlyByteBuf b) { return new Mundo(b.readBoolean()); }
+    public record Mundo(boolean ryutPartida, boolean cratera, int x, int y, int z) {
+        public static void encode(Mundo m, FriendlyByteBuf b) {
+            b.writeBoolean(m.ryutPartida); b.writeBoolean(m.cratera); b.writeInt(m.x); b.writeInt(m.y); b.writeInt(m.z);
+        }
+        public static Mundo decode(FriendlyByteBuf b) { return new Mundo(b.readBoolean(), b.readBoolean(), b.readInt(), b.readInt(), b.readInt()); }
         public static void handle(Mundo m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> com.lanterna.client.necron.ClientSaga.ryutPartida = m.ryutPartida));
+                    () -> () -> com.lanterna.client.necron.ClientSaga.mundo(m)));
             ctx.get().setPacketHandled(true);
         }
     }

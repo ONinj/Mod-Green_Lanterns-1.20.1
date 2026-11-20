@@ -564,7 +564,37 @@ def embriao():
              {"pele": g_pele, "rosto": g_pele, "cordao": g_pele})
 
 
+def animacoes_necron():
+    """Animações do Necron no mundo (a cutscene mexe nos ossos pelo código)."""
+    def sen(vel, amp, fase=0, base=0):
+        return "%s + math.sin(query.anim_time * %s + %s) * %s" % (base, vel, fase, amp)
+    ossos = {
+        "corpo": {"rotation": [sen(60, 1.5), 0, sen(45, 1.2)]},
+        "saia": {"rotation": [sen(80, 3), 0, sen(55, 2)]},
+        "cabeca": {"rotation": [sen(40, 3), sen(30, 6), 0]},
+        "mandibula": {"rotation": [sen(150, 6, 0, 6), 0, 0]},
+        "capuz": {"rotation": [sen(70, 2.5), 0, 0]},
+        "braco_d": {"rotation": [sen(50, 3, 0, -18), 0, sen(40, 2, 0, 6)]},
+        "braco_e": {"rotation": [sen(50, 4, 1, 8), 0, sen(40, 3, 1, -10)]},
+        "foice": {"rotation": [sen(50, 2, 0, 16), 0, 0]},
+    }
+    for i in range(1, 13):
+        ossos["farrapo_%d" % i] = {"rotation": [sen(90 + i * 7, 9, i * 1.3, 4), 0, sen(70, 3, i)]}
+    golpe = {
+        "braco_d": {"rotation": {"0.0": [-18, 0, 6], "0.25": [-150, -20, 10], "0.5": [40, 30, 0], "0.9": [-18, 0, 6]}},
+        "foice": {"rotation": {"0.0": [16, 0, 0], "0.25": [-30, 0, 0], "0.5": [60, 0, 0], "0.9": [16, 0, 0]}},
+        "corpo": {"rotation": {"0.0": [0, 0, 0], "0.25": [-8, 20, 0], "0.5": [12, -25, 0], "0.9": [0, 0, 0]}},
+    }
+    anim = {"format_version": "1.8.0", "animations": {
+        "misc.idle": {"loop": True, "animation_length": 6, "bones": ossos},
+        "attack.swing": {"animation_length": 0.9, "bones": golpe},
+    }}
+    with open(os.path.join(RAIZ, "animations", "entity", "necron.animation.json"), "w") as f:
+        json.dump(anim, f, indent=1)
+
+
 if __name__ == "__main__":
     necron()
+    animacoes_necron()
     embriao()
     print("ok: necron e embriao_vida")

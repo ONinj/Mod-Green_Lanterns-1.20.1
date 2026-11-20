@@ -65,6 +65,10 @@ public final class LoreEntities {
     public static final RegistryObject<EntityType<Bosses.Mammok>> MAMMOK = boss("mammok", Bosses.Mammok::new, 3.5f, 6.6f, false);
     public static final RegistryObject<EntityType<Bosses.Thessara>> THESSARA = boss("thessara", Bosses.Thessara::new, 2.6f, 4.5f, false);
     public static final RegistryObject<EntityType<Bosses.Vigia>> VIGIA_PARTIDO = boss("vigia_partido", Bosses.Vigia::new, 1.8f, 5.0f, false);
+    /** 0.54.2: o Necron (saga da Morte), na frente da Bateria Central da Morte na Terra. */
+    public static final RegistryObject<EntityType<com.lanterna.necron.NecronEntity>> NECRON = ModEntities.ENTITIES.register("necron",
+            () -> EntityType.Builder.of(com.lanterna.necron.NecronEntity::new, MobCategory.MONSTER).sized(1.2f, 3.2f).fireImmune()
+                    .clientTrackingRange(16).build(LanternaMod.id("necron").toString()));
     public static final RegistryObject<EntityType<Bosses.Morrow>> MORROW = boss("morrow", Bosses.Morrow::new, 4.5f, 2.6f, false);
     public static final RegistryObject<EntityType<Bosses.Penitente>> PENITENTE = boss("penitente", Bosses.Penitente::new, 2.2f, 3.9f, false);
     public static final RegistryObject<EntityType<Bosses.Nyrielle>> NYRIELLE = boss("nyrielle", Bosses.Nyrielle::new, 2.2f, 3.6f, false);
@@ -161,6 +165,7 @@ public final class LoreEntities {
             event.put(THESSARA.get(), LoreBoss.attributes(350, 10, 0.32).build());
             event.put(VIGIA_PARTIDO.get(), LoreBoss.attributes(300, 10, 0.28).build());
             event.put(MORROW.get(), LoreBoss.attributes(400, 12, 0.30).build());
+            event.put(NECRON.get(), com.lanterna.necron.NecronEntity.atributos().build());
             event.put(PENITENTE.get(), LoreBoss.attributes(380, 12, 0.24).build());
             event.put(NYRIELLE.get(), LoreBoss.attributes(360, 10, 0.25).build());
             event.put(DEVORADOR_DE_ECOS.get(), LoreBoss.attributes(600, 16, 0.26).build());

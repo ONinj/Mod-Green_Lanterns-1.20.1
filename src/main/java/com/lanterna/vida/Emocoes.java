@@ -67,6 +67,8 @@ public final class Emocoes {
     @Nullable public static String treino(Player p) { String t = tag(p).getString("treino"); return t.isEmpty() ? null : t; }
     public static boolean doisAneis(Player p) { return tag(p).getBoolean("dois"); }
     public static boolean dominada(Player p) { return tag(p).getBoolean("dominada"); }
+    /** Só para os testes: corpo preparado para Dois Anéis. */
+    public static void tag2(Player p) { tag(p).putBoolean("dois", true); }
 
     private static void nivel(Player p, String a, int n) {
         CompoundTag t = tag(p);

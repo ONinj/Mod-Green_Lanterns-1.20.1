@@ -128,6 +128,13 @@ public final class ComandosTeste {
                         .then(op("reset").executes(c -> {
                             com.lanterna.necron.SagaNecron.zerar(eu(c));
                             return ok(c, "saga_zerada");
+                        }))
+                        .then(op("impact").executes(c -> {
+                            ServerPlayer p = eu(c);
+                            var cc = com.lanterna.necron.Cratera.centro(p.server);
+                            if (cc == null) return erro(c, "saga_sem_cratera");
+                            p.teleportTo(p.server.overworld(), cc.getX() + 0.5, cc.getY() + 40, cc.getZ() - 45.5, 0, 30);
+                            return ok(c, "saga_cratera", cc.getX(), cc.getZ());
                         })))
                 .then(op("full").executes(c -> {
                     ServerPlayer p = eu(c);

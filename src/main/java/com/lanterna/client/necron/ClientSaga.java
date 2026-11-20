@@ -22,6 +22,42 @@ import net.minecraftforge.fml.common.Mod;
 public final class ClientSaga {
     /** Ryut já se partiu neste mundo. */
     public static boolean ryutPartida;
+    /** Onde o Necron caiu (centro da cratera), ou null. */
+    @org.jetbrains.annotations.Nullable public static net.minecraft.core.BlockPos cratera;
+
+    public static void mundo(com.lanterna.necron.SagaNecron.Mundo m) {
+        ryutPartida = m.ryutPartida();
+        cratera = m.cratera() ? new net.minecraft.core.BlockPos(m.x(), m.y(), m.z()) : null;
+        com.lanterna.necron.MissoesNecron.centro = cratera;
+    }
+
+    /** Quanto o jogador está "dentro" da terra morta (0 fora, 1 no meio). */
+    public static float naTerraMorta() {
+        var mc = Minecraft.getInstance();
+        if (cratera == null || mc.player == null || mc.level == null || mc.level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return 0;
+        double dx = mc.player.getX() - cratera.getX(), dz = mc.player.getZ() - cratera.getZ();
+        double d = Math.sqrt(dx * dx + dz * dz);
+        return Mth.clamp((float) ((com.lanterna.necron.Cratera.RAIO + 10 - d) / 40.0), 0, 1);
+    }
+
+    /** Cinza caindo, almas subindo e a névoa cinza-roxa na terra morta. */
+    @SubscribeEvent
+    public static void neblina(net.minecraftforge.client.event.ViewportEvent.ComputeFogColor e) {
+        float k = naTerraMorta();
+        if (k <= 0) return;
+        e.setRed(Mth.lerp(k * 0.75f, e.getRed(), 0.16f));
+        e.setGreen(Mth.lerp(k * 0.75f, e.getGreen(), 0.13f));
+        e.setBlue(Mth.lerp(k * 0.75f, e.getBlue(), 0.2f));
+    }
+
+    @SubscribeEvent
+    public static void neblinaPerto(net.minecraftforge.client.event.ViewportEvent.RenderFog e) {
+        float k = naTerraMorta();
+        if (k <= 0 || e.getMode() != net.minecraft.client.renderer.FogRenderer.FogMode.FOG_TERRAIN) return;
+        e.setNearPlaneDistance(Mth.lerp(k, e.getNearPlaneDistance(), 4f));
+        e.setFarPlaneDistance(Mth.lerp(k, e.getFarPlaneDistance(), 72f));
+        e.setCanceled(true);
+    }
 
     private static final int DUR_PAINEL = 220;
     private static int painel = -1;
@@ -43,6 +79,17 @@ public final class ClientSaga {
     public static void tick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.END) return;
         if (Minecraft.getInstance().level == null) { painel = -1; return; }
+        float k = naTerraMorta();
+        if (k > 0 && !Minecraft.getInstance().isPaused()) {
+            var mc = Minecraft.getInstance();
+            var r = mc.level.random;
+            for (int i = 0; i < (int) (6 * k); i++) {
+                double x = mc.player.getX() + (r.nextDouble() - 0.5) * 24, y = mc.player.getY() + r.nextDouble() * 10, z = mc.player.getZ() + (r.nextDouble() - 0.5) * 24;
+                mc.level.addParticle(r.nextInt(3) == 0 ? net.minecraft.core.particles.ParticleTypes.WHITE_ASH : net.minecraft.core.particles.ParticleTypes.ASH, x, y, z, 0, -0.02, 0);
+            }
+            if (r.nextInt(6) == 0) mc.level.addParticle(net.minecraft.core.particles.ParticleTypes.SOUL, mc.player.getX() + (r.nextDouble() - 0.5) * 16,
+                    mc.player.getY(), mc.player.getZ() + (r.nextDouble() - 0.5) * 16, 0, 0.04, 0);
+        }
         if (painel >= 0) {
             painel++;
             if (painel % 40 == 20 && painel < DUR_PAINEL - 30)
@@ -62,7 +109,7 @@ public final class ClientSaga {
         if (a <= 0.01f) return;
         int w = g.guiWidth();
         int pw = Math.min(330, w - 20), ph = 70;
-        int x = (w - pw) / 2, y = 14;
+        int x = (w - pw) / 2, y = g.guiHeight() / 4;
         int al = (int) (a * 220);
         g.fill(x, y, x + pw, y + ph, (al << 24) | 0x0C0612);
         int borda = ((int) (a * (170 + 60 * Mth.sin(t * 0.3f))) << 24) | 0x8A3CC8;

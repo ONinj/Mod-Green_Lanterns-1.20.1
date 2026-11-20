@@ -3900,6 +3900,74 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.54.2: a cratera do Necron na Terra (terra morta, Bateria Central da Morte, Necron, servos e a imunidade). */
+    private static void sceneCratera() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            com.lanterna.necron.Cratera.esquecer(sp.server);
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite("saga:ryut_partida");
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green");
+            com.lanterna.necron.SagaNecron.partirRyut(sp.server);
+            glog("centro=" + com.lanterna.necron.Cratera.centro(sp.server));
+        }));
+        waitFor(() -> { var s = mc.getSingleplayerServer(); return s != null && com.lanterna.necron.Cratera.pronta(s); }, 20 * 120);
+        at(5, () -> server(sp -> {
+            glog("pronta=" + com.lanterna.necron.Cratera.pronta(sp.server));
+            com.lanterna.mission.MissionManager.start(sp, "necron_1");
+            var c = com.lanterna.necron.Cratera.centro(sp.server);
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode creative");
+            sp.teleportTo(sp.serverLevel(), c.getX() + 0.5, c.getY() + 55, c.getZ() + 75.5, 180, 30);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+        }));
+        at(100, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(60, () -> shot("cratera_vista"));
+        at(5, () -> server(sp -> { var c = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(c.getX() + 30.5, c.getY() + 18, c.getZ() - 30.5, 45, 10); }));
+        at(80, () -> shot("cratera_bateria"));
+        at(5, () -> server(sp -> { var c = com.lanterna.necron.Cratera.centro(sp.server); sp.connection.teleport(c.getX() + 60.5, c.getY() + 16, c.getZ() + 50.5, 135, 18); }));
+        at(80, () -> shot("cratera_cemiterio"));
+        // o Necron de perto
+        at(5, () -> server(sp -> { var n = com.lanterna.necron.Cratera.lugarDoNecron(com.lanterna.necron.Cratera.centro(sp.server));
+            sp.connection.teleport(n.getX() + 0.5, n.getY() + 2.5, n.getZ() - 6.5, 0, 12); }));
+        at(80, () -> { shot("cratera_necron"); server(sp -> glog("necrons=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(40)).size()
+                + " servos=" + sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(120), m -> com.lanterna.necron.Cratera.servo(m)).size()
+                + " missao necron_1 feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_1"))); });
+        // imunidade: com um anel só, o servo não leva dano; com dois, leva
+        at(5, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival");
+            var l = sp.serverLevel();
+            var m = l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(120), x -> com.lanterna.necron.Cratera.servo(x)).stream().findFirst().orElse(null);
+            var n = l.getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(40)).stream().findFirst().orElse(null);
+            if (m == null) { glog("sem servo para testar"); return; }
+            float v0 = m.getHealth();
+            m.hurt(sp.damageSources().playerAttack(sp), 6);
+            float v1 = m.getHealth();
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var r = com.lanterna.capability.ModCapabilities.get(sp).orElse(null);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            r.segundoSlot().setStackInSlot(0, azul);
+            glog("servo " + m.getType().getDescriptionId() + " vida " + v0 + " -> " + v1 + " (um anel: não muda)");
+            if (n != null) { float a = n.getHealth(); n.hurt(sp.damageSources().playerAttack(sp), 6); glog("necron vida " + a + " -> " + n.getHealth()); }
+        }));
+        at(20, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var m = l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(120), x -> com.lanterna.necron.Cratera.servo(x)).stream().findFirst().orElse(null);
+            if (m == null) return;
+            float v0 = m.getHealth();
+            m.invulnerableTime = 0;
+            m.hurt(sp.damageSources().playerAttack(sp), 6);
+            glog("dois aneis=" + com.lanterna.necron.Cratera.doisAneis(sp) + " servo vida " + v0 + " -> " + m.getHealth());
+            glog("vida do jogador perto do Necron: " + sp.getHealth());
+        }));
+        at(100, () -> server(sp -> glog("vida do jogador depois de 5 s perto do Necron: " + sp.getHealth())));
+        at(20, () -> { glog("FIM cratera"); mc.stop(); });
+    }
+
     /** 0.54.1: o chamado de Ryut (piloto travado), a cena ao chegar, e Ryut partida e fechada depois. */
     private static void sceneChamado() {
         Minecraft mc = Minecraft.getInstance();
@@ -7199,6 +7267,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("emocoes")) sceneEmocoes();
         else if (ENABLED && SCENE.equals("necron")) sceneNecron();
         else if (ENABLED && SCENE.equals("chamado")) sceneChamado();
+        else if (ENABLED && SCENE.equals("cratera")) sceneCratera();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
