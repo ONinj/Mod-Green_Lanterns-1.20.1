@@ -77,6 +77,30 @@ public final class ProvaFonte {
         return PROVAS.containsKey(p.getUUID());
     }
 
+    /**
+     * O pirata ferido da prova Índigo (0.52.5): os guardas da cidade (Lanternas de Nok) não podem atacá-lo. Antes
+     * eles viam um pirata e o matavam, e a prova falhava sozinha.
+     */
+    public static boolean protegido(Entity x) {
+        for (Estado e : PROVAS.values()) if (e.tropa == Tropa.INDIGO && e.especial == x) return true;
+        return false;
+    }
+
+    /** Ninguém fere o pirata protegido além do jogador e dos Ecos da prova (os guardas, por exemplo, não). */
+    @SubscribeEvent
+    public static void onAtaque(net.minecraftforge.event.entity.living.LivingAttackEvent ev) {
+        if (ev.getEntity().level().isClientSide) return;
+        for (Estado e : PROVAS.values()) {
+            if (e.tropa != Tropa.INDIGO || e.especial != ev.getEntity()) continue;
+            Entity quem = ev.getSource().getEntity();
+            if (quem instanceof net.minecraft.world.entity.player.Player || (quem != null && e.criados.contains(quem))) return;
+            if (quem == null && !ev.getSource().is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) return; // fogo, queda...: segue normal
+            ev.setCanceled(true);
+            if (quem instanceof Mob m && m.getTarget() == ev.getEntity()) m.setTarget(null);
+            return;
+        }
+    }
+
     public static void comecar(ServerPlayer p, Tropa t, BlockPos bateria) {
         ServerLevel l = p.serverLevel();
         int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PRACAx(), PRACAz());
@@ -257,6 +281,9 @@ public final class ProvaFonte {
                     for (int i = 0; i < 2; i++) { Mob m = inimigo(l, true); surgir(l, e, m, 14); m.setTarget(f); }
                 }
                 if (e.ticks % 20 == 0) for (Entity x : e.criados) if (x instanceof Mob m && x != f && x.isAlive()) m.setTarget(f);
+                // os guardas da cidade largam o pirata ferido (ele está sob a proteção da prova)
+                if (e.ticks % 10 == 0) for (Mob m : l.getEntitiesOfClass(Mob.class, f.getBoundingBox().inflate(48),
+                        m -> m.getTarget() == f && !e.criados.contains(m))) m.setTarget(null);
                 if (f.getHealth() >= f.getMaxHealth() - 0.01f) vencer(p, e);
                 else if (e.ticks > 20 * 240) falhar(p, e, "tempo");
             }

@@ -342,6 +342,7 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     /** Quer brigar com este alvo? */
     public boolean hostilA(LivingEntity e) {
         if (e == this || !e.isAlive() || papel() == Especie.Papel.MERCADOR) return false;
+        if (com.lanterna.fonte.ProvaFonte.protegido(e)) return false; // o pirata ferido da prova de Nok
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
         if (!guilda.isEmpty()) return hostilGuilda(e, guilda);
         if (e instanceof Player p) {

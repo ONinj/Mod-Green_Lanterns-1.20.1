@@ -6,7 +6,7 @@ O mod se chama **New Lanterns** na CurseForge (jar `lanterna-<versão>.jar`, mod
 ## Os dois ramos (dois chats)
 - `main` (ESTE chat): a saga nova. Versão atual **0.53.1** (README: 1.61.1). Próximas: 0.53.2, 0.54.0...
 - `estavel` (outro chat): correções para os jogadores a partir da 0.52.4 (já está na 0.52.5+). Não publique nada da 0.53 na CurseForge; a saga sai primeiro só para os beta testers (pelo Discord).
-- Correções do `estavel` que valham para a saga precisam ser trazidas para cá (`git merge origin/estavel` ou cherry-pick, resolvendo conflitos no README/docs/versão). **Pendente:** trazer a 0.52.5 (Odym/Morrow, Nok, Zamaron) e o que vier depois.
+- Correções do `estavel` que valham para a saga precisam ser trazidas para cá (`git merge origin/estavel` ou cherry-pick, resolvendo conflitos no README/docs/versão). A 0.52.5 (Odym/Morrow, Nok, Zamaron) já foi trazida para o `main`; traga também o que vier depois.
 
 ## Regras do dono (sempre)
 - Responder sempre em **português**. O dono não programa: explique o resultado de forma simples, sem jargão.

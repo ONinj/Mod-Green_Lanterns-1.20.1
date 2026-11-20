@@ -1713,6 +1713,12 @@ A progressão é linear do nível 1 ao 75 (no nível 40, uma Tropa comum chega a
 - O arquivo do mod ficou bem menor e não baixa nem executa nada fora do jogo. O config/lanterna-client.toml de versões antigas pode ser apagado.
 
 
+## 0.52.5 — Correções: Nok, Odym e Zamaron
+
+- **Prova da Compaixão (Bateria Central de Nok):** os guardas da cidade viam o pirata ferido e o matavam, e a prova falhava sem você fazer nada. Agora o pirata ferido fica sob a proteção da prova: os guardas não o atacam (e largam o alvo se já estavam mirando nele). Só os Ecos da prova o ameaçam, e você ainda falha se o matar. Os guardas continuam lutando contra os Ecos.
+- **Morrow (Odym):** na fase 2, os cinco Faróis de Pérola eram postos em volta do altar, que fica na beira do lago: dois caíam no fundo da água e um ficava fora do muro da arena. Agora o pentágono é em volta do centro da arena, no chão, perto da borda do lago e longe do altar. Nos mundos em que a luta já aconteceu, os faróis antigos são desmontados na próxima luta. O Morrow também não nada mais para fora do muro.
+- **Zamaron:** os bichos não viajam pelo espaço com você, então o Ritual do Amor ficava difícil para quem joga sozinho. Agora há lobos, gatos e papagaios selvagens em Zamaron (nascem pelo planeta e sempre há alguns em volta da base, prontos para domar: osso, peixe cru e sementes). O ritual conta qualquer bicho domado seu a até 12 blocos (antes eram 8; o lobo que segue você às vezes ficava para trás e derrubava o ritual), e o papagaio no seu ombro também conta.
+
 ## 0.53.0 — Árvore das Emoções e Dois Anéis (começo do caminho para a Noite Mais Densa)
 
 **Árvore das Emoções (Anel da Vida)** — botão "Emoções" na aba Lanterna.

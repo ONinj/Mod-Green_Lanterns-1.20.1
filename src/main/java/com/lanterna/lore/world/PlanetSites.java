@@ -409,6 +409,7 @@ public final class PlanetSites {
         if (novo) {
             // cidade única: o Guardião e o mestre (líder do povo) em volta da Bateria Central, de frente para quem chega
             if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);
+            if (planet == PlanetLore.ZAMARON) n += bichosZamaron(level, c, area, chao);
             if (planet == PlanetLore.OA) {
                 String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
                 for (long i = quantos.apply("guardiao"); i < 3; i++, n++) {
@@ -426,6 +427,7 @@ public final class PlanetSites {
             return n;
         }
         if (planet == PlanetLore.NOK) n += feridosNok(level, c, area, chao);
+        if (planet == PlanetLore.ZAMARON) n += bichosZamaron(level, c, area, chao);
         if (planet == PlanetLore.OA) {
             String[] names = {"npc.lanterna.name.guardiao_1", "npc.lanterna.name.guardiao_2", "npc.lanterna.name.guardiao_3"};
             for (long i = quantos.apply("guardiao"); i < 3; i++, n++) {
@@ -463,6 +465,42 @@ public final class PlanetSites {
             e.setFlag(RaceEntity.WOUNDED, true);
             e.setHealth(e.getMaxHealth() * 0.35f);
             n++;
+        }
+        return n;
+    }
+
+    /**
+     * Zamaron (0.52.5): o Ritual do Amor pede um bicho domado perto de você, mas os bichos não viajam pelo espaço com o
+     * jogador. Em volta da base sempre há alguns lobos, gatos e papagaios selvagens para domar (até 2 de cada sem dono;
+     * no máximo 8 de cada na área, contando os já domados).
+     */
+    private static int bichosZamaron(ServerLevel level, BlockPos c, net.minecraft.world.phys.AABB area,
+                                     java.util.function.BiFunction<Integer, Integer, Integer> chao) {
+        var tipos = java.util.List.<net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.TamableAnimal>>of(
+                net.minecraft.world.entity.EntityType.WOLF, net.minecraft.world.entity.EntityType.CAT, net.minecraft.world.entity.EntityType.PARROT);
+        int n = 0;
+        for (var tipo : tipos) {
+            var todos = level.getEntities(tipo, area, net.minecraft.world.entity.Entity::isAlive);
+            long selvagens = todos.stream().filter(t -> !t.isTame()).count();
+            int novos = 0;
+            for (int t = 0; t < 16 && selvagens < 2 && todos.size() + novos < 8; t++) {
+                double a = level.random.nextDouble() * Math.PI * 2, r = 12 + level.random.nextDouble() * 14;
+                int x = (int) Math.round(Math.cos(a) * r), z = (int) Math.round(Math.sin(a) * r);
+                BlockPos at = new BlockPos(c.getX() + x, chao.apply(x, z), c.getZ() + z);
+                if (!level.getFluidState(at).isEmpty() || !level.getFluidState(at.below()).isEmpty()
+                        || !level.getBlockState(at.below()).isFaceSturdy(level, at.below(), net.minecraft.core.Direction.UP)
+                        || !level.getBlockState(at).getCollisionShape(level, at).isEmpty()
+                        || !level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty()) continue;
+                var bicho = tipo.create(level);
+                if (bicho == null) continue;
+                bicho.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360, 0);
+                bicho.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
+                bicho.setPersistenceRequired();
+                level.addFreshEntity(bicho);
+                selvagens++;
+                novos++;
+                n++;
+            }
         }
         return n;
     }
