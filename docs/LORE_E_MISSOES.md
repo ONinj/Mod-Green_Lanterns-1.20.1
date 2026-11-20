@@ -1797,3 +1797,16 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - O Lanterna fica no planeta depois da conversa.
 - Nova missão **Duas Luzes**: forjar um segundo anel, de qualquer Tropa e em qualquer planeta, e colocá-lo no punho (o segundo slot da aba Lanterna).
 - Depois da primeira fuga, morrer perto do Necron é morte normal.
+
+
+## 0.55.0 — O ataque à sua Tropa
+
+- No fim da conversa da fuga, a câmera sobe para o céu: uma **fenda da Morte** (um redemoinho preto e roxo) se abre sobre a **Bateria Central da sua Tropa**, e a voz do Necron ameaça: a sua Tropa será a primeira a se apagar. O Lanterna manda você forjar o segundo anel.
+- A fenda fica aberta no céu do planeta até a bateria ser defendida.
+- Ao completar **Duas Luzes** (dois anéis ao mesmo tempo), começa a missão **A Defesa da Tropa**.
+- **A batalha:** volte ao planeta da sua Tropa com os dois anéis e chegue perto da Bateria Central.
+  - Três **ondas** de servos caem da fenda (8, 11 e 14). A última traz o **Arauto do Necron**, um Lanterna Negro mais forte.
+  - Três **Lanternas da Tropa** descem para lutar junto.
+  - Servos perto da bateria **sugam a força dela** (a barra vermelha no alto da tela).
+  - Venceu as três ondas: a fenda se fecha e a missão termina.
+  - A força chegou a zero: os servos recuam para a fenda; dá para tentar de novo depois de 30 segundos. A sua Tropa nunca cai.
