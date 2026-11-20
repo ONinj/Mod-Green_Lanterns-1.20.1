@@ -290,6 +290,7 @@ public final class Fuga {
     public static void zerar(ServerPlayer p) {
         ATIVAS.remove(p.getUUID());
         SagaNecron.tag(p).remove("fugiu");
+        for (String k : new String[]{"necron:cratera", "necron:enfrentou", "necron:dois"}) com.lanterna.fonte.FonteDados.chamado(p, k, 0);
     }
 
     // ===================== rede =====================

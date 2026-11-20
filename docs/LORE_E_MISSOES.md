@@ -1784,3 +1784,16 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - **A regra da saga:** a luz de um anel só é engolida pelos servos do Necron. Só quem usa **dois anéis ao mesmo tempo** (o segundo no punho, pelos Dois Anéis) consegue machucá-los.
 - Missões: "A Queda do Necron" (chegar à terra morta) e "O Ser da Morte" (enfrentá-lo; continua na próxima versão).
 - Comandos de operador: `/lantern saga impact` (ir até a cratera).
+
+
+## 0.54.3 — A fuga
+
+- Na **primeira vez** que a sua vida cai abaixo de um quarto perto do Necron (na terra morta), você não morre: começa a **cena da fuga**.
+  - A tela turva, o coração bate forte; o Necron ergue a foice.
+  - Um **Lanterna da sua Tropa** desce do céu num clarão, ergue um escudo de luz e segura o golpe.
+  - Ele segura você e voa para longe e para cima, com os raios da Morte passando atrás.
+  - Tudo escurece. Você acorda no **planeta da sua Tropa**, com a vida cheia.
+- O Lanterna explica: o Necron nasceu quando o Nulo caiu; ele foi à Terra para absorver o **Embrião da Vida** e ter poder sem fim; os servos dele já atacam as **Baterias Centrais** das Tropas; a luz de um anel só some neles; só **dois anéis ao mesmo tempo** os ferem. O anel do dedo guarda os ataques; o do punho empresta a defesa, a cura e a ajuda da Tropa dele; a roda de construtos junta os dois.
+- O Lanterna fica no planeta depois da conversa.
+- Nova missão **Duas Luzes**: forjar um segundo anel, de qualquer Tropa e em qualquer planeta, e colocá-lo no punho (o segundo slot da aba Lanterna).
+- Depois da primeira fuga, morrer perto do Necron é morte normal.

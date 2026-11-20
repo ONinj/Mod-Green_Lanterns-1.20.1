@@ -33,6 +33,7 @@ public final class CenaFuga {
     public static void receber(Fuga.Cena m) {
         aliado = m.aliado();
         tropa = m.tropa();
+        Minecraft.getInstance().getToasts().clear();
         if (m.fase() == 0) { t = 0; necron = m.necron(); }
         else { t = Fuga.CASA; necron = -1; }
     }
@@ -132,6 +133,12 @@ public final class CenaFuga {
         return (int) ((tt - Fuga.FALA) / Fuga.POR_FALA);
     }
 
+    /** Sem a mão de primeira pessoa por cima da cena. */
+    @SubscribeEvent
+    public static void semMao(net.minecraftforge.client.event.RenderHandEvent e) {
+        if (t >= 0) e.setCanceled(true);
+    }
+
     // ===================== controles e pose =====================
 
     @SubscribeEvent
@@ -205,11 +212,16 @@ public final class CenaFuga {
         var linhas = mc.font.split(txt, w - 40);
         int y = h - fx / 2 - linhas.size() * (mc.font.lineHeight + 1) / 2;
         boolean fala = chave.contains("fala_") || chave.endsWith("aguenta") || chave.endsWith("segura");
-        int corTxt = fala ? com.lanterna.vida.Emocoes.cor(tropa) : 0xE6E6EE;
+        int corTxt = fala ? clarear(com.lanterna.vida.Emocoes.cor(tropa)) : 0xE6E6EE;
         for (var l : linhas) {
             g.drawCenteredString(mc.font, l, w / 2, y, (al << 24) | (corTxt & 0xFFFFFF));
             y += mc.font.lineHeight + 1;
         }
+    }
+
+    private static int clarear(int c) {
+        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+        return ((r + (255 - r) * 45 / 100) << 16) | ((g + (255 - g) * 45 / 100) << 8) | (b + (255 - b) * 45 / 100);
     }
 
     private CenaFuga() {}
