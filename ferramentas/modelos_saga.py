@@ -18,6 +18,7 @@ import random
 
 from PIL import Image
 
+ANG_SINAL = -1
 RAIZ = os.path.join("src", "main", "resources", "assets", "lanterna")
 
 
@@ -338,18 +339,22 @@ def necron():
 
     # a foice, na mão direita, com a pérola negra (a bateria da Morte) na junção da lâmina
     m.osso("foice", "braco_d", (-5.5, 8, 0))
-    m.cubo("foice", (-6, -10, -0.5), (1, 50, 1), "haste")
-    m.cubo("foice", (-6.5, -12, -1), (2, 2, 2), "metal")                          # ponteira
+    m.cubo("foice", (-6, -4, -0.5), (1, 44, 1), "haste")
+    m.cubo("foice", (-6.5, -6, -1), (2, 2, 2), "metal")                           # ponteira
     m.cubo("foice", (-6.5, 37, -1), (2, 3, 2), "metal")                           # colar da lâmina
-    # lâmina curva para a frente (-z) e para baixo
-    seg = 8
-    for i in range(seg):
-        s = (i + 0.5) / seg
-        z = -1.5 - i * 2.1
-        y = 39.5 + 3.2 * math.sin(s * math.pi * 0.9) - 7.5 * s * s
-        alt = 3.2 - 2.2 * s
-        ang = math.degrees(math.atan2(3.2 * math.pi * 0.9 * math.cos(s * math.pi * 0.9) / seg - 15 * s / seg, 2.1))
-        m.cubo("foice", (-5.75, y - alt / 2, z - 1.2), (0.5, alt, 2.4), "metal", rot=(ang, 0, 0), pivo=(-5.5, y, z))
+    # lâmina curva para a frente (-z) e para baixo: segmentos que se encostam seguindo a curva
+    pts = []
+    n = 16
+    for i in range(n + 1):
+        u = i / n
+        pts.append((39.5 + 3.4 * math.sin(u * math.pi * 0.85) - 6.5 * u * u, -1.0 - 16.0 * u))
+    for i in range(n):
+        (y0, z0), (y1, z1) = pts[i], pts[i + 1]
+        cy, cz = (y0 + y1) / 2, (z0 + z1) / 2
+        comp = math.hypot(y1 - y0, z1 - z0) + 0.35
+        ang = math.degrees(math.atan2(y1 - y0, -(z1 - z0)))
+        alt = 3.0 - 2.3 * (i / n)
+        m.cubo("foice", (-5.75, cy - alt * 0.35, cz - comp / 2), (0.5, alt, comp), "metal", rot=(ANG_SINAL * ang, 0, 0), pivo=(-5.5, cy, cz))
     m.cubo("foice", (-6, 38, 1), (1, 3, 2.5), "metal", rot=(30, 0, 0), pivo=(-5.5, 39, 1.5))  # esporão de trás
     m.osso("perola", "foice", (-5.5, 38.5, -1.8))
     m.cubo("perola", (-7, 37.5, -3), (3, 2, 2.4), "perola")
@@ -380,8 +385,9 @@ def p_pele(face, x, y, w, h, X, Y):
 def p_rosto(face, x, y, w, h, X, Y):
     if face == "frente":
         # olhos fechados (duas linhas), narizinho, boca
-        if y == h // 2 - 1 and (x in (1, 2) or x in (w - 3, w - 2)):
-            return rgba((168, 150, 170))
+        cx = (w - 1) / 2.0
+        if h // 2 - 2 <= y <= h // 2 - 1 and 0.8 <= abs(x - cx) <= 2.2:
+            return rgba((150, 128, 158))
         if y == h // 2 + 1 and x == w // 2:
             return rgba((222, 200, 208))
         if y == h // 2 + 2 and abs(x - (w - 1) / 2) < 1:
@@ -398,41 +404,58 @@ def p_cordao(face, x, y, w, h, X, Y):
     return rgba(mistura((226, 214, 236), (255, 255, 255), ((X + Y) % 3) / 2.0))
 
 
+def conta(m, osso, c, r, mat, frente=None):
+    """Uma "conta" arredondada (3 cubos cruzados + miolo), para formas orgânicas."""
+    x, y, z = c
+    if r < 0.75:
+        m.cubo(osso, (x - r, y - r, z - r), (2 * r, 2 * r, 2 * r), mat)
+        return
+    a, b = 2 * r, 2 * r * 0.7
+    m.cubo(osso, (x - a / 2, y - b / 2, z - b / 2), (a, b, b), mat)
+    m.cubo(osso, (x - b / 2, y - a / 2, z - b / 2), (b, a, b), mat)
+    m.cubo(osso, (x - b / 2, y - b / 2, z - a / 2), (b, b, a), frente or mat)
+    k = 2 * r * 0.86
+    m.cubo(osso, (x - k / 2, y - k / 2, z - k / 2), (k, k, k), mat)
+
+
 def embriao():
-    m = Modelo("embriao_vida", 128, 128)
+    m = Modelo("embriao_vida", 256, 256)
     m.osso("root")
-    m.osso("corpo", "root", (0, 6, 0), (-12, 0, 0))
-    # tronco curvado: costas arredondadas (+z), barriga (-z)
-    m.cubo("corpo", (-2.5, 4, -2), (5, 5, 4.5), "pele")
-    m.cubo("corpo", (-2.2, 4.5, -2.4), (4.4, 4, 5.2), "pele")
-    m.cubo("corpo", (-2.5, 1, -1.5), (5, 4, 4.5), "pele", rot=(25, 0, 0), pivo=(0, 4, 0))
-    m.cubo("corpo", (-2, 0.5, -0.5), (4, 3, 3.5), "pele", rot=(50, 0, 0), pivo=(0, 2, 0))
-    m.cubo("corpo", (-1.5, 3.5, 2.2), (3, 6, 1), "pele", rot=(-8, 0, 0), pivo=(0, 6, 2.5))       # espinha nas costas
-    # braços dobrados com as mãozinhas perto do rosto
+    m.osso("corpo", "root", (0, 7, 0))
+    # o corpo é um "C": as contas descem pelas costas (+z) e a ponta enrola para a frente, por baixo
+    R = 5.2
+    n = 11
+    for i in range(n):
+        u = i / (n - 1)
+        phi = math.radians(-5 + 215 * u)
+        y = 7 + R * math.cos(phi)
+        z = R * math.sin(phi) * 0.95
+        r = 3.3 - 2.4 * u ** 1.3
+        conta(m, "corpo", (0, y, z), r, "pele")
+    # barriga (preenche o meio do C)
+    conta(m, "corpo", (0, 6.5, -0.3), 2.8, "pele")
+    # brotos dos braços (dobrados para perto do rosto) e das pernas (encolhidas)
     for lado in (-1, 1):
-        x = 2.6 * lado
-        m.cubo("corpo", (x - 0.8, 5.5, -1.5), (1.6, 3.5, 1.6), "pele", rot=(-50, 0, -10 * lado), pivo=(x, 8.5, -0.5))
-        m.cubo("corpo", (x * 0.7 - 0.8, 6.5, -4.4), (1.6, 3, 1.6), "pele", rot=(-15, 0, 15 * lado), pivo=(x * 0.7, 6.8, -3.6))
-        m.cubo("corpo", (x * 0.55 - 0.9, 9, -4.8), (1.8, 1.4, 1.2), "pele")                         # mãozinha
-    # perninhas encolhidas (coxas para a frente, canelas para cima)
-    for lado in (-1, 1):
-        x = 1.6 * lado
-        m.cubo("corpo", (x - 1.1, 0.5, -5.2), (2.2, 2.2, 5), "pele", rot=(15, 0, 0), pivo=(x, 1.5, 0))
-        m.cubo("corpo", (x - 0.9, 0.8, -6.4), (1.8, 4.2, 1.8), "pele", rot=(20, 0, 0), pivo=(x, 1.5, -5.5))
-        m.cubo("corpo", (x - 0.9, 4.6, -7.2), (1.8, 1, 2.4), "pele")                                 # pezinho
-    # cabeça grande, inclinada para o peito
-    m.osso("cabeca", "corpo", (0, 9, -0.5), (32, 0, 0))
-    m.cubo("cabeca", (-3.5, 9.5, -4), (7, 6, 7), "rosto")
-    m.cubo("cabeca", (-3, 9, -3.5), (6, 7, 6), "pele")
-    m.cubo("cabeca", (-3, 10, -4.5), (6, 5, 8), "pele")
-    m.cubo("cabeca", (-2.5, 15.5, -3), (5, 0.8, 5), "pele")
+        conta(m, "corpo", (2.9 * lado, 9.2, -1.2), 1.1, "pele")
+        conta(m, "corpo", (2.6 * lado, 8.6, -2.8), 0.95, "pele")
+        conta(m, "corpo", (2.0 * lado, 9.2, -4.0), 0.75, "pele")
+        conta(m, "corpo", (2.6 * lado, 3.4, 0.4), 1.3, "pele")
+        conta(m, "corpo", (2.4 * lado, 3.0, -1.6), 1.1, "pele")
+        conta(m, "corpo", (2.1 * lado, 3.8, -3.2), 0.85, "pele")
+    # cabeça grande, curvada sobre o peito
+    m.osso("cabeca", "corpo", (0, 11, -0.5))
+    conta(m, "cabeca", (0, 12.8, -3.2), 4.3, "pele", frente="rosto")
+    conta(m, "cabeca", (0, 14.0, -1.4), 3.6, "pele")
     # cordão umbilical: sai da barriga e desce torcendo
-    pai, pv = "corpo", (0, 3, -2.3)
+    pai, pv = "corpo", (0, 5.0, -3.0)
     for i in range(1, 9):
-        n = "cordao_%d" % i
-        m.osso(n, pai, pv, (18 + (i % 3) * 6, 12 * math.sin(i), 0))
-        m.cubo(n, (pv[0] - 0.5, pv[1] - 2.2, pv[2] - 0.5), (1, 2.4, 1), "cordao")
-        pai, pv = n, (pv[0], pv[1] - 2.2, pv[2])
+        nome = "cordao_%d" % i
+        m.osso(nome, pai, pv)
+        prox = (pv[0] + 0.6 * math.sin(i * 1.3), pv[1] - 1.5, pv[2] - 0.5 + 0.4 * math.cos(i))
+        for k in range(3):
+            q = k / 3
+            conta(m, nome, (pv[0] + (prox[0] - pv[0]) * q, pv[1] + (prox[1] - pv[1]) * q, pv[2] + (prox[2] - pv[2]) * q), 0.45, "cordao")
+        pai, pv = nome, prox
     m.salvar(2, 2, {"pele": p_pele, "rosto": p_rosto, "cordao": p_cordao},
              {"pele": g_pele, "rosto": g_pele, "cordao": g_pele})
 

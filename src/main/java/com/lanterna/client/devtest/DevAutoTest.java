@@ -3928,7 +3928,7 @@ public final class DevAutoTest {
         // a cena começa sozinha 6 segundos depois do título
         waitFor(com.lanterna.client.necron.CinemaNecron::ativa, 400);
         at(1, () -> glog("cena aberta? " + com.lanterna.client.necron.CinemaNecron.ativa() + " t=" + com.lanterna.client.necron.CinemaNecron.tempoAtual()));
-        int[] fotos = {50, 150, 205, 300, 340, 356, 400, 470, 496, 520, 590, 622, 660, 720, 830, 884, 905, 935, 1000, 1045, 1120, 1220, 1320, 1386, 1398, 1430, 1480};
+        int[] fotos = {60, 160, 300, 345, 400, 470, 500, 560, 625, 660, 860, 890, 910, 935, 990, 1035, 1120, 1320, 1375, 1400, 1480};
         int antes = 1;
         for (int f : fotos) {
             int ff = f;

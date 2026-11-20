@@ -268,20 +268,20 @@ public final class CinemaNecron extends Screen {
             }
         } else if (t < D0) {
             c = new Camera(new Vec3(0, 0, 10), Vec3.ZERO, up, 60);
-        } else if (t < RACHA + 20) {
+        } else if (t < RACHA + 50) {
             // Ryut de longe, aproximando
-            float k = faixa(t, D0, RACHA + 20);
-            c = new Camera(new Vec3(150 - 40 * k, 60 - 20 * k, 640 - 180 * k), Vec3.ZERO, up, 55);
+            float k = faixa(t, D0, RACHA + 50);
+            c = new Camera(new Vec3(150 - 30 * k, 60 - 15 * k, 700 - 160 * k), Vec3.ZERO, up, 55);
         } else if (t < D1) {
             // dentro da fenda: o Necron sai das duas metades
-            float k = faixa(t, RACHA + 20, D1);
+            float k = faixa(t, RACHA + 50, D1);
             c = new Camera(new Vec3(6 - 4 * k, 3 + 1 * k, 70 - 10 * k), new Vec3(0, 0, -40 + 40 * suave(k)), up, 60);
         } else if (t < E1) {
             // o rosto
             float k = faixa(t, D1, E1);
-            double a = Math.toRadians(-18 + 26 * k);
-            double r = 3.4 - 0.9 * k;
-            c = new Camera(new Vec3(Math.sin(a) * r, 2.6, -Math.cos(a) * r), new Vec3(0, 2.45, 0), up, 45);
+            double a = Math.toRadians(-20 + 30 * k);
+            double r = 3.0 - 0.8 * k;
+            c = new Camera(new Vec3(Math.sin(a) * r, 2.15 + 0.1 * k, Math.cos(a) * r), new Vec3(0, 2.0, 0), up, 48);
         } else if (t < F1) {
             // voando: câmera de lado, girando para trás dele
             float k = faixa(t, E1, F1);
@@ -499,9 +499,9 @@ public final class CinemaNecron extends Screen {
         } else if (t < B1 && mc.player != null) {
             jogador(ps, buf, t);
             aneis(ps, buf, t);
-        } else if (t >= RACHA && t < D1) {
+        } else if (t >= RACHA + 50 && t < D1) {
             // o Necron saindo da fenda, vindo para a câmera
-            float k = faixa(t, RACHA + 20, D1 - 10);
+            float k = faixa(t, RACHA + 50, D1 - 8);
             ps.pushPose();
             ps.translate(0, -1 + 1 * k, -60 + 112 * k);
             ps.mulPose(Axis.YP.rotationDegrees(180));
@@ -634,7 +634,7 @@ public final class CinemaNecron extends Screen {
             if (t > ESTENDE && t < DESFAZ + 6) {
                 float k = faixa(t, ESTENDE + 20, DESFAZ);
                 float trem = t > DESFAZ - 30 ? 0.3f * Mth.sin(t * 2.5f) : 0;
-                sprite(b, m, dir, cima, mao.x, mao.y, mao.z, 0.25f + 0.9f * k + trem * 0.2f, 1, 1, 1, 0.4f + 0.6f * k);
+                sprite(b, m, dir, cima, mao.x, mao.y, mao.z, 0.2f + 0.55f * k + trem * 0.15f, 1, 1, 1, 0.4f + 0.6f * k);
             }
             if (t > DESFAZ - 2 && t < DESFAZ + 20) {
                 float k = (t - DESFAZ + 2) / 22f;
@@ -663,20 +663,18 @@ public final class CinemaNecron extends Screen {
             // luz roxa saindo das rachaduras e da fenda
             float k = faixa(t, RACHA - 80, RACHA);
             float pisca = 0.7f + 0.3f * Mth.sin(t * 0.9f) * Mth.sin(t * 0.37f);
-            if (t < RACHA + 20) sprite(b, m, dir, cima, 0, 0, 0, 175 + 30 * k, 0.45f, 0.1f, 0.7f, 0.5f * k * pisca);
+            if (t < RACHA + 50) sprite(b, m, dir, cima, 0, 0, 0, 175 + 30 * k, 0.45f, 0.1f, 0.7f, 0.5f * k * pisca);
             if (t >= RACHA && t < RACHA + 30) {
                 float f = (t - RACHA) / 30f;
                 sprite(b, m, dir, cima, 0, 0, 0, 120 + 500 * f, 0.85f, 0.7f, 1, 1 - f);
             }
-            if (t >= RACHA + 20) {
+            if (t >= RACHA + 50) {
                 // dentro da fenda: a luz do núcleo atrás do Necron
                 sprite(b, m, dir, cima, 0, 0, -60, 60, 0.4f, 0.1f, 0.6f, 0.7f * pisca);
             }
         } else if (t >= D1 && t < E1) {
-            // a pérola acende no rosto
-            float k = faixa(t, D1 + 40, D1 + 70);
-            Vec3 perola = new Vec3(0.45, 3.0, -0.25);
-            sprite(b, m, dir, cima, perola.x, perola.y, perola.z, 0.35f + 0.15f * Mth.sin(t * 0.4f), 0.6f, 0.3f, 0.9f, 0.9f * k);
+            // uma luz roxa fraca atrás dele
+            sprite(b, m, dir, cima, 0, 2.0, -1.5, 2.2f, 0.35f, 0.1f, 0.55f, 0.35f * faixa(t, D1 + 30, D1 + 70));
         } else if (t >= E1 && t < F1) {
             sprite(b, m, dir, cima, 0, 1.2, 0, 2.8f, 0.3f, 0.08f, 0.45f, 0.35f);
         } else if (t >= F1 && t < G1) {
@@ -684,7 +682,7 @@ public final class CinemaNecron extends Screen {
             if (t < IMPACTO) {
                 Vec3 c = cometa(t);
                 float ar = faixa(t, IMPACTO - 50, IMPACTO - 10);
-                sprite(b, m, dir, cima, c.x, c.y, c.z, 9 + 10 * ar, 0.5f + 0.5f * ar, 0.2f + 0.3f * ar, 0.7f - 0.5f * ar, 0.8f);
+                sprite(b, m, dir, cima, c.x, c.y, c.z, 14 + 12 * ar, 0.5f + 0.5f * ar, 0.2f + 0.3f * ar, 0.7f - 0.5f * ar, 0.8f);
             } else {
                 float k = faixa(t, IMPACTO, IMPACTO + 35);
                 sprite(b, m, dir, cima, alvo.x, alvo.y, alvo.z, 40 + 320 * k, 0.8f, 0.6f, 1, 1 - k);
@@ -714,7 +712,7 @@ public final class CinemaNecron extends Screen {
 
     private static Vec3 cometa(float t) {
         Vec3 alvo = impacto();
-        Vec3 de = alvo.add(520, 620, 380);
+        Vec3 de = alvo.add(300, 380, 250);
         float k = faixa(t, F1 + 10, IMPACTO);
         k = k * k;
         return de.add(alvo.subtract(de).scale(k));
@@ -795,21 +793,21 @@ public final class CinemaNecron extends Screen {
                 parte(new Vec3(Math.cos(a) * 0.7, 0.1 + (t - VOLTA) % 40 / 20.0, Math.sin(a) * 0.7), new Vec3(0, 0.01, 0), corTropa, 0.06f, 30);
             }
         } else if (t >= D0 && t < D1) {
-            if (t >= RACHA && t < RACHA + 40) {
+            if (t >= RACHA && t < RACHA + 45) {
                 // pedaços de Ryut voando
                 for (int i = 0; i < 12; i++) {
                     Vec3 p = aleatorio(80 + rnd.nextDouble() * 70);
                     Parte q = parte(new Vec3(p.x * 0.15, p.y, p.z), new Vec3(p.x * 0.03, p.y * 0.02, p.z * 0.02).add(aleatorio(1.5)), 0x6A6470, 2.5f + rnd.nextFloat() * 4, 120);
                     q.escura = true; q.atrito = 0.995f;
                 }
-                for (int i = 0; i < 8; i++) parte(aleatorio(30), aleatorio(4 + rnd.nextDouble() * 3), 0x8A40C0, 6f, 40);
+                for (int i = 0; i < 6; i++) parte(aleatorio(30), aleatorio(1.5 + rnd.nextDouble() * 1.5), 0x8A40C0, 5f, 40);
             }
-            if (t >= RACHA + 20) {
+            if (t >= RACHA + 50) {
                 // névoa roxa escorrendo pela fenda, perto da câmera
                 for (int i = 0; i < 3; i++) {
                     Vec3 p = new Vec3((rnd.nextDouble() - 0.5) * 30, (rnd.nextDouble() - 0.5) * 30, -80 + rnd.nextDouble() * 60);
-                    Parte q = parte(p, new Vec3(0, 0, 0.6), 0x5A1E80, 2 + rnd.nextFloat() * 3, 60);
-                    q.a = 0.4f; q.atrito = 1f;
+                    Parte q = parte(p, new Vec3(0, 0, 0.6), 0x5A1E80, 0.8f + rnd.nextFloat() * 1.2f, 60);
+                    q.a = 0.25f; q.atrito = 1f;
                 }
             }
         } else if (t >= D1 && t < E1) {
@@ -1025,16 +1023,18 @@ public final class CinemaNecron extends Screen {
 
     private static void criarBrilho() {
         texturaPronta = true;
-        NativeImage img = new NativeImage(64, 64, false);
-        for (int y = 0; y < 64; y++)
-            for (int x = 0; x < 64; x++) {
-                double d = Math.hypot(x - 31.5, y - 31.5) / 32.0;
-                double a = Math.max(0, 1 - d);
-                a = a * a * (0.6 + 0.4 * a);
+        NativeImage img = new NativeImage(128, 128, false);
+        for (int y = 0; y < 128; y++)
+            for (int x = 0; x < 128; x++) {
+                double d = Math.hypot(x - 63.5, y - 63.5) / 64.0;
+                double a = d >= 1 ? 0 : Math.exp(-d * d * 4.5) * (1 - d * d);
                 int al = (int) (Mth.clamp(a, 0, 1) * 255);
                 img.setPixelRGBA(x, y, (al << 24) | 0xFFFFFF);
             }
-        Minecraft.getInstance().getTextureManager().register(BRILHO, new DynamicTexture(img));
+        DynamicTexture tex = new DynamicTexture(img);
+        Minecraft.getInstance().getTextureManager().register(BRILHO, tex);
+        tex.bind();
+        tex.setFilter(true, false);
     }
 
     @Override

@@ -49,7 +49,7 @@ final class Atores {
     static float vento;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {
-        embriao.cor(r, g, b, 1f, brilho);
+        embriao.cor(r, g, b, 1f, brilho * 0.35f);
         embriao.desenhar(ps, buf, t, LightTexture.FULL_BRIGHT);
     }
 
