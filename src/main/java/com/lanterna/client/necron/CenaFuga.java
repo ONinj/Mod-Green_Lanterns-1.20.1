@@ -27,6 +27,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class CenaFuga {
     private static int t = -1;
     private static int aliado = -1, necron = -1;
+    private static Vec3 fenda = Vec3.ZERO;
     private static String tropa = "green";
     private static float pt;
 
@@ -35,7 +36,7 @@ public final class CenaFuga {
         tropa = m.tropa();
         Minecraft.getInstance().getToasts().clear();
         if (m.fase() == 0) { t = 0; necron = m.necron(); }
-        else { t = Fuga.CASA; necron = -1; }
+        else { t = Fuga.CASA; necron = -1; fenda = new Vec3(m.fx() + 0.5, m.fy(), m.fz() + 0.5); }
     }
 
     public static boolean ativa() { return t >= 0; }
@@ -63,6 +64,8 @@ public final class CenaFuga {
         if (t == Fuga.SOBE + 2) som(SoundEvents.ELYTRA_FLYING, 0.6f, 1.2f);
         if (t == Fuga.PRETO) som(SoundEvents.BEACON_DEACTIVATE, 0.8f, 0.6f);
         if (t == Fuga.CASA + 10) som(SoundEvents.BEACON_AMBIENT, 1f, 1.2f);
+        if (t == Fuga.ALERTA + 2) { som(SoundEvents.LIGHTNING_BOLT_THUNDER, 1f, 0.5f); som(SoundEvents.AMBIENT_CAVE.value(), 1f, 0.5f); }
+        if (t == Fuga.ALERTA + 12 || t == Fuga.ALERTA + 82) som(SoundEvents.WITHER_AMBIENT, 0.8f, 0.4f);
     }
 
     // ===================== câmera =====================
@@ -111,6 +114,14 @@ public final class CenaFuga {
             // de baixo, vendo os dois subirem e o Necron lá embaixo
             Vec3 de = eu.add(0, -7 - (tt - Fuga.SOBE) * 0.25, 0).add(4, 0, 4);
             return olhar(de, eu);
+        }
+        // o alerta: a câmera sobe dos dois para a fenda no céu, sobre a Bateria Central
+        if (tt >= Fuga.ALERTA) {
+            float k = faixa(tt, Fuga.ALERTA, Fuga.ALERTA + 50);
+            Vec3 base = eu.add(0, 0.6, 0);
+            Vec3 cam = base.add(fenda.subtract(base).multiply(1, 0, 1).normalize().scale(-4)).add(0, 1.2 + 2 * k, 0);
+            Vec3 alvo = base.lerp(fenda, 0.25 + 0.75 * k);
+            return olhar(cam, alvo);
         }
         // a conversa: em volta dos dois, devagar
         if (a == null) return null;
@@ -199,6 +210,11 @@ public final class CenaFuga {
         else if (tt > Fuga.CHEGA && tt < Fuga.SOBE + 30) { chave = "necron.lanterna.fuga.aguenta"; de = Fuga.CHEGA; ate = Fuga.SOBE + 30; }
         else if (tt > Fuga.SOBE + 32 && tt < Fuga.PRETO) { chave = "necron.lanterna.fuga.segura"; de = Fuga.SOBE + 32; ate = Fuga.PRETO; }
         else if (tt > Fuga.CASA - 25 && tt < Fuga.FALA - 2) { chave = "necron.lanterna.fuga.acorda"; de = Fuga.CASA - 25; ate = Fuga.FALA - 2; }
+        else if (tt >= Fuga.ALERTA + 10 && tt < Fuga.ALERTA + Fuga.NALERTAS * Fuga.POR_ALERTA) {
+            int i = (int) ((tt - Fuga.ALERTA) / Fuga.POR_ALERTA);
+            chave = "necron.lanterna.alerta_" + (i + 1);
+            de = Math.max(Fuga.ALERTA + 10, Fuga.ALERTA + i * Fuga.POR_ALERTA); ate = Fuga.ALERTA + (i + 1) * Fuga.POR_ALERTA;
+        }
         else if (tt >= Fuga.FALA && tt < Fuga.FALA + Fuga.NFALAS * Fuga.POR_FALA) {
             int i = falaAtual(tt);
             chave = "necron.lanterna.fuga.fala_" + (i + 1);
@@ -211,8 +227,9 @@ public final class CenaFuga {
         // falas longas quebram em duas linhas
         var linhas = mc.font.split(txt, w - 40);
         int y = h - fx / 2 - linhas.size() * (mc.font.lineHeight + 1) / 2;
-        boolean fala = chave.contains("fala_") || chave.endsWith("aguenta") || chave.endsWith("segura");
-        int corTxt = fala ? clarear(com.lanterna.vida.Emocoes.cor(tropa)) : 0xE6E6EE;
+        boolean fala = chave.contains("fala_") || chave.endsWith("aguenta") || chave.endsWith("segura") || chave.endsWith("alerta_3");
+        boolean voz = chave.endsWith("alerta_1") || chave.endsWith("alerta_2");
+        int corTxt = voz ? 0xC9A0FF : fala ? clarear(com.lanterna.vida.Emocoes.cor(tropa)) : 0xE6E6EE;
         for (var l : linhas) {
             g.drawCenteredString(mc.font, l, w / 2, y, (al << 24) | (corTxt & 0xFFFFFF));
             y += mc.font.lineHeight + 1;

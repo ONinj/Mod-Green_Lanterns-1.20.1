@@ -50,7 +50,9 @@ import java.util.function.Supplier;
 public final class Fuga {
     // marcos (ticks)
     public static final int CHEGA = 45, GOLPE = 58, SOBE = 66, PRETO = 140, CASA = 172, FALA = 200, NFALAS = 9, POR_FALA = 75;
-    public static final int FIM = FALA + NFALAS * POR_FALA + 20;
+    /** 0.55.0: depois da conversa, o alerta: a fenda da Morte se abre sobre a Bateria Central da Tropa. */
+    public static final int ALERTA = FALA + NFALAS * POR_FALA + 10, POR_ALERTA = 70, NALERTAS = 3;
+    public static final int FIM = ALERTA + NALERTAS * POR_ALERTA + 30;
 
     private static final class Estado {
         int t;
@@ -131,7 +133,7 @@ public final class Fuga {
         }
         ATIVAS.put(p.getUUID(), st);
         p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 80, 4, false, false));
-        ModNetwork.sendTo(p, new Cena(0, a == null ? -1 : a.getId(), n == null ? -1 : n.getId(), st.tropa.id().getPath()));
+        ModNetwork.sendTo(p, new Cena(0, a == null ? -1 : a.getId(), n == null ? -1 : n.getId(), st.tropa.id().getPath(), 0, 0, 0));
         LanternaMod.LOGGER.info("Lanterna: {} foi derrotado pelo Necron; um Lanterna {} vem buscá-lo", p.getGameProfile().getName(), st.tropa.id().getPath());
     }
 
@@ -229,6 +231,10 @@ public final class Fuga {
             a.setYRot(yaw(a.position(), p.position()));
             a.setYHeadRot(a.getYRot());
         }
+        if (t == ALERTA) {
+            Defesa.abrirFenda(p.serverLevel(), st.tropa);
+            p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 0.6f, 0.5f);
+        }
         if (t >= FIM) acabar(p, st);
     }
 
@@ -256,7 +262,8 @@ public final class Fuga {
             novo.moveTo(x + 0.5, y, z - 2.5, 0, 0);
             destino.addFreshEntity(novo);
             st.aliado = novo.getUUID();
-            ModNetwork.sendTo(p, new Cena(1, novo.getId(), -1, st.tropa.id().getPath()));
+            BlockPos f = Defesa.fenda(destino);
+            ModNetwork.sendTo(p, new Cena(1, novo.getId(), -1, st.tropa.id().getPath(), f.getX(), f.getY(), f.getZ()));
         }
         MissionManager.data(p);
         com.lanterna.fonte.FonteDados.chamado(p, "necron:enfrentou", 1);
@@ -296,9 +303,12 @@ public final class Fuga {
     // ===================== rede =====================
 
     /** Servidor → cliente: começa a cena da fuga (fase 0) ou a conversa no planeta (fase 1). */
-    public record Cena(int fase, int aliado, int necron, String tropa) {
-        public static void encode(Cena m, FriendlyByteBuf b) { b.writeVarInt(m.fase); b.writeInt(m.aliado); b.writeInt(m.necron); b.writeUtf(m.tropa, 32); }
-        public static Cena decode(FriendlyByteBuf b) { return new Cena(b.readVarInt(), b.readInt(), b.readInt(), b.readUtf(32)); }
+    public record Cena(int fase, int aliado, int necron, String tropa, int fx, int fy, int fz) {
+        public static void encode(Cena m, FriendlyByteBuf b) {
+            b.writeVarInt(m.fase); b.writeInt(m.aliado); b.writeInt(m.necron); b.writeUtf(m.tropa, 32);
+            b.writeInt(m.fx); b.writeInt(m.fy); b.writeInt(m.fz);
+        }
+        public static Cena decode(FriendlyByteBuf b) { return new Cena(b.readVarInt(), b.readInt(), b.readInt(), b.readUtf(32), b.readInt(), b.readInt(), b.readInt()); }
         public static void handle(Cena m, Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
                     () -> () -> com.lanterna.client.necron.CenaFuga.receber(m)));

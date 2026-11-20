@@ -353,6 +353,16 @@ public final class SagaNecron {
             com.lanterna.fonte.FonteDados.chamado(p, "necron:dois", 1);
             p.sendSystemMessage(Component.translatable("necron.lanterna.dois_pronto").withStyle(ChatFormatting.LIGHT_PURPLE));
         }
+        // 0.55.0: com as Duas Luzes, a missão de defender a própria Tropa
+        LoreData ld = MissionManager.data(p);
+        if (ld != null && ld.completed().contains("necron_3")) {
+            String m4 = "necron_4_" + tag(p).getString("tropa");
+            if (Emocoes.aspecto(tag(p).getString("tropa")) && !ld.completed().contains(m4) && !ld.active().containsKey(m4)) {
+                MissionManager.start(p, m4);
+                p.sendSystemMessage(Component.translatable("necron.lanterna.defesa_missao",
+                        Component.translatable("corps.lanterna." + tag(p).getString("tropa"))).withStyle(ChatFormatting.LIGHT_PURPLE));
+            }
+        }
         net.minecraft.core.BlockPos c = Cratera.centro(p.server);
         if (c == null || !Cratera.dentro(p.level(), c, p.getX(), p.getZ(), -20)) return;
         if (com.lanterna.fonte.FonteDados.chamado(p, "necron:cratera") >= 1) return;

@@ -3900,6 +3900,59 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.55.0: a defesa da Bateria Central da Tropa (três ondas caindo da fenda). */
+    private static void sceneDefesa() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            com.lanterna.necron.Defesa.zerar(sp.server, com.lanterna.lore.PlanetLore.OA);
+            com.lanterna.necron.Defesa.abrirFenda(sp.serverLevel(), com.lanterna.corps.BuiltinCorps.GREEN);
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            d.completed().add("necron_3");
+            d.completed().remove("necron_4_green");
+            com.lanterna.fonte.FonteDados.chamado(sp, "necron:defesa", 0);
+            com.lanterna.mission.MissionManager.start(sp, "necron_4_green");
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            var oa = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("oa").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(oa, h.getX() + 0.5, 90, h.getZ() + 30.5, 180, 0);
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+        }));
+        at(100, () -> server(sp -> { var b = com.lanterna.necron.Defesa.bateria(sp.serverLevel());
+            sp.connection.teleport(b.getX() + 0.5, b.getY() + 6, b.getZ() + 26.5, 180, -18); }));
+        at(60, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(40, () -> server(sp -> glog("batalha=" + com.lanterna.necron.Defesa.emBatalha(com.lanterna.lore.PlanetLore.OA))));
+        at(120, () -> shot("defesa_fenda"));
+        // simula o jogador vencendo cada onda: espera os servos caírem e derrota todos
+        for (int onda = 1; onda <= 3; onda++) {
+            int o = onda;
+            at(onda == 1 ? 60 : 260, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var lista = l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(140), m -> m.getTags().contains(com.lanterna.necron.Defesa.ONDA_TAG));
+                glog("onda " + o + ": servos=" + lista.size());
+                if (o == 2) shot("defesa_onda");
+                for (var m : lista) m.kill();
+            }));
+            at(120, () -> server(sp -> {
+                var l = sp.serverLevel();
+                for (var m : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(140), m -> m.getTags().contains(com.lanterna.necron.Defesa.ONDA_TAG))) m.kill();
+            }));
+        }
+        at(200, () -> server(sp -> glog("depois: batalha=" + com.lanterna.necron.Defesa.emBatalha(com.lanterna.lore.PlanetLore.OA)
+                + " defendida=" + com.lanterna.necron.Defesa.defendida(sp.server, com.lanterna.lore.PlanetLore.OA)
+                + " fenda=" + com.lanterna.necron.Defesa.fendaAberta(sp.server, com.lanterna.lore.PlanetLore.OA)
+                + " missao feita=" + com.lanterna.mission.MissionManager.data(sp).completed().contains("necron_4_green"))));
+        at(20, () -> { glog("FIM defesa"); mc.stop(); });
+    }
+
     /** 0.54.3: o Necron derruba o jogador; a fuga com o Lanterna da Tropa; a conversa no planeta; a missão do 2º anel. */
     private static void sceneFuga() {
         Minecraft mc = Minecraft.getInstance();
@@ -3912,6 +3965,7 @@ public final class DevAutoTest {
             var t = com.lanterna.necron.SagaNecron.tag(sp);
             t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putString("origem", "green");
             com.lanterna.necron.SagaNecron.partirRyut(sp.server);
+            com.lanterna.necron.Defesa.zerar(sp.server, com.lanterna.lore.PlanetLore.OA);
             com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, net.minecraft.world.item.ItemStack.EMPTY));
         }));
         waitFor(() -> { var s = mc.getSingleplayerServer(); return s != null && com.lanterna.necron.Cratera.pronta(s); }, 20 * 120);
@@ -3931,6 +3985,7 @@ public final class DevAutoTest {
         at(80, () -> server(sp -> glog("em casa? dim=" + sp.level().dimension().location() + " pos=" + sp.blockPosition() + " vida=" + sp.getHealth())));
         at(60, () -> shot("fuga_conversa_1"));
         at(240, () -> shot("fuga_conversa_2"));
+        at(400, () -> shot("fuga_alerta"));
         waitFor(() -> !com.lanterna.client.necron.CenaFuga.ativa(), 20 * 60);
         at(40, () -> server(sp -> {
             var d = com.lanterna.mission.MissionManager.data(sp);
@@ -7315,6 +7370,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("chamado")) sceneChamado();
         else if (ENABLED && SCENE.equals("cratera")) sceneCratera();
         else if (ENABLED && SCENE.equals("fuga")) sceneFuga();
+        else if (ENABLED && SCENE.equals("defesa")) sceneDefesa();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

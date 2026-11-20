@@ -466,6 +466,12 @@ public final class Cratera {
         return m;
     }
 
+    /** Um servo novo (para as ondas da defesa das Baterias). */
+    @Nullable
+    public static Mob novoServo(ServerLevel l) {
+        return servo(l);
+    }
+
     public static boolean servo(net.minecraft.world.entity.Entity e) {
         return e.getTags().contains(SERVO);
     }
