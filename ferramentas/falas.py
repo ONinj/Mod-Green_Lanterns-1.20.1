@@ -23,6 +23,8 @@ QUEM = [
     (r"^necron\.lanterna\.(defesa_fala|final_fala|vitoria_fala)$", "Lanterna aliado"),
     (r"^necron\.lanterna\.mestre_(1|apoio|duelo|rende|segura|fenda|fenda_fim)$", "Mestre da Tropa do jogador"),
     (r"^necron\.lanterna\.ancora_fala_fim$", "Lanterna da Tropa do jogador"),
+    (r"^necron\.lanterna\.socorro_(prisioneiros|sobreviventes|ladroes)$", "Lanterna de outra Tropa (pedindo ajuda)"),
+    (r"^necron\.lanterna\.preso_fala$", "Lanterna preso (solto da jaula)"),
     (r"^mission\.lanterna\.necron_a1\.talk$", "Sgt. Rui Tavares (Vila Aurora)"),
     (r"^mission\.lanterna\.necron_a3\.talk$", "Dra. Lívia Andrade (Vila Aurora)"),
     (r"^mission\.lanterna\.necron_[a-z0-9_]+\.talk$", "NPC da missão"),

@@ -60,6 +60,23 @@ public final class MissoesNecron {
                             Objective.of(Type.DUMMY, "alvo", 4, pl.planet, h)), "necron_3c_" + id.substring(10));
                     yield m(id, List.of(Objective.of(Type.FONTE, "necron:duelo", 1, pl.planet, h)), "necron_3d");
                 }
+                // necron_s_<tropa>: o socorro no planeta de outra Tropa antes da defesa (Capítulo 5)
+                if (id.startsWith("necron_s_")) {
+                    String t = id.substring(9);
+                    com.lanterna.lore.PlanetLore pl = null;
+                    for (com.lanterna.lore.PlanetLore x : com.lanterna.lore.PlanetLore.values()) if (x.corps.id().getPath().equals(t)) pl = x;
+                    if (pl == null) yield null;
+                    String pn = pl.planet;
+                    yield switch (Socorro.tipo(t)) {
+                        case PRISIONEIROS -> m(id, List.of(Objective.of(Type.FONTE, "necron:preso_" + t + "_1", 1, pn, Socorro.ponto(1)),
+                                Objective.of(Type.FONTE, "necron:preso_" + t + "_2", 1, pn, Socorro.ponto(2)),
+                                Objective.of(Type.FONTE, "necron:preso_" + t + "_3", 1, pn, Socorro.ponto(3))), "necron_4_" + t);
+                        case SOBREVIVENTES -> m(id, List.of(Objective.of(Type.FONTE, "necron:sobrev_" + t + "_1", 1, pn, Socorro.ponto(1)),
+                                Objective.of(Type.FONTE, "necron:sobrev_" + t + "_2", 1, pn, Socorro.ponto(2)),
+                                Objective.of(Type.FONTE, "necron:sobrev_" + t + "_3", 1, pn, Socorro.ponto(3))), "necron_4_" + t);
+                        case LADROES -> m(id, List.of(Objective.of(Type.COLLECT, "lanterna:fragmento_bateria", Socorro.FRAGMENTOS, pn, null)), "necron_4_" + t);
+                    };
+                }
                 // necron_4a_<tropa>: as três âncoras da Morte no planeta da Tropa (Capítulo 4)
                 if (id.startsWith("necron_4a_")) {
                     com.lanterna.lore.PlanetLore pl = null;

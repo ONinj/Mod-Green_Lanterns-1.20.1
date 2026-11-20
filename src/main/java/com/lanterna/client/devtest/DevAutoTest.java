@@ -3900,6 +3900,112 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.5: Capítulo 5 (os três tipos de socorro: prisioneiros em Ysmault, ladrões em Korugar, sobreviventes em Okaara). */
+    private static boolean SO_OKAARA = System.getProperty("lanterna.so_okaara") != null || SCENE.equals("cap5b");
+    private static void sceneCap5() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        String[][] alvos = SO_OKAARA ? new String[][]{{"orange", "okaara"}} : new String[][]{{"red", "ysmault"}, {"yellow", "korugar"}, {"orange", "okaara"}};
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            com.lanterna.necron.SagaNecron.zerar(sp);
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            t.putBoolean("dividido", true); t.putString("tropa", "green"); t.putBoolean("fugiu", true);
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.vida.Emocoes.tag2(sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+            sp.getInventory().clearOrCountMatchingItems(x -> x.is(com.lanterna.lore.LoreItems.FRAGMENTO_BATERIA.get()), -1, sp.inventoryMenu.getCraftSlots());
+            for (int sl = 9; sl < 36; sl++) sp.getInventory().items.set(sl, net.minecraft.world.item.ItemStack.EMPTY); // espaço para os fragmentos
+            var d = com.lanterna.mission.MissionManager.data(sp);
+            for (String[] a2 : alvos) {
+                com.lanterna.necron.Socorro.zerar(sp.server, com.lanterna.lore.PlanetLore.byPlanet(a2[1]));
+                for (String m : new String[]{"necron_s_" + a2[0], "necron_4_" + a2[0]}) { d.completed().remove(m); d.active().remove(m); }
+                com.lanterna.mission.MissionManager.start(sp, "necron_s_" + a2[0]);
+            }
+            glog("missoes: " + d.isActive("necron_s_red") + " " + d.isActive("necron_s_yellow") + " " + d.isActive("necron_s_orange"));
+        }));
+        if (!SO_OKAARA) {
+        // ---- Ysmault: as jaulas ----
+        at(10, () -> server(sp -> { var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("ysmault").dimension()); var h = com.lanterna.lore.PlanetLore.HUB; sp.teleportTo(lv, h.getX() + 0.5, 140, h.getZ() + 0.5, 0, 0); }));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            at(40, () -> server(sp -> { var b = com.lanterna.necron.Socorro.ponto(ii); sp.connection.teleport(b.getX() + 12.5, 140, b.getZ() + 0.5, 90, 40); }));
+            at(80, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var b = com.lanterna.necron.Socorro.ponto(ii);
+                int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX() + 3, b.getZ() + 3) + 4;
+                var tr = new net.minecraft.core.BlockPos(b.getX(), y, b.getZ());
+                var g = l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(100, 200, 100), m -> m.getTags().contains("lanterna_guarda_jaula:ysmault:" + ii));
+                glog("jaula " + ii + ": trava=" + l.getBlockState(tr).getBlock() + " guardas=" + g.size()
+                        + " preso=" + l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(100, 200, 100), x -> x.getTags().contains("lanterna_preso_jaula:" + ii)).size());
+                if (ii == 1) sp.connection.teleport(tr.getX() + 7.5, tr.getY() - 2, tr.getZ() + 0.5, 90, 10);
+                sp.gameMode.destroyBlock(tr);
+                glog("  com guardas: trava=" + l.getBlockState(tr).getBlock());
+                for (var m : g) { m.invulnerableTime = 0; m.hurt(sp.damageSources().playerAttack(sp), 10000); }
+            }));
+            if (i == 1) at(5, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); shot("cap5_jaula"); });
+            at(20, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var b = com.lanterna.necron.Socorro.ponto(ii);
+                int y = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX() + 3, b.getZ() + 3) + 4;
+                sp.gameMode.destroyBlock(new net.minecraft.core.BlockPos(b.getX(), y, b.getZ()));
+                glog("  solto=" + com.lanterna.fonte.FonteDados.chamado(sp, "necron:preso_red_" + ii));
+            }));
+        }
+        at(40, () -> server(sp -> { var d = com.lanterna.mission.MissionManager.data(sp); glog("prisioneiros feita=" + d.completed().contains("necron_s_red") + " defesa red ativa=" + d.isActive("necron_4_red")); }));
+        // ---- Korugar: os ladrões ----
+        at(10, () -> server(sp -> { var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("korugar").dimension()); var b = com.lanterna.necron.Socorro.ponto(2); sp.teleportTo(lv, b.getX() + 0.5, 150, b.getZ() + 0.5, 0, 50); }));
+        for (int k = 0; k < 4; k++) {
+            if (k == 0) {
+                at(90, () -> server(sp -> {
+                    var la = sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(300, 250, 300), x -> x.getTags().contains(com.lanterna.necron.Socorro.LADRAO));
+                    if (!la.isEmpty()) { var x = la.get(0); sp.connection.teleport(x.getX() + 6, x.getY() + 2, x.getZ(), 90, 15); }
+                }));
+                at(10, () -> { mc.options.hideGui = false; shot("cap5_ladrao"); });
+            }
+            at(k == 0 ? 2 : 100, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var la = l.getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(300, 250, 300), x -> x.getTags().contains(com.lanterna.necron.Socorro.LADRAO));
+                glog("ladroes=" + la.size());
+                for (var x : la) { x.invulnerableTime = 0; x.hurt(sp.damageSources().playerAttack(sp), 100000); }
+            }));
+            at(20, () -> server(sp -> {
+                for (var it : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, sp.getBoundingBox().inflate(300, 250, 300),
+                        x -> x.getItem().is(com.lanterna.lore.LoreItems.FRAGMENTO_BATERIA.get()))) { sp.getInventory().add(it.getItem().copy()); it.discard(); }
+            }));
+        }
+        at(40, () -> server(sp -> { var d = com.lanterna.mission.MissionManager.data(sp); glog("ladroes feita=" + d.completed().contains("necron_s_yellow") + " defesa yellow ativa=" + d.isActive("necron_4_yellow")); }));
+        }
+        // ---- Okaara: os sobreviventes ----
+        at(10, () -> server(sp -> { var lv = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("okaara").dimension()); var h = com.lanterna.lore.PlanetLore.HUB; sp.teleportTo(lv, h.getX() + 0.5, 140, h.getZ() + 0.5, 0, 0); }));
+        for (int i = 1; i <= 3; i++) {
+            int ii = i;
+            for (int tent = 0; tent < 3; tent++) {
+                at(40, () -> server(sp -> {
+                    if (com.lanterna.fonte.FonteDados.chamado(sp, "necron:sobrev_orange_" + ii) >= 1) return;
+                    var b = com.lanterna.necron.Socorro.ponto(ii);
+                    var v = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new net.minecraft.world.phys.AABB(b).inflate(30, 300, 30),
+                            x -> x.getTags().contains(com.lanterna.necron.Socorro.CIVIL + ":okaara:" + ii)).stream().findFirst().orElse(null);
+                    glog("posto " + ii + ": civil=" + (v != null) + " feito=" + com.lanterna.lore.LoreWorldData.get(sp.server).siteBuilt("saga:socorro:okaara:posto:" + ii)
+                            + " carregado=" + sp.serverLevel().areEntitiesLoaded(net.minecraft.world.level.ChunkPos.asLong(b.getX() >> 4, b.getZ() >> 4))
+                            + " ativa=" + com.lanterna.mission.MissionManager.data(sp).isActive("necron_s_orange") + " dim=" + sp.level().dimension().location());
+                    if (v == null) { sp.connection.teleport(b.getX() + 0.5, 140, b.getZ() + 0.5, 0, 60); return; }
+                    if (v.isNoGravity()) return;
+                    sp.connection.teleport(v.getX() + 2.5, v.getY(), v.getZ(), 90, 10);
+                    sp.interactOn(v, net.minecraft.world.InteractionHand.MAIN_HAND);
+                }));
+                if (ii == 1 && tent == 0) { at(8, () -> shot("cap5_civil")); at(40, () -> shot("cap5_bolha")); at(22, () -> {}); }
+                else at(70, () -> {});
+            }
+        }
+        at(120, () -> server(sp -> { var d = com.lanterna.mission.MissionManager.data(sp); glog("sobreviventes feita=" + d.completed().contains("necron_s_orange") + " defesa orange ativa=" + d.isActive("necron_4_orange")); }));
+        at(20, () -> { glog("FIM cap5"); mc.stop(); });
+    }
+
     /** 0.56.4: Capítulo 4 (as três âncoras da Morte antes da defesa). */
     private static void sceneCap4() {
         Minecraft mc = Minecraft.getInstance();
@@ -7685,6 +7791,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("aurora_necron")) sceneAuroraNecron();
         else if (ENABLED && SCENE.equals("cap3")) sceneCap3();
         else if (ENABLED && SCENE.equals("cap4")) sceneCap4();
+        else if (ENABLED && (SCENE.equals("cap5") || SCENE.equals("cap5b"))) sceneCap5();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

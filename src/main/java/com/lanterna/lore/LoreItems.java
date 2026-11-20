@@ -60,6 +60,9 @@ public final class LoreItems {
     // ---- Lanternas lendários: insígnias (uma de cada) e fragmentos (moeda da próxima saga) ----
     public static final RegistryObject<Item> FRAGMENTO_LENDARIO = reg("fragmento_lendario",
             () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).fireResistant(), true));
+    /** 0.56.5: pedaço de uma Bateria Central roubado pelos Ladrões da Luz (saga do Necron, Capítulo 5). */
+    public static final RegistryObject<Item> FRAGMENTO_BATERIA = reg("fragmento_bateria",
+            () -> new LoreItem(new Item.Properties().rarity(Rarity.RARE).stacksTo(16), true));
     public static final java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> INSIGNIAS = insignias();
 
     private static java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> insignias() {

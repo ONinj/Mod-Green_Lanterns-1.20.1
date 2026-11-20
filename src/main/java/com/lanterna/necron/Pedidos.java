@@ -217,10 +217,13 @@ public final class Pedidos {
             if (a != null) a.discard();
             PlanetLore pl = planeta(c.tropa);
             Defesa.abrirFenda(l, corps(c.tropa));
-            String m = "necron_4_" + c.tropa;
+            // 0.56.5: primeiro o socorro no planeta (prisioneiros, sobreviventes ou ladrões), depois a defesa
+            String m = "necron_4_" + c.tropa, s0 = "necron_s_" + c.tropa;
             LoreData d = MissionManager.data(p);
-            if (d != null) { d.completed().remove(m); com.lanterna.fonte.FonteDados.chamado(p, "necron:defesa_" + c.tropa, 0); }
-            MissionManager.start(p, m);
+            if (d != null) { d.completed().remove(m); d.completed().remove(s0); com.lanterna.fonte.FonteDados.chamado(p, "necron:defesa_" + c.tropa, 0); }
+            MissionManager.start(p, s0);
+            p.sendSystemMessage(Component.translatable("necron.lanterna.socorro_" + Socorro.tipo(c.tropa).name().toLowerCase())
+                    .withStyle(s -> s.withColor(cor)));
             tag(p).putString("defendendo", c.tropa);
             avancar(tag(p), p.server.overworld().getGameTime());
             p.sendSystemMessage(Component.translatable("necron.lanterna.pedido_missao", Component.translatable("corps.lanterna." + c.tropa), pl.planetName())

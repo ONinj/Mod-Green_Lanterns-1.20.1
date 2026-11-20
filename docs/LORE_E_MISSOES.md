@@ -1911,3 +1911,12 @@ Depois da Primeira Fenda, antes da Defesa da Tropa:
 - Derrotados os guardas, **quebre o núcleo**: a âncora se parte num clarão.
 - As três destruídas, a fenda fica fraca e começa **A Defesa da Tropa**.
 - As âncoras são do mundo: destruída por um jogador, conta para todos.
+
+## 0.56.5 — Saga do Necron, Capítulo 5: O Socorro
+
+Quando uma Tropa pede ajuda (Capítulo dos Pedidos), o jogador não vai direto para a defesa: antes há uma missão própria naquele planeta, que depende da Tropa:
+- **Prisioneiros** (Vermelha, Verde, Violeta): três Lanternas da Tropa estão presos em **jaulas da Morte** ao redor da cidade (a uns 95 blocos). Cada jaula tem 3 servos de guarda e uma **trava** de obsidiana chorona que só quebra depois que os guardas caem. Quebrada a trava, o Lanterna se solta, agradece e volta para a cidade.
+- **Ladrões** (Amarela, Índigo): servos da Morte roubaram **pedaços da Bateria Central**. Cace os ladrões e recupere **4 fragmentos de bateria**.
+- **Sobreviventes** (Laranja, Azul): três moradores (**Orin, Tessa e Kalu**) ficaram presos em postos fora da cidade, cercados por 3 servos cada. Clique no morador e fique ao lado dele uns 3 segundos, aguentando o ataque do cerco (se se afastar, a luz se solta): uma **bolha de luz** o leva voando até a cidade e o cerco daquele posto se desfaz.
+- Os locais do socorro são do mundo (contam para todos). Terminado o socorro, começa **A Defesa da Tropa** daquele planeta.
+

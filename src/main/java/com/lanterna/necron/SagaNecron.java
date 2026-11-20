@@ -300,6 +300,7 @@ public final class SagaNecron {
         parar(p);
         for (int i = 1; i <= 3; i++) com.lanterna.fonte.FonteDados.chamado(p, "necron:ancora_" + i, 0);
         for (String t : Emocoes.ASPECTOS) com.lanterna.fonte.FonteDados.chamado(p, "necron:defesa_" + t, 0);
+        for (String t : Emocoes.ASPECTOS) for (int i = 1; i <= 3; i++) { com.lanterna.fonte.FonteDados.chamado(p, "necron:preso_" + t + "_" + i, 0); com.lanterna.fonte.FonteDados.chamado(p, "necron:sobrev_" + t + "_" + i, 0); }
         Treino.zerar(p);
         Aurora.zerar(p);
         Fuga.zerar(p);
