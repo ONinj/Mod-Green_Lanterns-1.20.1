@@ -4,7 +4,7 @@ Leia este arquivo inteiro antes de mexer em qualquer coisa. Ele resume ~2 meses 
 O mod se chama **New Lanterns** na CurseForge (jar `lanterna-<versão>.jar`, modid `lanterna`, pacote `com.lanterna`).
 
 ## Os dois ramos (dois chats)
-- `main` (ESTE chat): a saga nova. Versão atual **0.53.1** (README: 1.61.1). Próximas: 0.53.2, 0.54.0...
+- `main` (ESTE chat): a saga nova. Versão atual **0.56.1** (README: 1.64.1). O trabalho fica no ramo da sessão do Claude até o dono pedir para levar ao `main`.
 - `estavel` (outro chat): correções para os jogadores a partir da 0.52.4 (já está na 0.52.5+). Não publique nada da 0.53 na CurseForge; a saga sai primeiro só para os beta testers (pelo Discord).
 - Correções do `estavel` que valham para a saga precisam ser trazidas para cá (`git merge origin/estavel` ou cherry-pick, resolvendo conflitos no README/docs/versão). A 0.52.5 (Odym/Morrow, Nok, Zamaron) já foi trazida para o `main`; traga também o que vier depois.
 
@@ -60,19 +60,32 @@ O mod se chama **New Lanterns** na CurseForge (jar `lanterna-<versão>.jar`, mod
 - Mundo/planetas: `lore/world/PlanetSites.java` (cidades), `terra/` (Cidade Aurora), `mogo/`, `hanks/`.
 - Missões: `mission/`. IA do anel (só chat): `ia/`.
 
-## A saga nova — o que o dono já decidiu
-Base: saga pós-Nulo inspirada na "Noite Mais Densa" (sem copiar). Foco no Anel da Morte, uso das insígnias lendárias, cutscenes com NPCs bem modelados. Depois virá outra saga (Parallax).
+## A saga do Necron — o que o dono já decidiu
 
-Feito (0.53.0–0.53.1):
-1. **Árvore das Emoções** do Anel da Vida: sem missões de ir e voltar, é farm dos chefes (Insígnias e Fragmentos Lendários). Cada aspecto começa com 3 construtos e abre mais a cada nível.
-2. **Treino**: o anel continua branco; traje e construtos viram os da Tropa treinada; cena com o traje se refazendo.
-3. **Dois Anéis**: o corpo preparado aguenta um 2º anel (fica para sempre, mesmo sem o Anel da Vida); o 2º empresta só construtos de defesa/cura/ajuda (DEFENSE e UTILITY); metade do traje (lado esquerdo) na cor dele; anel na outra mão; cena ao colocar.
+O Ser da Morte se chama **Necron** (com C). Saga pós-Nulo inspirada na "Noite Mais Densa" (sem copiar). Depois virá outra saga (Parallax).
 
-Próximo (combinado com o dono):
-4. **Ritual da divisão**: quando começa o primeiro evento do Ser da Morte (o nome NÃO é Nekron, ele vai dar outro), o player perde o controle do Anel da Vida. Cutscene: o player estende a mão, o anel se desfaz em **7 anéis** girando em volta dele; fica só o da Tropa escolhida no começo (com as mesmas estatísticas), os outros 6 partem para o espaço. Mensagem: ele não é mais digno; o Ser da Morte nasceu/foi libertado quando o Nulo morreu; a entidade da Vida (o "embrião") fica dormente/enfraquecida. Gatilho natural: a flag `dominada` (os 7 aspectos no nível 6).
-5. Depois: o despertar do Ser da Morte, chefes e mecânicas da saga (o dono descreve antes).
-6. Futuro: voz (pt e en) para os personagens que contam a história (só depois, e sem quebrar a regra de não baixar nada).
+**Tamanho:** a saga tem que ser LONGA: no mínimo ~5 horas de jogo direto até terminar, rica em cutscenes, falas e, acima de tudo, **jogabilidade** (o principal do mod é jogar, não só farmar).
 
-Valores escolhidos pelo Claude que o dono ainda pode mudar: custos dos fragmentos, +1,5% por nível, lado esquerdo do traje para o 2º anel, CONTROL fora do 2º anel.
+**Duas linhas (dois finais)** — decidido pelo dono, a fazer DEPOIS que a linha do herói estiver toda polida:
+- **Herói** (contra o Necron): vence; é a linha que está sendo feita agora.
+- **Corrompido** (ajuda o Necron a destruir tudo): o Necron vence, as Tropas caem, sobram poucos Lanternas, e na saga seguinte eles se juntam para purificar o jogador (o jogador não tem escolha nisso na próxima saga). A escolha desta saga reflete na próxima.
+
+**Feito (0.53.0–0.56.1):**
+1. 0.53: Árvore das Emoções do Anel da Vida, treino, Dois Anéis (`vida/Emocoes.java`, `client/vida/`).
+2. 0.54.0: cutscene da divisão (`client/necron/CinemaNecron.java`, tela de cinema própria: Embrião escurecendo, o anel se desfaz em 7, só o da Tropa de origem volta, Ryut se parte, Necron sai, voa e cai na Terra). Modelos `necron` e `embriao_vida` gerados por `ferramentas/modelos_saga.py` (o dono pode refazer no Blockbench com os mesmos nomes de arquivo e ossos).
+3. 0.54.1: chamado de Ryut + piloto travado até Ryut (`necron/SagaNecron.java`, `client/necron/ClientSaga.java`, `Autopilot.travar`); Ryut partida e fechada (`client/space/RyutPartida.java`).
+4. 0.54.2: cratera na Terra (`necron/Cratera.java`: terra morta gerada aos poucos, Bateria Central da Morte), `necron/NecronEntity.java`, servos imunes a quem tem um anel só.
+5. 0.54.3: a fuga (`necron/Fuga.java`, `client/necron/CenaFuga.java`): resgate pelo Lanterna da Tropa, conversa no planeta, missão Duas Luzes.
+6. 0.55.0: fenda sobre a Bateria Central e a defesa em 3 ondas (`necron/Defesa.java`, portal desenhado em `client/necron/RenderFenda.java`).
+7. 0.55.1: pedidos de ajuda e quedas do Amor/Índigo/Esperança (`necron/Pedidos.java`, `necron/Queda.java`, `client/necron/CenaPedido.java`, `CinemaQueda.java`).
+8. 0.55.2: polimento (voo do Necron, resgate suave, cúpula do escudo, fenda como portal).
+9. 0.56.0: A Terra Escurece (3 etapas, `necron/TerraEscurece.java`) e a batalha final em 4 fases com 15 aliados (`necron/BatalhaFinal.java`).
+10. 0.56.1: equilíbrio: nível máximo 250 (`tropa/Nivel.java`), nível cai para 90 na divisão, a Morte tira % da vida máxima, dano no Necron pelo nível de quem bate.
+
+Missões da linha `necron` em `necron/MissoesNecron.java` (necron_1 a necron_7; necron_4_<tropa> = defesa de uma Tropa). Comandos de teste: `/lantern saga replay|start|reset|impact`. Cenas de teste em `DevAutoTest`: `necron`, `chamado`, `cratera`, `fuga`, `defesa`, `pedidos`, `queda`, `final`, `nivel`.
+
+**Próximo:** a purificação (Terra e Lanternas corrompidos) e, principalmente, encher a linha do herói de jogabilidade até ~5 h (o Claude propôs um esqueleto de capítulos ao dono; seguir o que ele aprovar).
+
+Valores escolhidos pelo Claude que o dono ainda pode mudar: custos dos fragmentos, +1,5% por nível, lado esquerdo do traje para o 2º anel, CONTROL fora do 2º anel; na saga do Necron: falas e legendas, ordem dos pedidos e das quedas, 3 ondas por defesa, vida do Necron (1000) e a curva de dano por nível, corte para o nível 90, mínimos de 6%/15%.
 
 Não testado com dois jogadores reais: Purificar do Anel Branco; cenas vistas por outro player.
