@@ -158,7 +158,7 @@ public class NecronEntity extends Monster implements GeoEntity {
         l.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.4f, 0.5f);
         l.playSound(null, blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 0.8f, 0.6f);
         l.sendParticles(ParticleTypes.SWEEP_ATTACK, alvo.getX(), alvo.getY() + 1, alvo.getZ(), 3, 0.6, 0.3, 0.6, 0);
-        alvo.hurt(damageSources().mobAttack(this), 14);
+        alvo.hurt(damageSources().mobAttack(this), Math.max(14, alvo.getMaxHealth() * 0.3f));
         Vec3 empurra = alvo.position().subtract(position()).normalize().scale(1.6);
         alvo.push(empurra.x, 0.5, empurra.z);
         alvo.hurtMarked = true;
@@ -176,7 +176,7 @@ public class NecronEntity extends Monster implements GeoEntity {
             if (i % 4 == 0) l.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0);
         }
         l.playSound(null, blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 1f, 1.4f);
-        alvo.hurt(damageSources().indirectMagic(this, this), 7);
+        alvo.hurt(damageSources().indirectMagic(this, this), Math.max(7, alvo.getMaxHealth() * 0.16f));
         alvo.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 1));
         alvo.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
     }

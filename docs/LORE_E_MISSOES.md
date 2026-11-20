@@ -1856,3 +1856,15 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - No começo de cada fase ele fica um instante sem levar dano (a troca de poder).
 - **Controlada:** quem cai na batalha não morre. Os Lanternas puxam você para a borda da cratera, com vida e proteção. O Necron não recupera a vida, a não ser que todo mundo vá embora por mais de 30 segundos.
 - **Vencendo:** o Necron se desfaz em luz, os servos somem, os aliados comemoram com fogos nas cores das Tropas, e a cratera fica quieta. Começa a missão **A Purificação** (na próxima versão).
+
+
+## 0.56.1 — Equilíbrio da saga do Necron
+
+- **Nível máximo: 250** (era 150). Do 150 ao 250 cada nível custa bem mais experiência (~757 mil XP no total, mais que o dobro do caminho do 50 ao 150). Cada nível continua dando vida (+0,8) e força (+1%); a defesa do nível para nos 60% (alcançados no 150).
+- **Ao perder o Anel da Vida** (a divisão), o portador perde parte da força: o nível cai para **no máximo 90**. Quem já tinha passado pela divisão numa versão anterior perde uma vez, ao entrar no mundo.
+- **A Morte machuca em qualquer nível:**
+  - o Necron e os servos atravessam metade da defesa do nível;
+  - depois de todas as defesas (nível, armadura, proteções do anel), o golpe de um servo ainda tira pelo menos **6%** da vida máxima, e o do Necron pelo menos **15%** (a foice tira 30%, o raio 16%);
+  - na batalha final, os golpes avisados no chão crescem com a vida máxima de quem leva.
+- **O Necron da batalha final** tem 1000 de vida e é absurdamente forte: o dano que ele recebe depende do nível de quem bate. No nível 90 entra só 12% do golpe; no 200 ou mais, o golpe inteiro. Sempre pela metade, porque ele é a Morte. Os aliados tiram só um quarto. É preciso farmar até o 200–250 para derrubá-lo.
+- A força dos Lanternas lendários não mudou com o nível novo.

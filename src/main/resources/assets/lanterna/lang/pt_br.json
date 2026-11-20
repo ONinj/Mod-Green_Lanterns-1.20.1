@@ -3427,5 +3427,6 @@
   "objective.lanterna.fonte.necron.vitoria": "Derrotar o Necron",
   "mission.lanterna.necron_7.title": "A Purificação",
   "mission.lanterna.necron_7.desc": "O Necron caiu, mas a Terra continua morta em volta da cratera e os Lanternas corrompidos ainda vagam. Faça o ritual de purificação na Bateria Central da Morte.",
-  "objective.lanterna.fonte.necron.purificou_terra": "Purificar a Terra"
+  "objective.lanterna.fonte.necron.purificou_terra": "Purificar a Terra",
+  "nivel.lanterna.cortado": "O Anel da Vida levou parte da sua força: o seu nível caiu de %s para %s. O caminho até o nível 250 está aberto, e você vai precisar dele para enfrentar o Necron."
 }

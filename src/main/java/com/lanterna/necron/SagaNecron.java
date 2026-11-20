@@ -50,6 +50,8 @@ import java.util.function.Supplier;
 public final class SagaNecron {
     /** Duração da cutscene (em ticks) e quando o anel da Tropa volta para o dedo. */
     public static final int DURACAO = 1520, TROCA = 618;
+    /** 0.56.1: o nível máximo depois que o Anel da Vida se divide. */
+    public static final int NIVEL_DEPOIS = 90;
     /** Quando Ryut se parte na cena (o mundo guarda isso: Ryut fica partida para todos). */
     public static final int RACHA = 880;
     /** 0.54.1: depois do chamado, o piloto automático liga sozinho (e não dá para desligar) até chegar perto de Ryut. */
@@ -112,6 +114,11 @@ public final class SagaNecron {
             // Ryut já partida: quem estiver lá dentro é jogado para o espaço
             if (p.tickCount % 20 == 3 && ryutPartida(p.server) && naRyut(p)) expulsarDeRyut(p);
             if (p.tickCount % 20 == 9 && dividido(p)) missao(p);
+            // quem dividiu o anel antes da 0.56.1 perde o nível uma vez, ao entrar
+            if (p.tickCount % 20 == 15 && dividido(p) && !tag(p).getBoolean("nivel_cortado")) {
+                tag(p).putBoolean("nivel_cortado", true);
+                com.lanterna.tropa.Nivel.limitar(p, NIVEL_DEPOIS);
+            }
             if (!dividido(p) && Emocoes.dominada(p) && Emocoes.comAnelDaVida(p) && p.isAlive()) chamado(p);
             else if (tag(p).getBoolean("chamado") && p.tickCount % 20 == 5) {
                 tag(p).remove("chamado");   // tirou o Anel da Vida no meio do caminho: o chamado espera ele voltar
@@ -323,6 +330,9 @@ public final class SagaNecron {
             if (!p.getInventory().add(seg)) p.drop(seg, false);
         }
         tag(p).putBoolean("dividido", true);
+        // 0.56.1: sem o Anel da Vida, o portador perde parte da força (nível no máximo 90)
+        com.lanterna.tropa.Nivel.limitar(p, NIVEL_DEPOIS);
+        tag(p).putBoolean("nivel_cortado", true);
         tag(p).putLong("quando", p.level().getGameTime());
         data.setPowerActive(true);
         RingPowers.sync(p, data);

@@ -92,7 +92,7 @@ public final class Lendarios {
     public static float[] escala(LanternaEntity le) {
         int[] p = PICO.get(le.getUUID());
         int n = p == null ? 1 : Math.max(1, p[0]);
-        float nv = NIVEL / (float) com.lanterna.tropa.Nivel.MAX;
+        float nv = NIVEL / (float) com.lanterna.tropa.Nivel.MAX_ANTIGO;   // a escala dos lendários não muda com o nível novo
         float vida = 2.0f * (1 + 1.6f * nv) * (1 + 0.8f * (n - 1));
         float dano = 2.0f * (1 + 1.4f * nv) * (1 + 0.15f * (n - 1));
         return new float[]{vida, dano};

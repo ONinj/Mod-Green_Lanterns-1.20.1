@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 /**
- * Nível do Lanterna (1 a 150): a experiência da pessoa, separada da afinidade (que é o laço com aquele anel).
+ * Nível do Lanterna (1 a 250; até a 0.56.0 era 150): a experiência da pessoa, separada da afinidade (que é o laço com aquele anel).
  *
  *  - Cada nível custa mais XP que o anterior (do 1 ao 50 são ~54 mil XP).
  *  - A cada 5 níveis: +1 coração. Construtos e voo gastam 1% menos carga por nível (até 40%).
@@ -39,7 +39,9 @@ import java.util.UUID;
  */
 @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.lanterna.LanternaMod.MODID, bus = net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus.FORGE)
 public final class Nivel {
-    public static final int MAX = 150;
+    public static final int MAX = 250;
+    /** O antigo nível máximo (a fase dos lendários vai até ele; depois é a saga do Necron). */
+    public static final int MAX_ANTIGO = 150;
     /** Nível da Prova da Emoção (e do antigo nível máximo). */
     public static final int PROVA = 50;
     private static final UUID VIDA = UUID.fromString("0a3f7e42-5b8c-4d1e-9f2a-6c7b8d9e0f11");
@@ -49,7 +51,10 @@ public final class Nivel {
     /** XP para ir do nível n para o n+1. */
     public static int custo(int n) {
         // até o 50 como sempre; depois cresce mais devagar (do 50 ao 150 é a fase dos lendários)
-        return n <= PROVA ? 100 + 40 * n : 100 + 40 * PROVA + 25 * (n - PROVA);
+        if (n <= PROVA) return 100 + 40 * n;
+        if (n <= MAX_ANTIGO) return 100 + 40 * PROVA + 25 * (n - PROVA);
+        // 0.56.1: do 150 ao 250 (a saga do Necron) cada nível custa bem mais: é preciso farmar muito
+        return 100 + 40 * PROVA + 25 * (MAX_ANTIGO - PROVA) + 60 * (n - MAX_ANTIGO);
     }
 
     /** XP total para chegar ao nível n. */
@@ -79,6 +84,21 @@ public final class Nivel {
 
     public static int nivel(Player p) {
         return LoreCapability.get(p).map(d -> nivel(d.xp())).orElse(1);
+    }
+
+    /**
+     * 0.56.1: quando o Anel da Vida se divide, o portador perde parte da força: o nível cai para no máximo "max"
+     * (a experiência vai para o começo daquele nível).
+     */
+    public static void limitar(ServerPlayer p, int max) {
+        LoreData d = LoreCapability.get(p).orElse(null);
+        if (d == null) return;
+        int antes = nivel(d.xp());
+        if (antes <= max) return;
+        d.setXp(total(max));
+        aplicar(p);
+        p.sendSystemMessage(Component.translatable("nivel.lanterna.cortado", antes, max).withStyle(ChatFormatting.DARK_PURPLE));
+        MissionManager.sync(p, d);
     }
 
     /** Desconto de carga dos construtos e do voo (0 a 0,4). */
@@ -163,6 +183,9 @@ public final class Nivel {
         // contra jogadores a defesa já entra no equilíbrio do PvP (não conta duas vezes)
         if (com.lanterna.combate.Equilibrio.pvp(s, p)) return;
         double d = defesa(nivel(p));
+        // 0.56.1: a Morte (o Necron e os servos dele) atravessa metade da defesa do nível
+        var quem = s.getEntity();
+        if (quem instanceof com.lanterna.necron.NecronEntity || (quem != null && com.lanterna.necron.Cratera.servo(quem))) d *= 0.5;
         if (d > 0) e.setAmount((float) (e.getAmount() * (1 - d)));
     }
 

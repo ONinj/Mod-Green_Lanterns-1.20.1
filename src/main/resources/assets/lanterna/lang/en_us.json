@@ -3427,5 +3427,6 @@
   "objective.lanterna.fonte.necron.vitoria": "Defeat Necron",
   "mission.lanterna.necron_7.title": "The Purification",
   "mission.lanterna.necron_7.desc": "Necron has fallen, but Earth is still dead around the crater and the corrupted Lanterns still wander. Perform the purification ritual at the Central Battery of Death.",
-  "objective.lanterna.fonte.necron.purificou_terra": "Purify Earth"
+  "objective.lanterna.fonte.necron.purificou_terra": "Purify Earth",
+  "nivel.lanterna.cortado": "The Ring of Life took part of your strength: your level dropped from %s to %s. The road to level 250 is open, and you'll need it to face Necron."
 }

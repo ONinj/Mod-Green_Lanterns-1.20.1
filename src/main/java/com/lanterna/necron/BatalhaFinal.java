@@ -67,6 +67,9 @@ public final class BatalhaFinal {
 
     public static boolean ativa() { return ativa; }
 
+    /** Enquanto um golpe da batalha está sendo aplicado: a fração mínima da vida máxima que ele tira. */
+    public static float minimoAgora;
+
     public static boolean derrotado(MinecraftServer s) {
         return LoreWorldData.get(s).siteBuilt(DERROTADO);
     }
@@ -121,7 +124,7 @@ public final class BatalhaFinal {
         sozinho = 0;
         golpes.clear();
         var vida = n.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        if (vida != null) vida.setBaseValue(600);
+        if (vida != null) vida.setBaseValue(1000);
         n.setHealth(n.getMaxHealth());
         // os Lanternas que restam descem do céu
         List<BuiltinCorps> tropas = new ArrayList<>();
@@ -263,7 +266,10 @@ public final class BatalhaFinal {
             l.playSound(null, BlockPos.containing(g.pos), g.empurra ? SoundEvents.GENERIC_EXPLODE : SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.2f, 0.6f);
             for (ServerPlayer p : l.players()) {
                 if (p.position().distanceTo(g.pos) > g.raio + 0.6 || p.isCreative() || p.isSpectator()) continue;
-                p.hurt(p.damageSources().magic(), g.dano);
+                // o dano foi pensado para 40 de vida: cresce com a vida máxima de quem leva
+                minimoAgora = g.dano / 40f * 0.7f;
+                p.hurt(p.damageSources().magic(), g.dano * Math.max(1f, p.getMaxHealth() / 40f));
+                minimoAgora = 0;
                 if (g.empurra) {
                     Vec3 v = p.position().subtract(g.pos).normalize().scale(1.8);
                     p.push(v.x, 0.7, v.z);
@@ -352,6 +358,13 @@ public final class BatalhaFinal {
     public static void ferido(LivingHurtEvent e) {
         if (!ativa) return;
         if (e.getEntity() instanceof NecronEntity) {
+            // 0.56.1: ele é absurdamente forte. Quem bate com nível baixo quase não o fere (no 90 entra 12% do golpe; no
+            // 200 ou mais, metade); os aliados ajudam pouco (um quarto)
+            var quem = e.getSource().getEntity();
+            if (quem instanceof ServerPlayer p) {
+                int nv = com.lanterna.tropa.Nivel.nivel(p);
+                e.setAmount(e.getAmount() * 0.5f * Math.max(0.12f, Math.min(1f, (nv - 90) / 110f)));
+            } else if (quem != null && quem.getTags().contains(ALIADO)) e.setAmount(e.getAmount() * 0.25f);
             if (ticks < imuneAte) e.setAmount(0);
             else if (ticks < escudoAte) e.setAmount(e.getAmount() * 0.15f);
         }

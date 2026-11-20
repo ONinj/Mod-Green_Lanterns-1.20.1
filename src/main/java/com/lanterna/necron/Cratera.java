@@ -533,6 +533,18 @@ public final class Cratera {
         return r != null && r.hasRing() && !r.segundo().isEmpty();
     }
 
+    /**
+     * 0.56.1: em qualquer nível, a Morte machuca. Depois de todas as defesas (nível, armadura, proteções do anel), o
+     * golpe de um servo ainda tira pelo menos 6% da vida máxima, e o do Necron pelo menos 15%.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void servoFere(net.minecraftforge.event.entity.living.LivingDamageEvent e) {
+        if (!(e.getEntity() instanceof Player p) || e.isCanceled()) return;
+        var quem = e.getSource().getEntity();
+        float min = quem instanceof NecronEntity ? 0.15f : quem != null && servo(quem) ? 0.06f : BatalhaFinal.minimoAgora;
+        if (min > 0) e.setAmount(Math.max(e.getAmount(), p.getMaxHealth() * min));
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void ataque(LivingAttackEvent e) {
         var alvo = e.getEntity();

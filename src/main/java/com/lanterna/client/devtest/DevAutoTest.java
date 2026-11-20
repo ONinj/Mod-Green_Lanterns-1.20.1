@@ -3900,6 +3900,35 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.56.1: o nível cai para 90 na divisão; o servo fere um nível 150 de verdade. */
+    private static void sceneNivel() {
+        Minecraft mc = Minecraft.getInstance();
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setXp(com.lanterna.tropa.Nivel.total(150)));
+            com.lanterna.tropa.Nivel.aplicar(sp);
+            sp.setHealth(sp.getMaxHealth());
+            glog("antes: nivel=" + com.lanterna.tropa.Nivel.nivel(sp) + " vida max=" + sp.getMaxHealth() + " xp 150->250=" + (com.lanterna.tropa.Nivel.total(250) - com.lanterna.tropa.Nivel.total(150))
+                    + " xp 50->150=" + (com.lanterna.tropa.Nivel.total(150) - com.lanterna.tropa.Nivel.total(50)));
+            var m = com.lanterna.necron.Cratera.novoServo(sp.serverLevel());
+            m.moveTo(sp.getX() + 2, sp.getY(), sp.getZ(), 0, 0);
+            m.addTag(com.lanterna.necron.Cratera.SERVO);
+            sp.serverLevel().addFreshEntity(m);
+            float v0 = sp.getHealth();
+            sp.invulnerableTime = 0;
+            sp.hurt(sp.damageSources().mobAttack(m), 3);
+            glog("nivel 150: servo tirou " + (v0 - sp.getHealth()) + " de " + sp.getMaxHealth());
+            m.discard();
+            com.lanterna.tropa.Nivel.limitar(sp, 90);
+            sp.setHealth(sp.getMaxHealth());
+            glog("depois da divisao: nivel=" + com.lanterna.tropa.Nivel.nivel(sp) + " vida max=" + sp.getMaxHealth());
+        }));
+        at(20, () -> { glog("FIM nivel"); mc.stop(); });
+    }
+
     /** 0.56.0: a Terra Escurece (uma etapa) e a batalha final contra o Necron (quatro fases e a vitória). */
     private static void sceneFinal() {
         Minecraft mc = Minecraft.getInstance();
@@ -7518,6 +7547,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("pedidos")) scenePedidos();
         else if (ENABLED && SCENE.equals("queda")) sceneQueda();
         else if (ENABLED && SCENE.equals("final")) sceneFinal();
+        else if (ENABLED && SCENE.equals("nivel")) sceneNivel();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();
