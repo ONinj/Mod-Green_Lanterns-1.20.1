@@ -152,11 +152,21 @@ public final class Queda {
             for (int dz = -10; dz <= 10; dz++)
                 for (int y = y0; y < y0 + 60; y++) {
                     BlockState s = l.getBlockState(m.set(h.getX() + dx, y, h.getZ() + dz));
-                    boolean vidro = s.getBlock() instanceof AbstractGlassBlock || s.getBlock() instanceof StainedGlassPaneBlock || s.is(Blocks.GLASS_PANE);
-                    if (!vidro) continue;
+                    if (s.isAir()) continue;
                     double r = ruido(h.getX() + dx + y * 7, h.getZ() + dz, 23);
-                    if (r < 0.4) por(l, m, Blocks.AIR.defaultBlockState());
-                    else if (r < 0.65) por(l, m, Blocks.BLACK_STAINED_GLASS.defaultBlockState());
+                    boolean vidro = s.getBlock() instanceof AbstractGlassBlock || s.getBlock() instanceof StainedGlassPaneBlock || s.is(Blocks.GLASS_PANE);
+                    if (vidro) {
+                        if (r < 0.4) por(l, m, Blocks.AIR.defaultBlockState());
+                        else if (r < 0.65) por(l, m, Blocks.BLACK_STAINED_GLASS.defaultBlockState());
+                        continue;
+                    }
+                    // o resto da bateria: só blocos comuns (nunca os do mod: a forja, o portal e o núcleo continuam funcionando)
+                    var id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock());
+                    if (id == null || !id.getNamespace().equals("minecraft") || l.getBlockEntity(m) != null || y < y0 + 3) continue;
+                    if (r < 0.08) por(l, m, Blocks.AIR.defaultBlockState());
+                    else if (r < 0.16) por(l, m, Blocks.BLACKSTONE.defaultBlockState());
+                    else if (r < 0.2) por(l, m, Blocks.CRYING_OBSIDIAN.defaultBlockState());
+                    else if (r < 0.24) por(l, m, Blocks.GILDED_BLACKSTONE.defaultBlockState());
                 }
         // entulho de pedra negra e obsidiana chorando no chão em volta
         for (int i = 0; i < 26; i++) {
@@ -165,6 +175,14 @@ public final class Queda {
             int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             por(l, new BlockPos(x, y, z), i % 5 == 0 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : i % 2 == 0 ? Blocks.BLACKSTONE.defaultBlockState() : Blocks.BLACKSTONE_SLAB.defaultBlockState());
             if (i % 6 == 1) por(l, new BlockPos(x, y + 1, z), Blocks.SOUL_FIRE.defaultBlockState());
+        }
+        // espinhos de pedra negra cravados em volta da bateria (onde a fenda bateu)
+        for (int i = 0; i < 6; i++) {
+            double a = i * Math.PI / 3 + 0.4;
+            int x = h.getX() + (int) Math.round(Math.cos(a) * 11), z = h.getZ() + (int) Math.round(Math.sin(a) * 11);
+            int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            int alt = 5 + (i * 3) % 5;
+            for (int k = 0; k < alt; k++) por(l, new BlockPos(x, y + k, z), k < alt - 1 ? Blocks.BLACKSTONE.defaultBlockState() : Blocks.CRYING_OBSIDIAN.defaultBlockState());
         }
     }
 

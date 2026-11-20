@@ -3900,6 +3900,27 @@ public final class DevAutoTest {
     }
 
     /** 0.53: Árvore das Emoções do Anel da Vida, treino (traje da Tropa) e Dois Anéis (metade do traje). */
+    /** 0.55.1: uma Tropa caída (Zamaron) vista de perto. */
+    private static void sceneQueda() {
+        Minecraft mc = Minecraft.getInstance();
+        palco(mc);
+        at(20, () -> server(sp -> {
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode creative");
+            com.lanterna.necron.Queda.zerar(sp.server, com.lanterna.lore.PlanetLore.ZAMARON);
+            com.lanterna.necron.Queda.cair(sp.server, com.lanterna.lore.PlanetLore.ZAMARON);
+        }));
+        at(400, () -> server(sp -> {
+            var z = sp.server.getLevel(com.lanterna.space.SpaceBodies.byId("zamaron").dimension());
+            var h = com.lanterna.lore.PlanetLore.HUB;
+            sp.teleportTo(z, h.getX() + 22.5, 95, h.getZ() + 28.5, 140, 18);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+        }));
+        at(200, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = true; });
+        at(40, () -> shot("zamaron_caida2"));
+        at(20, () -> { glog("FIM queda"); mc.stop(); });
+    }
+
     /** 0.55.1: o primeiro pedido de ajuda (Tropa Vermelha), a queda de Zamaron e Zamaron caída. */
     private static void scenePedidos() {
         Minecraft mc = Minecraft.getInstance();
@@ -7423,6 +7444,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("fuga")) sceneFuga();
         else if (ENABLED && SCENE.equals("defesa")) sceneDefesa();
         else if (ENABLED && SCENE.equals("pedidos")) scenePedidos();
+        else if (ENABLED && SCENE.equals("queda")) sceneQueda();
         else if (ENABLED && SCENE.equals("nulo052")) sceneNulo052();
         else if (ENABLED && SCENE.equals("cmdsen")) sceneCmdsEn();
         else if (ENABLED && SCENE.equals("rev0501")) sceneRev0501();

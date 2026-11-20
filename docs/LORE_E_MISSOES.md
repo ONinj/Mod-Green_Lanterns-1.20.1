@@ -1810,3 +1810,19 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
   - Servos perto da bateria **sugam a força dela** (a barra vermelha no alto da tela).
   - Venceu as três ondas: a fenda se fecha e a missão termina.
   - A força chegou a zero: os servos recuam para a fenda; dá para tentar de novo depois de 30 segundos. A sua Tropa nunca cai.
+
+
+## 0.55.1 — Pedidos de ajuda e as Tropas que caem
+
+- Depois de defender a Bateria Central da sua Tropa, **Lanternas de outras Tropas vêm pedir socorro**. É uma cena no mundo: o Lanterna desce do céu, pousa na sua frente e conta que uma fenda do Necron se abriu sobre a Bateria Central dele. A fenda se abre e começa a missão de defender aquela bateria (as mesmas três ondas).
+- **Ordem:** até três pedidos, das Tropas Vermelha, Amarela, Laranja e Verde, nessa ordem, pulando a sua. Entre um pedido e outro, uma Tropa cai.
+- **As que caem:** Amor (Zamaron), Índigo (Nok) e Esperança (Odym). Se a sua Tropa for uma delas, ela não cai.
+- **A queda** é uma cena no espaço: o planeta brilha com a luz da Tropa, fios escuros chegam de todos os lados, a atmosfera fica roxa, o planeta escurece e a luz se apaga num último clarão.
+- **O planeta caído:**
+  - a Bateria Central fica meio destruída (vidro quebrado, pedra negra e obsidiana rachando a bateria, espinhos de pedra negra em volta);
+  - o poder não se perdeu: a forja continua funcionando e dá para fabricar o anel lá;
+  - a terra em volta da cidade morre (cinza, mato seco, teias, fogo das almas);
+  - o planeta todo fica com névoa e cinza, e servos do Necron rondam a cidade.
+  Fica assim até a próxima saga.
+- As quedas valem para o mundo todo. Se outro jogador já socorreu uma Tropa, ou ela já caiu, esse passo é pulado.
+- Depois de tudo, o Necron se volta para a Terra: missão **A Terra Escurece** (continua na próxima versão).
