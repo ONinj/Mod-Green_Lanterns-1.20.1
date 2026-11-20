@@ -23,6 +23,7 @@ public final class FlightPose {
     public static void tiltBody(Player player, PoseStack poseStack, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (player == mc.player && mc.screen != null) return; // na tela do inventário fica em pé
+        if (player == mc.player && com.lanterna.client.necron.CenaFuga.ativa()) return; // na cena da fuga quem posa é a cena
         float k = ClientFlight.tilt(player, partialTick);
         if (Math.abs(k) <= 0.001f) return;
 
@@ -40,6 +41,7 @@ public final class FlightPose {
     /** Ajusta braços, pernas e cabeça (chamado no fim da animação do modelo, via Mixin). */
     public static void applyLimbs(HumanoidModel<?> model, LivingEntity entity, float ageInTicks) {
         if (!(entity instanceof Player player) || !ClientFlight.isFlying(player) || player.onGround()) return;
+        if (player == Minecraft.getInstance().player && com.lanterna.client.necron.CenaFuga.ativa()) return;
 
         float partial = Minecraft.getInstance().getFrameTime();
         float tilt = ClientFlight.tilt(player, partial);

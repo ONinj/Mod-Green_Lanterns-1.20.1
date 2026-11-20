@@ -133,7 +133,11 @@ public final class Fuga {
         }
         ATIVAS.put(p.getUUID(), st);
         p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 80, 4, false, false));
-        ModNetwork.sendTo(p, new Cena(0, a == null ? -1 : a.getId(), n == null ? -1 : n.getId(), st.tropa.id().getPath(), 0, 0, 0));
+        // pode voar durante a fuga (quem leva é o Lanterna; num servidor sem voo o jogador seria expulso por "voar")
+        p.getAbilities().mayfly = true;
+        p.onUpdateAbilities();
+        ModNetwork.sendTo(p, new Cena(0, a == null ? -1 : a.getId(), n == null ? -1 : n.getId(), st.tropa.id().getPath(),
+                (int) Math.round(st.fugaDir.x * 1000), 0, (int) Math.round(st.fugaDir.z * 1000)));
         LanternaMod.LOGGER.info("Lanterna: {} foi derrotado pelo Necron; um Lanterna {} vem buscá-lo", p.getGameProfile().getName(), st.tropa.id().getPath());
     }
 
@@ -188,15 +192,9 @@ public final class Fuga {
             }
         }
         if (t > CHEGA && t < SOBE && a != null) {
-            // o escudo: uma cúpula de luz da Tropa entre o jogador e o Necron
+            // o escudo (a cúpula de luz) é desenhado no cliente
             Vec3 c0 = p.position().add(0, 1, 0);
             Vec3 paraNecron = n == null ? st.fugaDir.scale(-1) : n.position().subtract(p.position()).multiply(1, 0, 1).normalize();
-            for (int i = 0; i < 24; i++) {
-                double ang = (i / 24.0 - 0.5) * Math.PI * 1.2, alt = (l.random.nextDouble() - 0.3) * 2.4;
-                Vec3 lado = new Vec3(-paraNecron.z, 0, paraNecron.x);
-                Vec3 q = c0.add(paraNecron.scale(2.2 * Math.cos(ang))).add(lado.scale(2.2 * Math.sin(ang))).add(0, alt, 0);
-                l.sendParticles(luz, q.x, q.y, q.z, 1, 0, 0, 0, 0);
-            }
             if (t == GOLPE && n instanceof NecronEntity ne) {
                 ne.triggerAnim("golpe", "golpe");
                 l.playSound(null, p.blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.2f, 0.5f);
@@ -209,9 +207,9 @@ public final class Fuga {
             double k = (t - SOBE) / (double) (PRETO - SOBE);
             Vec3 pos = st.inicio.add(st.fugaDir.scale(70 * k * k)).add(0, 85 * k, 0);
             if (t < PRETO + 10) {
-                p.connection.teleport(pos.x, pos.y, pos.z, p.getYRot(), p.getXRot());
-                if (a != null) a.moveTo(pos.x - st.fugaDir.x * 0.6, pos.y + 0.6, pos.z - st.fugaDir.z * 0.6, yaw(st.inicio, pos), 0);
-                l.sendParticles(luz, pos.x, pos.y + 0.8, pos.z, 8, 0.4, 0.5, 0.4, 0);
+                // quem move o jogador é o cliente dele (suave, sem trancos); o servidor move o Lanterna para os outros verem
+                if (a != null) a.moveTo(pos.x - st.fugaDir.x * 0.55, pos.y + 0.45, pos.z - st.fugaDir.z * 0.55, yaw(st.inicio, pos), 0);
+                if (t % 2 == 0) l.sendParticles(luz, pos.x, pos.y + 0.8, pos.z, 3, 0.3, 0.4, 0.3, 0);
             }
             // os raios da Morte atrás deles
             if (n != null && t % 12 == 0 && t < PRETO) {
@@ -257,6 +255,7 @@ public final class Fuga {
         p.teleportTo(destino, x + 0.5, y, z + 0.5, 180, 0);
         p.setHealth(p.getMaxHealth());
         p.removeAllEffects();
+        com.lanterna.capability.ModCapabilities.get(p).ifPresent(r -> com.lanterna.power.RingPowers.applyFlightAbility(p, r));
         LanternaEntity novo = aliado(destino, st.tropa);
         if (novo != null) {
             novo.moveTo(x + 0.5, y, z - 2.5, 0, 0);

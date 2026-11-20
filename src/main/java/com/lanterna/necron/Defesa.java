@@ -95,6 +95,7 @@ public final class Defesa {
         PlanetLore p = PlanetLore.byCorps(tropa.id());
         if (p == null || defendida(l.getServer(), p)) return;
         LoreWorldData.get(l.getServer()).markSite(FENDA + p.planet);
+        avisarClientes(l.getServer());
     }
 
     // ===================== tick =====================
@@ -130,25 +131,28 @@ public final class Defesa {
         return corpo == null || corpo.dimension() == null ? null : s.getLevel(corpo.dimension());
     }
 
-    /** Um redemoinho escuro com borda roxa, raios caindo de vez em quando (visto de longe: partículas de longa distância). */
+    /** A fenda é desenhada no cliente (portal em espiral com faixas de luz); aqui só o som e, às vezes, um raio. */
     private static void desenharFenda(ServerLevel l, BlockPos f, int tc, float forca) {
-        DustParticleOptions negro = new DustParticleOptions(new Vector3f(0.05f, 0.0f, 0.09f), 4f);
-        DustParticleOptions roxo = new DustParticleOptions(new Vector3f(0.55f, 0.15f, 0.8f), 3f);
-        double gira = tc * 0.05;
-        List<ServerPlayer> ver = new ArrayList<>();
-        for (ServerPlayer q : l.players()) if (q.position().distanceTo(Vec3.atCenterOf(f)) < 220) ver.add(q);
-        if (ver.isEmpty()) return;
-        for (int i = 0; i < 40 * forca; i++) {
-            double a = gira * (1 + (i % 3) * 0.3) + i * 0.73, r = 1.5 + (i % 20) * 0.65;
-            boolean borda = r > 11;
-            double x = f.getX() + 0.5 + Math.cos(a) * r, y = f.getY() + Math.sin(a * 3) * 0.4 - r * 0.08, z = f.getZ() + 0.5 + Math.sin(a) * r;
-            for (ServerPlayer q : ver) l.sendParticles(q, borda || i % 5 == 0 ? roxo : negro, true, x, y, z, 1, 0, 0, 0, 0);
+        if (tc % 120 == 0) l.playSound(null, f, SoundEvents.AMBIENT_SOUL_SAND_VALLEY_MOOD.value(), SoundSource.AMBIENT, 3f, 0.5f);
+        if (tc % 90 == 0) l.playSound(null, f, SoundEvents.PORTAL_AMBIENT, SoundSource.AMBIENT, 2f, 0.4f);
+    }
+
+    /** As fendas abertas, para o cliente desenhar: "planeta:x:y:z;..." */
+    public static String fendasTexto(MinecraftServer s) {
+        StringBuilder b = new StringBuilder();
+        for (PlanetLore p : PlanetLore.values()) {
+            if (!fendaAberta(s, p)) continue;
+            ServerLevel l = nivel(s, p);
+            if (l == null) continue;
+            BlockPos f = fenda(l);
+            if (b.length() > 0) b.append(';');
+            b.append(p.planet).append(':').append(f.getX()).append(':').append(f.getY()).append(':').append(f.getZ());
         }
-        for (ServerPlayer q : ver) l.sendParticles(q, ParticleTypes.REVERSE_PORTAL, true, f.getX() + 0.5, f.getY(), f.getZ() + 0.5, 10, 5, 0.4, 5, 0.05);
-        if (tc % 120 == 0) {
-            l.playSound(null, f, SoundEvents.AMBIENT_SOUL_SAND_VALLEY_MOOD.value(), SoundSource.AMBIENT, 3f, 0.5f);
-            for (int k = 0; k < 24; k++) for (ServerPlayer q : ver) l.sendParticles(q, roxo, true, f.getX() + 0.5, f.getY() - k * 1.4, f.getZ() + 0.5, 2, 0.15, 0.2, 0.15, 0);
-        }
+        return b.toString();
+    }
+
+    private static void avisarClientes(MinecraftServer s) {
+        for (ServerPlayer q : s.getPlayerList().getPlayers()) SagaNecron.mandarMundo(q);
     }
 
     // ===================== a batalha =====================
@@ -287,6 +291,7 @@ public final class Defesa {
         MinecraftServer s = b.l.getServer();
         LoreWorldData w = LoreWorldData.get(s);
         w.resetSite(FENDA + b.planeta.planet);
+        avisarClientes(s);
         w.markSite(DEFENDIDA + b.planeta.planet);
         BlockPos f = fenda(b.l);
         int cor = b.planeta.corps.color();

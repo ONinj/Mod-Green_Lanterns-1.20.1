@@ -28,6 +28,8 @@ public final class CenaFuga {
     private static int t = -1;
     private static int aliado = -1, necron = -1;
     private static Vec3 fenda = Vec3.ZERO;
+    /** A subida: de onde saiu e para que lado foge (o cliente leva o jogador, suave). */
+    private static Vec3 fugaDir = new Vec3(1, 0, 0), inicio = null;
     private static String tropa = "green";
     private static float pt;
 
@@ -35,7 +37,11 @@ public final class CenaFuga {
         aliado = m.aliado();
         tropa = m.tropa();
         Minecraft.getInstance().getToasts().clear();
-        if (m.fase() == 0) { t = 0; necron = m.necron(); }
+        if (m.fase() == 0) {
+            t = 0; necron = m.necron(); inicio = null;
+            Vec3 d = new Vec3(m.fx() / 1000.0, 0, m.fz() / 1000.0);
+            fugaDir = d.lengthSqr() < 0.01 ? new Vec3(1, 0, 0) : d.normalize();
+        }
         else { t = Fuga.CASA; necron = -1; fenda = new Vec3(m.fx() + 0.5, m.fy(), m.fz() + 0.5); }
     }
 
@@ -50,7 +56,90 @@ public final class CenaFuga {
         if (mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen) return;
         t++;
         sons(t);
-        if (t > Fuga.FIM + 5) t = -1;
+        carregar(mc);
+        if (t > Fuga.FIM + 5) { t = -1; mc.player.setNoGravity(false); }
+    }
+
+    /** Onde o jogador está na subida (o mesmo caminho que o servidor usa para o Lanterna). */
+    private static Vec3 caminho(int tick) {
+        double k = Mth.clamp((tick - Fuga.SOBE) / (double) (Fuga.PRETO - Fuga.SOBE), 0, 1.15);
+        return inicio.add(fugaDir.scale(70 * k * k)).add(0, 85 * k, 0);
+    }
+
+    /** A subida, suave: o jogador e o Lanterna andam juntos, de tick em tick, sem trancos. */
+    private static void carregar(Minecraft mc) {
+        var p = mc.player;
+        if (t == Fuga.SOBE - 1) inicio = p.position();
+        if (inicio == null || t < Fuga.SOBE || t > Fuga.PRETO + 10) {
+            if (t == Fuga.PRETO + 11) p.setNoGravity(false);
+            return;
+        }
+        p.setNoGravity(true);
+        Vec3 antes = caminho(t - 1), agora = caminho(t);
+        p.setDeltaMovement(Vec3.ZERO);
+        p.setPos(agora.x, agora.y, agora.z);
+        p.xo = antes.x; p.yo = antes.y; p.zo = antes.z;
+        p.xOld = antes.x; p.yOld = antes.y; p.zOld = antes.z;
+        p.fallDistance = 0;
+        Entity a = aliado >= 0 ? mc.level.getEntity(aliado) : null;
+        if (a != null) {
+            // o Lanterna segura o jogador por trás, um pouco acima (como quem carrega alguém voando)
+            Vec3 off = fugaDir.scale(-0.55).add(0, 0.45, 0);
+            Vec3 aa = antes.add(off), an = agora.add(off);
+            a.setPos(an.x, an.y, an.z);
+            a.xo = aa.x; a.yo = aa.y; a.zo = aa.z;
+            a.xOld = aa.x; a.yOld = aa.y; a.zOld = aa.z;
+            float yaw = (float) Math.toDegrees(Math.atan2(-fugaDir.x, fugaDir.z));
+            a.setYRot(yaw); a.yRotO = yaw;
+            if (a instanceof net.minecraft.world.entity.LivingEntity le) { le.yBodyRot = le.yBodyRotO = yaw; le.yHeadRot = le.yHeadRotO = yaw; }
+        }
+    }
+
+    // ===================== o escudo (cúpula de luz da Tropa) =====================
+
+    public static boolean escudoAtivo() {
+        return t > Fuga.CHEGA - 2 && t < Fuga.SOBE + 4;
+    }
+
+    /** Meia cúpula de luz na cor da Tropa, entre o jogador e o Necron; acende forte quando a foice bate. */
+    public static void desenharEscudo(org.joml.Matrix4f m, Vec3 cam, float partial) {
+        var mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        float tt = t + partial;
+        Entity n = necron >= 0 ? mc.level.getEntity(necron) : null;
+        Vec3 eu = lerp(mc.player, partial);
+        Vec3 paraN = n == null ? fugaDir.scale(-1) : n.position().subtract(eu).multiply(1, 0, 1);
+        paraN = paraN.lengthSqr() < 0.01 ? fugaDir.scale(-1) : paraN.normalize();
+        Vec3 lado = new Vec3(-paraN.z, 0, paraN.x);
+        Vec3 c = eu.add(0, 0.2, 0).subtract(cam);
+        float abre = Mth.clamp((tt - Fuga.CHEGA + 2) / 6f, 0, 1), fecha = Mth.clamp((Fuga.SOBE + 4 - tt) / 6f, 0, 1);
+        float golpe = Math.max(0, 1 - Math.abs(tt - Fuga.GOLPE) / 6f);
+        float r = 2.6f * (0.6f + 0.4f * abre);
+        int cor = com.lanterna.vida.Emocoes.cor(tropa);
+        float cr = ((cor >> 16) & 255) / 255f, cg = ((cor >> 8) & 255) / 255f, cb = (cor & 255) / 255f;
+        com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionColorShader);
+        com.mojang.blaze3d.systems.RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        var b = com.mojang.blaze3d.vertex.Tesselator.getInstance().getBuilder();
+        b.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);
+        int lat = 10, lon = 16;
+        for (int i = 0; i < lat; i++)
+            for (int j = 0; j < lon; j++) {
+                int[][] vs = {{i, j}, {i, j + 1}, {i + 1, j + 1}, {i + 1, j}};
+                for (int[] v : vs) {
+                    // meia esfera virada para o Necron: ângulo vertical 0..90°, horizontal -90..90°
+                    double fi = Math.PI / 2 * v[0] / lat, th = -Math.PI / 2 + Math.PI * v[1] / lon;
+                    Vec3 nrm = paraN.scale(Math.cos(fi) * Math.cos(th)).add(lado.scale(Math.cos(fi) * Math.sin(th))).add(0, Math.sin(fi), 0);
+                    Vec3 q = c.add(nrm.scale(r)).add(0, 0.8, 0);
+                    Vec3 ver = q.scale(-1).normalize();
+                    float borda = (float) (1 - Math.abs(nrm.dot(ver)));
+                    boolean linha = v[0] % 3 == 0 || v[1] % 4 == 0;
+                    float a = (0.04f + 0.4f * borda * borda + (linha ? 0.1f : 0) + 0.35f * golpe) * abre * fecha;
+                    b.vertex(m, (float) q.x, (float) q.y, (float) q.z).color(cr, cg, cb, Mth.clamp(a, 0, 1)).endVertex();
+                }
+            }
+        com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(b.end());
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
     }
 
     private static void som(net.minecraft.sounds.SoundEvent s, float vol, float tom) {
@@ -112,8 +201,11 @@ public final class CenaFuga {
         }
         if (tt < Fuga.CASA) {
             // de baixo, vendo os dois subirem e o Necron lá embaixo
-            Vec3 de = eu.add(0, -7 - (tt - Fuga.SOBE) * 0.25, 0).add(4, 0, 4);
-            return olhar(de, eu);
+            // perseguição: atrás e ao lado dos dois, um pouco abaixo; no começo mais perto (o arranque), depois abre
+            float k = faixa(tt, Fuga.SOBE, Fuga.PRETO);
+            Vec3 lado = new Vec3(-fugaDir.z, 0, fugaDir.x);
+            Vec3 de = eu.add(fugaDir.scale(-3.5 - 5 * k)).add(lado.scale(2.5 + 3 * k)).add(0, -1.5 - 2 * k, 0);
+            return olhar(de, eu.add(fugaDir.scale(1.5)).add(0, 0.6, 0));
         }
         // o alerta: a câmera sobe dos dois para a fenda no céu, sobre a Bateria Central
         if (tt >= Fuga.ALERTA) {

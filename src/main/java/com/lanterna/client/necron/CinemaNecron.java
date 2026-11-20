@@ -288,7 +288,7 @@ public final class CinemaNecron extends Screen {
             // voando: câmera de lado, girando para trás dele
             float k = faixa(t, E1, F1);
             double a = Math.toRadians(70 + 100 * k);
-            double r = 5.5 + 1.5 * Math.sin(k * 3);
+            double r = 4.2 + 1.0 * Math.sin(k * 3);
             c = new Camera(new Vec3(Math.sin(a) * r, 1.4 + 0.6 * k, Math.cos(a) * r), new Vec3(0, 1.2, 0), up, 58);
         } else {
             // a Terra
@@ -519,8 +519,10 @@ public final class CinemaNecron extends Screen {
             ps.popPose();
         } else if (t >= E1 && t < F1) {
             ps.pushPose();
-            ps.translate(0, 1.2 + 0.15 * Mth.sin(t * 0.08f), 0);
-            ps.mulPose(Axis.XP.rotationDegrees(-62));
+            // deitado, de cabeça para a frente (-z), balançando de leve como quem rasga o vento
+            ps.translate(0, 1.2 + 0.12 * Mth.sin(t * 0.08f), 0);
+            ps.mulPose(Axis.ZP.rotationDegrees(5 * Mth.sin(t * 0.03f)));
+            ps.mulPose(Axis.XP.rotationDegrees(-72 + 3 * Mth.sin(t * 0.05f)));
             ps.translate(0, -1.2, 0);
             ps.scale(1.25f, 1.25f, 1.25f);
             atores.necronVoando(ps, buf, t);

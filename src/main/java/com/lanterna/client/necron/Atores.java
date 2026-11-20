@@ -33,19 +33,38 @@ final class Atores {
         for (int i = 1; i <= 8; i++) osso(m, "cordao_" + i, 0.12f * Mth.sin(t * 0.05f + i * 0.7f), 0, 0.1f * Mth.sin(t * 0.04f + i));
     });
     private final Rend necron = new Rend("necron", (m, t) -> {
-        // farrapos e capa balançando (mais forte voando)
-        float vento = Atores.vento;
-        for (int i = 1; i <= 12; i++) osso(m, "farrapo_" + i, (0.18f + 0.6f * vento) * Mth.sin(t * (0.12f + 0.2f * vento) + i * 1.3f) + 0.9f * vento, 0,
-                0.1f * Mth.sin(t * 0.09f + i));
-        osso(m, "saia", 0.05f * Mth.sin(t * 0.07f) + 0.35f * vento, 0, 0);
-        osso(m, "cabeca", 0.05f * Mth.sin(t * 0.05f) - 0.15f * vento, 0.08f * Mth.sin(t * 0.03f), 0);
+        if (Atores.vento > 0.5f) { voando(m, t); return; }
+        // parado: farrapos e capa balançando devagar, a foice erguida ao lado do corpo
+        for (int i = 1; i <= 12; i++) osso(m, "farrapo_" + i, 0.18f * Mth.sin(t * 0.12f + i * 1.3f), 0, 0.1f * Mth.sin(t * 0.09f + i));
+        osso(m, "saia", 0.05f * Mth.sin(t * 0.07f), 0, 0);
+        osso(m, "cabeca", 0.05f * Mth.sin(t * 0.05f), 0.08f * Mth.sin(t * 0.03f), 0);
         osso(m, "mandibula", 0.12f + 0.12f * Math.max(0, Mth.sin(t * 0.21f)), 0, 0);
-        osso(m, "capuz", 0.04f * Mth.sin(t * 0.06f) + 0.25f * vento, 0, 0);
-        // a foice erguida ao lado do corpo; voando, apontada para a frente
-        osso(m, "braco_d", -0.35f - 0.4f * vento + 0.04f * Mth.sin(t * 0.05f), 0, 0.12f);
-        osso(m, "braco_e", 0.1f + 0.9f * vento + 0.05f * Mth.sin(t * 0.05f + 1), 0, -0.18f);
-        osso(m, "foice", 0.3f + 0.2f * vento, 0, 0);
+        osso(m, "capuz", 0.04f * Mth.sin(t * 0.06f), 0, 0);
+        osso(m, "braco_d", -0.35f + 0.04f * Mth.sin(t * 0.05f), 0, 0.12f);
+        osso(m, "braco_e", 0.1f + 0.05f * Mth.sin(t * 0.05f + 1), 0, -0.18f);
+        osso(m, "foice", 0.3f, 0, 0);
     });
+
+    /**
+     * Voando (o corpo vai deitado, de cabeça para a frente): a cabeça levantada olhando o caminho, o braço esquerdo
+     * esticado à frente, a foice puxada para trás ao longo do corpo, e a túnica, o capuz e os farrapos escorrendo para
+     * trás e tremulando com o vento. (rotX positivo leva um membro que pende para baixo na direção da frente.)
+     */
+    private static void voando(GeoModel<Ator> m, float t) {
+        for (int i = 1; i <= 12; i++) {
+            float onda = Mth.sin(t * 0.55f - i * 0.9f);
+            osso(m, "farrapo_" + i, -0.3f + 0.32f * onda, 0, 0.12f * Mth.sin(t * 0.4f + i * 2.1f));
+        }
+        osso(m, "saia", -0.12f + 0.06f * Mth.sin(t * 0.5f), 0, 0.04f * Mth.sin(t * 0.37f));
+        osso(m, "cabeca", 0.95f + 0.04f * Mth.sin(t * 0.07f), 0.06f * Mth.sin(t * 0.05f), 0);
+        osso(m, "capuz", -0.32f + 0.07f * Mth.sin(t * 0.6f), 0, 0);
+        osso(m, "mandibula", 0.28f + 0.06f * Mth.sin(t * 0.3f), 0, 0);
+        osso(m, "braco_e", 2.85f + 0.05f * Mth.sin(t * 0.09f), 0, -0.08f);
+        osso(m, "braco_d", -0.22f + 0.04f * Mth.sin(t * 0.08f), 0, 0.1f);
+        osso(m, "foice", 2.95f, 0, 0.05f);
+        osso(m, "corpo", 0, 0, 0.05f * Mth.sin(t * 0.04f));
+    }
+
     static float vento;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {

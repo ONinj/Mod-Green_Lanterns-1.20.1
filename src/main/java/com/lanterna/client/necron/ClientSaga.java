@@ -31,10 +31,17 @@ public final class ClientSaga {
         com.lanterna.necron.MissoesNecron.centro = cratera;
         caidas.clear();
         for (String s : m.caidas().split(",")) if (!s.isEmpty()) caidas.add(s);
+        fendas.clear();
+        for (String s : m.fendas().split(";")) {
+            String[] k = s.split(":");
+            if (k.length == 4) fendas.put(k[0], new net.minecraft.core.BlockPos(Integer.parseInt(k[1]), Integer.parseInt(k[2]), Integer.parseInt(k[3])));
+        }
     }
 
     /** Os planetas das Tropas que caíram diante do Necron (névoa e cinza no planeta todo). */
     public static final java.util.Set<String> caidas = new java.util.HashSet<>();
+    /** As fendas abertas (planeta → posição), desenhadas como portal. */
+    public static final java.util.Map<String, net.minecraft.core.BlockPos> fendas = new java.util.HashMap<>();
 
     private static boolean noPlanetaCaido() {
         var mc = Minecraft.getInstance();

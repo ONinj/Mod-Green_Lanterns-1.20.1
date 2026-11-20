@@ -4052,7 +4052,8 @@ public final class DevAutoTest {
         at(1, () -> { mc.options.hideGui = false; server(sp -> glog("fuga comecou: vida=" + sp.getHealth() + " emFuga=" + com.lanterna.necron.Fuga.emFuga(sp))); });
         at(20, () -> shot("fuga_caido"));
         at(35, () -> shot("fuga_escudo"));
-        at(40, () -> shot("fuga_sobe"));
+        at(25, () -> shot("fuga_sobe"));
+        at(15, () -> shot("fuga_sobe2"));
         at(60, () -> server(sp -> glog("subindo: y=" + (int) sp.getY() + " vida=" + sp.getHealth())));
         at(80, () -> server(sp -> glog("em casa? dim=" + sp.level().dimension().location() + " pos=" + sp.blockPosition() + " vida=" + sp.getHealth())));
         at(60, () -> shot("fuga_conversa_1"));
@@ -4228,7 +4229,7 @@ public final class DevAutoTest {
         // a cena começa sozinha 6 segundos depois do título
         waitFor(com.lanterna.client.necron.CinemaNecron::ativa, 400);
         at(1, () -> glog("cena aberta? " + com.lanterna.client.necron.CinemaNecron.ativa() + " t=" + com.lanterna.client.necron.CinemaNecron.tempoAtual()));
-        int[] fotos = {60, 160, 1000, 1120};
+        int[] fotos = {1090, 1140, 1190, 1240};
         int antes = 1;
         for (int f : fotos) {
             int ff = f;
