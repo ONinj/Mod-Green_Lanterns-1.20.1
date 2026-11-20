@@ -1833,3 +1833,26 @@ Próximos passos (quinta): o ritual em que o Anel da Vida se desfaz nos 7 anéis
 - **O Necron voando pelo espaço** (na cutscene): agora vai deitado, de cabeça para a frente, olhando o caminho, com um braço esticado à frente e a foice puxada para trás ao longo do corpo. A túnica, o capuz e os farrapos escorrem para trás e tremulam com o vento. A câmera ficou mais perto.
 - **O resgate:** o jogador sobe suave, sem trancos, e o Lanterna o segura de verdade, colado nele. A câmera persegue os dois por trás. O escudo agora é uma **cúpula de luz** na cor da Tropa, que acende quando a foice bate.
 - **A fenda da Morte:** virou um **portal de verdade**, com espiral roxa girando em duas camadas, o olho escuro no meio, a borda acesa e faixas de luz caindo e balançando. Não usa mais as partículas do Minecraft.
+
+
+## 0.56.0 — A Terra Escurece e a Última Luz
+
+**A Terra Escurece** (missão depois das quedas)
+- Cada vez que você volta para a Terra, vindo do espaço ou de outro planeta (com pelo menos 2 minutos entre uma volta e outra), a escuridão avança uma etapa. São **três etapas**:
+  - a terra morta em volta da cratera cresce 70 blocos de raio por etapa;
+  - o céu da Terra inteira fica mais cinza-roxo;
+  - os servos rondam cada vez mais longe.
+- Na terceira etapa, os Lanternas que ainda resistem chamam para a batalha final.
+
+**A Última Luz** (a batalha final)
+- Vá até a cratera com **dois anéis** e chegue perto do Necron.
+- **15 Lanternas** das Tropas que não caíram descem do céu e lutam junto (atacam os servos e o Necron).
+- O Necron finalmente sangra: 600 de vida, a barra no alto da tela. Só quem usa duas luzes, e os aliados, conseguem feri-lo.
+- **Quatro fases**, cada uma com o poder de uma Tropa que ele derrubou:
+  1. **O Amor roubado:** cristais caem do céu (círculos violeta no chão avisam antes); o abraço que puxa todo mundo para perto dele.
+  2. **O Índigo roubado:** ele some e reaparece atrás de alguém, com a foice já descendo; chama ecos (servos).
+  3. **A Esperança roubada:** um escudo azul-escuro que quase anula o dano (espere ele cair); lanças de luz em linha.
+  4. **A Morte:** mãos negras saem do chão debaixo de cada um; uma onda de morte em volta dele que joga longe; mais servos.
+- No começo de cada fase ele fica um instante sem levar dano (a troca de poder).
+- **Controlada:** quem cai na batalha não morre. Os Lanternas puxam você para a borda da cratera, com vida e proteção. O Necron não recupera a vida, a não ser que todo mundo vá embora por mais de 30 segundos.
+- **Vencendo:** o Necron se desfaz em luz, os servos somem, os aliados comemoram com fogos nas cores das Tropas, e a cratera fica quieta. Começa a missão **A Purificação** (na próxima versão).
