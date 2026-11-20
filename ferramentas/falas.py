@@ -18,6 +18,8 @@ QUEM = [
     (r"^necron\.lanterna\.alerta_[12]$", "Necron"),
     (r"^necron\.lanterna\.alerta_3$", "Lanterna da Tropa do jogador"),
     (r"^necron\.lanterna\.pedido_\d$", "Lanterna de outra Tropa (pedindo ajuda)"),
+    (r"^necron\.lanterna\.pedido\.[a-z]+_\d$", "Lanterna de outra Tropa (pedindo ajuda)"),
+    (r"^necron\.lanterna\.defesa_fala\.[a-z]+$", "Lanterna da Tropa defendida"),
     (r"^necron\.lanterna\.queda_[12]$", "Narrador"),
     (r"^necron\.lanterna\.rastro_[123]$", "O anel"),
     (r"^necron\.lanterna\.(defesa_fala|final_fala|vitoria_fala)$", "Lanterna aliado"),

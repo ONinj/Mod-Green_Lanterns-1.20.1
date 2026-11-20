@@ -217,7 +217,7 @@ public class ConstructRenderer extends EntityRenderer<ConstructEntity> {
     private static void beam(ConstructEntity e, PoseStack pose, VertexConsumer body, VertexConsumer glow, int color, int gc,
                              float age, float alpha, Vec3 origin, LivingEntity owner, float pt) {
         Minecraft mc = Minecraft.getInstance();
-        Vec3 start = owner != null ? CastAnim.mao(owner, pt) : origin;
+        Vec3 start = owner != null ? (e.papel() == 1 ? CastAnim.maoOutra(owner, pt) : CastAnim.mao(owner, pt)) : origin;
         Vec3 endW = e.end();
         // Para quem atira, o fim é calculado aqui mesmo (sem esperar o servidor): o feixe gruda na mira
         if (owner != null && owner == mc.player) {

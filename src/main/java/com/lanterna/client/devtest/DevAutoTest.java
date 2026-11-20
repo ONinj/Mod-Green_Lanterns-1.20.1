@@ -4006,6 +4006,72 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM cap5"); mc.stop(); });
     }
 
+    private static boolean AJ_DERROTADO;
+
+    /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
+    private static void sceneAjustes() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.server.getCommands().performPrefixedCommand(src, "time set midnight");
+            com.lanterna.vida.Emocoes.tag2(sp);
+            var lar = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.ORANGE.id(), com.lanterna.corps.BuiltinCorps.ORANGE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(lar, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, lar));
+            sp.connection.teleport(sp.getX(), sp.getY() + 6, sp.getZ(), 0, 25);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities();
+            sp.getInventory().selected = 8; sp.getInventory().items.set(8, net.minecraft.world.item.ItemStack.EMPTY);
+        }));
+        at(40, () -> server(sp -> { com.lanterna.construct.Constructs.cast(sp, "laser"); }));
+        at(30, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(15, () -> shot("aj_laser_frente"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(15, () -> shot("aj_laser_costas"));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = false; });
+        at(15, () -> shot("aj_laser_1p"));
+        at(5, () -> server(sp -> { com.lanterna.construct.Constructs.release(sp, null);
+            glog("feixes vivos depois de soltar=" + sp.serverLevel().getEntitiesOfClass(com.lanterna.construct.ConstructEntity.class, sp.getBoundingBox().inflate(60), x -> x.kind() == com.lanterna.construct.ConstructEntity.Kind.BEAM).size()); }));
+        at(20, () -> { com.lanterna.client.construct.ConstructWheelScreen.pinned = true; mc.setScreen(new com.lanterna.client.construct.ConstructWheelScreen()); });
+        at(20, () -> shot("aj_roda_1"));
+        at(5, () -> { if (mc.screen != null) mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_TAB, 0, 0); });
+        at(15, () -> shot("aj_roda_2"));
+        at(5, () -> { if (mc.screen != null) mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_TAB, 0, 0); com.lanterna.client.construct.ConstructWheelScreen.pinned = false; mc.setScreen(null); });
+        // Lanternas NPC durante a guerra contra o Necron
+        at(20, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            AJ_DERROTADO = com.lanterna.necron.BatalhaFinal.derrotado(sp.server);
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+            var ver = com.lanterna.especies.LanternaEntity.lanterna(l, com.lanterna.corps.BuiltinCorps.RED, true);
+            ver.moveTo(sp.getX() + 3, sp.getY(), sp.getZ(), 0, 0); l.addFreshEntity(ver);
+            var amarelo = com.lanterna.especies.LanternaEntity.lanterna(l, com.lanterna.corps.BuiltinCorps.YELLOW, true);
+            amarelo.moveTo(sp.getX() - 3, sp.getY(), sp.getZ(), 0, 0); l.addFreshEntity(amarelo);
+            var servo = com.lanterna.necron.Cratera.novoServo(l);
+            servo.addTag(com.lanterna.necron.Cratera.SERVO);
+            servo.moveTo(sp.getX(), sp.getY(), sp.getZ() + 6, 0, 0); l.addFreshEntity(servo);
+            glog("ryut partida=" + com.lanterna.necron.SagaNecron.ryutPartida(sp.server) + " necron derrotado=" + com.lanterna.necron.BatalhaFinal.derrotado(sp.server));
+            glog("vermelho hostil ao jogador verde=" + ver.hostilA(sp) + " ao amarelo=" + ver.hostilA(amarelo) + " ao servo=" + ver.hostilA(servo));
+            glog("amarelo hostil ao jogador=" + amarelo.hostilA(sp) + " ao servo=" + amarelo.hostilA(servo));
+            if (servo instanceof com.lanterna.especies.LanternaEntity sl) glog("servo (lanterna negro) hostil ao jogador=" + sl.hostilA(sp));
+            ver.addTag("aj_teste"); amarelo.addTag("aj_teste"); servo.addTag("aj_teste");
+        }));
+        at(100, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (var x : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(30), m -> m.getTags().contains("aj_teste")))
+                glog("  " + x.getName().getString() + " alvo=" + (x.getTarget() == null ? "nenhum" : x.getTarget().getName().getString()) + " vida=" + x.getHealth());
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            for (var x : l.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, sp.getBoundingBox().inflate(30), m -> m.getTags().contains("aj_teste"))) x.discard();
+            if (AJ_DERROTADO) com.lanterna.lore.LoreWorldData.get(sp.server).markSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+        }));
+        at(20, () -> { glog("FIM ajustes"); mc.stop(); });
+    }
+
     /** 0.56.7: Capítulo 7 (fendas na Terra, cerco de Aurora, pulsos, Santuário, Embrião). */
     private static void sceneCap7() {
         Minecraft mc = Minecraft.getInstance();
@@ -4234,9 +4300,6 @@ public final class DevAutoTest {
         com.lanterna.client.ia.VozAnel.mudo = true;
         palco(mc);
         at(20, () -> {
-            glog("sons de fala registrados: voz=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.voz")) != null)
-                    + " anel=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.anel")) != null)
-                    + " morte=" + (mc.getSoundManager().getSoundEvent(com.lanterna.LanternaMod.id("fala.morte")) != null));
             com.lanterna.client.voz.Falas.falar("necron.lanterna.mestre_1", "lanterna");
             server(sp -> {
                 var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
@@ -7960,6 +8023,7 @@ public final class DevAutoTest {
         else if (ENABLED && (SCENE.equals("cap5") || SCENE.equals("cap5b"))) sceneCap5();
         else if (ENABLED && SCENE.equals("cap6")) sceneCap6();
         else if (ENABLED && SCENE.equals("cap7")) sceneCap7();
+        else if (ENABLED && SCENE.equals("ajustes")) sceneAjustes();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

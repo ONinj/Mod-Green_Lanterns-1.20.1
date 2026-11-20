@@ -555,6 +555,7 @@ public class ConstructEntity extends Entity {
     private int ultimoDano = -100, ultimoAlvo = -1;
 
     private void beamHit(LivingEntity owner) {
+        if (papel() == 1) return; // 0.56.8: o feixe do segundo anel acompanha o principal (o dano é do principal)
         Vec3 stop = end();
         LivingEntity hit = firstEntityOnLine(owner, owner.getEyePosition(), stop.add(owner.getViewVector(1f).scale(0.5)));
         ServerLevel sl = (ServerLevel) level();

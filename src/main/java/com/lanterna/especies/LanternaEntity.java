@@ -343,12 +343,19 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     public boolean hostilA(LivingEntity e) {
         if (e == this || !e.isAlive() || papel() == Especie.Papel.MERCADOR) return false;
         if (com.lanterna.fonte.ProvaFonte.protegido(e)) return false; // o pirata ferido da prova de Nok
+        // 0.56.8: a guerra contra o Necron. Os servos não brigam entre si; os Lanternas das Tropas atacam os servos e
+        // fazem trégua entre si e com os jogadores (a não ser com quem os provocar)
+        boolean servoEu = com.lanterna.necron.Cratera.servo(this);
+        if (servoEu && com.lanterna.necron.Cratera.servo(e)) return false;
+        if (!servoEu && com.lanterna.necron.Cratera.servo(e)) return papel() == Especie.Papel.LANTERNA && !isPirata() && tropa() != BuiltinCorps.BLACK;
+        boolean tregua = !servoEu && !isPirata() && tropa() != BuiltinCorps.BLACK && emGuerraComONecron();
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
         if (!guilda.isEmpty()) return hostilGuilda(e, guilda);
         if (e instanceof Player p) {
             if (p.isCreative() || p.isSpectator()) return false;
             if (angry.contains(p.getUUID())) return true;
             if (isPirata()) return true;
+            if (tregua) return false;
             if (com.lanterna.guilda.TropasNpc.hostil(p, tropa())) return true;
             return Factions.enemies(tropa(), Factions.playerCorps(p));
         }
@@ -356,9 +363,16 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
             if (o.papel() == Especie.Papel.MERCADOR) return isPirata() && random.nextInt(3) == 0;
             if (isPirata()) return !o.isPirata();
             if (o.isPirata()) return true;
+            if (tregua && o.tropa() != BuiltinCorps.BLACK) return false;
             return Factions.enemies(tropa(), o.tropa());
         }
         return papel() == Especie.Papel.LANTERNA && e instanceof LoreCreatures.Eco;
+    }
+
+    /** Ryut partiu e o Necron ainda não caiu: as Tropas estão juntas contra a Morte. */
+    private boolean emGuerraComONecron() {
+        var s = level().getServer();
+        return s != null && com.lanterna.necron.SagaNecron.ryutPartida(s) && !com.lanterna.necron.BatalhaFinal.derrotado(s);
     }
 
     /** Tropas de guilda: a defesa briga com quem não é da guilda; o ataque, com a guilda dona do planeta. */

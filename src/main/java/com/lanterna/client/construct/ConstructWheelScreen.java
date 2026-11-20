@@ -101,17 +101,41 @@ public class ConstructWheelScreen extends Screen {
         g.fillGradient(0, 0, width, height, 0x60000000, 0x90000000);
 
         // anel de dentro: construtos de qualquer anel; anel de fora: os da Tropa (os da Árvore da Luz só depois de liberados)
-        java.util.List<ConstructType> comuns = new java.util.ArrayList<>(), tropa = new java.util.ArrayList<>();
+        java.util.List<ConstructType> comuns = new java.util.ArrayList<>(), tropa = new java.util.ArrayList<>(), doSegundo = new java.util.ArrayList<>();
+        String seg = com.lanterna.client.vida.ClientEmocoes.segundo();
+        boolean portador = minecraft.player != null && com.lanterna.client.uniform.Corrompida.nivel(minecraft.player) == 2;
         boolean branco = ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white");
         String pagina = branco ? ConstructType.PAGINAS_BRANCO[Math.floorMod(paginaBranco, ConstructType.PAGINAS_BRANCO.length)] : null;
-        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps, minecraft.player != null && com.lanterna.client.uniform.Corrompida.nivel(minecraft.player) == 2)) {
+        for (ConstructType t : ConstructType.daRoda(ClientRingData.corps, portador)) {
             if (branco) {
                 if (t.corps != null && !t.corps.equals(pagina)) continue;
             } else if (t.domDoPortador() && !t.disponivel(ClientRingData.corps)) {
                 // dons da Morte do Portador Negro: aparecem junto com os da Tropa
             } else if (t.arvore && !com.lanterna.client.fonte.ClientFonte.tem(t.id)
                     && !(t.corps != null && t.corps.equals(com.lanterna.client.vida.ClientEmocoes.segundo()))) continue; // 0.53: suporte do 2º anel
+            // 0.56.8: os construtos emprestados pelo segundo anel ficam numa aba só deles
+            if (!branco && seg != null && seg.equals(t.corps) && !t.disponivel(ClientRingData.corps, portador)) { doSegundo.add(t); continue; }
             (t.corps == null ? comuns : tropa).add(t);
+        }
+        boolean abas = !branco && !doSegundo.isEmpty();
+        if (!abas) abaSegundo = false;
+        if (abaSegundo) {
+            comuns = new java.util.ArrayList<>();
+            tropa = doSegundo;
+            color = com.lanterna.vida.Emocoes.cor(seg);
+        }
+        if (abas) {
+            Component nome1 = Component.translatable("construct.lanterna.aba_anel", Component.translatable("corps.lanterna." + ClientRingData.corps.getPath()));
+            Component nome2 = Component.translatable("construct.lanterna.aba_anel", Component.translatable("corps.lanterna." + seg));
+            int ty = Math.max(2, cy - (int) (OUTER * 1.08f * k) - 34);
+            int w1 = font.width(nome1) + 12, w2 = font.width(nome2) + 12, x0 = cx - (w1 + w2 + 6) / 2;
+            int c1 = ClientRingData.color, c2 = com.lanterna.vida.Emocoes.cor(seg);
+            g.fill(x0, ty - 3, x0 + w1, ty + 11, Hud.argb(abaSegundo ? 0x101418 : c1, abaSegundo ? 200 : 170));
+            g.fill(x0 + w1 + 6, ty - 3, x0 + w1 + 6 + w2, ty + 11, Hud.argb(abaSegundo ? c2 : 0x101418, abaSegundo ? 170 : 200));
+            g.drawString(font, nome1, x0 + 6, ty, abaSegundo ? 0xFF8A949C : 0xFFFFFFFF, true);
+            g.drawString(font, nome2, x0 + w1 + 12, ty, abaSegundo ? 0xFFFFFFFF : 0xFF8A949C, true);
+            Component dica = Component.translatable("construct.lanterna.aba_dica");
+            g.drawString(font, dica, cx - font.width(dica) / 2, ty + 14, 0xFFA0A8B0, true);
         }
         if (branco) {
             Component pg = Component.translatable("construct.lanterna.pagina_branco",
@@ -220,6 +244,17 @@ public class ConstructWheelScreen extends Screen {
 
     /** Anel Branco: qual Tropa a roda mostra (rodinha do mouse ou setas trocam). */
     private static int paginaBranco;
+    /** 0.56.8: com dois anéis, a roda mostra os construtos do anel do dedo ou os do segundo anel (rodinha/setas/Tab). */
+    private static boolean abaSegundo;
+
+    private static boolean temSegundo() {
+        return com.lanterna.client.vida.ClientEmocoes.segundo() != null && !(ClientRingData.corps != null && ClientRingData.corps.getPath().equals("white"));
+    }
+
+    private void trocarAba() {
+        abaSegundo = !abaSegundo;
+        if (minecraft.player != null) minecraft.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4f, 1.6f);
+    }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
@@ -228,6 +263,7 @@ public class ConstructWheelScreen extends Screen {
             if (minecraft.player != null) minecraft.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.4f, 1.6f);
             return true;
         }
+        if (temSegundo()) { trocarAba(); return true; }
         return super.mouseScrolled(mx, my, delta);
     }
 
@@ -247,6 +283,7 @@ public class ConstructWheelScreen extends Screen {
             paginaBranco += key == GLFW.GLFW_KEY_RIGHT ? 1 : -1;
             return true;
         }
+        if ((key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_TAB) && temSegundo()) { trocarAba(); return true; }
         if (hovered != null && key >= GLFW.GLFW_KEY_1 && key <= GLFW.GLFW_KEY_4) {
             int p = key - GLFW.GLFW_KEY_1;
             if (ClientConstructs.level() >= hovered.unlockLevel) {

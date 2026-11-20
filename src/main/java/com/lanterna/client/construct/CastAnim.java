@@ -48,6 +48,8 @@ public final class CastAnim {
     private static final Map<Integer, Anim> ANIMS = new HashMap<>();
     /** Quem está segurando um construto contínuo agora (laser, picareta, napalm). */
     private static final Map<Integer, Integer> MIRANDO = new HashMap<>();
+    /** 0.56.8: quem atira o laser com os dois anéis (o segundo feixe sai da outra mão). */
+    private static final java.util.Set<Integer> DUPLO = new java.util.HashSet<>();
 
     public static Estilo estilo(ConstructType t) {
         return switch (t) {
@@ -104,9 +106,18 @@ public final class CastAnim {
 
     /** Posição da mão do anel no mundo (aproximada pelo corpo, ou perto da câmera em primeira pessoa). */
     public static Vec3 mao(LivingEntity e, float pt) {
-        Minecraft mc = Minecraft.getInstance();
         boolean direita = !(e instanceof Player p) || p.getMainArm() == HumanoidArm.RIGHT;
-        float side = direita ? 1 : -1;
+        return mao(e, pt, direita ? 1 : -1);
+    }
+
+    /** 0.56.8: a outra mão (a do segundo anel, no punho). */
+    public static Vec3 maoOutra(LivingEntity e, float pt) {
+        boolean direita = !(e instanceof Player p) || p.getMainArm() == HumanoidArm.RIGHT;
+        return mao(e, pt, direita ? -1 : 1);
+    }
+
+    private static Vec3 mao(LivingEntity e, float pt, float side) {
+        Minecraft mc = Minecraft.getInstance();
         if (e == mc.player && mc.options.getCameraType().isFirstPerson()) {
             Vec3 look = e.getViewVector(pt);
             Vec3 right = look.cross(new Vec3(0, 1, 0));
@@ -153,13 +164,15 @@ public final class CastAnim {
         long now = mc.level.getGameTime();
         ANIMS.values().removeIf(a -> now - a.inicio > a.dur + 2);
         MIRANDO.clear();
+        DUPLO.clear();
         SEGURA.values().removeIf(t -> t < now);
         for (var e2 : SEGURA.keySet()) MIRANDO.put(e2, 0);
         for (Entity e : mc.level.entitiesForRendering()) {
             if (e instanceof ConstructEntity c && (c.kind() == ConstructEntity.Kind.BEAM || c.kind() == ConstructEntity.Kind.STREAM
                     || c.kind() == ConstructEntity.Kind.PICKAXE || c.kind() == ConstructEntity.Kind.DRILL)) {
                 LivingEntity o = c.owner();
-                if (o != null) MIRANDO.put(o.getId(), c.color());
+                if (o != null && c.papel() == 1 && c.kind() == ConstructEntity.Kind.BEAM) DUPLO.add(o.getId());
+                else if (o != null) MIRANDO.put(o.getId(), c.color());
             }
         }
     }
@@ -179,6 +192,14 @@ public final class CastAnim {
             arm.xRot = model.head.xRot - Mth.HALF_PI + Mth.sin(age * 1.9f) * 0.02f;
             arm.yRot = model.head.yRot + Mth.cos(age * 2.3f) * 0.02f;
             arm.zRot = 0;
+            if (DUPLO.contains(entity.getId())) {
+                // os dois braços apontam juntos, as mãos um pouco mais perto uma da outra
+                outro.xRot = model.head.xRot - Mth.HALF_PI + Mth.cos(age * 1.7f) * 0.02f;
+                outro.yRot = model.head.yRot + 0.12f * side + Mth.sin(age * 2.1f) * 0.02f;
+                arm.yRot -= 0.12f * side;
+                outro.zRot = 0;
+                return;
+            }
             outro.xRot = Mth.lerp(0.5f, outro.xRot, -0.5f);
             outro.zRot = 0.15f * side;
             return;
@@ -236,6 +257,10 @@ public final class CastAnim {
     @SubscribeEvent
     public static void onRenderHand(RenderHandEvent event) {
         Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && event.getHand() == InteractionHand.OFF_HAND && event.getItemStack().isEmpty() && DUPLO.contains(mc.player.getId())) {
+            outraMao(event, mc);
+            return;
+        }
         if (mc.player == null || mc.level == null || event.getHand() != InteractionHand.MAIN_HAND || !event.getItemStack().isEmpty()) return;
         PoseStack ps = event.getPoseStack();
         float side = mc.player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
@@ -275,6 +300,36 @@ public final class CastAnim {
             }
             case MIRA -> ps.translate(-0.12f * side * env, 0.16f * env, -0.12f * env);
         }
+    }
+
+    /**
+     * 0.56.8: no laser com dois anéis, a outra mão também aparece erguida em primeira pessoa (o Minecraft não desenha
+     * a mão vazia do lado secundário; aqui ela é desenhada como a principal, espelhada).
+     */
+    private static void outraMao(RenderHandEvent event, Minecraft mc) {
+        var player = mc.player;
+        HumanoidArm braco = player.getMainArm().getOpposite();
+        float f = braco == HumanoidArm.RIGHT ? 1 : -1;
+        float age = player.tickCount + event.getPartialTick();
+        PoseStack ps = event.getPoseStack();
+        ps.pushPose();
+        // a pose de mira, espelhada
+        ps.translate(-0.12f * f + Mth.sin(age * 1.9f) * 0.004f, 0.16f + Mth.sin(age * 2.5f) * 0.004f, -0.12f);
+        ps.mulPose(Axis.XP.rotationDegrees(-8));
+        // o mesmo caminho do braço vazio do Minecraft (ItemInHandRenderer.renderPlayerArm, sem balanço)
+        ps.translate(f * 0.64000005f, -0.6f, -0.71999997f);
+        ps.mulPose(Axis.YP.rotationDegrees(f * 45.0f));
+        ps.translate(f * -1.0f, 3.6f, 3.5f);
+        ps.mulPose(Axis.ZP.rotationDegrees(f * 120.0f));
+        ps.mulPose(Axis.XP.rotationDegrees(200.0f));
+        ps.mulPose(Axis.YP.rotationDegrees(f * -135.0f));
+        ps.translate(f * 5.6f, 0.0f, 0.0f);
+        var r = mc.getEntityRenderDispatcher().getRenderer(player);
+        if (r instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) {
+            if (braco == HumanoidArm.RIGHT) pr.renderRightHand(ps, event.getMultiBufferSource(), event.getPackedLight(), player);
+            else pr.renderLeftHand(ps, event.getMultiBufferSource(), event.getPackedLight(), player);
+        }
+        ps.popPose();
     }
 
     private CastAnim() {}

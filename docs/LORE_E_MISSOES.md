@@ -1939,3 +1939,11 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - Terminada a última etapa, começa **A Última Luz** (a batalha final).
 - As fendas, o cerco, os canteiros, o Santuário e o Embrião são do mundo: contam para todos os jogadores. O Embrião continua dormindo no Santuário até a purificação.
 
+## 0.56.8 — Ajustes da saga
+
+- **Falas sem falatório:** os sons de sílabas que imitavam os personagens falando saíram. As falas continuam em texto; quando houver vozes gravadas, elas tocam (ferramentas/vozes.py).
+- **Pedidos de ajuda diferentes:** cada Tropa pede ajuda do seu jeito (o Lanterna Vermelho com raiva, o Laranja meio ganancioso, o Amarelo orgulhoso, o Azul com esperança, o Índigo falando pouco, o Violeta com amor) e agradece com uma fala própria quando a bateria é salva.
+- **Trégua contra a Morte:** de Ryut partida até a derrota do Necron, os Lanternas NPC de todas as Tropas (menos piratas e Lanternas Negros) atacam os servos do Necron, não brigam entre si e não atacam os jogadores (a não ser quem os provocar).
+- **Laser com dois anéis:** com o segundo anel no punho, os dois braços se erguem e sai um feixe de cada mão: um na cor da Tropa do anel do dedo e outro na cor do segundo anel, juntos até o alvo. O dano do laser fica 25% maior.
+- **Roda de construtos com abas:** com dois anéis, a roda mostra numa aba os construtos do anel do dedo e na outra os emprestados pelo segundo anel (na cor dele). Rodinha do mouse, setas ou Tab trocam de aba.
+

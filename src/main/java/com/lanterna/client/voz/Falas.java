@@ -2,11 +2,9 @@ package com.lanterna.client.voz;
 
 import com.lanterna.LanternaMod;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.TickEvent;
@@ -23,33 +21,14 @@ import java.util.Map;
  *
  * Cada fala é identificada pela chave do texto dela (a mesma da legenda). Se existir o áudio gravado daquela fala no
  * idioma do jogo ("assets/lanterna/sounds/voz/pt_br/&lt;chave&gt;.ogg", registrado pelo ferramentas/vozes.py), ele toca.
- * Se não, toca o "falatório": sílabas curtinhas no ritmo do texto, com o tom de quem fala (ver ferramentas/sons_fala.py).
+ * Se não existir, a fala fica em silêncio (0.56.8: o dono pediu para tirar o "falatório" de sílabas).
  *
- * Perfis: homem, mulher, pessoa (tom pelo número), lanterna, anel, necron e narrador (o narrador só fala com áudio
- * gravado; sem ele fica em silêncio).
+ * O perfil (homem, mulher, pessoa, lanterna, anel, necron, narrador) fica guardado só para organizar as falas.
  */
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class Falas {
-    private record Perfil(String som, float tom, float variacao, int ritmo) {}
-
-    private static final Map<String, Perfil> PERFIS = Map.of(
-            "homem", new Perfil("fala.voz", 0.85f, 0.08f, 3),
-            "mulher", new Perfil("fala.voz", 1.3f, 0.1f, 3),
-            "lanterna", new Perfil("fala.voz", 1.0f, 0.08f, 3),
-            "anel", new Perfil("fala.anel", 1.0f, 0.05f, 3),
-            "necron", new Perfil("fala.morte", 0.85f, 0.05f, 5));
-
-    private static final class Fala {
-        final String perfil;
-        int silabas, espera;
-        final float tomBase;
-        Fala(String perfil, int silabas, float tomBase) { this.perfil = perfil; this.silabas = silabas; this.tomBase = tomBase; }
-    }
-
     private static final Deque<Object[]> FILA = new ArrayDeque<>();
-    private static Fala atual;
     private static SimpleSoundInstance gravada;
-    private static final RandomSource RND = RandomSource.create();
 
     private static String idioma() {
         String c = Minecraft.getInstance().getLanguageManager().getSelected();
@@ -80,7 +59,6 @@ public final class Falas {
     }
 
     public static void parar() {
-        atual = null;
         if (gravada != null) Minecraft.getInstance().getSoundManager().stop(gravada);
         gravada = null;
     }
@@ -99,32 +77,16 @@ public final class Falas {
             mc.getSoundManager().play(gravada);
             return;
         }
-        if (perfil.equals("narrador")) { proxima(); return; }
-        String texto = I18n.exists(limpa) ? I18n.get(limpa) : limpa;
-        int silabas = Math.max(3, Math.min(48, texto.replaceAll("[^\\p{L}]", "").length() / 3));
-        float base = tom > 0 ? tom : PERFIS.getOrDefault(perfil, PERFIS.get("homem")).tom;
-        atual = new Fala(perfil.equals("pessoa") ? "homem" : perfil, silabas, base);
+        // sem áudio gravado: silêncio (segue para a próxima da fila)
+        proxima();
     }
 
     @SubscribeEvent
     public static void tick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.END) return;
         var mc = Minecraft.getInstance();
-        if (mc.level == null) { FILA.clear(); atual = null; return; }
-        if (gravada != null) {
-            if (!mc.getSoundManager().isActive(gravada)) { gravada = null; proxima(); }
-            return;
-        }
-        if (atual == null) return;
-        if (--atual.espera > 0) return;
-        Perfil p = PERFIS.getOrDefault(atual.perfil, PERFIS.get("homem"));
-        SoundEvent som = SoundEvent.createVariableRangeEvent(LanternaMod.id(p.som));
-        float tom = atual.tomBase * (1 + (RND.nextFloat() * 2 - 1) * p.variacao);
-        mc.getSoundManager().play(SimpleSoundInstance.forUI(som, tom, 0.55f));
-        atual.silabas--;
-        // pausas de vez em quando, como entre palavras
-        atual.espera = p.ritmo + (RND.nextInt(5) == 0 ? 3 : 0);
-        if (atual.silabas <= 0) { atual = null; proxima(); }
+        if (mc.level == null) { FILA.clear(); return; }
+        if (gravada != null && !mc.getSoundManager().isActive(gravada)) { gravada = null; proxima(); }
     }
 
     /** Tom de uma "pessoa" pelo número (cada NPC fala sempre no mesmo tom). */

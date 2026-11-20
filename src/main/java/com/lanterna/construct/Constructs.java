@@ -64,6 +64,8 @@ public final class Constructs {
     private static final class Active {
         final ConstructType type;
         @Nullable ConstructEntity visual;
+        /** 0.56.8: o feixe do segundo anel (sai da outra mão, na cor dele). */
+        @Nullable ConstructEntity visual2;
         int ticks;
         @Nullable BlockPos mining;
         float progress;
@@ -157,7 +159,13 @@ public final class Constructs {
             Active a = new Active(type);
             ACTIVE.put(player.getUUID(), a);
             if (type == ConstructType.LASER) {
-                a.visual = ConstructEntity.spawnBeam(player, ring.color(), 3.0f * power(player, ring), 20 * 60 * 10);
+                // 0.56.8: com dois anéis, sai um feixe de cada mão (o do segundo anel só brilha; o dano fica no principal, um pouco maior)
+                boolean duplo = !ring.segundo().isEmpty() && ring.segundoCor() != 0;
+                a.visual = ConstructEntity.spawnBeam(player, ring.color(), 3.0f * power(player, ring) * (duplo ? 1.25f : 1f), 20 * 60 * 10);
+                if (duplo) {
+                    a.visual2 = ConstructEntity.spawnBeam(player, ring.segundoCor(), 0f, 20 * 60 * 10);
+                    a.visual2.setPapel(1);
+                }
                 player.level().playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.8f);
             }
             if (type == ConstructType.NAPALM) {
@@ -184,6 +192,7 @@ public final class Constructs {
         if (a == null || (id != null && !a.type.id.equals(id))) return;
         ACTIVE.remove(player.getUUID());
         if (a.visual != null) a.visual.discard();
+        if (a.visual2 != null) a.visual2.discard();
         if (a.mining != null) player.level().destroyBlockProgress(player.getId(), a.mining, -1);
     }
 
@@ -923,6 +932,7 @@ public final class Constructs {
         UUID id = event.getEntity().getUUID();
         Active a = ACTIVE.remove(id);
         if (a != null && a.visual != null) a.visual.discard();
+        if (a != null && a.visual2 != null) a.visual2.discard();
         ConstructEntity s = SHIELDS.remove(id);
         if (s != null) s.discard();
         COOLDOWNS.remove(id);

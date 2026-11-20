@@ -106,7 +106,9 @@ public final class CenaPedido {
         float de = FALA + i * POR_FALA, ate = de + POR_FALA;
         int al = Math.max(4, (int) (Math.min(faixa(tt, de, de + 8), 1 - faixa(tt, ate - 8, ate)) * 255));
         String propria = com.lanterna.client.ClientRingData.corps == null ? "green" : com.lanterna.client.ClientRingData.corps.getPath();
-        String chave = "necron.lanterna.pedido_" + (i + 1);
+        // 0.56.8: cada Tropa pede ajuda do seu jeito (se faltar a fala dela, usa a comum)
+        String chave = "necron.lanterna.pedido." + tropa + "_" + (i + 1);
+        if (!net.minecraft.client.resources.language.I18n.exists(chave)) chave = "necron.lanterna.pedido_" + (i + 1);
         if (!chave.equals(ultimaFala) || t < FALA + 2) {
             if (!chave.equals(ultimaFala)) com.lanterna.client.voz.Falas.falar(chave, "lanterna", com.lanterna.client.voz.Falas.tomDe(lanterna));
             ultimaFala = chave;
