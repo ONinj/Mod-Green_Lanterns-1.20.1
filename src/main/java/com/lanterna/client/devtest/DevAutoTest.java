@@ -4606,6 +4606,79 @@ public final class DevAutoTest {
         at(10, () -> { glog("FIM necroforma"); mc.stop(); });
     }
 
+    /** 0.58.3: as animações da Forma do Necron (andar, voar, golpe da foice) e do chefe. */
+    private static void sceneNecronAnim() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring black");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "time set noon");
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+        }));
+        at(20, () -> server(sp -> { com.lanterna.morte.Necroforma.ativar(sp, 1f); glog("ativa=" + com.lanterna.morte.Necroforma.ativa(sp)); }));
+        at(20, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(20, () -> shot("na_parado"));
+        // andando
+        at(1, () -> hold(mc.options.keyUp, true));
+        at(14, () -> shot("na_andando"));
+        at(1, () -> hold(mc.options.keyUp, false));
+        // o golpe: zumbis na frente, ataque no ar
+        at(10, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int i = 0; i < 3; i++) {
+                var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
+                double a = Math.toRadians(sp.getYRot() + 90 + (i - 1) * 30);
+                z.moveTo(sp.getX() + Math.cos(a) * 3.2, sp.getY(), sp.getZ() + Math.sin(a) * 3.2, 0, 0);
+                z.setNoAi(true); z.addTag("na_alvo"); z.setHealth(20); l.addFreshEntity(z);
+            }
+        }));
+        at(20, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); look(0, 10); });
+        at(10, () -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND));
+        at(3, () -> shot("na_golpe_1"));
+        at(3, () -> shot("na_golpe_2"));
+        at(3, () -> shot("na_golpe_3"));
+        at(10, () -> server(sp -> {
+            String v = ""; for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(8), x -> x.getTags().contains("na_alvo"))) { v += (int) z.getHealth() + " "; }
+            glog("zumbis depois do corte no ar: " + v);
+        }));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(5, () -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND));
+        at(4, () -> shot("na_golpe_frente"));
+        at(20, () -> server(sp -> { for (var z : sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(8), x -> x.getTags().contains("na_alvo"))) z.discard(); }));
+        // voando com o voo do anel
+        at(5, () -> { look(0, 0); if (!com.lanterna.client.ClientRingData.flight) com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.network.ToggleFlightPacket()); });
+        at(20, () -> cmd("tp @s ~ ~12 ~"));
+        at(20, () -> { glog("voo do anel=" + com.lanterna.client.flight.ClientFlight.isFlying(mc.player)); look(0, 0); hold(mc.options.keyUp, true); mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); });
+        at(12, () -> { glog("voando vel=" + String.format("%.2f", com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s tilt=" + com.lanterna.client.flight.ClientFlight.tilt(mc.player, 0)); shot("na_voando"); });
+        at(1, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT));
+        at(2, () -> shot("na_voando_frente"));
+        at(1, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(1, () -> hold(mc.options.keyUp, false));
+        // o chefe: perto da cratera, ele golpeia
+        at(20, () -> server(sp -> {
+            com.lanterna.morte.Necroforma.encerrar(sp);
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+            var cr = com.lanterna.necron.Cratera.centro(sp.server); var n = com.lanterna.necron.Cratera.lugarDoNecron(cr);
+            sp.teleportTo(sp.server.overworld(), n.getX() + 0.5, n.getY() + 2, n.getZ() + 9.5, 180, 0);
+        }));
+        at(60, () -> server(sp -> {
+            var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(40)).stream().findFirst().orElse(null);
+            glog("necron=" + (n != null));
+            if (n != null) n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
+        }));
+        at(5, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); shot("na_chefe_golpe"); });
+        at(30, () -> shot("na_chefe_parado"));
+        at(10, () -> server(sp -> { sp.getAbilities().invulnerable = false; sp.onUpdateAbilities(); }));
+        at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8632,6 +8705,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("missoes58")) sceneMissoes58();
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
+        else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

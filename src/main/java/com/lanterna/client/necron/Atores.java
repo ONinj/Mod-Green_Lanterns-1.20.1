@@ -32,51 +32,15 @@ final class Atores {
         osso(m, "cabeca", 0.06f * Mth.sin(t * 0.04f), 0.05f * Mth.sin(t * 0.03f), 0);
         for (int i = 1; i <= 8; i++) osso(m, "cordao_" + i, 0.12f * Mth.sin(t * 0.05f + i * 0.7f), 0, 0.1f * Mth.sin(t * 0.04f + i));
     });
-    private final Rend necron = new Rend("necron", (m, t) -> {
-        if (Atores.vento > 0.5f) { voando(m, t); return; }
-        // parado: farrapos e capa balançando devagar, a foice erguida ao lado do corpo
-        for (int i = 1; i <= 12; i++) osso(m, "farrapo_" + i, 0.18f * Mth.sin(t * 0.12f + i * 1.3f), 0, 0.1f * Mth.sin(t * 0.09f + i));
-        osso(m, "saia", 0.05f * Mth.sin(t * 0.07f), 0, 0);
-        osso(m, "cabeca", 0.05f * Mth.sin(t * 0.05f), 0.08f * Mth.sin(t * 0.03f), 0);
-        osso(m, "mandibula", 0.12f + 0.12f * Math.max(0, Mth.sin(t * 0.21f)), 0, 0);
-        osso(m, "capuz", 0.04f * Mth.sin(t * 0.06f), 0, 0);
-        osso(m, "braco_d", -0.35f + 0.04f * Mth.sin(t * 0.05f), 0, 0.12f);
-        osso(m, "braco_e", 0.1f + 0.05f * Mth.sin(t * 0.05f + 1), 0, -0.18f);
-        osso(m, "foice", 0.3f, 0, 0);
-        // 0.58.0: vencido, ele cai de joelhos (a cabeça baixa, os braços soltos, a foice escorregando da mão)
-        if (ajoelhar > 0.001f) {
-            float k = ajoelhar;
-            osso(m, "cabeca", 0.55f * k + 0.05f * Mth.sin(t * 0.05f), 0, 0);
-            osso(m, "mandibula", 0.3f * k, 0, 0);
-            osso(m, "braco_d", -0.35f * (1 - k) + 0.15f * k, 0, 0.12f + 0.2f * k);
-            osso(m, "braco_e", 0.1f * (1 - k) + 0.1f * k, 0, -0.18f - 0.25f * k);
-            osso(m, "foice", 0.3f + 1.2f * k, 0, 0.4f * k);
-        }
-    });
-
-    /**
-     * Voando (o corpo vai deitado, de cabeça para a frente): a cabeça levantada olhando o caminho, o braço esquerdo
-     * esticado à frente, a foice puxada para trás ao longo do corpo, e a túnica, o capuz e os farrapos escorrendo para
-     * trás e tremulando com o vento. (rotX positivo leva um membro que pende para baixo na direção da frente.)
-     */
-    private static void voando(GeoModel<Ator> m, float t) {
-        for (int i = 1; i <= 12; i++) {
-            float onda = Mth.sin(t * 0.55f - i * 0.9f);
-            osso(m, "farrapo_" + i, -0.3f + 0.32f * onda, 0, 0.12f * Mth.sin(t * 0.4f + i * 2.1f));
-        }
-        osso(m, "saia", -0.12f + 0.06f * Mth.sin(t * 0.5f), 0, 0.04f * Mth.sin(t * 0.37f));
-        osso(m, "cabeca", 0.95f + 0.04f * Mth.sin(t * 0.07f), 0.06f * Mth.sin(t * 0.05f), 0);
-        osso(m, "capuz", -0.32f + 0.07f * Mth.sin(t * 0.6f), 0, 0);
-        osso(m, "mandibula", 0.28f + 0.06f * Mth.sin(t * 0.3f), 0, 0);
-        osso(m, "braco_e", 2.85f + 0.05f * Mth.sin(t * 0.09f), 0, -0.08f);
-        osso(m, "braco_d", -0.22f + 0.04f * Mth.sin(t * 0.08f), 0, 0.1f);
-        osso(m, "foice", 2.95f, 0, 0.05f);
-        osso(m, "corpo", 0, 0, 0.05f * Mth.sin(t * 0.04f));
-    }
+    // 0.58.3: as poses do Necron ficam no PoseNecron (as mesmas do chefe e da Forma do Necron)
+    private final Rend necron = new Rend("necron", (m, t) -> PoseNecron.aplicar(m::getBone,
+            new PoseNecron.Estado(t, andar, Math.max(vento, voo), golpe, ajoelhar, vento > 0.5f)));
 
     static float vento;
     /** 0.58.0: 0 = de pé; 1 = de joelhos (a cena da queda do Necron). */
     static float ajoelhar;
+    /** 0.58.3: andando (0..1), voando (0..1) e o golpe da foice (0..1), para a Forma do Necron. */
+    static float andar, voo, golpe;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {
         embriao.cor(r, g, b, 1f, brilho * 0.3f);

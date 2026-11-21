@@ -21,7 +21,7 @@ public final class LoreRenderers {
         event.registerEntityRenderer(LoreEntities.MAMMOK.get(), ctx -> new LoreRenderer<>(ctx, "mammok", 1.6f, false));
         event.registerEntityRenderer(LoreEntities.THESSARA.get(), ctx -> new LoreRenderer<>(ctx, "thessara", 1.5f, true));
         event.registerEntityRenderer(LoreEntities.VIGIA_PARTIDO.get(), ctx -> new LoreRenderer<>(ctx, "vigia_partido", 1.5f, true));
-        event.registerEntityRenderer(LoreEntities.NECRON.get(), ctx -> new LoreRenderer<>(ctx, "necron", 1.6f, false));
+        event.registerEntityRenderer(LoreEntities.NECRON.get(), com.lanterna.client.necron.NecronRenderer::new);
         event.registerEntityRenderer(LoreEntities.ESPECTRO.get(), com.lanterna.client.necron.EspectroRenderer::new);
         event.registerEntityRenderer(LoreEntities.MORROW.get(), ctx -> new LoreRenderer<>(ctx, "morrow", 1.6f, true));
         event.registerEntityRenderer(LoreEntities.PENITENTE.get(), ctx -> new LoreRenderer<>(ctx, "penitente", 1.5f, false));

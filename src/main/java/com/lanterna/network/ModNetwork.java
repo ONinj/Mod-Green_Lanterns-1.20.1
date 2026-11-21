@@ -298,6 +298,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.morte.Necroforma.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.morte.Necroforma.Pacote::encode).decoder(com.lanterna.morte.Necroforma.Pacote::decode)
                 .consumerMainThread(com.lanterna.morte.Necroforma.Pacote::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.morte.Necroforma.Golpe.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.morte.Necroforma.Golpe::encode).decoder(com.lanterna.morte.Necroforma.Golpe::decode)
+                .consumerMainThread(com.lanterna.morte.Necroforma.Golpe::handle).add();
         CHANNEL.messageBuilder(com.lanterna.necron.Cenas.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.Cenas.Pacote::encode).decoder(com.lanterna.necron.Cenas.Pacote::decode)
                 .consumerMainThread(com.lanterna.necron.Cenas.Pacote::handle).add();

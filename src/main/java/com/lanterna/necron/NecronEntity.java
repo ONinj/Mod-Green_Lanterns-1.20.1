@@ -159,6 +159,7 @@ public class NecronEntity extends Monster implements GeoEntity {
     /** A foice: golpe largo, joga longe. */
     private void golpe(ServerLevel l, Player alvo) {
         triggerAnim("golpe", "golpe");
+        swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);   // 0.58.3: o golpe da foice (a animação)
         l.playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 1.4f, 0.5f);
         l.playSound(null, blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 0.8f, 0.6f);
         l.sendParticles(ParticleTypes.SWEEP_ATTACK, alvo.getX(), alvo.getY() + 1, alvo.getZ(), 3, 0.6, 0.3, 0.6, 0);
@@ -170,6 +171,7 @@ public class NecronEntity extends Monster implements GeoEntity {
 
     /** O raio da Morte: uma linha de luz negra até o alvo; seca a vida (Wither). */
     private void raio(ServerLevel l, Player alvo) {
+        swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);
         Vec3 de = position().add(0, 2.6, 0), ate = alvo.position().add(0, 1, 0);
         Vec3 dir = ate.subtract(de);
         int n = (int) (dir.length() * 3);

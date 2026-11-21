@@ -37,7 +37,7 @@ import java.util.function.Supplier;
  * o corpo dele é desenhado como o modelo do Necron, com a foice (ver client/necron/NecroformaCliente).
  *
  *  · ao se transformar: o Grito da Morte, uma onda de almas que fere, empurra e cega quem está perto;
- *  · a foice: cada golpe corpo a corpo corta em arco os inimigos em volta (60% do golpe) e devolve vida (15%);
+ *  · a foice: cada ataque corta em arco os inimigos na frente (até 4,5 blocos) e devolve vida;
  *  · a aura da Morte: quem é inimigo a até 6 blocos seca (Wither) e fica lento;
  *  · força II e resistência I; os outros dons da Morte ficam 50% mais fortes e recarregam na metade do tempo.
  *
@@ -126,39 +126,61 @@ public final class Necroforma {
         if (t == 200) p.displayClientMessage(Component.translatable("morte.lanterna.necroforma_aviso").withStyle(ChatFormatting.GRAY), true);
     }
 
-    /** A foice: o golpe corpo a corpo corta em arco e devolve vida. */
-    /** Enquanto o arco da foice fere os outros (esses ferimentos não fazem outro arco). */
+    private static final Map<UUID, Long> ULTIMO_CORTE = new HashMap<>();
+    /** Enquanto o corte fere (esses ferimentos não fazem outro corte). */
     private static boolean cortando;
 
-    @SubscribeEvent
-    public static void golpe(LivingHurtEvent e) {
-        if (cortando || !(e.getSource().getDirectEntity() instanceof ServerPlayer p) || !ativa(p) || e.getSource().getEntity() != p) return;
-        if (!e.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)) return;
-        LivingEntity alvo = e.getEntity();
+    /**
+     * 0.58.3: a foice. Cada vez que o Arauto transformado ataca (o cliente avisa quando o braço balança, acertando
+     * alguém ou não), a lâmina corta em arco tudo o que é inimigo na frente, a até 4,5 blocos, e devolve vida.
+     */
+    public static void cortar(ServerPlayer p) {
+        if (!ativa(p) || cortando) return;
+        long agora = p.serverLevel().getGameTime();
+        if (agora - ULTIMO_CORTE.getOrDefault(p.getUUID(), 0L) < 10) return;
+        ULTIMO_CORTE.put(p.getUUID(), agora);
         ServerLevel l = p.serverLevel();
-        float dano = e.getAmount() + 4f;
-        e.setAmount(dano);
-        p.heal(dano * 0.15f);
-        Vec3 olhar = p.getViewVector(1f).multiply(1, 0, 1).normalize();
+        var ring = com.lanterna.capability.ModCapabilities.get(p).orElse(null);
+        float pow = ring == null ? 1f : com.lanterna.construct.Constructs.power(p, ring);
+        float dano = 6f + 8f * pow;
+        Vec3 olhar = p.getViewVector(1f).multiply(1, 0, 1);
+        olhar = olhar.lengthSqr() < 1e-4 ? new Vec3(0, 0, 1) : olhar.normalize();
+        float total = 0;
         cortando = true;
         try {
-            for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(3.5, 1.5, 3.5), y -> y != alvo && ConstructEntity.inimigo(p, y))) {
+            for (LivingEntity x : l.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(4.5, 2, 4.5), y -> ConstructEntity.inimigo(p, y))) {
                 Vec3 d = x.position().subtract(p.position()).multiply(1, 0, 1);
-                if (d.lengthSqr() > 1e-3 && d.normalize().dot(olhar) < 0.2) continue;   // só o arco na frente
+                if (d.length() > 4.5 || d.lengthSqr() > 0.25 && d.normalize().dot(olhar) < 0.25) continue;   // só o arco na frente
                 x.invulnerableTime = 0;
-                com.lanterna.combate.Equilibrio.ferirComPoder(x, p.damageSources().playerAttack(p), dano * 0.6f);
+                com.lanterna.combate.Equilibrio.ferirComPoder(x, p.damageSources().playerAttack(p), dano);
+                Vec3 emp = d.lengthSqr() > 1e-3 ? d.normalize().scale(0.6) : olhar.scale(0.6);
+                x.push(emp.x, 0.2, emp.z);
+                total += dano;
             }
         } finally {
             cortando = false;
         }
-        // o rastro da lâmina: um arco de almas
-        for (int k = 0; k <= 16; k++) {
-            double a = Math.toRadians(-70 + 140 * k / 16.0);
+        if (total > 0) p.heal(Math.min(8f, total * 0.15f));
+        // o rastro da lâmina: um arco de almas na altura do peito
+        for (int k = 0; k <= 20; k++) {
+            double a = Math.toRadians(-75 + 150 * k / 20.0);
             Vec3 dir = new Vec3(olhar.x * Math.cos(a) - olhar.z * Math.sin(a), 0, olhar.x * Math.sin(a) + olhar.z * Math.cos(a));
-            Vec3 q = p.position().add(0, 1.1, 0).add(dir.scale(2.6));
+            Vec3 q = p.position().add(0, 1.3 - 0.6 * k / 20.0, 0).add(dir.scale(3.0));
             l.sendParticles(ParticleTypes.SCULK_SOUL, q.x, q.y, q.z, 1, 0.05, 0.05, 0.05, 0);
+            if (k % 4 == 0) l.sendParticles(ParticleTypes.SWEEP_ATTACK, q.x, q.y, q.z, 1, 0, 0, 0, 0);
         }
-        l.playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1f, 0.6f);
+        l.playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.1f, 0.55f);
+        if (total > 0) l.playSound(null, p.blockPosition(), SoundEvents.WITHER_SHOOT, SoundSource.PLAYERS, 0.5f, 0.7f);
+    }
+
+    /** Cliente → servidor: o Arauto transformado balançou a foice. */
+    public record Golpe() {
+        public static void encode(Golpe m, FriendlyByteBuf b) {}
+        public static Golpe decode(FriendlyByteBuf b) { return new Golpe(); }
+        public static void handle(Golpe m, Supplier<NetworkEvent.Context> ctx) {
+            ctx.get().enqueueWork(() -> { ServerPlayer p = ctx.get().getSender(); if (p != null) cortar(p); });
+            ctx.get().setPacketHandled(true);
+        }
     }
 
     @SubscribeEvent
@@ -169,6 +191,7 @@ public final class Necroforma {
     @SubscribeEvent
     public static void saiu(PlayerEvent.PlayerLoggedOutEvent e) {
         RESTA.remove(e.getEntity().getUUID());
+        ULTIMO_CORTE.remove(e.getEntity().getUUID());
     }
 
     /** Quem passa a ver o jogador (chegou perto, entrou no servidor) fica sabendo da forma dele. */

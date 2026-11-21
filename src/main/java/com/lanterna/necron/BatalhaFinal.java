@@ -289,6 +289,7 @@ public final class BatalhaFinal {
 
     /** O abraço do Amor roubado: puxa todo mundo para perto dele. */
     private static void abraco(ServerLevel l, NecronEntity n, List<ServerPlayer> ps, int cor) {
+        n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);   // 0.58.3: a foice acompanha o golpe
         l.playSound(null, n.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 2f, 0.5f);
         for (ServerPlayer p : ps) {
             if (p.distanceTo(n) > 22) continue;
@@ -306,6 +307,7 @@ public final class BatalhaFinal {
 
     /** O Índigo roubado: some e aparece atrás de alguém, com a foice já descendo. */
     private static void piscar(ServerLevel l, BlockPos c, NecronEntity n, ServerPlayer alvo, int cor) {
+        n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);   // 0.58.3: a foice acompanha o golpe
         Vec3 atras = alvo.position().subtract(Vec3.directionFromRotation(0, alvo.getYRot()).multiply(1, 0, 1).normalize().scale(3));
         Vec3 casa = Vec3.atBottomCenterOf(Cratera.lugarDoNecron(c));
         if (atras.distanceTo(casa) > 30) atras = casa.add(atras.subtract(casa).normalize().scale(30));
@@ -319,6 +321,7 @@ public final class BatalhaFinal {
 
     /** Ecos: servos que saem da sombra dele. */
     private static void chamarEcos(ServerLevel l, NecronEntity n, int quantos) {
+        n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);   // 0.58.3: a foice acompanha o golpe
         for (int i = 0; i < quantos; i++) {
             Mob m = Cratera.novoServo(l);
             if (m == null) continue;
@@ -341,6 +344,7 @@ public final class BatalhaFinal {
 
     /** Lança de luz invertida: uma fileira de golpes do Necron até o alvo. */
     private static void lanca(ServerLevel l, NecronEntity n, ServerPlayer alvo, int cor) {
+        n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true);   // 0.58.3: a foice acompanha o golpe
         Vec3 de = n.position(), dir = alvo.position().subtract(de).multiply(1, 0, 1);
         if (dir.lengthSqr() < 1) return;
         dir = dir.normalize();

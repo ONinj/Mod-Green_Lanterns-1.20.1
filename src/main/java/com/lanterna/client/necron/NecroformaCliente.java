@@ -29,6 +29,7 @@ public final class NecroformaCliente {
     /** entidade → ticks desde que se transformou (para o surgimento). */
     private static final Map<Integer, Integer> IDADE = new HashMap<>();
     private static Atores atores;
+    private static float animAntes;
     public static final float ESCALA = 1.0f;
 
     public static void receber(int entidade, int ticks) {
@@ -47,6 +48,13 @@ public final class NecroformaCliente {
     public static void tick(TickEvent.ClientTickEvent e) {
         if (e.phase != TickEvent.Phase.END) return;
         if (Minecraft.getInstance().level == null) { ATIVOS.clear(); IDADE.clear(); return; }
+        // o Arauto transformado balançou o braço: avisa o servidor (o corte da foice)
+        var mc = Minecraft.getInstance();
+        if (mc.player != null && ativa(mc.player)) {
+            float anim = mc.player.getAttackAnim(0);
+            if (anim > 0 && animAntes <= 0) com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.morte.Necroforma.Golpe());
+            animAntes = anim;
+        }
         ATIVOS.replaceAll((k, v) -> v - 1);
         ATIVOS.values().removeIf(v -> v <= 0);
         IDADE.keySet().retainAll(ATIVOS.keySet());
@@ -67,20 +75,24 @@ public final class NecroformaCliente {
         ps.pushPose();
         float corpo = Mth.rotLerp(pt, p.yBodyRotO, p.yBodyRot);
         ps.mulPose(Axis.YP.rotationDegrees(180 - corpo));
-        // voando (com o anel), o corpo deita na direção do voo
-        double vel = p.getDeltaMovement().horizontalDistance();
-        boolean voa = p.getAbilities().flying && vel > 0.12;
-        float s = ESCALA * (0.6f + 0.4f * surge);
-        if (voa) {
-            ps.translate(0, 1.2, 0);
-            ps.mulPose(Axis.XP.rotationDegrees(-(float) Math.min(70, vel * 160)));
-            ps.translate(0, -1.2, 0);
+        // voando com o anel: deita o corpo como o voo do mod deita o jogador
+        boolean voa = com.lanterna.client.flight.ClientFlight.isFlying(p) && !p.onGround();
+        float tilt = voa ? com.lanterna.client.flight.ClientFlight.tilt(p, pt) : 0;
+        if (Math.abs(tilt) > 0.001f) {
+            float ang = tilt * (-90f - p.getViewXRot(pt));
+            ps.translate(0, 1.1, 0);
+            ps.mulPose(Axis.XP.rotationDegrees(ang));
+            ps.translate(0, -1.1, 0);
         }
+        float s = ESCALA * (0.6f + 0.4f * surge);
         ps.scale(s, s, s);
-        // as pernas não existem: ele paira um pouco acima do chão, balançando
+        // ele não tem pernas: paira um pouco acima do chão, balançando
         ps.translate(0, 0.08 + 0.05 * Math.sin(t * 0.08), 0);
-        if (voa) atores.necronVoando(ps, e.getMultiBufferSource(), t);
-        else atores.necron(ps, e.getMultiBufferSource(), t, 0.05f, 1f);
+        Atores.andar = PoseNecron.andar(p, pt);
+        Atores.voo = Mth.clamp(tilt, 0, 1);
+        Atores.golpe = PoseNecron.golpe(p, pt);
+        atores.necron(ps, e.getMultiBufferSource(), t, 0.05f, 1f);
+        Atores.andar = Atores.voo = Atores.golpe = 0;
         ps.popPose();
     }
 
