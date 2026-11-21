@@ -148,6 +148,15 @@ public final class CastAnim {
         SEGURA.remove(entityId);
     }
 
+    /** 0.58.4: quanto da animação de conjurar já passou (0..1), ou -1 se não está conjurando (o Necron usa). */
+    public static float conjurando(int entityId, float pt) {
+        Anim a = ANIMS.get(entityId);
+        Minecraft mc = Minecraft.getInstance();
+        if (a == null || mc.level == null) return -1;
+        float k = (mc.level.getGameTime() - a.inicio + pt) / Math.max(1, a.dur + 6);
+        return k < 0 || k > 1 ? -1 : k;
+    }
+
     public static boolean mirando(int entityId) {
         return MIRANDO.containsKey(entityId);
     }

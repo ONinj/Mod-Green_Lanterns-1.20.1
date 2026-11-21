@@ -23,7 +23,7 @@ public class NecronRenderer extends GeoEntityRenderer<NecronEntity> {
                 float anda = PoseNecron.andar(n, pt);
                 // rápido (os saltos da batalha) é voo; devagar é deslizar
                 float voo = Mth.clamp((anda - 0.6f) * 2.5f, 0, 1);
-                PoseNecron.aplicar(this::getBone, new PoseNecron.Estado(t, anda, voo, PoseNecron.golpe(n, pt), 0));
+                PoseNecron.aplicar(this::getBone, PoseNecron.estado(n, pt, voo, -1, 1));
                 var dados = st.getData(DataTickets.ENTITY_MODEL_DATA);
                 if (dados != null) getBone("cabeca").ifPresent(b -> {
                     b.setRotX(b.getRotX() - dados.headPitch() * Mth.DEG_TO_RAD * 0.6f);

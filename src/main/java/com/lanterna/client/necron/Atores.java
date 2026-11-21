@@ -34,13 +34,15 @@ final class Atores {
     });
     // 0.58.3: as poses do Necron ficam no PoseNecron (as mesmas do chefe e da Forma do Necron)
     private final Rend necron = new Rend("necron", (m, t) -> PoseNecron.aplicar(m::getBone,
-            new PoseNecron.Estado(t, andar, Math.max(vento, voo), golpe, ajoelhar, vento > 0.5f)));
+            estadoForcado != null ? estadoForcado : new PoseNecron.Estado(t, andar, Math.max(vento, voo), golpe, ajoelhar, vento > 0.5f)));
 
     static float vento;
     /** 0.58.0: 0 = de pé; 1 = de joelhos (a cena da queda do Necron). */
     static float ajoelhar;
     /** 0.58.3: andando (0..1), voando (0..1) e o golpe da foice (0..1), para a Forma do Necron. */
     static float andar, voo, golpe;
+    /** 0.58.4: o estado completo (com transições), quando quem desenha já o calculou. */
+    static PoseNecron.Estado estadoForcado;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {
         embriao.cor(r, g, b, 1f, brilho * 0.3f);

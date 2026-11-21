@@ -4679,6 +4679,53 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.58.4: as animações novas do Necron (surgir, girar a foice, dois golpes, conjurar, curva). */
+    private static void sceneNecronAnim2() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring black");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "time set noon");
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+        }));
+        at(20, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); look(0, 5); });
+        at(5, () -> server(sp -> com.lanterna.morte.Necroforma.ativar(sp, 1f)));
+        at(9, () -> shot("n2_surge_1"));
+        at(9, () -> shot("n2_surge_2"));
+        at(30, () -> shot("n2_parado"));
+        // espera o giro da foice (a cada 180 ticks, de 148 a 180)
+        at(1, () -> { int falta = Math.floorMod(158 - mc.player.tickCount, 180); glog("esperando o giro: " + falta + " ticks"); ESPERA_GIRO = falta; });
+        if (!SCENE.endsWith("b")) {
+        waitFor(() -> Math.floorMod(mc.player.tickCount, 180) == 158, 200);
+        at(1, () -> shot("n2_giro_1"));
+        at(8, () -> shot("n2_giro_2"));
+        at(30, () -> {});
+        }
+        // os dois golpes
+        at(5, () -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND));
+        for (int k = 1; k <= 8; k++) { int kk = k; at(1, () -> shot("n2_g1_" + kk)); }
+        at(18, () -> mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND));
+        at(4, () -> shot("n2_golpe2_prep"));
+        at(3, () -> shot("n2_golpe2_corte"));
+        // conjurar
+        at(20, () -> com.lanterna.client.construct.CastAnim.receber(new com.lanterna.construct.CastAnimPacket(mc.player.getId(), "ceifa", 0x2C2C34)));
+        at(7, () -> shot("n2_conjurar"));
+        // a curva
+        at(25, () -> { for (int k = 0; k < 1; k++) mc.player.setYRot(mc.player.getYRot()); });
+        for (int k = 0; k < 6; k++) at(1, () -> { mc.player.setYRot(mc.player.getYRot() + 14); mc.player.yBodyRot += 14; });
+        at(1, () -> shot("n2_curva"));
+        at(20, () -> server(sp -> { com.lanterna.morte.Necroforma.encerrar(sp); sp.getAbilities().invulnerable = false; sp.onUpdateAbilities();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative"); }));
+        at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim2"); mc.stop(); });
+    }
+    private static int ESPERA_GIRO;
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8706,6 +8753,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && (SCENE.equals("necronanim2") || SCENE.equals("necronanim2b"))) sceneNecronAnim2();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();
