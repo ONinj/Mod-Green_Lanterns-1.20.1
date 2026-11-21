@@ -983,6 +983,22 @@
   "en": "After the Necron: return to the Sanctuary (west of Aurora, at the bottom of the shaft) and watch the Embryo wake; it flies to the sky over the crater and its light heals the Earth (the Battery of Death becomes the White Battery). On the fallen worlds, defeat the 6 corrupted Lanterns (they are purified, not killed) and the corrupted leader; the Corps returns and the core you kept in Chapter 6 rekindles their battery. Finally, the Ritual of Earth at the White Battery. The core comes from the Jailer, who appears after you dig out the 3 rubble mounds on the fallen world."
  },
  {
+  "id": "necroforma",
+  "chaves": [
+   "forma do necron",
+   "virar o necron",
+   "transformar no necron",
+   "necroforma",
+   "foice do necron",
+   "necron form",
+   "become the necron",
+   "transform into necron",
+   "necron scythe"
+  ],
+  "pt": "A Forma do Necron é um dom do Anel Preto (só o Arauto da Morte, a partir da afinidade Confiável): na roda de construtos, ela transforma você no Necron por 60 segundos (recarga de 3 minutos). Ao se transformar, o Grito da Morte fere, empurra e cega quem está perto; cada golpe corpo a corpo vira um corte de foice em arco que devolve vida; a aura seca e deixa lentos os inimigos em volta; você ganha força e resistência; e os outros dons da Morte ficam 50% mais fortes e recarregam na metade do tempo. Todos no servidor veem o Necron no seu lugar.",
+  "en": "The Necron Form is a Black Ring gift (Herald of Death only, from the Trusted affinity on): on the construct wheel, it turns you into the Necron for 60 seconds (3-minute recharge). As you transform, the Death Scream hurts, pushes back and blinds those nearby; every melee hit becomes an arcing scythe cut that drains life; the aura withers and slows nearby enemies; you gain strength and resistance; and your other Death gifts are 50% stronger and recharge twice as fast. Everyone on the server sees the Necron in your place."
+ },
+ {
   "id": "tentacao",
   "chaves": [
    "tentacao",

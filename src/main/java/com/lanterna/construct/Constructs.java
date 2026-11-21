@@ -84,7 +84,8 @@ public final class Constructs {
     public static float power(ServerPlayer player, RingData ring) {
         return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * com.lanterna.combate.Supremos.dano(ring.corps(), player)
                 * com.lanterna.tropa.Nivel.forca(player) * (1f + com.lanterna.construct.fonte.ArvoreDaLuz.bonusDano(player))
-                * com.lanterna.vida.Emocoes.bonusForca(player, ring); // 0.53: aspectos fortalecidos no Anel da Vida
+                * com.lanterna.vida.Emocoes.bonusForca(player, ring) // 0.53: aspectos fortalecidos no Anel da Vida
+                * com.lanterna.morte.Necroforma.poder(player); // 0.58.2: na Forma do Necron
     }
 
     public static int level(ServerPlayer player) {
@@ -176,7 +177,8 @@ public final class Constructs {
             boolean ok = perform(player, ring, type, lvl);
             if (!ok) return;
             if (!player.isCreative()) RingPowers.setCharge(player, ring, ring.charge() - com.lanterna.tropa.Nivel.custoComDesconto(player, cost));
-            cds.put(type, now + Math.round(type.cooldown * com.lanterna.construct.fonte.ArvoreDaLuz.recarga(player)));
+            cds.put(type, now + Math.round(type.cooldown * com.lanterna.construct.fonte.ArvoreDaLuz.recarga(player)
+                    * (type == ConstructType.NECROFORMA ? 1f : com.lanterna.morte.Necroforma.recarga(player))));
         }
         LAST_USED.put(player.getUUID(), type);
         com.lanterna.network.ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
@@ -385,6 +387,13 @@ public final class Constructs {
                 level.playSound(null, spot.x, spot.y, spot.z, SoundEvents.WITHER_AMBIENT, SoundSource.PLAYERS, 1.2f, 0.6f);
             }
             case FAREJAR -> farejar(player, level, color, lvl);
+            case NECROFORMA -> {
+                if (com.lanterna.morte.Necroforma.ativa(player)) {
+                    com.lanterna.morte.Necroforma.encerrar(player);   // usar de novo: volta à forma de antes
+                    return false;
+                }
+                if (!com.lanterna.morte.Necroforma.ativar(player, pow)) return false;
+            }
             case DRENAR -> {
                 LivingEntity target = lookedEntity(player, 20);
                 if (target == null) {

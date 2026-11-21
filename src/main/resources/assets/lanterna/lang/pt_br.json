@@ -3912,5 +3912,10 @@
   "necron.lanterna.medalha_ganhou": "Você recebeu a Medalha da Última Luz.",
   "item.lanterna.fragmento_noite": "Fragmento da Noite Eterna",
   "item.lanterna.fragmento_noite.desc": "O que sobrou da luz da Vida depois que o Necron a bebeu.\nÀs vezes, lá no fundo, brilha amarelo.",
-  "necron.lanterna.fragmento_noite_ganhou": "No fim da noite, um caco escuro ficou na sua mão: o Fragmento da Noite Eterna."
+  "necron.lanterna.fragmento_noite_ganhou": "No fim da noite, um caco escuro ficou na sua mão: o Fragmento da Noite Eterna.",
+  "construct.lanterna.necroforma": "Forma do Necron",
+  "construct.lanterna.necroforma.desc": "Só o Arauto da Morte. Você vira o Necron por 60 segundos: o Grito da Morte empurra e cega quem está perto; a foice corta em arco e devolve vida; a aura seca e prende os inimigos; força e resistência; os outros dons da Morte ficam 50% mais fortes e recarregam na metade do tempo.",
+  "morte.lanterna.necroforma_comeca": "A Morte veste você. Por um instante, você é o Necron.",
+  "morte.lanterna.necroforma_aviso": "A Forma do Necron está se desfazendo...",
+  "morte.lanterna.necroforma_fim": "Você volta à sua forma."
 }

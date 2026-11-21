@@ -43,6 +43,8 @@ public enum ConstructType {
     DRENAR("drenar", Category.ATTACK, 90, false, 1, 120, "black"),
     MORTALHA("mortalha", Category.CONTROL, 110, false, 2, 220, "black"),
     TUMULO("tumulo", Category.CONTROL, 120, false, 3, 260, "black"),
+    /** 0.58.2: a Forma do Necron: o Arauto vira o Necron por 60 s (recarga de 3 min). */
+    NECROFORMA("necroforma", Category.UTILITY, 150, false, 3, 20 * 60 * 3, "black"),
     VIDA("vida", Category.DEFENSE, 150, false, 1, 300, "white"),
     /** 0.52: o anel da Vida purifica outro jogador corrompido (recarga de 10 minutos). */
     PURIFICAR("purificar", Category.UTILITY, 200, false, 1, 20 * 60 * 10, "white"),

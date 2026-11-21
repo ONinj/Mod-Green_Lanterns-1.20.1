@@ -4545,6 +4545,67 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronmodelo"); mc.stop(); });
     }
 
+    /** 0.58.2: a Forma do Necron (o Arauto vira o Necron). */
+    private static void sceneNecroforma() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> d.setMorte(0));
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring black");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.server.getCommands().performPrefixedCommand(src, "time set noon");
+            sp.getAbilities().invulnerable = true; sp.getAbilities().mayfly = true; sp.onUpdateAbilities();
+            glog("arauto=" + com.lanterna.morte.AnelPreto.arauto(sp) + " nivel afinidade=" + com.lanterna.construct.Constructs.level(sp));
+        }));
+        at(20, () -> server(sp -> {
+            com.lanterna.construct.Constructs.cast(sp, "necroforma");
+            glog("pelo construto: ativa=" + com.lanterna.morte.Necroforma.ativa(sp));
+            if (!com.lanterna.morte.Necroforma.ativa(sp)) com.lanterna.morte.Necroforma.ativar(sp, 1f);
+            glog("ativa=" + com.lanterna.morte.Necroforma.ativa(sp));
+        }));
+        at(30, () -> { mc.options.hideGui = false; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(20, () -> shot("nf_frente"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(15, () -> shot("nf_costas"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        at(15, () -> shot("nf_1p"));
+        // a foice e a aura
+        at(5, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (int i = 0; i < 3; i++) {
+                var z = net.minecraft.world.entity.EntityType.ZOMBIE.create(l);
+                double a = Math.toRadians(sp.getYRot() + 90 + (i - 1) * 25);
+                z.moveTo(sp.getX() + Math.cos(a) * 2.5, sp.getY(), sp.getZ() + Math.sin(a) * 2.5, 0, 0);
+                z.setNoAi(true); z.addTag("nf_alvo"); l.addFreshEntity(z);
+            }
+        }));
+        at(30, () -> server(sp -> {
+            var zs = sp.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Zombie.class, sp.getBoundingBox().inflate(6), x -> x.getTags().contains("nf_alvo"));
+            String antes = ""; for (var z : zs) antes += (int) z.getHealth() + "(" + z.hasEffect(net.minecraft.world.effect.MobEffects.WITHER) + ") ";
+            sp.setHealth(sp.getMaxHealth() * 0.5f);
+            float vida0 = sp.getHealth();
+            if (!zs.isEmpty()) sp.attack(zs.get(0));
+            String depois = ""; for (var z : zs) depois += (int) z.getHealth() + " ";
+            glog("zumbis antes=" + antes + " depois do golpe=" + depois + " vida do jogador " + vida0 + " -> " + sp.getHealth());
+            for (var z : zs) z.discard();
+        }));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK); server(sp -> { sp.getAbilities().flying = true; sp.onUpdateAbilities(); }); });
+        for (int k = 0; k < 20; k++) at(1, () -> server(sp -> { var v = sp.getViewVector(1f).multiply(1, 0, 1).normalize().scale(0.6); sp.setDeltaMovement(v.x, 0.05, v.z); sp.hurtMarked = true; }));
+        at(1, () -> shot("nf_voando"));
+        at(20, () -> server(sp -> {
+            com.lanterna.morte.Necroforma.encerrar(sp);
+            glog("encerrada: ativa=" + com.lanterna.morte.Necroforma.ativa(sp));
+            sp.getAbilities().invulnerable = false; sp.onUpdateAbilities();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+        }));
+        at(20, () -> shot("nf_depois"));
+        at(10, () -> { glog("FIM necroforma"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8570,6 +8631,7 @@ public final class DevAutoTest {
         else if (ENABLED && (SCENE.equals("cenas") || SCENE.equals("cenaqueda"))) sceneCenas();
         else if (ENABLED && SCENE.equals("missoes58")) sceneMissoes58();
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
+        else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

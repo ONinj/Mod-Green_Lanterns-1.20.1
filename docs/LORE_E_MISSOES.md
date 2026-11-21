@@ -2018,3 +2018,12 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 
 O Necron ganhou um modelo novo, um pouco maior e muito mais detalhado: o crânio é arredondado e esculpido (sobrancelhas, órbitas fundas com uma brasa azul fria no fundo, maçãs do rosto, nariz, têmporas fundas), cheio de rachaduras, com restos de pele seca, couro cabeludo podre e fios de cabelo; os dentes são um a um, alguns faltando. No peito aberto, as costelas, o esterno e o coração da Morte; no ombro, uma ombreira com um crânio; no cinto, correntes e outro crânio pendurado. As mãos terminam em garras de osso. A foice tem a lâmina serrilhada, rebites, um crânio cravado na base e a pérola negra presa por garras.
 
+## 0.58.2 — A Forma do Necron
+
+O Arauto da Morte ganhou o dom mais temido do Anel Preto: por 60 segundos, ele **vira o Necron**. O corpo some e, no lugar, todos veem a figura do Necron, com o capuz, o crânio rachado e a foice com a pérola negra.
+- **O Grito da Morte:** ao se transformar, uma onda de almas fere, empurra, cega e seca quem está perto.
+- **A foice:** cada golpe corpo a corpo vira um corte em arco, que atinge os inimigos na frente e devolve um pouco de vida.
+- **A aura da Morte:** os inimigos em volta secam e ficam lentos.
+- Força, resistência, e os outros dons da Morte (Mãos dos Mortos, Drenar, Mortalha, Túmulo) ficam mais fortes e recarregam mais rápido.
+- Libera com a afinidade Confiável; recarga de 3 minutos.
+

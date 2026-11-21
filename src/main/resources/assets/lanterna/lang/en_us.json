@@ -3912,5 +3912,10 @@
   "necron.lanterna.medalha_ganhou": "You received the Medal of the Last Light.",
   "item.lanterna.fragmento_noite": "Shard of the Eternal Night",
   "item.lanterna.fragmento_noite.desc": "What was left of Life's light after the Necron drank it.\nSometimes, deep inside, it glows yellow.",
-  "necron.lanterna.fragmento_noite_ganhou": "At the end of the night, a dark shard remained in your hand: the Shard of the Eternal Night."
+  "necron.lanterna.fragmento_noite_ganhou": "At the end of the night, a dark shard remained in your hand: the Shard of the Eternal Night.",
+  "construct.lanterna.necroforma": "Necron Form",
+  "construct.lanterna.necroforma.desc": "Herald of Death only. You become the Necron for 60 seconds: the Death Scream pushes back and blinds those nearby; the scythe cuts in an arc and drains life; the aura withers and slows enemies; strength and resistance; your other Death gifts are 50% stronger and recharge twice as fast.",
+  "morte.lanterna.necroforma_comeca": "Death wears you. For a moment, you are the Necron.",
+  "morte.lanterna.necroforma_aviso": "The Necron Form is fading...",
+  "morte.lanterna.necroforma_fim": "You return to your own form."
 }
