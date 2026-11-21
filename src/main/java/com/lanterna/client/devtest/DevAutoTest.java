@@ -4503,6 +4503,48 @@ public final class DevAutoTest {
         at(20, () -> { glog("FIM missoes58"); mc.stop(); });
     }
 
+    /** 0.58.1: fotos do modelo novo do Necron (crânio de perto, corpo inteiro, lados e costas). */
+    private static void sceneNecronModelo() {
+        Minecraft mc = Minecraft.getInstance();
+        palco(mc);
+        final double[] base = new double[3];
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.server.getCommands().performPrefixedCommand(src, "time set noon");
+            com.lanterna.lore.LoreWorldData.get(sp.server).resetSite(com.lanterna.necron.BatalhaFinal.DERROTADO);
+            var cr = com.lanterna.necron.Cratera.centro(sp.server); var n = com.lanterna.necron.Cratera.lugarDoNecron(cr);
+            sp.teleportTo(sp.server.overworld(), n.getX() + 0.5, n.getY() + 2, n.getZ() + 8.5, 180, 0);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities();
+        }));
+        at(80, () -> server(sp -> {
+            var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(60)).stream().findFirst().orElse(null);
+            glog("necron=" + (n != null));
+            if (n == null) return;
+            n.setNoAi(true);
+            n.setYRot(0); n.yBodyRot = 0; n.yHeadRot = 0; n.yBodyRotO = 0; n.yHeadRotO = 0;
+            base[0] = n.getX(); base[1] = n.getY(); base[2] = n.getZ();
+        }));
+        mc.options.hideGui = true;
+        // (dx, dy, dz, yaw, pitch, nome): a câmera é o olho do jogador
+        double[][] tomadas = {
+                {0, 3.0, 2.3, 180, 8}, {0.9, 3.2, 1.9, 155, 10}, {0, 1.9, 7.5, 180, -8}, {6.5, 2.2, 0, 90, -5},
+                {0, 2.2, -6.5, 0, -5}, {2.2, 0.2, 3.2, 145, -38}, {-1.6, 2.7, 1.4, 228, 2}};
+        String[] nomes = {"nec_cranio", "nec_cranio_lado", "nec_corpo", "nec_lado", "nec_costas", "nec_baixo", "nec_rosto_esq"};
+        for (int i = 0; i < tomadas.length; i++) {
+            int ii = i;
+            at(15, () -> server(sp -> {
+                double[] t = tomadas[ii];
+                var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(60)).stream().findFirst().orElse(null);
+                if (n != null) { n.setYRot(0); n.yBodyRot = 0; n.yHeadRot = 0; }
+                sp.connection.teleport(base[0] + t[0], base[1] + t[1] - sp.getEyeHeight(), base[2] + t[2], (float) t[3], (float) t[4]);
+            }));
+            at(25, () -> shot(nomes[ii]));
+        }
+        at(10, () -> server(sp -> { var n = sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(60)).stream().findFirst().orElse(null); if (n != null) n.setNoAi(false); }));
+        at(10, () -> { mc.options.hideGui = false; glog("FIM necronmodelo"); mc.stop(); });
+    }
+
     private static boolean AJ_DERROTADO;
 
     /** 0.56.8: ajustes (laser com dois anéis, abas da roda, Lanternas contra os servos). */
@@ -8527,6 +8569,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("mortecarga")) sceneMorteCarga();
         else if (ENABLED && (SCENE.equals("cenas") || SCENE.equals("cenaqueda"))) sceneCenas();
         else if (ENABLED && SCENE.equals("missoes58")) sceneMissoes58();
+        else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();
         else if (ENABLED && SCENE.equals("inclina")) sceneInclina();

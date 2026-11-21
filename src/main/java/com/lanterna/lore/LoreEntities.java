@@ -67,7 +67,7 @@ public final class LoreEntities {
     public static final RegistryObject<EntityType<Bosses.Vigia>> VIGIA_PARTIDO = boss("vigia_partido", Bosses.Vigia::new, 1.8f, 5.0f, false);
     /** 0.54.2: o Necron (saga da Morte), na frente da Bateria Central da Morte na Terra. */
     public static final RegistryObject<EntityType<com.lanterna.necron.NecronEntity>> NECRON = ModEntities.ENTITIES.register("necron",
-            () -> EntityType.Builder.of(com.lanterna.necron.NecronEntity::new, MobCategory.MONSTER).sized(1.2f, 3.2f).fireImmune()
+            () -> EntityType.Builder.of(com.lanterna.necron.NecronEntity::new, MobCategory.MONSTER).sized(1.4f, 3.8f).fireImmune()
                     .clientTrackingRange(16).build(LanternaMod.id("necron").toString()));
     /** 0.57.0: o Espectro (o próprio jogador com o Anel da Morte), na linha da Tentação. */
     public static final RegistryObject<EntityType<com.lanterna.necron.EspectroEntity>> ESPECTRO = ModEntities.ENTITIES.register("espectro",

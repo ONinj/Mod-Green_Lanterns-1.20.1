@@ -255,7 +255,7 @@ public final class CenaMundo {
             ps.translate(n.x - cam.x, n.y - cam.y - 0.95 * Atores.ajoelhar - 0.6 * some, n.z - cam.z);
             // de frente para quem lutou (o modelo do GeckoLib olha para -z)
             ps.mulPose(Axis.YP.rotationDegrees((float) Math.toDegrees(Math.atan2(frente.x, frente.z)) + 180));
-            float esc = 1.35f * (1 - 0.25f * some);
+            float esc = 1.6f * (1 - 0.25f * some);
             ps.scale(esc, esc, esc);
             atores.necron(ps, buf, tt, 0.2f + 0.8f * some, 1f - some);
             ps.popPose();

@@ -508,13 +508,13 @@ public final class CinemaNecron extends Screen {
             ps.translate(0, -1 + 1 * k, -60 + 112 * k);
             ps.mulPose(Axis.YP.rotationDegrees(180));
             ps.mulPose(Axis.XP.rotationDegrees(-25 * (1 - k)));
-            ps.scale(1.5f, 1.5f, 1.5f);
+            ps.scale(1.65f, 1.65f, 1.65f);
             atores.necron(ps, buf, t, 1f - 0.7f * k, 1f);
             ps.popPose();
         } else if (t >= D1 && t < E1) {
             ps.pushPose();
             ps.mulPose(Axis.YP.rotationDegrees(180));
-            ps.scale(1.25f, 1.25f, 1.25f);
+            ps.scale(1.38f, 1.38f, 1.38f);
             atores.necron(ps, buf, t, 0.15f, faixa(t, D1 + 30, D1 + 60));
             ps.popPose();
         } else if (t >= E1 && t < F1) {
@@ -524,7 +524,7 @@ public final class CinemaNecron extends Screen {
             ps.mulPose(Axis.ZP.rotationDegrees(5 * Mth.sin(t * 0.03f)));
             ps.mulPose(Axis.XP.rotationDegrees(-72 + 3 * Mth.sin(t * 0.05f)));
             ps.translate(0, -1.2, 0);
-            ps.scale(1.25f, 1.25f, 1.25f);
+            ps.scale(1.38f, 1.38f, 1.38f);
             atores.necronVoando(ps, buf, t);
             ps.popPose();
         }

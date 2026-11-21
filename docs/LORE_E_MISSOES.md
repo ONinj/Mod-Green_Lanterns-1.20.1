@@ -2014,3 +2014,7 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 - **Herói — O Dia Seguinte** (necron_10): Aurora comemora com fogos nas cores das sete Tropas; o Sgt. Rui agradece, a Dra. Lívia conta que o pulso da Vida sumiu no espaço (e que há um sinal amarelo estranho vindo de Korugar) e entrega a **Medalha da Última Luz**.
 - **Corrompido:** no fim da Noite Eterna, o **Fragmento da Noite Eterna** fica na mão do Arauto ("Às vezes, lá no fundo, brilha amarelo.").
 
+## 0.58.1 — O Necron, em detalhe
+
+O Necron ganhou um modelo novo, um pouco maior e muito mais detalhado: o crânio é arredondado e esculpido (sobrancelhas, órbitas fundas com uma brasa azul fria no fundo, maçãs do rosto, nariz, têmporas fundas), cheio de rachaduras, com restos de pele seca, couro cabeludo podre e fios de cabelo; os dentes são um a um, alguns faltando. No peito aberto, as costelas, o esterno e o coração da Morte; no ombro, uma ombreira com um crânio; no cinto, correntes e outro crânio pendurado. As mãos terminam em garras de osso. A foice tem a lâmina serrilhada, rebites, um crânio cravado na base e a pérola negra presa por garras.
+
