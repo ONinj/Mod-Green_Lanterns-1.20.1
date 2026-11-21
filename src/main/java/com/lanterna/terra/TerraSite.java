@@ -171,6 +171,8 @@ public final class TerraSite {
             d.pronto = true;
             d.setDirty();
             LanternaMod.LOGGER.info("Lanterna: a Cidade Aurora vai nascer em {}", d.c);
+            // mundo novo: a cidade já vai sendo desenhada em segundo plano enquanto o jogador entra
+            if (com.lanterna.cidade.Layout.novo()) AuroraGeracao.preparar(ow, d.c);
         }
         centro = d.c;
     }
@@ -515,19 +517,26 @@ public final class TerraSite {
         l.addFreshEntity(e);
     }
 
+    private static long chegada = -1;
+
     /** De vez em quando, se alguém está por perto: quem sumiu (morreu) volta. */
     @SubscribeEvent
     public static void onTick(TickEvent.ServerTickEvent e) {
         if (e.phase != TickEvent.Phase.END) return;
         MinecraftServer s = e.getServer();
         ServerLevel ow = s.overworld();
-        if (ow.getGameTime() % 1200 != 37) return;
+        // 0.58.6: quem chega à vila encontra os moradores logo (confere a cada 2 s nos primeiros 30 s); depois, a cada
+        // minuto, como antes (mais que isso faria nascer cópia de quem só se afastou do posto)
+        if (ow.getGameTime() % 40 != 17) return;
         Dados d = Dados.get(s);
         if (!d.pronto || d.c == null) return;
         boolean perto = false;
         for (ServerPlayer p : s.getPlayerList().getPlayers())
-            if (p.level() == ow && p.blockPosition().distSqr(d.c) < 80 * 80) perto = true;
-        if (perto) pessoas(ow, d.c);
+            if (p.level() == ow && p.blockPosition().distSqr(d.c) < 100 * 100) perto = true;
+        long agora = ow.getGameTime();
+        if (!perto) { chegada = -1; return; }
+        if (chegada < 0) chegada = agora;
+        if (agora - chegada <= 600 || agora % 1200 == 1177) pessoas(ow, d.c);
     }
 
     // ===================== Pacote =====================

@@ -73,6 +73,8 @@ public final class CidadeUnica {
         /** Onde ficam as casas (os nativos moram nelas). */
         public final List<BlockPos> casas = new ArrayList<>();
         final String chave;
+        /** 0.58.6: os desenhos de todas as peças já foram pedidos (em paralelo, em segundo plano). */
+        volatile boolean preparada;
 
         Planta(PlanetLore p, int y, String chave) {
             this.planeta = p;
@@ -585,6 +587,7 @@ public final class CidadeUnica {
     }
 
     static void gerar(WorldGenLevel level, Planta pl, int cx, int cz, RandomSource rnd) {
+        preparar(level.getLevel(), pl);
         Mundo.Geracao g = new Mundo.Geracao(level, cx, cz, rnd);
         terreno(new Kit(g, pl.pal), pl, cx, cz);
         for (Peca p : pl.pecas) {
@@ -599,6 +602,23 @@ public final class CidadeUnica {
             }
         }
         Acabamento.prenderNoPedaco(level, cx, cz, pl.y - 2, pl.y + 60);
+    }
+
+    /**
+     * 0.58.6: no primeiro pedaço da cidade, todas as peças são desenhadas de uma vez, em paralelo e em segundo plano;
+     * os outros pedaços só copiam (antes cada pedaço esperava o desenho das peças que passavam por ele, uma a uma).
+     */
+    static void preparar(ServerLevel l, Planta pl) {
+        if (pl.preparada) return;
+        synchronized (pl) {
+            if (pl.preparada) return;
+            pl.preparada = true;
+        }
+        long t0 = System.nanoTime();
+        List<CompletableFuture<?>> fs = new ArrayList<>();
+        for (Peca p : pl.pecas) fs.add(CompletableFuture.runAsync(() -> desenho(l, pl, p), net.minecraft.Util.backgroundExecutor()));
+        CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new)).thenRun(() ->
+                LanternaMod.LOGGER.info("Lanterna: cidade de {} desenhada em segundo plano em {} ms", pl.planeta.planet, (System.nanoTime() - t0) / 1_000_000));
     }
 
     /** O desenho da peça (feito uma vez e guardado até todos os pedaços dela serem gerados). */

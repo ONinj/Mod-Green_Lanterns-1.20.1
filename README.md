@@ -153,6 +153,8 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.66.4 ✅ (0.58.4) Animações do Necron mais vivas (Forma do Necron e o chefe): transições suaves entre parado, andando, voando e caindo; parado com respiração, cabeça que inclina e, a cada ~9 s, a foice girando na mão; andar com balanço e farrapos em onda atrasada; curvas em que o tronco vira antes e o pano chicoteia atrás; queda com túnica subindo e braços abertos; golpe em sequência (1º diagonal por cima do ombro, 2º revés horizontal), com antecipação inteira e impacto que passa do ponto; pose de conjurar (mão esquerda erguida) ao usar os dons da Morte; e a transformação: ele se ergue curvado abrindo os braços
 
 1.66.5 ✅ (0.58.5) Golpes do Necron corrigidos: a foice agora fica sempre bem segura na mão (a haste não vira mais de cabeça para baixo quando o braço sobe). 1º golpe: ergue a foice com a lâmina atrás da cabeça e desce cortando à frente, com as duas mãos na haste; 2º golpe: foice deitada na cintura varrendo com o giro do tronco. Vale para o chefe e para a Forma do Necron
+
+1.66.6 ✅ (0.58.6) Cidades carregam bem mais rápido: a Cidade Aurora é desenhada inteira em segundo plano logo que o mundo é criado (~1,7 s) e os pedaços do mundo só copiam o desenho, como a vila do Minecraft; a altura do terreno é guardada em vez de recalculada (uma casa na beira da vila levava até 19 s só nisso). No teste (mundo novo): a vila passou de 52 s para 14 s para carregar (um lugar sem nada leva 11 s) e os moradores de 62 s para 14 s (ao chegar, a vila confere os moradores a cada 2 s por 30 s). As cidades dos planetas e tropas também desenham tudo em paralelo no primeiro pedaço
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

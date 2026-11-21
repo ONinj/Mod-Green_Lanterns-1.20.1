@@ -4679,6 +4679,47 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** Mede quanto a cidade de um planeta (Korugar) demora para aparecer. */
+    private static void sceneCidadeTempo() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        long[] t0 = new long[1];
+        at(40, () -> { mc.options.renderDistance().set(10); cmd("gamemode creative"); });
+        at(20, () -> { t0[0] = System.currentTimeMillis(); server(sp -> {
+            var k = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("korugar"));
+            sp.teleportTo(sp.server.getLevel(k), 0.5, 160, 0.5, 0, 30); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }); });
+        waitFor(() -> { if (mc.level == null || !mc.level.dimension().location().getPath().equals("korugar")) return false;
+            for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) if (!mc.level.getChunkSource().hasChunk(x, z)) return false;
+            return true; }, 20 * 240);
+        at(1, () -> glog("TEMPO chunks da cidade de Korugar (9x9) = " + (System.currentTimeMillis() - t0[0]) + " ms"));
+        at(60, () -> shot("korugar_tempo"));
+        at(10, () -> { glog("FIM cidadetempo"); mc.stop(); });
+    }
+
+    /** Mede quanto a Cidade Aurora demora para aparecer (mundo normal novo: -Pmundo=normalN). */
+    private static void sceneAuroraTempo() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        long[] t0 = new long[1];
+        at(40, () -> { mc.options.renderDistance().set(10); cmd("gamemode creative"); glog("aurora=" + com.lanterna.terra.TerraSite.centro); });
+        at(20, () -> { t0[0] = System.currentTimeMillis(); server(sp -> { var c = com.lanterna.terra.TerraSite.centro;
+            sp.teleportTo(sp.server.overworld(), c.getX() + 0.5, c.getY() + 30, c.getZ() + 0.5, 0, 30); sp.getAbilities().flying = true; sp.onUpdateAbilities(); }); });
+        waitFor(() -> { var c = com.lanterna.terra.TerraSite.centro; if (mc.level == null) return false;
+            for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) if (!mc.level.getChunkSource().hasChunk((c.getX() >> 4) + x, (c.getZ() >> 4) + z)) return false;
+            return true; }, 20 * 180);
+        at(1, () -> glog("TEMPO chunks da cidade (9x9) = " + (System.currentTimeMillis() - t0[0]) + " ms"));
+        waitFor(() -> mc.level != null && mc.level.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, mc.player.getBoundingBox().inflate(80)).size() >= 5, 20 * 120);
+        at(1, () -> glog("TEMPO moradores (5+) = " + (System.currentTimeMillis() - t0[0]) + " ms; tick medio " + String.format("%.1f", mc.getSingleplayerServer().getAverageTickTime()) + " ms"));
+        at(40, () -> shot("aurora_tempo"));
+        // comparação: um lugar longe, só com o terreno do Minecraft
+        at(5, () -> { t0[0] = System.currentTimeMillis(); server(sp -> sp.teleportTo(sp.server.overworld(), 3000.5, 140, 3000.5, 0, 30)); });
+        waitFor(() -> { if (mc.level == null) return false;
+            for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) if (!mc.level.getChunkSource().hasChunk((3000 >> 4) + x, (3000 >> 4) + z)) return false;
+            return true; }, 20 * 180);
+        at(1, () -> glog("TEMPO chunks de um lugar comum (9x9) = " + (System.currentTimeMillis() - t0[0]) + " ms"));
+        at(10, () -> { glog("FIM auroratempo"); mc.stop(); });
+    }
+
     /** 0.58.5: o golpe do Necron visto de lado (para conferir a pegada da foice). */
     private static void sceneNecronLado() {
         Minecraft mc = Minecraft.getInstance();
@@ -8777,6 +8818,8 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("cidadetempo")) sceneCidadeTempo();
+        else if (ENABLED && SCENE.equals("auroratempo")) sceneAuroraTempo();
         else if (ENABLED && SCENE.equals("necronlado")) sceneNecronLado();
         else if (ENABLED && (SCENE.equals("necronanim2") || SCENE.equals("necronanim2b"))) sceneNecronAnim2();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
@@ -9046,13 +9089,16 @@ public final class DevAutoTest {
         // Máquina nova sem o mundo "test" (o quickPlay não acha e para no menu): cria um superplano com comandos
         if (!criouMundo && mc.level == null && mc.getOverlay() == null && mc.getSingleplayerServer() == null
                 && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen || mc.screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen)
-                && !mc.getLevelSource().levelExists("test")) {
+                && !mc.getLevelSource().levelExists(System.getProperty("lanterna.autotest.mundo", "test"))) {
             criouMundo = true;
-            var settings = new net.minecraft.world.level.LevelSettings("test", net.minecraft.world.level.GameType.CREATIVE, false,
+            String nomeMundo = System.getProperty("lanterna.autotest.mundo", "test");
+            // mundos "normal..." usam o gerador normal (para medir a geração da Cidade Aurora); os outros, superplano
+            var preset = nomeMundo.startsWith("normal") ? net.minecraft.world.level.levelgen.presets.WorldPresets.NORMAL : net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT;
+            var settings = new net.minecraft.world.level.LevelSettings(nomeMundo, net.minecraft.world.level.GameType.CREATIVE, false,
                     net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.GameRules(), net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
-            mc.createWorldOpenFlows().createFreshLevel("test", settings, new net.minecraft.world.level.levelgen.WorldOptions(12345L, false, false),
+            mc.createWorldOpenFlows().createFreshLevel(nomeMundo, settings, new net.minecraft.world.level.levelgen.WorldOptions(12345L, nomeMundo.startsWith("normal"), false),
                     reg -> reg.registryOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
-                            .getHolderOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT).value().createWorldDimensions());
+                            .getHolderOrThrow(preset).value().createWorldDimensions());
             return;
         }
         if (mc.player == null || mc.level == null) return;

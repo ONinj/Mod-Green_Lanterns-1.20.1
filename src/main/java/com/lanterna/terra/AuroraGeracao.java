@@ -54,6 +54,7 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
     private static final Map<String, CompletableFuture<Desenho>> DESENHOS = new ConcurrentHashMap<>();
 
     public static void esquecer() {
+        preparadoDe = null;
         pecas = null;
         pecasDe = null;
         DESENHOS.clear();
@@ -71,6 +72,7 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
         if (mx * mx + mz * mz > (R + 10) * (R + 10)) return false;
         try {
             List<Peca> ps = pecas(c);
+            preparar(l.getLevel(), c);
             Mundo g = new Mundo.Geracao(l, cx, cz, ctx.random());
             terreno(new Kit(g, TerraSite.paleta()), c, cx, cz);
             for (Peca p : ps) {
@@ -102,17 +104,39 @@ public final class AuroraGeracao extends Feature<NoneFeatureConfiguration> {
         com.lanterna.cidade.Obra.etapa(l, x -> fim.run());
     }
 
+    private static volatile BlockPos preparadoDe;
+
+    /**
+     * 0.58.6: desenha a cidade inteira de uma vez, em paralelo e em segundo plano (como a vila do Minecraft, que decide
+     * tudo antes e depois só copia). Antes, cada pedaço do mundo esperava o desenho do prédio que passava por ele, um
+     * de cada vez, e a cidade levava quase um minuto para aparecer.
+     */
+    public static void preparar(ServerLevel l, BlockPos c) {
+        if (c == null || c.equals(preparadoDe)) return;
+        synchronized (AuroraGeracao.class) {
+            if (c.equals(preparadoDe)) return;
+            preparadoDe = c;
+        }
+        long t0 = System.nanoTime();
+        List<CompletableFuture<?>> fs = new ArrayList<>();
+        for (Peca p : pecas(c)) fs.add(CompletableFuture.runAsync(() -> desenho(l, c, p), net.minecraft.Util.backgroundExecutor()));
+        CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new)).thenRun(() ->
+                LanternaMod.LOGGER.info("Lanterna: Cidade Aurora desenhada em segundo plano em {} ms", (System.nanoTime() - t0) / 1_000_000));
+    }
+
     private static Desenho desenho(ServerLevel l, BlockPos c, Peca p) {
         CompletableFuture<Desenho> nova = new CompletableFuture<>();
         CompletableFuture<Desenho> f = DESENHOS.putIfAbsent(p.id(), nova);
         if (f != null) return f.join();
         try {
+            long t0 = System.nanoTime();
             Desenho d = new Desenho();
             Mundo.Virtual v = new Mundo.Virtual(l, d, (x, z) -> chao(l, c, x, z));
             Kit k = new Kit(v, TerraSite.paleta());
             Obra.imediato(l, () -> p.obra().accept(k));
             d.acabar(v);
             nova.complete(d);
+            LanternaMod.LOGGER.info("Lanterna: Aurora desenhou {} em {} ms ({})", p.id(), (System.nanoTime() - t0) / 1_000_000, Thread.currentThread().getName());
             return d;
         } catch (Throwable t) {
             LanternaMod.LOGGER.error("Lanterna: falha desenhando {} da Cidade Aurora", p.id(), t);

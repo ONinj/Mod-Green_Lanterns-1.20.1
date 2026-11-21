@@ -133,10 +133,23 @@ public interface Mundo {
         @Override public void molde(ResourceLocation id, BlockPos canto) { d.molde(id, canto); }
     }
 
+    /**
+     * Guardadas por mundo: a conta do gerador é pesada e as construções perguntam a mesma coluna milhares de vezes
+     * (0.58.6: uma casa na beira da Cidade Aurora levava até 19 s só nisso).
+     */
+    static final java.util.Map<ServerLevel, java.util.concurrent.ConcurrentHashMap<Long, Integer>> ALTURAS =
+            java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
     /** Altura do terreno segundo o gerador (sem o mundo existir). */
     static int alturaGerador(ServerLevel l, int x, int z) {
+        var cache = ALTURAS.computeIfAbsent(l, k -> new java.util.concurrent.ConcurrentHashMap<>());
+        long chave = ((long) x << 32) | (z & 0xFFFFFFFFL);
+        Integer h = cache.get(chave);
+        if (h != null) return h;
         var src = l.getChunkSource();
-        return src.getGenerator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, l, src.randomState());
+        int v = src.getGenerator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, l, src.randomState());
+        if (cache.size() < 400_000) cache.put(chave, v);
+        return v;
     }
 
     /** Teste: um baú já com tabela. */
