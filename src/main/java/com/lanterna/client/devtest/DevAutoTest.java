@@ -4679,6 +4679,30 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.58.5: o golpe do Necron visto de lado (para conferir a pegada da foice). */
+    private static void sceneNecronLado() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+            var n = com.lanterna.lore.LoreEntities.NECRON.get().create(sp.serverLevel());
+            n.moveTo(0.5, 200, 10.5, 90, 0);
+            n.setNoAi(true); n.setInvulnerable(true); n.setYBodyRot(90); n.setYHeadRot(90);
+            sp.serverLevel().addFreshEntity(n);
+            sp.teleportTo(sp.serverLevel(), 0.5, 200, 0.5, 0, 0);
+        }));
+        at(20, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); look(0, -12); });
+        at(30, () -> shot("nl_parado"));
+        for (int g = 1; g <= 2; g++) {
+            int gg = g;
+            at(10, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(30)).forEach(n -> n.swing(net.minecraft.world.InteractionHand.MAIN_HAND, true))));
+            for (int k = 1; k <= 8; k++) { int kk = k; at(2, () -> shot("nl_g" + gg + "_" + kk)); }
+            at(20, () -> {});
+        }
+        at(10, () -> { mc.options.hideGui = false; glog("FIM necronlado"); mc.stop(); });
+    }
+
     /** 0.58.4: as animações novas do Necron (surgir, girar a foice, dois golpes, conjurar, curva). */
     private static void sceneNecronAnim2() {
         Minecraft mc = Minecraft.getInstance();
@@ -8753,6 +8777,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("necronlado")) sceneNecronLado();
         else if (ENABLED && (SCENE.equals("necronanim2") || SCENE.equals("necronanim2b"))) sceneNecronAnim2();
         else if (ENABLED && SCENE.equals("hanks")) sceneHanks();
         else if (ENABLED && SCENE.equals("v30")) sceneV30();

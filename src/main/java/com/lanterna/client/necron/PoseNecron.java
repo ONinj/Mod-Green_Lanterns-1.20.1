@@ -148,6 +148,7 @@ public final class PoseNecron {
             float g = (ciclo - 0.82f) / 0.18f;
             float sobe = suave(g / 0.25f) * (1 - suave((g - 0.75f) / 0.25f));
             somar(m, "braco_d", 0.75f, 0, -0.1f, sobe);
+            somar(m, "foice", -0.75f, 0, 0, sobe);   // a haste continua em pé enquanto o braço sobe
             somar(m, "foice", 0, (float) (Math.PI * 2 * suave((g - 0.15f) / 0.6f)), 0, 1);
             somar(m, "cabeca", 0.05f, -0.15f, 0, sobe);
         }
@@ -172,39 +173,54 @@ public final class PoseNecron {
         return m;
     }
 
-    /** O golpe 1: por cima do ombro direito, descendo em diagonal. */
+    /*
+     * Como a foice funciona: ela é filha do braço direito e gira em volta da mão. O ângulo que importa é o da HASTE no
+     * mundo (em relação ao corpo): haste = braço + foice. Por isso cada golpe define o ângulo do braço (a) e o ângulo
+     * da haste (h) e a foice recebe h - a. Na pose parada a = -0,35 e h ≈ 0 (haste em pé, lâmina em cima).
+     * rotX positivo: o braço vai para a frente e para cima; a ponta de cima da haste vai para TRÁS.
+     */
+    private static void segurar(Map<String, float[]> m, float braco, float haste, float bracoY, float bracoZ, float hasteZ, float peso) {
+        ir(m, "braco_d", braco, bracoY, bracoZ, peso);
+        ir(m, "foice", haste - braco, 0, hasteZ, peso);
+    }
+
+    /** O golpe 1: a foice sobe por cima do ombro (lâmina atrás da cabeça) e desce na frente, de cima para baixo. */
     private static void golpeDiagonal(Map<String, float[]> m, float g) {
         float prep = suave(g / 0.34f);                                         // antecipação: sobe e recua
-        float corte = passaDoPonto((g - 0.34f) / 0.22f);                       // o corte (passa do ponto)
-        float volta = suave((g - 0.64f) / 0.36f);
+        float corte = passaDoPonto((g - 0.38f) / 0.2f);                        // o corte (passa do ponto)
+        float volta = suave((g - 0.66f) / 0.34f);
         float peso = prep * (1 - volta);
-        float c = Mth.clamp(corte, 0, 1.25f);
-        ir(m, "braco_d", Mth.lerp(c, 3.0f, 0.5f), Mth.lerp(c, 0.4f, -0.6f), Mth.lerp(c, 0.7f, -0.5f), peso);
-        ir(m, "foice", Mth.lerp(c, -1.0f, 0.95f), 0, Mth.lerp(c, 0.25f, -0.3f), peso);
-        somar(m, "corpo", Mth.lerp(c, -0.16f, 0.26f), Mth.lerp(c, 0.42f, -0.46f), Mth.lerp(c, 0.06f, -0.05f), peso);
-        somar(m, "cabeca", Mth.lerp(c, -0.12f, 0.08f), Mth.lerp(c, -0.2f, 0.25f), 0, peso);
-        ir(m, "braco_e", Mth.lerp(c, 0.95f, -0.35f), 0, Mth.lerp(c, -0.55f, -0.15f), peso);
+        float c = Mth.clamp(corte, 0, 1.2f);
+        // braço: de erguido (2,7) para estendido à frente e abaixo (0,8); haste: de inclinada para trás (0,75,
+        // lâmina atrás da cabeça) para deitada à frente e para baixo (-1,9, a lâmina cravando no chão à frente)
+        float braco = Mth.lerp(c, 2.7f, 0.8f), haste = Mth.lerp(c, 0.75f, -1.9f);
+        segurar(m, braco, haste, Mth.lerp(c, 0.15f, -0.25f), Mth.lerp(c, 0.25f, -0.15f), 0, peso);
+        // a mão esquerda ajuda a segurar a haste (sobe junto e desce junto)
+        ir(m, "braco_e", Mth.lerp(c, 2.3f, 0.95f), Mth.lerp(c, -0.35f, -0.45f), Mth.lerp(c, -0.2f, 0.25f), peso);
+        somar(m, "corpo", Mth.lerp(c, -0.18f, 0.3f), Mth.lerp(c, 0.25f, -0.2f), 0, peso);
+        somar(m, "cabeca", Mth.lerp(c, -0.15f, 0.15f), 0, 0, peso);
         ir(m, "mandibula", 0.15f + 0.35f * Mth.clamp(c, 0, 1), 0, 0, peso);
-        somar(m, "saia", 0, Mth.lerp(c, -0.15f, 0.2f), 0, peso);
-        for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, 0.12f, 0, 0.45f * (c - 0.5f) * (i % 2 == 0 ? 1 : -1), peso);
+        somar(m, "saia", Mth.lerp(c, -0.1f, 0.15f), 0, 0, peso);
+        for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, Mth.lerp(c, -0.2f, 0.3f), 0, 0.2f * (c - 0.5f) * (i % 2 == 0 ? 1 : -1), peso);
         somar(m, "capuz", Mth.lerp(c, -0.1f, 0.12f), 0, 0, peso);
     }
 
-    /** O golpe 2: o revés, um corte horizontal da esquerda para a direita, na altura da cintura. */
+    /** O golpe 2: o revés, a foice deitada na altura da cintura varrendo de um lado para o outro (o tronco gira). */
     private static void golpeReves(Map<String, float[]> m, float g) {
         float prep = suave(g / 0.3f);
-        float corte = passaDoPonto((g - 0.3f) / 0.24f);
-        float volta = suave((g - 0.62f) / 0.38f);
+        float corte = passaDoPonto((g - 0.32f) / 0.24f);
+        float volta = suave((g - 0.64f) / 0.36f);
         float peso = prep * (1 - volta);
-        float c = Mth.clamp(corte, 0, 1.25f);
-        ir(m, "braco_d", 1.45f, Mth.lerp(c, -1.05f, 1.15f), Mth.lerp(c, -0.35f, 0.55f), peso);
-        ir(m, "foice", Mth.lerp(c, 1.2f, 1.6f), Mth.lerp(c, 0.3f, -0.4f), Mth.lerp(c, 0.9f, -0.7f), peso);
-        somar(m, "corpo", 0.12f, Mth.lerp(c, -0.5f, 0.55f), 0, peso);
-        somar(m, "cabeca", 0, Mth.lerp(c, 0.3f, -0.3f), 0, peso);
-        ir(m, "braco_e", Mth.lerp(c, -0.2f, 0.7f), 0, Mth.lerp(c, -0.1f, -0.6f), peso);
+        float c = Mth.clamp(corte, 0, 1.2f);
+        // braço à frente na altura da cintura; haste deitada para a frente (lâmina na ponta, à frente)
+        segurar(m, 1.25f, -1.45f, Mth.lerp(c, 0.55f, -0.6f), 0, 0, peso);
+        ir(m, "braco_e", 1.15f, Mth.lerp(c, 0.45f, -0.7f), Mth.lerp(c, 0.15f, -0.1f), peso);
+        // quem varre é o tronco: começa torcido para o lado da foice e gira inteiro para o outro
+        somar(m, "corpo", 0.12f, Mth.lerp(c, -0.75f, 0.8f), 0, peso);
+        somar(m, "cabeca", 0, Mth.lerp(c, 0.35f, -0.35f), 0, peso);
         ir(m, "mandibula", 0.4f, 0, 0, peso);
-        somar(m, "saia", 0, Mth.lerp(c, 0.2f, -0.25f), 0, peso);
-        for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, 0.15f, 0, 0.5f * (0.5f - c), peso);
+        somar(m, "saia", 0, Mth.lerp(c, 0.25f, -0.3f), 0, peso);
+        for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, 0.1f, 0, 0.45f * (0.5f - c), peso);
     }
 
     public static void aplicar(Function<String, Optional<? extends CoreGeoBone>> ossos, Estado e) {
