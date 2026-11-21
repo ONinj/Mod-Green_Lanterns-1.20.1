@@ -264,8 +264,11 @@ public final class Tentacao {
         dir = dir.lengthSqr() < 0.5 ? new Vec3(1, 0, 0) : dir.normalize();
         double x = b.getX() + 0.5 - dir.x * 6, z = b.getZ() + 0.5 - dir.z * 6;
         int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (int) Math.floor(x), (int) Math.floor(z));
-        s.moveTo(x, y, z, 0, 0);
+        s.moveTo(x, y - 2.25, z, (float) Math.toDegrees(Math.atan2(-dir.x, dir.z)) + 180, 0);
         s.setDono(p);
+        s.setNoAi(true);
+        s.noPhysics = true;
+        s.subir = 50;
         s.setCustomName(Component.translatable("necron.lanterna.espectro_nome", p.getName()).withStyle(ChatFormatting.DARK_GRAY));
         var hp = s.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         int nv = com.lanterna.tropa.Nivel.nivel(p);
@@ -277,6 +280,7 @@ public final class Tentacao {
         s.setTarget(p);
         l.sendParticles(ParticleTypes.SCULK_SOUL, s.getX(), s.getY() + 1, s.getZ(), 80, 0.5, 1.2, 0.5, 0.05);
         l.playSound(null, s.blockPosition(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 0.6f, 1.4f);
+        Cenas.mostrar(p, "espectro", new Vec3(x, y, z), p.position());
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.translatable("necron.lanterna.espectro_titulo").withStyle(ChatFormatting.DARK_GRAY)));
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(Component.translatable("necron.lanterna.espectro_sub").withStyle(ChatFormatting.GRAY)));
         p.sendSystemMessage(Component.translatable("necron.lanterna.espectro_fala").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));

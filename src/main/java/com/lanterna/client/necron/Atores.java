@@ -43,6 +43,15 @@ final class Atores {
         osso(m, "braco_d", -0.35f + 0.04f * Mth.sin(t * 0.05f), 0, 0.12f);
         osso(m, "braco_e", 0.1f + 0.05f * Mth.sin(t * 0.05f + 1), 0, -0.18f);
         osso(m, "foice", 0.3f, 0, 0);
+        // 0.58.0: vencido, ele cai de joelhos (a cabeça baixa, os braços soltos, a foice escorregando da mão)
+        if (ajoelhar > 0.001f) {
+            float k = ajoelhar;
+            osso(m, "cabeca", 0.55f * k + 0.05f * Mth.sin(t * 0.05f), 0, 0);
+            osso(m, "mandibula", 0.3f * k, 0, 0);
+            osso(m, "braco_d", -0.35f * (1 - k) + 0.15f * k, 0, 0.12f + 0.2f * k);
+            osso(m, "braco_e", 0.1f * (1 - k) + 0.1f * k, 0, -0.18f - 0.25f * k);
+            osso(m, "foice", 0.3f + 1.2f * k, 0, 0.4f * k);
+        }
     });
 
     /**
@@ -66,6 +75,8 @@ final class Atores {
     }
 
     static float vento;
+    /** 0.58.0: 0 = de pé; 1 = de joelhos (a cena da queda do Necron). */
+    static float ajoelhar;
 
     void embriao(PoseStack ps, MultiBufferSource buf, float t, float r, float g, float b, float brilho) {
         embriao.cor(r, g, b, 1f, brilho * 0.3f);

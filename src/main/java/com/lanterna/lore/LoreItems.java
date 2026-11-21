@@ -66,6 +66,12 @@ public final class LoreItems {
     /** 0.56.6: o núcleo da Bateria Central de uma Tropa caída, guardado pelo Carcereiro (saga do Necron, Capítulo 6). */
     public static final RegistryObject<Item> NUCLEO_BATERIA = reg("nucleo_bateria",
             () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant(), true));
+    /** 0.58.0: a lembrança do herói da saga do Necron (epílogo em Aurora). */
+    public static final RegistryObject<Item> MEDALHA_ULTIMA_LUZ = reg("medalha_ultima_luz",
+            () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant(), true));
+    /** 0.58.0: a lembrança do Arauto (o fim da linha corrompida). */
+    public static final RegistryObject<Item> FRAGMENTO_NOITE = reg("fragmento_noite",
+            () -> new LoreItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(1).fireResistant(), true));
     public static final java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> INSIGNIAS = insignias();
 
     private static java.util.Map<com.lanterna.lendarios.Lendario, RegistryObject<Item>> insignias() {

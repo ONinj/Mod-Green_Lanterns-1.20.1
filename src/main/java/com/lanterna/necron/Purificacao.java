@@ -146,6 +146,8 @@ public final class Purificacao {
 
     private static int despT = -1;
     private static BlockPos despC;
+    /** Quem está vendo a cutscene do Despertar. */
+    private static final List<UUID> CENA = new ArrayList<>();
 
     private static void despertar(ServerLevel l, BlockPos c) {
         MinecraftServer s = l.getServer();
@@ -154,6 +156,14 @@ public final class Purificacao {
         despT = 0;
         despC = c;
         avisarClientes(s);
+        // 0.58.0: a cutscene do Despertar para quem está no Santuário (no meio dela, eles vão para a borda da cratera)
+        CENA.clear();
+        BlockPos cr = Cratera.centro(s);
+        for (ServerPlayer q : l.players())
+            if (cr != null && q.distanceToSqr(Vec3.atCenterOf(c)) < 30 * 30) {
+                CENA.add(q.getUUID());
+                Cenas.mostrar(q, "despertar", Vec3.atLowerCornerOf(c), Vec3.atLowerCornerOf(cr));
+            }
         for (ServerPlayer q : l.players()) if (q.distanceToSqr(Vec3.atCenterOf(c)) < 120 * 120)
             q.sendSystemMessage(Component.translatable("necron.lanterna.desperta_1").withStyle(ChatFormatting.GREEN, ChatFormatting.ITALIC));
         LanternaMod.LOGGER.info("Lanterna: o Embrião da Vida despertou");
@@ -169,6 +179,15 @@ public final class Purificacao {
             l.sendParticles(ParticleTypes.HAPPY_VILLAGER, c.getX() + 0.5, c.getY() - 3, c.getZ() + 0.5, 2, 5, 0.5, 5, 0);
         }
         if (t == 60) falar(l, c, "necron.lanterna.desperta_2", ChatFormatting.GREEN);
+        // no branco da cutscene, quem a assiste vai para a borda da cratera (de onde vê o Embrião descer)
+        BlockPos crt = Cratera.centro(l.getServer());
+        if (t == 178 && crt != null) for (UUID u : CENA) {
+            ServerPlayer q = l.getServer().getPlayerList().getPlayer(u);
+            if (q == null) continue;
+            int x = crt.getX() + 40, z = crt.getZ() + 6;
+            int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            q.teleportTo(l, x + 0.5, y + 0.1, z + 0.5, 90, -20);
+        }
         if (t == VOO) {
             l.playSound(null, c, SoundEvents.BEACON_ACTIVATE, SoundSource.AMBIENT, 3f, 0.6f);
             l.playSound(null, c, SoundEvents.TOTEM_USE, SoundSource.AMBIENT, 2f, 0.8f);
@@ -674,11 +693,10 @@ public final class Purificacao {
         if (t == 520) falar(l, c, "necron.lanterna.epilogo_2", ChatFormatting.GRAY);
         if (t == 520) for (UUID u : RITUAL) { Entity a = l.getEntity(u); if (a != null) SOBE.add(new Object[]{l.dimension(), u, -5}); }
         if (t == 640) {
+            // 0.58.0: a visão de Parallax (cutscene: no escuro, um olho amarelo se abre)
             for (ServerPlayer q : s.getPlayerList().getPlayers()) {
-                q.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(Component.translatable("necron.lanterna.parallax_titulo").withStyle(ChatFormatting.YELLOW)));
-                q.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(Component.translatable("necron.lanterna.parallax_sub").withStyle(ChatFormatting.GOLD)));
+                Cenas.mostrar(q, "parallax");
                 q.sendSystemMessage(Component.translatable("necron.lanterna.parallax_1").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
-                q.playNotifySound(SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.AMBIENT, 0.6f, 0.6f);
             }
             marcar(s, FIM);
             for (ServerPlayer q : s.getPlayerList().getPlayers()) {

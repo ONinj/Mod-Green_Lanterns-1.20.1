@@ -81,18 +81,21 @@ public final class LinhaCorrompida {
         Integer f = FALA.get(p.getUUID());
         if (f != null) { juramento(p, f + 1); return; }
         if (p.tickCount % 10 != 3) return;
-        if (d.isActive("necron_c1")) perto(p, 14, () -> FALA.put(p.getUUID(), 0));
+        if (d.isActive("necron_c1")) { NecronEntity n = perto(p, 14); if (n != null) { FALA.put(p.getUUID(), 0); Cenas.mostrar(p, "juramento", n.position(), p.position()); } }
         if (d.isActive("necron_c2")) apagar(p);
         if (d.isActive("necron_c3")) coracao(p, d);
-        if (d.isActive("necron_c4") && !venceu(p.server)) perto(p, 20, () -> FALA.put(p.getUUID(), 1000));
+        if (d.isActive("necron_c4") && !venceu(p.server)) {
+            NecronEntity n = perto(p, 20);
+            BlockPos cr = Cratera.centro(p.server);
+            if (n != null) { FALA.put(p.getUUID(), 1000); Cenas.mostrar(p, "noite", n.position(), cr == null ? n.position() : Vec3.atBottomCenterOf(cr), p.position()); }
+        }
         if (d.isActive("necron_c4") && venceu(p.server) && FonteDados.chamado(p, "necron:noite") < 1) { FonteDados.chamado(p, "necron:noite", 1); ProximaSaga.corrompido(p); }
     }
 
-    /** Perto do Necron (na Terra). */
-    private static void perto(ServerPlayer p, double raio, Runnable faz) {
-        if (p.level().dimension() != Level.OVERWORLD) return;
-        NecronEntity n = p.serverLevel().getEntitiesOfClass(NecronEntity.class, p.getBoundingBox().inflate(raio)).stream().findFirst().orElse(null);
-        if (n != null) faz.run();
+    /** O Necron, se estiver perto (na Terra). */
+    private static NecronEntity perto(ServerPlayer p, double raio) {
+        if (p.level().dimension() != Level.OVERWORLD) return null;
+        return p.serverLevel().getEntitiesOfClass(NecronEntity.class, p.getBoundingBox().inflate(raio)).stream().findFirst().orElse(null);
     }
 
     private static void dizer(ServerPlayer p, String chave, ChatFormatting cor) {
@@ -129,7 +132,7 @@ public final class LinhaCorrompida {
         if (u == 620) {
             dizer(p, "necron.lanterna.c4_epilogo_3", ChatFormatting.GOLD);
             p.serverLevel().sendParticles(p, new DustParticleOptions(new Vector3f(1f, 0.85f, 0.15f), 1.4f), true, p.getX(), p.getY() + 1.1, p.getZ(), 20, 0.25, 0.3, 0.25, 0);
-            p.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.6f, 0.5f);
+            Cenas.mostrar(p, "parallax_anel");
         }
         if (u >= 620) FALA.remove(p.getUUID());
     }

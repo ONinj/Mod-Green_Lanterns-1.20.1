@@ -93,7 +93,11 @@ public class NecronEntity extends Monster implements GeoEntity {
     @Override
     public void die(DamageSource s) {
         super.die(s);
-        if (level() instanceof ServerLevel l) BatalhaFinal.vitoria(l, this);
+        if (level() instanceof ServerLevel l) {
+            BatalhaFinal.vitoria(l, this);
+            // 0.58.0: a queda dele é uma cutscene (o modelo cai de joelhos e se desfaz); o corpo some na hora
+            if (BatalhaFinal.derrotado(l.getServer())) discard();
+        }
     }
 
     @Override public boolean isPushable() { return false; }

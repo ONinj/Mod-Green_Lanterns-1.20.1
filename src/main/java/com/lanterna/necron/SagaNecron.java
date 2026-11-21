@@ -316,6 +316,9 @@ public final class SagaNecron {
         UltimaLuz.zerar(p);
         Tentacao.zerar(p);
         ProximaSaga.zerar(p);
+        CorrompidaMeio.zerar(p);
+        Resistencia.zerar(p);
+        Epilogo.zerar(p);
         LinhaCorrompida.zerar(p);
         Purificacao.zerar(p);
         Treino.zerar(p);

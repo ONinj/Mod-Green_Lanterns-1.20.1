@@ -76,7 +76,10 @@ public final class NpcDialogs {
                     Objective o = m.objectives().get(i);
                     boolean matches = o.type() == Objective.Type.TALK && (o.target().equals(key)
                             || (role.equals("guardiao") && o.target().equals("lider:" + planet)));
-                    if (matches && e.getValue()[i] < o.count()) lines.add("mission.lanterna." + m.id() + ".talk");
+                    if (!matches || e.getValue()[i] >= o.count()) continue;
+                    // 0.58.0: nas missões da saga do Necron com mais de uma conversa, cada personagem tem a sua fala
+                    long conversas = m.objectives().stream().filter(x -> x.type() == Objective.Type.TALK).count();
+                    lines.add("mission.lanterna." + m.id() + ".talk" + (m.id().startsWith("necron_") && conversas > 1 ? "." + role : ""));
                 }
             }
             MissionManager.onTalk(player, role, planet);

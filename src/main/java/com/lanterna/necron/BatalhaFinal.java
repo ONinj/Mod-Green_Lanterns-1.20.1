@@ -426,6 +426,9 @@ public final class BatalhaFinal {
                 l.sendParticles(ParticleTypes.FIREWORK, a.getX(), a.getY() + 2, a.getZ(), 30, 0.5, 1, 0.5, 0.1);
             }
         }
+        // 0.58.0: a cutscene da queda (para quem lutou)
+        for (ServerPlayer p : c == null ? l.players() : lutando(l, c))
+            Cenas.mostrar(p, "queda", n.position(), c == null ? n.position() : Vec3.atBottomCenterOf(c), p.position());
         for (ServerPlayer p : c == null ? l.players() : lutando(l, c)) {
             titulo(p, "necron.lanterna.vitoria_titulo", "necron.lanterna.vitoria_sub", 0xFFFFFF);
             p.sendSystemMessage(Component.translatable("necron.lanterna.vitoria_fala").withStyle(ChatFormatting.GREEN));

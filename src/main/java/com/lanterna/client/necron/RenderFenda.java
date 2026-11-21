@@ -185,6 +185,26 @@ public final class RenderFenda {
     private static float suave(float x) { x = Mth.clamp(x, 0, 1); return x * x * (3 - 2 * x); }
 
     /**
+     * 0.58.0: onde o Embrião está, u ticks depois de acordar. Ele sobe pelo poço até sumir no céu sobre o Santuário e
+     * depois desce do céu sobre a cratera (assim quem está num lugar ou no outro vê; antes ele atravessava ~900 blocos
+     * por cima de pedaços do mundo que ninguém tinha carregado).
+     */
+    static Vec3 posEmbriao(BlockPos camara, BlockPos cratera, float u) {
+        int voo = com.lanterna.necron.Purificacao.VOO, chega = com.lanterna.necron.Purificacao.CHEGA;
+        Vec3 de = new Vec3(camara.getX() + 0.5, camara.getY() - 1.6, camara.getZ() + 0.5);
+        Vec3 ate = new Vec3(cratera.getX() + 0.5, cratera.getY() + com.lanterna.necron.Purificacao.ALTO, cratera.getZ() + 0.5);
+        if (u < voo) return de;
+        int meio = voo + 90;
+        if (u < meio) {
+            float k = (u - voo) / (float) (meio - voo);
+            return de.add(0, 180 * k * k, 0);
+        }
+        float k = suave((u - meio) / (float) (chega - meio));
+        float desce = 1 - (1 - k) * (1 - k);
+        return ate.add(0, 260 * (1 - desce), 0);
+    }
+
+    /**
      * 0.56.9: o Embrião acorda no Santuário (bate mais forte), sai da Terra voando até o céu sobre a cratera e fica lá,
      * enorme e aceso; no fim do Ritual da Terra ele sobe para o espaço. Devolve há quanto tempo a onda de luz começou
      * (ou -1 se ela não está passando agora).
@@ -193,18 +213,9 @@ public final class RenderFenda {
         if (atores == null) atores = new Atores();
         float u = agora - tDesp;
         int voo = com.lanterna.necron.Purificacao.VOO, chega = com.lanterna.necron.Purificacao.CHEGA;
-        Vec3 de = new Vec3(camara.getX() + 0.5, camara.getY() - 1.6, camara.getZ() + 0.5);
-        Vec3 ate = new Vec3(cratera.getX() + 0.5, cratera.getY() + com.lanterna.necron.Purificacao.ALTO, cratera.getZ() + 0.5);
-        Vec3 pos;
-        float esc;
-        if (u < voo) {
-            pos = de;
-            esc = 1.2f * (1 + 0.12f * Mth.sin(u * (u < 50 ? 0.3f : 0.6f)));
-        } else {
-            float k = suave((u - voo) / (chega - voo));
-            pos = de.lerp(ate, k).add(0, Mth.sin(k * Mth.PI) * 40, 0);
-            esc = 1.2f + 4.8f * k;
-        }
+        Vec3 pos = posEmbriao(camara, cratera, u);
+        float k0 = u < voo ? 0 : suave((u - voo) / (chega - voo));
+        float esc = u < voo ? 1.2f * (1 + 0.12f * Mth.sin(u * (u < 50 ? 0.3f : 0.6f))) : 1.2f + 4.8f * k0;
         pos = pos.add(0, 0.6 * Mth.sin(agora * 0.04f), 0);
         float alfa = 1f;
         if (tFim >= 0) {

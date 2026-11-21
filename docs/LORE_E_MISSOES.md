@@ -1995,3 +1995,22 @@ Depois dos pedidos e das ruínas, o Necron volta toda a força para a Terra. Ant
 
 - O Anel Preto do **Arauto da Morte** e o anel do **Portador Negro** (inclusive o de quem aceitou a Morte na saga do Necron) não gastam carga: estão sempre cheios e nunca precisam recarregar, como o Anel Branco. A Morte não tem bateria.
 
+## 0.58.0 — Saga do Necron: cutscenes e as missões que faltavam
+
+**Cutscenes** (câmera de cinema no mundo, faixas pretas, legendas, transições e sons; o jogador fica parado e não leva dano):
+- **A queda do Necron:** vencido, ele fica de pé encarando quem lutou ("Vocês... acham que acabou?"), cai de joelhos com a cabeça baixa e a foice escorregando ("A Morte não acaba. Ela só... espera."), e se desfaz em almas; a câmera sobe e mostra a cratera inteira.
+- **O Despertar:** a câmera gira em volta do Embrião no Santuário enquanto o coração dele bate cada vez mais forte; ele sobe pelo poço até sumir no céu; num clarão branco o jogador vai para a borda da cratera e vê o Embrião descer do céu, enorme, e soltar a onda de luz. (O caminho do Embrião mudou: ele sobe sobre o Santuário e desce sobre a cratera, então quem estiver num lugar ou no outro vê.)
+- **O Juramento:** de trás do Arauto, a figura imensa do Necron; um close do rosto dele, de baixo; a câmera gira por cima do Arauto ajoelhado e um clarão roxo fecha o juramento.
+- **A Noite Eterna:** o Embrião apagado sai das mãos do Arauto e entra no peito do Necron, soltando almas; a câmera sobe enquanto a onda escura cobre a Terra.
+- **O Espectro:** a sombra do jogador se levanta do chão, devagar, e encara o dono.
+- **Parallax:** no escuro, um olho amarelo de pupila em fenda se abre, com faíscas de medo subindo (no fim do Ritual da Terra). No fim da Noite Eterna, a versão curta: o olho aparece no fundo do anel negro.
+
+**A linha corrompida, mais longa** (entre Apagar as Luzes e a Noite Eterna):
+- **A Caçada** (necron_c2b): quatro Lanternas fugiram para a Terra com notícias do Arauto. O anel negro os fareja (uma coluna cinza-roxa sobre cada um); cada fugitivo anda com dois companheiros e fala ao ser achado ("Volte, portador. Ainda dá tempo de voltar.").
+- **Aurora Apagada** (necron_c2c): o Sgt. Rui enfrenta o Arauto ("A Lia ainda desenha você no caderno..."); quatro **Guardas de Aurora** (golens) defendem a praça; vencidos, ficar 15 segundos junto ao escudo de luz da Dra. Lívia até ele se apagar.
+- **A Última Resistência** (necron_c3b), o clímax: apagado o Embrião, os últimos Lanternas descem sobre a cratera. Três ondas: oito Lanternas; dez com dois oficiais; e os **três líderes**, cada um com barra de chefe e uma onda da sua cor (o primeiro é o líder da Tropa que o Arauto traiu: "Eu te dei o anel. Eu te ensinei a voar."). Os servos do Necron lutam do lado do Arauto. Se ele cair ou sair da cratera, a resistência se reagrupa.
+
+**Os epílogos:**
+- **Herói — O Dia Seguinte** (necron_10): Aurora comemora com fogos nas cores das sete Tropas; o Sgt. Rui agradece, a Dra. Lívia conta que o pulso da Vida sumiu no espaço (e que há um sinal amarelo estranho vindo de Korugar) e entrega a **Medalha da Última Luz**.
+- **Corrompido:** no fim da Noite Eterna, o **Fragmento da Noite Eterna** fica na mão do Arauto ("Às vezes, lá no fundo, brilha amarelo.").
+

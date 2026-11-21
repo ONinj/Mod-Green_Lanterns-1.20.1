@@ -36,6 +36,8 @@ import java.util.UUID;
 public class EspectroEntity extends Monster {
     private static final EntityDataAccessor<Optional<UUID>> DONO = SynchedEntityData.defineId(EspectroEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private int longe, laser = 60;
+    /** 0.58.0: ticks que faltam para ele terminar de se levantar do chão (a cutscene). */
+    public int subir;
 
     public EspectroEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -81,6 +83,7 @@ public class EspectroEntity extends Monster {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        if (subir > 0) return false;
         // só o dono fere o próprio espectro
         if (!level().isClientSide && source.getEntity() instanceof LivingEntity quem && !quem.getUUID().equals(dono())
                 && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
@@ -93,6 +96,13 @@ public class EspectroEntity extends Monster {
         if (level().isClientSide) {
             if (tickCount % 2 == 0) level().addParticle(ParticleTypes.SCULK_SOUL, getRandomX(0.6), getRandomY(), getRandomZ(0.6), 0, 0.03, 0);
             if (tickCount % 3 == 0) level().addParticle(ParticleTypes.SMOKE, getRandomX(0.5), getY() + 0.1, getRandomZ(0.5), 0, 0.01, 0);
+            return;
+        }
+        if (subir > 0) {
+            subir--;
+            setPos(getX(), getY() + 0.045, getZ());
+            setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            if (subir == 0) { setNoAi(false); noPhysics = false; }
             return;
         }
         ServerPlayer d = dono() == null ? null : ((ServerLevel) level()).getServer().getPlayerList().getPlayer(dono());

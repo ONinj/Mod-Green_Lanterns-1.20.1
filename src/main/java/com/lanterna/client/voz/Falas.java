@@ -132,7 +132,12 @@ public final class Falas {
             Map.entry("necron.lanterna.c1_fala", "necron"),
             Map.entry("necron.lanterna.c3_guardioes", "lanterna"),
             Map.entry("necron.lanterna.c4_fala", "necron"),
-            Map.entry("necron.lanterna.c4_epilogo", "narrador"));
+            Map.entry("necron.lanterna.c4_epilogo", "narrador"),
+            Map.entry("necron.lanterna.caca_achou_", "lanterna"),
+            Map.entry("necron.lanterna.aurora_escudo", "necron"),
+            Map.entry("necron.lanterna.resist_onda_", "lanterna"),
+            Map.entry("necron.lanterna.resist_lider_fala", "lanterna"),
+            Map.entry("necron.lanterna.resist_fim", "necron"));
 
     @SubscribeEvent
     public static void chat(ClientChatReceivedEvent e) {

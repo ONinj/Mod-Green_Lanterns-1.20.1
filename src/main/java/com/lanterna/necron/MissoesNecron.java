@@ -60,8 +60,13 @@ public final class MissoesNecron {
             case "necron_espectro" -> m(id, List.of(Objective.of(Type.FONTE, "necron:espectro", 1, "earth", null)), null);
             case "necron_c1" -> m(id, List.of(Objective.of(Type.FONTE, "necron:juramento", 1, "earth", chao)), "necron_c2");
             case "necron_c2" -> m(id, List.of(Objective.of(Type.FONTE, "necron:apagou_1", 1, null, null),
-                    Objective.of(Type.FONTE, "necron:apagou_2", 1, null, null), Objective.of(Type.FONTE, "necron:apagou_3", 1, null, null)), "necron_c3");
-            case "necron_c3" -> m(id, List.of(fonte("necron:guardioes", Escurece.santuario()), fonte("necron:embriao_preso", Escurece.santuario())), "necron_c4");
+                    Objective.of(Type.FONTE, "necron:apagou_2", 1, null, null), Objective.of(Type.FONTE, "necron:apagou_3", 1, null, null)), "necron_c2b");
+            case "necron_c2b" -> m(id, List.of(fonte("necron:caca_1", CorrompidaMeio.fuga(1)), fonte("necron:caca_2", CorrompidaMeio.fuga(2)),
+                    fonte("necron:caca_3", CorrompidaMeio.fuga(3)), fonte("necron:caca_4", CorrompidaMeio.fuga(4))), "necron_c2c");
+            case "necron_c2c" -> m(id, List.of(Objective.of(Type.TALK, "seguranca:earth", 1, "earth", aurora()),
+                    fonte("necron:aurora_golens", aurora()), fonte("necron:aurora_apagada", aurora())), "necron_c3");
+            case "necron_c3" -> m(id, List.of(fonte("necron:guardioes", Escurece.santuario()), fonte("necron:embriao_preso", Escurece.santuario())), "necron_c3b");
+            case "necron_c3b" -> m(id, List.of(Objective.of(Type.FONTE, "necron:resistencia", 1, "earth", chao)), "necron_c4");
             case "necron_c4" -> m(id, List.of(Objective.of(Type.FONTE, "necron:noite", 1, "earth", chao)), null);
             // Capítulo 9: A Purificação
             case "necron_7" -> m(id, List.of(fonte("necron:despertar", Escurece.santuario()),
@@ -69,7 +74,9 @@ public final class MissoesNecron {
             case "necron_8" -> m(id, List.of(Objective.of(Type.FONTE, "necron:purificado_violet", 1, planetaDe("violet"), com.lanterna.lore.PlanetLore.HUB),
                     Objective.of(Type.FONTE, "necron:purificado_indigo", 1, planetaDe("indigo"), com.lanterna.lore.PlanetLore.HUB),
                     Objective.of(Type.FONTE, "necron:purificado_blue", 1, planetaDe("blue"), com.lanterna.lore.PlanetLore.HUB)), "necron_9");
-            case "necron_9" -> m(id, List.of(Objective.of(Type.FONTE, "necron:ritual", 1, "earth", chao)), null);
+            case "necron_9" -> m(id, List.of(Objective.of(Type.FONTE, "necron:ritual", 1, "earth", chao)), "necron_10");
+            case "necron_10" -> m(id, List.of(Objective.of(Type.TALK, "seguranca:earth", 1, "earth", aurora()),
+                    Objective.of(Type.TALK, "cientista:earth", 1, "earth", aurora())), null);
             default -> {
                 // necron_3b_<tropa> / necron_3c_<tropa>: o treino e o duelo no planeta da Tropa (Capítulo 3)
                 if (id.startsWith("necron_3b_") || id.startsWith("necron_3c_")) {

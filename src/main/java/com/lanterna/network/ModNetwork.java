@@ -295,6 +295,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.necron.Pedidos.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.Pedidos.Pacote::encode).decoder(com.lanterna.necron.Pedidos.Pacote::decode)
                 .consumerMainThread(com.lanterna.necron.Pedidos.Pacote::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.necron.Cenas.Pacote.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.necron.Cenas.Pacote::encode).decoder(com.lanterna.necron.Cenas.Pacote::decode)
+                .consumerMainThread(com.lanterna.necron.Cenas.Pacote::handle).add();
         CHANNEL.messageBuilder(com.lanterna.necron.Tentacao.Pergunta.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.Tentacao.Pergunta::encode).decoder(com.lanterna.necron.Tentacao.Pergunta::decode)
                 .consumerMainThread(com.lanterna.necron.Tentacao.Pergunta::handle).add();
