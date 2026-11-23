@@ -83,6 +83,7 @@ public final class Tentacao {
 
     /** Tenta a alma: com a chance, a pergunta vai aparecer (agora ou ao renascer). */
     private static boolean tentar(ServerPlayer p, double chance) {
+        if (Fases.bloqueada(5)) return false;   // versões de teste: a Tentação chega na fase 5
         if (!emGuerra(p) || tag(p).getBoolean("tentado") || tag(p).contains("aneis_presos")) return false;
         int imune = tag(p).getInt("tentacao_imune");
         if (imune > 0) { tag(p).putInt("tentacao_imune", imune - 1); return false; }

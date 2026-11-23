@@ -4679,6 +4679,26 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.59.0: as versões de teste (rodar com -Pfase=1, depois com -Pfase=2 no mesmo mundo, depois -Pfase=0 para limpar). */
+    private static void sceneFaseTeste() {
+        Minecraft mc = Minecraft.getInstance();
+        at(60, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            glog("fase liberada=" + com.lanterna.necron.Fases.LIBERADA + " necron_3 ativa ao entrar=" + d.isActive("necron_3") + " feita=" + d.isDone("necron_3")
+                    + " pendentes=" + sp.getPersistentData().getString("lanterna_fase_pendentes"));
+            if (com.lanterna.necron.Fases.LIBERADA == 0) { d.active().remove("necron_3"); d.completed().remove("necron_3"); sp.getPersistentData().remove("lanterna_fase_pendentes"); glog("limpo"); return; }
+            if (!d.isActive("necron_3")) d.completed().remove("necron_3");
+            d.completed().remove("necron_a1");
+            com.lanterna.mission.MissionManager.start(sp, "necron_3");
+            glog("depois de tentar: necron_3 ativa=" + d.isActive("necron_3") + " feita=" + d.isDone("necron_3") + " pendentes=" + sp.getPersistentData().getString("lanterna_fase_pendentes"));
+            com.lanterna.mission.MissionManager.start(sp, "necron_a1");
+            glog("necron_a1 (fase 1) ativa=" + d.isActive("necron_a1"));
+            d.active().remove("necron_a1");
+        }));
+        at(20, () -> { mc.options.hideGui = false; shot("fase_aviso"); });
+        at(20, () -> { glog("FIM fasetest"); mc.stop(); });
+    }
+
     /** Mede quanto a cidade de um planeta (Korugar) demora para aparecer. */
     private static void sceneCidadeTempo() {
         Minecraft mc = Minecraft.getInstance();
@@ -8818,6 +8838,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("fasetest")) sceneFaseTeste();
         else if (ENABLED && SCENE.equals("cidadetempo")) sceneCidadeTempo();
         else if (ENABLED && SCENE.equals("auroratempo")) sceneAuroraTempo();
         else if (ENABLED && SCENE.equals("necronlado")) sceneNecronLado();

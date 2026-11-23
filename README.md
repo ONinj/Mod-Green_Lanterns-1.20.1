@@ -155,6 +155,8 @@ Cada push no GitHub roda o Actions ("Compilar mod"). O `.jar` fica em **Actions 
 1.66.5 ✅ (0.58.5) Golpes do Necron corrigidos: a foice agora fica sempre bem segura na mão (a haste não vira mais de cabeça para baixo quando o braço sobe). 1º golpe: ergue a foice com a lâmina atrás da cabeça e desce cortando à frente, com as duas mãos na haste; 2º golpe: foice deitada na cintura varrendo com o giro do tronco. Vale para o chefe e para a Forma do Necron
 
 1.66.6 ✅ (0.58.6) Cidades carregam bem mais rápido: a Cidade Aurora é desenhada inteira em segundo plano logo que o mundo é criado (~1,7 s) e os pedaços do mundo só copiam o desenho, como a vila do Minecraft; a altura do terreno é guardada em vez de recalculada (uma casa na beira da vila levava até 19 s só nisso). No teste (mundo novo): a vila passou de 52 s para 14 s para carregar (um lugar sem nada leva 11 s) e os moradores de 62 s para 14 s (ao chegar, a vila confere os moradores a cada 2 s por 30 s). As cidades dos planetas e tropas também desenham tudo em paralelo no primeiro pedaço
+
+1.67.0 ✅ (0.59.0) Versões de teste da saga do Necron: cinco jars (0.59.0-teste1 a teste5), cada um liberando uma parte da saga (1: Capítulos 1–2; 2: 3–4; 3: 5–6; 4: 7–8 e a Forma do Necron; 5: Capítulo 9, epílogo, Tentação e linha corrompida). Ao chegar no fim da parte liberada aparece um aviso; a missão que ficou esperando começa sozinha ao entrar no mundo com a versão seguinte. O jar normal libera tudo. Detalhes em docs/VERSOES_TESTE.md
 5. Estruturas: nave caída (verde), rio de sangue (vermelho)
 
 ## Arte

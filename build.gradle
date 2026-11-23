@@ -111,3 +111,10 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// 0.59.0: versões de teste da saga do Necron (gradle build -Pfase=N; 0 = tudo liberado)
+processResources {
+    def fase = project.findProperty('fase') ?: '0'
+    inputs.property 'fase', fase
+    filesMatching('lanterna_fase.txt') { filter { String l -> fase.toString() } }
+}

@@ -392,6 +392,7 @@ public final class Constructs {
                     com.lanterna.morte.Necroforma.encerrar(player);   // usar de novo: volta à forma de antes
                     return false;
                 }
+                if (com.lanterna.necron.Fases.barrarForma(player)) return false;
                 if (!com.lanterna.morte.Necroforma.ativar(player, pow)) return false;
             }
             case DRENAR -> {

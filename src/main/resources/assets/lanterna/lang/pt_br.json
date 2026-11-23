@@ -3917,5 +3917,7 @@
   "construct.lanterna.necroforma.desc": "Só o Arauto da Morte. Você vira o Necron por 60 segundos: o Grito da Morte empurra e cega quem está perto; a foice corta em arco e devolve vida; a aura seca e prende os inimigos; força e resistência; os outros dons da Morte ficam 50% mais fortes e recarregam na metade do tempo.",
   "morte.lanterna.necroforma_comeca": "A Morte veste você. Por um instante, você é o Necron.",
   "morte.lanterna.necroforma_aviso": "A Forma do Necron está se desfazendo...",
-  "morte.lanterna.necroforma_fim": "Você volta à sua forma."
+  "morte.lanterna.necroforma_fim": "Você volta à sua forma.",
+  "lanterna.fase.fim": "[Saga do Necron] Você chegou ao fim desta versão de teste. A próxima parte da saga chega na versão de teste %s; quando você entrar no mundo com ela, a missão começa sozinha.",
+  "lanterna.fase.forma": "A Forma do Necron chega na versão de teste %s."
 }

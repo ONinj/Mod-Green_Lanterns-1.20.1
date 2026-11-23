@@ -3917,5 +3917,7 @@
   "construct.lanterna.necroforma.desc": "Herald of Death only. You become the Necron for 60 seconds: the Death Scream pushes back and blinds those nearby; the scythe cuts in an arc and drains life; the aura withers and slows enemies; strength and resistance; your other Death gifts are 50% stronger and recharge twice as fast.",
   "morte.lanterna.necroforma_comeca": "Death wears you. For a moment, you are the Necron.",
   "morte.lanterna.necroforma_aviso": "The Necron Form is fading...",
-  "morte.lanterna.necroforma_fim": "You return to your own form."
+  "morte.lanterna.necroforma_fim": "You return to your own form.",
+  "lanterna.fase.fim": "[Necron Saga] You reached the end of this test version. The next part of the saga comes in test version %s; when you join the world with it, the mission starts by itself.",
+  "lanterna.fase.forma": "The Necron Form arrives in test version %s."
 }

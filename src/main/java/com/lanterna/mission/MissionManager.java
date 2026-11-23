@@ -38,6 +38,8 @@ public final class MissionManager {
         LoreData data = data(player);
         Mission m = Missions.get(id);
         if (data == null || m == null || data.isActive(id)) return;
+        // 0.59.0: versões de teste da saga do Necron (a parte que ainda não foi liberada fica para a próxima)
+        if (!data.isDone(id) && com.lanterna.necron.Fases.barrar(player, id)) return;
         // 0.50.1: o treino até um nível pode voltar a ser pedido (antes, um treino já feito travava a linha principal)
         if (data.isDone(id) && !m.line().equals("patrulha") && !id.startsWith("treino_")) return;
         data.start(m);

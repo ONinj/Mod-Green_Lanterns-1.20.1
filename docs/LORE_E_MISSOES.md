@@ -2027,3 +2027,16 @@ O Arauto da Morte ganhou o dom mais temido do Anel Preto: por 60 segundos, ele *
 - Força, resistência, e os outros dons da Morte (Mãos dos Mortos, Drenar, Mortalha, Túmulo) ficam mais fortes e recarregam mais rápido.
 - Libera com a afinidade Confiável; recarga de 3 minutos.
 
+## 0.59.0 — Versões de teste da saga do Necron
+
+A saga pode ser entregue em cinco partes para os testadores (veja docs/VERSOES_TESTE.md). A história não muda: cada
+versão de teste só para num ponto e avisa que a continuação vem na próxima.
+
+| Teste | Libera |
+|---|---|
+| 1 | Capítulos 1 e 2 (Vila Aurora, a cratera, o primeiro encontro com o Necron) |
+| 2 | Capítulos 3 e 4 (Duas Luzes, treino, duelo, Âncoras) |
+| 3 | Capítulos 5 e 6 (Socorro e Ruínas) |
+| 4 | Capítulos 7 e 8 (a Terra escurece, a batalha final) e a Forma do Necron |
+| 5 | Capítulo 9, epílogo, a Tentação e a linha corrompida |
+
