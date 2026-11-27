@@ -39,18 +39,24 @@ public class JuramentoScreen extends Screen {
     private long erro;
     /** Teste automático: fala sozinho. */
     public static boolean autoFalar;
+    /** 0.59.1: o juramento contra o frenesi (10 s, só os dois primeiros versos; 20 s escrevendo). */
+    private final boolean frenesi;
+    private final long inicio = System.currentTimeMillis();
+    private boolean perdeu;
 
     public static void abrir(String tipo, String tropa, int cor) {
         Minecraft.getInstance().setScreen(new JuramentoScreen(tipo, tropa, cor));
     }
 
     private JuramentoScreen(String tipo, String tropa, int cor) {
-        super(Component.translatable(tipo.equals(Juramento.FONTE) ? "juramento.lanterna.titulo_fonte" : "juramento.lanterna.titulo"));
+        super(Component.translatable(tipo.equals(com.lanterna.emocao.Instabilidade.TIPO) ? "emocao.lanterna.titulo_frenesi"
+                : tipo.equals(Juramento.FONTE) ? "juramento.lanterna.titulo_fonte" : "juramento.lanterna.titulo"));
         this.tipo = tipo;
         this.tropa = tropa;
         this.cor = cor;
+        this.frenesi = tipo.equals(com.lanterna.emocao.Instabilidade.TIPO);
         String base = tipo.equals(Juramento.FONTE) ? "juramento.lanterna." : "juramento_anel.lanterna.";
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= (frenesi ? 2 : 4); i++) {
             String linha = I18n.get(base + tropa + "." + i);
             List<String> ws = new ArrayList<>();
             for (String w : linha.trim().split("\\s+")) if (!w.isEmpty()) ws.add(w);
@@ -143,6 +149,9 @@ public class JuramentoScreen extends Screen {
         }
     }
 
+    /** Quanto tempo o juramento contra o frenesi dá (ms). */
+    private long prazo() { return escrito ? 20000 : 10000; }
+
     @Override
     public void tick() {
         long agora = System.currentTimeMillis();
@@ -150,7 +159,15 @@ public class JuramentoScreen extends Screen {
         ultimo = agora;
         brilho = Math.max(0, brilho - 0.08f);
         if (fim >= 0) {
-            if (agora - fim > 2600) onClose();
+            if (agora - fim > (frenesi ? 1400 : 2600)) onClose();
+            return;
+        }
+        if (frenesi && agora - inicio > prazo()) {
+            // o tempo acabou: a emoção toma conta
+            perdeu = true;
+            fim = agora;
+            ModNetwork.sendToServer(new Juramento.Feito(tipo, tropa, 0));
+            if (minecraft != null && minecraft.player != null) minecraft.player.playSound(SoundEvents.RAVAGER_ROAR, 0.8f, 0.8f);
             return;
         }
         if (verso >= versos.size()) return;
@@ -168,7 +185,14 @@ public class JuramentoScreen extends Screen {
         int h = 210, y = Math.max(10, (height - h) / 2);
         Hud.panel(g, x, y, w, h, cor, 0.95f);
         Hud.textCenter(g, Hud.title(title.copy()), width / 2, y + 10, Hud.argb(cor, 255));
-        Hud.wrapped(g, Hud.body(Component.translatable("juramento.lanterna.instrucao")), x + 12, y + 26, w - 24, 0xFFB8C4CC, 10);
+        Hud.wrapped(g, Hud.body(Component.translatable(frenesi ? "emocao.lanterna.instrucao" : "juramento.lanterna.instrucao")), x + 12, y + 26, w - 24, 0xFFB8C4CC, 10);
+        if (frenesi) {
+            // o tempo que falta, numa barra que treme quando está acabando
+            float resta = fim >= 0 ? 0 : Mth.clamp(1 - (System.currentTimeMillis() - inicio) / (float) prazo(), 0, 1);
+            int bw = w - 24, tremor = resta < 0.3f ? (int) (Math.sin(System.currentTimeMillis() / 40.0) * 2) : 0;
+            g.fill(x + 12 + tremor, y + h - 52, x + 12 + bw + tremor, y + h - 48, 0x60000000);
+            g.fill(x + 12 + tremor, y + h - 52, x + 12 + (int) (bw * resta) + tremor, y + h - 48, resta < 0.3f ? 0xFFFF4040 : Hud.argb(cor, 255));
+        }
         // versos, palavra por palavra
         int ly = y + 54;
         for (int v = 0; v < versos.size(); v++) {
@@ -204,7 +228,8 @@ public class JuramentoScreen extends Screen {
             g.fill(bx, my0 + 12 - bh, bx + 4, my0 + 12, nv * 1.6f >= lim ? Hud.argb(cor, 255) : 0x40FFFFFF);
         }
         Component estado;
-        if (fim >= 0) estado = Component.translatable("juramento.lanterna.feito");
+        if (fim >= 0 && perdeu) estado = Component.translatable("emocao.lanterna.perdeu");
+        else if (fim >= 0) estado = Component.translatable(frenesi ? "emocao.lanterna.controlou" : "juramento.lanterna.feito");
         else if (escrito) estado = Component.translatable("juramento.lanterna.escrevendo", digitado.toString());
         else if (!Microfone.disponivel() && Microfone.falhou()) estado = Component.translatable("juramento.lanterna.sem_microfone");
         else estado = Component.translatable(fala ? "juramento.lanterna.ouvindo" : "juramento.lanterna.silencio");

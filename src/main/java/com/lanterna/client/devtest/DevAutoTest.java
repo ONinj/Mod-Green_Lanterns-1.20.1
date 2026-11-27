@@ -4679,6 +4679,122 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.59.1: emoções instáveis (juramento contra o frenesi, maestria, frenesi) e a imersão na Bateria Central. */
+    private static void sceneEmocao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        boolean[] antes = new boolean[1];
+        java.util.function.Consumer<String> st = (o) -> server(sp -> glog(o + ": " + com.lanterna.emocao.Instabilidade.status(sp).getString()
+                + " frenesi=" + com.lanterna.emocao.Instabilidade.emFrenesi(sp) + " poder=" + String.format("%.2f", com.lanterna.emocao.Instabilidade.poder(sp))));
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring red");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+            var t = com.lanterna.necron.SagaNecron.tag(sp);
+            antes[0] = t.getBoolean("dividido");
+            t.putBoolean("dividido", true);
+            sp.getPersistentData().remove("lanterna_emocao");
+        }));
+        at(10, () -> st.accept("inicio"));
+        // 1) recita a tempo
+        at(10, () -> { com.lanterna.client.juramento.JuramentoScreen.autoFalar = true; server(com.lanterna.emocao.Instabilidade::provocar); });
+        waitFor(() -> mc.screen instanceof com.lanterna.client.juramento.JuramentoScreen, 100);
+        at(20, () -> { mc.options.hideGui = false; shot("frenesi_prova"); });
+        waitFor(() -> mc.screen == null, 400);
+        at(10, () -> st.accept("depois de resistir"));
+        // 2) não recita: o tempo acaba
+        at(10, () -> { com.lanterna.client.juramento.JuramentoScreen.autoFalar = false; server(com.lanterna.emocao.Instabilidade::provocar); });
+        waitFor(() -> mc.screen instanceof com.lanterna.client.juramento.JuramentoScreen, 100);
+        at(180, () -> shot("frenesi_acabando"));
+        waitFor(() -> mc.screen == null, 400);
+        at(10, () -> { st.accept("sem recitar"); mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(30, () -> shot("frenesi_aura"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
+        // 3) imersão: perto da Bateria Central de Ysmault (Tropa Vermelha)
+        at(10, () -> server(sp -> {
+            var k = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("ysmault"));
+            sp.teleportTo(sp.server.getLevel(k), 6.5, 200, 136.5, 0, 0);
+        }));
+        at(120, () -> server(sp -> { int y = sp.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 6, 136);
+            sp.teleportTo(sp.serverLevel(), 6.5, y, 136.5, 160, 10); glog("chao ysmault y=" + y); }));
+        at(20, () -> server(sp -> { var b = com.lanterna.emocao.Instabilidade.bateriaPerto(sp, com.lanterna.baterias.Tropa.VERMELHO);
+            glog("bateria perto=" + (b == null ? "nenhuma" : b.getBlockPos().toShortString())); }));
+        at(140, () -> server(sp -> glog("perto da bateria (7 s): imersao=" + com.lanterna.emocao.Instabilidade.imersao(sp, com.lanterna.baterias.Tropa.VERMELHO) + " s")));
+        at(5, () -> server(sp -> com.lanterna.emocao.Instabilidade.somarImersao(sp, 7200)));
+        at(110, () -> { st.accept("com 2 h de imersão"); mc.options.hideGui = true; shot("imersao_bateria"); });
+        at(10, () -> server(sp -> {
+            com.lanterna.necron.SagaNecron.tag(sp).putBoolean("dividido", antes[0]);
+            sp.getPersistentData().remove("lanterna_emocao");
+            sp.removeAllEffects();
+            sp.getAbilities().invulnerable = false; sp.onUpdateAbilities();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.teleportTo(sp.server.overworld(), 0.5, 200, 0.5, 0, 0);
+        }));
+        at(20, () -> { mc.options.hideGui = false; glog("FIM frenesi"); mc.stop(); });
+    }
+
+    /** 0.59.1: o Necron parado como bengala e se alimentando de uma caveira (ângulo -Pang=graus em volta dele). */
+    private static void sceneNecronAlimento() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        float ang = Float.parseFloat(System.getProperty("lanterna.autotest.ang", "60"));
+        at(20, () -> server(sp -> {
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+            var n = com.lanterna.lore.LoreEntities.NECRON.get().create(sp.serverLevel());
+            n.moveTo(0.5, 200, 0.5, 0, 0);
+            n.setNoAi(true); n.setInvulnerable(true); n.setYBodyRot(0); n.setYHeadRot(0);
+            sp.serverLevel().addFreshEntity(n);
+            // a câmera: a 8 blocos, girada "ang" graus a partir da frente dele (ele olha para +z)
+            double a = Math.toRadians(ang);
+            double x = 0.5 + Math.sin(a) * 5.5, z = 0.5 + Math.cos(a) * 5.5;
+            sp.teleportTo(sp.serverLevel(), x, 202.5, z, (float) Math.toDegrees(Math.atan2(x - 0.5, -(z - 0.5))), 0);
+            sp.getAbilities().flying = true; sp.onUpdateAbilities();
+        }));
+        at(20, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(5, () -> { var p = mc.player; p.setXRot(8); });
+        java.util.function.Supplier<com.lanterna.necron.NecronEntity> nec = () -> mc.level.getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, mc.player.getBoundingBox().inflate(30)).stream().findFirst().orElse(null);
+        at(20, () -> shot("nal_parado"));
+        waitFor(() -> { var n = nec.get(); float g = n == null ? -1 : com.lanterna.client.necron.PoseNecron.alimento(n); return g > 0.1f && g < 0.13f; }, 600);
+        int[] quando = {0, 14, 30, 50, 66, 78};
+        for (int i = 0; i < quando.length; i++) { int ii = i; at(i == 0 ? 1 : quando[i] - quando[i - 1], () -> shot("nal_" + ii)); }
+        at(30, () -> { mc.options.hideGui = false; glog("FIM necronalimento"); mc.stop(); });
+    }
+
+    /** 0.59.1: a cena do segundo anel (não dispara ao entrar no mundo, fecha o menu, sem a mão de primeira pessoa). */
+    private static void sceneAnel2() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        waitFor(() -> com.lanterna.client.vida.CenaEmocoes.ativa(), 200);
+        at(1, () -> glog("ao entrar: cena ativa=" + com.lanterna.client.vida.CenaEmocoes.ativa() + " segundo=" + com.lanterna.client.ClientVisibleRings.of(mc.player.getId()).segundo()));
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            com.lanterna.vida.Emocoes.tag2(sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, net.minecraft.world.item.ItemStack.EMPTY));
+        }));
+        at(40, () -> { mc.options.hideGui = true; mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player)); });
+        at(10, () -> server(sp -> {
+            var azul = com.lanterna.item.PowerRingItem.create(com.lanterna.corps.BuiltinCorps.BLUE.id(), com.lanterna.corps.BuiltinCorps.BLUE.color(), -1);
+            com.lanterna.item.PowerRingItem.setOwner(azul, sp);
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> r.segundoSlot().setStackInSlot(0, azul));
+        }));
+        waitFor(() -> com.lanterna.client.vida.CenaEmocoes.ativa(), 100);
+        at(2, () -> glog("cena começou=" + com.lanterna.client.vida.CenaEmocoes.ativa() + " menu=" + (mc.screen == null ? "fechado" : mc.screen.getClass().getSimpleName())));
+        at(12, () -> shot("anel2_a"));
+        at(20, () -> shot("anel2_b"));
+        at(12, () -> shot("anel2_c"));
+        at(8, () -> shot("anel2_d"));
+        at(25, () -> shot("anel2_e"));
+        at(20, () -> shot("anel2_f"));
+        at(30, () -> { mc.options.hideGui = false; glog("FIM anel2"); mc.stop(); });
+    }
+
     /** O Respeito dos Ghallos: troca de verdade pela tela de comércio, com o anel laranja. */
     private static void sceneGhallosTroca() {
         Minecraft mc = Minecraft.getInstance();
@@ -8881,6 +8997,9 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("emocao")) sceneEmocao();
+        else if (ENABLED && SCENE.equals("necronalimento")) sceneNecronAlimento();
+        else if (ENABLED && SCENE.equals("anel2")) sceneAnel2();
         else if (ENABLED && SCENE.equals("ghallos")) sceneGhallosTroca();
         else if (ENABLED && SCENE.equals("fasetest")) sceneFaseTeste();
         else if (ENABLED && SCENE.equals("cidadetempo")) sceneCidadeTempo();

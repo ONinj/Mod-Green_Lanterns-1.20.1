@@ -49,6 +49,8 @@ public final class PoseNecron {
         float inicioGolpe = Float.NaN;
         int golpes;
         float andar, voo, virar, cair, t = Float.NaN;
+        /** 0.59.1: há quanto tempo está parado (a alimentação conta a partir daqui). */
+        float quietoHa;
     }
 
     private static final Map<Entity, Mem> MEM = new WeakHashMap<>();
@@ -100,7 +102,11 @@ public final class PoseNecron {
         m.voo = Mth.lerp(k * 0.8f, m.voo, vooAlvo);
         m.virar = Mth.lerp(k * 0.7f, m.virar, virarAlvo);
         m.cair = Mth.lerp(k, m.cair, cairAlvo);
-        return new Estado(t, m.andar, m.voo, golpe(e, pt), 0, false, lado(e), m.virar, m.cair, conjurar, surge);
+        float gp = golpe(e, pt);
+        boolean parado = andarAlvo < 0.05f && vooAlvo < 0.05f && gp <= 0.001f && conjurar < 0 && surge >= 0.999f && cairAlvo < 0.05f;
+        m.quietoHa = parado ? m.quietoHa + dt : 0;
+        ultimo = e;
+        return new Estado(t, m.andar, m.voo, gp, 0, false, lado(e), m.virar, m.cair, conjurar, surge);
     }
 
     // ===================== utilidades =====================
@@ -128,6 +134,66 @@ public final class PoseNecron {
 
     // ===================== poses =====================
 
+    /** A haste parada (em relação ao corpo): um pouco inclinada, o topo levemente à frente. */
+    static final float HASTE_PARADO = -0.06f;
+
+    // ===================== 0.59.1: alimentar-se de uma caveira =====================
+
+    /** Parado, a cada CICLO ticks ele pega uma caveira e se alimenta dela durante DUR_ALIM ticks. */
+    public static final int CICLO = 320, DUR_ALIM = 92;
+    /** As cutscenes (Atores sem estado forçado) desligam a animação. */
+    public static boolean alimentar = true;
+    /** Último peso da animação de cada entidade (0 = não está parado o bastante para se alimentar). */
+    private static final Map<Entity, Float> QUIETO = new WeakHashMap<>();
+    private static Entity ultimo;
+
+    /** Em que ponto da alimentação esta entidade está (0..1) ou -1: conta desde que ela parou de se mexer. */
+    public static float alimento(Entity e) {
+        Mem m = MEM.get(e);
+        return m == null ? -1 : alimento(m.quietoHa);
+    }
+
+    /** Em que ponto da alimentação a entidade está (0..1) ou -1. */
+    public static float alimento(float t) {
+        float f = t % CICLO;
+        return f >= CICLO - DUR_ALIM ? (f - (CICLO - DUR_ALIM)) / DUR_ALIM : -1;
+    }
+
+    /** O peso da alimentação desta entidade no último quadro desenhado. */
+    public static float quieto(Entity e) { return QUIETO.getOrDefault(e, 0f); }
+
+    /** Tamanho da caveira na mão: surge, murcha enquanto é drenada e se desfaz. */
+    static float escalaCaveira(float g) {
+        if (g < 0.1f || g > 0.86f) return 0;
+        if (g < 0.18f) return suave((g - 0.1f) / 0.08f);
+        if (g < 0.35f) return 1;
+        if (g < 0.8f) return 1 - 0.3f * (g - 0.35f) / 0.45f;
+        return 0.7f * (1 - (g - 0.8f) / 0.06f);
+    }
+
+    private static void alimentar(Map<String, float[]> m, float g, float q, float t) {
+        float pega = suave(g / 0.15f);
+        float ergue = suave((g - 0.15f) / 0.2f);
+        float solta = suave((g - 0.84f) / 0.16f);
+        float w = q * pega * (1 - solta);
+        if (w < 0.001f) return;
+        float suga = ergue * (1 - suave((g - 0.78f) / 0.06f));
+        // a mão esquerda: primeiro se abre para o lado (a caveira surge nela), depois ergue a caveira diante do rosto
+        float bx = Mth.lerp(ergue, 0.55f, 2.05f), by = Mth.lerp(ergue, 0.1f, CAV_Y), bz = Mth.lerp(ergue, -0.45f, 0.05f);
+        float treme = 0.03f * suga * Mth.sin(t * 2.1f);
+        ir(m, "braco_e", bx + treme, by, bz, w);
+        // a caveira vira o rosto para ele
+        ir(m, "caveira", CAV_X * ergue, Mth.PI * ergue, 0, w);   // vira o rosto da caveira para ele
+        somar(m, "cabeca", 0.1f * ergue, -0.12f * ergue, 0, w);
+        ir(m, "mandibula", 0.2f + 0.45f * suga + 0.08f * suga * Mth.sin(t * 1.7f), 0, 0, w);
+        somar(m, "corpo", 0.08f * ergue, -0.1f * ergue, 0, w);
+        somar(m, "capuz", 0.05f * ergue, 0, 0, w);
+        for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, 0, 0, 0.08f * suga * Mth.sin(t * 0.5f + i), w);
+    }
+
+    /** Ajustes da caveira erguida (giro do braço para o meio e giro da própria caveira). */
+    static float CAV_Y = 0.12f, CAV_X = -1.6f;
+
     private static Map<String, float[]> parado(float t) {
         Map<String, float[]> m = new HashMap<>();
         float resp = Mth.sin(t * 0.055f);
@@ -139,19 +205,11 @@ public final class PoseNecron {
         por(m, "cabeca", 0.05f * Mth.sin(t * 0.05f) - 0.03f * resp, 0.1f * Mth.sin(t * 0.023f), 0.22f * inclina);
         por(m, "mandibula", 0.1f + 0.1f * Math.max(0, Mth.sin(t * 0.21f)) + 0.06f * Math.max(0, Mth.sin(t * 0.73f)), 0, 0);
         por(m, "capuz", 0.04f * Mth.sin(t * 0.06f), 0, 0.03f * inclina);
-        por(m, "braco_d", -0.35f + 0.04f * resp, 0, 0.12f);
+        // 0.59.1: a foice como bengala: a mão à frente do corpo e a haste em pé, apoiada no chão à frente dele
+        float bengala = 0.42f + 0.03f * resp;
+        por(m, "braco_d", bengala, 0, 0.1f);
+        por(m, "foice", HASTE_PARADO - bengala, 0, -0.1f);
         por(m, "braco_e", 0.1f + 0.05f * Mth.sin(t * 0.05f + 1), 0, -0.18f - 0.03f * resp);
-        por(m, "foice", 0.3f, 0, 0);
-        // a cada ~9 s: gira a foice na mão (uma volta da lâmina) e apoia de novo
-        float ciclo = (t % 180f) / 180f;
-        if (ciclo > 0.82f) {
-            float g = (ciclo - 0.82f) / 0.18f;
-            float sobe = suave(g / 0.25f) * (1 - suave((g - 0.75f) / 0.25f));
-            somar(m, "braco_d", 0.75f, 0, -0.1f, sobe);
-            somar(m, "foice", -0.75f, 0, 0, sobe);   // a haste continua em pé enquanto o braço sobe
-            somar(m, "foice", 0, (float) (Math.PI * 2 * suave((g - 0.15f) / 0.6f)), 0, 1);
-            somar(m, "cabeca", 0.05f, -0.15f, 0, sobe);
-        }
         return m;
     }
 
@@ -240,8 +298,10 @@ public final class PoseNecron {
             for (int i = 1; i <= 12; i++) somar(m, "farrapo_" + i, -0.38f + 0.24f * Mth.sin(passo * 2 - i * 0.8f), 0, 0.08f * Mth.sin(passo - i), an);
             somar(m, "capuz", -0.14f + 0.03f * Mth.sin(passo * 2), 0, 0, an);
             somar(m, "braco_e", 0.38f * Mth.sin(passo), 0, -0.06f, an);
-            somar(m, "braco_d", -0.12f + 0.12f * Mth.sin(passo + Mth.PI), 0, 0, an);
-            somar(m, "foice", 0.08f * Mth.sin(passo + Mth.PI), 0, 0, an);
+            // a bengala vai à frente a cada passo e a haste continua quase em pé
+            float b = 0.12f * Mth.sin(passo + Mth.PI);
+            somar(m, "braco_d", b, 0, 0, an);
+            somar(m, "foice", -b + 0.05f * Mth.sin(passo), 0, 0, an);
         }
         // ---- curva: o tronco vira antes, o pano fica para trás ----
         float v = Mth.clamp(e.virar(), -1, 1);
@@ -299,6 +359,17 @@ public final class PoseNecron {
             ir(m, "braco_e", 0.1f, 0, -0.43f, k);
             ir(m, "foice", 1.5f, 0, 0.4f, k);
         }
+        // ---- 0.59.1: parado, de vez em quando ele se alimenta de uma caveira ----
+        float quieto = (1 - voo) * (1 - an) * (g > 0.001f ? 0 : 1) * (cj >= 0 ? 0 : 1) * (s < 0.999f ? 0 : 1) * (1 - k)
+                * (e.cinema() ? 0 : 1) * (alimentar ? 1 : 0);
+        float al = ultimo != null ? alimento(mem(ultimo).quietoHa) : -1;
+        if (al >= 0 && quieto > 0.01f) alimentar(m, al, quieto, t);
+        float cav = al >= 0 ? escalaCaveira(al) * quieto : 0;
+        ossos.apply("caveira").ifPresent(b -> {
+            b.setHidden(cav < 0.02f);
+            b.setScaleX(Math.max(cav, 0.001f)); b.setScaleY(Math.max(cav, 0.001f)); b.setScaleZ(Math.max(cav, 0.001f));
+        });
+        if (ultimo != null) { QUIETO.put(ultimo, quieto); ultimo = null; }
         for (var en : m.entrySet()) {
             float[] r = en.getValue();
             ossos.apply(en.getKey()).ifPresent(b -> {

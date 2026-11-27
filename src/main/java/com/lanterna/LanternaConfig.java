@@ -33,6 +33,9 @@ public final class LanternaConfig {
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_TROPA;
     public static final ForgeConfigSpec.BooleanValue PVP_MESMA_GUILDA;
 
+    public static final ForgeConfigSpec.BooleanValue INSTABILIDADE;
+    public static final ForgeConfigSpec.BooleanValue IMERSAO;
+
     public static final ForgeConfigSpec.IntValue GUILDA_MAX_PLANETAS;
     public static final ForgeConfigSpec.IntValue GUILDA_MAX_MEMBROS;
     public static final ForgeConfigSpec.IntValue GUILDA_MAX_DEFESA;
@@ -200,6 +203,13 @@ public final class LanternaConfig {
                 .defineInRange("minutos_purificacao", 30.0, 0.0, 12000.0);
         MORTE_DIAS_FOME = b.comment("Days (real time) the Black Lantern lasts without reaping a ring bearer before going into a frenzy (0 turns it off)", "Dias (tempo real) que o Lanterna Negro aguenta sem ceifar um portador de anel antes de entrar em frenesi (0 desliga)")
                 .defineInRange("dias_fome", 3, 0, 365);
+        b.pop();
+
+        b.comment("Unstable emotions (after the Life Ring splits) and the Central Battery immersion", "Emoções instáveis (depois que o Anel da Vida se parte) e a imersão na Bateria Central").push("emocoes");
+        INSTABILIDADE = b.comment("Strong emotions build up in the ring; at the limit the bearer must recite the oath in 10 s or go into a frenzy",
+                "As emoções fortes se acumulam no anel; no limite o portador precisa recitar o juramento em 10 s ou entra em frenesi").define("instabilidade_emocional", true);
+        IMERSAO = b.comment("Staying near your Corps' Central Battery slowly makes you stronger (like Larfleeze, bathed by the emotion's entity)",
+                "Ficar perto da Bateria Central da sua Tropa deixa você mais forte aos poucos (como o Larfleeze, banhado pela entidade da emoção)").define("imersao_bateria", true);
         b.pop();
 
         SPEC = b.build();

@@ -55,6 +55,12 @@ public final class CenaEmocoes {
         var v = ClientVisibleRings.of(p.getId());
         int cor = tipo == Tipo.TREINO && v.traje().isEmpty() ? com.lanterna.corps.BuiltinCorps.WHITE.color() : v.color();
         CENAS.put(p.getId(), new Cena(tipo, cor, v.segundoCor(), agora(), p.yBodyRot));
+        // 0.59.1: quem passa pela cena sai de qualquer menu (o do anel, o inventário...) para ver a cena
+        var mc = Minecraft.getInstance();
+        if (p == mc.player && mc.screen != null) {
+            if (mc.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>) mc.player.closeContainer();
+            else mc.setScreen(null);
+        }
         // treino: o traje antigo se desfaz no clarão do começo e o novo escorre pelo corpo durante a espiral
         if (tipo == Tipo.TREINO) com.lanterna.client.uniform.UniformTransition.refazer(p.getId());
     }
@@ -95,7 +101,10 @@ public final class CenaEmocoes {
             var v = ClientVisibleRings.of(p.getId());
             String chave = v.ring().isEmpty() ? null : v.traje() + "|" + v.segundo();
             String antes = ULTIMO.put(p.getId(), chave);
-            // só quando o anel já estava no dedo (entrar no mundo ou colocar o anel não conta)
+            // só quando o anel já estava no dedo (entrar no mundo ou colocar o anel não conta). 0.59.1: os dados do
+            // segundo anel chegam um instante depois dos do primeiro ao entrar no mundo (ou quando outro jogador entra
+            // na vista); nos primeiros 5 s da entidade no cliente nada dispara a cena
+            if (p.tickCount < 100) continue;
             if (antes != null && chave != null && !antes.equals(chave)) {
                 String[] a = antes.split("\\|", -1), n = chave.split("\\|", -1);
                 if (!n[1].isEmpty() && !n[1].equals(a[1])) comecar(p, Tipo.SEGUNDO);
@@ -127,13 +136,13 @@ public final class CenaEmocoes {
         return ((int) (r + (255 - r) * f) << 16) | ((int) (g + (255 - g) * f) << 8) | (int) (b + (255 - b) * f);
     }
 
-    /** Onde fica a mão do segundo anel (a que não é a principal), mais ou menos. */
+    /** Onde fica a mão do segundo anel (a que não é a principal): erguida à frente do peito durante a cena. */
     private static Vec3 maoSegunda(Player p) {
         float yaw = (float) Math.toRadians(p.yBodyRot);
         double lado = p.getMainArm() == HumanoidArm.RIGHT ? 1 : -1; // o segundo anel fica na outra mão
-        // esquerda do corpo = +x quando olha para +z
-        double lx = Math.cos(yaw) * lado * 0.37, lz = Math.sin(yaw) * lado * 0.37;
-        return new Vec3(p.getX() + lx, p.getY() + 0.68, p.getZ() + lz);
+        // esquerda do corpo = +x quando olha para +z; frente = (-sen, cos)
+        double sx = Math.cos(yaw) * lado, sz = Math.sin(yaw) * lado, fx = -Math.sin(yaw), fz = Math.cos(yaw);
+        return new Vec3(p.getX() + sx * 0.2 + fx * 0.62, p.getY() + 1.3, p.getZ() + sz * 0.2 + fz * 0.62);
     }
 
     private static void onda(Player p, int cor, int n, double vel) {
@@ -195,14 +204,28 @@ public final class CenaEmocoes {
         Vec3 mao = maoSegunda(p);
         if (t == 0) { som(p, SoundEvents.BEACON_POWER_SELECT, 1f, 0.55f); som(p, SoundEvents.PORTAL_TRIGGER, 0.25f, 1.8f); }
         if (t < APARECE) {
-            // faíscas da cor do segundo anel vindo de longe e se juntando na mão
-            int n = 2 + t / 10;
+            // faíscas da cor do segundo anel vindo de longe em espiral e se juntando na mão (cada vez mais)
+            int n = 1 + t / 7;
             for (int i = 0; i < n; i++) {
                 double a = p.getRandom().nextDouble() * Math.PI * 2, b = (p.getRandom().nextDouble() - 0.3) * Math.PI * 0.8;
-                double r = 2.6 + p.getRandom().nextDouble() * 1.2;
-                double x = mao.x + Math.cos(a) * Math.cos(b) * r, y = mao.y + Math.sin(b) * r, z = mao.z + Math.sin(a) * Math.cos(b) * r;
-                double k = 0.11;
-                orb(p, i % 2 == 0 ? c2 : l2, 0.11f, x, y, z, (mao.x - x) * k, (mao.y - y) * k, (mao.z - z) * k);
+                double r = 2.4 + p.getRandom().nextDouble() * 1.4;
+                double dx = Math.cos(a) * Math.cos(b), dy = Math.sin(b), dz = Math.sin(a) * Math.cos(b);
+                double x = mao.x + dx * r, y = mao.y + dy * r, z = mao.z + dz * r;
+                double k = 0.1, gira = 0.06;   // puxada para a mão + um pouco de lado (espiral)
+                orb(p, i % 2 == 0 ? c2 : l2, 0.09f + p.getRandom().nextFloat() * 0.05f, x, y, z,
+                        (mao.x - x) * k - dz * gira, (mao.y - y) * k, (mao.z - z) * k + dx * gira);
+            }
+            // nos últimos instantes, um aro de luz se fecha em volta do dedo
+            if (t > APARECE - 16) {
+                double raio = 0.75 * (APARECE - t) / 16.0 + 0.04;
+                float yaw = (float) Math.toRadians(p.yBodyRot);
+                double fx = -Math.sin(yaw), fz = Math.cos(yaw), sx = Math.cos(yaw), sz = Math.sin(yaw);
+                for (int i = 0; i < 14; i++) {
+                    double a = i * Math.PI * 2 / 14 + t * 0.3;
+                    // o aro fica de pé, de frente para o jogador (plano lado/altura)
+                    orb(p, i % 3 == 0 ? 0xFFFFFF : c2, 0.07f, mao.x + sx * Math.cos(a) * raio + fx * 0.02, mao.y + Math.sin(a) * raio,
+                            mao.z + sz * Math.cos(a) * raio + fz * 0.02, 0, 0, 0);
+                }
             }
             // um núcleo pulsando na mão
             if (t % 2 == 0) orb(p, 0xFFFFFF, 0.06f + t * 0.004f, mao.x, mao.y, mao.z, 0, 0, 0);
@@ -278,6 +301,62 @@ public final class CenaEmocoes {
         var in = e.getInput();
         in.forwardImpulse = 0; in.leftImpulse = 0;
         in.up = in.down = in.left = in.right = in.jumping = in.shiftKeyDown = false;
+    }
+
+    /** 0.59.1: a câmera é de fora: a mão de primeira pessoa não aparece. */
+    @SubscribeEvent
+    public static void semMao(net.minecraftforge.client.event.RenderHandEvent e) {
+        if (ativa()) e.setCanceled(true);
+    }
+
+    private static float suave(float x) { x = Mth.clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+
+    /**
+     * 0.59.1: os braços na cena. Segundo anel: a mão sobe à frente do peito, treme enquanto a luz se junta, dá um tranco
+     * para cima no clarão e fecha o punho, desce devagar com as luzes trançando e os dois braços se abrem na onda final.
+     * Treino: os braços se abrem aos poucos, palmas para fora, e voltam no fim.
+     */
+    public static void bracos(net.minecraft.client.model.HumanoidModel<?> m, net.minecraft.world.entity.LivingEntity e) {
+        if (!(e instanceof Player p)) return;
+        Cena c = CENAS.get(p.getId());
+        if (c == null) return;
+        float t = agora() - c.inicio + Minecraft.getInstance().getFrameTime();
+        boolean destro = p.getMainArm() == HumanoidArm.RIGHT;
+        var outro = destro ? m.leftArm : m.rightArm;
+        var principal = destro ? m.rightArm : m.leftArm;
+        float lado = destro ? 1 : -1;   // yRot que leva o braço "outro" para o meio do corpo
+        if (c.tipo == Tipo.SEGUNDO) {
+            float sobe = suave(t / 12f) * (1 - suave((t - 78f) / 14f));
+            float tranco = t < APARECE ? 0 : (float) Math.exp(-(t - APARECE) / 4.0) * Mth.sin((t - APARECE) * 0.9f);
+            float desce = suave((t - APARECE - 8) / 26f);
+            float treme = t < APARECE ? 0.035f * (t / APARECE) * Mth.sin(t * 2.7f) : 0;
+            float x = Mth.lerp(desce, -1.5f, -1.05f) - 0.55f * tranco + treme;
+            outro.xRot = Mth.lerp(sobe, outro.xRot, x);
+            outro.yRot = Mth.lerp(sobe, outro.yRot, lado * Mth.lerp(desce, 0.3f, 0.45f));
+            outro.zRot = Mth.lerp(sobe, outro.zRot, treme * lado);
+            // o outro braço acompanha, meio erguido, como quem segura o próprio pulso
+            float apoia = suave(t / 16f) * (1 - suave((t - APARECE + 4) / 8f));
+            principal.xRot = Mth.lerp(apoia, principal.xRot, -1.2f);
+            principal.yRot = Mth.lerp(apoia, principal.yRot, lado * 0.55f);
+            // a onda final: os dois braços se abrem
+            float abre = suave((t - 84f) / 6f) * (1 - suave((t - 94f) / 6f));
+            m.leftArm.zRot = Mth.lerp(abre, m.leftArm.zRot, -0.55f);
+            m.rightArm.zRot = Mth.lerp(abre, m.rightArm.zRot, 0.55f);
+            m.head.xRot = Mth.lerp(suave(t / 10f) * (1 - desce), m.head.xRot, 0.35f);   // olhando a própria mão
+        } else {
+            float abre = suave(t / 20f) * (1 - suave((t - 60f) / 16f));
+            float clarao = (float) Math.exp(-Math.abs(t - 30) / 5.0);
+            m.leftArm.zRot = Mth.lerp(abre, m.leftArm.zRot, -0.7f - 0.25f * clarao);
+            m.rightArm.zRot = Mth.lerp(abre, m.rightArm.zRot, 0.7f + 0.25f * clarao);
+            m.leftArm.xRot = Mth.lerp(abre, m.leftArm.xRot, -0.25f);
+            m.rightArm.xRot = Mth.lerp(abre, m.rightArm.xRot, -0.25f);
+            m.head.xRot = Mth.lerp(abre, m.head.xRot, -0.3f * clarao);
+        }
+        if (m instanceof net.minecraft.client.model.PlayerModel<?> pm) {
+            pm.leftSleeve.copyFrom(m.leftArm);
+            pm.rightSleeve.copyFrom(m.rightArm);
+            pm.hat.copyFrom(m.head);
+        }
     }
 
     /** Sem painéis durante a cena (só os títulos). */

@@ -33,8 +33,12 @@ final class Atores {
         for (int i = 1; i <= 8; i++) osso(m, "cordao_" + i, 0.12f * Mth.sin(t * 0.05f + i * 0.7f), 0, 0.1f * Mth.sin(t * 0.04f + i));
     });
     // 0.58.3: as poses do Necron ficam no PoseNecron (as mesmas do chefe e da Forma do Necron)
-    private final Rend necron = new Rend("necron", (m, t) -> PoseNecron.aplicar(m::getBone,
-            estadoForcado != null ? estadoForcado : new PoseNecron.Estado(t, andar, Math.max(vento, voo), golpe, ajoelhar, vento > 0.5f)));
+    private final Rend necron = new Rend("necron", (m, t) -> {
+        // 0.59.1: nas cutscenes ele não se alimenta (só no chefe e na Forma do Necron)
+        PoseNecron.alimentar = estadoForcado != null;
+        PoseNecron.aplicar(m::getBone, estadoForcado != null ? estadoForcado : new PoseNecron.Estado(t, andar, Math.max(vento, voo), golpe, ajoelhar, vento > 0.5f));
+        PoseNecron.alimentar = true;
+    });
 
     static float vento;
     /** 0.58.0: 0 = de pé; 1 = de joelhos (a cena da queda do Necron). */

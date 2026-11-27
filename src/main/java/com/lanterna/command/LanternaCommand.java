@@ -257,6 +257,15 @@ public final class LanternaCommand {
                                             com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "points"));
                                     return 1;
                                 })))
+                // 0.59.1: emoções instáveis e imersão (status para todos; provocar/imersao para testes)
+                .then(Commands.literal("emotion")
+                        .executes(c -> { ServerPlayer p = c.getSource().getPlayerOrException(); p.sendSystemMessage(com.lanterna.emocao.Instabilidade.status(p)); return 1; })
+                        .then(Commands.literal("provoke").requires(source -> source.hasPermission(2))
+                                .executes(c -> { com.lanterna.emocao.Instabilidade.provocar(c.getSource().getPlayerOrException()); return 1; }))
+                        .then(Commands.literal("immersion").requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("seconds", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(c -> { com.lanterna.emocao.Instabilidade.somarImersao(c.getSource().getPlayerOrException(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "seconds")); return 1; }))))
                 .then(Commands.literal("respect").requires(source -> source.hasPermission(2))
                         .then(Commands.argument("race", com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .then(Commands.argument("value", com.mojang.brigadier.arguments.IntegerArgumentType.integer())

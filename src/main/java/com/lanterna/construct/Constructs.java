@@ -85,7 +85,8 @@ public final class Constructs {
         return Affinity.power(Affinity.points(EquipmentHelper.ring(player))) * com.lanterna.combate.Supremos.dano(ring.corps(), player)
                 * com.lanterna.tropa.Nivel.forca(player) * (1f + com.lanterna.construct.fonte.ArvoreDaLuz.bonusDano(player))
                 * com.lanterna.vida.Emocoes.bonusForca(player, ring) // 0.53: aspectos fortalecidos no Anel da Vida
-                * com.lanterna.morte.Necroforma.poder(player); // 0.58.2: na Forma do Necron
+                * com.lanterna.morte.Necroforma.poder(player) // 0.58.2: na Forma do Necron
+                * com.lanterna.emocao.Instabilidade.poder(player); // 0.59.1: frenesi e imersão na Bateria Central
     }
 
     public static int level(ServerPlayer player) {

@@ -9,7 +9,7 @@ rosto, cavidade do nariz, dentes um a um, mandíbula com os ramos, vértebras do
 com a lâmina chanfrada e a pérola presa por garras.
 
 Os nomes e os pivôs dos ossos são os mesmos de antes (a cena e a entidade mexem neles pelo código):
-root, corpo, saia, farrapo_1..12, cabeca, mandibula, capuz, braco_d, braco_e, foice, perola.
+root, corpo, saia, farrapo_1..12, cabeca, mandibula, capuz, braco_d, braco_e (caveira), foice, perola.
 
 Rodar na raiz do projeto:  python3 ferramentas/modelo_necron.py
 """
@@ -752,6 +752,21 @@ def necron():
             m.cubo(nome, (fx + 0.05, 11.1 - comp - 1.75, -1.5), (0.32, 0.75, 0.32), "osso", D=6)  # ponta em garra
         m.cubo(nome, (px - 0.4 * sinal - 0.25, 10.4, -1.8), (0.48, 1.3, 0.48), "osso", D=6)  # polegar
         m.cubo(nome, (px - 0.4 * sinal - 0.22, 9.4, -2.1), (0.42, 1.0, 0.42), "osso", D=6)
+
+    # ---------------- 0.59.1: a caveira que ele segura para se alimentar (escondida; aparece na animação) ----------------
+    m.osso("caveira", "braco_e", (6.3, 8.6, -1.4))
+    cx, cy, cz = 6.3, 6.4, -1.4
+    m.cubo("caveira", (cx - 2.2, cy - 1.2, cz - 2.2), (4.4, 3.6, 4.4), "cranio", D=6)          # calota
+    m.cubo("caveira", (cx - 1.8, cy + 2.4, cz - 1.8), (3.6, 0.8, 3.6), "cranio", D=6)          # topo
+    m.cubo("caveira", (cx - 1.6, cy - 2.4, cz - 2.5), (3.2, 1.3, 2.6), "cranio", D=6)          # maxila
+    m.cubo("caveira", (cx - 2.35, cy - 1.6, cz - 1.0), (0.5, 1.4, 1.6), "osso", D=6)           # zigomáticos
+    m.cubo("caveira", (cx + 1.85, cy - 1.6, cz - 1.0), (0.5, 1.4, 1.6), "osso", D=6)
+    m.cubo("caveira", (cx - 1.55, cy - 0.5, cz - 2.35), (1.2, 1.1, 0.3), "orbita", D=8)       # órbitas
+    m.cubo("caveira", (cx + 0.35, cy - 0.5, cz - 2.35), (1.2, 1.1, 0.3), "orbita", D=8)
+    m.cubo("caveira", (cx - 0.3, cy - 1.45, cz - 2.6), (0.6, 0.8, 0.3), "buraco", D=8)        # nariz
+    m.cubo("caveira", (cx - 1.3, cy - 2.75, cz - 2.65), (2.6, 0.5, 0.3), "dente", D=8)        # dentes
+    m.cubo("caveira", (cx - 1.4, cy - 3.5, cz - 2.3), (2.8, 0.8, 2.1), "osso", D=6)           # mandíbula
+    m.cubo("caveira", (cx - 0.9, cy + 1.2, cz - 2.3), (0.25, 1.5, 0.2), "buraco", D=8)        # rachadura
 
     # ---------------- a foice: haste amarrada, lâmina chanfrada e serrilhada, crânio na base, a pérola ----------------
     m.osso("foice", "braco_d", (-6.3, 10.5, -0.4))

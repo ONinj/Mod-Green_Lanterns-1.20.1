@@ -2040,3 +2040,31 @@ versão de teste só para num ponto e avisa que a continuação vem na próxima.
 | 4 | Capítulos 7 e 8 (a Terra escurece, a batalha final) e a Forma do Necron |
 | 5 | Capítulo 9, epílogo, a Tentação e a linha corrompida |
 
+## 0.59.1 — Emoções instáveis, a imersão na Bateria e o Necron revisto
+
+**Emoções instáveis** (só depois que o Anel da Vida se parte, no começo da saga do Necron; pode ser desligado na config, `instabilidade_emocional`)
+- A emoção do seu anel se acumula com o que você vive: levar dano, ferir, matar e ficar com pouca vida. Fora de combate, ela baixa sozinha.
+- Cada Tropa sente mais uma coisa:
+  - **Raiva** (vermelho): ferve mais rápido.
+  - **Medo** (amarelo): cresce rápido com pouca vida.
+  - **Avareza** (laranja): sobe a cada item recolhido.
+  - **Amor** (violeta) e **Compaixão** (índigo): sobem quando alguém perto de você é ferido.
+- **No limite, o anel exige controle:** aparece a tela do juramento (a mesma da Bateria Central) com os dois primeiros versos e **10 segundos** (20 escrevendo).
+  - **Conseguiu:** +1 de **maestria** daquela emoção, e ela passa a demorar mais para transbordar. Com 10 de maestria você a domina; no futuro, poderá entrar em frenesi de propósito.
+  - **Não conseguiu (ou fechou a tela):** **frenesi** por 20 s, com mais força e velocidade e constructos 30% mais fortes, mas a fome dispara. Depois, 10 s de cansaço (fraqueza e lentidão).
+  - Depois de cada vez, a emoção fica alguns minutos sem pedir de novo.
+- `/lantern emotion` mostra a emoção acumulada, o limite, a maestria e a imersão.
+
+**Imersão na Bateria Central** (como o Larfleeze, que passou bilhões de anos ao lado do Ofidiano dentro da Bateria laranja; opção `imersao_bateria`)
+- Cada entidade emocional mora na Bateria Central da sua Tropa. Ficar perto dela (até 24 blocos) com o anel daquela Tropa banha você na luz dela.
+- O tempo acumula em 4 níveis: **30 min, 2 h, 5 h e 10 h**. Cada nível deixa os constructos 4% mais fortes, **para sempre** (até +16%).
+- O preço: quanto mais imerso, mais instável a emoção (o limite baixa).
+
+**Necron**
+- A foice agora é como uma **bengala**: a mão fica à frente e a haste em pé, apoiada no chão à frente dele.
+- O giro da foice saiu. No lugar: depois de uns 11 s parado, ele **pega uma caveira** na outra mão, ergue diante do rosto e **se alimenta**, com faixas de luz saindo da caveira para a boca dele; no fim, ela vira pó. Vale para o chefe e para a Forma do Necron; nas cutscenes, não.
+
+**Segundo anel**
+- A cena não dispara mais ao entrar no mundo, fecha qualquer menu aberto e esconde a mão de primeira pessoa.
+- Ficou mais viva: você ergue a mão à frente do peito, as faíscas giram em espiral até ela, um aro de luz se fecha em volta do dedo e, no fim, os braços se abrem na onda.
+

@@ -106,7 +106,10 @@ public final class Juramento {
 
         public static void handle(Feito m, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayer p = ctx.get().getSender();
-            if (p != null) {
+            if (p != null && m.tipo.equals(com.lanterna.emocao.Instabilidade.TIPO)) {
+                // 0.59.1: o juramento contra o frenesi (desistir também conta como não conseguir)
+                com.lanterna.emocao.Instabilidade.resposta(p, Math.max(0, m.palavras));
+            } else if (p != null) {
                 if (m.palavras < 0) cancelado(p);
                 else concluido(p, m.tipo, m.tropa, m.palavras);
             }
