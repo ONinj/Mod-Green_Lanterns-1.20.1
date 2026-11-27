@@ -49,6 +49,7 @@ public final class ClientModEvents {
         event.register(KeyBindings.CONSTRUCT_USE);
         for (var k : KeyBindings.PRESETS) event.register(k);
         event.register(KeyBindings.OFICINA);
+        event.register(KeyBindings.FRENESI);
         event.register(KeyBindings.JOURNAL);
         event.register(KeyBindings.GUIA);
         event.register(KeyBindings.NAVE_DESCER);

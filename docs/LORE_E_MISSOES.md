@@ -2068,3 +2068,12 @@ versão de teste só para num ponto e avisa que a continuação vem na próxima.
 - A cena não dispara mais ao entrar no mundo, fecha qualquer menu aberto e esconde a mão de primeira pessoa.
 - Ficou mais viva: você ergue a mão à frente do peito, as faíscas giram em espiral até ela, um aro de luz se fecha em volta do dedo e, no fim, os braços se abrem na onda.
 
+## 0.59.2 — Frenesi de propósito e a aura de vapor
+
+- **Frenesi de propósito:** com a emoção dominada (maestria 10), **Alt+G** solta o frenesi quando você quiser. É um frenesi controlado: a fome não dispara e o cansaço dura metade. Depois, 2 minutos de espera.
+- **Imersão mais rápida:** os 4 níveis agora são **5 min, 15 min, 40 min e 80 min** perto da Bateria Central da sua Tropa.
+- **Aura de vapor:** banhado pela luz, a aura fica maior e o corpo solta um vapor na cor da Tropa, como o suor evaporando de quem se exercita num dia frio. Acontece:
+  - perto da Bateria Central da sua Tropa;
+  - dentro da Fonte (a dimensão atrás da Bateria);
+  - com a sobrecarga do Banho de Luz.
+

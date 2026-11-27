@@ -3927,7 +3927,7 @@
   "emocao.lanterna.frenesi": "FRENZY! You lost control: %s took over. More strength and speed and constructs 30%% stronger, but hunger soars. In 20 s, exhaustion.",
   "emocao.lanterna.frenesi_fim": "The frenzy fades. You are exhausted.",
   "emocao.lanterna.resistiu": "You mastered %s this time. Mastery: %s/%s (the emotion will take longer to overflow).",
-  "emocao.lanterna.dominio": "You master %s! It now takes much longer to overflow (in the future: enter a frenzy on purpose).",
+  "emocao.lanterna.dominio": "You master %s! It now takes much longer to overflow, and you can unleash it on purpose: Alt+G (controlled frenzy).",
   "emocao.lanterna.imersao": "%s: the entity's light seeps into you. Immersion %s/%s: constructs +%s%% stronger forever (and the emotion more unstable).",
   "emocao.lanterna.status": "Emotion: %s · built up %s/%s · mastery %s/%s · Battery immersion %s/%s (%s min) · unstable: %s",
   "emocao.lanterna.sem_anel": "You are not wearing an emotional Corps ring.",
@@ -3939,5 +3939,9 @@
   "emocao.lanterna.emocao.laranja": "Avarice",
   "emocao.lanterna.emocao.azul": "Hope",
   "emocao.lanterna.emocao.indigo": "Compassion",
-  "emocao.lanterna.emocao.violeta": "Love"
+  "emocao.lanterna.emocao.violeta": "Love",
+  "key.lanterna.frenesi": "Frenzy (mastered emotion)",
+  "emocao.lanterna.vol": "You unleash %s on purpose: controlled FRENZY for 20 s.",
+  "emocao.lanterna.vol_falta": "You don't master %s yet (mastery %s/%s). Resist when it overflows to gain mastery.",
+  "emocao.lanterna.vol_espera": "The emotion is still settling (%s s)."
 }

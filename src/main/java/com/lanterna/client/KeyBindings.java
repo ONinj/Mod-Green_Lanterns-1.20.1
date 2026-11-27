@@ -95,6 +95,10 @@ public final class KeyBindings {
     public static final KeyMapping OFICINA = new KeyMapping("key.lanterna.oficina", KeyConflictContext.IN_GAME,
             net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY);
 
+    /** 0.59.2: frenesi de propósito (quem domina a emoção do anel): Alt+G. */
+    public static final KeyMapping FRENESI = new KeyMapping("key.lanterna.frenesi", KeyConflictContext.IN_GAME,
+            net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
+
     private static KeyMapping preset(int n, int key) {
         return new KeyMapping("key.lanterna.preset_" + n, KeyConflictContext.IN_GAME,
                 net.minecraftforge.client.settings.KeyModifier.ALT, InputConstants.Type.KEYSYM, key, CATEGORY);

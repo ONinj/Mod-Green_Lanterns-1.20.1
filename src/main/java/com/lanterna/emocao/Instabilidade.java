@@ -58,7 +58,8 @@ public final class Instabilidade {
     public static final String TIPO = "frenesi";
     public static final int DOMINIO = 10;
     static final int DUR_FRENESI = 20 * 20, DUR_CANSACO = 10 * 20, PRAZO = 10 * 20;
-    static final int[] NIVEIS_IMERSAO = {1800, 7200, 18000, 36000};
+    /** 0.59.2: 5 min, 15 min, 40 min e 80 min perto da Bateria (era 30 min, 2 h, 5 h e 10 h). */
+    static final int[] NIVEIS_IMERSAO = {300, 900, 2400, 4800};
 
     // ===================== dados =====================
 
@@ -177,10 +178,12 @@ public final class Instabilidade {
             int cor = t != null ? t.cor : 0xFF3A20;
             ((ServerLevel) p.level()).sendParticles(new DustParticleOptions(new org.joml.Vector3f(((cor >> 16) & 255) / 255f, ((cor >> 8) & 255) / 255f, (cor & 255) / 255f), 1.6f),
                     p.getX(), p.getY() + 1, p.getZ(), 14, 0.45, 0.7, 0.45, 0);
-            p.causeFoodExhaustion(1.6f);
+            boolean controlado = d.getBoolean("controlado");
+            p.causeFoodExhaustion(controlado ? 0.4f : 1.6f);
             if (fr - agora <= 20) {
-                p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, DUR_CANSACO, 0, false, true));
-                p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, DUR_CANSACO, 0, false, true));
+                d.putBoolean("controlado", false);
+                p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, controlado ? DUR_CANSACO / 2 : DUR_CANSACO, 0, false, true));
+                p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, controlado ? DUR_CANSACO / 2 : DUR_CANSACO, 0, false, true));
                 p.displayClientMessage(Component.translatable("emocao.lanterna.frenesi_fim").withStyle(ChatFormatting.GRAY), true);
             }
             return;
@@ -246,6 +249,48 @@ public final class Instabilidade {
         }
     }
 
+    // ===================== 0.59.2: frenesi de propósito =====================
+
+    /** Quem domina a emoção (maestria DOMINIO) pode soltá-la quando quiser (Alt+G). Sem a fome descontrolada. */
+    public static void voluntario(ServerPlayer p) {
+        Tropa t = tropa(p);
+        if (t == null) return;
+        CompoundTag d = dados(p);
+        long agora = agora(p);
+        Component nome = Component.translatable("emocao.lanterna.emocao." + t.nome);
+        if (maestria(p, t) < DOMINIO) {
+            p.displayClientMessage(Component.translatable("emocao.lanterna.vol_falta", nome, maestria(p, t), DOMINIO).withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+        if (d.getLong("frenesi") > agora || d.getLong("prova") > 0) return;
+        long pronto = d.getLong("pausaVol");
+        if (pronto > agora) {
+            p.displayClientMessage(Component.translatable("emocao.lanterna.vol_espera", (pronto - agora) / 20 + 1).withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+        d.putLong("frenesi", agora + DUR_FRENESI);
+        d.putBoolean("controlado", true);
+        d.putLong("pausaVol", agora + DUR_FRENESI + 20 * 60 * 2);
+        d.putFloat("medidor", 0);
+        p.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, DUR_FRENESI, 1, false, true));
+        p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, DUR_FRENESI, 0, false, true));
+        p.level().playSound(null, p.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2f, 1.0f);
+        p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1f, 0.7f);
+        ((ServerLevel) p.level()).sendParticles(new DustParticleOptions(t.corVetor(), 2f), p.getX(), p.getY() + 1, p.getZ(), 80, 0.8, 1, 0.8, 0.1);
+        p.sendSystemMessage(Component.translatable("emocao.lanterna.vol", nome).withStyle(s -> s.withColor(t.cor)));
+    }
+
+    /** Cliente → servidor: a tecla do frenesi. */
+    public record Pedido() {
+        public static void encode(Pedido m, net.minecraft.network.FriendlyByteBuf b) {}
+        public static Pedido decode(net.minecraft.network.FriendlyByteBuf b) { return new Pedido(); }
+        public static void handle(Pedido m, java.util.function.Supplier<net.minecraftforge.network.NetworkEvent.Context> ctx) {
+            ServerPlayer p = ctx.get().getSender();
+            if (p != null) voluntario(p);
+            ctx.get().setPacketHandled(true);
+        }
+    }
+
     private static int t2(CompoundTag d, ServerPlayer p) {
         Tropa t = tropa(p);
         return t != null ? t.cor : 0xFFFFFF;
@@ -254,9 +299,12 @@ public final class Instabilidade {
     // ===================== imersão na Bateria Central =====================
 
     static void imersao(ServerPlayer p, @Nullable Tropa t, CompoundTag d) {
-        if (t == null || !LanternaConfig.IMERSAO.get()) return;
+        if (t == null) return;
         BateriaNucleoBlockEntity b = bateriaPerto(p, t);
         if (b == null) return;
+        // banhado pela luz: a aura de vapor fica ligada enquanto ele estiver perto (renovada a cada 5 s)
+        d.putLong("banhoAte", agora(p) + 120);
+        if (!LanternaConfig.IMERSAO.get()) return;
         CompoundTag im = d.getCompound("imersao");
         int antes = nivelImersao(p, t);
         im.putInt(t.nome, im.getInt(t.nome) + 5);
@@ -292,6 +340,9 @@ public final class Instabilidade {
         return null;
     }
 
+    /** Está perto da Bateria Central da própria Tropa (banhado pela luz dela)? */
+    public static boolean banhando(ServerPlayer p) { return dados(p).getLong("banhoAte") > agora(p); }
+
     // ===================== comando =====================
 
     public static Component status(ServerPlayer p) {
@@ -312,6 +363,14 @@ public final class Instabilidade {
         d.putLong("prova", 0);
         d.putFloat("medidor", limite(p, t));
         d.putLong("combate", agora(p));
+    }
+
+    public static void definirMaestria(ServerPlayer p, int n) {
+        Tropa t = tropa(p);
+        if (t == null) return;
+        CompoundTag d = dados(p), ma = d.getCompound("maestria");
+        ma.putInt(t.nome, Math.max(0, n));
+        d.put("maestria", ma);
     }
 
     public static void somarImersao(ServerPlayer p, int segundos) {

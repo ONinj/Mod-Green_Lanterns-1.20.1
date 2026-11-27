@@ -37,6 +37,7 @@ minecraft {
             property 'lanterna.autotest.scene', project.findProperty('scene') ?: 'full'
             property 'lanterna.autotest.mundo', project.findProperty('mundo') ?: 'test'
             property 'lanterna.autotest.ang', project.findProperty('ang') ?: '60'
+            property 'lanterna.autotest.cor', project.findProperty('cor') ?: 'green'
             property 'lanterna.tropas', project.findProperty('tropas') ?: 'green,red,yellow,blue,violet,indigo,orange,black,white'
             property 'lanterna.planetas', project.findProperty('planetas') ?: 'oa,korugar,ysmault,odym,okaara,nok,zamaron,ryut'
             if (project.findProperty('refazer')) property 'lanterna.refazer', 'true'

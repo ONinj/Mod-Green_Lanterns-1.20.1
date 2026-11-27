@@ -262,6 +262,10 @@ public final class LanternaCommand {
                         .executes(c -> { ServerPlayer p = c.getSource().getPlayerOrException(); p.sendSystemMessage(com.lanterna.emocao.Instabilidade.status(p)); return 1; })
                         .then(Commands.literal("provoke").requires(source -> source.hasPermission(2))
                                 .executes(c -> { com.lanterna.emocao.Instabilidade.provocar(c.getSource().getPlayerOrException()); return 1; }))
+                        .then(Commands.literal("mastery").requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("value", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 100))
+                                        .executes(c -> { com.lanterna.emocao.Instabilidade.definirMaestria(c.getSource().getPlayerOrException(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c, "value")); return 1; })))
                         .then(Commands.literal("immersion").requires(source -> source.hasPermission(2))
                                 .then(Commands.argument("seconds", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                                         .executes(c -> { com.lanterna.emocao.Instabilidade.somarImersao(c.getSource().getPlayerOrException(),

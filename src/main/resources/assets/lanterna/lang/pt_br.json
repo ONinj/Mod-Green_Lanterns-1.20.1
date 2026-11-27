@@ -3927,7 +3927,7 @@
   "emocao.lanterna.frenesi": "FRENESI! Você perdeu o controle: %s tomou conta. Mais força e velocidade e constructos 30%% mais fortes, mas a fome dispara. Em 20 s, o cansaço.",
   "emocao.lanterna.frenesi_fim": "O frenesi passa. Você está exausto.",
   "emocao.lanterna.resistiu": "Você dominou %s desta vez. Maestria: %s/%s (a emoção vai demorar mais para transbordar).",
-  "emocao.lanterna.dominio": "Você domina %s! Agora ela demora muito mais para transbordar (no futuro: entrar em frenesi de propósito).",
+  "emocao.lanterna.dominio": "Você domina %s! Agora ela demora muito mais para transbordar, e você pode soltá-la de propósito: Alt+G (frenesi controlado).",
   "emocao.lanterna.imersao": "%s: a luz da entidade penetra em você. Imersão %s/%s: constructos +%s%% mais fortes para sempre (e a emoção mais instável).",
   "emocao.lanterna.status": "Emoção: %s · acumulada %s/%s · maestria %s/%s · imersão na Bateria %s/%s (%s min) · instável: %s",
   "emocao.lanterna.sem_anel": "Você não está usando o anel de uma Tropa emocional.",
@@ -3939,5 +3939,9 @@
   "emocao.lanterna.emocao.laranja": "a Avareza",
   "emocao.lanterna.emocao.azul": "a Esperança",
   "emocao.lanterna.emocao.indigo": "a Compaixão",
-  "emocao.lanterna.emocao.violeta": "o Amor"
+  "emocao.lanterna.emocao.violeta": "o Amor",
+  "key.lanterna.frenesi": "Frenesi (emoção dominada)",
+  "emocao.lanterna.vol": "Você solta %s de propósito: FRENESI controlado por 20 s.",
+  "emocao.lanterna.vol_falta": "Você ainda não domina %s (maestria %s/%s). Resista ao transbordar para ganhar maestria.",
+  "emocao.lanterna.vol_espera": "A emoção ainda está se recompondo (%s s)."
 }

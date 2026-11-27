@@ -117,22 +117,44 @@ public final class ClientFonte {
         float h = p.getBbHeight();
         float pulso = 0.85f + 0.15f * Mth.sin(t * 0.25f);
         pose.pushPose();
-        // halo do corpo (elipse vertical)
+        // 0.59.2: banhado pela luz, a aura é maior e evapora do corpo, como suor num dia frio
+        // halo do corpo (elipse vertical, maior que antes)
         pose.pushPose();
         pose.translate(0, h * 0.5f, 0);
-        pose.scale(0.62f, h * 0.62f, 0.62f);
-        EnergyShapes.sphere(pose, glow, 1f, c, 0.10f * pulso, t);
-        EnergyShapes.sphere(pose, glow, 0.86f, EnergyShapes.clarear(c, 0.4f), 0.07f * pulso, t * 1.4f);
+        pose.scale(0.8f, h * 0.72f, 0.8f);
+        EnergyShapes.sphere(pose, glow, 1f, c, 0.09f * pulso, t);
+        EnergyShapes.sphere(pose, glow, 0.85f, EnergyShapes.clarear(c, 0.4f), 0.07f * pulso, t * 1.4f);
+        EnergyShapes.sphere(pose, glow, 0.68f, EnergyShapes.clarear(c, 0.65f), 0.05f * pulso, t * 0.8f);
         pose.popPose();
+        // o vapor: nuvenzinhas que saem de pontos do corpo (ombros, cabeça, braços, costas), sobem, se abrem e somem
+        float[][] pontos = {{0.22f, 1.42f, 0}, {-0.22f, 1.42f, 0}, {0, 1.75f, 0.05f}, {0.34f, 1.05f, 0}, {-0.34f, 1.05f, 0},
+                {0.1f, 1.2f, 0.15f}, {-0.1f, 1.2f, 0.15f}, {0.12f, 0.75f, -0.1f}, {-0.12f, 0.75f, -0.1f}, {0, 1.35f, -0.14f}};
+        float corpo = Mth.rotLerp(e.getPartialTick(), p.yBodyRotO, p.yBodyRot);
+        double cy = Math.cos(Math.toRadians(-corpo)), sy = Math.sin(Math.toRadians(-corpo));
+        for (int i = 0; i < 34; i++) {
+            float[] o = pontos[i % pontos.length];
+            float fase = (t * (0.018f + 0.004f * (i % 3)) + i * 0.618f) % 1f;
+            double dx = o[0] * cy - o[2] * sy, dz = o[0] * sy + o[2] * cy;
+            // sobe ondulando, levado por um vento fraco, e se espalha
+            double sob = fase * 1.1, deriva = Math.sin(t * 0.05 + i * 1.7) * 0.18 * fase;
+            float raio = 0.09f + 0.42f * fase;
+            float al = Mth.sin(fase * Mth.PI) * (1 - fase * 0.6f) * 0.5f;
+            pose.pushPose();
+            pose.translate(dx * h / 1.8 + deriva, o[1] * h / 1.8 + sob, dz * h / 1.8 + Math.cos(t * 0.04 + i) * 0.1 * fase);
+            // vapor: claro (como fumaça de suor), tingido com a cor da Tropa; mais forte perto do corpo
+            EnergyShapes.sphere(pose, glow, raio, EnergyShapes.clarear(c, i % 3 == 0 ? 0.7f : 0.45f), al, t + i * 13);
+            EnergyShapes.sphere(pose, glow, raio * 0.55f, c, al * 0.8f, t + i * 7);
+            pose.popPose();
+        }
         // chamas de luz subindo
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 12; i++) {
             double ang = i * 2.39996 + t * 0.03;
             float fase = ((t * 0.045f + i * 0.37f) % 1f);
-            double r = 0.42 + 0.08 * Math.sin(t * 0.2 + i);
-            float y0 = fase * h * 0.9f, y1 = y0 + 0.35f + 0.25f * (1 - fase);
-            float al = Mth.sin(fase * Mth.PI) * 0.5f;
-            Vec3 a0 = new Vec3(Math.cos(ang) * r, y0, Math.sin(ang) * r), a1 = new Vec3(Math.cos(ang) * r * 0.8, y1, Math.sin(ang) * r * 0.8);
-            EnergyShapes.tube(pose, glow, a0, a1, 0.07f, 0.01f, c, al, 4);
+            double r = 0.5 + 0.1 * Math.sin(t * 0.2 + i);
+            float y0 = fase * h * 0.95f, y1 = y0 + 0.4f + 0.3f * (1 - fase);
+            float al = Mth.sin(fase * Mth.PI) * 0.45f;
+            Vec3 a0 = new Vec3(Math.cos(ang) * r, y0, Math.sin(ang) * r), a1 = new Vec3(Math.cos(ang) * r * 0.75, y1, Math.sin(ang) * r * 0.75);
+            EnergyShapes.tube(pose, glow, a0, a1, 0.08f, 0.01f, c, al, 4);
         }
         // anel nos pés
         EnergyShapes.anel(pose, glow, 0.7f + 0.05f * Mth.sin(t * 0.3f), 0.18f, 0.02f, c, 0.55f * pulso);
@@ -145,11 +167,16 @@ public final class ClientFonte {
         if (e.phase != TickEvent.Phase.END || mc.level == null || mc.isPaused() || AURAS.isEmpty()) return;
         for (var en : AURAS.entrySet()) {
             var ent = mc.level.getEntity(en.getKey());
-            if (ent == null || mc.level.random.nextInt(3) != 0) continue;
+            if (ent == null) continue;
             int c = en.getValue().cor;
-            mc.level.addParticle(new DustParticleOptions(new Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 0.9f),
-                    ent.getX() + (mc.level.random.nextDouble() - 0.5) * 0.9, ent.getY() + mc.level.random.nextDouble() * ent.getBbHeight(),
-                    ent.getZ() + (mc.level.random.nextDouble() - 0.5) * 0.9, 0, 0.04, 0);
+            var r = mc.level.random;
+            // faíscas de luz e fiapos de vapor que sobem devagar e se desfazem
+            if (r.nextInt(2) == 0) mc.level.addParticle(new DustParticleOptions(new Vector3f(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f), 1.2f),
+                    ent.getX() + (r.nextDouble() - 0.5) * 1.0, ent.getY() + r.nextDouble() * ent.getBbHeight(),
+                    ent.getZ() + (r.nextDouble() - 0.5) * 1.0, 0, 0.05, 0);
+            mc.level.addParticle(com.lanterna.particle.GlowOrbOptions.of(c, 0.12f + r.nextFloat() * 0.1f),
+                    ent.getX() + (r.nextDouble() - 0.5) * 0.7, ent.getY() + 0.6 + r.nextDouble() * ent.getBbHeight() * 0.8,
+                    ent.getZ() + (r.nextDouble() - 0.5) * 0.7, (r.nextDouble() - 0.5) * 0.01, 0.025 + r.nextDouble() * 0.02, (r.nextDouble() - 0.5) * 0.01);
         }
     }
 

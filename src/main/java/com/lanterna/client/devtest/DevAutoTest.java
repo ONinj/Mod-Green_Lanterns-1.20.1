@@ -4679,6 +4679,26 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.59.2: a aura de vapor (banhado pela luz), sobre a grama para enxergar bem. */
+    private static void sceneVapor() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring " + System.getProperty("lanterna.autotest.cor", "green"));
+            com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) r.setPowerActive(true); });
+            com.lanterna.fonte.FonteDados.sobrecarga(sp, 5000);
+        }));
+        at(60, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); look(0, 10); });
+        at(30, () -> shot("vapor_1"));
+        at(17, () -> shot("vapor_2"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_BACK));
+        at(20, () -> shot("vapor_3"));
+        at(5, () -> server(sp -> com.lanterna.fonte.FonteDados.sobrecarga(sp, 0)));
+        at(10, () -> { mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); mc.options.hideGui = false; glog("FIM vapor"); mc.stop(); });
+    }
+
     /** 0.59.1: emoções instáveis (juramento contra o frenesi, maestria, frenesi) e a imersão na Bateria Central. */
     private static void sceneEmocao() {
         Minecraft mc = Minecraft.getInstance();
@@ -4722,8 +4742,18 @@ public final class DevAutoTest {
         at(20, () -> server(sp -> { var b = com.lanterna.emocao.Instabilidade.bateriaPerto(sp, com.lanterna.baterias.Tropa.VERMELHO);
             glog("bateria perto=" + (b == null ? "nenhuma" : b.getBlockPos().toShortString())); }));
         at(140, () -> server(sp -> glog("perto da bateria (7 s): imersao=" + com.lanterna.emocao.Instabilidade.imersao(sp, com.lanterna.baterias.Tropa.VERMELHO) + " s")));
-        at(5, () -> server(sp -> com.lanterna.emocao.Instabilidade.somarImersao(sp, 7200)));
-        at(110, () -> { st.accept("com 2 h de imersão"); mc.options.hideGui = true; shot("imersao_bateria"); });
+        at(5, () -> server(sp -> com.lanterna.emocao.Instabilidade.somarImersao(sp, 900)));
+        at(110, () -> { st.accept("com 15 min de imersão"); mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT); });
+        at(40, () -> shot("vapor_bateria"));
+        at(20, () -> shot("vapor_bateria2"));
+        // frenesi de propósito: sem domínio, recusa; com domínio, entra
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.emocao.Instabilidade.Pedido()));
+        at(10, () -> st.accept("Alt+G sem dominio"));
+        at(5, () -> server(sp -> com.lanterna.emocao.Instabilidade.definirMaestria(sp, 10)));
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.emocao.Instabilidade.Pedido()));
+        at(10, () -> st.accept("Alt+G com dominio"));
+        at(30, () -> shot("frenesi_vol"));
+        at(5, () -> mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON));
         at(10, () -> server(sp -> {
             com.lanterna.necron.SagaNecron.tag(sp).putBoolean("dividido", antes[0]);
             sp.getPersistentData().remove("lanterna_emocao");
@@ -8997,6 +9027,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("vapor")) sceneVapor();
         else if (ENABLED && SCENE.equals("emocao")) sceneEmocao();
         else if (ENABLED && SCENE.equals("necronalimento")) sceneNecronAlimento();
         else if (ENABLED && SCENE.equals("anel2")) sceneAnel2();

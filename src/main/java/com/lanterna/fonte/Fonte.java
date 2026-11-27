@@ -143,7 +143,9 @@ public final class Fonte {
         ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), new FontePackets.Estado(FonteDados.pressao(p), FonteDados.banho(p),
                 FonteDados.sobrecarga(p), fonteDe(p.level()) != null, FonteDados.bloqueado(p), FonteDados.essencia(p),
                 com.lanterna.construct.fonte.ArvoreDaLuz.nosDoAnel(p), selos(p)));
-        boolean ligada = FonteDados.sobrecarga(p) > 0 && ring != null && ring.hasRing() && ring.powerActive();
+        // 0.59.2: banhado pela luz (sobrecarga, dentro da Fonte ou perto da Bateria Central da sua Tropa): aura de vapor
+        boolean ligada = ring != null && ring.hasRing() && (FonteDados.sobrecarga(p) > 0 && ring.powerActive()
+                || fonteDe(p.level()) != null || com.lanterna.emocao.Instabilidade.banhando(p));
         boolean era = AURA.getOrDefault(p.getUUID(), false);
         // liga/desliga na hora e repete a cada 2 s para quem acabou de chegar perto
         if (ligada != era || (ligada && p.tickCount % 40 == 0)) {
