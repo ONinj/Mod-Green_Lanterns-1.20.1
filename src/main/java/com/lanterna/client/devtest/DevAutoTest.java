@@ -4679,6 +4679,49 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** O Respeito dos Ghallos: troca de verdade pela tela de comércio, com o anel laranja. */
+    private static void sceneGhallosTroca() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        int[] id = new int[1];
+        at(20, () -> server(sp -> {
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring orange");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode survival");
+            sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            d.completed().remove("main_okaara_2"); d.active().remove("main_okaara_2");
+            d.reps().put("ghallos", 0);
+            com.lanterna.mission.MissionManager.start(sp, "main_okaara_2");
+            sp.getInventory().clearContent();
+            sp.getInventory().add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLD_INGOT, 64));
+            var g = com.lanterna.lore.LoreEntities.typeOf(com.lanterna.lore.entity.Race.GHALLOS).create(sp.serverLevel());
+            g.moveTo(sp.getX() + 2, sp.getY(), sp.getZ(), 0, 0); g.setNoAi(true);
+            sp.serverLevel().addFreshEntity(g); id[0] = g.getId();
+            glog("missao ativa=" + d.isActive("main_okaara_2") + " rep=" + d.rep("ghallos"));
+        }));
+        at(20, () -> server(sp -> com.lanterna.lore.entity.NpcDialogs.action(sp, id[0], "trade")));
+        at(20, () -> glog("tela=" + (mc.screen == null ? "nenhuma" : mc.screen.getClass().getSimpleName())));
+        for (int k = 0; k < 3; k++) {
+            at(10, () -> { if (mc.player.containerMenu instanceof net.minecraft.world.inventory.MerchantMenu mm) {
+                mm.setSelectionHint(0); mm.tryMoveItems(0);
+                mc.getConnection().send(new net.minecraft.network.protocol.game.ServerboundSelectTradePacket(0)); } });
+            at(10, () -> { var mm = mc.player.containerMenu;
+                mc.gameMode.handleInventoryMouseClick(mm.containerId, 2, 0, net.minecraft.world.inventory.ClickType.PICKUP, mc.player);
+                mc.gameMode.handleInventoryMouseClick(mm.containerId, -999, 0, net.minecraft.world.inventory.ClickType.PICKUP, mc.player); });
+            at(30, () -> server(sp -> { var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+                glog("depois da troca: rep=" + d.rep("ghallos") + " esmeraldas=" + sp.getInventory().countItem(net.minecraft.world.item.Items.EMERALD)
+                        + " progresso=" + (d.isActive("main_okaara_2") ? java.util.Arrays.toString(d.active().get("main_okaara_2")) : "concluida=" + d.isDone("main_okaara_2"))); }));
+        }
+        at(10, () -> { mc.setScreen(null); shot("ghallos_troca"); });
+        at(10, () -> server(sp -> { sp.getAbilities().invulnerable = false; sp.onUpdateAbilities();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative"); }));
+        at(10, () -> { glog("FIM ghallos"); mc.stop(); });
+    }
+
     /** 0.59.0: as versões de teste (rodar com -Pfase=1, depois com -Pfase=2 no mesmo mundo, depois -Pfase=0 para limpar). */
     private static void sceneFaseTeste() {
         Minecraft mc = Minecraft.getInstance();
@@ -8838,6 +8881,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("ghallos")) sceneGhallosTroca();
         else if (ENABLED && SCENE.equals("fasetest")) sceneFaseTeste();
         else if (ENABLED && SCENE.equals("cidadetempo")) sceneCidadeTempo();
         else if (ENABLED && SCENE.equals("auroratempo")) sceneAuroraTempo();
