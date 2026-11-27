@@ -2077,3 +2077,11 @@ versão de teste só para num ponto e avisa que a continuação vem na próxima.
   - dentro da Fonte (a dimensão atrás da Bateria);
   - com a sobrecarga do Banho de Luz.
 
+## 0.59.3 — O esqueleto de animação do Necron
+
+- **Braços:** ombro (clavícula e ombreira) → bíceps → antebraço (cotovelo) → mão → dedos. A foice fica presa na mão direita; a caveira, na esquerda.
+- **Pernas novas, de osso:** bacia → coxa → canela (joelho) → pé. A túnica se abre na frente e a barra subiu acima das canelas, para os passos aparecerem.
+- **Animações em quadros-chave**, no formato do Blockbench, no arquivo `animations/entity/necron.animation.json`: parado (a foice como bengala), andar, voar, golpe 1, golpe 2, conjurar, surgir, alimentar, ajoelhar e cair.
+  - Elas são geradas por `ferramentas/anim_necron.py`, e o mod as mistura com suavidade conforme o que ele está fazendo.
+  - **Para ajustar no Blockbench:** abra `geo/entity/necron.geo.json` e o arquivo de animação. Se você editar no Blockbench, não rode mais o `anim_necron.py`, porque ele reescreve o arquivo.
+

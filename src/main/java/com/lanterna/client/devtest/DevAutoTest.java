@@ -4950,6 +4950,14 @@ public final class DevAutoTest {
             for (int k = 1; k <= 8; k++) { int kk = k; at(2, () -> shot("nl_g" + gg + "_" + kk)); }
             at(20, () -> {});
         }
+        // andando: o servidor empurra o Necron devagar (sem IA) e a câmera vê as pernas de lado
+        for (int k = 0; k < 40; k++) {
+            int kk = k;
+            at(1, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.necron.NecronEntity.class, sp.getBoundingBox().inflate(30))
+                    .forEach(n -> { n.moveTo(n.getX() - 0.09, n.getY(), n.getZ(), 90, 0); n.setYBodyRot(90); n.setYHeadRot(90); })));
+            if (k >= 16 && k % 3 == 0) at(0, () -> shot("nl_andar_" + kk));
+        }
+        at(30, () -> shot("nl_parado2"));
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronlado"); mc.stop(); });
     }
 

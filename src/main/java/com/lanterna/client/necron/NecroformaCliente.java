@@ -86,8 +86,8 @@ public final class NecroformaCliente {
         }
         float s = ESCALA * (0.6f + 0.4f * surge);
         ps.scale(s, s, s);
-        // ele não tem pernas: paira um pouco acima do chão, balançando
-        ps.translate(0, 0.08 + 0.05 * Math.sin(t * 0.08), 0);
+        // 0.59.3: agora ele tem pernas e pisa no chão (só no voo ele balança)
+        if (voa) ps.translate(0, 0.05 * Math.sin(t * 0.08), 0);
         float cj = com.lanterna.client.construct.CastAnim.conjurando(p.getId(), pt);
         Atores.estadoForcado = PoseNecron.estado(p, pt, Mth.clamp(tilt, 0, 1), cj, Mth.clamp((idade + pt) / 26f, 0, 1));
         atores.necron(ps, e.getMultiBufferSource(), t, 0.05f, 1f);

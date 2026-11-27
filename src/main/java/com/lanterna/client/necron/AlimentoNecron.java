@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = LanternaMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class AlimentoNecron {
     /** Onde ficam a caveira erguida e a boca, no modelo (unidades de 1/16 de bloco; frente = -z). */
-    static double CAV_FRENTE = 14.0, CAV_ALTURA = 35.5, BOCA_FRENTE = 3.2, BOCA_ALTURA = 32.5, CAV_LADO = 0;
+    static double CAV_FRENTE = 13.0, CAV_ALTURA = 30.5, BOCA_FRENTE = 3.2, BOCA_ALTURA = 32.5, CAV_LADO = -1.5;
 
     @SubscribeEvent
     public static void tick(TickEvent.ClientTickEvent e) {

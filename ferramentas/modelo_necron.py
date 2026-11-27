@@ -9,7 +9,8 @@ rosto, cavidade do nariz, dentes um a um, mandíbula com os ramos, vértebras do
 com a lâmina chanfrada e a pérola presa por garras.
 
 Os nomes e os pivôs dos ossos são os mesmos de antes (a cena e a entidade mexem neles pelo código):
-root, corpo, saia, farrapo_1..12, cabeca, mandibula, capuz, braco_d, braco_e (caveira), foice, perola.
+root, corpo, saia, farrapo_1..12, cabeca, mandibula, capuz, ombro_d/e → braco_d/e → antebraco_d/e → mao_d/e (foice, caveira) → dedos_d/e,
+ perna_d/e → canela_d/e → pe_d/e, perola.
 
 Rodar na raiz do projeto:  python3 ferramentas/modelo_necron.py
 """
@@ -563,31 +564,55 @@ def necron():
     # ---------------- a saia longa em camadas e os farrapos ----------------
     m.osso("saia", "corpo", (0, 16, 0))
     m.cubo("saia", (-5.4, 10, -3.5), (10.8, 6, 7.3), "pano", D=3)
-    m.cubo("saia", (-6.0, 3, -4.0), (12.0, 7.2, 8.3), "pano", D=3)
-    m.cubo("saia", (-6.4, 0.8, -4.3), (12.8, 2.4, 8.9), "pano", D=3)
-    for k in range(10):   # pregas da saia (frente e trás)
+    # 0.59.3: a túnica se abre na frente (as pernas aparecem quando ele anda): costas, lados e duas abas na frente
+    m.cubo("saia", (-6.0, 4.5, 0.6), (12.0, 5.7, 3.7), "pano", D=3)                # costas (a barra acima das canelas)
+    m.cubo("saia", (-6.4, 3.0, 2.2), (12.8, 1.8, 2.4), "pano", D=3)                # barra de trás, mais comprida
+    m.cubo("saia", (-6.0, 6.0, -4.0), (1.6, 4.2, 4.6), "pano", D=3)                # lados
+    m.cubo("saia", (4.4, 6.0, -4.0), (1.6, 4.2, 4.6), "pano", D=3)
+    m.cubo("saia", (-5.2, 5.4, -4.2), (1.9, 4.7, 0.9), "pano", D=3)                # abas da frente, rasgadas
+    m.cubo("saia", (3.3, 5.0, -4.2), (1.9, 5.1, 0.9), "pano", D=3)
+    m.cubo("saia", (-4.6, 4.2, -4.0), (0.8, 1.2, 0.6), "farrapo", D=4)
+    m.cubo("saia", (3.9, 3.9, -4.0), (0.8, 1.1, 0.6), "farrapo", D=4)
+    m.cubo("saia", (-6.1, 4.6, -2.6), (0.6, 1.4, 1.0), "farrapo", D=4)
+    m.cubo("saia", (5.5, 4.9, -1.4), (0.6, 1.1, 1.0), "farrapo", D=4)
+    for k in range(10):   # pregas da saia (atrás)
         x = -5.8 + k * 1.25
-        m.cubo("saia", (x, 1.2, -4.55), (0.5, 9.0 - (k % 3) * 0.8, 0.4), "pano", D=3)
-        m.cubo("saia", (x, 1.2, 4.6), (0.5, 9.0 - ((k + 1) % 3) * 0.8, 0.4), "pano", D=3)
+        m.cubo("saia", (x, 3.2, 4.6), (0.5, 7.0 - ((k + 1) % 3) * 0.8, 0.4), "pano", D=3)
     pos = [(-5.8, -4.6), (-3.2, -4.7), (-0.4, -4.8), (2.4, -4.7), (4.6, -4.6),
            (-5.6, 4.7), (-2.6, 4.8), (0.6, 4.8), (3.6, 4.7), (-6.7, -0.8), (6.0, -0.8), (6.0, 1.6)]
     for i, (x, z) in enumerate(pos, 1):
         nome = "farrapo_%d" % i
-        m.osso(nome, "saia", (x + 1, 3, z + 0.4))
-        comp = 3.5 + (i * 7) % 5
-        larg = 1.6 + (i % 3) * 0.5
-        m.cubo(nome, (x, 3 - comp, z), (larg, comp, 0.5), "farrapo", D=4)
-        m.cubo(nome, (x + 0.3, 3 - comp - 1.2, z + 0.1), (larg * 0.45, 1.4, 0.3), "farrapo", D=4)
-    # pés de osso (saem por baixo da saia): tarso, metatarsos e falanges
-    for sinal in (-1, 1):
-        x = 2.4 * sinal
-        m.cubo("root", (x - 1.0, 0, -1.6), (2.0, 1.1, 2.4), "osso", D=5)
-        m.cubo("root", (x - 0.5, 0.6, 0.6), (1.0, 0.9, 1.0), "osso", D=5)            # calcanhar
+        # 0.59.3: presos na barra (mais alta) e sem passar do chão
+        y0 = 6.0 if z < 0 else 4.0
+        m.osso(nome, "saia", (x + 1, y0, z + 0.4))
+        comp = 2.4 + (i * 7) % 4
+        larg = (1.0 if z < -3 else 1.6) + (i % 3) * 0.4
+        m.cubo(nome, (x, y0 - comp, z), (larg, comp, 0.5), "farrapo", D=4)
+        m.cubo(nome, (x + 0.3, max(0.1, y0 - comp - 1.2), z + 0.1), (larg * 0.45, 1.2, 0.3), "farrapo", D=4)
+    # 0.59.3: pernas de osso articuladas: bacia (no root) → coxa → canela → pé
+    m.cubo("root", (-3.6, 13.6, -1.6), (7.2, 2.2, 3.2), "osso", D=5)                # bacia
+    m.cubo("root", (-1.0, 12.8, -1.2), (2.0, 1.2, 2.2), "osso", D=5)               # sacro
+    for sinal, lado in ((-1, "d"), (1, "e")):
+        x = 2.6 * sinal
+        m.osso("perna_" + lado, "root", (x, 14.6, 0))
+        m.cubo("perna_" + lado, (x - 1.1, 13.6, -1.1), (2.2, 1.8, 2.2), "osso", D=5)        # cabeça do fêmur
+        m.cubo("perna_" + lado, (x - 0.7, 8.4, -0.75), (1.4, 5.6, 1.4), "osso", D=5)        # fêmur
+        m.cubo("perna_" + lado, (x - 0.95, 12.0, -1.3), (1.9, 1.5, 0.6), "farrapo", D=4)    # tiras de pano
+        m.cubo("perna_" + lado, (x - 0.35, 9.6, -0.95), (0.3, 2.6, 0.3), "carne", D=6)      # tendão seco
+        m.osso("canela_" + lado, "perna_" + lado, (x, 8.2, 0))
+        m.cubo("canela_" + lado, (x - 1.05, 7.4, -1.15), (2.1, 1.5, 2.1), "osso", D=5)     # joelho
+        m.cubo("canela_" + lado, (x - 0.55, 7.9, -1.4), (1.1, 0.9, 0.5), "osso", D=6)      # patela
+        m.cubo("canela_" + lado, (x - 0.65, 2.0, -0.7), (1.0, 5.6, 1.0), "osso", D=5)      # tíbia
+        m.cubo("canela_" + lado, (x + 0.35, 2.3, -0.3), (0.55, 5.0, 0.55), "osso", D=6)    # fíbula
+        m.cubo("canela_" + lado, (x - 0.5, 4.0, -0.95), (0.25, 2.4, 0.25), "carne", D=6)
+        m.cubo("canela_" + lado, (x - 0.9, 5.4, -1.0), (1.8, 0.8, 1.8), "corda", D=5)      # trapo amarrado
+        m.osso("pe_" + lado, "canela_" + lado, (x, 1.6, 0))
+        m.cubo("pe_" + lado, (x - 0.85, 0.8, -1.0), (1.7, 1.3, 1.9), "osso", D=5)          # tarso
+        m.cubo("pe_" + lado, (x - 0.5, 0.6, 0.6), (1.0, 1.0, 1.0), "osso", D=5)            # calcanhar
         for k in range(4):
             fx = x - 1.0 + k * 0.55
-            m.cubo("root", (fx, 0, -3.0), (0.4, 0.5, 1.4), "osso", D=6)
-            m.cubo("root", (fx + 0.02, 0, -3.8), (0.36, 0.4, 0.8), "osso", D=6)
-        m.cubo("root", (x - 0.5, 1.1, -0.5), (1.0, 2.0, 1.0), "osso", D=5)            # canela
+            m.cubo("pe_" + lado, (fx, 0, -2.5), (0.4, 0.55, 1.6), "osso", D=6)             # metatarsos
+            m.cubo("pe_" + lado, (fx + 0.02, 0, -3.4), (0.36, 0.42, 0.95), "osso", D=6)    # falanges
 
     # ---------------- a CABEÇA ----------------
     m.osso("cabeca", "corpo", (0, 28.5, 0))
@@ -725,36 +750,50 @@ def necron():
     m.cubo("capuz", (2.4, 21.5, 4.8), (1.4, 7.5, 0.5), "farrapo", D=3)
 
     # ---------------- braços: manga rasgada em camadas, úmero, cotovelo, rádio e ulna, mão com falanges ----------------
-    for sinal, nome in ((-1, "braco_d"), (1, "braco_e")):
+    # 0.59.3: braço articulado: ombro (clavícula e ombreira) → braço (bíceps, úmero) → antebraço → mão → dedos
+    for sinal, lado in ((-1, "d"), (1, "e")):
+        nome = "braco_" + lado
         px = 6.3 * sinal
-        m.osso(nome, "corpo", (px, 27.5, 0))
+        m.osso("ombro_" + lado, "corpo", (3.6 * sinal, 28.4, 0))
+        m.cubo("ombro_" + lado, (min(1.2 * sinal, 5.6 * sinal), 27.9, -0.5), (4.4, 0.8, 1.0), "osso", D=5)   # clavícula
+        m.cubo("ombro_" + lado, (px - 2.4, 27.2, -2.6), (4.8, 1.6, 5.2), "pano", D=3)                      # ombreira
+        m.cubo("ombro_" + lado, (px - 2.0, 28.6, -2.2), (4.0, 0.7, 4.4), "farrapo", D=4)
+        m.osso(nome, "ombro_" + lado, (px, 27.5, 0))
         m.cubo(nome, (px - 1.05, 26.4, -1.05), (2.1, 2.1, 2.1), "osso", D=5)              # cabeça do úmero
-        m.cubo(nome, (px - 2.1, 22.0, -2.3), (4.2, 5.6, 4.6), "pano", D=3)               # manga
+        m.cubo(nome, (px - 2.1, 22.0, -2.3), (4.2, 5.0, 4.6), "pano", D=3)               # manga
         for k in range(5):
             comp = 1.6 + _h(k, sinal, 11) * 3.2
             ang = k * 72
             dx, dz = 1.9 * math.cos(math.radians(ang)), 2.0 * math.sin(math.radians(ang))
             m.cubo(nome, (px + dx - 0.6, 22.0 - comp, dz - 0.15), (1.2, comp, 0.3), "farrapo", D=4)
         m.cubo(nome, (px - 0.65, 19.8, -0.65), (1.3, 6.8, 1.3), "osso", D=5)             # úmero
-        m.cubo(nome, (px - 0.95, 18.9, -0.95), (1.9, 1.3, 1.9), "osso", D=5)             # cotovelo
-        m.cubo(nome, (px - 0.35, 18.4, 0.55), (0.7, 0.8, 0.6), "osso", D=5)              # olécrano
-        m.cubo(nome, (px - 0.78, 13.6, -0.62), (0.62, 5.6, 0.62), "osso", D=5)           # rádio
-        m.cubo(nome, (px + 0.1, 13.6, -0.1), (0.6, 5.6, 0.6), "osso", D=5)               # ulna
-        m.cubo(nome, (px - 0.62, 14.2, -0.86), (0.3, 2.6, 0.3), "carne", D=6)            # tendões secos
-        m.cubo(nome, (px + 0.35, 15.0, 0.45), (0.25, 2.0, 0.25), "carne", D=6)
-        m.cubo(nome, (px - 1.05, 12.6, -1.05), (2.1, 1.1, 2.1), "osso", D=5)             # carpo
-        m.cubo(nome, (px - 1.15, 11.1, -0.95), (2.3, 1.5, 0.95), "osso", D=5)            # metacarpos
+        m.cubo(nome, (px - 0.4, 21.5, -0.95), (0.3, 3.4, 0.3), "carne", D=6)             # bíceps seco
+        ante = "antebraco_" + lado
+        m.osso(ante, nome, (px, 19.5, 0))
+        m.cubo(ante, (px - 0.95, 18.9, -0.95), (1.9, 1.3, 1.9), "osso", D=5)             # cotovelo
+        m.cubo(ante, (px - 0.35, 18.4, 0.55), (0.7, 0.8, 0.6), "osso", D=5)              # olécrano
+        m.cubo(ante, (px - 0.78, 13.6, -0.62), (0.62, 5.6, 0.62), "osso", D=5)           # rádio
+        m.cubo(ante, (px + 0.1, 13.6, -0.1), (0.6, 5.6, 0.6), "osso", D=5)               # ulna
+        m.cubo(ante, (px - 0.62, 14.2, -0.86), (0.3, 2.6, 0.3), "carne", D=6)            # tendões secos
+        m.cubo(ante, (px + 0.35, 15.0, 0.45), (0.25, 2.0, 0.25), "carne", D=6)
+        m.cubo(ante, (px - 0.9, 16.4, -0.9), (1.8, 0.7, 1.8), "corda", D=5)              # trapo no pulso
+        mao = "mao_" + lado
+        m.osso(mao, ante, (px, 13.4, 0))
+        m.cubo(mao, (px - 1.05, 12.6, -1.05), (2.1, 1.1, 2.1), "osso", D=5)              # carpo
+        m.cubo(mao, (px - 1.15, 11.1, -0.95), (2.3, 1.5, 0.95), "osso", D=5)             # metacarpos
+        m.cubo(mao, (px - 0.4 * sinal - 0.25, 10.4, -1.8), (0.48, 1.3, 0.48), "osso", D=6)  # polegar
+        m.cubo(mao, (px - 0.4 * sinal - 0.22, 9.4, -2.1), (0.42, 1.0, 0.42), "osso", D=6)
+        dedos = "dedos_" + lado
+        m.osso(dedos, mao, (px, 11.1, -0.7))
         for k in range(4):
             fx = px - 1.1 + k * 0.6
             comp = (1.3, 1.5, 1.4, 1.1)[k]
-            m.cubo(nome, (fx, 11.1 - comp, -0.95), (0.42, comp, 0.42), "osso", D=6)      # falange 1
-            m.cubo(nome, (fx + 0.02, 11.1 - comp - 1.05, -1.2), (0.38, 1.1, 0.38), "osso", D=6)   # falange 2
-            m.cubo(nome, (fx + 0.05, 11.1 - comp - 1.75, -1.5), (0.32, 0.75, 0.32), "osso", D=6)  # ponta em garra
-        m.cubo(nome, (px - 0.4 * sinal - 0.25, 10.4, -1.8), (0.48, 1.3, 0.48), "osso", D=6)  # polegar
-        m.cubo(nome, (px - 0.4 * sinal - 0.22, 9.4, -2.1), (0.42, 1.0, 0.42), "osso", D=6)
+            m.cubo(dedos, (fx, 11.1 - comp, -0.95), (0.42, comp, 0.42), "osso", D=6)      # falange 1
+            m.cubo(dedos, (fx + 0.02, 11.1 - comp - 1.05, -1.2), (0.38, 1.1, 0.38), "osso", D=6)   # falange 2
+            m.cubo(dedos, (fx + 0.05, 11.1 - comp - 1.75, -1.5), (0.32, 0.75, 0.32), "osso", D=6)  # ponta em garra
 
     # ---------------- 0.59.1: a caveira que ele segura para se alimentar (escondida; aparece na animação) ----------------
-    m.osso("caveira", "braco_e", (6.3, 8.6, -1.4))
+    m.osso("caveira", "mao_e", (6.3, 8.6, -1.4))
     cx, cy, cz = 6.3, 6.4, -1.4
     m.cubo("caveira", (cx - 2.2, cy - 1.2, cz - 2.2), (4.4, 3.6, 4.4), "cranio", D=6)          # calota
     m.cubo("caveira", (cx - 1.8, cy + 2.4, cz - 1.8), (3.6, 0.8, 3.6), "cranio", D=6)          # topo
@@ -769,7 +808,7 @@ def necron():
     m.cubo("caveira", (cx - 0.9, cy + 1.2, cz - 2.3), (0.25, 1.5, 0.2), "buraco", D=8)        # rachadura
 
     # ---------------- a foice: haste amarrada, lâmina chanfrada e serrilhada, crânio na base, a pérola ----------------
-    m.osso("foice", "braco_d", (-6.3, 10.5, -0.4))
+    m.osso("foice", "mao_d", (-6.3, 10.5, -0.4))
     m.cubo("foice", (-6.8, -3, -0.9), (1, 56, 1), "haste", D=4)
     for y in (2, 9, 20, 31, 42):
         m.cubo("foice", (-7.05, y, -1.15), (1.5, 0.7, 1.5), "osso", D=5)                  # anéis de osso
