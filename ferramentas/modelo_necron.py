@@ -220,7 +220,7 @@ class Modelo:
             glow.putpixel((tw - 1, th - 1), (1, 1, 1, 255))
         img.save(os.path.join(RAIZ, "textures", "entity", self.nome + ".png"), optimize=True)
         glow.save(os.path.join(RAIZ, "textures", "entity", self.nome + "_glowmask.png"), optimize=True)
-        print("necron: %d cubos, textura %dx%d" % (len(self.cubos), tw, th))
+        print("%s: %d cubos, textura %dx%d" % (self.nome, len(self.cubos), tw, th))
 
 
 # ============================== cores e pintores ==============================

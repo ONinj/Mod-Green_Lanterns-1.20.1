@@ -2085,3 +2085,19 @@ versão de teste só para num ponto e avisa que a continuação vem na próxima.
   - Elas são geradas por `ferramentas/anim_necron.py`, e o mod as mistura com suavidade conforme o que ele está fazendo.
   - **Para ajustar no Blockbench:** abra `geo/entity/necron.geo.json` e o arquivo de animação. Se você editar no Blockbench, não rode mais o `anim_necron.py`, porque ele reescreve o arquivo.
 
+## 0.60.0 — As entidades emocionais nas Baterias Centrais
+
+Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinhos. Elas estão **presas dentro das Baterias Centrais**: nadam em volta do núcleo e são vistas brilhando através do vidro.
+
+| Tropa | Entidade | Forma |
+|---|---|---|
+| Verde | Íon (a Vontade) | uma baleia do espaço |
+| Amarelo | Parallax (o Medo) | um inseto-larva enorme, com mandíbulas, antenas e 6 patas |
+| Vermelho | o Açougueiro (a Raiva) | um touro-demônio com chifres e crina de espinhos |
+| Laranja | Ofidiano (a Avareza) | uma serpente coroada, com capuz de espinhos |
+| Azul | Adara (a Esperança) | uma ave de asas largas e cauda em leque |
+| Índigo | o Prosélito (a Compaixão) | uma lula com oito tentáculos e dois longos de caça |
+| Violeta | o Predador (o Amor) | um caçador alado de pescoço longo |
+
+É delas a luz que banha quem fica perto da Bateria (a imersão), e é daqui que um dia o Parallax vai escapar.
+

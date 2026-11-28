@@ -16,8 +16,21 @@ public class BateriaNucleoRenderer extends GeoBlockRenderer<BateriaNucleoBlockEn
     public BateriaNucleoRenderer(BlockEntityRendererProvider.Context ctx) {
         super(new Modelo());
         addRenderLayer(new AutoGlowingGeoLayer<>(this));
+        // 0.60.0: a entidade da emoção, presa dentro do núcleo
+        addRenderLayer(new software.bernie.geckolib.renderer.layer.GeoRenderLayer<>(this) {
+            @Override
+            public void render(com.mojang.blaze3d.vertex.PoseStack ps, BateriaNucleoBlockEntity be, software.bernie.geckolib.cache.object.BakedGeoModel model,
+                               RenderType type, net.minecraft.client.renderer.MultiBufferSource bufs, com.mojang.blaze3d.vertex.VertexConsumer buffer,
+                               float pt, int light, int overlay) {
+                ps.pushPose();
+                ps.translate(-0.5, 0, -0.5);   // a camada está no centro do bloco; o desenho conta a partir do canto
+                com.lanterna.client.entidades.EntidadesBateria.desenhar(be, ps, bufs, pt);
+                ps.popPose();
+            }
+        });
     }
     @Override public boolean shouldRenderOffScreen(BateriaNucleoBlockEntity be) { return true; }
+
     @Override public int getViewDistance() { return 256; }
 
     static class Modelo extends GeoModel<BateriaNucleoBlockEntity> {

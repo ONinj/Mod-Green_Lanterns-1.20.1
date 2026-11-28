@@ -4679,6 +4679,33 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.60.0: as entidades emocionais dentro das Baterias Centrais (uma de cada vez, -Pang=distância). */
+    private static void sceneEntidades() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        palco(mc);
+        double dist = Double.parseDouble(System.getProperty("lanterna.autotest.ang", "13"));
+        at(20, () -> server(sp -> { sp.getAbilities().flying = true; sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+            sp.teleportTo(sp.serverLevel(), dist * 0.6 + 0.5, 219.5, dist * 0.8 + 0.5, 143, 12); }));
+        at(10, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        for (var t : com.lanterna.baterias.Tropa.values()) {
+            at(10, () -> server(sp -> sp.serverLevel().setBlockAndUpdate(new net.minecraft.core.BlockPos(0, 200, 0),
+                    com.lanterna.baterias.ModBaterias.NUCLEO.get().defaultBlockState().setValue(com.lanterna.baterias.BateriaNucleoBlock.TROPA, t))));
+            at(60, () -> shot("entidade_" + t.nome));
+            at(25, () -> shot("entidade_" + t.nome + "_b"));
+        }
+        at(5, () -> server(sp -> { sp.serverLevel().setBlockAndUpdate(new net.minecraft.core.BlockPos(0, 200, 0), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            sp.getAbilities().invulnerable = false; sp.onUpdateAbilities(); sp.teleportTo(sp.serverLevel(), 0.5, 202.6, 11.5, 180, 6); }));
+        // vitrine: cada uma de perto, de lado (3/4)
+        for (var t : com.lanterna.baterias.Tropa.values()) {
+            at(15, () -> { com.lanterna.client.entidades.EntidadesBateria.vitrine = t; com.lanterna.client.entidades.EntidadesBateria.vitrineGiro = 125;
+                com.lanterna.client.entidades.EntidadesBateria.vitrinePos = new net.minecraft.world.phys.Vec3(0.5, 201.5, 0.5); });
+            at(25, () -> shot("vitrine_" + t.nome));
+        }
+        at(5, () -> com.lanterna.client.entidades.EntidadesBateria.vitrine = null);
+        at(10, () -> { mc.options.hideGui = false; glog("FIM entidades"); mc.stop(); });
+    }
+
     /** 0.59.2: a aura de vapor (banhado pela luz), sobre a grama para enxergar bem. */
     private static void sceneVapor() {
         Minecraft mc = Minecraft.getInstance();
@@ -9035,6 +9062,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("entidades")) sceneEntidades();
         else if (ENABLED && SCENE.equals("vapor")) sceneVapor();
         else if (ENABLED && SCENE.equals("emocao")) sceneEmocao();
         else if (ENABLED && SCENE.equals("necronalimento")) sceneNecronAlimento();
