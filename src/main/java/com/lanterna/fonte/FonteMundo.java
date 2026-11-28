@@ -70,9 +70,17 @@ public final class FonteMundo {
         if (tropa == null || Obra.ocupada()) return;
         var data = LoreWorldData.get(p.server);
         String site = "fonte_" + tropa + ":salas";
-        if (data.siteBuilt(site)) return;
-        data.markSite(site);
-        construir(p.serverLevel(), tropa);
+        if (!data.siteBuilt(site)) {
+            data.markSite(site);
+            construir(p.serverLevel(), tropa);
+            return;
+        }
+        // 0.60.3: o Salão das Memórias (o Arquivo refeito, com o Altar dos Desafios) e os cristais em volta
+        String salao = "fonte_" + tropa + ":memorias";
+        if (!data.siteBuilt(salao)) {
+            data.markSite(salao);
+            construirMemorias(p.serverLevel(), tropa);
+        }
     }
 
     private static void s(ServerLevel l, BlockPos p, BlockState st) { l.setBlock(p, st, 2); }
@@ -103,22 +111,6 @@ public final class FonteMundo {
         java.util.List<net.minecraft.world.level.ChunkPos> pedacos = new java.util.ArrayList<>();
         for (int cx = -3; cx <= 2; cx++) for (int cz = -3; cz <= 10; cz++) pedacos.add(new net.minecraft.world.level.ChunkPos(cx, cz));
         Obra.carregar(level, pedacos);
-        // Arquivo (oeste)
-        Obra.etapa(level, l -> {
-            BlockPos a = new BlockPos(-24, 100, 0);
-            disco(l, a, 7, c.piso(), c.borda());
-            for (int i = 0; i < 6; i++) {
-                double ang = i * Math.PI / 3;
-                BlockPos p = a.offset((int) Math.round(Math.cos(ang) * 6), 1, (int) Math.round(Math.sin(ang) * 6));
-                for (int y = 0; y < 5; y++) s(l, p.above(y), b(y == 4 ? c.luz() : c.vidro()));
-            }
-            BlockPos lec = a.above();
-            s(l, lec, Blocks.LECTERN.defaultBlockState().setValue(LecternBlock.FACING, Direction.EAST));
-            if (l.getBlockEntity(lec) instanceof LecternBlockEntity be) {
-                LecternBlock.tryPlaceBook(null, l, lec, l.getBlockState(lec), livro(tropa));
-            }
-            ponte(l, new BlockPos(-7, 100, 0), new BlockPos(-17, 100, 0), c);
-        });
         // Forja de Construtos (leste)
         Obra.etapa(level, l -> {
             BlockPos f = new BlockPos(24, 100, 0);
@@ -168,6 +160,100 @@ public final class FonteMundo {
             s(l, ILHA.above(2), b(c.vidro()));
         });
         Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: salas da Fonte {} prontas", tropa));
+    }
+
+    // ===================== 0.60.3: o Salão das Memórias =====================
+
+    private static void circulo(ServerLevel l, BlockPos c, double r, int y, BlockState st) {
+        int n = (int) Math.ceil(r * 8);
+        for (int i = 0; i < n; i++) {
+            double a = i * Math.PI * 2 / n;
+            s(l, new BlockPos(c.getX() + (int) Math.round(Math.cos(a) * r), y, c.getZ() + (int) Math.round(Math.sin(a) * r)), st);
+        }
+    }
+
+    /** Uma estátua de um Lanterna lendário (de frente para o centro do salão). */
+    private static void estatua(ServerLevel l, BlockPos base, Cores c, int nivel) {
+        int alto = nivel == 3 ? 2 : 1;
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) for (int y = 1; y <= alto; y++)
+            s(l, base.offset(dx, y, dz), b(Math.abs(dx) + Math.abs(dz) == 2 ? c.borda() : Blocks.POLISHED_DEEPSLATE));
+        BlockPos p = base.above(alto + 1);
+        s(l, p, b(c.vidro())); s(l, p.above(), b(c.vidro()));                      // pernas
+        s(l, p.above(2), b(c.borda())); s(l, p.above(3), b(c.borda()));            // tronco
+        for (Direction d : new Direction[]{Direction.EAST, Direction.WEST}) s(l, p.above(3).relative(d), b(c.vidro()));   // braços
+        s(l, p.above(4), b(c.luz()));                                              // cabeça de luz
+        if (nivel == 3) for (Direction d : Direction.Plane.HORIZONTAL) s(l, p.above(5).relative(d), b(c.vidro()));   // auréola do lendário
+        // o anel brilhando na mão
+        s(l, p.above(3).relative(Direction.EAST).above(), b(Blocks.END_ROD));
+    }
+
+    private static void construirMemorias(ServerLevel level, String tropa) {
+        Cores c = CORES.getOrDefault(tropa, CORES.get("verde"));
+        BlockPos m = Desafios.SALAO;
+        java.util.List<net.minecraft.world.level.ChunkPos> pedacos = new java.util.ArrayList<>();
+        for (int cx = -4; cx <= 0; cx++) for (int cz = -2; cz <= 1; cz++) pedacos.add(new net.minecraft.world.level.ChunkPos(cx, cz));
+        Obra.carregar(level, pedacos);
+        // limpa o Arquivo antigo e a área do salão
+        Obra.etapa(level, l -> {
+            for (int dx = -17; dx <= 17; dx++) for (int dz = -17; dz <= 17; dz++) for (int y = 90; y <= 118; y++)
+                if (dx * dx + dz * dz <= 17 * 17) s(l, m.offset(dx, y - m.getY(), dz), b(Blocks.AIR));
+            for (int x = -17; x <= -6; x++) for (int dz = -2; dz <= 2; dz++) for (int y = 100; y <= 106; y++) s(l, new BlockPos(x, y, dz), b(Blocks.AIR));
+        });
+        // o piso flutuante: anéis, o anel de luz embutido, o centro brilhando e a base em cone por baixo
+        Obra.etapa(level, l -> {
+            for (int dx = -14; dx <= 14; dx++) for (int dz = -14; dz <= 14; dz++) {
+                double d = Math.sqrt(dx * dx + dz * dz);
+                if (d > 14) continue;
+                Block piso = d > 13 ? c.borda() : (d > 9 && d < 10.2) ? c.luz() : d < 2.2 ? c.vidro() : ((int) d) % 3 == 0 ? c.borda() : c.piso();
+                s(l, m.offset(dx, 0, dz), b(piso));
+                if (d < 2.2) s(l, m.offset(dx, -1, dz), b(c.luz()));
+                for (int k = 1; k <= 7; k++) if (d <= 14 - k * 1.9) s(l, m.offset(dx, -k, dz), b(k == 7 ? c.luz() : Blocks.BLACK_CONCRETE));
+            }
+        });
+        // colunas, arcos e a borda do teto
+        Obra.etapa(level, l -> {
+            for (int i = 0; i < 12; i++) {
+                double a = i * Math.PI / 6 + Math.PI / 12;
+                BlockPos p = m.offset((int) Math.round(Math.cos(a) * 13), 1, (int) Math.round(Math.sin(a) * 13));
+                if (p.getX() > m.getX() + 9 && Math.abs(p.getZ()) <= 3) continue;   // a entrada, pela ponte
+                for (int y = 0; y < 8; y++) s(l, p.above(y), b(y % 3 == 2 ? c.borda() : c.vidro()));
+                s(l, p.above(8), b(c.luz()));
+            }
+            circulo(l, m, 13, m.getY() + 9, b(c.borda()));
+            circulo(l, m, 12, m.getY() + 10, b(c.vidro()));
+            circulo(l, m, 10.5, m.getY() + 11, b(c.vidro()));
+        });
+        // as quatro estátuas das memórias e o Altar dos Desafios com o livro
+        Obra.etapa(level, l -> {
+            double[] ang = {Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.65, Math.PI * 0.35};
+            for (int i = 0; i < 4; i++) estatua(l, m.offset((int) Math.round(Math.cos(ang[i]) * 9.5), 0, (int) Math.round(Math.sin(ang[i]) * 9.5)), c, i);
+            BlockPos al = Desafios.ALTAR;
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) s(l, al.offset(dx, -1, dz), b(Blocks.CRYING_OBSIDIAN));
+            s(l, al, b(Blocks.LODESTONE));
+            s(l, al.above(), b(c.luz()));
+            s(l, al.offset(-2, 0, 0), b(c.borda())); s(l, al.offset(2, 0, 0), b(c.borda()));
+            s(l, al.offset(-2, 1, 0), b(Blocks.END_ROD)); s(l, al.offset(2, 1, 0), b(Blocks.END_ROD));
+            BlockPos lec = al.offset(0, 0, 2).east(3);
+            s(l, lec, Blocks.LECTERN.defaultBlockState().setValue(LecternBlock.FACING, Direction.NORTH));
+            if (l.getBlockEntity(lec) instanceof LecternBlockEntity) LecternBlock.tryPlaceBook(null, l, lec, l.getBlockState(lec), livro(tropa));
+            ponte(l, new BlockPos(-7, 100, 0), new BlockPos(m.getX() + 13, 100, 0), c);
+        });
+        // cristais flutuando em volta da Fonte
+        Obra.etapa(level, l -> {
+            var r = new java.util.Random(tropa.hashCode());
+            for (int i = 0; i < 16; i++) {
+                double a = i * Math.PI * 2 / 16 + r.nextDouble() * 0.3;
+                double dist = 48 + r.nextDouble() * 24;
+                BlockPos p = new BlockPos((int) (Math.cos(a) * dist), 104 + r.nextInt(26), (int) (Math.sin(a) * dist) + 40);
+                int h = 3 + r.nextInt(5);
+                for (int y = -h; y <= h; y++) {
+                    int w = Math.max(0, (h - Math.abs(y)) / 2);
+                    for (int dx = -w; dx <= w; dx++) for (int dz = -w; dz <= w; dz++)
+                        if (Math.abs(dx) + Math.abs(dz) <= w) s(l, p.offset(dx, y, dz), b(Math.abs(y) == h ? c.luz() : c.vidro()));
+                }
+            }
+        });
+        Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: Salão das Memórias da Fonte {} pronto", tropa));
     }
 
     /** O livro do Arquivo: memórias dos Lanternas antigos daquela Tropa (texto traduzido no cliente). */

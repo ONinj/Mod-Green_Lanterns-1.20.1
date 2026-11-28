@@ -4679,6 +4679,59 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.60.3: a Fonte por dentro: Salão das Memórias, o Altar dos Desafios e as entidades em tamanho real no céu. */
+    private static void sceneFonteDesafio() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        java.util.function.Consumer<String> ir = (tropa) -> server(sp -> {
+            var k = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("fonte_" + tropa));
+            sp.teleportTo(sp.server.getLevel(k), -4.5, 101, 0.5, 90, 0);
+            sp.getAbilities().flying = true; sp.getAbilities().invulnerable = true; sp.onUpdateAbilities();
+        });
+        at(40, () -> { cmd("gamemode creative"); server(sp -> { var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring red");
+            sp.getPersistentData().remove("lanterna_emocao"); com.lanterna.necron.SagaNecron.tag(sp).putBoolean("dividido", false); }); });
+        at(10, () -> ir.accept("vermelho"));
+        at(400, () -> { mc.options.hideGui = true; server(sp -> sp.teleportTo(sp.serverLevel(), -6.5, 112, 6.5, 120, 30)); });
+        at(60, () -> shot("fonte_salao"));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), -26.5, 101, -6.5, 180, 15)));
+        at(40, () -> shot("fonte_altar"));
+        at(5, () -> { mc.options.hideGui = false; server(sp -> com.lanterna.fonte.Desafios.abrir(sp, "vermelho")); });
+        at(30, () -> shot("fonte_altar_tela"));
+        at(5, () -> { mc.setScreen(null); server(sp -> {
+            glog("essencia antes=" + com.lanterna.fonte.FonteDados.essencia(sp));
+            sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "gamemode survival"); }); });
+        at(5, () -> com.lanterna.network.ModNetwork.sendToServer(new com.lanterna.fonte.Desafios.Desafiar("vermelho", 0)));
+        at(40, () -> { mc.options.hideGui = false; shot("fonte_eco"); });
+        at(5, () -> server(sp -> sp.serverLevel().getEntitiesOfClass(com.lanterna.especies.LanternaEntity.class, sp.getBoundingBox().inflate(40), com.lanterna.fonte.Desafios::eco)
+                .forEach(e -> { glog("eco: " + e.getCustomName().getString() + " vida=" + e.getMaxHealth()); e.hurt(sp.damageSources().playerAttack(sp), 9999); })));
+        at(20, () -> server(sp -> glog("essencia depois=" + com.lanterna.fonte.FonteDados.essencia(sp) + " vencido=" + com.lanterna.fonte.Desafios.vencido(sp, "vermelho", 0))));
+        // as entidades em tamanho real, uma Fonte de cada vez (fontedesafio2: só elas)
+        for (String t : new String[]{"vermelho", "verde", "amarelo", "laranja", "violeta"}) {
+            at(10, () -> ir.accept(t));
+            at(60, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+            at(1, () -> {
+                // olha para onde a entidade está (mesma conta do EntidadesBateria.naFonte)
+                double ang = mc.level.getGameTime() * 0.0016, x = Math.cos(ang) * 95, z = 70 + Math.sin(ang) * 95, y = 160;
+                var p = mc.player;
+                // vai para 60 blocos dela, olhando para ela
+                double dx = x - 0, dz = z - 70, d = Math.sqrt(dx * dx + dz * dz);
+                double cx = x - dx / d * 80, cz = z - dz / d * 80;
+                server(sp -> sp.teleportTo(sp.serverLevel(), cx, 150, cz, 0, 0));
+            });
+            at(15, () -> { double ang = mc.level.getGameTime() * 0.0016, x = Math.cos(ang) * 95, z = 70 + Math.sin(ang) * 95, y = 160;
+                var p = mc.player; double dx = x - p.getX(), dy = y - p.getEyeY(), dz = z - p.getZ();
+                look((float) Math.toDegrees(Math.atan2(-dx, dz)), (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)))); });
+            at(10, () -> shot("fonte_entidade_" + t));
+        }
+        at(10, () -> server(sp -> { sp.getAbilities().invulnerable = false; sp.onUpdateAbilities();
+            var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green");
+            sp.server.getCommands().performPrefixedCommand(src, "gamemode creative");
+            sp.teleportTo(sp.server.overworld(), 0.5, 200, 0.5, 0, 0); }));
+        at(20, () -> { mc.options.hideGui = false; glog("FIM fontedesafio"); mc.stop(); });
+    }
+
     /** 0.60.0: as entidades emocionais dentro das Baterias Centrais (uma de cada vez, -Pang=distância). */
     private static void sceneEntidades() {
         Minecraft mc = Minecraft.getInstance();
@@ -9098,6 +9151,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("fontedesafio")) sceneFonteDesafio();
         else if (ENABLED && SCENE.equals("entidades")) sceneEntidades();
         else if (ENABLED && SCENE.equals("vapor")) sceneVapor();
         else if (ENABLED && SCENE.equals("emocao")) sceneEmocao();

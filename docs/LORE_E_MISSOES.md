@@ -2109,3 +2109,45 @@ Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinho
 - **Prova da Emoção do Índigo (nível 50):** curar Ves'Kai feridos, Lanternas aliados e bichos domados agora conta (antes só animais, aldeões e jogadores, e quem jogava sozinho ficava travado).
 - **Provas da Fonte do Amor e da Esperança:** o par perdido e os Aelínos nasciam dentro das paredes e morriam sufocados; agora nascem de pé. A prova do Amor também falhava na hora porque o par, longe da praça, era guardado pelo jogo assim que nascia; agora só falha se um deles morrer de verdade.
 - **Piloto automático:** em alta velocidade, um ponto de desvio ou o destino de lado e perto fazia o piloto andar em círculos; agora ele solta a hiperpropulsão para virar e pula o ponto se não chegar mais perto em 10 s. Saindo de perto de um planeta com o destino do outro lado, a rota agora contorna o planeta.
+
+## 0.60.3 — Os Desafios das Memórias e as entidades dentro da Fonte
+
+**O Salão das Memórias** (dentro da Fonte de cada Tropa, a oeste da plataforma de chegada)
+- O Arquivo virou um salão flutuante:
+  - piso com anéis de luz, 12 colunas de vidro com arcos;
+  - as estátuas de quatro Lanternas lendários da Tropa (o do livro, numa base mais alta e com auréola);
+  - o **Altar dos Desafios** ao lado do livro.
+- Em volta da Fonte flutuam cristais da cor da Tropa.
+
+**Os Desafios**
+- Clique no altar: aparecem os quatro lendários das histórias, do mais fraco ao do livro, com a história de cada um.
+- **Desafiar** chama o Eco dele no meio do salão. O Eco é um Lanterna daquela Tropa, mais forte a cada nível, com barra de vida.
+- **Vencer** dá **Essência da Fonte**, os pontos da Árvore da Luz (tecla P):
+
+| Lendário | 1º | 2º | 3º | 4º (o do livro) |
+|---|---|---|---|---|
+| 1ª vitória | 8 | 12 | 18 | 25 |
+
+  Depois da primeira vitória, cada uma dá 3, e o Eco leva 10 minutos para voltar.
+- Com os nós da árvore abertos (8), o Coração da Emoção (o chefe da Ilha) pode despertar.
+- Morrer, sair da Fonte ou se afastar do salão encerra o desafio. Só o anel da própria Tropa pode desafiar.
+
+| Tropa | Os lendários (do 1º ao do livro) |
+|---|---|
+| Verde | Taro Venn · Ilka Dorran · Mestre Oruvai · Kheru, a Primeira Sentinela |
+| Amarelo | Sekk, o Rastejante · Vharra Dusk · Imperatriz Nhol · Vigia Orrun |
+| Vermelho | Brask · Ruuna Cinzaferro · Khaldor Sangue-Velho · Varek, o Juramentado |
+| Laranja | Pib Moedaboa · Zarkas · Rainha Ovir · Thal-Morro, o Último Mercador |
+| Azul | Neme · Capitão Arlo Brisa · Sora Vel · Lio, que acendeu a primeira estrela azul |
+| Índigo | Tuun · Mãe Silen · o Irmão Calado · Anûr, a Peregrina Sem Palavras |
+| Violeta | Lissa · Corin, o Fiel · Rainha Ameth · Ysel |
+
+**As entidades dentro da Fonte**
+- As entidades emocionais agora vivem **dentro da Fonte**, em tamanho real (dezenas de blocos), nadando devagar no céu dela. Não aparecem mais em volta da Bateria.
+- Foram refeitas pelas referências dos quadrinhos:
+  - Íon: um peixe de nadadeiras longas e bigodes;
+  - Parallax: um demônio-inseto de pé, com cauda de serpente, braços com garras e asas;
+  - o Açougueiro: um touro corcunda, de chifres longos e presas;
+  - o Predador: uma fera esquelética de cabeça alongada.
+- É de uma delas que, na próxima saga, o Parallax vai escapar.
+

@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "20";
+    private static final String VERSION = "21";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -307,6 +307,12 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.necron.Tentacao.Pergunta.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.Tentacao.Pergunta::encode).decoder(com.lanterna.necron.Tentacao.Pergunta::decode)
                 .consumerMainThread(com.lanterna.necron.Tentacao.Pergunta::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.fonte.Desafios.Abrir.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.fonte.Desafios.Abrir::encode).decoder(com.lanterna.fonte.Desafios.Abrir::decode)
+                .consumerMainThread(com.lanterna.fonte.Desafios.Abrir::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.fonte.Desafios.Desafiar.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.lanterna.fonte.Desafios.Desafiar::encode).decoder(com.lanterna.fonte.Desafios.Desafiar::decode)
+                .consumerMainThread(com.lanterna.fonte.Desafios.Desafiar::handle).add();
         CHANNEL.messageBuilder(com.lanterna.emocao.Instabilidade.Pedido.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(com.lanterna.emocao.Instabilidade.Pedido::encode).decoder(com.lanterna.emocao.Instabilidade.Pedido::decode)
                 .consumerMainThread(com.lanterna.emocao.Instabilidade.Pedido::handle).add();

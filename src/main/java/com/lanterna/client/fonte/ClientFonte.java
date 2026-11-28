@@ -168,6 +168,8 @@ public final class ClientFonte {
         for (var en : AURAS.entrySet()) {
             var ent = mc.level.getEntity(en.getKey());
             if (ent == null) continue;
+            // em primeira pessoa, as partículas da própria aura ficariam na frente da câmera
+            if (ent == mc.player && mc.options.getCameraType().isFirstPerson()) continue;
             int c = en.getValue().cor;
             var r = mc.level.random;
             // faíscas de luz e fiapos de vapor que sobem devagar e se desfazem

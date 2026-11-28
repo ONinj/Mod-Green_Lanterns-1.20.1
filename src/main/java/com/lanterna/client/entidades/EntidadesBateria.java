@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 0.60.0: as entidades emocionais presas dentro das Baterias Centrais (Íon, Parallax, o Açougueiro, Ofidiano, Adara,
+ * 0.60.3: as entidades vivem DENTRO da Fonte (a dimensão atrás da Bateria), em tamanho real, nadando no céu dela (não
+ * aparecem mais em volta da Bateria). 0.60.0: as entidades emocionais presas dentro das Baterias Centrais (Íon, Parallax, o Açougueiro, Ofidiano, Adara,
  * o Prosélito e o Predador). Cada uma nada em círculos dentro do vidro do núcleo, brilhando e meio transparente, com a
  * animação "nadar" em quadros-chave (ferramentas/modelo_entidades.py). Só no cliente; o servidor não sabe delas.
  */
@@ -121,6 +122,42 @@ public final class EntidadesBateria {
         }
         r.render(ps, r.ator, buf, null, null, LightTexture.FULL_BRIGHT);
         ps.popPose();
+    }
+
+    // ===================== 0.60.3: em tamanho real, dentro da Fonte (a dimensão da Bateria) =====================
+
+    /** Quanto maior que na vitrine (o modelo inteiro fica com uns 35 a 50 blocos). */
+    static final float GIGANTE = 8.5f;
+
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void naFonte(net.minecraftforge.client.event.RenderLevelStageEvent e) {
+        if (e.getStage() != net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) return;
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level == null) return;
+        String nome = com.lanterna.fonte.Fonte.fonteDe(mc.level);
+        if (nome == null) return;
+        Tropa t = null;
+        for (Tropa x : Tropa.values()) if (x.nome.equals(nome)) t = x;
+        if (t == null) return;
+        Rend r = RENDS.computeIfAbsent(t, k -> new Rend("entidade_" + k.nome));
+        float tempo = mc.level.getGameTime() + e.getPartialTick();
+        // nada num círculo grande no céu da Fonte, em volta da plataforma e da ponte da Ilha do Coração
+        double ang = tempo * 0.0016;
+        double x = Math.cos(ang) * 95, z = 70 + Math.sin(ang) * 95, y = 160 + Math.sin(tempo * 0.004) * 10;
+        var cam = e.getCamera().getPosition();
+        PoseStack ps = e.getPoseStack();
+        var buf = mc.renderBuffers().bufferSource();
+        float s = ESCALA.getOrDefault(t, 2f) * GIGANTE;
+        ps.pushPose();
+        ps.translate(x - cam.x, y - cam.y, z - cam.z);
+        ps.mulPose(Axis.YP.rotation((float) (-ang)));
+        ps.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(tempo * 0.01) * 6));
+        ps.scale(s, s, s);
+        r.ator.tempo = tempo;
+        ps.translate(-0.5, -0.51, -0.5);
+        r.render(ps, r.ator, buf, null, null, LightTexture.FULL_BRIGHT);
+        ps.popPose();
+        buf.endBatch();
     }
 
     // ===================== teste: vitrine (uma entidade parada no ar, sem a bateria) =====================

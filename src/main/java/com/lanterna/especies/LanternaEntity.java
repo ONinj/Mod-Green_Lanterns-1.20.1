@@ -343,6 +343,9 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
     public boolean hostilA(LivingEntity e) {
         if (e == this || !e.isAlive() || papel() == Especie.Papel.MERCADOR) return false;
         if (com.lanterna.fonte.ProvaFonte.protegido(e)) return false; // o pirata ferido da prova de Nok
+        // 0.60.3: o Eco de um Desafio da Fonte só luta com quem o chamou (e ninguém mais o ataca)
+        if (com.lanterna.fonte.Desafios.eco(this)) return com.lanterna.fonte.Desafios.ecoDe(this, e);
+        if (com.lanterna.fonte.Desafios.eco(e)) return false;
         // 0.56.8: a guerra contra o Necron. Os servos não brigam entre si; os Lanternas das Tropas atacam os servos e
         // fazem trégua entre si e com os jogadores (a não ser com quem os provocar)
         boolean servoEu = com.lanterna.necron.Cratera.servo(this);

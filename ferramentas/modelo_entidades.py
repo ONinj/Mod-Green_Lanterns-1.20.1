@@ -160,153 +160,149 @@ TAU = 2 * math.pi
 # ============================== VERDE: Íon, a baleia do espaço ==============================
 
 def ion():
+    """Íon: um peixe de luz verde (como os quadrinhos): cabeça grande com bigodes, nadadeiras longas esvoaçantes."""
     m = base.Modelo("entidade_verde")
     m.osso("root")
-    segs = ["corpo_%d" % i for i in range(1, 11)]
-    cadeia(m, segs, "root", (0, 10, -14), (0, 0, 7))
-    raios = [(8, 7.4), (8.6, 7.8), (8.4, 7.4), (7.6, 6.8), (6.6, 6), (5.6, 5), (4.6, 4.2), (3.6, 3.3), (2.7, 2.5), (2, 1.8)]
+    segs = ["corpo_%d" % i for i in range(1, 6)]
+    cadeia(m, segs, "root", (0, 12, -6), (0, 0, 7))
+    raios = [(6.2, 7.4), (6.0, 7.2), (5.0, 6.2), (3.8, 4.8), (2.4, 3.2)]
     for i, s_ in enumerate(segs):
-        z0 = -14 + 7 * i
+        z0 = -6 + 7 * i
         rx, ry = raios[i]
-        elipsoide(m, s_, (0, 10, z0 + 3.5), (rx, ry, 4.2), "corpo", "z", 5, D=3)
-        for k in range(4):   # pregas da barriga
-            m.cubo(s_, (-rx * 0.7 + k * rx * 0.46 - 0.3, 10 - ry + 0.2, z0 + 0.6), (0.6, 0.5, 6), "escuro", D=3)
-        for k in range(2):   # crista dorsal em fita
-            m.cubo(s_, (-0.3, 10 + ry - 0.6 + k * 1.1, z0 + 1 + k * 1.5), (0.6, 1.6 - k * 0.4, 4.5 - k), "membrana", D=3)
-    m.osso("cabeca", "corpo_1", (0, 10, -14))
-    elipsoide(m, "cabeca", (0, 10.8, -19.5), (7.4, 6.4, 6.2), "corpo", "z", 6, D=3)
-    m.osso("boca", "cabeca", (0, 7, -16))
-    elipsoide(m, "boca", (0, 6.4, -20.5), (6.6, 2.2, 6), "escuro", "z", 5, D=3)
+        elipsoide(m, s_, (0, 12, z0 + 3.5), (rx, ry, 4.3), "corpo", "z", 5, D=3)
+        for k in range(5):   # escamas grandes em fileiras
+            for sx in (-1, 1):
+                m.cubo(s_, (sx * rx * 0.85 - 0.4, 9.5 + k * 1.3, z0 + 1 + (k % 2) * 2), (0.8, 1.0, 2.2), "claro" if k % 2 else "escuro", D=4)
+    # a cabeça grande: testa alta, olho redondo, boca larga com lábios, opérculo e bigodes longos
+    m.osso("cabeca", "corpo_1", (0, 12, -6))
+    elipsoide(m, "cabeca", (0, 13, -11), (6, 7, 6.5), "corpo", "z", 6, D=3)
+    elipsoide(m, "cabeca", (0, 11.2, -16), (4.4, 4.4, 3.4), "corpo", "z", 4, D=3)
+    m.osso("boca", "cabeca", (0, 9.5, -14))
+    elipsoide(m, "boca", (0, 9.2, -17.6), (3.8, 1.5, 2.6), "escuro", "z", 4, D=3)
+    m.cubo("boca", (-3.2, 10.2, -19.4), (6.4, 0.6, 1.2), "claro", D=5)                    # lábio
     for sx in (-1, 1):
-        m.cubo("cabeca", (sx * 5.6 - 1.1, 11.4, -23.4), (2.2, 2.0, 2.0), "olho", D=6)
-        m.cubo("cabeca", (sx * 5.6 - 1.4, 13.6, -23.0), (2.8, 0.7, 2.4), "escuro", D=4)
-        for k in range(5):   # barbilhões finos e longos saindo do queixo
-            m.cubo("boca", (sx * (2 + k * 0.2) - 0.25, 5 - k * 1.3, -25 + k * 0.6), (0.5, 1.4, 0.5), "membrana", D=5)
-    # nadadeiras peitorais longas, em fita, que ondulam (3 partes cada)
+        m.cubo("cabeca", (sx * 5.2 - 1.3, 13.6, -14.4), (2.6, 2.6, 2.6), "olho", D=6)
+        m.cubo("cabeca", (sx * 5.2 - 0.6, 14.2, -15.0), (1.2, 1.2, 0.4), "escuro", D=8)    # pupila
+        for k in range(4):                                                                 # o opérculo (guelra)
+            m.cubo("cabeca", (sx * 6.0 - 0.3, 9 + k * 1.6, -8.5 + k * 0.2), (0.6, 1.4, 0.8), "escuro", D=4)
+        nomes = ["bigode%d_%s" % (k, "d" if sx < 0 else "e") for k in range(5)]
+        for k, n in enumerate(nomes):
+            m.osso(n, "boca" if k == 0 else nomes[k - 1], (sx * (3 + k * 2.6), 9.6 - k * 0.6, -18 + k * 1.2))
+            m.cubo(n, (sx * (3 + k * 2.6) - (2.6 if sx < 0 else 0), 9.4 - k * 0.6, -18.2 + k * 1.2), (2.6, 0.45, 0.45), "membrana", D=5)
+    # nadadeiras longas: 3 dorsais, 2 peitorais, 2 pélvicas e a cauda em 4 fitas (cada uma em 4 partes que ondulam)
+    fitas = []
+
+    def fita(nome, pai, inicio, passo, larg, comp, n=4):
+        x, y, z = inicio
+        nomes = ["%s_%d" % (nome, k) for k in range(n)]
+        for k, b in enumerate(nomes):
+            px, py, pz = x + passo[0] * k, y + passo[1] * k, z + passo[2] * k
+            m.osso(b, pai if k == 0 else nomes[k - 1], (px, py, pz))
+            w = larg * (1 - 0.18 * k)
+            # uma lâmina fina de membrana, com a nervura clara no meio
+            m.cubo(b, (px - 0.2, py - w / 2, pz), (0.4, w, comp), "membrana", D=3)
+            m.cubo(b, (px - 0.25, py - 0.25, pz), (0.5, 0.5, comp), "claro", D=4)
+        fitas.append(nomes)
+    fita("dorsal1", "corpo_1", (0, 19.5, -4), (0, 2.6, 6), 6, 7)
+    fita("dorsal2", "corpo_2", (0, 19.2, 3), (0, 2.2, 6.5), 5, 7)
+    fita("dorsal3", "corpo_3", (0, 17.5, 10), (0, 1.6, 6.5), 4.5, 7)
     for sx, lado in ((-1, "d"), (1, "e")):
-        ant = "corpo_2"
-        for parte in range(3):
-            n = "nadadeira%d_%s" % (parte + 1, lado)
-            x0 = sx * (7.5 + parte * 9)
-            m.osso(n, ant, (x0, 7 - parte * 0.6, -7 + parte * 4))
-            for k in range(8):
-                m.cubo(n, (x0 + (sx * k * 1.15 if sx > 0 else -k * 1.15 - 1.2), 6.6 - parte * 0.6 - k * 0.05, -8 + parte * 4 + k * 0.5),
-                       (1.2, 0.5, 6.5 - parte * 1.6 - k * 0.25), "membrana", D=3)
-            ant = n
-    # cauda: lóbulos largos e três fitas longas que flutuam atrás
-    m.osso("cauda", "corpo_10", (0, 10, 56))
-    for sx in (-1, 1):
-        for k in range(8):
-            m.cubo("cauda", (sx * (0.8 + k * 1.9) - (2.0 if sx < 0 else 0), 9.6, 56.5 + k * 1.1), (2.0, 0.8, 6 - k * 0.5), "membrana", D=3)
-    for f, (dx, dy) in enumerate(((-3, 0), (0, 1.2), (3, 0))):
-        ant = "cauda"
-        for k in range(5):
-            n = "fita%d_%d" % (f, k)
-            m.osso(n, ant, (dx, 10 + dy, 62 + k * 6))
-            m.cubo(n, (dx - 0.8 + k * 0.05, 9.8 + dy, 62 + k * 6), (1.6 - k * 0.2, 0.35, 6.2), "membrana", D=3)
-            ant = n
-    m.salvar(pintores("verde", 11), {}, vis_w=6, vis_h=4)
+        fita("peitoral_" + lado, "corpo_1", (sx * 6, 9, -2), (sx * 3.4, -1.4, 5), 4.5, 6)
+        fita("pelvica_" + lado, "corpo_2", (sx * 3, 5.2, 5), (sx * 1.6, -2.6, 5.4), 3.6, 6)
+    for f, (dx, dy) in enumerate(((-2.4, 2.5), (-0.8, -0.5), (0.8, 1.2), (2.4, -2.5))):
+        fita("cauda%d" % f, "corpo_5", (dx, 12 + dy, 34), (dx * 0.8, dy * 1.4, 7), 4.2, 8, 5)
+    m.salvar(pintores("verde", 11), {}, vis_w=6, vis_h=5)
 
     def q(f):
-        p = onda(segs, f, 7, 0.55, 1)
-        for s_, v in onda(segs, f, 4, 0.55, 0).items():
-            p[s_] = (v[0], p[s_][1], 0)
-        p["cauda"] = (12 * S(TAU * f - 10 * 0.55), 0, 0)
-        for fi in range(3):
+        p = onda(segs, f, 6, 0.55, 1)
+        for i, nomes in enumerate(fitas):
+            for k, b in enumerate(nomes):
+                p[b] = (12 * S(TAU * f * 2 - k * 0.9 - i * 0.7), 10 * S(TAU * f - k * 0.8 + i), 0)
+        for lado, sx in (("d", 1), ("e", -1)):
             for k in range(5):
-                p["fita%d_%d" % (fi, k)] = (14 * S(TAU * f * 2 - k * 0.9 - fi), 10 * S(TAU * f - k * 0.7 + fi), 0)
-        for parte in range(3):
-            p["nadadeira%d_d" % (parte + 1)] = (0, 0, 20 * S(TAU * f - parte * 0.9))
-            p["nadadeira%d_e" % (parte + 1)] = (0, 0, -20 * S(TAU * f - parte * 0.9))
-        p["boca"] = (5 + 5 * S(TAU * f * 2), 0, 0)
-        p["cabeca"] = (2 * S(TAU * f), 3 * S(TAU * f + 1), 0)
+                p["bigode%d_%s" % (k, lado)] = (8 * S(TAU * f * 2 - k), sx * 10 * S(TAU * f * 1.5 - k * 0.8), 0)
+        p["boca"] = (6 + 6 * S(TAU * f * 2), 0, 0)
+        p["cabeca"] = (2 * S(TAU * f), 4 * S(TAU * f + 1), 0)
         return p
-    gravar_anim("entidade_verde", 7.0, q)
+    gravar_anim("entidade_verde", 6.0, q)
 
 
 # ============================== AMARELO: Parallax, o inseto do Medo ==============================
 
 def parallax():
+    """Parallax: um demônio-inseto de pé (os quadrinhos): cabeça enorme de boca aberta cheia de dentes, braços longos com
+    garras, dois pares de asas, e o corpo que termina numa cauda de serpente com espinhos."""
     m = base.Modelo("entidade_amarelo")
     m.osso("root")
-    segs = ["corpo_%d" % i for i in range(1, 12)]
-    cadeia(m, segs, "root", (0, 10, -6), (0, 0, 4.6))
-    for i, s in enumerate(segs):
-        z0 = -6 + 4.6 * i
-        r = 6.2 - abs(i - 2.5) * 0.35 if i < 5 else 5.4 - (i - 5) * 0.62
-        elipsoide(m, s, (0, 10, z0 + 2.3), (r, r * 0.8, 2.6), "corpo", "z", 4, D=3)
-        m.cubo(s, (-r * 0.85, 10 + r * 0.55, z0 + 0.3), (r * 1.7, 0.7, 1.0), "escuro", D=3)   # placa do dorso
-        espinho(m, s, (0, 10 + r * 0.75, z0 + 2), 1.6 + (i % 2) * 0.8, 0.9, "claro", (-30, 0, 0))
-        for sx in (-1, 1):
-            espinho(m, s, (sx * r * 0.8, 10 + r * 0.3, z0 + 2), 1.2, 0.7, "escuro", (0, 0, sx * 55))
-    # cabeça: olhos compostos, mandíbulas, antenas
-    m.osso("cabeca", "corpo_1", (0, 10, -6))
-    elipsoide(m, "cabeca", (0, 10.5, -10), (5.5, 4.8, 4.5), "corpo", "z", 5, D=3)
+    # a cauda de serpente (o "chão" dele): 12 segmentos que se enrolam, com uma fileira de espinhos
+    rabo = ["cauda_%d" % i for i in range(1, 13)]
+    cadeia(m, rabo, "root", (0, 14, 0), (0, -0.6, 3.6))
+    for i, s_ in enumerate(rabo):
+        r = 4.4 - i * 0.32
+        elipsoide(m, s_, (0, 14 - i * 0.6, 1.8 + i * 3.6), (r, r * 0.9, 2.1), "corpo", "z", 2, D=3)
+        espinho(m, s_, (0, 14 - i * 0.6 + r * 0.8, 1.8 + i * 3.6), 2.2 - i * 0.13, 0.9, "claro", (-35, 0, 0))
+        m.cubo(s_, (-r * 0.6, 14 - i * 0.6 - r * 0.85, i * 3.6 + 0.3), (r * 1.2, 0.5, 3.2), "escuro", D=4)       # placas da barriga
+    # o tronco de pé: abdome em anéis, tórax e o coração de luz no peito
+    m.osso("tronco", "root", (0, 15, 0))
+    for k in range(5):
+        r = 4.6 - abs(k - 2) * 0.25
+        elipsoide(m, "tronco", (0, 17 + k * 2.6, 0), (r, 1.4, r * 0.8), "corpo" if k % 2 == 0 else "escuro", "y", 2, D=3)
+    elipsoide(m, "tronco", (0, 31, 0), (6.4, 4.6, 4.6), "corpo", "y", 5, D=3)
+    m.cubo("tronco", (-1.6, 29.4, -4.8), (3.2, 3.2, 0.8), "olho", D=6)                                       # o coração de luz
+    for k in range(8):                                                                                        # o rendado do peito
+        m.cubo("tronco", (-4 + k * 1.1, 27 + (k % 3) * 1.4, -4.4), (0.4, 2.6, 0.4), "claro", D=5)
+    # a cabeça enorme: crânio, chifres-orelha, olhos fundos, mandíbula aberta com duas fileiras de dentes
+    m.osso("cabeca", "tronco", (0, 35, -1))
+    elipsoide(m, "cabeca", (0, 40, -3), (5.2, 5, 5), "corpo", "y", 5, D=3)
+    m.osso("mandibula", "cabeca", (0, 37, -2))
+    elipsoide(m, "mandibula", (0, 35.2, -6), (4.4, 1.8, 4.6), "escuro", "z", 5, D=3)
+    for k in range(9):
+        a = (k - 4) / 4 * 1.1
+        m.cubo("cabeca", (math.sin(a) * 4 - 0.25, 37.2, -3 - math.cos(a) * 4.4), (0.5, 1.4, 0.5), "claro", D=6)       # dentes de cima
+        m.cubo("mandibula", (math.sin(a) * 3.6 - 0.25, 36.4, -2.4 - math.cos(a) * 4.4), (0.5, 1.3, 0.5), "claro", D=6)  # de baixo
     for sx in (-1, 1):
-        for k in range(9):   # o olho composto, facetas
-            m.cubo("cabeca", (sx * 4.6 - 1.2 + (k % 3) * 0.8 * sx, 10.6 + (k // 3) * 0.8, -13.2 + (k % 2) * 0.3), (0.8, 0.8, 0.8), "olho", D=6)
-        lado = "d" if sx < 0 else "e"
-        m.osso("mandibula_" + lado, "cabeca", (sx * 2.4, 8, -13))
-        for k in range(5):
-            m.cubo("mandibula_" + lado, (sx * (2.2 + k * 0.35) - 0.5, 7.6 - k * 0.15, -14 - k * 1.3), (1.0, 1.0 - k * 0.12, 1.4), "claro", D=4)
-        m.cubo("mandibula_" + lado, (sx * 3.6 - 0.4, 7.2, -20.2), (0.8, 0.8, 0.8), "escuro", D=5)
-        m.osso("antena_" + lado, "cabeca", (sx * 2, 14.5, -11))
-        for k in range(10):
-            m.cubo("antena_" + lado, (sx * (2 + k * 0.7) - 0.25, 14.5 + k * 1.2, -11.5 - k * 0.8), (0.5, 1.3, 0.5), "escuro", D=5)
-    # seis patas articuladas (coxa e canela) nos três primeiros segmentos
-    for i in range(3):
-        s = segs[i + 1]
-        z = -6 + 4.6 * (i + 1) + 2.3
-        for sx, lado in ((-1, "d"), (1, "e")):
-            coxa, canela = "pata%d_%s" % (i + 1, lado), "patab%d_%s" % (i + 1, lado)
-            m.osso(coxa, s, (sx * 5, 8, z))
+        m.cubo("cabeca", (sx * 2.8 - 0.7, 41.5, -7.4), (1.4, 1.2, 1.0), "olho", D=6)
+        for k in range(6):                                                                                    # chifres-orelha
+            m.cubo("cabeca", (sx * (4.4 + k * 0.8) - 0.6, 43 + k * 1.1, -2 + k * 0.5), (1.2 - k * 0.12, 1.4, 1.2 - k * 0.12), "claro", D=5)
+    # braços longos: ombro → braço → antebraço → mão com três garras compridas
+    for sx, lado in ((-1, "d"), (1, "e")):
+        b1, b2, b3 = "braco_" + lado, "antebraco_" + lado, "mao_" + lado
+        m.osso(b1, "tronco", (sx * 6.4, 32, 0))
+        elipsoide(m, b1, (sx * 8.4, 28.5, 0), (1.8, 4.2, 1.8), "corpo", "y", 3, D=3)
+        m.osso(b2, b1, (sx * 9, 24.5, 0))
+        elipsoide(m, b2, (sx * 9.4, 20.5, -0.6), (1.4, 4.2, 1.4), "corpo", "y", 3, D=3)
+        espinho(m, b2, (sx * 10.2, 22, 0.8), 1.6, 0.7, "claro", (70, 0, 0))
+        m.osso(b3, b2, (sx * 9.6, 16.3, -1))
+        m.cubo(b3, (sx * 9.6 - 1.4, 14, -2.2), (2.8, 2.4, 2.4), "corpo", D=4)
+        for g in range(3):
             for k in range(4):
-                m.cubo(coxa, (sx * (5 + k * 1.5) - 0.7, 8 - k * 0.3, z - 0.7), (1.4, 1.2, 1.4), "corpo", D=4)
-            m.osso(canela, coxa, (sx * 11, 7, z))
-            for k in range(5):
-                m.cubo(canela, (sx * 11 - 0.5, 7 - k * 1.6 - 1.6, z - 0.5 - k * 0.3), (1.0, 1.7, 1.0), "escuro", D=4)
-            m.cubo(canela, (sx * 11 - 0.4, -1.6, z - 2.6), (0.8, 0.6, 1.6), "claro", D=5)   # garra
-    # presas grandes saindo da boca
-    for sx in (-1, 1):
-        for k in range(5):
-            m.cubo("cabeca", (sx * (1.4 - k * 0.15) - 0.4, 7.4 - k * 0.9, -13.6 - k * 0.5), (0.8, 1.0, 0.8), "claro", D=6)
-    # dois pares de asas de inseto (membrana com nervuras), no 2º e 3º segmentos
+                m.cubo(b3, (sx * 9.6 - 1.2 + g * 1.0, 14 - k * 1.4, -2.6 - k * 0.7), (0.55, 1.5, 0.55), "claro", D=6)
+    # dois pares de asas de inseto com o desenho em anéis
     for par in range(2):
         for sx, lado in ((-1, "d"), (1, "e")):
             n = "asa%d_%s" % (par + 1, lado)
-            z = -6 + 4.6 * (par + 1) + 1.5
-            m.osso(n, segs[par + 1], (sx * 2, 15.5, z))
-            for k in range(10):
-                larg = 3.2 - abs(k - 3) * 0.32
-                m.cubo(n, (sx * (2 + k * 1.6) - (1.6 if sx < 0 else 0), 15.4 + k * 0.12, z - larg / 2 + k * 0.35), (1.6, 0.25, max(0.6, larg * 1.8)), "membrana", D=3)
-                if k % 3 == 0:
-                    m.cubo(n, (sx * (2 + k * 1.6) - (1.6 if sx < 0 else 0), 15.55 + k * 0.12, z - 0.15 + k * 0.35), (1.6, 0.2, 0.3), "claro", D=4)
-    # garras em pinça nas patas da frente
-    for sx, lado in ((-1, "d"), (1, "e")):
-        for k in range(2):
-            m.cubo("patab1_" + lado, (sx * 11 - 0.6 + k * 0.9 * sx, -2.4, -0.5 - 3.4), (0.5, 1.4, 2.4), "claro", D=5)
-    # ferrão
-    m.osso("ferrao", segs[-1], (0, 10, 44))
-    for k in range(6):
-        m.cubo("ferrao", (-1.1 + k * 0.15, 10 + k * 0.7, 44 + k * 1.4), (2.2 - k * 0.3, 1.6 - k * 0.15, 1.6), "claro", D=4)
-    m.salvar(pintores("amarelo", 23), {}, vis_w=6, vis_h=4)
+            m.osso(n, "tronco", (sx * 2.5, 32 - par * 4, 3.5))
+            for k in range(12):
+                alt = 4.5 - abs(k - 4) * 0.4
+                m.cubo(n, (sx * (2.5 + k * 1.5) - (1.5 if sx < 0 else 0), 32 - par * 4 + k * 0.7 - alt / 2, 3.5 + k * 0.2), (1.5, max(1, alt * 2), 0.25), "membrana", D=3)
+                if k % 2 == 0:
+                    m.cubo(n, (sx * (2.5 + k * 1.5) - (1.5 if sx < 0 else 0), 32 - par * 4 + k * 0.7 - 0.3, 3.45 + k * 0.2), (1.5, 0.6, 0.3), "claro", D=4)
+    m.salvar(pintores("amarelo", 23), {}, vis_w=6, vis_h=6)
 
     def q(f):
-        p = onda(segs, f, 7, 0.55, 1, 1)
-        for s, v in onda(segs, f, 5, 0.55, 0, 2).items():
-            p[s] = (v[0], p[s][1], 0)
-        for i in range(3):
-            for sx, lado in ((-1, "d"), (1, "e")):
-                fase = TAU * f * 3 + i * 2.1 + (math.pi if lado == "e" else 0)
-                p["pata%d_%s" % (i + 1, lado)] = (25 * S(fase), 0, sx * (8 + 10 * S(fase + 1)))
-                p["patab%d_%s" % (i + 1, lado)] = (-15 + 20 * S(fase + 0.8), 0, 0)
-        for lado, sx in (("d", -1), ("e", 1)):
-            p["mandibula_" + lado] = (0, sx * (10 + 10 * S(TAU * f * 4)), 0)
-            p["antena_" + lado] = (10 * S(TAU * f * 2 + sx), 0, sx * 8 * S(TAU * f * 3))
-        p["ferrao"] = (20 * S(TAU * f * 2), 0, 0)
-        for par in range(2):   # as asas vibram rápido
-            p["asa%d_d" % (par + 1)] = (0, 0, 28 * S(TAU * f * 10 + par * 1.5))
-            p["asa%d_e" % (par + 1)] = (0, 0, -28 * S(TAU * f * 10 + par * 1.5))
+        p = onda(rabo, f, 16, 0.55, 1, 1)
+        for s_, v in onda(rabo, f, 6, 0.55, 0, 1).items():
+            p[s_] = (v[0], p[s_][1], 0)
+        p["tronco"] = (-4 + 4 * S(TAU * f), 6 * S(TAU * f), 0)
+        p["cabeca"] = (6 * S(TAU * f * 2), 10 * S(TAU * f), 0)
+        p["mandibula"] = (22 + 14 * S(TAU * f * 3), 0, 0)
+        for lado, sx in (("d", 1), ("e", -1)):
+            fa = TAU * f + (0 if lado == "d" else math.pi)
+            p["braco_" + lado] = (50 + 25 * S(fa), 0, sx * -(20 + 10 * S(fa)))
+            p["antebraco_" + lado] = (40 + 20 * S(fa + 1), 0, 0)
+            p["mao_" + lado] = (20 * S(fa * 2), 0, 0)
+            for par in range(2):
+                p["asa%d_%s" % (par + 1, lado)] = (0, sx * 10, sx * -26 * S(TAU * f * 10 + par * 1.5))
         return p
     gravar_anim("entidade_amarelo", 5.0, q)
 
@@ -318,7 +314,7 @@ def acougueiro():
     m.osso("root")
     m.osso("corpo", "root", (0, 16, 0))
     elipsoide(m, "corpo", (0, 18, -4), (8.6, 8, 9), "corpo", "z", 8, D=3)       # peito e ombros enormes
-    elipsoide(m, "corpo", (0, 23, -5), (6.4, 4.2, 6.5), "corpo", "z", 6, D=3)   # a corcova de músculo
+    elipsoide(m, "corpo", (0, 25, -5), (8.6, 6.2, 8), "corpo", "z", 7, D=3)     # a corcova enorme de músculo
     elipsoide(m, "corpo", (0, 17, 8), (6.5, 6, 7), "corpo", "z", 6, D=3)        # ancas
     for k in range(12):                                                         # crina de espinhos nas costas
         espinho(m, "corpo", (0, 24.5 - abs(k - 4) * 0.4, -10 + k * 1.8), 3.2 - abs(k - 3) * 0.25, 1.3, "escuro", (-35, 0, 0))
@@ -326,7 +322,7 @@ def acougueiro():
         m.cubo("corpo", (-8.2, 14 + k * 1.4, -9 + k), (0.6, 1.0, 8), "escuro", D=3)
         m.cubo("corpo", (7.6, 14 + k * 1.4, -9 + k), (0.6, 1.0, 8), "escuro", D=3)
     m.osso("cabeca", "corpo", (0, 20, -12))
-    elipsoide(m, "cabeca", (0, 18.5, -17), (6.6, 6.2, 6.6), "corpo", "z", 7, D=3)
+    elipsoide(m, "cabeca", (0, 17.5, -17), (5.4, 5.4, 6), "corpo", "z", 7, D=3)
     for k in range(6):                                                          # rugas e veias saltadas na testa
         m.cubo("cabeca", (-3 + k * 1.2, 22.8, -21 + (k % 2) * 0.6), (0.6, 0.6, 3), "escuro", D=4)
     for sx in (-1, 1):                                                          # narinas fumegando
@@ -338,11 +334,14 @@ def acougueiro():
         m.cubo("mandibula", (-2.6 + k * 1.0, 13.9, -23.6), (0.5, 1.2, 0.5), "claro", D=6)   # presas
     for sx in (-1, 1):
         m.cubo("cabeca", (sx * 3.6 - 0.9, 19.6, -22.2), (1.8, 1.3, 1.2), "olho", D=6)
-        # chifres: curvos, para os lados e para a frente (em degraus)
-        for k in range(9):
-            a = k / 8
-            m.cubo("cabeca", (sx * (5 + a * 7) - (1.6 - a) / 2, 22 + math.sin(a * math.pi) * 4, -16 - a * 5), (1.6 - a + 0.3, 1.6 - a + 0.3, 1.6 - a + 0.3),
-                   "claro", D=4)
+        # chifres longos: saem para os lados e curvam para cima e para trás (os quadrinhos)
+        for k in range(14):
+            a = k / 13
+            g = 2.0 - a * 1.5
+            m.cubo("cabeca", (sx * (5.5 + a * 6) - g / 2, 21 + a * a * 13, -17 + a * 9 - (a * a) * 4), (g, g, g), "claro", D=4)
+        # presas compridas saindo da boca para baixo
+        for k in range(6):
+            m.cubo("mandibula", (sx * 2.6 - 0.45, 12.6 - k * 1.1, -24 + k * 0.5), (0.9 - k * 0.08, 1.2, 0.9 - k * 0.08), "claro", D=5)
     # quatro patas: coxa e canela, cascos
     for z0, nome in ((-8, "dianteira"), (9, "traseira")):
         for sx, lado in ((-1, "d"), (1, "e")):
@@ -548,68 +547,76 @@ def proselito():
 # ============================== VIOLETA: o Predador, o caçador alado do Amor ==============================
 
 def predador():
+    """O Predador: uma fera esquelética e alongada (os quadrinhos): cabeça comprida, costelas e espinhos à mostra, patas
+    finas e longas em três partes e uma cauda segmentada."""
     m = base.Modelo("entidade_violeta")
     m.osso("root")
-    m.osso("corpo", "root", (0, 14, 0))
-    elipsoide(m, "corpo", (0, 15, -2), (6.5, 6, 9), "corpo", "z", 7, D=3)
-    elipsoide(m, "corpo", (0, 14, 9), (5.2, 5, 6), "corpo", "z", 5, D=3)
-    for k in range(14):                                                    # placas e espinhos nas costas
-        espinho(m, "corpo", (0, 20.6 - abs(k - 5) * 0.35, -10 + k * 1.6), 2.6 - abs(k - 4) * 0.12, 1.2, "claro" if k % 2 else "escuro", (-30, 0, 0))
-    for k in range(10):                                                    # escamas grossas nos flancos
-        for sx in (-1, 1):
-            m.cubo("corpo", (sx * 6.2 - 0.5, 12 + (k % 3) * 2.2, -8 + k * 1.8), (1.0, 1.4, 1.5), "escuro", D=4)
+    m.osso("corpo", "root", (0, 20, 0))
+    # a espinha e as costelas (o corpo é quase só osso de luz)
+    for k in range(12):
+        z = -10 + k * 2
+        m.cubo("corpo", (-1.2, 22.5 + math.sin(k / 11 * math.pi) * 1.5, z), (2.4, 2.0, 1.8), "corpo", D=4)            # vértebras
+        espinho(m, "corpo", (0, 24.2 + math.sin(k / 11 * math.pi) * 1.5, z + 0.9), 3.6 - abs(k - 4) * 0.2, 1.0, "claro", (-35, 0, 0))
+        if 1 <= k <= 8:
+            for sx in (-1, 1):
+                for j in range(5):   # a costela curva descendo pelo lado
+                    a = j / 4 * 2.1
+                    m.cubo("corpo", (sx * (1.4 + math.sin(a) * 4.2) - 0.35, 23 - (1 - math.cos(a)) * 3.6, z + 0.5), (0.7, 1.4, 0.7), "corpo", D=5)
+    elipsoide(m, "corpo", (0, 20, -7), (4.2, 3.6, 4), "escuro", "z", 4, D=3)          # o peito
+    elipsoide(m, "corpo", (0, 20.5, 11), (3.4, 3, 3.4), "escuro", "z", 4, D=3)        # a bacia
     pesc = ["pescoco_%d" % i for i in range(1, 4)]
-    cadeia(m, pesc, "corpo", (0, 17, -10), (0, 1.0, -3.4))
+    cadeia(m, pesc, "corpo", (0, 22, -10), (0, 0.6, -3))
     for i, s_ in enumerate(pesc):
-        elipsoide(m, s_, (0, 17.4 + i * 1.0, -11.7 - i * 3.4), (4 - i * 0.3, 4 - i * 0.3, 2.2), "corpo", "z", 3, D=3)
-    # a cabeça grande de lagarto: crânio, focinho, olhos fundos, chifres para trás e a crista (franja) de espinhos
-    m.osso("cabeca", pesc[-1], (0, 20, -20))
-    elipsoide(m, "cabeca", (0, 20.5, -24), (5, 4.4, 5.5), "corpo", "z", 6, D=3)
-    elipsoide(m, "cabeca", (0, 19, -31), (3.4, 2.8, 4.2), "corpo", "z", 5, D=3)
-    m.osso("mandibula", "cabeca", (0, 17.5, -22))
-    elipsoide(m, "mandibula", (0, 16.2, -28), (3.6, 1.5, 6.5), "escuro", "z", 6, D=3)
-    for k in range(9):                                                     # dentes em cima e embaixo
-        m.cubo("cabeca", (-2.6 + k * 0.65, 16.6, -34.2 + abs(k - 4) * 0.9), (0.35, 1.0, 0.35), "claro", D=6)
-        m.cubo("mandibula", (-2.4 + k * 0.6, 17.0, -33.8 + abs(k - 4) * 0.9), (0.3, 0.9, 0.3), "claro", D=6)
+        m.cubo(s_, (-1.1, 21.4 + i * 0.6, -13 - i * 3), (2.2, 2.0, 3), "corpo", D=4)
+        espinho(m, s_, (0, 23.4 + i * 0.6, -11.6 - i * 3), 1.8, 0.8, "claro", (-35, 0, 0))
+    # a cabeça comprida: crânio alongado para trás, maxilar com dentes à mostra, olhos pequenos
+    m.osso("cabeca", pesc[-1], (0, 23.5, -19))
+    for k in range(10):   # o crânio alongado (fatias, crescendo e afinando para trás)
+        r = 2.0 + math.sin(k / 9 * math.pi) * 1.6
+        m.cubo("cabeca", (-r * 0.8, 23.5 - r * 0.6 + k * 0.45, -25 + k * 1.6), (r * 1.6, r * 1.2, 1.7), "corpo", D=4)
+    m.osso("mandibula", "cabeca", (0, 22.4, -21))
+    m.cubo("mandibula", (-1.5, 21.0, -28.4), (3.0, 1.2, 7), "escuro", D=4)
+    for k in range(8):
+        m.cubo("cabeca", (-1.4 + (k % 4) * 0.9, 22.2, -28.6 + (k // 4) * 1.6), (0.35, 1.0, 0.35), "claro", D=6)
+        m.cubo("mandibula", (-1.3 + (k % 4) * 0.85, 22.0, -28.2 + (k // 4) * 1.6), (0.3, 0.8, 0.3), "claro", D=6)
     for sx in (-1, 1):
-        m.cubo("cabeca", (sx * 3.2 - 0.6, 21.6, -28.4), (1.2, 1.0, 1.0), "olho", D=6)
-        m.cubo("cabeca", (sx * 3.2 - 0.9, 22.8, -28.6), (1.8, 0.8, 1.6), "escuro", D=4)    # sobrancelha óssea
-        for k in range(9):                                                 # chifres longos curvos para trás
-            a_ = k / 8
-            m.cubo("cabeca", (sx * (3.6 + a_ * 3) - (1.1 - a_ * 0.6) / 2, 23.5 + math.sin(a_ * 2.2) * 3.5, -23 + a_ * 9),
-                   (1.1 - a_ * 0.6 + 0.2, 1.1 - a_ * 0.6 + 0.2, 1.4), "claro", D=4)
-    for k in range(11):                                                    # a franja de espinhos atrás da cabeça
-        a_ = (k - 5) / 5 * 1.3
-        espinho(m, "cabeca", (math.sin(a_) * 5.2, 21 + math.cos(a_) * 3.6, -19.5), 2.8 - abs(k - 5) * 0.15, 0.9, "escuro", (-40, 0, -math.degrees(a_)))
-    # quatro patas fortes com coxa, canela e garras
-    for z0, nome in ((-6, "dianteira"), (9, "traseira")):
+        m.cubo("cabeca", (sx * 1.6 - 0.4, 24.4, -24.6), (0.8, 0.6, 0.8), "olho", D=6)
+    # quatro patas finas e longas: coxa → canela → pé com garras
+    for z0, nome in ((-7, "dianteira"), (10, "traseira")):
         for sx, lado in ((-1, "d"), (1, "e")):
-            coxa, canela = "perna_%s_%s" % (nome, lado), "canela_%s_%s" % (nome, lado)
-            m.osso(coxa, "corpo", (sx * 5.5, 13, z0))
-            elipsoide(m, coxa, (sx * 6.5, 10, z0), (2.4, 4, 2.4), "corpo", "y", 4, D=3)
-            m.osso(canela, coxa, (sx * 7, 6.5, z0))
-            elipsoide(m, canela, (sx * 7, 3.6, z0 - 0.4), (1.5, 3.2, 1.6), "corpo", "y", 3, D=3)
+            b1, b2, b3 = "perna_%s_%s" % (nome, lado), "canela_%s_%s" % (nome, lado), "pe_%s_%s" % (nome, lado)
+            m.osso(b1, "corpo", (sx * 3.6, 20, z0))
+            for k in range(6):
+                m.cubo(b1, (sx * (3.6 + k * 0.9) - 0.6, 20 - k * 1.4 - 1.4, z0 + (k * 0.6 if nome == "traseira" else -k * 0.4) - 0.6), (1.2, 1.5, 1.2), "corpo", D=4)
+            kx = sx * 9
+            m.osso(b2, b1, (kx, 12, z0))
+            for k in range(7):
+                m.cubo(b2, (kx - 0.45, 12 - k * 1.5 - 1.5, z0 + k * 0.5 - 0.45), (0.9, 1.6, 0.9), "corpo", D=5)
+            espinho(m, b2, (kx, 11, z0 + 0.8), 2.2, 0.7, "claro", (80, 0, 0))
+            m.osso(b3, b2, (kx, 1.6, z0 + 3.5))
             for g in range(3):
-                m.cubo(canela, (sx * 7 - 1.0 + g * 0.8, 0, z0 - 3), (0.45, 0.6, 2.2), "claro", D=6)
-    rabo = ["cauda_%d" % i for i in range(1, 8)]
-    cadeia(m, rabo, "corpo", (0, 14, 14), (0, -0.5, 3.6))
+                m.cubo(b3, (kx - 0.9 + g * 0.8, 0, z0 + 0.6), (0.4, 0.5, 3.0), "claro", D=6)
+    rabo = ["cauda_%d" % i for i in range(1, 10)]
+    cadeia(m, rabo, "corpo", (0, 21, 13), (0, 0.5, 3.4))
     for i, s_ in enumerate(rabo):
-        r = 3.4 - i * 0.42
-        elipsoide(m, s_, (0, 14 - i * 0.5, 15.8 + i * 3.6), (r, r * 0.9, 2), "corpo", "z", 2, D=3)
-        espinho(m, s_, (0, 14 - i * 0.5 + r * 0.8, 15.6 + i * 3.6), 1.4 - i * 0.12, 0.7, "escuro", (-40, 0, 0))
+        r = 1.8 - i * 0.15
+        m.cubo(s_, (-r / 2, 21 + i * 0.5 - r / 2, 13 + i * 3.4), (r, r, 3.5), "corpo", D=4)
+        espinho(m, s_, (0, 21 + i * 0.5 + r / 2, 14.5 + i * 3.4), 1.4, 0.6, "claro", (-40, 0, 0))
+    espinho(m, rabo[-1], (0, 25, 44), 3.2, 1.4, "claro", (95, 0, 0))
     m.salvar(pintores("violeta", 97), {}, vis_w=6, vis_h=5)
 
     def q(f):
         a_ = TAU * f * 2
-        p = {"corpo": (2 * S(a_), 5 * S(TAU * f), 0), "cabeca": (8 * S(a_ + 1) - 4, 12 * S(TAU * f), 0),
-             "mandibula": (8 + 16 * max(0, S(TAU * f * 3)), 0, 0)}
+        p = {"corpo": (2 * S(a_), 4 * S(TAU * f), 0), "cabeca": (-6 + 8 * S(a_ + 1), 12 * S(TAU * f), 0),
+             "mandibula": (10 + 16 * max(0, S(TAU * f * 3)), 0, 0)}
         p.update(onda(pesc, f, 6, 0.6, 1, 1))
-        p.update(onda(rabo, f, 18, 0.6, 1, 1))
+        p.update(onda(rabo, f, 16, 0.6, 1, 1))
         for nome, off in (("dianteira", 0), ("traseira", math.pi)):
             for lado, sx in (("d", 0), ("e", math.pi)):
                 fa = a_ + off + sx
-                p["perna_%s_%s" % (nome, lado)] = (22 * S(fa), 0, 0)
-                p["canela_%s_%s" % (nome, lado)] = (-14 + 14 * S(fa + 1.2) if nome == "dianteira" else 14 - 14 * S(fa + 1.2), 0, 0)
+                p["perna_%s_%s" % (nome, lado)] = (26 * S(fa), 0, 0)
+                p["canela_%s_%s" % (nome, lado)] = (-20 + 20 * S(fa + 1.2), 0, 0)
+                p["pe_%s_%s" % (nome, lado)] = (15 * S(fa + 2), 0, 0)
         return p
     gravar_anim("entidade_violeta", 3.4, q)
 
