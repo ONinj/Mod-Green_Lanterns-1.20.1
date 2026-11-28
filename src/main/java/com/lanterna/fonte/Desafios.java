@@ -67,7 +67,7 @@ public final class Desafios {
 
     public static boolean vencido(ServerPlayer p, String tropa, int i) { return dados(p).getBoolean(tropa + "_" + i); }
 
-    static Tropa tropa(String nome) {
+    public static Tropa tropa(String nome) {
         for (Tropa t : Tropa.values()) if (t.nome.equals(nome)) return t;
         return null;
     }

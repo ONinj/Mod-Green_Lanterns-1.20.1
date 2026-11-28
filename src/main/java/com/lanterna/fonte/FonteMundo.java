@@ -80,6 +80,13 @@ public final class FonteMundo {
         if (!data.siteBuilt(salao)) {
             data.markSite(salao);
             construirMemorias(p.serverLevel(), tropa);
+            return;
+        }
+        // 0.60.4: a prisão da entidade (ao norte, depois do Salão do Conselho)
+        String prisao = "fonte_" + tropa + ":prisao2";
+        if (!data.siteBuilt(prisao)) {
+            data.markSite(prisao);
+            construirPrisao(p.serverLevel(), tropa);
         }
     }
 
@@ -254,6 +261,63 @@ public final class FonteMundo {
             }
         });
         Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: Salão das Memórias da Fonte {} pronto", tropa));
+    }
+
+    // ===================== 0.60.4: a prisão da entidade (como a cela da Kurama) =====================
+
+    private static void construirPrisao(ServerLevel level, String tropa) {
+        Cores c = CORES.getOrDefault(tropa, CORES.get("verde"));
+        int gz = Prisao.GRADES_Z, L = Prisao.LARGURA;
+        java.util.List<net.minecraft.world.level.ChunkPos> pedacos = new java.util.ArrayList<>();
+        for (int cx = -3; cx <= 2; cx++) for (int cz = -9; cz <= -2; cz++) pedacos.add(new net.minecraft.world.level.ChunkPos(cx, cz));
+        Obra.carregar(level, pedacos);
+        // o chão: água rasa e escura por toda a sala (antessala e cela), com as bordas de pedra
+        Obra.etapa(level, l -> {
+            for (int x = -L - 2; x <= L + 2; x++) for (int z = -124; z <= -42; z++) {
+                boolean borda = Math.abs(x) > L || z < -122;
+                s(l, new BlockPos(x, 98, z), b(Blocks.BLACK_CONCRETE));
+                s(l, new BlockPos(x, 99, z), b(borda ? c.borda() : Blocks.BLACK_CONCRETE));
+                s(l, new BlockPos(x, 100, z), borda ? b(c.borda()) : z > gz + 1 && Math.abs(x) <= 3 ? b(c.piso()) : b(Blocks.WATER));
+            }
+        });
+        // as paredes da cela e da antessala, altas e escuras, com fendas de luz da cor da Tropa
+        Obra.etapa(level, l -> {
+            for (int y = 101; y <= 144; y++) {
+                for (int z = -124; z <= -42; z++) for (int sx : new int[]{-L - 2, L + 2}) s(l, new BlockPos(sx, y, z), b(y % 9 == 0 && z % 6 == 0 ? c.luz() : Blocks.BLACKSTONE));
+                for (int x = -L - 2; x <= L + 2; x++) s(l, new BlockPos(x, y, -124), b(y % 9 == 0 && x % 6 == 0 ? c.luz() : Blocks.BLACKSTONE));
+            }
+        });
+        // as grades gigantes (do chão até 42 blocos) e as traves
+        Obra.etapa(level, l -> {
+            for (int x = -L; x <= L; x++) {
+                boolean barra = Math.floorMod(x, 4) == 0;
+                for (int y = 100; y <= 142; y++) {
+                    if (barra) { s(l, new BlockPos(x, y, gz), b(c.borda())); if (Math.abs(x) <= 4) s(l, new BlockPos(x, y, gz - 1), b(c.borda())); }
+                    else if (y == 100 || y == 121 || y == 142) s(l, new BlockPos(x, y, gz), b(Blocks.POLISHED_BLACKSTONE));
+                }
+            }
+        });
+        // o selo: um papel grande atravessado no portão do meio, com o símbolo da Tropa
+        Obra.etapa(level, l -> {
+            int z = gz + 1;
+            // 0.60.4: mais baixo, para não tapar o rosto da entidade quando ela encosta nas grades
+            int y0 = 101;
+            for (int x = -3; x <= 3; x++) for (int y = 101; y <= 130; y++) s(l, new BlockPos(x, y, z), b(Blocks.AIR));   // o selo antigo (mais alto)
+            for (int x = -2; x <= 2; x++) for (int y = y0; y <= y0 + 10; y++) s(l, new BlockPos(x, y, z), b(Blocks.WHITE_WOOL));
+            // os traços do selo (as letras do lacre)
+            int[][] tracos = {{0, 9}, {0, 8}, {-1, 7}, {0, 7}, {1, 7}, {0, 5}, {-1, 4}, {1, 4}, {-2, 3}, {2, 3}, {0, 2}, {0, 1}};
+            for (int[] t : tracos) s(l, new BlockPos(t[0], y0 + t[1], z), b(Blocks.BLACK_WOOL));
+            s(l, new BlockPos(0, y0 + 5, z), b(c.luz()));
+        });
+        // a antessala: a ponte que vem do Salão do Conselho e tochas da cor da Tropa
+        Obra.etapa(level, l -> {
+            ponte(l, new BlockPos(0, 100, -38), new BlockPos(0, 100, -43), c);
+            for (int z = -56; z <= -44; z += 6) for (int sx : new int[]{-4, 4}) {
+                s(l, new BlockPos(sx, 100, z), b(c.borda()));
+                s(l, new BlockPos(sx, 101, z), b(Blocks.SOUL_LANTERN));
+            }
+        });
+        Obra.etapa(level, l -> LanternaMod.LOGGER.info("Lanterna: a prisão da Fonte {} pronta", tropa));
     }
 
     /** O livro do Arquivo: memórias dos Lanternas antigos daquela Tropa (texto traduzido no cliente). */

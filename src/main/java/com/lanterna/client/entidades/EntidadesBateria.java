@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 0.60.4: presas numa cela gigante dentro da Fonte (fonte/Prisao), atrás das grades, como a Kurama.
  * 0.60.3: as entidades vivem DENTRO da Fonte (a dimensão atrás da Bateria), em tamanho real, nadando no céu dela (não
  * aparecem mais em volta da Bateria). 0.60.0: as entidades emocionais presas dentro das Baterias Centrais (Íon, Parallax, o Açougueiro, Ofidiano, Adara,
  * o Prosélito e o Predador). Cada uma nada em círculos dentro do vidro do núcleo, brilhando e meio transparente, com a
@@ -128,6 +129,32 @@ public final class EntidadesBateria {
 
     /** Quanto maior que na vitrine (o modelo inteiro fica com uns 35 a 50 blocos). */
     static final float GIGANTE = 8.5f;
+    /** Ajuste para caber na cela (as compridas encolhem um pouco). */
+    static final Map<Tropa, Float> TAMANHO_CELA = new EnumMap<>(Tropa.class);
+    /** Centro do modelo em z e o y mínimo (unidades do modelo), meio comprimento e meia largura na cela (blocos). */
+    static final Map<Tropa, float[]> CENTRO = new EnumMap<>(Tropa.class);
+    /** As compridas andam de perfil rente às grades (como uma fera enjaulada); as outras encaram o jogador. */
+    static final java.util.Set<Tropa> PERFIL = java.util.EnumSet.of(Tropa.VERDE, Tropa.LARANJA, Tropa.VIOLETA, Tropa.VERMELHO);
+    static {
+        CENTRO.put(Tropa.VERDE, new float[]{24.9f, -5.1f, 23.00f, 8.39f});
+        CENTRO.put(Tropa.AMARELO, new float[]{16.4f, 6.6f, 21.26f, 16.11f});
+        CENTRO.put(Tropa.VERMELHO, new float[]{1.7f, -0.2f, 23.00f, 10.01f});
+        CENTRO.put(Tropa.LARANJA, new float[]{20.1f, 3.6f, 23.00f, 4.97f});
+        CENTRO.put(Tropa.AZUL, new float[]{-0.6f, 6.4f, 17.40f, 25.00f});
+        CENTRO.put(Tropa.INDIGO, new float[]{0.0f, -16.7f, 4.10f, 7.87f});
+        CENTRO.put(Tropa.VIOLETA, new float[]{8.0f, 0.0f, 23.00f, 6.28f});
+        TAMANHO_CELA.put(Tropa.VERDE, 0.505f);
+        TAMANHO_CELA.put(Tropa.AMARELO, 0.569f);
+        TAMANHO_CELA.put(Tropa.VERMELHO, 0.534f);
+        TAMANHO_CELA.put(Tropa.LARANJA, 0.430f);
+        TAMANHO_CELA.put(Tropa.AZUL, 0.497f);
+        TAMANHO_CELA.put(Tropa.INDIGO, 0.402f);
+        TAMANHO_CELA.put(Tropa.VIOLETA, 0.454f);
+    }
+    /** O quanto a entidade veio até as grades (0..1, suavizado). */
+    static float perto;
+
+    static boolean PrisaoScreenAberta() { return net.minecraft.client.Minecraft.getInstance().screen instanceof com.lanterna.client.fonte.PrisaoScreen; }
 
     @net.minecraftforge.eventbus.api.SubscribeEvent
     public static void naFonte(net.minecraftforge.client.event.RenderLevelStageEvent e) {
@@ -141,18 +168,35 @@ public final class EntidadesBateria {
         if (t == null) return;
         Rend r = RENDS.computeIfAbsent(t, k -> new Rend("entidade_" + k.nome));
         float tempo = mc.level.getGameTime() + e.getPartialTick();
-        // nada num círculo grande no céu da Fonte, em volta da plataforma e da ponte da Ilha do Coração
-        double ang = tempo * 0.0016;
-        double x = Math.cos(ang) * 95, z = 70 + Math.sin(ang) * 95, y = 160 + Math.sin(tempo * 0.004) * 10;
+        // 0.60.4: presa na cela (como a Kurama): no fundo, no escuro; quando alguém se aproxima das grades ela vem até
+        // elas e o encara; no diálogo, encosta nas grades
+        var pl = mc.player;
+        double dist = Math.hypot(pl.getX(), pl.getZ() - com.lanterna.fonte.Prisao.GRADES_Z);
+        float alvo = PrisaoScreenAberta() ? 1f : (float) net.minecraft.util.Mth.clamp((50 - dist) / 34, 0, 1);
+        perto += (alvo - perto) * 0.02f;
+        var cela = com.lanterna.fonte.Prisao.CELA;
+        double x = Math.sin(tempo * 0.006) * 6, y = cela.getY() + 1.2 + Math.sin(tempo * 0.02) * 0.8;
+        float[] ce = CENTRO.getOrDefault(t, new float[]{0, 0, 20, 10});
+        boolean perfil = PERFIL.contains(t);
+        // de perto: as compridas andam de um lado para o outro de perfil (meia largura até as grades); as outras encaram
+        double zFundo = -120 + ce[2], zPerto = com.lanterna.fonte.Prisao.GRADES_Z - 2 - (perfil ? ce[3] : ce[2]);
+        double z = zFundo + (zPerto - zFundo) * perto;
+        double passo = Math.sin(tempo * 0.005);
+        if (perfil) x = x * (1 - perto) + passo * 9 * perto;
+        // de perfil: vira para o lado em que anda (a virada é suave quando ele muda de direção)
+        double lado = Math.tanh(Math.cos(tempo * 0.005) * 4);
+        double vira = perfil ? perto * lado * Math.PI / 2
+                : net.minecraft.util.Mth.clamp(Math.atan2(pl.getX() - x, pl.getZ() - z), -0.5, 0.5);
         var cam = e.getCamera().getPosition();
         PoseStack ps = e.getPoseStack();
         var buf = mc.renderBuffers().bufferSource();
-        float s = ESCALA.getOrDefault(t, 2f) * GIGANTE;
+        float s = ESCALA.getOrDefault(t, 2f) * GIGANTE * TAMANHO_CELA.getOrDefault(t, 1f);
         ps.pushPose();
         ps.translate(x - cam.x, y - cam.y, z - cam.z);
-        ps.mulPose(Axis.YP.rotation((float) (-ang)));
-        ps.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(tempo * 0.01) * 6));
+        ps.mulPose(Axis.YP.rotation((float) (Math.PI + vira)));   // a frente do modelo (-z) olha para as grades (+z)
         ps.scale(s, s, s);
+        // centraliza o modelo (frente/trás) e apoia no chão da cela
+        ps.translate(0, -ce[1] / 16f, -ce[0] / 16f);
         r.ator.tempo = tempo;
         ps.translate(-0.5, -0.51, -0.5);
         r.render(ps, r.ator, buf, null, null, LightTexture.FULL_BRIGHT);

@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "21";
+    private static final String VERSION = "22";
     public static SimpleChannel CHANNEL;
 
     public static void register() {
@@ -307,6 +307,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(com.lanterna.necron.Tentacao.Pergunta.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.necron.Tentacao.Pergunta::encode).decoder(com.lanterna.necron.Tentacao.Pergunta::decode)
                 .consumerMainThread(com.lanterna.necron.Tentacao.Pergunta::handle).add();
+        CHANNEL.messageBuilder(com.lanterna.fonte.Prisao.Fala.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.lanterna.fonte.Prisao.Fala::encode).decoder(com.lanterna.fonte.Prisao.Fala::decode)
+                .consumerMainThread(com.lanterna.fonte.Prisao.Fala::handle).add();
         CHANNEL.messageBuilder(com.lanterna.fonte.Desafios.Abrir.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.lanterna.fonte.Desafios.Abrir::encode).decoder(com.lanterna.fonte.Desafios.Abrir::decode)
                 .consumerMainThread(com.lanterna.fonte.Desafios.Abrir::handle).add();

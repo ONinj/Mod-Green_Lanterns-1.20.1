@@ -4679,6 +4679,35 @@ public final class DevAutoTest {
         at(10, () -> { mc.options.hideGui = false; glog("FIM necronanim"); mc.stop(); });
     }
 
+    /** 0.60.4: a prisão da entidade dentro da Fonte (-Pcor=vermelho...): de longe, de perto e o diálogo. */
+    private static void scenePrisao() {
+        Minecraft mc = Minecraft.getInstance();
+        com.lanterna.client.ia.VozAnel.mudo = true;
+        String[] tropas = System.getProperty("lanterna.autotest.cor", "vermelho").split(",");
+        at(40, () -> { cmd("gamemode creative"); server(sp -> { var src = sp.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            sp.server.getCommands().performPrefixedCommand(src, "lantern ring green"); }); });
+        for (String t : tropas) {
+            at(10, () -> server(sp -> {
+                var k = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, com.lanterna.LanternaMod.id("fonte_" + t));
+                sp.teleportTo(sp.server.getLevel(k), 0.5, 101, -10.5, 180, 0);
+                sp.getAbilities().flying = true; sp.getAbilities().invulnerable = true; sp.onUpdateAbilities(); }));
+            at(500, () -> { mc.options.hideGui = true; server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 112, -12.5, 180, 4)); });
+            at(80, () -> shot("prisao_" + t + "_longe"));
+            at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, 114, -44.5, 180, -2)));
+            at(200, () -> shot("prisao_" + t + "_perto"));
+            at(5, () -> { mc.options.hideGui = false; server(sp -> {
+                var e = new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(sp, net.minecraft.world.InteractionHand.MAIN_HAND,
+                        new net.minecraft.core.BlockPos(0, 104, com.lanterna.fonte.Prisao.GRADES_Z), new net.minecraft.world.phys.BlockHitResult(sp.position(), net.minecraft.core.Direction.SOUTH,
+                        new net.minecraft.core.BlockPos(0, 104, com.lanterna.fonte.Prisao.GRADES_Z), false));
+                com.lanterna.fonte.Prisao.clique(e); }); });
+            at(80, () -> shot("prisao_" + t + "_fala1"));
+            for (int i = 2; i <= 5; i++) { int ii = i; at(5, () -> { if (mc.screen != null) { mc.screen.mouseClicked(0, 0, 0); mc.screen.mouseClicked(0, 0, 0); } }); if (i == 5) at(70, () -> shot("prisao_" + t + "_fala5")); }
+            at(5, () -> mc.setScreen(null));
+        }
+        at(10, () -> server(sp -> { sp.getAbilities().invulnerable = false; sp.onUpdateAbilities(); sp.teleportTo(sp.server.overworld(), 0.5, 200, 0.5, 0, 0); }));
+        at(20, () -> { mc.options.hideGui = false; glog("FIM prisao"); mc.stop(); });
+    }
+
     /** 0.60.3: a Fonte por dentro: Salão das Memórias, o Altar dos Desafios e as entidades em tamanho real no céu. */
     private static void sceneFonteDesafio() {
         Minecraft mc = Minecraft.getInstance();
@@ -9151,6 +9180,7 @@ public final class DevAutoTest {
         else if (ENABLED && SCENE.equals("necronmodelo")) sceneNecronModelo();
         else if (ENABLED && SCENE.equals("necroforma")) sceneNecroforma();
         else if (ENABLED && SCENE.equals("necronanim")) sceneNecronAnim();
+        else if (ENABLED && SCENE.equals("prisao")) scenePrisao();
         else if (ENABLED && SCENE.equals("fontedesafio")) sceneFonteDesafio();
         else if (ENABLED && SCENE.equals("entidades")) sceneEntidades();
         else if (ENABLED && SCENE.equals("vapor")) sceneVapor();

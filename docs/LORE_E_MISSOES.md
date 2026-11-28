@@ -2151,3 +2151,15 @@ Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinho
   - o Predador: uma fera esquelética de cabeça alongada.
 - É de uma delas que, na próxima saga, o Parallax vai escapar.
 
+## 0.60.4 — As entidades presas
+
+- Dentro de cada Fonte, depois do Salão do Conselho (ao norte), fica a **prisão da entidade**, como a cela da Kurama:
+  - uma sala escura com o chão de água;
+  - grades gigantes, de 42 blocos, na cor da Tropa;
+  - um selo de papel no portão do meio.
+- A entidade fica no fundo da cela. Quando alguém se aproxima, ela vem até as grades:
+  - as compridas (Íon, Ofidiano, Açougueiro e Predador) andam de perfil de um lado para o outro, como uma fera enjaulada;
+  - as outras (Parallax, Adara e Prosélito) encaram quem chega.
+- **Clique direito nas grades:** a entidade fala, em 5 falas que aparecem letra por letra. Ela conta quem é, quem a prendeu e o que sofre ali, e **ameaça a Tropa do anel** de quem a ouve.
+- Elas não nadam mais no céu da Fonte: estão presas.
+
