@@ -2101,3 +2101,11 @@ Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinho
 
 É delas a luz que banha quem fica perto da Bateria (a imersão), e é daqui que um dia o Parallax vai escapar.
 
+
+## 0.60.1 — Correções dos beta testers
+
+- **Lanternas Negros do Necron:** os servos que são Lanternas Negros não atacavam o jogador (no resgate dos moradores cercados de Aurora e no resto da saga). Eles só atacavam quem usasse o anel de uma Tropa inimiga da Negra. Agora todo servo do Necron ataca o jogador e os Lanternas das Tropas (quem aceitou a Morte continua em paz com eles).
+- **Ves'Kai de Nok:** os saudáveis às vezes apareciam ajoelhados como os feridos, ou ficavam trocando de pose. Agora só o ferido fica ajoelhado.
+- **Prova da Emoção do Índigo (nível 50):** curar Ves'Kai feridos, Lanternas aliados e bichos domados agora conta (antes só animais, aldeões e jogadores, e quem jogava sozinho ficava travado).
+- **Provas da Fonte do Amor e da Esperança:** o par perdido e os Aelínos nasciam dentro das paredes e morriam sufocados; agora nascem de pé. A prova do Amor também falhava na hora porque o par, longe da praça, era guardado pelo jogo assim que nascia; agora só falha se um deles morrer de verdade.
+- **Piloto automático:** em alta velocidade, um ponto de desvio ou o destino de lado e perto fazia o piloto andar em círculos; agora ele solta a hiperpropulsão para virar e pula o ponto se não chegar mais perto em 10 s. Saindo de perto de um planeta com o destino do outro lado, a rota agora contorna o planeta.

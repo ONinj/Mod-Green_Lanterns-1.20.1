@@ -127,7 +127,7 @@ public final class ProvaFonte {
             case AZUL -> {
                 Race r = Race.ofPlanet(PlanetLore.ODYM.planet);
                 for (int i = 0; i < 3; i++) {
-                    RaceEntity n = com.lanterna.lore.world.PlanetSites.nativo(l, r, e.centro.offset(-3 + 3 * i, 0, -8));
+                    RaceEntity n = com.lanterna.lore.world.PlanetSites.nativo(l, r, LugarDeSurgir.livre(l, e.centro.offset(-3 + 3 * i, 0, -8), 6));
                     if (n != null) { n.setCustomName(Component.translatable("prova.lanterna.azul.protegido")); n.setCustomNameVisible(true); e.criados.add(n); }
                 }
             }
@@ -142,11 +142,13 @@ public final class ProvaFonte {
             }
             case VIOLETA -> {
                 Race r = Race.ofPlanet(PlanetLore.ZAMARON.planet);
-                RaceEntity a = com.lanterna.lore.world.PlanetSites.nativo(l, r, e.centro.offset(0, 0, -10));
+                RaceEntity a = com.lanterna.lore.world.PlanetSites.nativo(l, r, LugarDeSurgir.livre(l, e.centro.offset(0, 0, -10), 6));
                 // o par perdido está numa casa longe da praça
                 List<BlockPos> casas = com.lanterna.cidade.CidadesPovos.casas(com.lanterna.cidade.CidadeNativa.CENTRO.atY(e.centro.getY()));
                 BlockPos longe = casas.get((casas.size() / 2 + l.random.nextInt(casas.size() / 3)) % casas.size());
                 l.getChunkAt(longe);
+                // no chão da cidade do povo (não na altura da praça), de pé dentro da casa ou na porta
+                longe = LugarDeSurgir.livre(l, longe.atY(com.lanterna.cidade.CidadeNativa.altura(l) + 1), 10);
                 RaceEntity b = com.lanterna.lore.world.PlanetSites.nativo(l, r, longe);
                 if (a != null && b != null) {
                     a.setCustomName(Component.translatable("prova.lanterna.violeta.a")); a.setCustomNameVisible(true);
@@ -288,7 +290,16 @@ public final class ProvaFonte {
                 else if (e.ticks > 20 * 240) falhar(p, e, "tempo");
             }
             case VIOLETA -> {
-                if (e.especial == null || e.par == null || !e.especial.isAlive() || !e.par.isAlive()) { falhar(p, e, "violeta"); return; }
+                // 0.52.6: o par perdido mora longe da praça, fora da área que o servidor mantém ativa: o jogo o guarda no
+                // disco assim que nasce e o traz de volta quando alguém chega perto (é outra instância). Antes isso contava
+                // como "morreu" e a prova falhava na hora. Só falha se um deles morrer de verdade.
+                e.especial = atual(l, e.especial);
+                e.par = atual(l, e.par);
+                if (morto(e.especial) || morto(e.par)) { falhar(p, e, "violeta"); return; }
+                if (e.especial.isRemoved() || e.par.isRemoved()) {
+                    if (e.ticks > 20 * 480) falhar(p, e, "tempo");
+                    return;
+                }
                 if (e.seguindo && e.par instanceof Mob b && e.ticks % 10 == 0) {
                     if (b.distanceTo(p) > 3) b.getNavigation().moveTo(p, 1.1);
                     if (b.distanceTo(p) > 24) b.teleportTo(p.getX(), p.getY(), p.getZ());
@@ -297,6 +308,28 @@ public final class ProvaFonte {
                 else if (e.ticks > 20 * 480) falhar(p, e, "tempo");
             }
         }
+    }
+
+    /** A instância carregada agora (depois de o pedaço do mundo ser guardado e lido de novo, a entidade é outra). */
+    @Nullable
+    private static Entity atual(ServerLevel l, @Nullable Entity x) {
+        if (x == null || !x.isRemoved() || x.getRemovalReason() == null || !x.getRemovalReason().shouldSave()) return x;
+        Entity n = l.getEntity(x.getUUID());
+        return n != null ? n : x;
+    }
+
+    /** Morreu de verdade (não só guardado no disco por estar longe)? */
+    private static boolean morto(@Nullable Entity x) {
+        if (x == null) return true;
+        if (x.isRemoved()) return x.getRemovalReason() == null || !x.getRemovalReason().shouldSave();
+        return !x.isAlive();
+    }
+
+    /** Só para os testes: onde está o par perdido da prova do Amor. */
+    @Nullable
+    public static BlockPos ondePar(ServerPlayer p) {
+        Estado e = PROVAS.get(p.getUUID());
+        return e == null || e.par == null ? null : e.par.blockPosition();
     }
 
     private static long contaVivos(Estado e) {

@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public final class Rota {
     /** Um obstáculo: esfera que a rota não pode cortar. */
-    private record Obstaculo(String id, Vec3 c, double r) {}
+    private record Obstaculo(String id, Vec3 c, double r, double nucleo) {}
 
     private static final int MAX_PONTOS = 14;
 
@@ -45,13 +45,22 @@ public final class Rota {
         double len = ab.length();
         if (len < 1) return;
         Vec3 dir = ab.scale(1 / len);
+        double raioBate = 0;
         for (Obstaculo o : obs) {
             // quem já está dentro da folga (saindo de um planeta) ou o próprio ponto final não contam
-            if (a.distanceTo(o.c) < o.r || b.distanceTo(o.c) < o.r) continue;
+            double rr = o.r;
+            if (a.distanceTo(o.c) < rr || b.distanceTo(o.c) < rr) {
+                // 0.52.6: saindo de perto de um planeta com o destino do outro lado, a rota ia reto através dele e o
+                // desvio de última hora empurrava para fora: o jogador ficava dando voltas em torno do planeta. Agora,
+                // dentro da folga, a rota ainda contorna o núcleo (o planeta e uma margem).
+                if (Autopilot.semAntiCirculo) continue;
+                rr = o.nucleo;
+                if (a.distanceTo(o.c) < rr || b.distanceTo(o.c) < rr) continue;
+            }
             double along = o.c.subtract(a).dot(dir);
             if (along <= 0 || along >= len) continue;
             double miss = a.add(dir.scale(along)).distanceTo(o.c);
-            if (miss < o.r && along < primeiro) { primeiro = along; bate = o; }
+            if (miss < rr && along < primeiro) { primeiro = along; bate = o; raioBate = rr; }
         }
         if (bate == null) return;
         // o desvio: do ponto mais perto do centro, para fora, um pouco além da folga
@@ -63,7 +72,7 @@ public final class Rota {
             fora = new Vec3(fora.x, 0, fora.z);
             if (fora.lengthSqr() < 1e-6) fora = new Vec3(1, 0, 0);
         }
-        Vec3 h = fora.normalize().scale(bate.r * 1.25 + 400);
+        Vec3 h = fora.normalize().scale(raioBate < bate.r ? raioBate + 600 : bate.r * 1.25 + 400);
         Vec3 w = new Vec3(bate.c.x + h.x, Math.max(-380, Math.min(1380, perto.y)), bate.c.z + h.z);
         // novos obstáculos perto do desvio também contam
         for (Obstaculo n : obstaculos(w, w, destino, vel)) if (obs.stream().noneMatch(x -> x.id.equals(n.id))) obs.add(n);
@@ -83,12 +92,12 @@ public final class Rota {
             for (SpaceBodies.Body c : SpaceBodies.near(q, 1)) {
                 if (!c.landable() || c.id().equals(destino) || !vistos.add("b" + c.id())) continue;
                 // a hiperpropulsão freia quando a distância à superfície é menor que 14 x a velocidade
-                l.add(new Obstaculo("b" + c.id(), c.center(), c.radius() + 14 * vel));
+                l.add(new Obstaculo("b" + c.id(), c.center(), c.radius() + 14 * vel, c.radius() + 350));
             }
             for (Perigos.Perigo p : Perigos.near(q, 1)) {
                 if (!vistos.add("p" + p.id())) continue;
                 // perto do perigo ela freia (distância / 12) dentro do alcance da puxada
-                l.add(new Obstaculo("p" + p.id(), p.centro(), p.zonaDano() + Math.min(p.alcance(), 12 * vel) + 150));
+                l.add(new Obstaculo("p" + p.id(), p.centro(), p.zonaDano() + Math.min(p.alcance(), 12 * vel) + 150, p.zonaDano() + 250));
             }
         }
         return l;

@@ -37,8 +37,22 @@ public final class Autopilot {
     /** 0.52.3: a rota traçada no espaço (pontos que faltam; o último é o destino). */
     private static java.util.List<Vec3> rota = java.util.List.of();
     private static int rotaIdade;
+    /** 0.52.6: a menor distância até o ponto atual da rota e há quantos ticks ela não diminui (anti-círculo). */
+    private static double pertoDoPonto = Double.MAX_VALUE;
+    private static int semAvanco;
     /** Só para os testes: desliga a rota (piloto antigo, reto). */
     public static boolean semRota;
+    /** Só para os testes: desliga o anti-círculo da 0.52.6 (para comparar). */
+    public static boolean semAntiCirculo;
+
+    /** Só para os testes: põe um ponto de desvio na frente da rota e segura a rota por 50 s. */
+    public static void pontoDeTeste(Vec3 w) {
+        rota = new java.util.ArrayList<>(rota);
+        rota.add(0, w);
+        rotaIdade = -1000;
+        pertoDoPonto = Double.MAX_VALUE;
+        semAvanco = 0;
+    }
 
     /** Os pontos da rota que faltam (para o mapa estelar). */
     public static java.util.List<Vec3> rota() {
@@ -180,8 +194,11 @@ public final class Autopilot {
         // não frear. Ela é refeita a cada 4 s (o caminho muda pouco, mas o embalo e os puxões tiram um pouco do lugar).
         if (semRota) rota = new java.util.ArrayList<>(java.util.List.of(target.center()));
         else if (rota.isEmpty() || ++rotaIdade > 80) {
+            Vec3 antes = rota.isEmpty() ? null : rota.get(0);
             rota = new java.util.ArrayList<>(Rota.tracar(pos, target.center(), target.id(), ClientFlight.hyperMax()));
             rotaIdade = 0;
+            // ponto novo (longe do de antes): a contagem do anti-círculo recomeça
+            if (antes == null || rota.get(0).distanceTo(antes) > 300) { pertoDoPonto = Double.MAX_VALUE; semAvanco = 0; }
         }
         // passa para o próximo ponto um pouco antes de chegar (cortar demais a curva entraria na zona dos freios)
         double antecipa = Math.max(300, ClientFlight.localSpeed() * 5);
@@ -192,6 +209,32 @@ public final class Autopilot {
         }
         boolean desvio = rota.size() > 1;
         if (desvio) dir = rota.get(0).subtract(pos).normalize();
+        // 0.52.6: em alta velocidade a curva é muito aberta (raio de uns 4 mil blocos a 3.000 b/s). Um ponto do desvio
+        // que ficava de lado era rodeado para sempre ("andando em círculos"). Perto de um ponto fora do nariz, larga a
+        // hiperpropulsão para conseguir virar; e se passar 10 s sem chegar mais perto dele, pula o ponto e refaz a rota.
+        boolean curvaFechada = false;
+        if (desvio && !semAntiCirculo) {
+            Vec3 w = rota.get(0);
+            double dw = pos.distanceTo(w);
+            double raioCurva = ClientFlight.localSpeed() / Math.toRadians(2.0);
+            curvaFechada = dw < raioCurva * 2 && player.getLookAngle().dot(dir) < 0.8;
+            if (dw < pertoDoPonto - 50) { pertoDoPonto = dw; semAvanco = 0; }
+            else if (++semAvanco > 200) {
+                rota.remove(0);
+                rota = new java.util.ArrayList<>(Rota.tracar(pos, target.center(), target.id(), ClientFlight.hyperMax()));
+                // o ponto refeito pode ser o mesmo: o primeiro fica de fora se ainda estiver de lado e perto
+                if (rota.size() > 1 && pos.distanceTo(rota.get(0)) < raioCurva * 2) rota.remove(0);
+                rotaIdade = 0;
+                pertoDoPonto = Double.MAX_VALUE;
+                semAvanco = 0;
+                dir = rota.size() > 1 ? rota.get(0).subtract(pos).normalize() : target.center().subtract(pos).normalize();
+            }
+        } else {
+            pertoDoPonto = Double.MAX_VALUE;
+            semAvanco = 0;
+            // o destino final de lado e perto (chegando torto, ou o Mogo/Hanks andando): idem, solta para virar
+            if (!semAntiCirculo) curvaFechada = dist < ClientFlight.localSpeed() / Math.toRadians(2.0) * 2 && player.getLookAngle().dot(dir) < 0.8;
+        }
 
         // Desvia de planetas no caminho (senão pousaria no planeta errado)
         for (SpaceBodies.Body b : SpaceBodies.near(pos, 3)) {
@@ -225,7 +268,7 @@ public final class Autopilot {
         Vec3 look = player.getLookAngle();
         // nas curvas da rota a hiperpropulsão continua (ela mesma vira aos poucos)
         // (a própria hiperpropulsão vira aos poucos para onde o anel olha; antes, a cada curva ela se apagava)
-        boolean aligned = !semRota && ClientFlight.hyperOn() ? look.dot(dir) > 0.2 : look.dot(dir) > 0.985;
+        boolean aligned = !semRota && ClientFlight.hyperOn() ? look.dot(dir) > 0.2 && !curvaFechada : look.dot(dir) > 0.985;
         // Já dentro do planeta: segura a posição até o pouso acontecer
         if (dist < 0) return new Control(-1, false, false, false, false);
         // Chegando: sem impulso, para entrar devagar

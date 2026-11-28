@@ -351,6 +351,13 @@ public class LanternaEntity extends AbstractVillager implements GeoEntity, TemEs
         if (e instanceof Player pc && com.lanterna.necron.Tentacao.corrompido(pc) && !pc.isCreative() && !pc.isSpectator())
             return !servoEu && papel() == Especie.Papel.LANTERNA && !isPirata() && tropa() != BuiltinCorps.BLACK;
         if (!servoEu && com.lanterna.necron.Cratera.servo(e)) return papel() == Especie.Papel.LANTERNA && !isPirata() && tropa() != BuiltinCorps.BLACK;
+        // 0.60.1: o servo do Necron (Lanterna Negro) ataca qualquer jogador e os Lanternas das Tropas. Antes ele só atacava
+        // quem fosse de uma Tropa inimiga da Negra (pela tabela das Tropas), e ficava parado no resgate de Aurora.
+        if (servoEu) {
+            if (e instanceof Player sp) return !sp.isCreative() && !sp.isSpectator();
+            if (e instanceof LanternaEntity o) return !o.isPirata() && o.papel() != Especie.Papel.MERCADOR;
+            return false;
+        }
         boolean tregua = !servoEu && !isPirata() && tropa() != BuiltinCorps.BLACK && emGuerraComONecron();
         String guilda = getPersistentData().getString(com.lanterna.guilda.Conquistas.TAG_GUILDA);
         if (!guilda.isEmpty()) return hostilGuilda(e, guilda);

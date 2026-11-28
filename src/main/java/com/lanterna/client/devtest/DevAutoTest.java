@@ -9017,8 +9017,44 @@ public final class DevAutoTest {
         at(20, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** 0.60.1: o Lanterna Negro servo do Necron ataca o jogador (resgate de Aurora). */
+    private static void sceneV0601() {
+        Minecraft mc = Minecraft.getInstance();
+        Object[] ref = new Object[2];
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("gamemode creative"); cmd("lantern ring green");
+            cmd("execute in minecraft:overworld run tp @s 0 120 0"); cmd("kill @e[type=!player,distance=..60]"); });
+        for (String tropa : new String[]{"green", "yellow", "blue"}) {
+            at(40, () -> server(sp -> {
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring " + tropa);
+                var l = sp.serverLevel();
+                int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 0);
+                sp.teleportTo(l, 0.5, h, 0.5, 0f, 0f);
+                sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                sp.setHealth(sp.getMaxHealth());
+                var g = com.lanterna.especies.LanternaEntity.lanterna(l, com.lanterna.corps.BuiltinCorps.BLACK, false);
+                g.moveTo(4.5, h, 0.5, 90, 0);
+                g.finalizeSpawn(l, l.getCurrentDifficultyAt(g.blockPosition()), net.minecraft.world.entity.MobSpawnType.EVENT, null, null);
+                g.addTag(com.lanterna.necron.Cratera.SERVO);
+                g.addTag(com.lanterna.necron.Aurora.CERCO);
+                l.addFreshEntity(g);
+                ref[0] = g;
+                ref[1] = sp.getHealth();
+                glog(tropa + ": servo Lanterna Negro hostil ao jogador? " + g.hostilA(sp));
+            }));
+            at(100, () -> server(sp -> {
+                var g = (com.lanterna.especies.LanternaEntity) ref[0];
+                glog(tropa + ": 5 s depois o servo mira no jogador? " + (g.getTarget() == sp) + " | vida do jogador " + Math.round((float) ref[1]) + " -> " + Math.round(sp.getHealth()));
+                g.discard();
+                sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            }));
+        }
+        at(20, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
         if (ENABLED && SCENE.equals("portal")) scenePortal();
+        else if (ENABLED && SCENE.equals("v0601")) sceneV0601();
         else if (ENABLED && SCENE.equals("v0525")) sceneV0525();
         else if (ENABLED && SCENE.equals("comandos")) sceneComandos();
         else if (ENABLED && SCENE.equals("receber")) sceneReceber();
