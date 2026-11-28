@@ -127,7 +127,7 @@ public final class ProvaFonte {
             case AZUL -> {
                 Race r = Race.ofPlanet(PlanetLore.ODYM.planet);
                 for (int i = 0; i < 3; i++) {
-                    RaceEntity n = com.lanterna.lore.world.PlanetSites.nativo(l, r, e.centro.offset(-3 + 3 * i, 0, -8));
+                    RaceEntity n = com.lanterna.lore.world.PlanetSites.nativo(l, r, LugarDeSurgir.livre(l, e.centro.offset(-3 + 3 * i, 0, -8), 6));
                     if (n != null) { n.setCustomName(Component.translatable("prova.lanterna.azul.protegido")); n.setCustomNameVisible(true); e.criados.add(n); }
                 }
             }
@@ -142,11 +142,13 @@ public final class ProvaFonte {
             }
             case VIOLETA -> {
                 Race r = Race.ofPlanet(PlanetLore.ZAMARON.planet);
-                RaceEntity a = com.lanterna.lore.world.PlanetSites.nativo(l, r, e.centro.offset(0, 0, -10));
+                RaceEntity a = com.lanterna.lore.world.PlanetSites.nativo(l, r, LugarDeSurgir.livre(l, e.centro.offset(0, 0, -10), 6));
                 // o par perdido está numa casa longe da praça
                 List<BlockPos> casas = com.lanterna.cidade.CidadesPovos.casas(com.lanterna.cidade.CidadeNativa.CENTRO.atY(e.centro.getY()));
                 BlockPos longe = casas.get((casas.size() / 2 + l.random.nextInt(casas.size() / 3)) % casas.size());
                 l.getChunkAt(longe);
+                // no chão da cidade do povo (não na altura da praça), de pé dentro da casa ou na porta
+                longe = LugarDeSurgir.livre(l, longe.atY(com.lanterna.cidade.CidadeNativa.altura(l) + 1), 10);
                 RaceEntity b = com.lanterna.lore.world.PlanetSites.nativo(l, r, longe);
                 if (a != null && b != null) {
                     a.setCustomName(Component.translatable("prova.lanterna.violeta.a")); a.setCustomNameVisible(true);

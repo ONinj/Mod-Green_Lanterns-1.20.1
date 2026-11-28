@@ -182,8 +182,11 @@ public final class TropaEvents {
         LivingEntity e = event.getEntity();
         if (e.level().isClientSide || event.getAmount() <= 0) return;
         if (e instanceof ServerPlayer p && is(p, BuiltinCorps.BLUE)) emocao(p, Math.round(event.getAmount() * 4));
-        // Índigo: alguém se cura perto (não é o próprio)
-        if (e instanceof Animal || e instanceof AbstractVillager || e instanceof Player) {
+        // Índigo: alguém se cura perto (não é o próprio). 0.52.6: conta qualquer ser que não seja inimigo — os Ves'Kai
+        // feridos de Nok, os Lanternas aliados e os bichos; antes só animais, aldeões e jogadores, e quem jogava
+        // sozinho quase não ganhava pontos.
+        if (e instanceof Animal || e instanceof AbstractVillager || e instanceof Player
+                || e instanceof com.lanterna.lore.entity.RaceEntity || (e instanceof LanternaEntity l && !l.isPirata())) {
             for (ServerPlayer p : e.level().getEntitiesOfClass(ServerPlayer.class, e.getBoundingBox().inflate(12))) {
                 if (p != e && is(p, BuiltinCorps.INDIGO)) emocao(p, Math.round(event.getAmount() * 5));
             }

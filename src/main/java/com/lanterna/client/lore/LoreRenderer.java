@@ -105,6 +105,11 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
                                   VertexConsumer vc, boolean reRender, float pt, int light, int overlay,
                                   float r, float g, float b, float a) {
         String n = bone.getName();
+        // 0.52.6: os ossos do modelo são os mesmos para todos os Ves'Kai. A pose de ajoelhado do ferido era escrita
+        // neles e ficava para o próximo Ves'Kai desenhado (os saudáveis pareciam feridos ou ficavam trocando de pose).
+        // Agora a pose vale só para este desenho: o osso volta ao que era logo depois.
+        float[] antes = entity instanceof RaceEntity rv && rv.race() == Race.VES_KAI && rv.hasFlag(RaceEntity.WOUNDED)
+                ? new float[]{bone.getRotX(), bone.getRotY(), bone.getRotZ(), bone.getPosX(), bone.getPosY(), bone.getPosZ()} : null;
         if (entity instanceof RaceEntity race) {
             switch (race.race()) {
                 case BRAKKARI -> {
@@ -139,6 +144,10 @@ public class LoreRenderer<T extends LivingEntity & GeoAnimatable> extends GeoEnt
             }
         }
         super.renderRecursively(pose, entity, bone, type, buffers, vc, reRender, pt, light, overlay, r, g, b, a);
+        if (antes != null) {
+            bone.setRotX(antes[0]); bone.setRotY(antes[1]); bone.setRotZ(antes[2]);
+            bone.setPosX(antes[3]); bone.setPosY(antes[4]); bone.setPosZ(antes[5]);
+        }
     }
 
     /**

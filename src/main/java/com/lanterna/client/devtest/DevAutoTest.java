@@ -6920,8 +6920,148 @@ public final class DevAutoTest {
         at(20, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
     }
 
+    /** 0.52.6: Ves'Kai feridos x saudáveis, emoção do Índigo, provas Violeta/Azul sem nascer nas paredes, piloto sem círculos. */
+    private static void sceneV0526() {
+        Minecraft mc = Minecraft.getInstance();
+        Object[] ref = new Object[4];
+        java.util.function.BiFunction<net.minecraft.world.entity.Entity, String, Boolean> nome = (x, k) -> x.getCustomName() != null
+                && x.getCustomName().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents tc && tc.getKey().equals(k);
+        at(40, () -> { if (mc.player.isDeadOrDying()) { mc.player.respawn(); mc.setScreen(null); } });
+        at(40, () -> { cmd("gamerule doDaylightCycle false"); cmd("time set 6000"); cmd("weather clear"); cmd("gamemode creative"); cmd("lantern ring indigo"); });
+        // ---- 1) Nok: um Ves'Kai ferido entre dois saudáveis ----
+        at(20, () -> cmd("execute in lanterna:nok run tp @s 0 150 100"));
+        waitFor(() -> mc.level.dimension().location().getPath().equals("nok") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            for (var v : l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, new net.minecraft.world.phys.AABB(0, 0, 60, 1, 1, 61).inflate(60, 300, 60), v -> v.role().isEmpty())) v.discard();
+            l.getChunkAt(new BlockPos(0, 0, 60));
+            int h = l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 0, 60);
+            sp.teleportTo(l, 0.5, h, 60.5, 180f, 10f);
+            sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+            sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, 20 * 900, 4, false, false));
+            for (int i = 0; i < 3; i++) {
+                var v = com.lanterna.lore.world.PlanetSites.nativo(l, com.lanterna.lore.entity.Race.VES_KAI, com.lanterna.fonte.LugarDeSurgir.livre(l, new BlockPos(-3 + 3 * i, h, 55), 4));
+                if (v == null) continue;
+                v.setFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED, i == 1);
+                v.setNoAi(true);
+                v.setYRot(0); v.setYBodyRot(0); v.setYHeadRot(0);
+                ref[i] = v;
+            }
+            glog("nok: ves'kai ferido no meio=" + (ref[1] != null && ((com.lanterna.lore.entity.RaceEntity) ref[1]).hasFlag(com.lanterna.lore.entity.RaceEntity.WOUNDED)));
+        }));
+        at(20, () -> { mc.options.hideGui = true; mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON); });
+        at(40, () -> shot("v0526_veskai_perto"));
+        at(5, () -> server(sp -> sp.teleportTo(sp.serverLevel(), 0.5, sp.getY() + 3, 78.5, 180f, 8f)));
+        at(40, () -> shot("v0526_veskai_longe"));
+        at(5, () -> mc.options.hideGui = false);
+        // ---- 2) Índigo: curar um Ves'Kai conta para a Prova da Emoção ----
+        at(10, () -> server(sp -> {
+            var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            com.lanterna.mission.MissionManager.start(sp, "prova_indigo");
+            int e0 = d.emocao();
+            var v = (net.minecraft.world.entity.LivingEntity) ref[0];
+            v.setHealth(v.getMaxHealth() - 6);
+            v.heal(4);
+            glog("indigo: prova ativa=" + d.isActive("prova_indigo") + " emocao antes=" + e0 + " depois de curar 4 de um Ves'Kai=" + d.emocao());
+        }));
+        // ---- 3) Zamaron: o par perdido da prova Violeta (3 vezes, casas sorteadas) ----
+        at(20, () -> { cmd("gamemode creative"); cmd("lantern ring violet"); cmd("execute in lanterna:zamaron run tp @s 0 150 100"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("zamaron") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        for (int rodada = 0; rodada < 3; rodada++) {
+            final int rr = rodada;
+            at(60, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var b = com.lanterna.fonte.FonteChamado.praca();
+                l.getChunkAt(b.offset(0, 0, -20));
+                sp.teleportTo(l, b.getX() + 0.5, l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 20), b.getZ() - 19.5, 0f, 0f);
+                sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                com.lanterna.fonte.ProvaFonte.comecar(sp, com.lanterna.baterias.Tropa.VIOLETA, b);
+            }));
+            at(80, () -> server(sp -> {
+                var l = sp.serverLevel();
+                var area = new net.minecraft.world.phys.AABB(0, 0, 0, 1, 1, 1).inflate(400, 400, 400);
+                var a = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, area, x -> nome.apply(x, "prova.lanterna.violeta.a")).stream().findFirst().orElse(null);
+                var p = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, area, x -> nome.apply(x, "prova.lanterna.violeta.b")).stream().findFirst().orElse(null);
+                glog("violeta " + (rr + 1) + ": par " + (p == null ? "SUMIU" : "vivo=" + p.isAlive() + " vida=" + p.getHealth() + "/" + p.getMaxHealth() + " na parede=" + p.isInWall() + " em " + p.blockPosition().toShortString())
+                        + " | parceiro " + (a == null ? "SUMIU" : "vivo=" + a.isAlive() + " na parede=" + a.isInWall()) + " | prova=" + com.lanterna.fonte.ProvaFonte.ativa(sp));
+                if (a != null && p != null) p.teleportTo(a.getX() + 1, a.getY(), a.getZ());
+            }));
+            at(40, () -> server(sp -> glog("violeta " + (rr + 1) + ": prova ainda ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "violeta:prova"))));
+        }
+        // ---- 4) Odym: os três Aelínos da prova Azul ----
+        at(20, () -> { cmd("gamemode creative"); cmd("lantern ring blue"); cmd("execute in lanterna:odym run tp @s 0 150 100"); });
+        waitFor(() -> mc.level.dimension().location().getPath().equals("odym") && mc.screen == null, 900);
+        waitFor(() -> !com.lanterna.cidade.Obra.ocupada(), 60000);
+        at(60, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var b = com.lanterna.fonte.FonteChamado.praca();
+            l.getChunkAt(b.offset(0, 0, -20));
+            sp.teleportTo(l, b.getX() + 0.5, l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 20), b.getZ() - 19.5, 0f, 0f);
+            com.lanterna.fonte.ProvaFonte.comecar(sp, com.lanterna.baterias.Tropa.AZUL, b);
+        }));
+        at(80, () -> server(sp -> {
+            var l = sp.serverLevel();
+            var ns = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(80, 200, 80), x -> nome.apply(x, "prova.lanterna.azul.protegido"));
+            glog("azul: aelinos=" + ns.size() + " vivos=" + ns.stream().filter(x -> x.isAlive()).count() + " na parede=" + ns.stream().filter(x -> x.isInWall()).count()
+                    + " vida=" + ns.stream().map(x -> String.valueOf(Math.round(x.getHealth()))).reduce((x, y) -> x + "," + y).orElse("-"));
+        }));
+        // ---- 5) Piloto automático: um ponto de desvio de lado, em plena velocidade ----
+        String[] destino = new String[1];
+        for (int caso = 0; caso < 2; caso++) {
+            final boolean antigo = caso == 0;
+            at(20, () -> server(sp -> {
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
+                sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
+                com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(75)); com.lanterna.mission.MissionManager.sync(sp, d); });
+                sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
+                sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), -14000, 100, -14000, 0, 0);
+            }));
+            at(60, () -> {
+                com.lanterna.client.flight.Autopilot.semAntiCirculo = antigo;
+                if (destino[0] == null) {
+                    var l = com.lanterna.client.flight.Destinations.all(4);
+                    var best = l.get(0); double bd = 0;
+                    for (var d : l) { double dd = d.center().distanceTo(mc.player.position()); if (dd > bd && d.dimension() != null) { bd = dd; best = d; } }
+                    destino[0] = best.id();
+                }
+                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": inicio " + com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId(destino[0])));
+            });
+            at(200, () -> {
+                var pos = mc.player.position();
+                var fwd = mc.player.getDeltaMovement().normalize();
+                var lado = fwd.cross(new net.minecraft.world.phys.Vec3(0, 1, 0)).normalize();
+                var w = pos.add(lado.scale(1500)).add(fwd.scale(400));
+                ref[3] = w;
+                com.lanterna.client.flight.Autopilot.pontoDeTeste(w);
+                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": ponto de lado posto a 1500 blocos; vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s hyper=" + com.lanterna.client.flight.ClientFlight.hyperOn());
+            });
+            int[] st = new int[3];
+            double[] menor = {Double.MAX_VALUE};
+            for (int k0 = 0; k0 < 60; k0++) { final int k = k0; at(10, () -> {
+                var w = (net.minecraft.world.phys.Vec3) ref[3];
+                var r = com.lanterna.client.flight.Autopilot.rota();
+                boolean ainda = !r.isEmpty() && r.get(0).distanceTo(w) < 1;
+                double d = mc.player.position().distanceTo(w);
+                menor[0] = Math.min(menor[0], d);
+                if (ainda) st[0]++;
+                if (st[1] == 0 && !ainda) { st[1] = 1; glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": largou o ponto depois de " + (st[0] / 2.0) + " s (mais perto: " + Math.round(menor[0]) + " blocos)"); }
+                if (k % 10 == 0 && ainda) glog("   t=" + (k / 2.0) + "s dist ao ponto " + Math.round(d) + " vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " hyper " + com.lanterna.client.flight.ClientFlight.hyperOn());
+            }); }
+            at(1, () -> {
+                if (st[1] == 0) glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": PRESO no ponto 30 s (mais perto: " + Math.round(menor[0]) + " blocos)");
+                com.lanterna.client.flight.Autopilot.clear();
+                com.lanterna.client.flight.Autopilot.semAntiCirculo = false;
+            });
+        }
+        at(20, () -> { for (String g : GLOG) LanternaMod.LOGGER.info("AUTOTEST RES {}", g); LanternaMod.LOGGER.info("AUTOTEST done"); mc.stop(); });
+    }
+
     static {
         if (ENABLED && SCENE.equals("portal")) scenePortal();
+        else if (ENABLED && SCENE.equals("v0526")) sceneV0526();
         else if (ENABLED && SCENE.equals("v0525")) sceneV0525();
         else if (ENABLED && SCENE.equals("comandos")) sceneComandos();
         else if (ENABLED && SCENE.equals("receber")) sceneReceber();

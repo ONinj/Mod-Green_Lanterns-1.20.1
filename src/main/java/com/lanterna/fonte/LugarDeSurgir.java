@@ -50,5 +50,32 @@ public final class LugarDeSurgir {
         return l.getFluidState(p).isEmpty();
     }
 
+    /**
+     * 0.52.6: um lugar onde dá para ficar de pé perto de {@code perto} (chão firme, dois blocos livres, sem água), o
+     * mais perto possível dele, procurando até {@code raio} blocos para os lados e 8 para cima e para baixo. Os
+     * moradores das provas (o par perdido de Zamaron, os Aelínos) nasciam dentro das paredes e do chão e sufocavam.
+     */
+    public static BlockPos livre(ServerLevel l, BlockPos perto, int raio) {
+        for (int r = 0; r <= raio; r++) {
+            for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) {
+                if (Math.max(Math.abs(dx), Math.abs(dz)) != r) continue; // só a borda do quadrado: do mais perto ao mais longe
+                for (int dy : new int[]{0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8}) {
+                    BlockPos p = perto.offset(dx, dy, dz);
+                    if (dePe(l, p)) return p;
+                }
+            }
+        }
+        // nada perto: em cima do terreno
+        return new BlockPos(perto.getX(), l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, perto.getX(), perto.getZ()), perto.getZ());
+    }
+
+    /** Dá para ficar de pé aqui? */
+    public static boolean dePe(ServerLevel l, BlockPos p) {
+        BlockPos baixo = p.below();
+        return l.getBlockState(baixo).isFaceSturdy(l, baixo, net.minecraft.core.Direction.UP)
+                && l.getBlockState(p).getCollisionShape(l, p).isEmpty() && l.getBlockState(p.above()).getCollisionShape(l, p.above()).isEmpty()
+                && l.getFluidState(p).isEmpty() && l.getFluidState(p.above()).isEmpty();
+    }
+
     private LugarDeSurgir() {}
 }
