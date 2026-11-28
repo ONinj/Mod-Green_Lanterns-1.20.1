@@ -2091,13 +2091,13 @@ Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinho
 
 | Tropa | Entidade | Forma |
 |---|---|---|
-| Verde | Íon (a Vontade) | uma baleia do espaço |
-| Amarelo | Parallax (o Medo) | um inseto-larva enorme, com mandíbulas, antenas e 6 patas |
+| Verde | Íon (a Vontade) | uma baleia do espaço pálida, com nadadeiras e cauda em fitas |
+| Amarelo | Parallax (o Medo) | um inseto enorme, com asas, presas, antenas e 6 patas |
 | Vermelho | o Açougueiro (a Raiva) | um touro-demônio com chifres e crina de espinhos |
 | Laranja | Ofidiano (a Avareza) | uma serpente coroada, com capuz de espinhos |
 | Azul | Adara (a Esperança) | uma ave de asas largas e cauda em leque |
 | Índigo | o Prosélito (a Compaixão) | uma lula com oito tentáculos e dois longos de caça |
-| Violeta | o Predador (o Amor) | um caçador alado de pescoço longo |
+| Violeta | o Predador (o Amor) | uma fera reptiliana de cabeça grande, com chifres e franja de espinhos |
 
 É delas a luz que banha quem fica perto da Bateria (a imersão), e é daqui que um dia o Parallax vai escapar.
 
