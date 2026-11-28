@@ -6958,6 +6958,7 @@ public final class DevAutoTest {
         // ---- 2) Índigo: curar um Ves'Kai conta para a Prova da Emoção ----
         at(10, () -> server(sp -> {
             var d = com.lanterna.mission.LoreCapability.get(sp).orElse(null);
+            sp.teleportTo(sp.serverLevel(), 0.5, sp.getY() - 3, 60.5, 180f, 10f); // perto deles (o Índigo sente a até 12 blocos)
             com.lanterna.mission.MissionManager.start(sp, "prova_indigo");
             int e0 = d.emocao();
             var v = (net.minecraft.world.entity.LivingEntity) ref[0];
@@ -6978,17 +6979,30 @@ public final class DevAutoTest {
                 sp.teleportTo(l, b.getX() + 0.5, l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, b.getX(), b.getZ() - 20), b.getZ() - 19.5, 0f, 0f);
                 sp.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
                 com.lanterna.fonte.ProvaFonte.comecar(sp, com.lanterna.baterias.Tropa.VIOLETA, b);
+                ref[2] = com.lanterna.fonte.ProvaFonte.ondePar(sp);
             }));
-            at(80, () -> server(sp -> {
+            at(60, () -> server(sp -> glog("violeta " + (rr + 1) + ": 3 s depois, com o par longe, prova ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " par em " + (ref[2] == null ? "?" : ((BlockPos) ref[2]).toShortString()))));
+            at(10, () -> server(sp -> { var q = (BlockPos) ref[2]; if (q != null) sp.teleportTo(sp.serverLevel(), q.getX() + 0.5, q.getY() + 0.2, q.getZ() + 3.5, 180f, 0f); }));
+            at(60, () -> server(sp -> {
                 var l = sp.serverLevel();
-                var area = new net.minecraft.world.phys.AABB(0, 0, 0, 1, 1, 1).inflate(400, 400, 400);
-                var a = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, area, x -> nome.apply(x, "prova.lanterna.violeta.a")).stream().findFirst().orElse(null);
-                var p = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, area, x -> nome.apply(x, "prova.lanterna.violeta.b")).stream().findFirst().orElse(null);
-                glog("violeta " + (rr + 1) + ": par " + (p == null ? "SUMIU" : "vivo=" + p.isAlive() + " vida=" + p.getHealth() + "/" + p.getMaxHealth() + " na parede=" + p.isInWall() + " em " + p.blockPosition().toShortString())
-                        + " | parceiro " + (a == null ? "SUMIU" : "vivo=" + a.isAlive() + " na parede=" + a.isInWall()) + " | prova=" + com.lanterna.fonte.ProvaFonte.ativa(sp));
-                if (a != null && p != null) p.teleportTo(a.getX() + 1, a.getY(), a.getZ());
+                var p = l.getEntitiesOfClass(com.lanterna.lore.entity.RaceEntity.class, sp.getBoundingBox().inflate(30), x -> nome.apply(x, "prova.lanterna.violeta.b")).stream().findFirst().orElse(null);
+                glog("violeta " + (rr + 1) + ": par " + (p == null ? "NAO ACHADO" : "vivo=" + p.isAlive() + " vida=" + p.getHealth() + "/" + p.getMaxHealth() + " na parede=" + p.isInWall() + " em " + p.blockPosition().toShortString()) + " | prova=" + com.lanterna.fonte.ProvaFonte.ativa(sp));
+                if (p != null) net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract(sp, net.minecraft.world.InteractionHand.MAIN_HAND, p));
+                ref[1] = p;
             }));
-            at(40, () -> server(sp -> glog("violeta " + (rr + 1) + ": prova ainda ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "violeta:prova"))));
+            // volta andando (de 15 em 15 blocos) até a praça; o par segue
+            for (int passo = 0; passo < 16; passo++) at(12, () -> server(sp -> {
+                var b = com.lanterna.fonte.FonteChamado.praca().offset(0, 0, -13);
+                var l = sp.serverLevel();
+                double dx = b.getX() - sp.getX(), dz = b.getZ() - sp.getZ(), dd = Math.sqrt(dx * dx + dz * dz);
+                if (dd < 3) return;
+                double k = Math.min(1, 15 / dd);
+                int nx = (int) Math.floor(sp.getX() + dx * k), nz = (int) Math.floor(sp.getZ() + dz * k);
+                l.getChunkAt(new BlockPos(nx, 0, nz));
+                sp.teleportTo(l, nx + 0.5, l.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, nx, nz) + 0.1, nz + 0.5, 0f, 0f);
+            }));
+            at(60, () -> server(sp -> glog("violeta " + (rr + 1) + ": de volta à praça, prova ativa=" + com.lanterna.fonte.ProvaFonte.ativa(sp) + " chamado=" + com.lanterna.fonte.FonteDados.chamado(sp, "violeta:prova")
+                    + (ref[1] instanceof net.minecraft.world.entity.Entity p ? " par a " + Math.round(p.distanceTo(sp)) + " blocos, vivo=" + p.isAlive() : ""))));
         }
         // ---- 4) Odym: os três Aelínos da prova Azul ----
         at(20, () -> { cmd("gamemode creative"); cmd("lantern ring blue"); cmd("execute in lanterna:odym run tp @s 0 150 100"); });
@@ -7007,51 +7021,42 @@ public final class DevAutoTest {
             glog("azul: aelinos=" + ns.size() + " vivos=" + ns.stream().filter(x -> x.isAlive()).count() + " na parede=" + ns.stream().filter(x -> x.isInWall()).count()
                     + " vida=" + ns.stream().map(x -> String.valueOf(Math.round(x.getHealth()))).reduce((x, y) -> x + "," + y).orElse("-"));
         }));
-        // ---- 5) Piloto automático: um ponto de desvio de lado, em plena velocidade ----
-        String[] destino = new String[1];
+        // ---- 5) Piloto automático: saindo de perto de um planeta com o destino do outro lado ----
         for (int caso = 0; caso < 2; caso++) {
             final boolean antigo = caso == 0;
+            double[] st = new double[6];
             at(20, () -> server(sp -> {
                 sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern ring green");
                 sp.server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "lantern full");
                 com.lanterna.mission.LoreCapability.get(sp).ifPresent(d -> { d.setXp(com.lanterna.tropa.Nivel.total(75)); com.lanterna.mission.MissionManager.sync(sp, d); });
                 sp.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
                 com.lanterna.capability.ModCapabilities.get(sp).ifPresent(r -> { if (!r.powerActive()) com.lanterna.power.RingPowers.togglePower(sp); if (!r.flightEnabled()) com.lanterna.power.RingPowers.toggleFlight(sp); });
-                sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), -14000, 100, -14000, 0, 0);
+                var pl = com.lanterna.space.SpaceBodies.byId("oa");
+                var dest = com.lanterna.space.SpaceBodies.byId("korugar");
+                var u = dest.center().subtract(pl.center()).normalize();
+                var start = pl.center().subtract(u.scale(pl.radius() + 500));
+                sp.teleportTo(sp.server.getLevel(com.lanterna.space.SpaceBodies.SPACE), start.x, Math.max(-380, Math.min(1380, start.y)), start.z, 0, 0);
             }));
             at(60, () -> {
                 com.lanterna.client.flight.Autopilot.semAntiCirculo = antigo;
-                if (destino[0] == null) {
-                    var l = com.lanterna.client.flight.Destinations.all(4);
-                    var best = l.get(0); double bd = 0;
-                    for (var d : l) { double dd = d.center().distanceTo(mc.player.position()); if (dd > bd && d.dimension() != null) { bd = dd; best = d; } }
-                    destino[0] = best.id();
-                }
-                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": inicio " + com.lanterna.client.flight.Autopilot.start(com.lanterna.client.flight.Destinations.byId(destino[0])));
+                var dest = com.lanterna.client.flight.Destinations.byId("korugar");
+                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": Oa no meio do caminho até Korugar; inicio " + com.lanterna.client.flight.Autopilot.start(dest)
+                        + " falta " + Math.round(com.lanterna.client.flight.Autopilot.remaining(mc.player)));
+                st[0] = com.lanterna.client.flight.Autopilot.remaining(mc.player); st[1] = st[0]; st[3] = mc.player.getYRot();
             });
-            at(200, () -> {
-                var pos = mc.player.position();
-                var fwd = mc.player.getDeltaMovement().normalize();
-                var lado = fwd.cross(new net.minecraft.world.phys.Vec3(0, 1, 0)).normalize();
-                var w = pos.add(lado.scale(1500)).add(fwd.scale(400));
-                ref[3] = w;
-                com.lanterna.client.flight.Autopilot.pontoDeTeste(w);
-                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": ponto de lado posto a 1500 blocos; vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " b/s hyper=" + com.lanterna.client.flight.ClientFlight.hyperOn());
-            });
-            int[] st = new int[3];
-            double[] menor = {Double.MAX_VALUE};
-            for (int k0 = 0; k0 < 60; k0++) { final int k = k0; at(10, () -> {
-                var w = (net.minecraft.world.phys.Vec3) ref[3];
-                var r = com.lanterna.client.flight.Autopilot.rota();
-                boolean ainda = !r.isEmpty() && r.get(0).distanceTo(w) < 1;
-                double d = mc.player.position().distanceTo(w);
-                menor[0] = Math.min(menor[0], d);
-                if (ainda) st[0]++;
-                if (st[1] == 0 && !ainda) { st[1] = 1; glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": largou o ponto depois de " + (st[0] / 2.0) + " s (mais perto: " + Math.round(menor[0]) + " blocos)"); }
-                if (k % 10 == 0 && ainda) glog("   t=" + (k / 2.0) + "s dist ao ponto " + Math.round(d) + " vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " hyper " + com.lanterna.client.flight.ClientFlight.hyperOn());
+            for (int k0 = 0; k0 < 80; k0++) { final int k = k0; at(10, () -> {
+                if (st[5] > 0) return;
+                if (!mc.player.level().dimension().equals(com.lanterna.space.SpaceBodies.SPACE)) { st[5] = k / 2.0 + 0.5; glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": CHEGOU em " + st[5] + " s"); return; }
+                double f = com.lanterna.client.flight.Autopilot.remaining(mc.player);
+                if (f > st[1] + 50) st[2]++;
+                st[1] = f;
+                float yaw = mc.player.getYRot();
+                st[4] += Math.abs(net.minecraft.util.Mth.wrapDegrees(yaw - st[3])); st[3] = yaw;
+                if (k % 8 == 0) glog("   t=" + (k / 2.0) + "s falta " + Math.round(f) + " vel " + Math.round(com.lanterna.client.flight.ClientFlight.localSpeed() * 20) + " hyper " + com.lanterna.client.flight.ClientFlight.hyperOn() + " pontos " + com.lanterna.client.flight.Autopilot.rota().size());
             }); }
             at(1, () -> {
-                if (st[1] == 0) glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": PRESO no ponto 30 s (mais perto: " + Math.round(menor[0]) + " blocos)");
+                glog("piloto " + (antigo ? "ANTIGO" : "NOVO") + ": em 40 s avançou " + Math.round(st[0] - com.lanterna.client.flight.Autopilot.remaining(mc.player)) + " blocos rumo a Korugar; meios segundos se afastando: " + (int) st[2]
+                        + "; giro total " + Math.round(st[4]) + " graus" + (st[5] > 0 ? " (chegou)" : ""));
                 com.lanterna.client.flight.Autopilot.clear();
                 com.lanterna.client.flight.Autopilot.semAntiCirculo = false;
             });
