@@ -2091,18 +2091,18 @@ Cada emoção tem a sua entidade, um animal feito de energia, como nos quadrinho
 
 | Tropa | Entidade | Forma |
 |---|---|---|
-| Verde | Íon (a Vontade) | uma baleia do espaço |
-| Amarelo | Parallax (o Medo) | um inseto-larva enorme, com mandíbulas, antenas e 6 patas |
+| Verde | Íon (a Vontade) | uma baleia do espaço pálida, com nadadeiras e cauda em fitas |
+| Amarelo | Parallax (o Medo) | um inseto enorme, com asas, presas, antenas e 6 patas |
 | Vermelho | o Açougueiro (a Raiva) | um touro-demônio com chifres e crina de espinhos |
 | Laranja | Ofidiano (a Avareza) | uma serpente coroada, com capuz de espinhos |
 | Azul | Adara (a Esperança) | uma ave de asas largas e cauda em leque |
 | Índigo | o Prosélito (a Compaixão) | uma lula com oito tentáculos e dois longos de caça |
-| Violeta | o Predador (o Amor) | um caçador alado de pescoço longo |
+| Violeta | o Predador (o Amor) | uma fera reptiliana de cabeça grande, com chifres e franja de espinhos |
 
 É delas a luz que banha quem fica perto da Bateria (a imersão), e é daqui que um dia o Parallax vai escapar.
 
 
-## 0.60.1 — Correções dos beta testers
+## 0.60.2 — Correções dos beta testers
 
 - **Lanternas Negros do Necron:** os servos que são Lanternas Negros não atacavam o jogador (no resgate dos moradores cercados de Aurora e no resto da saga). Eles só atacavam quem usasse o anel de uma Tropa inimiga da Negra. Agora todo servo do Necron ataca o jogador e os Lanternas das Tropas (quem aceitou a Morte continua em paz com eles).
 - **Ves'Kai de Nok:** os saudáveis às vezes apareciam ajoelhados como os feridos, ou ficavam trocando de pose. Agora só o ferido fica ajoelhado.

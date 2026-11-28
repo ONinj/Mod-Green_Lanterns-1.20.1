@@ -34,8 +34,8 @@ public final class EntidadesBateria {
     /** Tamanho de cada uma (o modelo tem ~1/16 de bloco por unidade). */
     static final Map<Tropa, Float> ESCALA = new EnumMap<>(Tropa.class);
     static {
-        ESCALA.put(Tropa.VERDE, 2.6f); ESCALA.put(Tropa.AMARELO, 2.6f); ESCALA.put(Tropa.VERMELHO, 3.0f); ESCALA.put(Tropa.LARANJA, 2.5f);
-        ESCALA.put(Tropa.AZUL, 3.2f); ESCALA.put(Tropa.INDIGO, 3.2f); ESCALA.put(Tropa.VIOLETA, 3.0f);
+        ESCALA.put(Tropa.VERDE, 1.9f); ESCALA.put(Tropa.AMARELO, 2.6f); ESCALA.put(Tropa.VERMELHO, 3.0f); ESCALA.put(Tropa.LARANJA, 2.5f);
+        ESCALA.put(Tropa.AZUL, 3.2f); ESCALA.put(Tropa.INDIGO, 3.2f); ESCALA.put(Tropa.VIOLETA, 2.6f);
     }
 
     static final class Ator implements GeoAnimatable {
